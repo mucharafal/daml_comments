@@ -1,0 +1,445 @@
+[
+  {
+    "id" : "4ffbb958-9bfd-4248-89d9-b6a71e4f1941",
+    "prId" : 6568,
+    "comments" : [
+      {
+        "id" : "1215a971-6bec-4915-b2fc-585b3f08c091",
+        "parentId" : null,
+        "author" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "body" : "Up for discussion whether we want to override the record time in the log entry with the record time for the update. My preference would be to have the record time from the log entry take precedence over the record time for the update. This way, we could selectively set the record time to the pre-execution time in some rejection log entries. (It's not really feasible in Concord, but we could do this in DAML-on-SQL if we wanted to; not sure that it would buy us anything in the end.)",
+        "createdAt" : "2020-07-02T07:26:12Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "552856a9-c0ce-46c9-8353-faff1f896d90",
+        "parentId" : "1215a971-6bec-4915-b2fc-585b3f08c091",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "As discussed, changed it to always take the record time from the log entry whenever available.",
+        "createdAt" : "2020-07-02T08:48:31Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e115010b9d46239fedf65c99bcc15a46b7e8acd4",
+    "line" : 58,
+    "diffHunk" : "@@ -1,1 +194,198 @@      recordTimeForUpdate: Option[Timestamp],\n      recordTimeFromLogEntry: Option[Timestamp]): Timestamp =\n    (recordTimeForUpdate, recordTimeFromLogEntry) match {\n      case (_, Some(recordTime)) => recordTime\n      case (Some(recordTime), _) => recordTime"
+  },
+  {
+    "id" : "f22eb004-9c52-47a2-9314-f844664c2edf",
+    "prId" : 6568,
+    "comments" : [
+      {
+        "id" : "0ec48b44-7ac0-4ca7-adb6-3e844d4445c3",
+        "parentId" : null,
+        "author" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "body" : "Right. AFAIK the ledger API server will get confused when it receives different updates for the same command ID. This will likely change in the future, but for now this seems to be the right behaviour.",
+        "createdAt" : "2020-07-02T07:32:08Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "976741b3-33c3-4c7c-b746-e651b987c386",
+        "parentId" : "0ec48b44-7ac0-4ca7-adb6-3e844d4445c3",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "OK, thanks for the confirmation.",
+        "createdAt" : "2020-07-02T08:42:55Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e115010b9d46239fedf65c99bcc15a46b7e8acd4",
+    "line" : 99,
+    "diffHunk" : "@@ -1,1 +284,288 @@      case _ if deduplicated =>\n        // We don't emit updates for deduplicated submissions.\n        None\n\n      case DamlLogEntry.PayloadCase.TRANSACTION_REJECTION_ENTRY if invalidRecordTime =>"
+  },
+  {
+    "id" : "46c50068-b78e-478d-af73-96bb6e62e954",
+    "prId" : 6568,
+    "comments" : [
+      {
+        "id" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "parentId" : null,
+        "author" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "body" : "I wonder whether we should log at INFO or DEBUG here that we've dropped the out-of-time-bounds rejection. I don't expect that this case should happen, so I suggest to at least record in the log that this has happened.",
+        "createdAt" : "2020-07-02T07:37:13Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "125f88db-8afd-4740-9cb6-e4c30a00903a",
+        "parentId" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Good point -- added at `INFO` level.",
+        "createdAt" : "2020-07-02T08:41:51Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2caf865f-81df-46fc-bf56-aaea2f44d9a9",
+        "parentId" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Shouldn't we rather fail if we don't expect this case to be valid (i.e., seeing it would mean a bug)?",
+        "createdAt" : "2020-07-02T10:11:20Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6e164feb-b121-4f9c-9023-9becd73424f6",
+        "parentId" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "It'll have the same effect, i.e., the ledger API server won't stop and you'll have something in the log. However, explicitly logging something will probably yield easier to consume information than an exception caught somewhere.",
+        "createdAt" : "2020-07-02T13:32:16Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ecd893f4-580f-46b4-bc8b-68d043eb8e5d",
+        "parentId" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I meant I'd rather crash if we see unexpected behavior, so that we can't possibly overlook it.",
+        "createdAt" : "2020-07-02T13:47:00Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a003e695-7b3a-4e7e-aad8-6c00e4eb83db",
+        "parentId" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "In order to avoid overlooking such an issue you just need to set up the right monitoring. I.e., in my view the difference between 'crashing' and logging that we've dropped the out-of-time-bounds rejection is that in case of the previous the ledger API server will be restarted automagically whereas in the latter case it doesn't need to be restarted (you'll have the same information in the logs).",
+        "createdAt" : "2020-07-02T16:23:17Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1cd9e3b9-c0af-4fea-b20f-24846d4b0b99",
+        "parentId" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Yes, if we only catch a bug in production (or any stage with auto-restart) then we need the right monitoring to raise some big red flag, that's why I wonder if a crash (or an exception log) is more amenable to that than an `INFO` log. Maybe raising to `ERROR` at least?",
+        "createdAt" : "2020-07-02T16:28:49Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "00696b49-0714-4fa0-8466-985ae342d7f3",
+        "parentId" : "6849ec6f-b8ed-468c-a63c-a0a41d12ed99",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Raised to `ERROR`.",
+        "createdAt" : "2020-07-03T12:26:07Z",
+        "updatedAt" : "2020-07-03T12:26:07Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e115010b9d46239fedf65c99bcc15a46b7e8acd4",
+    "line" : 145,
+    "diffHunk" : "@@ -1,1 +330,334 @@        logger.error(\n          s\"Dropped out-of-time-bounds log entry of type=${wrappedLogEntry.getPayloadCase}\")\n        None\n\n      case DamlLogEntry.PayloadCase.TRANSACTION_ENTRY |"
+  },
+  {
+    "id" : "73e2d9dc-ce1a-4005-9f95-cbff0281d1df",
+    "prId" : 3966,
+    "comments" : [
+      {
+        "id" : "74eb108c-9e60-4921-9c98-b18b5785b1e4",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Can you add a unit test case for this, please?",
+        "createdAt" : "2020-01-07T17:10:17Z",
+        "updatedAt" : "2020-01-08T13:43:42Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5fbfc105-3979-4fc1-9842-b7052f8a5d4f",
+        "parentId" : "74eb108c-9e60-4921-9c98-b18b5785b1e4",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Added.",
+        "createdAt" : "2020-01-08T09:57:16Z",
+        "updatedAt" : "2020-01-08T13:43:42Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9df0c47c64a4fc5c7b0d6d4122fd6aaafaee5498",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +222,226 @@    )\n    Update.TransactionAccepted(\n      optSubmitterInfo =\n        if (txEntry.hasSubmitterInfo) Some(parseSubmitterInfo(txEntry.getSubmitterInfo)) else None,\n      transactionMeta = TransactionMeta("
+  },
+  {
+    "id" : "3b521044-0939-4898-86d8-9a96629ae73d",
+    "prId" : 3811,
+    "comments" : [
+      {
+        "id" : "1923a91e-6e91-4c42-92cd-b98d80225116",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "You mean returning a `RejectionReason` and not bailing out with an exception?",
+        "createdAt" : "2019-12-11T09:59:44Z",
+        "updatedAt" : "2019-12-11T10:10:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f3c5ab80-2eb2-4d0a-90a0-68466ab81c84",
+        "parentId" : "1923a91e-6e91-4c42-92cd-b98d80225116",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Yes, I find a crash a tall price to pay for missing error reason",
+        "createdAt" : "2019-12-11T10:56:13Z",
+        "updatedAt" : "2019-12-11T10:56:13Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fe939473-ef81-4948-a614-fea97a2790db",
+        "parentId" : "1923a91e-6e91-4c42-92cd-b98d80225116",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Makes sense. Do you want to add that new enum value to `RejectionReason` then?",
+        "createdAt" : "2019-12-11T11:15:59Z",
+        "updatedAt" : "2019-12-11T11:28:15Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "561993529dbc4e148f7a091eb4cfd2d40ef559d8",
+    "line" : 13,
+    "diffHunk" : "@@ -1,1 +241,245 @@          )\n        case DamlTransactionRejectionEntry.ReasonCase.REASON_NOT_SET =>\n          //TODO: Replace with \"Unknown reason\" error code or something similar\n          throw Err.InternalError(\"transactionRejectionEntryToUpdate: REASON_NOT_SET!\")\n      }"
+  },
+  {
+    "id" : "26abc532-c8b3-4489-90a4-8f472d65ec8f",
+    "prId" : 3744,
+    "comments" : [
+      {
+        "id" : "0d38bdfe-0247-4b55-ac76-3567524c9386",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Probably an artifact of spinning off another branch, but asking just to make sure: why are the Brian's initials here?",
+        "createdAt" : "2019-12-05T10:44:20Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b36b096a-82db-4dac-81f9-44c1ec61b913",
+        "parentId" : "0d38bdfe-0247-4b55-ac76-3567524c9386",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Because the change is taken from Brian's original PR.",
+        "createdAt" : "2019-12-05T12:02:52Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d8204b7c377ce994002fb11ce1227c245747b3d0",
+    "line" : 32,
+    "diffHunk" : "@@ -1,1 +38,42 @@    * @return [[Update]]s constructed from log entry.\n    */\n  // TODO(BH): add participantId to ensure participant id matches in DamlLogEntry\n  @throws(classOf[Err])\n  def logEntryToUpdate(entryId: DamlLogEntryId, entry: DamlLogEntry): List[Update] = {"
+  },
+  {
+    "id" : "4fc48bd4-a735-4675-bdaf-2508aa7209da",
+    "prId" : 637,
+    "comments" : [
+      {
+        "id" : "4cd4d5e7-d4ca-4274-854c-65a273035928",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "explain purpose of this singleton object",
+        "createdAt" : "2019-04-26T13:39:10Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d5b2167d99861a69fd3366ab5fb08acc35514642",
+    "line" : 22,
+    "diffHunk" : "@@ -1,1 +20,24 @@  * key-value based ledger.\n  */\nobject KeyValueConsumption {\n\n  def packDamlLogEntry(entry: DamlStateKey): ByteString = entry.toByteString"
+  }
+]

@@ -1,0 +1,144 @@
+[
+  {
+    "id" : "9b78c854-342a-47ed-b0f8-b0213a424390",
+    "prId" : 3425,
+    "comments" : [
+      {
+        "id" : "e5f585b9-7070-4730-8b80-f54583629f8a",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "We shouldn't reinvent all this locally; let's let the database do its job, perhaps with a well-placed `SELECT FOR UPDATE`.",
+        "createdAt" : "2019-11-11T22:55:22Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "56e46f1a-0894-4ee8-b647-167c3f9b70f6",
+        "parentId" : "e5f585b9-7070-4730-8b80-f54583629f8a",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Ummmm...\r\n\r\n> FOR UPDATE/FOR SHARE Clause. FOR UPDATE causes the rows retrieved by the SELECT statement to be locked as though for update. This prevents them from being modified or deleted by other transactions until the current transaction ends.\r\n\r\nwhy do we want to lock them? With optimistic locking (which I thought we agreed we are doing), this problem is usually solved the way I did it, checking for the number or rows updated (usually with a version or timestamp, offset in our case is fine).\r\nWith optimistic locking whatever transaction commits first -- wins, the other should retry.",
+        "createdAt" : "2019-11-12T15:15:51Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e05eccd3-cd72-4b59-89d1-6d74ff673fdb",
+        "parentId" : "e5f585b9-7070-4730-8b80-f54583629f8a",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "in my experience, the less you mess with locking, the better. This is to avoid issues when deadlocked thread started a DB lock but never committed or rolled back the transaction.",
+        "createdAt" : "2019-11-12T15:20:49Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d1533159-c942-42c4-bdef-ee5f775aa22f",
+        "parentId" : "e5f585b9-7070-4730-8b80-f54583629f8a",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "This isn't so different, as the `update` here also acquires a lock. (And it must, for the compare-and-swap check to be valid.)",
+        "createdAt" : "2019-11-12T18:30:02Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "72dfe9e7-218a-444d-8b3c-5e1e950b04a0",
+        "parentId" : "e5f585b9-7070-4730-8b80-f54583629f8a",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "the duration of this compare-and-swap is as short as the duration of the regular update, It is implemented using atomic `UPDATE .... WHERE last_offset=$lastOffset`. We just check the number of rows updated by this query, which has to be 1, else we re-run the entire flow.\r\nI think this is the simplest and most performant implementation.",
+        "createdAt" : "2019-11-12T18:51:35Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4bd1cbe2-28d5-4901-8d6b-287ef65ceef0",
+        "parentId" : "e5f585b9-7070-4730-8b80-f54583629f8a",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "plus we update offset as the last step in the flow, so any discrepancies would be caught at this point.",
+        "createdAt" : "2019-11-12T18:52:50Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "47bc3a0d-b243-4f65-b522-f49a371ef012",
+        "parentId" : "e5f585b9-7070-4730-8b80-f54583629f8a",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Yes, and that `update` acquires a lock which is released on commit.",
+        "createdAt" : "2019-11-12T19:35:56Z",
+        "updatedAt" : "2019-11-12T19:35:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9dc62b2aba0c9d4c197e1df63834edb315bfbe80",
+    "line" : 30,
+    "diffHunk" : "@@ -1,1 +62,66 @@        fconn.pure(())\n      else\n        fconn.raiseError(StaleOffsetException(party, templateId, newOffset, lastOffset))\n    } yield ()\n"
+  }
+]

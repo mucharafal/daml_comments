@@ -1,0 +1,323 @@
+[
+  {
+    "id" : "f8a28495-1b1e-4389-b081-0ec49ed8c70f",
+    "prId" : 7654,
+    "comments" : [
+      {
+        "id" : "d12cef8a-1fd1-4e1c-8811-c6a87e1212c8",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Unbinding the middleware first seems more intuitive to me given that it connects to the oauth server.",
+        "createdAt" : "2020-10-16T14:56:33Z",
+        "updatedAt" : "2020-10-16T15:18:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "84e5b9e8-c676-4557-80d9-dc47df5211f1",
+        "parentId" : "d12cef8a-1fd1-4e1c-8811-c6a87e1212c8",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Fair enough, fixed.",
+        "createdAt" : "2020-10-16T15:15:49Z",
+        "updatedAt" : "2020-10-16T15:18:19Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b1adc8e2e9d1b4d7828d6b222879ebaabd6947a",
+    "line" : 90,
+    "diffHunk" : "@@ -1,1 +124,128 @@          cleanup = () =>\n            for {\n              _ <- middleware.unbind()\n              _ <- oauth.unbind()\n            } yield ()"
+  },
+  {
+    "id" : "bdf26448-650b-48db-8cfb-d427445c0bcc",
+    "prId" : 6927,
+    "comments" : [
+      {
+        "id" : "0b7be834-96a0-4e9b-830b-91fc8a62a76b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like you are now starting toxiproxy in parallel with Sandbox. I believe that is racy, consider the following scenario:\r\n\r\n1. `LockedFreePort.find()` will bind to port 0 to get a free port X and immediately stop listening on that port and give you back the port X it got allocated by the OS.\r\n2. Now port X is free, Sandbox starts up bindings to port 0. This doesn’t go through the locking mechanism afaik as it is only used in the test library. The OS is free to allocate Sandbox to port X since nothing is listening on this.\r\n3. Now toxiproxy is started on port X which is already occupied by Sandbox.\r\n\r\nAt least on Linux, this is very hard to trigger since the Kernel will not immediately reuse the port so Sandbox will be allocated to a different port. Not quite sure about other platforms but I don’t recall seeing issues with this there either. So we probably don’t have to worry about this for now but it’s worth keeping in mind. You could fix it fairly easily by sequencing `toxiproxyF` before starting Sandbox or only create the future after you got `ledgerPort`.",
+        "createdAt" : "2020-07-30T06:21:49Z",
+        "updatedAt" : "2020-07-30T06:22:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "213fcb6b-8334-4b5e-bb01-c87b6796ea88",
+        "parentId" : "0b7be834-96a0-4e9b-830b-91fc8a62a76b",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Ahh interesting. I'll keep an eye on it and probably reorder the futures later.",
+        "createdAt" : "2020-07-30T17:43:34Z",
+        "updatedAt" : "2020-07-30T17:44:08Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ffef5071-3eeb-42a9-b127-a189c9c0b8d2",
+        "parentId" : "0b7be834-96a0-4e9b-830b-91fc8a62a76b",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Something like this maybe?\r\n\r\n```\r\n- should give an 'unauthorized' response for a stop request without an authorization header *** FAILED *** (123 milliseconds)\r\n  java.lang.NullPointerException:\r\n  at com.daml.ports.PortLock$Locked.unlock(PortLock.scala:55)\r\n  at com.daml.ports.PortLock$.lock(PortLock.scala:41)\r\n  at com.daml.ports.LockedFreePort$.find(LockedFreePort.scala:15)\r\n  at com.daml.lf.engine.trigger.TriggerServiceFixture$.$anonfun$withTriggerService$1(TriggerServiceFixture.scala:65)\r\n```",
+        "createdAt" : "2020-07-30T18:30:07Z",
+        "updatedAt" : "2020-07-30T18:30:07Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5432e873-73f3-4db2-a625-c9915263597b",
+        "parentId" : "0b7be834-96a0-4e9b-830b-91fc8a62a76b",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "That could be it! I'll submit the PR sequencing `toxiproxyF` before the sandbox as it's an easy change anyway.",
+        "createdAt" : "2020-07-30T18:43:55Z",
+        "updatedAt" : "2020-07-30T18:43:56Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b3bcf935-5a8a-4faf-bbf4-5ed89f4a03d1",
+        "parentId" : "0b7be834-96a0-4e9b-830b-91fc8a62a76b",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "#6939 for the one, and 69d5d87c904add3ee19566f7ce61d00d3c34db3c for the other.",
+        "createdAt" : "2020-07-30T19:36:32Z",
+        "updatedAt" : "2020-07-30T19:36:32Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9da65d203728c37c05e82c1cdcd4581d76e66879",
+    "line" : 23,
+    "diffHunk" : "@@ -1,1 +63,67 @@      else BazelRunfiles.rlocation(\"external/toxiproxy_dev_env/toxiproxy-server-windows-amd64.exe\")\n    val toxiproxyF: Future[(Process, ToxiproxyClient)] = for {\n      toxiproxyPort <- Future(LockedFreePort.find())\n      toxiproxyServer <- Future(\n        Process(Seq(toxiproxyExe, \"--port\", toxiproxyPort.port.value.toString)).run())"
+  },
+  {
+    "id" : "74f42cf4-5a45-4426-b0c9-2d5f94443e8a",
+    "prId" : 6926,
+    "comments" : [
+      {
+        "id" : "044cb177-f0f8-4b7e-b29c-72f5027f3bb5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What exactly went wrong with `Future.sequence`? As far as I understand `Future.sequence` is not fail fast so it shouldn’t stop anything from running. Does running these things in parallel cause issues?",
+        "createdAt" : "2020-08-04T05:03:33Z",
+        "updatedAt" : "2020-08-04T05:03:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5863908a-043f-49a8-8b48-86b59836c86b",
+        "parentId" : "044cb177-f0f8-4b7e-b29c-72f5027f3bb5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Actually, I think I might have misread something and it is fail fast which probably explains the issue here.",
+        "createdAt" : "2020-08-04T05:04:40Z",
+        "updatedAt" : "2020-08-04T05:04:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1a117c8b-ff7e-4bf7-8104-103a2d94b186",
+        "parentId" : "044cb177-f0f8-4b7e-b29c-72f5027f3bb5",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I don't think `Future.sequence` is fail-fast. It's passed already-running Futures and AFAIK, there's no way to stop them.",
+        "createdAt" : "2020-08-04T09:18:31Z",
+        "updatedAt" : "2020-08-04T09:18:31Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5db2db8e-940d-49d3-b7d4-a37328a7ec70",
+        "parentId" : "044cb177-f0f8-4b7e-b29c-72f5027f3bb5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "So the issue was that we tried to stop things in parallel? I’m not quite sure why that’s a problem.",
+        "createdAt" : "2020-08-04T09:23:32Z",
+        "updatedAt" : "2020-08-04T09:23:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fdc2e9fe-9aa0-43e9-822f-168f26389709",
+        "parentId" : "044cb177-f0f8-4b7e-b29c-72f5027f3bb5",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It is fail-fast in the sense that if one future fails, it completed, allowing the next step (the restart) to proceed despite something else's shutdown being in progress.",
+        "createdAt" : "2020-08-04T12:09:18Z",
+        "updatedAt" : "2020-08-04T12:09:18Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4b3a7b40-6341-4260-a7af-b9a8fa85b20f",
+        "parentId" : "044cb177-f0f8-4b7e-b29c-72f5027f3bb5",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I could possibly restore the parallel shutdown, if the forced success of this chain is really the relevant piece, but would rather get this in as is first.",
+        "createdAt" : "2020-08-04T12:13:24Z",
+        "updatedAt" : "2020-08-04T12:13:24Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d621b11a-0803-4b64-ab43-53ec19a96b27",
+        "parentId" : "044cb177-f0f8-4b7e-b29c-72f5027f3bb5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense, thanks for the explanation! I’m not worried about losing parallelism so totally fine to get this in and ignore this.",
+        "createdAt" : "2020-08-04T12:14:40Z",
+        "updatedAt" : "2020-08-04T12:14:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d621fa244b09f829603ce2baad68676abb485e58",
+    "line" : 29,
+    "diffHunk" : "@@ -1,1 +138,142 @@\n    fa.transformWith { ta =>\n      for {\n        se <- optErr(serviceF.flatMap {\n          case (_, system) =>"
+  },
+  {
+    "id" : "f0c332d7-5585-42cf-9f31-8495dd71ff16",
+    "prId" : 6309,
+    "comments" : [
+      {
+        "id" : "a0bbeb08-0647-4abd-b5fa-5eaa07c06247",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "```suggestion\r\n        noSecretKey = true // Use the default secret for testing.\r\n```",
+        "createdAt" : "2020-06-11T22:18:15Z",
+        "updatedAt" : "2020-06-11T22:19:34Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "df38038340aa1699372867c97fee63f61f3bd093",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +124,128 @@        dar,\n        jdbcConfig,\n        noSecretKey = true // That's ok, use the default.\n      )\n    } yield service"
+  }
+]

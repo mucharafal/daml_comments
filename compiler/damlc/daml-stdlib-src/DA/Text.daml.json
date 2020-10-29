@@ -1,0 +1,118 @@
+[
+  {
+    "id" : "13fbc87d-7bb3-4ba4-a6ab-d1e1b868bce3",
+    "prId" : 3734,
+    "comments" : [
+      {
+        "id" : "79abfb54-f02a-40ee-ae96-86dc9bac50a8",
+        "parentId" : null,
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "This is a very bad idea. The stdlib should never be different (in terms of types and existence of functions) depending on the _target language_. \r\nAlso, having functions with different names makes it very cumbersome to compare anything.\r\nTo achieve the goal of comparing performance impacts for these primitives, I suggest either leaving this on a branch (if we are unsure about whether anything works) or branching the _existing_  `DA.Text` interface, like so\r\n```\r\nsplitOn : Text -> Text -> [Text]\r\n#ifdef DAML_UNSTABLE\r\nsplitOn = primitive  @\"BETextSplitOn\"\r\n#else\r\nsplitOn \"\" t' = [t']\r\nsplitOn _ \"\" = [\"\"]\r\nsplitOn ... current master\r\n#endif\r\n```\r\nUsing separate pragmas instead of a single `DAML_UNSTABLE` you can then implement a \"switchboard\" for test setups (testing on a branch) to measure the individual primitives or combinations.\r\nObviously more startup cost, but the only thing that makes sense for measurements (nobody will sit down inserting `unstable` prefixes at all the call sites for such measurements)",
+        "createdAt" : "2019-12-04T21:28:30Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ef7638d6-1db6-487b-b5e3-f0075f7a0b54",
+        "parentId" : "79abfb54-f02a-40ee-ae96-86dc9bac50a8",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "> This is a very bad idea. The stdlib should never be different (in terms of types and existence of functions) depending on the _target language_.\r\n\r\nThis is not possible in general. E.g., consider the addition of the new map type. There is no way to have this for older LF versions.\r\n\r\nBranching the existing DA.Text interface means that we have to recompile the SDK for every experiment we want to run which seems much more cumbersome than running a search and replace to add `unstable` prefixes.",
+        "createdAt" : "2019-12-05T05:29:36Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e67b8edb-c9a1-44db-9aa9-2b97ded291fb",
+        "parentId" : "79abfb54-f02a-40ee-ae96-86dc9bac50a8",
+        "author" : null,
+        "body" : "I agree with @cocreature here. Recompiling the compiler and the SDK for each experiment isn't really a good idea. It's not only extremely slow but also has the potential to introduce unrelated compilation artifacts into the benchmarks. By exposing all of these unstable functions for the same target (1.dev), we're always testing the same SDK, compiler, stdlib packages, and the only question is \"do these primitives result in a significant improvement\"? (That said, we don't currently have a way to make any conclusions about statistical significance in DAML. All we can do is eyeball it . . .)\r\n\r\nThe point of `DAML_UNSTABLE` is that it's only available for those working on 1.dev and it's 100% not a stable interface, so it's perfect for this kind of experimentation. We already have different parts of the stdlib that depending on the LF target (see Numeric, GenMap, AnyTemplate, etc features), because otherwise we would have to drop support for older LF versions.",
+        "createdAt" : "2019-12-05T11:01:37Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "52d49471-e9b4-4337-baef-c075d7f1c662",
+        "parentId" : "79abfb54-f02a-40ee-ae96-86dc9bac50a8",
+        "author" : {
+          "login" : "filmackay",
+          "name" : "Fil Mackay",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1817552?v=4"
+        },
+        "body" : "What about in a `Data.Text.Unstable` module?",
+        "createdAt" : "2020-01-10T03:06:44Z",
+        "updatedAt" : "2020-01-10T03:06:44Z",
+        "lastEditedBy" : {
+          "login" : "filmackay",
+          "name" : "Fil Mackay",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1817552?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ea94ecd7a45890252cd55edbd0adda2787b8cbdc",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +55,59 @@  , DA.Text.fromCodePoints\n\n#ifdef DAML_UNSTABLE\n  -- unstable, experimental primitives\n  , unstableToUpper"
+  },
+  {
+    "id" : "4893aecd-5493-4bf9-8dd5-1f8c27430329",
+    "prId" : 3063,
+    "comments" : [
+      {
+        "id" : "7c5c3e56-1566-4c74-999b-1331ecca142a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Should we deprecate `parseDecimal` (not necessarily now but at some point).",
+        "createdAt" : "2019-09-30T07:48:55Z",
+        "updatedAt" : "2019-09-30T07:49:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "676e759d-c099-40cc-a3ec-ec6762df35ac",
+        "parentId" : "7c5c3e56-1566-4c74-999b-1331ecca142a",
+        "author" : null,
+        "body" : "At some point, I think so",
+        "createdAt" : "2019-09-30T10:02:30Z",
+        "updatedAt" : "2019-09-30T10:02:31Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f632ada94e98c59084ee19f61536cfeab9a5c850",
+    "line" : 16,
+    "diffHunk" : "@@ -1,1 +50,54 @@  , DA.Text.parseNumeric\n#endif\n  , DA.Text.parseDecimal\n  , DA.Text.sha256\n  , DA.Text.toCodePoints"
+  }
+]

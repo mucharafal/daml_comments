@@ -1,0 +1,3890 @@
+[
+  {
+    "id" : "683dc8c2-9c27-4f5a-9866-c86a1a6d3cec",
+    "prId" : 6834,
+    "comments" : [
+      {
+        "id" : "58ef9a14-925e-4010-ba68-75b69c4766e6",
+        "parentId" : null,
+        "author" : {
+          "login" : "RobinKrom",
+          "name" : "drsk",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/827698?v=4"
+        },
+        "body" : "Where is the `DecoderLazy` actually constructed in the codegen?",
+        "createdAt" : "2020-07-22T17:53:45Z",
+        "updatedAt" : "2020-07-22T17:53:45Z",
+        "lastEditedBy" : {
+          "login" : "RobinKrom",
+          "name" : "drsk",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/827698?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "abb50807-152c-4a7d-a3f5-7eb25fd7cdc8",
+        "parentId" : "58ef9a14-925e-4010-ba68-75b69c4766e6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "For variants, that part is fine. The problem is that variants are not the only way to write recursive (terminating) types `Optional`, `List` and `TextMap` give you the same issues and therefore need to be lazy as well. This just seemed like the most appropriate place to document what needs to be lazy.",
+        "createdAt" : "2020-07-22T17:54:59Z",
+        "updatedAt" : "2020-07-22T17:54:59Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "19a888f7-da9c-4ad1-a8ca-77a487b165a2",
+        "parentId" : "58ef9a14-925e-4010-ba68-75b69c4766e6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The other option would be to make all record fields lazy but I’m not quite sure around the performance implications of making things lazy so limiting it to where we need it to break recursion seemed like a better choice.",
+        "createdAt" : "2020-07-22T17:58:53Z",
+        "updatedAt" : "2020-07-22T17:58:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4484c03f-7f3c-4caf-8dcc-8f5bd773f31c",
+        "parentId" : "58ef9a14-925e-4010-ba68-75b69c4766e6",
+        "author" : {
+          "login" : "RobinKrom",
+          "name" : "drsk",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/827698?v=4"
+        },
+        "body" : "makes sense, thanks!",
+        "createdAt" : "2020-07-23T08:48:17Z",
+        "updatedAt" : "2020-07-23T08:48:18Z",
+        "lastEditedBy" : {
+          "login" : "RobinKrom",
+          "name" : "drsk",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/827698?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6665127fa528a85209f8a213aa3865360858ad44",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +479,483 @@    | DecoderConstant DecoderConstant\n    | DecoderRef TypeRef -- ^ Reference to an object with a .decoder() method\n    | DecoderLazy Decoder -- ^ Lazy decoder, we need this to avoid infinite loops\n    -- on recursive types. We insert this in every variant, Optional, List and TextMap\n    -- which are the only ways to construct terminating recursive types."
+  },
+  {
+    "id" : "9fce54cd-b818-471a-ab72-27156dcac078",
+    "prId" : 6834,
+    "comments" : [
+      {
+        "id" : "908c488a-084b-4993-8a6a-076acd649e85",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I assume with \"terminating recursive types\" you meant recursive types that are inhabited. Is that correct?",
+        "createdAt" : "2020-07-22T20:44:57Z",
+        "updatedAt" : "2020-07-22T21:00:29Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6665127fa528a85209f8a213aa3865360858ad44",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +481,485 @@    | DecoderLazy Decoder -- ^ Lazy decoder, we need this to avoid infinite loops\n    -- on recursive types. We insert this in every variant, Optional, List and TextMap\n    -- which are the only ways to construct terminating recursive types.\n\ndata DecoderConstant"
+  },
+  {
+    "id" : "69ee5397-d08e-4e70-ad0c-20674d06cbfd",
+    "prId" : 6657,
+    "comments" : [
+      {
+        "id" : "821aeee7-5518-4908-a117-a92320b0d63b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I just learnt that `const` was only introduced in ES6. 😞",
+        "createdAt" : "2020-07-09T19:15:49Z",
+        "updatedAt" : "2020-07-09T19:31:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4a316c70-a90c-4032-8b8a-c4d058fe8c02",
+        "parentId" : "821aeee7-5518-4908-a117-a92320b0d63b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah all the good stuff is only in ES6 :cry: But given that this is generated code it luckily isn’t a big deal (and I believe the typescript typechecker might still yell at you although I haven’t verified that (should be the same as before)).",
+        "createdAt" : "2020-07-09T19:32:58Z",
+        "updatedAt" : "2020-07-09T19:32:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "381ee9cd524fb450ded324f1f48f4cc97a2cf7cb",
+    "line" : 131,
+    "diffHunk" : "@@ -1,1 +215,219 @@    modHeader ES5 = commonjsPrefix ++\n      [ \"/* eslint-disable-next-line no-unused-vars */\"\n      , \"var jtv = require('@mojotech/json-type-validation');\"\n      , \"/* eslint-disable-next-line no-unused-vars */\"\n      , \"var damlTypes = require('@daml/types');\""
+  },
+  {
+    "id" : "f40c84b0-4198-47b4-9f51-782d9c2ec820",
+    "prId" : 6615,
+    "comments" : [
+      {
+        "id" : "853802e8-50d5-4320-a78a-c2c189f73731",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Shouldn't we treat the case when `args` is empty different?",
+        "createdAt" : "2020-07-08T07:56:04Z",
+        "updatedAt" : "2020-07-08T07:58:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b7b46237-a462-4216-b406-3fcb416f46d5",
+        "parentId" : "853802e8-50d5-4320-a78a-c2c189f73731",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I realized that on my branch where I change it to emit declaration files but it doesn’t actually make a difference. Typescript seems to be perfectly happy with `<>`. (I’ll still fix it).",
+        "createdAt" : "2020-07-08T07:59:43Z",
+        "updatedAt" : "2020-07-08T07:59:44Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "36330525b73a099b3fc48a30be0c9792ca20c8e5",
+    "line" : 271,
+    "diffHunk" : "@@ -1,1 +486,490 @@        , [ \"  | '\" <> f <> \"'\" | f <- fs ]\n        ]\n  where ty t args = t <> \"<\" <> T.intercalate \", \" args <> \">\"\n\n-- | Generate the Serializable definition for a datatype."
+  },
+  {
+    "id" : "93fd67ad-8b0b-4bdb-a409-8600220bb13a",
+    "prId" : 5587,
+    "comments" : [
+      {
+        "id" : "f13ce5ed-8673-496c-b952-f8c464df7bd2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Just out of curiosity, have you tried using just `Key` instead of `T.Key`? Did that work?",
+        "createdAt" : "2020-04-16T19:50:24Z",
+        "updatedAt" : "2020-04-16T20:00:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c996837c-0890-4326-b7ed-dea88c86317a",
+        "parentId" : "f13ce5ed-8673-496c-b952-f8c464df7bd2",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Somebody seems to love the magic weapons for point-free code, `maybe` & `const`... 😃\r\nI would have gone for\r\n```suggestion\r\n                              tK = if isJust mbKeyDef then tT <> \".Key\" else \"undefined\"\r\n```",
+        "createdAt" : "2020-04-16T19:51:29Z",
+        "updatedAt" : "2020-04-16T20:00:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b902d6d1-81ee-4779-af8b-5549b09ba2b4",
+        "parentId" : "f13ce5ed-8673-496c-b952-f8c464df7bd2",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "> Just out of curiosity, have you tried using just `Key` instead of `T.Key`? Did that work?\r\n\r\nI have as a matter of fact. Yes, that works fine.",
+        "createdAt" : "2020-04-16T21:07:14Z",
+        "updatedAt" : "2020-04-16T21:07:15Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9c49bde3c90377c04ba63a6b08ba6367fe9c5618",
+    "line" : 8,
+    "diffHunk" : "@@ -1,1 +391,395 @@                          let mbKeyDef = fst . genType (moduleName mod) . tplKeyType <$> tplKey tpl\n                              tT = conName\n                              tK = maybe \"undefined\" (const (tT <> \".Key\")) mbKeyDef\n                              tI = \"typeof \" <> tT <> \".templateId\" in\n                          [ \"export namespace \" <> tT <> \" {\" ] ++"
+  },
+  {
+    "id" : "727d2d60-0093-48f4-bcb0-97cba9fe8783",
+    "prId" : 5571,
+    "comments" : [
+      {
+        "id" : "8d66516c-ec32-48e9-8f17-415c710c1752",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I assume this will just be undefined if we do not have a key? Is this tested?",
+        "createdAt" : "2020-04-16T14:11:55Z",
+        "updatedAt" : "2020-04-16T14:12:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c6c91782-028e-475e-95b7-35a2e2641d7a",
+        "parentId" : "8d66516c-ec32-48e9-8f17-415c710c1752",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "In the event there is no key, then the definition in play is `export type Key = unknown` which is consistent with the definitions of `Event<>` and `CreateEvent<>`. Yes, tested.",
+        "createdAt" : "2020-04-16T14:18:46Z",
+        "updatedAt" : "2020-04-16T14:18:47Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "72535d45c1b8ec7a43d469e44a1e26622b509de6",
+    "line" : 19,
+    "diffHunk" : "@@ -1,1 +390,394 @@                        associatedTypes =\n                          let tT = conName\n                              tK = tT <> \".Key\"\n                              tI = \"typeof \" <> tT <> \".templateId\" in\n                          [ \"export namespace \" <> tT <> \" {\""
+  },
+  {
+    "id" : "752b519b-7f15-4b92-b06e-f96a14b829d9",
+    "prId" : 5571,
+    "comments" : [
+      {
+        "id" : "1f664931-e345-4d72-bf53-44f152f6c1c8",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I would prefer if there was no `Key` type synonym when there's no contract key for the template. Let's use `Key` for `tK` when there is a key and `undefined` when there's no key.",
+        "createdAt" : "2020-04-16T15:26:47Z",
+        "updatedAt" : "2020-04-16T15:26:47Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e1f649c9-a33f-4fc6-80f5-dfdeb51215d4",
+        "parentId" : "1f664931-e345-4d72-bf53-44f152f6c1c8",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "PR https://github.com/digital-asset/daml/pull/5587.",
+        "createdAt" : "2020-04-16T16:08:30Z",
+        "updatedAt" : "2020-04-16T16:08:31Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "72535d45c1b8ec7a43d469e44a1e26622b509de6",
+    "line" : 22,
+    "diffHunk" : "@@ -1,1 +393,397 @@                              tI = \"typeof \" <> tT <> \".templateId\" in\n                          [ \"export namespace \" <> tT <> \" {\"\n                          , \"  export type Key = \" <> maybe \"unknown\" (fst . genType (moduleName mod) . tplKeyType) (tplKey tpl)\n                          , \"  export type CreateEvent = damlLedger.CreateEvent\" <> \"<\" <> tparams [tT, tK, tI] <> \">\"\n                          , \"  export type ArchiveEvent = damlLedger.ArchiveEvent\" <> \"<\" <>  tparams [tT, tI] <> \">\""
+  },
+  {
+    "id" : "0e556379-5565-4cdb-8b93-04b1c8a17f94",
+    "prId" : 5323,
+    "comments" : [
+      {
+        "id" : "0a4df8c7-2873-41a3-9ac6-ff7db9e25621",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why are you not using `callProcessSilent` here?",
+        "createdAt" : "2020-04-01T06:24:50Z",
+        "updatedAt" : "2020-04-01T11:02:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f700ca58-c704-4aa3-9902-6cb5f6fd75cb",
+        "parentId" : "0a4df8c7-2873-41a3-9ac6-ff7db9e25621",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Didn't feel right having this executable depend on a test utility library",
+        "createdAt" : "2020-04-01T10:53:57Z",
+        "updatedAt" : "2020-04-01T11:02:41Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a2f4f774-f9b5-4f4f-a18a-28ff4bb6be12",
+        "parentId" : "0a4df8c7-2873-41a3-9ac6-ff7db9e25621",
+        "author" : null,
+        "body" : "Maybe `callProcessSilent` (etc) should be in da-hs-base.",
+        "createdAt" : "2020-04-01T11:00:42Z",
+        "updatedAt" : "2020-04-01T11:02:41Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "df27ddef-6612-4adb-a009-f43607aa8974",
+        "parentId" : "0a4df8c7-2873-41a3-9ac6-ff7db9e25621",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Not ~sufficiently~ currently motivated (enough) to do it for this one case today but my arm can be twisted if you feel strongly about it 😉  Do you? ",
+        "createdAt" : "2020-04-01T11:08:34Z",
+        "updatedAt" : "2020-04-01T11:12:33Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4065b043-e137-4ef7-a439-a35e9bdf47d1",
+        "parentId" : "0a4df8c7-2873-41a3-9ac6-ff7db9e25621",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "@associahedron ",
+        "createdAt" : "2020-04-01T11:10:00Z",
+        "updatedAt" : "2020-04-01T11:10:01Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fbd41357-9ae8-4c32-b338-a84144cbf74d",
+        "parentId" : "0a4df8c7-2873-41a3-9ac6-ff7db9e25621",
+        "author" : null,
+        "body" : "Not strongly, no :) ",
+        "createdAt" : "2020-04-01T11:10:05Z",
+        "updatedAt" : "2020-04-01T11:10:05Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6753e52f-929c-41ba-a9d8-b89a9f718ced",
+        "parentId" : "0a4df8c7-2873-41a3-9ac6-ff7db9e25621",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I do agree though, just inclined to do it down the road when a more motivating circumstance arises.",
+        "createdAt" : "2020-04-01T11:11:19Z",
+        "updatedAt" : "2020-04-01T11:11:19Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "910d8cde2a20dfa2ec955c1f660b07062bec4b51",
+    "line" : 20,
+    "diffHunk" : "@@ -1,1 +611,615 @@      copyDirectory pkg $ \"node_modules\" </> scope </> pkg\n\n    yarn :: [String] -> IO ()\n    yarn args = do\n      (exitCode, _, err) <- readProcessWithExitCode \"yarn\" args \"\""
+  },
+  {
+    "id" : "4859aa03-60d5-4e41-a5de-8b9063e15a7e",
+    "prId" : 5209,
+    "comments" : [
+      {
+        "id" : "0460f6e0-c4a3-406d-b9e9-f2362ac0e7b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This is because `A/B/C/module.ts` file sits one level deeper than `A/B/C.ts`.",
+        "createdAt" : "2020-03-26T10:15:01Z",
+        "updatedAt" : "2020-03-26T14:23:18Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7009aff7cd6ec3595cab8af0ca8deff007a84e3e",
+    "line" : 27,
+    "diffHunk" : "@@ -1,1 +229,233 @@        imports = (PRSelf, modName) `Set.delete` Set.unions refs\n        (internalImports, externalImports) = splitImports imports\n        rootPath = map (const \"..\") (unModuleName modName)\n        defs = map biconcat defSers\n        modText = T.unlines $ intercalate [\"\"] $ filter (not . null) $"
+  },
+  {
+    "id" : "e68410c4-684d-4944-9af3-051542d7f75c",
+    "prId" : 5197,
+    "comments" : [
+      {
+        "id" : "cd743c52-ad67-45ce-b206-e119450315fe",
+        "parentId" : null,
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Do we still need this after the recent change?",
+        "createdAt" : "2020-03-25T20:06:28Z",
+        "updatedAt" : "2020-03-25T20:37:25Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "51afcb89-9d1b-4fc6-a0b3-e4b7b03821ac",
+        "parentId" : "cd743c52-ad67-45ce-b206-e119450315fe",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Do you mean the camelcase exception? We still produce names like `DA_Template_Internal` which might trigger a warning.",
+        "createdAt" : "2020-03-25T20:17:42Z",
+        "updatedAt" : "2020-03-25T20:37:25Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5abb2ebd-9239-4d5f-b928-2672ce5712eb",
+        "parentId" : "cd743c52-ad67-45ce-b206-e119450315fe",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I did. Ok!",
+        "createdAt" : "2020-03-25T20:18:36Z",
+        "updatedAt" : "2020-03-25T20:37:25Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "48bdeaa24d48feb9788fb193e93d3158496d3125",
+    "line" : 67,
+    "diffHunk" : "@@ -1,1 +260,264 @@    modHeader =\n      [ \"// Generated from \" <> modPath (unModuleName modName) <> \".daml\"\n      , \"/* eslint-disable @typescript-eslint/camelcase */\"\n      , \"/* eslint-disable @typescript-eslint/no-namespace */\"\n      , \"/* eslint-disable @typescript-eslint/no-use-before-define */\""
+  },
+  {
+    "id" : "746f3557-0876-4395-92ef-925f24dc87e6",
+    "prId" : 5171,
+    "comments" : [
+      {
+        "id" : "95e5a4ff-eb25-4048-9ce8-dd52af6c85bc",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can you please create an issue to make sure we remove this flag after the next release.",
+        "createdAt" : "2020-03-25T17:32:18Z",
+        "updatedAt" : "2020-03-25T17:50:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9e28f149-b4ad-4828-881e-0c433d6453c5",
+        "parentId" : "95e5a4ff-eb25-4048-9ce8-dd52af6c85bc",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/issues/5194",
+        "createdAt" : "2020-03-25T18:34:58Z",
+        "updatedAt" : "2020-03-25T18:34:59Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ede39c0bc7b73401d689c75f3f46feb6f2c5843f",
+    "line" : 47,
+    "diffHunk" : "@@ -1,1 +79,83 @@    { optInputDars :: [FilePath]\n    , optOutputDir :: FilePath\n    , optInputPackageJson :: Maybe FilePath -- Deprecated.\n    , optScope :: Scope -- Defaults to 'daml.js'.\n    }"
+  },
+  {
+    "id" : "b7ceb989-47d7-433b-82a4-8a0a07f1e118",
+    "prId" : 5098,
+    "comments" : [
+      {
+        "id" : "743e43dd-8e13-46fa-8564-c1f6776d7498",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "You've apparently done too much OCaml in your life. Nobody else would leave a space between \"Error\" and the colon afterwards. 😉",
+        "createdAt" : "2020-03-20T08:35:25Z",
+        "updatedAt" : "2020-03-20T08:35:34Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "89312882f256fc1cc54ac6d03a1692bcf561dfb2",
+    "line" : 9,
+    "diffHunk" : "@@ -1,1 +746,750 @@    Just bytes ->\n      case eitherDecode @PackageJson bytes of\n        Left msg -> fail $ \"Error : '\" <> optInputPackageJson <> \"' : \" <> msg\n        Right packageJson -> pure packageJson\n  transformAndWrite ourWorkspaces outBaseDir packageJson"
+  },
+  {
+    "id" : "24755c6a-8679-407b-9550-eb5eb6c781a1",
+    "prId" : 5088,
+    "comments" : [
+      {
+        "id" : "ef89297f-0f61-4de1-b087-1b361e1d584f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Shadowing `id` is a bit confusing.",
+        "createdAt" : "2020-03-19T16:17:22Z",
+        "updatedAt" : "2020-03-19T16:17:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0ee47ab7-5529-4172-9d02-7b1e5d073c27",
+        "parentId" : "ef89297f-0f61-4de1-b087-1b361e1d584f",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm innocent. 🤷‍♂",
+        "createdAt" : "2020-03-19T17:05:51Z",
+        "updatedAt" : "2020-03-19T17:05:52Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d1d173aa884ccf973a78aba176065c91d09572af",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +174,178 @@                     pkgName = packageNameText pkgId mbPkgName\n                 let pkgDesc = case mbPkgName of\n                       Nothing -> id\n                       Just pkgName -> unPackageName pkgName <> \" (hash: \" <> id <> \")\"\n                 T.putStrLn $ \"Generating \" <> pkgDesc"
+  },
+  {
+    "id" : "809a3b2f-0748-4734-b455-1ee643ccf7be",
+    "prId" : 5081,
+    "comments" : [
+      {
+        "id" : "4aa74f33-73e9-4ddf-94a1-72457bea43ae",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "If you use `eiherDecode` you can get an error message on parse failures.",
+        "createdAt" : "2020-03-19T07:54:20Z",
+        "updatedAt" : "2020-03-19T07:54:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ef66a5c7-c72e-4939-acd0-5477b902d22c",
+        "parentId" : "4aa74f33-73e9-4ddf-94a1-72457bea43ae",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Excellent idea. Would be `eitherDecode @PackageJson` then I guess.",
+        "createdAt" : "2020-03-19T08:05:55Z",
+        "updatedAt" : "2020-03-19T08:05:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3bb213bd-8b79-43fe-ba47-003b26ca9fd6",
+        "parentId" : "4aa74f33-73e9-4ddf-94a1-72457bea43ae",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I'll get another PR going for that.",
+        "createdAt" : "2020-03-19T10:52:35Z",
+        "updatedAt" : "2020-03-19T10:52:35Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "701028ba-a9b0-4473-90e3-d0f46faab644",
+        "parentId" : "4aa74f33-73e9-4ddf-94a1-72457bea43ae",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I've had a look at the error messages it produces. They don't look helpful to be honest. For example, with a stray ',' the resulting error message is:\r\n```\r\nError in $: Failed reading: satisfy. Expecting object value\r\n```\r\nI recommend we do not switch from `decode` to `eitherDecode`.",
+        "createdAt" : "2020-03-19T18:20:43Z",
+        "updatedAt" : "2020-03-19T18:20:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4d6a8572-1547-41cd-b637-cc8f7042e8b2",
+        "parentId" : "4aa74f33-73e9-4ddf-94a1-72457bea43ae",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It depends on the error and the kind of code you write. E.g. for a missing key you can often get fairly decent errors. Using things like `withObject`, `<?>` you can improve errors. I wouldn’t use one bad error message as an indicator that not showing the error at all is better.",
+        "createdAt" : "2020-03-19T18:27:10Z",
+        "updatedAt" : "2020-03-19T18:27:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3b026f63-aa8c-4847-9a73-fda28a9b4fd2",
+        "parentId" : "4aa74f33-73e9-4ddf-94a1-72457bea43ae",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok, sounds reasonable. In which case I offer https://github.com/digital-asset/daml/pull/5098 😃  ",
+        "createdAt" : "2020-03-19T18:31:28Z",
+        "updatedAt" : "2020-03-19T18:31:28Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f4693b184a4cd1682837e9ac4ddf2d48ab7fada",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +744,748 @@  packageJson <- case mbBytes of\n    Nothing -> pure mempty\n    Just bytes -> case decode @PackageJson bytes of\n      Nothing -> fail $ \"Error decoding JSON from '\" <> optInputPackageJson <> \"'\"\n      Just packageJson -> pure packageJson"
+  },
+  {
+    "id" : "ee1b0638-ef73-4a36-8465-cbc31d02efe8",
+    "prId" : 5005,
+    "comments" : [
+      {
+        "id" : "71df4803-47eb-4842-9bf7-2061bb1a4289",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I think the following is easier to read (and shorter):\r\n```suggestion\r\n    Just bytes -> case decode @PackageJson bytes of\r\n```",
+        "createdAt" : "2020-03-16T09:21:48Z",
+        "updatedAt" : "2020-03-16T09:25:49Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9640f962003330d691482ffa2c1b07dfa5e06655",
+    "line" : 58,
+    "diffHunk" : "@@ -1,1 +749,753 @@  packageJson <- case mbBytes of\n    Nothing -> pure mempty\n    Just bytes -> case decode bytes :: Maybe PackageJson of\n      Nothing -> fail $ \"Error decoding JSON from '\" <> optInputPackageJson <> \"'\"\n      Just packageJson -> pure packageJson"
+  },
+  {
+    "id" : "9dce7363-a726-4551-8913-15154201d1e1",
+    "prId" : 5005,
+    "comments" : [
+      {
+        "id" : "85aca0a9-d3f1-4d10-bc2b-871b47cfc269",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not a big fan of using (highly) polymorphic constants in monomorphic code. What is `mempty` here? Is it `[]` or `Sum 0` or `Endo id`? I _guess_ it's an empty string of some sort. If so, I'd prefer to have the following for the sake of legibility:\r\n```suggestion\r\n    Nothing -> pure \"\"\r\n```",
+        "createdAt" : "2020-03-16T09:25:33Z",
+        "updatedAt" : "2020-03-16T09:25:49Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9640f962003330d691482ffa2c1b07dfa5e06655",
+    "line" : 57,
+    "diffHunk" : "@@ -1,1 +748,752 @@    (Just <$> BSL.readFile optInputPackageJson) (const $ pure Nothing)\n  packageJson <- case mbBytes of\n    Nothing -> pure mempty\n    Just bytes -> case decode bytes :: Maybe PackageJson of\n      Nothing -> fail $ \"Error decoding JSON from '\" <> optInputPackageJson <> \"'\""
+  },
+  {
+    "id" : "395c3b1e-bd0a-4a33-b9e1-69d8b4cc47ad",
+    "prId" : 5001,
+    "comments" : [
+      {
+        "id" : "01ed08f0-d63e-4f35-9a16-ca79e9cc60c9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "How reasonable would it be to default this to `package.json`?",
+        "createdAt" : "2020-03-13T19:57:48Z",
+        "updatedAt" : "2020-03-13T20:44:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "99e08a83-9c0d-42a8-8ed7-3da55703d966",
+        "parentId" : "01ed08f0-d63e-4f35-9a16-ca79e9cc60c9",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Very reasonable I expect. I'll do that.",
+        "createdAt" : "2020-03-13T20:03:35Z",
+        "updatedAt" : "2020-03-13T20:44:57Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fd62e20b94f00b0592230f520a91b0f57ca3096f",
+    "line" : 14,
+    "diffHunk" : "@@ -1,1 +94,98 @@        <> help \"Output directory for the generated packages\"\n        )\n    <*> strOption\n        (  short 'p'\n        <> metavar \"PACKAGE-JSON\""
+  },
+  {
+    "id" : "51e00fe9-19e1-4613-8a8d-bbb3244c90b3",
+    "prId" : 5001,
+    "comments" : [
+      {
+        "id" : "82efed9e-6cef-4994-9aae-d3a58eae5666",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe catch the error when reading the file and default it to this instead of explicitly creating it here?",
+        "createdAt" : "2020-03-13T20:48:34Z",
+        "updatedAt" : "2020-03-13T20:49:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fd62e20b94f00b0592230f520a91b0f57ca3096f",
+    "line" : 45,
+    "diffHunk" : "@@ -1,1 +734,738 @@  -- exist, create it.\n  packageJsonExists <- doesFileExist optInputPackageJson\n  when (not packageJsonExists) $ do\n    BSL.writeFile optInputPackageJson $\n      encodePretty (object"
+  },
+  {
+    "id" : "4cddf8a1-7033-4d64-a167-8870234b9a7d",
+    "prId" : 4975,
+    "comments" : [
+      {
+        "id" : "03c57f78-b0a5-4e9e-98b1-97b7bb16591c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Side note: The whole code in this module seems to become increasingly messy. I hope it won’t grow much anymore so this is probably not a huge issue but if it does, we should use a pretty printing library and maybe consider introducing some intermediate types or at least lots of helper functions instead of converting directly to strings.",
+        "createdAt" : "2020-03-12T20:16:55Z",
+        "updatedAt" : "2020-03-12T21:11:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "af8b74c3-d759-4d6f-891f-e71e4b8f2610",
+        "parentId" : "03c57f78-b0a5-4e9e-98b1-97b7bb16591c",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Captured in issue https://github.com/digital-asset/daml/issues/5047.",
+        "createdAt" : "2020-03-17T16:40:55Z",
+        "updatedAt" : "2020-03-17T16:40:56Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3f6f10a59e79f234fa88ceca81c572c611a97f7d",
+    "line" : 20,
+    "diffHunk" : "@@ -1,1 +352,356 @@              -- The complete definition of the companion object.\n              serDesc =\n                [ \"export const \" <> conName <> \": daml.Serializable<\" <> conName <> \"> & {\"] <>\n                [ \"  readonly \" <> cons <> \": \" <> conName <> \";\" | cons <- cs ] ++\n                [\"} = {\"] ++"
+  },
+  {
+    "id" : "589d18b8-3512-4ad4-a58e-99192b580d35",
+    "prId" : 4975,
+    "comments" : [
+      {
+        "id" : "624214c4-86a2-48d2-863a-120f1caca8f2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "One thing that has come up in the past I believe is the need to enumerate enum values (e.g., let’s say you have a dropdown or something like that). If my understanding and my google searches are correct this is easy to do with an enum but not with a union. However, given that we have the companion object, we can probably add the enumeration on that, e.g. `Color.keys = [\"Red\", …]`. I would suggest to leave this out of this PR and do some research if there is a common pattern for this in typescript that we can steal.",
+        "createdAt" : "2020-03-12T20:25:58Z",
+        "updatedAt" : "2020-03-12T21:11:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "936b16a6-a2b1-4838-8512-f8a5d3d6758c",
+        "parentId" : "624214c4-86a2-48d2-863a-120f1caca8f2",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Yes, we should definitely do something like this. If it wasn't for the `decoder` method, we could use `Object.keys(Color)`. But it's there anyway. So, having `Color.keys` would be great.",
+        "createdAt" : "2020-03-16T09:33:32Z",
+        "updatedAt" : "2020-03-16T09:33:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5de394ad-ae75-4e07-9b2d-03fea1b0e027",
+        "parentId" : "624214c4-86a2-48d2-863a-120f1caca8f2",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/5044",
+        "createdAt" : "2020-03-17T15:37:06Z",
+        "updatedAt" : "2020-03-17T15:37:06Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3f6f10a59e79f234fa88ceca81c572c611a97f7d",
+    "line" : 23,
+    "diffHunk" : "@@ -1,1 +355,359 @@                [ \"  readonly \" <> cons <> \": \" <> conName <> \";\" | cons <- cs ] ++\n                [\"} = {\"] ++\n                [\"  \" <> cons <> \": '\" <> cons <> \"',\" | cons <- cs] ++\n                [\"  decoder: () => jtv.oneOf<\" <> conName <> \">\" <> \"(\"] ++\n                [\"      jtv.constant(\" <> conName <> \".\" <> cons <> \"),\" | cons <- cs] ++"
+  },
+  {
+    "id" : "0914ebf3-2fc9-4bd6-875f-cae78aef579c",
+    "prId" : 4975,
+    "comments" : [
+      {
+        "id" : "76eb55e3-7320-44d5-b79c-8812094af560",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Declaring that `Color.X` has type `Color` renders the pattern match exhaustiveness checker for `Color` useless. Instead, we want to declare the type as `\"X\"`. The easiest way to get this is to intersect with the type\r\n```\r\n{readonly [c in Color]: c}\r\n```\r\ninstead of the record were constructing here.",
+        "createdAt" : "2020-03-16T09:53:00Z",
+        "updatedAt" : "2020-03-16T09:54:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "845924c8-718b-42bf-824e-ac6c88b3fe17",
+        "parentId" : "76eb55e3-7320-44d5-b79c-8812094af560",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "For reference https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types.",
+        "createdAt" : "2020-03-17T14:22:03Z",
+        "updatedAt" : "2020-03-17T14:22:04Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1ce2bd61-b7d0-4534-9794-9a5fa513e59f",
+        "parentId" : "76eb55e3-7320-44d5-b79c-8812094af560",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/5044",
+        "createdAt" : "2020-03-17T14:48:51Z",
+        "updatedAt" : "2020-03-17T14:48:52Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3f6f10a59e79f234fa88ceca81c572c611a97f7d",
+    "line" : 21,
+    "diffHunk" : "@@ -1,1 +353,357 @@              serDesc =\n                [ \"export const \" <> conName <> \": daml.Serializable<\" <> conName <> \"> & {\"] <>\n                [ \"  readonly \" <> cons <> \": \" <> conName <> \";\" | cons <- cs ] ++\n                [\"} = {\"] ++\n                [\"  \" <> cons <> \": '\" <> cons <> \"',\" | cons <- cs] ++"
+  },
+  {
+    "id" : "3a16178b-bedf-4bea-b8a6-aa215bfc8298",
+    "prId" : 4975,
+    "comments" : [
+      {
+        "id" : "d74a977b-f90a-4f26-bcb1-07d3bb154ae1",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We already state that `Color` has type `daml.Serializable<Color>` (intersected with more stuff) above. Thus, we can drop this check. If that's the last occurrence of this check (hopfully!), then we can remove the whole `STATIC_IMPLEMENTS_SERIALIZABLE_CHECK` from our libraries.",
+        "createdAt" : "2020-03-16T09:54:50Z",
+        "updatedAt" : "2020-03-16T09:54:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c3dadc7c-6c0c-4fba-b96c-187916b9a8d6",
+        "parentId" : "d74a977b-f90a-4f26-bcb1-07d3bb154ae1",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/5044. Unfortunately, not the last occurence.",
+        "createdAt" : "2020-03-17T14:49:17Z",
+        "updatedAt" : "2020-03-17T14:49:17Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b0dc1b0f-d0a7-4d48-8e4a-ee48b6dc2bc1",
+        "parentId" : "d74a977b-f90a-4f26-bcb1-07d3bb154ae1",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "although the last occurrence is silly in the same way that this one became. will remove it in this PR freeing the way to delete it from @daml/types. ",
+        "createdAt" : "2020-03-17T14:50:24Z",
+        "updatedAt" : "2020-03-17T14:50:24Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5b47ad6a-ee14-4529-b68a-b870aaef5fcd",
+        "parentId" : "d74a977b-f90a-4f26-bcb1-07d3bb154ae1",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Done in https://github.com/digital-asset/daml/pull/5044 including removal of the definition of the check from `daml-types`.",
+        "createdAt" : "2020-03-17T15:00:54Z",
+        "updatedAt" : "2020-03-17T15:00:54Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3f6f10a59e79f234fa88ceca81c572c611a97f7d",
+    "line" : 28,
+    "diffHunk" : "@@ -1,1 +360,364 @@                [\"  ),\"] ++\n                [\"} as const;\"] ++\n                [\"daml.STATIC_IMPLEMENTS_SERIALIZABLE_CHECK<\" <> conName <> \">(\" <> conName <> \")\"]\n          in\n          ((makeType typeDesc, serDesc), Set.empty)"
+  },
+  {
+    "id" : "efc445dc-e5c6-4224-8c2d-1a60dfed4da2",
+    "prId" : 4951,
+    "comments" : [
+      {
+        "id" : "8145b9dd-f4e9-4212-8993-c379cd272dce",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This changes behavior: `joinPath` is platform dependent. On Windows it will produce backslashes, i.e., `joinPath [\"a\", \"b\"] == \"a\\\\b\"`. Does that still work?  If it does, did it work before, i.e., do both `/` and `\\` work on Windows? If so, would it be better to use `/` consistently everywhere so the generated typescript code is platform independent?",
+        "createdAt" : "2020-03-11T18:25:36Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7b28f792-d4fc-46e9-9447-f31c027beebf",
+        "parentId" : "8145b9dd-f4e9-4212-8993-c379cd272dce",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "the approach we've taken in ghc-lib scripts is to use '/' even on windows.\r\n- i'll change the implementation of `modPath` to use `intercalate` rather than `joinPath`\r\n- `import System.FilePath.Posix((</>)) -- Make sure we generate / on all platforms.`\r\n\r\nthe change to `modPath`  has the additional benefit of cutting down on more `T.unpack`'s too. ",
+        "createdAt" : "2020-03-11T18:33:02Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1a95bd52-e478-4a1f-90c6-0425a1f667cb",
+        "parentId" : "8145b9dd-f4e9-4212-8993-c379cd272dce",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I know how it works for ghc-lib. What I don’t know if javascript import syntax imposes special restrictions. From looking around, I couldn’t find a clear answer to this.",
+        "createdAt" : "2020-03-11T18:34:25Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "24c79e1b-ea8b-4402-8456-daae58e9d6cb",
+        "parentId" : "8145b9dd-f4e9-4212-8993-c379cd272dce",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "it would seem according to https://shapeshed.com/writing-cross-platform-node/ that forward slashes will work on windows.",
+        "createdAt" : "2020-03-11T18:41:28Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "454a4022-fabe-43b8-82bb-84de2e07ac02",
+        "parentId" : "8145b9dd-f4e9-4212-8993-c379cd272dce",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "i expect the two suggested changes above is a good idea so as to negate the possibility of future maintainers wondering about it all over.",
+        "createdAt" : "2020-03-11T18:42:44Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "044ad742-5ab0-4793-8d5c-898bbbf3ed28",
+        "parentId" : "8145b9dd-f4e9-4212-8993-c379cd272dce",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That doesn’t talk about imports which is the thing I’m worried about. Anyway, given that basically all examples I can find use forward slashes that seems like a safe choice and it is platform independent which makes me happy since I like reproducible builds across platforms.",
+        "createdAt" : "2020-03-11T18:43:12Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6c485c4f-9a74-4f51-99bc-fc74b01e8dc8",
+        "parentId" : "8145b9dd-f4e9-4212-8993-c379cd272dce",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "> basically all examples I can find use forward slashes that seems like a safe choice \r\n\r\nagreed. have pushed a revision. good to go?",
+        "createdAt" : "2020-03-11T18:46:21Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0292d1964bcdf22d58064a0fe8dc136cec7f4f1",
+    "line" : 33,
+    "diffHunk" : "@@ -1,1 +262,266 @@    importDecl pkgMap modRef@(pkgRef, modName) rootPath =\n      \"import * as \" <>  genModuleRef modRef <> \" from '\" <>\n      modPath ((rootPath : pkgRefStr pkgMap pkgRef : [\"lib\" | pkgRef /= PRSelf]) ++ unModuleName modName) <>\n      \"';\"\n"
+  },
+  {
+    "id" : "00cc4f1d-1eee-4566-8b1e-7356a555c276",
+    "prId" : 4951,
+    "comments" : [
+      {
+        "id" : "b1658f43-a3a4-4a10-8dc8-2d5f1905f389",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Given that you already import `System.FilePath.Posix`, maybe just use `joinPath` from there?",
+        "createdAt" : "2020-03-11T18:45:57Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "daa19b28-1991-4123-8dcd-4f69998456ac",
+        "parentId" : "b1658f43-a3a4-4a10-8dc8-2d5f1905f389",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "we could, i like that this approach allows us to avoid unpacks.",
+        "createdAt" : "2020-03-11T18:46:51Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5d1ea930-5808-4116-af09-df1867a1b38a",
+        "parentId" : "b1658f43-a3a4-4a10-8dc8-2d5f1905f389",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense :+1:",
+        "createdAt" : "2020-03-11T18:47:42Z",
+        "updatedAt" : "2020-03-11T18:52:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0292d1964bcdf22d58064a0fe8dc136cec7f4f1",
+    "line" : 60,
+    "diffHunk" : "@@ -1,1 +561,565 @@-- \"B\"]' is \"./A/B\".\nmodPath :: [T.Text] -> T.Text\nmodPath parts = T.intercalate \"/\" parts\n\nonHead :: (a -> a) -> [a] -> [a]"
+  },
+  {
+    "id" : "7acefb20-1b84-4c18-96d1-d275364cc3bb",
+    "prId" : 4951,
+    "comments" : [
+      {
+        "id" : "42088a00-3c4f-4e7a-ae93-9848d1c29232",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can't we just import `System.FilePath.Posix` _instead_ of `System.FilePath`.",
+        "createdAt" : "2020-03-12T10:09:59Z",
+        "updatedAt" : "2020-03-12T10:13:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "829197c0-72f9-42f7-9d18-c8f412cd1fe4",
+        "parentId" : "42088a00-3c4f-4e7a-ae93-9848d1c29232",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "i agree it seems sensible. see https://github.com/digital-asset/daml/pull/4963.",
+        "createdAt" : "2020-03-12T11:54:18Z",
+        "updatedAt" : "2020-03-12T11:54:19Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "68364340-f569-47d6-993e-d03b1bc8923a",
+        "parentId" : "42088a00-3c4f-4e7a-ae93-9848d1c29232",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Update : after discussion, it seems the safer choice is to not replace `FilePath` with `FilePath.Posix` so, it was decided to not land https://github.com/digital-asset/daml/pull/4963.",
+        "createdAt" : "2020-03-12T12:57:25Z",
+        "updatedAt" : "2020-03-12T12:57:25Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0292d1964bcdf22d58064a0fe8dc136cec7f4f1",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +32,36 @@import System.Directory\nimport System.FilePath hiding ((<.>), (</>))\nimport System.FilePath.Posix((</>)) -- Make sure we generate / on all platforms.\nimport qualified System.FilePath as FP\n"
+  },
+  {
+    "id" : "bc4422b9-afd0-4131-865d-d2f9133338f2",
+    "prId" : 4926,
+    "comments" : [
+      {
+        "id" : "32439e44-101a-4589-bfb0-38f90bc52bb9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This might be showing my ignorance of typescript but why do we use namespaces instead of ES2015 module syntax? All the docs I can find on this claim that this is outdated and legacy stuff and ES2015 module syntax should be preferered.",
+        "createdAt" : "2020-03-11T07:39:22Z",
+        "updatedAt" : "2020-03-11T12:08:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0db1fab5-8fe7-41e6-b4d7-363b14b574c1",
+        "parentId" : "32439e44-101a-4589-bfb0-38f90bc52bb9",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Each ES2015 module has to go into its own file, which is exactly the opposite of what we're trying to do here. However, _I think_ we can use proper `const`s and nested objects for the value level and `declare namspace` for the type level to achieve what we want. Let's try that in a separate PR though.",
+        "createdAt" : "2020-03-11T10:07:10Z",
+        "updatedAt" : "2020-03-11T12:08:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9694540c-d35f-4527-87ac-07b368895026",
+        "parentId" : "32439e44-101a-4589-bfb0-38f90bc52bb9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see, I didn’t think of the type-level stuff so I thought a simple object would be sufficient.",
+        "createdAt" : "2020-03-11T16:40:02Z",
+        "updatedAt" : "2020-03-11T16:40:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "13e89ec71941cba02bae6952b66d10827cea0610",
+    "line" : 86,
+    "diffHunk" : "@@ -1,1 +613,617 @@          ]\n        go indent var (m : parts) = let ws = spaces indent in\n          [ ws <> \"/* eslint-disable @typescript-eslint/no-namespace */\"\n          , ws <> \"export namespace \" <> m <> \" {\"\n          ] <>"
+  },
+  {
+    "id" : "d19a77a8-6f05-4798-8163-cbeb59c6c400",
+    "prId" : 4926,
+    "comments" : [
+      {
+        "id" : "f50851c3-ab08-4999-a3eb-0e932371d689",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I find the inlined pretty printing quite hard to read. Do we actually need this? Maybe leave it out for now and replace it by a proper pretty printing library at some point?",
+        "createdAt" : "2020-03-11T07:44:23Z",
+        "updatedAt" : "2020-03-11T12:08:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "13e89ec71941cba02bae6952b66d10827cea0610",
+    "line" : 89,
+    "diffHunk" : "@@ -1,1 +616,620 @@          , ws <> \"export namespace \" <> m <> \" {\"\n          ] <>\n          go (indent + 2) var parts <>\n          [ ws <> \"}\" ]\n        go _ _ [] = []"
+  },
+  {
+    "id" : "4af00a94-ce63-473c-8f1a-2c086e6801e5",
+    "prId" : 4908,
+    "comments" : [
+      {
+        "id" : "b17cdfce-af3c-4980-b6bc-a567f205927e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What’s the point of including the `@` here? Can a scope ever not contain an `@`? My understanding was that the `@` sign is not part of the scope name but just syntax to differentiate the scope from the name. So it seems more sensible to not include it here.",
+        "createdAt" : "2020-03-09T19:04:44Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "875d553a-a99c-422d-b0fa-08007c7b95b2",
+        "parentId" : "b17cdfce-af3c-4980-b6bc-a567f205927e",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "@cocreature in https://github.com/digital-asset/daml/pull/4818#discussion_r388145444, @hurryabit indicated that he'd prefer to see the '@'. i'm easy on this point.",
+        "createdAt" : "2020-03-09T19:15:55Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "acfdea0a-c156-46ee-81d3-12d1bf03dd87",
+        "parentId" : "b17cdfce-af3c-4980-b6bc-a567f205927e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That was about the internals not the UX for the CLI argument afaict. Either way, if @hurryabit prefers this I don’t feel too strongly about this.",
+        "createdAt" : "2020-03-09T19:18:17Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "db29d5eb-d5a6-4f16-b9ef-9798592cd8b9",
+        "parentId" : "b17cdfce-af3c-4980-b6bc-a567f205927e",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "As @cocreature said, I preferred it for the internals. If we required our users to pass the `@` to the CLI argument, we also need to check that they actually do it, which we currently don't. That said, I prefer if our would not need to pass in the `@` symbol but just `daml.js`.",
+        "createdAt" : "2020-03-11T09:48:29Z",
+        "updatedAt" : "2020-03-11T09:48:29Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7360cd5a-b1cc-4049-aca6-1841dbb73166",
+        "parentId" : "b17cdfce-af3c-4980-b6bc-a567f205927e",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4939",
+        "createdAt" : "2020-03-11T13:24:43Z",
+        "updatedAt" : "2020-03-11T13:24:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2cfd59b9df6a3b375874b3c10ce37b23477f8af0",
+    "line" : 23,
+    "diffHunk" : "@@ -1,1 +101,105 @@        (  short 's'\n        <> metavar \"SCOPE\"\n        <> value \"@daml.js\"\n        <> help \"The NPM scope name for the generated packages; defaults to @daml.js\"\n        ))"
+  },
+  {
+    "id" : "b62a794f-dffc-4151-991c-59a84f6a05fc",
+    "prId" : 4908,
+    "comments" : [
+      {
+        "id" : "964b825b-f4d5-4ea9-89e6-91376d71e80d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like this is the root not the leaf. Am I missing something?",
+        "createdAt" : "2020-03-09T19:12:28Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1c482d2d-4271-4914-8b03-9e8e45602965",
+        "parentId" : "964b825b-f4d5-4ea9-89e6-91376d71e80d",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "No it's the leaf. We take the filename of `/some/long/path/to/here` giving 'here'.",
+        "createdAt" : "2020-03-09T19:18:04Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7685d1be-d6b0-4318-8715-3feb93f426c7",
+        "parentId" : "964b825b-f4d5-4ea9-89e6-91376d71e80d",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Wow. Is it really spelled `optOuputDir` in the code? Better fix that :)\r\n",
+        "createdAt" : "2020-03-09T19:18:54Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "25e5ac32-cfd5-4d7f-9472-5e1ed3d3bcf3",
+        "parentId" : "964b825b-f4d5-4ea9-89e6-91376d71e80d",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Fixed.",
+        "createdAt" : "2020-03-09T19:20:04Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "556a9bcf-63ea-40f8-ba54-46b5953c4184",
+        "parentId" : "964b825b-f4d5-4ea9-89e6-91376d71e80d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "oh i see, I misread the code. Thanks for the explanation!",
+        "createdAt" : "2020-03-09T19:20:06Z",
+        "updatedAt" : "2020-03-09T19:46:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2cfd59b9df6a3b375874b3c10ce37b23477f8af0",
+    "line" : 92,
+    "diffHunk" : "@@ -1,1 +668,672 @@        -- Topologically order our packages.\n      outBaseDir = T.pack $ takeFileName optOutputDir\n        -- The leaf directory of the output directory (e.g. often 'daml2ts').\n  let ourWorkspaces = map ((outBaseDir <> \"/\") <>) ps\n  bytes <- BSL.readFile file"
+  },
+  {
+    "id" : "66d29430-6794-42dc-93c2-8721f9153dc8",
+    "prId" : 4887,
+    "comments" : [
+      {
+        "id" : "ecf197bc-2e19-447c-9628-288688e11de7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Do we really need to mark this a `T.Text`? Isn't `\"es5\"` just fine? That will give us a `String` and the right thing.\r\n```suggestion\r\n        [ \"target\" .= \"es5\"\r\n```\r\nSame in many places below.",
+        "createdAt" : "2020-03-09T10:43:27Z",
+        "updatedAt" : "2020-03-09T12:13:49Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e363ca25-fee7-4e3c-8a8d-04c626f8839c",
+        "parentId" : "ecf197bc-2e19-447c-9628-288688e11de7",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "It really needs to be marked as Text.",
+        "createdAt" : "2020-03-09T11:01:56Z",
+        "updatedAt" : "2020-03-09T12:13:49Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "09807bd3-2095-4233-80cb-99b4733f7bdb",
+        "parentId" : "ecf197bc-2e19-447c-9628-288688e11de7",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Ah right, because we have `OverloadedStrings` turned on to be able to get `Text` literals. 😦",
+        "createdAt" : "2020-03-09T12:02:30Z",
+        "updatedAt" : "2020-03-09T12:13:49Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "671273b87d011dd24ccc205355b414e47eec088f",
+    "line" : 126,
+    "diffHunk" : "@@ -1,1 +572,576 @@    tsConfig = object\n      [ \"compilerOptions\" .= object\n        [ \"target\" .= (\"es5\" :: T.Text)\n        , \"lib\" .= ([\"dom\", \"es2015\"] :: [T.Text])\n        , \"strict\" .= True"
+  },
+  {
+    "id" : "cee44b90-3ae2-4876-98d5-19511417156b",
+    "prId" : 4887,
+    "comments" : [
+      {
+        "id" : "ad6b2e02-b9bf-4a58-ad5b-13dce8c6a201",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Good idea to make it explicit! Very fancy though. 😃\r\n\r\n",
+        "createdAt" : "2020-03-09T11:54:56Z",
+        "updatedAt" : "2020-03-09T12:13:49Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "671273b87d011dd24ccc205355b414e47eec088f",
+    "line" : 54,
+    "diffHunk" : "@@ -1,1 +64,68 @@newtype NpmPackageName = NpmPackageName {unNpmPackageName :: T.Text}\n  deriving stock (Eq, Show)\n  deriving newtype (Hashable, FromJSON, ToJSON, ToJSONKey)\nnewtype NpmPackageVersion = NpmPackageVersion {unNpmPackageVersion :: T.Text}\n  deriving stock (Eq, Show)"
+  },
+  {
+    "id" : "48d6a519-bb03-4457-83dd-919f90fc8dc7",
+    "prId" : 4858,
+    "comments" : [
+      {
+        "id" : "43cb8054-fd0e-4b61-9926-4ed3d6ae68de",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I don't understand why returning this text here is better than what we had before. Could you please shed some light on this?",
+        "createdAt" : "2020-03-05T22:08:20Z",
+        "updatedAt" : "2020-03-05T22:21:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "64109f68-022e-48e5-92d6-7b1fa1a6dbe2",
+        "parentId" : "43cb8054-fd0e-4b61-9926-4ed3d6ae68de",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I'm struggling now to find the reference (update : https://github.com/digital-asset/daml/pull/4818#discussion_r388146306) but at the end of the day it is so that we can write this:\r\n```\r\n  let (g, nodeFromVertex) = graphFromEdges'\r\n        (map (\\(a, ds) -> (a, a, map undependency ds)) dependencies)\r\n```\r\nIn that call to `graphFromEdges'` either everything needs to be strings or everything needs to be `Text`. Switching to `Text` makes sense because dependencies are naturally text:\r\n```\r\n        depends = [ Dependency $ pkgRefStr pkgMap pkgRef\r\n                  | (pkgRef, _) <- modRefs refs, pkgRef /= PRSelf ]\r\n```\r\nPackage names are naturally text:\r\n```\r\npackageNameText :: PackageId -> Maybe PackageName -> T.Text\r\npackageNameText pkgId mbPkgIdent = maybe (unPackageId pkgId) unPackageName mbPkgIdent\r\n```\r\nSo with this formulation there are no calls to `T.pack`, `T.unpack`.",
+        "createdAt" : "2020-03-05T22:13:56Z",
+        "updatedAt" : "2020-03-05T22:27:51Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5a80d6fc-32a0-4466-b045-7c8892bf42a3",
+        "parentId" : "43cb8054-fd0e-4b61-9926-4ed3d6ae68de",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What I meant is that before this change we computed the value of the `pkgName` we're returning hat at the call site of `daml2ts`, i.e., in line 126 above. Now, we compute it twice, there and in the `where` clause below.",
+        "createdAt" : "2020-03-06T09:32:48Z",
+        "updatedAt" : "2020-03-06T09:32:53Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a7f1b286-6f7a-4ea9-baf2-6a59cfa290b2",
+        "parentId" : "43cb8054-fd0e-4b61-9926-4ed3d6ae68de",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Oh I see. Yes you are right. Well spotted. I'll eliminate the redundancy.",
+        "createdAt" : "2020-03-06T11:29:49Z",
+        "updatedAt" : "2020-03-06T11:29:50Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec2e540da0e90de0063b280ce57f1a4a794bf3a9",
+    "line" : 15,
+    "diffHunk" : "@@ -1,1 +152,156 @@\n-- Write the files for a single package.\ndaml2ts :: Daml2TsParams -> IO (T.Text, [Dependency])\ndaml2ts Daml2TsParams {..} = do\n    let Options {..} = opts"
+  },
+  {
+    "id" : "1d058d68-e4c6-4d40-9319-331d4f6c701d",
+    "prId" : 4852,
+    "comments" : [
+      {
+        "id" : "ec3f3507-c389-4f3f-af19-f10fa5863785",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    sdkVersionOrErr <- DATypes.parseVersion . T.pack . fromMaybe \"0.0.0\" <$> getSdkVersionMaybe\r\n```\r\nI find the name `version` bit too generic given that its pretty much the same as `sdkVersion` below.",
+        "createdAt" : "2020-03-05T22:13:35Z",
+        "updatedAt" : "2020-03-05T22:14:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9063788b-08bb-4e92-8895-6c25a0afec79",
+        "parentId" : "ec3f3507-c389-4f3f-af19-f10fa5863785",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4861",
+        "createdAt" : "2020-03-06T01:16:50Z",
+        "updatedAt" : "2020-03-06T01:16:51Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1af3f577028e08b742a81ae3abbd42d04f4f41b3",
+    "line" : 16,
+    "diffHunk" : "@@ -1,1 +112,116 @@main = do\n    opts@Options{..} <- execParser optionsParserInfo\n    version <- DATypes.parseVersion . T.pack . fromMaybe \"0.0.0\" <$> getSdkVersionMaybe\n    sdkVersion <- case version of\n          Left _ -> fail \"Invalid SDK version\""
+  },
+  {
+    "id" : "3dc4f45b-17ab-4793-8cad-4ead9e754209",
+    "prId" : 4818,
+    "comments" : [
+      {
+        "id" : "dcb6147c-3e3c-4a54-88ed-f37ff7170cfa",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I found it easier to understand with the leading `@`. Here and below.",
+        "createdAt" : "2020-03-05T08:40:08Z",
+        "updatedAt" : "2020-03-05T12:00:20Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2b558aa4-f0fd-4e9f-9e84-4a5ec8fda46f",
+        "parentId" : "dcb6147c-3e3c-4a54-88ed-f37ff7170cfa",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I like it too but understand why the presence of `fromJust . stripPrefix` causes a maintainer to be concerned.",
+        "createdAt" : "2020-03-05T11:41:48Z",
+        "updatedAt" : "2020-03-05T12:00:20Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ac73504b-9ea4-4db7-9c6b-255cb295f849",
+        "parentId" : "dcb6147c-3e3c-4a54-88ed-f37ff7170cfa",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That makes sense. Thanks for the explanation.\r\n\r\nIt could help if the comment explained very briefly that the scope `foo` is the `@foo` in a package name.",
+        "createdAt" : "2020-03-05T12:15:03Z",
+        "updatedAt" : "2020-03-05T12:15:03Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2a91706e-7a8d-4482-8324-15ac61f84193",
+        "parentId" : "dcb6147c-3e3c-4a54-88ed-f37ff7170cfa",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-03-05T14:01:16Z",
+        "updatedAt" : "2020-03-05T14:01:16Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a5e837e0-6437-44bb-98f3-a1c708061ca3",
+        "parentId" : "dcb6147c-3e3c-4a54-88ed-f37ff7170cfa",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "This comment is going into https://github.com/digital-asset/daml/pull/4837. When `scope` becomes a command line argument, I'll be sure to move the comment along with it.",
+        "createdAt" : "2020-03-05T14:04:16Z",
+        "updatedAt" : "2020-03-05T14:04:17Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d46e1fb7-ef8c-4840-919a-ffe90f18f456",
+        "parentId" : "dcb6147c-3e3c-4a54-88ed-f37ff7170cfa",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "This went back to the way we want it in https://github.com/digital-asset/daml/pull/4908 (making scope an optional command line argument).",
+        "createdAt" : "2020-03-09T16:08:34Z",
+        "updatedAt" : "2020-03-09T16:08:35Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "00d45cb44007659545cda3a4ccf31a12b4c88fbe",
+    "line" : 35,
+    "diffHunk" : "@@ -1,1 +146,150 @@newtype Dependency = Dependency {undependency :: T.Text}  deriving (Eq, Ord)\n\n-- Gives the scope 'foo' given a directory path like '/path/to/foo'.\nscopeOfScopeDir :: FilePath -> Scope\nscopeOfScopeDir = Scope . takeFileName"
+  },
+  {
+    "id" : "f475dd27-0780-4185-b01c-7296ee687970",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "926981ad-1d4b-4832-9ae5-79e8e2911cfb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Let’s leave it for a separate PR but the `stripPrefix` stuff here looks similar to the other `stripPrefix` stuff. Rather than stripping it here, it shouldn’t be added in the first place.",
+        "createdAt" : "2020-03-04T19:09:01Z",
+        "updatedAt" : "2020-03-04T19:19:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "74506553-b3f3-44eb-a7fe-d984a9700972",
+        "parentId" : "926981ad-1d4b-4832-9ae5-79e8e2911cfb",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "i'll work on a follow up for this today.",
+        "createdAt" : "2020-03-04T19:22:26Z",
+        "updatedAt" : "2020-03-04T19:22:27Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "40ec5b27-f748-4624-ae08-2c206bb40e42",
+        "parentId" : "926981ad-1d4b-4832-9ae5-79e8e2911cfb",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4818",
+        "createdAt" : "2020-03-04T21:04:27Z",
+        "updatedAt" : "2020-03-04T21:04:28Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 485,
+    "diffHunk" : "@@ -1,1 +652,656 @@      ps = map (fst3 . nodeFromVertex) $ reverse (topSort g)\n        -- Topologically order our packages.\n      ldr = fromJust (stripPrefix \"@\" (unscope (scopeOfScopeDir optOutputDir)))\n        -- 'ldr' we expect to be something like \"daml2ts/\".\n  let ourPackages = map (T.pack . ((ldr ++ \"/\") ++)) ps"
+  },
+  {
+    "id" : "f84db4ce-7b69-44bc-a936-afce26a0230b",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "f78ae82e-89fb-4a32-8b7d-53af97d7b684",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks somewhat dangerous. You are throwing away every field apart from the two you modify. Additional fields should probably stay intact. Let’s tackle that in a separate PR.",
+        "createdAt" : "2020-03-04T19:10:14Z",
+        "updatedAt" : "2020-03-04T19:19:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b199ee3f-f9a2-48d1-b504-5b5c87ac14c4",
+        "parentId" : "f78ae82e-89fb-4a32-8b7d-53af97d7b684",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "sounds good. yes, i am a newbie with this library and would like to learn how to better here in this respect.",
+        "createdAt" : "2020-03-04T19:15:03Z",
+        "updatedAt" : "2020-03-04T19:19:03Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3e08fea1-2ec8-441f-bc29-f0011403c390",
+        "parentId" : "f78ae82e-89fb-4a32-8b7d-53af97d7b684",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "@hurryabit addresses this (along with other niggles) in https://github.com/digital-asset/daml/pull/4820.",
+        "createdAt" : "2020-03-05T00:22:41Z",
+        "updatedAt" : "2020-03-05T00:22:42Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cfefe887-c5a7-4fe2-960c-1bd52e98074a",
+        "parentId" : "f78ae82e-89fb-4a32-8b7d-53af97d7b684",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This is fixed in https://github.com/digital-asset/daml/pull/4820.",
+        "createdAt" : "2020-03-05T00:24:27Z",
+        "updatedAt" : "2020-03-05T00:24:28Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 492,
+    "diffHunk" : "@@ -1,1 +659,663 @@    (fail $ \"Error decoding JSON from '\" <> file <> \"'\")\n    (transformAndWrite ourPackages ldr)\n    (decode bytes :: Maybe PackageJson)\n  where\n    transformAndWrite :: [T.Text] -> String -> PackageJson -> IO ()"
+  },
+  {
+    "id" : "ca3b182c-d892-45ae-aa51-a223ab76dc30",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "f2581062-58fc-4ae9-b0ad-57f821ce5ff2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The number of parameters to this function is slowly getting out of hands. Can we please change it to a single record in a follow-up PR.",
+        "createdAt" : "2020-03-04T19:26:18Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0479985d-405f-49ed-b93a-4ceaa8fc7286",
+        "parentId" : "f2581062-58fc-4ae9-b0ad-57f821ce5ff2",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Yes, will do.",
+        "createdAt" : "2020-03-04T21:15:23Z",
+        "updatedAt" : "2020-03-04T21:15:24Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4cd36ea2-f50f-4183-b41b-968f0d15b0db",
+        "parentId" : "f2581062-58fc-4ae9-b0ad-57f821ce5ff2",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4852",
+        "createdAt" : "2020-03-05T15:44:21Z",
+        "updatedAt" : "2020-03-05T15:44:21Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 137,
+    "diffHunk" : "@@ -1,1 +133,137 @@                     asName = if name == id then \"itself\" else name\n                 putStrLn $ \"Generating \" <> id <> \" as \" <> asName\n                 deps <- daml2ts opts pm pkgId pkg mbPkgName damlTypesVersion packageVersion\n                 pure (name, name, deps)\n        whenJust optInputPackageJson $"
+  },
+  {
+    "id" : "8e22f28e-eef0-42c3-8a3b-0a185359257f",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "b7c7b72d-b61b-4683-a225-79da004bb9a6",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Does it make sense to return the same thing twice?",
+        "createdAt" : "2020-03-04T19:26:29Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "45167f08-a178-43a1-bf3c-f81297061f31",
+        "parentId" : "b7c7b72d-b61b-4683-a225-79da004bb9a6",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "It's setting up the call to `Graph.topSort` that requires the tuples in roughly that format. It is possible to not do this here and return `(name, deps)` and do the \"dup\" at the call site to `topSort`. I'll put in the PR with the parameter pack enhancement of the comment above.",
+        "createdAt" : "2020-03-04T21:16:48Z",
+        "updatedAt" : "2020-03-04T21:16:49Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d8c0a036-c2a8-41fe-ac52-3340b75430ac",
+        "parentId" : "b7c7b72d-b61b-4683-a225-79da004bb9a6",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ ",
+        "createdAt" : "2020-03-05T15:15:27Z",
+        "updatedAt" : "2020-03-05T15:15:27Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b5cd5b06-791a-46ec-94f9-e7e594f0e67e",
+        "parentId" : "b7c7b72d-b61b-4683-a225-79da004bb9a6",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4847",
+        "createdAt" : "2020-03-05T15:23:27Z",
+        "updatedAt" : "2020-03-05T15:23:28Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 138,
+    "diffHunk" : "@@ -1,1 +134,138 @@                 putStrLn $ \"Generating \" <> id <> \" as \" <> asName\n                 deps <- daml2ts opts pm pkgId pkg mbPkgName damlTypesVersion packageVersion\n                 pure (name, name, deps)\n        whenJust optInputPackageJson $\n          writeTopLevelPackageJson optOutputDir dependencies"
+  },
+  {
+    "id" : "627caa06-9f36-4873-a9a3-27f41785dc10",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "b9c53d98-1215-4557-833f-d516e51d21e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should make the scope configurable via a command line argument rather than infer it from some path. I suggest we use `@daml.js` as the default for that argument.",
+        "createdAt" : "2020-03-04T19:29:30Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "56f20a30-6edb-4f40-86fc-885fe8bd09fd",
+        "parentId" : "b9c53d98-1215-4557-833f-d516e51d21e9",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-03-04T21:17:16Z",
+        "updatedAt" : "2020-03-04T21:17:17Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4387d340-d5ba-491d-8815-a0b86a33b4c7",
+        "parentId" : "b9c53d98-1215-4557-833f-d516e51d21e9",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4908",
+        "createdAt" : "2020-03-09T16:00:52Z",
+        "updatedAt" : "2020-03-09T16:00:53Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 158,
+    "diffHunk" : "@@ -1,1 +146,150 @@\n-- Gives the scope '@foo' given a directory path like '/path/to/foo'.\nscopeOfScopeDir :: FilePath -> Scope\nscopeOfScopeDir = Scope . (\"@\" <>) . takeFileName\n"
+  },
+  {
+    "id" : "41badb42-950a-4e20-97a1-fd40938083b7",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "30b152aa-b4d9-4973-8856-8b9e39a04d8f",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n          --   import * as pkgd14e08_DA_Internal_Template from '@daml2ts/d14e08/lib/DA/Internal/Template';\r\n```",
+        "createdAt" : "2020-03-04T19:30:57Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "36573ca0-ea2d-47ac-85dc-62b8e8278f05",
+        "parentId" : "30b152aa-b4d9-4973-8856-8b9e39a04d8f",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I have a PR here https://github.com/digital-asset/daml/pull/4818 with other cosmetic changes. I'll add this to that.",
+        "createdAt" : "2020-03-04T21:18:05Z",
+        "updatedAt" : "2020-03-04T21:18:05Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 183,
+    "diffHunk" : "@@ -1,1 +171,175 @@          -- The scope e.g. '@daml2ts'.\n          -- We use this, for example, when generating import declarations e.g.\n          --   'import * as pkgd14e08_DA_Internal_Template from @daml2ts/d14e08/lib/DA/Internal/Template';'\n    createDirectoryIfMissing True packageSrcDir\n    -- Write .ts files for the package and harvest references to"
+  },
+  {
+    "id" : "07848cb6-b7c3-4f75-92a9-65233c06899e",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "f6314790-c331-4752-aa8d-6b10d5de5e53",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That comment should probably go a few lines deeper. There are no references to be harvested from `packageId.ts`.",
+        "createdAt" : "2020-03-04T19:32:09Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "787f5ed9-81dd-4746-a2cc-21def217cb6a",
+        "parentId" : "f6314790-c331-4752-aa8d-6b10d5de5e53",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-03-04T21:19:20Z",
+        "updatedAt" : "2020-03-04T21:19:21Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cf271619-df42-4c5d-83ab-41493b50c166",
+        "parentId" : "f6314790-c331-4752-aa8d-6b10d5de5e53",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4858",
+        "createdAt" : "2020-03-05T18:07:12Z",
+        "updatedAt" : "2020-03-05T18:07:12Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 185,
+    "diffHunk" : "@@ -1,1 +173,177 @@          --   'import * as pkgd14e08_DA_Internal_Template from @daml2ts/d14e08/lib/DA/Internal/Template';'\n    createDirectoryIfMissing True packageSrcDir\n    -- Write .ts files for the package and harvest references to\n    -- foreign packages as we do.\n    T.writeFileUtf8 (packageSrcDir </> \"packageId.ts\") $ T.unlines"
+  },
+  {
+    "id" : "01b6777f-a7e4-4868-8985-3641f01adc4c",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "68061aa5-24d6-40b0-84af-8d1accba3705",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'd suggest to write the `packageId.ts` file here, together with the other \"meta data\".",
+        "createdAt" : "2020-03-04T19:34:04Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8cb427b4-e132-4d9c-aa55-57e97e489d97",
+        "parentId" : "68061aa5-24d6-40b0-84af-8d1accba3705",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-03-04T21:19:43Z",
+        "updatedAt" : "2020-03-04T21:19:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bd7e9e58-1175-47d7-b76e-2446f600fe3d",
+        "parentId" : "68061aa5-24d6-40b0-84af-8d1accba3705",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4858",
+        "createdAt" : "2020-03-05T18:07:17Z",
+        "updatedAt" : "2020-03-05T18:07:17Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 192,
+    "diffHunk" : "@@ -1,1 +180,184 @@    -- Now write 'package.json', 'tsconfig.json' and '.eslint.rc.json'\n    -- files into the package dir. The 'package.json' needs the\n    -- dependencies.\n    writeTsConfig packageDir\n    writeEsLintConfig packageDir"
+  },
+  {
+    "id" : "7cb7d4d2-e262-4d20-b0bc-c18d1d8898c4",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "de7ae1e2-146f-499a-bf2d-0292fe91340a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "You seem to love the `maybe` function. I'd say a simple `case ... of` is almost always easier to read when the function you pass as the second argument is a syntactic lambda.",
+        "createdAt" : "2020-03-04T19:35:22Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3fa752aa-8e1c-4bbe-88ec-51f0625672ea",
+        "parentId" : "de7ae1e2-146f-499a-bf2d-0292fe91340a",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok. You want it changed in this instance?",
+        "createdAt" : "2020-03-04T21:20:49Z",
+        "updatedAt" : "2020-03-04T21:20:49Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "93693e7c-0e42-490d-866c-338fbe43fdc7",
+        "parentId" : "de7ae1e2-146f-499a-bf2d-0292fe91340a",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Preferably yes. I like easy to read code.",
+        "createdAt" : "2020-03-05T00:23:35Z",
+        "updatedAt" : "2020-03-05T00:23:35Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b6d7126d-ce34-4e21-9eb1-bbd3a715a1c0",
+        "parentId" : "de7ae1e2-146f-499a-bf2d-0292fe91340a",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ ",
+        "createdAt" : "2020-03-05T13:47:37Z",
+        "updatedAt" : "2020-03-05T13:47:38Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 201,
+    "diffHunk" : "@@ -1,1 +189,193 @@      writeModuleTs :: FilePath -> Scope -> Module -> IO [Dependency]\n      writeModuleTs packageSrcDir scope mod = do\n         maybe (pure [])\n           (\\(modTxt, ds) -> do\n             let outputFile = packageSrcDir </> joinPath (map T.unpack (unModuleName (moduleName mod))) FP.<.> \"ts\""
+  },
+  {
+    "id" : "8c3584ea-ed97-45a9-9c23-91f6b45a70b2",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "2a6b0cd3-bd75-4f01-8099-95e407634b33",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "IMO, the only point of `maybe` is to allow for point-free style:\r\n```suggestion\r\n        (T.pack . packageNameStr pkgId . fst)\r\n```\r\nI still prefer a `case ... of` expression though. It would cover the same number of lines and be easier to read.",
+        "createdAt" : "2020-03-04T19:39:54Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1a3b2677-e90c-4ccf-b4b9-9b52b6ff046b",
+        "parentId" : "2a6b0cd3-bd75-4f01-8099-95e407634b33",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "What you've written there is nice. Sorry I missed that. Given your comments about my use of maybes in general here I guess I'll eschew it though in favor of a case.",
+        "createdAt" : "2020-03-04T21:22:07Z",
+        "updatedAt" : "2020-03-04T21:22:08Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0a5b4232-cddc-4489-af3d-53e738686eae",
+        "parentId" : "2a6b0cd3-bd75-4f01-8099-95e407634b33",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ ",
+        "createdAt" : "2020-03-05T13:48:09Z",
+        "updatedAt" : "2020-03-05T13:48:09Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 286,
+    "diffHunk" : "@@ -1,1 +241,245 @@      PRImport pkgId ->\n        maybe (error \"IMPOSSIBLE : package map malformed\")\n        (\\(mbPkgName, _) -> T.pack $ packageNameStr pkgId mbPkgName)\n        (Map.lookup pkgId pm)\n"
+  },
+  {
+    "id" : "987624d3-02cd-4493-8449-f84c4bc3fa55",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "34445505-8be8-4442-98b4-3f1188bc48fb",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Renamings like this in such a big PR make the PR even harder to review. 😓 ",
+        "createdAt" : "2020-03-04T19:42:00Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3091c808-a747-4c2a-99ff-6bc062ff8f55",
+        "parentId" : "34445505-8be8-4442-98b4-3f1188bc48fb",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok. I'm sorry.",
+        "createdAt" : "2020-03-04T21:23:18Z",
+        "updatedAt" : "2020-03-04T21:23:18Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 317,
+    "diffHunk" : "@@ -1,1 +453,457 @@  where\n    go = \\case\n        TVar v -> dupe (unTypeVarName v)\n        TUnit -> (\"{}\", \"daml.Unit\")\n        TBool -> (\"boolean\", \"daml.Bool\")"
+  },
+  {
+    "id" : "0e48f471-3e6a-44e7-b2a1-9facc64b1132",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "4306ace2-45ab-445d-847e-6566106f1d0d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That's indented too deep:\r\n```suggestion\r\n    , \"  },\"\r\n```",
+        "createdAt" : "2020-03-04T19:42:45Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "123aa9f0-7388-4259-aa5a-78e363d9db80",
+        "parentId" : "4306ace2-45ab-445d-847e-6566106f1d0d",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Noted. Will fix.",
+        "createdAt" : "2020-03-04T21:23:31Z",
+        "updatedAt" : "2020-03-04T21:23:31Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e86698f1-4d73-4d52-acd7-e2e3495c18e6",
+        "parentId" : "4306ace2-45ab-445d-847e-6566106f1d0d",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Fixed in https://github.com/digital-asset/daml/pull/4818.",
+        "createdAt" : "2020-03-04T21:37:00Z",
+        "updatedAt" : "2020-03-04T21:37:01Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 385,
+    "diffHunk" : "@@ -1,1 +552,556 @@    , \"    \\\"declaration\\\": true,\"\n    , \"    \\\"sourceMap\\\": true\"\n    , \"    },\"\n    , \"  \\\"include\\\": [\\\"src/**/*.ts\\\"],\"\n    , \"}\""
+  },
+  {
+    "id" : "0b958b3c-2e4e-4bd5-9730-4a5d0b38380e",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "ad65335a-a32f-4e26-8371-16b2eea69d72",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "It's not clear to me that this is the right thing to do. For now, I would leave the `license` field out until we have a better idea.",
+        "createdAt" : "2020-03-04T19:44:00Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3b079ef9-38be-416a-9d2c-76d0a63ebd81",
+        "parentId" : "ad65335a-a32f-4e26-8371-16b2eea69d72",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-03-04T21:23:49Z",
+        "updatedAt" : "2020-03-04T21:23:49Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 421,
+    "diffHunk" : "@@ -1,1 +588,592 @@   , \"  \\\"version\\\": \\\"\" <> packageVersion <> \"\\\",\"\n   , \"  \\\"description\\\": \\\"Produced by daml2ts\\\",\"\n   , \"  \\\"license\\\": \\\"Apache-2.0\\\",\"\n   , \"  \\\"dependencies\\\": {\"\n   , \"    \\\"@daml/types\\\": \\\"\" <> damlTypesVersion <> \"\\\",\""
+  },
+  {
+    "id" : "7fc4cda1-e5d4-4f29-897e-f568d0f63084",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "211dfbc9-92ca-4cfb-b911-7c988b71e524",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We need to make these version numbers easier configurable. I suggest to put constants somewhere close to the top of the file.",
+        "createdAt" : "2020-03-04T19:44:53Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "95d3ef1d-d494-4dcd-a715-9de05122478d",
+        "parentId" : "211dfbc9-92ca-4cfb-b911-7c988b71e524",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-03-04T21:24:01Z",
+        "updatedAt" : "2020-03-04T21:24:02Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2786413f-2c7b-43f5-b780-a3f8c252dbfa",
+        "parentId" : "211dfbc9-92ca-4cfb-b911-7c988b71e524",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4878",
+        "createdAt" : "2020-03-06T14:10:31Z",
+        "updatedAt" : "2020-03-06T14:10:31Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 432,
+    "diffHunk" : "@@ -1,1 +599,603 @@    , \"  },\"\n    , \"  \\\"devDependencies\\\": {\"\n    , \"    \\\"@typescript-eslint/eslint-plugin\\\": \\\"^2.11.0\\\",\"\n    , \"    \\\"@typescript-eslint/parser\\\": \\\"^2.11.0\\\",\"\n    , \"    \\\"eslint\\\": \\\"^6.7.2\\\",\""
+  },
+  {
+    "id" : "b34887d9-773d-4867-9795-f98ce66274cb",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "6bef560f-e8dc-4851-b446-c735503bbf84",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "If you put `json-type-validation` as the last dependency, you'd get out of the business of figuring out where the commas go and remove complexity.",
+        "createdAt" : "2020-03-04T19:47:03Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4aebd6f5-5d6e-42b0-939f-0e9da8ed8ce4",
+        "parentId" : "6bef560f-e8dc-4851-b446-c735503bbf84",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Fair enough. Will fix.",
+        "createdAt" : "2020-03-04T21:24:40Z",
+        "updatedAt" : "2020-03-04T21:24:41Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "61921b53-2060-44d0-b960-cd13851f3064",
+        "parentId" : "6bef560f-e8dc-4851-b446-c735503bbf84",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4859",
+        "createdAt" : "2020-03-05T18:34:00Z",
+        "updatedAt" : "2020-03-05T18:34:00Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 425,
+    "diffHunk" : "@@ -1,1 +592,596 @@   , \"    \\\"@daml/types\\\": \\\"\" <> damlTypesVersion <> \"\\\",\"\n   , \"    \\\"@mojotech/json-type-validation\\\": \\\"^3.1.0\\\"\" ++ if not $ null dependencies then \", \" else \"\"\n   ] ++ dependencies ++\n    [\"  },\"\n    , \"  \\\"scripts\\\": {\""
+  },
+  {
+    "id" : "25611332-61ce-4f4a-891f-92160cb45e2f",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "2cf3ca22-c3a3-4075-a84b-034631b01827",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I have no clue what `ldr` stands for. Can we please give this variable a more descriptive name?",
+        "createdAt" : "2020-03-04T19:50:46Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b0fd4dfc-dd1b-4fbd-ac42-0fdb1ef69f11",
+        "parentId" : "2cf3ca22-c3a3-4075-a84b-034631b01827",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "\"Leader\". Yes.",
+        "createdAt" : "2020-03-04T21:24:55Z",
+        "updatedAt" : "2020-03-04T21:24:56Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d868c27b-a731-4b2f-858b-eed995421e5e",
+        "parentId" : "2cf3ca22-c3a3-4075-a84b-034631b01827",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Changed in https://github.com/digital-asset/daml/pull/4818 to `scope`.",
+        "createdAt" : "2020-03-05T13:49:17Z",
+        "updatedAt" : "2020-03-05T13:49:17Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 485,
+    "diffHunk" : "@@ -1,1 +652,656 @@      ps = map (fst3 . nodeFromVertex) $ reverse (topSort g)\n        -- Topologically order our packages.\n      ldr = fromJust (stripPrefix \"@\" (unscope (scopeOfScopeDir optOutputDir)))\n        -- 'ldr' we expect to be something like \"daml2ts/\".\n  let ourPackages = map (T.pack . ((ldr ++ \"/\") ++)) ps"
+  },
+  {
+    "id" : "bdc97f67-cfba-4279-8faa-467ef60a69eb",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "35a0d2dc-05f4-4586-8155-b6933b7d5f39",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Make `ldr` a `T.Text` and\r\n```suggestion\r\n            filter (not . T.isPrefixOf ldr) (workspace oldPackageJson)\r\n```",
+        "createdAt" : "2020-03-04T19:54:21Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ace18e4e-a59b-4a32-9b68-d690070c1a87",
+        "parentId" : "35a0d2dc-05f4-4586-8155-b6933b7d5f39",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-03-04T21:25:23Z",
+        "updatedAt" : "2020-03-04T21:25:24Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e71835f1-2f7a-4ea8-8bb9-5c72c34fd38b",
+        "parentId" : "35a0d2dc-05f4-4586-8155-b6933b7d5f39",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4859",
+        "createdAt" : "2020-03-05T18:26:25Z",
+        "updatedAt" : "2020-03-05T18:26:25Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 502,
+    "diffHunk" : "@@ -1,1 +669,673 @@            | x <- [T.unpack y | y <- workspaces oldPackageJson]\n            , isNothing $ stripPrefix ldr x\n            ]\n      --  * Our packages need to come after 'daml-types' if it exists;\n      --  * Our packages need to come before any other existing packages."
+  },
+  {
+    "id" : "46a1e082-93b2-4210-8e18-68d979dfdaad",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "490743f1-792b-4f3b-8db4-7a81be1cb16c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why do you hate `case ... of` so much?",
+        "createdAt" : "2020-03-04T19:55:23Z",
+        "updatedAt" : "2020-03-04T19:56:00Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bce2f7cb-36a8-4494-94a8-3914dbb903de",
+        "parentId" : "490743f1-792b-4f3b-8db4-7a81be1cb16c",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok, I got the message.",
+        "createdAt" : "2020-03-04T21:26:10Z",
+        "updatedAt" : "2020-03-04T21:42:41Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a3ad39a5-a2d7-44fd-99e7-305d51ee85a5",
+        "parentId" : "490743f1-792b-4f3b-8db4-7a81be1cb16c",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ ",
+        "createdAt" : "2020-03-05T13:51:23Z",
+        "updatedAt" : "2020-03-05T13:51:24Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 505,
+    "diffHunk" : "@@ -1,1 +672,676 @@      --  * Our packages need to come after 'daml-types' if it exists;\n      --  * Our packages need to come before any other existing packages.\n          allPackages = maybe\n            (ourPackages ++ keepPackages)\n            (\\(before, after) -> before ++ damlTypes ++ ourPackages ++ after)"
+  },
+  {
+    "id" : "799bd41d-4510-4714-a240-caec0bfce698",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "a6f18cb3-f787-41ba-82ac-4a2b752421fd",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We can remove the special case for `daml-types`, which is actually `@daml/types` once https://github.com/digital-asset/daml/pull/4820 has landed. The only reason why you would need this is when you don't get `@daml/types` from npmjs.com but rather have it somehow local, as we do in our tests. However, we can also use the `resolutions` field in the workspace `package.json` to point to our local version of `@daml/types`, as in https://github.com/digital-asset/daml/pull/4820.",
+        "createdAt" : "2020-03-05T00:18:49Z",
+        "updatedAt" : "2020-03-05T00:18:49Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "18b345a0-d872-4360-84c2-dabfcc4472ec",
+        "parentId" : "a6f18cb3-f787-41ba-82ac-4a2b752421fd",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "In other words, the packages generated by `daml2ts` go first, everything else comes afterwards. This should simplify the code here quite a bit.",
+        "createdAt" : "2020-03-05T00:20:05Z",
+        "updatedAt" : "2020-03-05T00:20:05Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c80ec995-2b0a-4b00-b8ef-085892c8a48d",
+        "parentId" : "a6f18cb3-f787-41ba-82ac-4a2b752421fd",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Yes, got it. Will implement.",
+        "createdAt" : "2020-03-05T00:33:21Z",
+        "updatedAt" : "2020-03-05T00:33:21Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4386cf84-fc8c-4647-8424-5b60fd9024c4",
+        "parentId" : "a6f18cb3-f787-41ba-82ac-4a2b752421fd",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4859",
+        "createdAt" : "2020-03-05T18:24:16Z",
+        "updatedAt" : "2020-03-05T18:24:17Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 503,
+    "diffHunk" : "@@ -1,1 +670,674 @@            , isNothing $ stripPrefix ldr x\n            ]\n      --  * Our packages need to come after 'daml-types' if it exists;\n      --  * Our packages need to come before any other existing packages.\n          allPackages = maybe"
+  },
+  {
+    "id" : "6e60b1e7-7c02-4b09-85f8-671f075ad7b7",
+    "prId" : 4677,
+    "comments" : [
+      {
+        "id" : "edfbbc7e-9333-46d5-9be3-41db8cf69a9e",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why did you remove the `let`s? OCaml's `let x = ... in let y = ... in ...` is superior to Haskell's `let { x = ...; y = ... } in ...`, which is basically a huge footgun.",
+        "createdAt" : "2020-02-24T19:16:57Z",
+        "updatedAt" : "2020-02-24T19:17:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0b6f7daf-97de-4e6e-9d3e-54f10a8abc71",
+        "parentId" : "edfbbc7e-9333-46d5-9be3-41db8cf69a9e",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "We had,\r\n```haskell\r\n  let x = ...\r\n  let y = ...\r\n  ...\r\n```\r\nin a monadic context. I replaced with,\r\n```haskell\r\nlet x = ...\r\n      y = ...\r\n      ...\r\n```\r\nas I believed it to be more idiomatic? You want I restore it?\r\n",
+        "createdAt" : "2020-02-24T19:18:59Z",
+        "updatedAt" : "2020-02-24T19:22:16Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c66bd60c-fd0f-4df9-8289-1142becaeb79",
+        "parentId" : "edfbbc7e-9333-46d5-9be3-41db8cf69a9e",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Let me know if so and I'll do so in a follow up PR!",
+        "createdAt" : "2020-02-24T19:28:08Z",
+        "updatedAt" : "2020-02-24T19:28:09Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9ae75cc7-78f7-4f58-a212-db09597e842b",
+        "parentId" : "edfbbc7e-9333-46d5-9be3-41db8cf69a9e",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I don't know which one is more idiomatic. Let's go with the safer version then, i.e., the old version.",
+        "createdAt" : "2020-02-25T13:01:51Z",
+        "updatedAt" : "2020-02-25T13:01:52Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3b9d969a823c3ba1d5837388aabcf5f3624625ee",
+    "line" : 56,
+    "diffHunk" : "@@ -1,1 +93,97 @@        \\(pkgId, (mbPkgName, pkg)) -> do\n          let id = show $ unPackageId pkgId\n              name = maybe id (T.unpack . unPackageName) mbPkgName\n              asName = if name == id then \"itself\" else name\n          putStrLn $ \"Generating \" <> id <> \" as \" <> asName"
+  },
+  {
+    "id" : "f592d282-a53b-42da-816c-2645c8846d30",
+    "prId" : 4589,
+    "comments" : [
+      {
+        "id" : "d0f36ed1-7db5-46c8-84d6-2b56b9d1d883",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I always get confused by nested folds and I think this is also sensitive to the order which is probably not intended: If I first see `a.dar` which has a dependency on `$pkgid1` and afterwards `b.dar` where the main dalf has `$pkgid1` I’m not going to pick up the name for `$pkgid1`. If I put `b.dar` first I will pick up the name. \r\n\r\nI would suggest to do this in two steps instead:\r\n\r\n1. Take a list of DARs and build up a list of `Map.Map PackageId ([String], Archive)`. This basically consist of a function `FilePath -> Map.Map PackageId ([String], Archive)` that you apply to each DAR and then throw something like `Map.unionsWith (\\(names1, archive), (names2, _) -> (names1 <> names2, archive)` at it to merge them (a bit more complex if you want to detect duplicate package names).\r\n2. Check for errors, if there are none iterate over the map and generate typescript.",
+        "createdAt" : "2020-02-18T20:03:01Z",
+        "updatedAt" : "2020-02-18T22:09:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dafc0971-38cb-47bc-ba8e-798546efcdc1",
+        "parentId" : "d0f36ed1-7db5-46c8-84d6-2b56b9d1d883",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "> I always get confused by nested folds and I think this is also sensitive to the order which is probably not intended: If I first see a.dar which has a dependency on $pkgid1 and afterwards b.dar where the main dalf has $pkgid1 I’m not going to pick up the name for $pkgid1. If I put b.dar first I will pick up the name.\r\n\r\nI'm not sure about that.\r\n\r\nIf you see `a.dar` and it depends on `$pkgid1`, then ts will be generated for `$pkgid1` (against its hash). If later you see `b.dar` where the main dalf has `$pkgid1`, it will generate again this time against its package name (unless the package name is missing in which case it won't regenerate).",
+        "createdAt" : "2020-02-18T20:28:07Z",
+        "updatedAt" : "2020-02-18T22:09:01Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4126dd93-58bd-4e0d-bb2b-c4985e4de9b6",
+        "parentId" : "d0f36ed1-7db5-46c8-84d6-2b56b9d1d883",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see, you will actually call `daml2ts` twice. That’s not what I would have expected. I would have expected that we always generate once per package id. If we can somehow infer a name for that package id we use it (assuming it’s unique, otherwise we error out). If there is no name we generate it without a name.",
+        "createdAt" : "2020-02-18T20:48:04Z",
+        "updatedAt" : "2020-02-18T22:09:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "31713047-c949-48cc-8eb0-266f6cb08857",
+        "parentId" : "d0f36ed1-7db5-46c8-84d6-2b56b9d1d883",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Cool. I hear you. This might not be the end game but yes, the scheme implemented here in some cases ~will~ might result in some duplicated packages (1.a  of https://github.com/digital-asset/daml/issues/4585). Thanks for looking at that somewhat tricky logic Moritz!",
+        "createdAt" : "2020-02-18T20:52:27Z",
+        "updatedAt" : "2020-02-18T22:09:01Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "21cf7648-7dae-4ad8-88fb-33770f6928f1",
+        "parentId" : "d0f36ed1-7db5-46c8-84d6-2b56b9d1d883",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I could live with the duplicates for now but ultimately they'll have to go. What @cocreature describes would solve that problem _and_ most likely be easier to understand since it separates the conflict detection from the code generation.\r\n\r\nI would suggest to build an intermediate structure of type `Map PackageId (Archive, Maybe String)`, where the `Maybe String` part is an optional name for a package. If we see a second name, we can fail immediately. We can build this intermediate structure in one big `foldl'` over _all_ DALFs and their potential names.",
+        "createdAt" : "2020-02-18T20:59:09Z",
+        "updatedAt" : "2020-02-18T22:09:01Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4cfa57d959142aacb99b2e6fbc3d865de3c11999",
+    "line" : 53,
+    "diffHunk" : "@@ -1,1 +51,55 @@main = do\n    opts@Options{..} <- execParser optionsParserInfo\n    foldM_ (processDar opts) Map.empty optInputDars\n      where\n        -- Generate the ts for a single DAR. 'processed' is a map of"
+  },
+  {
+    "id" : "213d9e20-3699-47bb-852a-1e38153b86af",
+    "prId" : 4589,
+    "comments" : [
+      {
+        "id" : "eab45a7a-bafa-4044-ae07-0c5dd2270961",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "It would be good to have a description of what it means for a `PackageId` to appear as a key of the map. And what it means for a `String` to be contained in the list of a specific `PackageId`.",
+        "createdAt" : "2020-02-18T20:51:25Z",
+        "updatedAt" : "2020-02-18T22:09:01Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8a9d4726-1b55-4e4e-994a-95d4e1da1b47",
+        "parentId" : "eab45a7a-bafa-4044-ae07-0c5dd2270961",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-02-18T21:42:26Z",
+        "updatedAt" : "2020-02-18T22:09:01Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4cfa57d959142aacb99b2e6fbc3d865de3c11999",
+    "line" : 58,
+    "diffHunk" : "@@ -1,1 +56,60 @@        -- package ids of processed DALFs (the same package can appear\n        -- in multiple DARs - avoid regenerating them where possible).\n        processDar :: Options -> Map.Map PackageId [String] -> FilePath -> IO (Map.Map PackageId [String])\n        processDar opts pkgs dar = do\n          dar <- B.readFile dar"
+  },
+  {
+    "id" : "014dd221-106c-4c4e-8f48-cc680a3ffb3f",
+    "prId" : 4476,
+    "comments" : [
+      {
+        "id" : "3949781e-491c-4686-aee3-1dec35a7c8a4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Whenever I see this pattern I wish Haskell's `let`s wouldn't be recursive by default. So sad. 😿",
+        "createdAt" : "2020-02-11T20:53:07Z",
+        "updatedAt" : "2020-02-11T20:53:17Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "470a305dbec7ef86ed9a3c742435fc7bcadb9638",
+    "line" : 9,
+    "diffHunk" : "@@ -1,1 +60,64 @@    dalfs <- either fail pure $ DAR.readDalfs archive\n    DAR.DalfManifest{packageName, ..} <- either fail pure $ DAR.readDalfManifest archive\n    packageName <- pure $ optMainPackageName <|> packageName\n    forM_ ((DAR.mainDalf dalfs, packageName) : map (, Nothing) (DAR.dalfs dalfs)) $ \\(dalf, mbPkgName) -> do\n        (pkgId, pkg) <- either (fail . show)  pure $ Archive.decodeArchive Archive.DecodeAsMain (BSL.toStrict dalf)"
+  },
+  {
+    "id" : "8ccf957a-20e5-415f-a6f2-1ee74918c650",
+    "prId" : 4186,
+    "comments" : [
+      {
+        "id" : "ef6c6ad6-2960-4758-8c85-24df3b5ef075",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n                              [\"  export type Key = \" <> fst (genType (moduleName mod) (tplKeyType key))] ++\r\n```",
+        "createdAt" : "2020-01-23T16:36:18Z",
+        "updatedAt" : "2020-01-23T16:37:23Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ba23e4fe614a08c3ef5ac8bf5a398e8e42e1d724",
+    "line" : 21,
+    "diffHunk" : "@@ -1,1 +251,255 @@                              [ \"// eslint-disable-next-line @typescript-eslint/no-namespace\"\n                              , \"export namespace \" <> conName <> \" {\"] ++\n                              [\"  export type Key = \" <> fst (genType (moduleName mod) (tplKeyType key)) <> \"\"] ++\n                              [\"}\"]) (tplKey tpl)\n                        registrations ="
+  },
+  {
+    "id" : "d8e9bd53-9ce9-43d6-b0c8-39b1ead80aa0",
+    "prId" : 4047,
+    "comments" : [
+      {
+        "id" : "70d38804-bc05-4927-b93a-c0f11fbcc727",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why?",
+        "createdAt" : "2020-01-14T19:26:11Z",
+        "updatedAt" : "2020-01-14T21:12:06Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "064e83bb-45bb-47b5-a2a5-417c8569c817",
+        "parentId" : "70d38804-bc05-4927-b93a-c0f11fbcc727",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Probably a mistake. Let me check.",
+        "createdAt" : "2020-01-14T19:53:25Z",
+        "updatedAt" : "2020-01-14T21:12:06Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d038eadf-acc9-4450-b332-2027eea99e96",
+        "parentId" : "70d38804-bc05-4927-b93a-c0f11fbcc727",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "No, not a mistake. We can't assume the result of `makeSer` is going to be in a context where a trailing `;` is right (the variant case has a usage where it's not - the alternative of course is do surgery on it with something like `replace`).\r\n```haskell\r\n  Corge: ({\r\n    decoder: () => jtv.object({\r\n      x: daml.Int.decoder(),\r\n      y: daml.Text.decoder(),\r\n    }),\r\n  });, -- <- here!\r\n```\r\n",
+        "createdAt" : "2020-01-14T20:22:09Z",
+        "updatedAt" : "2020-01-14T21:12:06Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3893795c-fb74-4f9b-b227-d6d6f1543b4d",
+        "parentId" : "70d38804-bc05-4927-b93a-c0f11fbcc727",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That an explanation makes sense. Happy to change it then.",
+        "createdAt" : "2020-01-14T20:25:57Z",
+        "updatedAt" : "2020-01-14T21:12:06Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b53294257221487f2c5abc0f6a00dce9cbe09c9b",
+    "line" : 171,
+    "diffHunk" : "@@ -1,1 +268,272 @@            [\"export const \" <> conName <> serHeader <> \" ({\"] ++\n            map (\"  \" <>) (onHead (\"decoder: \" <>) serDesc) ++\n            [\"})\"]\n        makeNameSpace serDesc =\n            [ \"// eslint-disable-next-line @typescript-eslint/no-namespace\""
+  },
+  {
+    "id" : "009417c5-0c90-41c7-94e6-d2f68d5598de",
+    "prId" : 4047,
+    "comments" : [
+      {
+        "id" : "d6b1d52c-505c-4c9f-9e61-260eb8f841c4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "How does the first line look like? Can we modify it with `onHead` instead?",
+        "createdAt" : "2020-01-14T19:30:09Z",
+        "updatedAt" : "2020-01-14T21:12:06Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9a13bad8-ef0e-4420-82fc-9a5b1c471a38",
+        "parentId" : "d6b1d52c-505c-4c9f-9e61-260eb8f841c4",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I recall evaluating that and determining that it was easier to discard the line.",
+        "createdAt" : "2020-01-14T20:44:25Z",
+        "updatedAt" : "2020-01-14T21:12:06Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b53294257221487f2c5abc0f6a00dce9cbe09c9b",
+    "line" : 101,
+    "diffHunk" : "@@ -1,1 +157,161 @@                let\n                  assocNames = map fst assocDefDataTypes\n                  -- Any associated serializers, dropping the first line\n                  -- of each.\n                  assocSers = map (\\(n, d) -> (n, serFromDef (drop 1) n d)) assocDefDataTypes"
+  },
+  {
+    "id" : "761ce7e8-a427-41c5-a131-b0bff4fc1ea5",
+    "prId" : 3895,
+    "comments" : [
+      {
+        "id" : "32b51d4c-a2b8-4f61-abe8-25b00219bea7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I suppose `rtyp` is the companion object (ie. `Serializable` dictionary) for the return type. I think I've used something like `rser` below. We should find a consistent naming scheme for these. Not necessarily in this PR but soon.",
+        "createdAt" : "2019-12-20T10:26:50Z",
+        "updatedAt" : "2019-12-20T12:56:44Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "07e78250-69f3-42e6-9bea-641c512dcbb1",
+        "parentId" : "32b51d4c-a2b8-4f61-abe8-25b00219bea7",
+        "author" : null,
+        "body" : "Ok",
+        "createdAt" : "2019-12-20T11:51:55Z",
+        "updatedAt" : "2019-12-20T12:56:44Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a63d1a81485323a7fa5c1e1b7822721fa74377e8",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +156,160 @@                Just tpl ->\n                    let (chcs, argRefs) = unzip\n                            [((unChoiceName (chcName chc), t, r, rtyp), argRefs)\n                            | chc <- NM.toList (tplChoices tpl)\n                            , let tLf = snd (chcArgBinder chc)"
+  }
+]

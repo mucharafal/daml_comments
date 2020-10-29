@@ -1,0 +1,133 @@
+[
+  {
+    "id" : "f7c55fbc-cea2-409c-9337-393be15778a9",
+    "prId" : 5780,
+    "comments" : [
+      {
+        "id" : "b84dfe4d-22dd-424a-b7e5-d906d9fc9e68",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Nit: `.tag_name` is separate from the transformation from `\"v1.0.2\"` to `[1,0,2]`.",
+        "createdAt" : "2020-04-29T12:30:32Z",
+        "updatedAt" : "2020-04-30T13:04:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a940b94e53c4c7a36e8d6b2e4585ee8dc1ed0105",
+    "line" : 17,
+    "diffHunk" : "@@ -1,1 +120,124 @@          #    1.0.2.\n          # 2. The `.tag_name | .[1:] | split (\".\") | map(tonumber)` part will\n          #    turn \"v1.0.2\" into an array [1, 0, 2].\n          # 3. jq documents its sort method to sort numbers in numeric order\n          #    and arrays in lexical order (ascending in both cases)."
+  },
+  {
+    "id" : "45439814-fcaf-474d-be13-de2748702c2e",
+    "prId" : 4024,
+    "comments" : [
+      {
+        "id" : "af389fe8-33ce-4406-ba88-d5cfe765f2c2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Shall we put a limit to this? Right now, we're risking to get stuck in an infinite loop.",
+        "createdAt" : "2020-01-13T13:51:54Z",
+        "updatedAt" : "2020-01-13T13:51:54Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a460fdbd6d09968290b4f906d17665474ba3c1df",
+    "line" : 4,
+    "diffHunk" : "@@ -1,1 +69,73 @@          for version in $(echo $RELEASES | sed -e 's/ /\\n/g'); do\n            git checkout \"$version\"\n            while ! nix-build -A tools -A cached nix; do; done\n            LAST_UPDATE=$(echo $VERSIONS | jq -r '.results[] | select(.name == \"'${version#v}'\") | .last_updated')\n            if [[ -n \"$LAST_UPDATE\" ]]; then"
+  },
+  {
+    "id" : "7b164898-eb5f-4aac-9675-d65170fdedeb",
+    "prId" : 2090,
+    "comments" : [
+      {
+        "id" : "1066064d-2699-498c-af48-977aaa2d2d01",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I think we still need the `yarn compile` step.",
+        "createdAt" : "2019-07-10T12:17:11Z",
+        "updatedAt" : "2019-07-10T12:27:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "93bd4f56-0c2a-4233-8dd8-41dbae7e5898",
+        "parentId" : "1066064d-2699-498c-af48-977aaa2d2d01",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Good point, will add that.",
+        "createdAt" : "2019-07-10T12:19:46Z",
+        "updatedAt" : "2019-07-10T12:27:01Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c1fd2aceba15ee036afbb7ee56d9566c5d8b194d",
+    "line" : 8,
+    "diffHunk" : "@@ -1,1 +179,183 @@            cd compiler/daml-extension\n            # This produces out/src/extension.js\n            bazel run @nodejs//:bin/yarn\n            bazel run @nodejs//:bin/yarn compile\n            bazel run @daml_extension_deps//vsce/bin:vsce -- publish ${GITHUB#v} -p $MARKETPLACE_TOKEN"
+  },
+  {
+    "id" : "6118ed44-8927-403c-8af1-c83fa0afa979",
+    "prId" : 1838,
+    "comments" : [
+      {
+        "id" : "50ce5b00-a3d4-4c3f-bbab-b04e07301188",
+        "parentId" : null,
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "```\r\nline 22: unexpected EOF while looking for matching `\"'\r\n```\r\nhttps://dev.azure.com/digitalasset/daml/_build/results?buildId=9529&view=logs",
+        "createdAt" : "2019-06-24T13:21:40Z",
+        "updatedAt" : "2019-06-24T13:21:41Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6692938000e465846f631fd5c780c03bf1125ca1",
+    "line" : 4,
+    "diffHunk" : "@@ -1,1 +145,149 @@              echo \"RUN apk add curl bash\" >> Dockerfile\n              echo \"RUN curl https://get.daml.com | sh -s ${version#v}\" >> Dockerfile\n              echo \"ENV PATH=\"~/.daml/bin:${PATH}\" >> Dockerfile\n              docker build -t digitalasset/daml-sdk:${version#v} .\n              docker push digitalasset/daml-sdk:${version#v}"
+  }
+]

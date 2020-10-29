@@ -1,0 +1,134 @@
+[
+  {
+    "id" : "1ac45d45-e63e-483f-a9e5-7d574879aafa",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "a12a8f31-0d77-4dee-95e8-38fd7eaae00c",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "An experiment with using phantoms to clarify use of these non-typeclassy implicits that Scala libraries tend to have, like `ExecutionContext`. If successful in this PR, we may expand to those other implicits, like `Connection` or indeed `ExecutionContext`.\r\n\r\nThis also demonstrates why I don't think one-size-fits-all tagging \"libraries\" are super helpful. Having a simple version like `scalaz.Tag` covering many common scenarios is fine, but there are often places where you wish to precisely control the resulting semantics, such as this one.\r\n\r\nThe type parameter could be added directly to `LoggingContext`, but I think it is more interesting here to demonstrate how you could add these phantom controls to implicit designs that you don't otherwise control.\r\n\r\n/cc @SamirTalwar @leo-da ",
+        "createdAt" : "2020-08-21T21:50:30Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0ecdc8a7-6f50-4caa-8630-cb8635a7a8d7",
+        "parentId" : "a12a8f31-0d77-4dee-95e8-38fd7eaae00c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Seems like a smart idea. Where are you using it?",
+        "createdAt" : "2020-08-24T07:44:01Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "08a6c65a-c583-4d3b-b546-eb43fbdd7703",
+        "parentId" : "a12a8f31-0d77-4dee-95e8-38fd7eaae00c",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "@SamirTalwar-DA In this PR, you can see\r\n\r\n1. where `Runner` now demands a `LoggingContextOf[Trigger]`,\r\n2. in its diff history, where `TriggerRunner` started demanding a `LoggingContextOf[Config]`, and\r\n3. where the first demand propagated outward into where the second was already satisfied, so it became `LoggingContextOf[Config with Trigger]`, which satisfies both.",
+        "createdAt" : "2020-09-02T21:20:59Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "863e78f2-38f7-48da-b9e3-eb89f8a75aed",
+        "parentId" : "a12a8f31-0d77-4dee-95e8-38fd7eaae00c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I see it now. No complaints; seems like the API itself requires very little heavy lifting.\r\n\r\nI like this logic a lot, and I'd definitely support using this kind of thing for execution contexts too.",
+        "createdAt" : "2020-09-03T13:15:42Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 33,
+    "diffHunk" : "@@ -1,1 +31,35 @@  * `LoggingContextOf[Foo with Bar]` then the latter will be chosen, in\n  * accordance with SLS §7.2, §6.26.3.  This fits well the \"more context =\n  * better than\" overall philosophy of the contextualized-logging library.\n  */\nobject LoggingContextOf {"
+  },
+  {
+    "id" : "28423092-84ee-4fae-9e14-80a865649805",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "04169b0b-80c9-4f82-a8fb-d2d6b7d1fbad",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do I see it correctly that we do not use this yet? Perfectly fine, just wanted to make sure I didn’t miss it.",
+        "createdAt" : "2020-09-03T10:39:13Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e6f69f0a-471e-483b-9e1e-01598fd7d52c",
+        "parentId" : "04169b0b-80c9-4f82-a8fb-d2d6b7d1fbad",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Indeed.",
+        "createdAt" : "2020-09-03T13:02:36Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 46,
+    "diffHunk" : "@@ -1,1 +44,48 @@\n  @silent(\" label .* is never used\") // Proxy only\n  def withEnrichedLoggingContext[P, A](label: label[P], kvs: Map[String, String])(\n      implicit loggingContext: LoggingContextOf[A]): withEnrichedLoggingContext[P, A] =\n    new withEnrichedLoggingContext(kvs, loggingContext.extend[P])"
+  }
+]

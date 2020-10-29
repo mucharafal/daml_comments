@@ -1,0 +1,274 @@
+[
+  {
+    "id" : "8e135e39-d637-4788-b9c6-f9f527772f82",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "66bb9ad0-af87-4e23-b78a-cb3851b8a93d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This kind of pattern can be a bit dangerous since if the thread dies (e.g. throws an exception) you will never notice. Also if the main thread of a Haskell application shuts down, all other threads die immediately without even running finalizers which can be quite confusing. Usually something like `withAsync` or one of the other functions in `async` is a better way to handle this. That said, no need to address this before merging especially since this pattern is already used in other parts, just something to keep in mind for a future PR.",
+        "createdAt" : "2019-07-05T16:09:42Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "30ae082d-52f3-4176-8794-87ae1010d5ca",
+        "parentId" : "66bb9ad0-af87-4e23-b78a-cb3851b8a93d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Yes I agree. We should switch to `async` as you suggest.",
+        "createdAt" : "2019-07-08T10:11:20Z",
+        "updatedAt" : "2019-07-08T10:11:20Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 32,
+    "diffHunk" : "@@ -1,1 +30,34 @@    makeLedgerService $ \\timeout config -> do\n    stream <- newStream\n    _ <- forkIO $\n        withGRPCClient config $ \\client -> do\n            service <- LL.transactionServiceClient client"
+  },
+  {
+    "id" : "c373c434-9a7e-45b0-91d2-a708cc200213",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "f9b32662-52ec-4980-877d-1990741697ce",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe also add in the error message that it originated from `raiseTransactionTree`.",
+        "createdAt" : "2019-07-05T16:11:26Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "380d9b35-4c57-45b3-99e9-f023702d895d",
+        "parentId" : "f9b32662-52ec-4980-877d-1990741697ce",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "What I really want to do is push the handling of Nothing/Just for all RPC response types down into the `raise` functionality of  the `Convert` module. This response field optionality is an artifact of GRPC/proto which it is sad to have repeated in every rpc-wrapper.",
+        "createdAt" : "2019-07-08T10:16:48Z",
+        "updatedAt" : "2019-07-08T10:16:48Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 64,
+    "diffHunk" : "@@ -1,1 +62,66 @@            ClientNormalResponse (LL.GetTransactionResponse (Just tx)) _m1 _m2 _status _details ->\n                case raiseTransactionTree tx of\n                    Left reason -> fail (show reason)\n                    Right x -> return $ Just x\n            ClientErrorResponse (ClientIOError (GRPCIOBadStatusCode StatusNotFound _details)) ->"
+  },
+  {
+    "id" : "e8047b66-cf17-4992-b82d-7ca273c0e3c4",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "f217d6c7-0924-465f-8362-c92d09f9b1d9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe add a comment on when you will get `Nothing` (only if you get a not found message) vs when you get an exception (all other failure cases).",
+        "createdAt" : "2019-07-05T16:12:36Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c2824720-8763-47a6-b2a7-4c0773b7f3ca",
+        "parentId" : "f217d6c7-0924-465f-8362-c92d09f9b1d9",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I think more generally we need to work out how best to link from the haskell bindings to the documentation which originates in the .proto files\r\n```\r\n// Lookup a transaction by the ID of an event that appears within it.\r\n  // Returns ``NOT_FOUND`` if no such transaction exists.\r\n  rpc GetFlatTransactionByEventId (GetTransactionByEventIdRequest) returns (GetFlatTransactionResponse);\r\n```\r\n\r\nand to document our general scheme of mapping `NOT_FOUND` (at the grpc level) to the `Maybe` type for the haskell binding.\r\n\r\n",
+        "createdAt" : "2019-07-08T10:21:35Z",
+        "updatedAt" : "2019-07-08T10:21:35Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 52,
+    "diffHunk" : "@@ -1,1 +50,54 @@    where f = raiseList raiseTransactionTree . LL.getTransactionTreesResponseTransactions\n\ngetTransactionByEventId :: LedgerId -> EventId -> [Party] -> LedgerService (Maybe TransactionTree)\ngetTransactionByEventId lid eid parties =\n    makeLedgerService $ \\timeout config -> do"
+  },
+  {
+    "id" : "ce2e565a-c706-46ef-b042-7318f2b04c76",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "675bc0c5-26a5-4d16-b698-3ee2abce7518",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Same here.",
+        "createdAt" : "2019-07-05T16:12:48Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 71,
+    "diffHunk" : "@@ -1,1 +69,73 @@                fail (show e)\n\ngetTransactionById :: LedgerId -> TransactionId -> [Party] -> LedgerService (Maybe TransactionTree)\ngetTransactionById lid trid parties =\n    makeLedgerService $ \\timeout config -> do"
+  },
+  {
+    "id" : "1130701a-c135-4768-84b0-92bea4e80328",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "7bdf3699-a03c-413e-8c7e-80856082b3a7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Same here.",
+        "createdAt" : "2019-07-05T16:12:55Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 90,
+    "diffHunk" : "@@ -1,1 +88,92 @@                fail (show e)\n\ngetFlatTransactionByEventId :: LedgerId -> EventId -> [Party] -> LedgerService (Maybe Transaction)\ngetFlatTransactionByEventId lid eid parties =\n    makeLedgerService $ \\timeout config -> do"
+  },
+  {
+    "id" : "2b613c0f-26e9-4abd-a560-35110ec6e2dd",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "8c742ae9-cd3c-49ee-9101-485d1ce34087",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Same here.",
+        "createdAt" : "2019-07-05T16:13:04Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 109,
+    "diffHunk" : "@@ -1,1 +107,111 @@                fail (show e)\n\ngetFlatTransactionById :: LedgerId -> TransactionId -> [Party] -> LedgerService (Maybe Transaction)\ngetFlatTransactionById lid trid parties =\n    makeLedgerService $ \\timeout config -> do"
+  },
+  {
+    "id" : "1a1f4b17-3c01-4585-b530-7a76af655fe5",
+    "prId" : 1865,
+    "comments" : [
+      {
+        "id" : "4c383571-7a4e-4053-a090-56b1b625554a",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Do we really want Java style naming? Or is this inevitable with autogen stuff?",
+        "createdAt" : "2019-06-25T19:55:39Z",
+        "updatedAt" : "2019-06-25T19:58:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ddf69eeb-d3ae-43e7-9440-e90dee573462",
+        "parentId" : "4c383571-7a4e-4053-a090-56b1b625554a",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "These are the names of the services as defined in the .proto files.\r\nFor code discoverability, it's useful to keep the direct name correspondence.",
+        "createdAt" : "2019-06-26T09:28:08Z",
+        "updatedAt" : "2019-06-26T09:28:09Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "083986803f9b3170c769c8f1a0c16e4556e24542",
+    "line" : 9,
+    "diffHunk" : "@@ -1,1 +7,11 @@    ) where\n\nimport Com.Digitalasset.Ledger.Api.V1.LedgerOffset\nimport Com.Digitalasset.Ledger.Api.V1.TransactionFilter\nimport Control.Concurrent(forkIO)"
+  }
+]

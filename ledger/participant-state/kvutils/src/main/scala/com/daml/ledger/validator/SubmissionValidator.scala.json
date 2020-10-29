@@ -1,0 +1,153 @@
+[
+  {
+    "id" : "2ddf5619-301c-4274-a86c-b0cb387bd700",
+    "prId" : 7063,
+    "comments" : [
+      {
+        "id" : "2511fc7a-a7ab-4ef5-a20d-28deeb167150",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I'd consider being a bit more audacious and:\r\n\r\n- Removing the execution context from the constructor.\r\n- Perhaps even removing `validate` that seems to be used in tests only (and possibly replacing it with a local or shared test utility) or pass the execution context there too.",
+        "createdAt" : "2020-08-10T07:18:52Z",
+        "updatedAt" : "2020-08-10T07:49:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "035a92dc-99be-4d0c-bc4b-c59a74f73fbd",
+        "parentId" : "2511fc7a-a7ab-4ef5-a20d-28deeb167150",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'd like to do that but didn't want to break compatibility. If you're happy for me to do so, I'm on it.",
+        "createdAt" : "2020-08-10T07:49:36Z",
+        "updatedAt" : "2020-08-10T07:49:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "47fe5ac7-dfed-415a-b2af-4e9f39998f69",
+        "parentId" : "2511fc7a-a7ab-4ef5-a20d-28deeb167150",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Looking into this, this means a larger breaking change, adding `implicit executionContext` to all methods of `LedgerStateAccess` and `LedgerStateOperations`.\r\n\r\nI think this is a good idea, personally, but it would break source compatibility for implementors, and so I don't want to do it here. I'm happy to look at it separately.",
+        "createdAt" : "2020-08-10T07:59:06Z",
+        "updatedAt" : "2020-08-10T07:59:07Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3b7a2fe9-34df-4ee7-907d-b24446f67bf7",
+        "parentId" : "2511fc7a-a7ab-4ef5-a20d-28deeb167150",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Yes you're right, better to evaluate separately.",
+        "createdAt" : "2020-08-10T08:17:44Z",
+        "updatedAt" : "2020-08-10T08:17:45Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "18d594e5fd16fa8e21875d091137dd6808a8611b",
+    "line" : 16,
+    "diffHunk" : "@@ -1,1 +85,89 @@      participantId: ParticipantId,\n  )(\n      implicit executionContext: ExecutionContext,\n      loggingContext: LoggingContext,\n  ): Future[Either[ValidationFailed, LogResult]] ="
+  },
+  {
+    "id" : "d5990353-7370-4ba6-a5f5-12c60250a405",
+    "prId" : 4437,
+    "comments" : [
+      {
+        "id" : "b2199dd2-ea73-4a79-a723-e38e17bfdedf",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "We might want to run multiple validators in one process, e.g. for testing purposes. Right now sharing the engines is not a big issue as they only share the compiled packages, but later on we’ll surely add metrics etc. which shouldn’t be shared. Consider not making the engine a singleton. Otoh, we can refactor when we need to.",
+        "createdAt" : "2020-02-07T08:09:55Z",
+        "updatedAt" : "2020-02-10T12:53:39Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "df5b33be-fffa-47d9-a06a-b86c2d86d291",
+        "parentId" : "b2199dd2-ea73-4a79-a723-e38e17bfdedf",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "That's a good point. Let's leave this for a later PR if that's fine with you -- i.e., we may want to add a `processSubmission` wrapper that works with multiple `Engine` instances running on separate threads.",
+        "createdAt" : "2020-02-07T10:32:58Z",
+        "updatedAt" : "2020-02-10T12:53:39Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "458e851a-be9f-425a-95bf-13570bbea4b0",
+        "parentId" : "b2199dd2-ea73-4a79-a723-e38e17bfdedf",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "SGTM",
+        "createdAt" : "2020-02-07T10:35:17Z",
+        "updatedAt" : "2020-02-10T12:53:40Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b53e6c80e9907f181e0a6a6cfde60e0d2b6a3c21",
+    "line" : 178,
+    "diffHunk" : "@@ -1,1 +176,180 @@      .build()\n\n  private lazy val engine = Engine()\n\n  private[validator] def processSubmission(participantId: ParticipantId)("
+  }
+]

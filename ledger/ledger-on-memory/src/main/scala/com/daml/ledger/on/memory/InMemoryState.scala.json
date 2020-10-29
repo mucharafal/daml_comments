@@ -1,0 +1,106 @@
+[
+  {
+    "id" : "2c7f9015-3823-41c2-9491-a979a91ee4c9",
+    "prId" : 4755,
+    "comments" : [
+      {
+        "id" : "a33a8035-f503-4713-a358-e5904934a86a",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "This immediately tries to acquire the lock and blocks the current thread. Is this the intention?",
+        "createdAt" : "2020-02-28T16:54:56Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b3450be6-3c74-4673-979e-a4428bbef65b",
+        "parentId" : "a33a8035-f503-4713-a358-e5904934a86a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Yes. If we acquired the lock afterwards, what would be the point?\r\n\r\nAFAIK, this has exactly the same semantics as:\r\n\r\n```\r\n    Future.successful(lockCurrentState.acquire())\r\n      .flatMap(_ => action(log, state))\r\n      .andThen { case _ => lockCurrentState.release() }",
+        "createdAt" : "2020-03-02T13:41:28Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2911fbb5-1cdd-499d-a6cb-41eea2eed010",
+        "parentId" : "a33a8035-f503-4713-a358-e5904934a86a",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Would it make sense to do this inside a `Future { }` block so that acquiring the lock happens in the right execution context?",
+        "createdAt" : "2020-03-02T15:01:15Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c0dbd9c5-fce8-457f-8b34-a50f53a19a96",
+        "parentId" : "a33a8035-f503-4713-a358-e5904934a86a",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "That's fine, just wanted to check if you are good with immediately blocking the current thread when you call `withFutureWriteLock`.\r\nOf course, didn't want to question whether you need to lock before or after `action` (edited comment).",
+        "createdAt" : "2020-03-02T15:01:46Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "60784aac-92ad-49ae-b17d-82df205e1f17",
+        "parentId" : "a33a8035-f503-4713-a358-e5904934a86a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Doesn't really matter; this is not a lock that's bound to a thread, it's a simple semaphore which can be acquired and released from anywhere. The developer is responsible for ensuring that it's not released unless it's acquired.\r\n\r\n@miklos-da, you wrote this code, I just moved it. 😉 ",
+        "createdAt" : "2020-03-02T15:03:34Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6d36fdaa30a004657bd518f427ba4d9695681aa0",
+    "line" : 37,
+    "diffHunk" : "@@ -1,1 +35,39 @@      implicit executionContext: ExecutionContext\n  ): Future[A] = {\n    lockCurrentState.acquire()\n    action(log, state)\n      .andThen {"
+  }
+]

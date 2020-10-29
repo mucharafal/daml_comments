@@ -1,0 +1,502 @@
+[
+  {
+    "id" : "3ad909ec-91d6-4125-9ea6-c42db8a6354b",
+    "prId" : 7115,
+    "comments" : [
+      {
+        "id" : "3ad7b898-9376-452d-bc07-cbea3b840838",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Could we unzip and rezip to fix this?",
+        "createdAt" : "2020-08-13T09:04:53Z",
+        "updatedAt" : "2020-08-13T09:05:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "44af5bc6-d0dd-42e2-9664-b7e9ddd59ab9",
+        "parentId" : "3ad7b898-9376-452d-bc07-cbea3b840838",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, I was hoping to find a way to do this with vsce directly, but failing that this should do it. ",
+        "createdAt" : "2020-08-13T09:12:01Z",
+        "updatedAt" : "2020-08-13T09:12:02Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "77731321-ffc9-497b-aafb-a7065742be7d",
+        "parentId" : "3ad7b898-9376-452d-bc07-cbea3b840838",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not much to be gained trying to fix this if we cannot fix Navigator. In the end, the thing we really want to be reproducible is the SDK tarball.",
+        "createdAt" : "2020-08-13T09:19:31Z",
+        "updatedAt" : "2020-08-13T09:19:31Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "adc19d37704cdfbab2dcbf782fe97d6c21e94bd4",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +77,81 @@# is just a zip archive. The order of entries in that archive is\n# non-deterministic and the individual entries contain non-reproducible\n# timestamps.\ngenrule(\n    name = \"vsix\","
+  },
+  {
+    "id" : "bfbe6fd1-2bf0-447d-ae0c-67fe2891e087",
+    "prId" : 6884,
+    "comments" : [
+      {
+        "id" : "3fae8cbf-5a2d-4bbe-a90c-730fdb777570",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What changed here? Shouldn’t the paths still be the same as before?",
+        "createdAt" : "2020-07-30T13:59:31Z",
+        "updatedAt" : "2020-08-05T14:02:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d3c31ae4-db1c-45a2-b895-0c7b7fbc63fd",
+        "parentId" : "3fae8cbf-5a2d-4bbe-a90c-730fdb777570",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "This is a consequence of `--format=ustar`. Looking at IEEE Std 1003.1-1988 the filename is limited to 256 characters split into two components separated by `/`: a prefix of at most 155 characters and the filename of at most 100 characters. In this case the filename `97e9576e421fc74fc3b3eed0f6f0ab3be937d0f110bacca2151119236a1a6fc2a5262b044ec008be7300e3489eb49631d1f0572d08ca99384f2f9182ab57` exceeds the 100 character limit.\r\n\r\nIf need longer file names at some point then [reproducible-builds.org](https://reproducible-builds.org/docs/archives/) recommends\r\n\r\n> To avoid this, either unset POSIXLY_CORRECT (only works with tar>1.32) or add to the tar call --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime or --format=gnu (both only available in GNU tar) or use --format=ustar if the limitations in that format are not a problem.\r\n\r\nto avoid non-deterministic PAX headers. However, it places some restrictions on the tar version.\r\n",
+        "createdAt" : "2020-08-05T13:39:40Z",
+        "updatedAt" : "2020-08-05T14:02:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "216b3b80-0c29-4db7-a3c0-8bc41bf5a970",
+        "parentId" : "3fae8cbf-5a2d-4bbe-a90c-730fdb777570",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense, thanks for the explanation!",
+        "createdAt" : "2020-08-05T13:48:28Z",
+        "updatedAt" : "2020-08-05T14:02:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "19f57f0075be4b6776ef77d0a7374fd6831b28dd",
+    "line" : 8,
+    "diffHunk" : "@@ -1,1 +68,72 @@        cd ..\n        # Avoid file path too long errors on Windows of the form\n        #   .../tar_dev_env/usr/bin/tar: node_modules/.cache/terser-webpack-plugin/...: file name is too long (cannot be split); not dumped\n        $(execpath //bazel_tools/sh:mktgz) $@ --exclude=\"node_modules/.cache/*\" node_modules\n    \"\"\","
+  },
+  {
+    "id" : "1ee8dd0d-7aef-4249-9478-b402377254b6",
+    "prId" : 6870,
+    "comments" : [
+      {
+        "id" : "63009281-b5f4-49d3-b2af-416c9fd48259",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not quite sure what changed here but it doesn’t seem all that surprising that vsce does not have npm implicitly in PATH.",
+        "createdAt" : "2020-07-27T13:14:25Z",
+        "updatedAt" : "2020-07-27T16:18:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f892739781276e7facc8c21b59996c40648ebaab",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +106,110 @@        # vsce needs Yarn or NPM in path and for some reason NPM\n        # fails to find npm-cli.js so we use Yarn.\n        PATH=$$(dirname $$DIR/$(location //:yarn)):$$PATH $$DIR/$(location @daml_extension_deps//vsce/bin:vsce) package --yarn -o $$DIR/$@\n    \"\"\".format(npm = npm_version),\n    tools = ["
+  },
+  {
+    "id" : "14a15e43-ab2b-415e-9889-0360aec0eb5a",
+    "prId" : 6870,
+    "comments" : [
+      {
+        "id" : "f60ce2fd-7013-43ac-bc91-2b379dc34975",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Maybe an instance of https://github.com/bazelbuild/rules_nodejs/issues/1565?",
+        "createdAt" : "2020-07-27T13:23:21Z",
+        "updatedAt" : "2020-07-27T16:18:10Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e8254566-f8c5-4a71-b7c2-d3ffbdbbec24",
+        "parentId" : "f60ce2fd-7013-43ac-bc91-2b379dc34975",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Looks like it! Although that issue is pretty old so I would have expected that we hit this before? I’m now slightly worried that this will break publishing to NPM as well :thinking: ",
+        "createdAt" : "2020-07-27T13:26:01Z",
+        "updatedAt" : "2020-07-27T16:18:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d9584bde-c1cd-4bbe-ad1c-2f79fee0b904",
+        "parentId" : "f60ce2fd-7013-43ac-bc91-2b379dc34975",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "We hit it before on publishing and fixed it with [this patch](https://github.com/digital-asset/daml/blob/e0b9a535b32b57e9f1a79f0626458e3e1edfcfbc/bazel_tools/rules_nodejs_npm_cli_path.patch) (also linked on the issue). I'm not sure what's different in this case.",
+        "createdAt" : "2020-07-27T13:39:45Z",
+        "updatedAt" : "2020-07-27T16:18:10Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "744aea9b-9d91-4944-a591-18b6b22551cb",
+        "parentId" : "f60ce2fd-7013-43ac-bc91-2b379dc34975",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Alright, then I’m less worried. The workaround of using Yarn seems somewhat sensible here given that we use Yarn everywhere else.",
+        "createdAt" : "2020-07-27T13:47:15Z",
+        "updatedAt" : "2020-07-27T16:18:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f892739781276e7facc8c21b59996c40648ebaab",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +105,109 @@        $$DIR/$(location //:yarn) compile\n        # vsce needs Yarn or NPM in path and for some reason NPM\n        # fails to find npm-cli.js so we use Yarn.\n        PATH=$$(dirname $$DIR/$(location //:yarn)):$$PATH $$DIR/$(location @daml_extension_deps//vsce/bin:vsce) package --yarn -o $$DIR/$@\n    \"\"\".format(npm = npm_version),"
+  },
+  {
+    "id" : "e4011a7a-cc1a-4bbc-b44f-21e35108693b",
+    "prId" : 4513,
+    "comments" : [
+      {
+        "id" : "a733c6a5-73b9-4e47-b647-6b162d67c11a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is this required by this PR?",
+        "createdAt" : "2020-02-19T10:07:09Z",
+        "updatedAt" : "2020-02-25T14:08:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2876f6ba-96b2-4631-ac26-7df86ebff37a",
+        "parentId" : "a733c6a5-73b9-4e47-b647-6b162d67c11a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Yes: because we add a call to .format at the end of that string, Bazel will take anything in squiggly brackets as a substitution; the double brackets prevent that.",
+        "createdAt" : "2020-02-19T12:36:18Z",
+        "updatedAt" : "2020-02-25T14:08:02Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "81246bd2733ace93653cb663dca5a0cdaf7c11e9",
+    "line" : 22,
+    "diffHunk" : "@@ -1,1 +93,97 @@        set -euo pipefail\n        TMP_DIR=$$(mktemp -d)\n        cleanup () {{ rm -rf $$TMP_DIR || return; }}\n        trap cleanup EXIT\n        DIR=$$PWD"
+  },
+  {
+    "id" : "701990a7-ad2d-452f-9e29-95b829a68074",
+    "prId" : 2113,
+    "comments" : [
+      {
+        "id" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is it actually worth caching this separately? How slow is it? The extension doesn’t change too often so the cases where the yarn lock file doesn’t change while the extension changes (which would be the only case where this helps) should be quite rare.",
+        "createdAt" : "2019-07-11T15:29:46Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "02860bc5-bd99-4b8f-a040-38cea3282847",
+        "parentId" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Takes about 80s on my machine, whereas the rest (which required most of the iterating) runs in about 3s. It was definitely worth separating for writing these rules. I suppose once it all works we may go back and merge them, but I'm not sure what harm it makes to hacve this as a separate step?",
+        "createdAt" : "2019-07-11T16:03:56Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1746e897-f512-4ad0-b4df-a9ec2209c465",
+        "parentId" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "No harm, I was just thinking about reducing the complexity. But given those timings it seems quite reasonable to have this as a separate step. That said, I am not sure we gain much by splitting this into one rule that wraps `node_modules` in a tarball only to then extract it in the other rule so I would just inline the logic for this. The actual caching should come from copying `@daml_extension_deps//:node_modules` not from the fact that this is a separate rule.",
+        "createdAt" : "2019-07-12T07:00:14Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ee70b6ca-9c9b-4c59-8df1-74247e852a2f",
+        "parentId" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I totally agree with you, but my computer doesn't. Getting the files from Bazel takes 80s, getting the tarball from Bazel, extracting it, _and_ doing all the other stuff with yarn & vsce takes 5s.",
+        "createdAt" : "2019-07-12T13:23:47Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1d4892ad-3a44-4143-9ced-1f6fe259637d",
+        "parentId" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m confused, you are saying if you copy from `@daml_extension_deps//:node_modules` to `node_modules` before calling `yarn` instead of going via the indirection it gets slower?",
+        "createdAt" : "2019-07-12T13:25:23Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "83fcae7e-d24b-4df7-9fd1-665c42eb818f",
+        "parentId" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "From my observations, it looks like what is slow is getting files from Bazel (specifically lots of small files). I suspect this has something to do with symlinks and may be faster on Linux.\r\n\r\nSo getting `node_modules` one file at a time, as currently done in the `node_deps_cache` rule, takes a _long_ time (we're talking ~80s on my machine for about 60MB across 3k files), whereas fetching one tarball from Bazel and extracting that \"locally\" (as currently done by the `vsix` rule) is about as fast as I'd expect, i.e. practically instant.\r\n\r\nI don't really have a good explanation for why (except that hunch about symlinks), but there it is. I do not observe any speed-up attributable to caching if I inline the logic from `node_deps_cache` into `vsix`*. This is in fact what I started with; this is not a case of premature optimization, I had written the slow version first.\r\n\r\n*: Other than caching the whole result of the genrule, obviously. But when I change the text of the genrule, even for steps that happen strictly after that point, I get the full 80s again if the fetching of files is inline.",
+        "createdAt" : "2019-07-12T17:09:55Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a0112f5d-1c10-404c-b1ff-453b40e168b7",
+        "parentId" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "> I’m confused, you are saying if you copy from `@daml_extension_deps//:node_modules` to `node_modules` before calling `yarn` instead of going via the indirection it gets slower?\r\n\r\nMore specifically: the copying is what is slow, hence the creation of a separate rule that just does the copying, so that gets cached as a single tarball and on subsequent runs I only have to pay the cost of accessing a Bazel-provided file once (rather than 3k times).",
+        "createdAt" : "2019-07-12T17:11:40Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3b3bc738-94bf-4322-84c7-bb7361d14891",
+        "parentId" : "fcd6f257-df67-4ca3-b4e4-eda84a52240f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thank you for the clarification! I definitely did not expect that copying a bunch of files takes 80s which is why I got a bit confused. I completely agree that a separate rule is the right way to handle this in that case!",
+        "createdAt" : "2019-07-12T17:27:20Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b34fe776d6ca357e55f939cf9039de5e2127dfef",
+    "line" : 36,
+    "diffHunk" : "@@ -1,1 +20,24 @@# exists\", so at this point I'm completely out of trust.\ngenrule(\n    name = \"node_deps_cache\",\n    srcs = [\"@daml_extension_deps//:node_modules\"],\n    outs = [\"node_modules.tar.gz\"],"
+  },
+  {
+    "id" : "23f50b21-b488-4969-9031-8cde647faaef",
+    "prId" : 2113,
+    "comments" : [
+      {
+        "id" : "f948171f-1629-4b39-b35d-a04e0eec1d74",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe add a comment on what you are doing here. Took me a few seconds to decypher (yes I’m bad at bash :slightly_smiling_face:)",
+        "createdAt" : "2019-07-11T15:32:31Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7a58e20b-51b2-4fec-a9e3-b33534e63065",
+        "parentId" : "f948171f-1629-4b39-b35d-a04e0eec1d74",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Fair enough. It took me a while to figure out I had to do that, too. (Still hoping I'm missing something and I don't actually have to do it, though.)",
+        "createdAt" : "2019-07-11T16:04:33Z",
+        "updatedAt" : "2019-07-12T21:01:03Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b34fe776d6ca357e55f939cf9039de5e2127dfef",
+    "line" : 51,
+    "diffHunk" : "@@ -1,1 +35,39 @@            # before we can write the file\n            file=$$(basename $$f)\n            dir=$$(dirname $$f | sed 's:^.*/node_modules/::')\n            mkdir -p $$dir\n            cp ../$$f $$dir/$$file"
+  }
+]

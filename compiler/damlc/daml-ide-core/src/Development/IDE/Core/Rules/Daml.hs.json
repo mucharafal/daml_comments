@@ -1,0 +1,328 @@
+[
+  {
+    "id" : "85ba050f-d82a-4246-8868-e5b4a10f1916",
+    "prId" : 5349,
+    "comments" : [
+      {
+        "id" : "14d0139e-add1-4b1d-92f1-ecb9c9f30661",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "IIRC there were some issues around `mask` vs. `uninterruptibleMask` with GRPC. What's the reasoning for `mask` instead of `uninterruptibleMask` here?",
+        "createdAt" : "2020-04-02T08:32:58Z",
+        "updatedAt" : "2020-04-02T08:34:02Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f715a5de-38ae-4a34-880a-bcf82a5b3fdd",
+        "parentId" : "14d0139e-add1-4b1d-92f1-ecb9c9f30661",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I somewhat wondered about this as well. For the other grpc issue, we ended up refactoring it to be save even if `mask` is interrupted instead of using `uninterruptibleMask` (which seems a bit fishy for a network request). I believe that is the case here as well. If we don’t end up GCing we will restore the set of context roots to the old roots so at worst we will GC again.",
+        "createdAt" : "2020-04-02T08:49:54Z",
+        "updatedAt" : "2020-04-02T08:49:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c4d0a9fc-750a-4360-adaf-b1e6a195435f",
+        "parentId" : "14d0139e-add1-4b1d-92f1-ecb9c9f30661",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That seems reasonable. Thanks for explaining.",
+        "createdAt" : "2020-04-02T16:35:25Z",
+        "updatedAt" : "2020-04-02T16:35:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d2e4350736cfb42406b65d22767a71cb1f77643c",
+    "line" : 18,
+    "diffHunk" : "@@ -1,1 +913,917 @@          DamlEnv{..} <- getDamlServiceEnv\n          liftIO $ whenJust envScenarioService $ \\scenarioService -> do\n              mask $ \\restore -> do\n                  ctxs <- takeMVar envScenarioContexts\n                  -- Filter down to contexts of files of interest."
+  },
+  {
+    "id" : "0c82e809-de4e-4054-89a6-cf3cf463e078",
+    "prId" : 2145,
+    "comments" : [
+      {
+        "id" : "dae7aca5-eeb5-484a-bd8e-7b6b5fa43017",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is this code actually reachable?",
+        "createdAt" : "2019-07-15T14:16:27Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3c8ef75b-ea5f-4a81-82f2-a1462a5ea8fa",
+        "parentId" : "dae7aca5-eeb5-484a-bd8e-7b6b5fa43017",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It is reachable if you request it the rule explicitly e.g. in a test.",
+        "createdAt" : "2019-07-15T14:17:48Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b5a3362a-a87e-433d-b4ba-9d323ab9f81a",
+        "parentId" : "dae7aca5-eeb5-484a-bd8e-7b6b5fa43017",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Would it make sense to push the pattern match into the caller of this rule?",
+        "createdAt" : "2019-07-15T14:20:49Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d8fa8b81-3b4f-4e8e-81b0-8e3d2191c886",
+        "parentId" : "dae7aca5-eeb5-484a-bd8e-7b6b5fa43017",
+        "author" : null,
+        "body" : "Let me know what you want to do.",
+        "createdAt" : "2019-07-15T14:42:40Z",
+        "updatedAt" : "2019-07-15T14:44:22Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c12cfd37-7ff8-4cbb-9bd5-55885c521df8",
+        "parentId" : "dae7aca5-eeb5-484a-bd8e-7b6b5fa43017",
+        "author" : null,
+        "body" : "^ I'm inclined to land this. Will raise a new PR if @martin-drhu-da  deems changes desirable.",
+        "createdAt" : "2019-07-15T15:11:31Z",
+        "updatedAt" : "2019-07-15T15:11:31Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6565adfc-2b3d-46c2-9393-30acb240dd83",
+        "parentId" : "dae7aca5-eeb5-484a-bd8e-7b6b5fa43017",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I had another look. I misunderstood it the previous time. I'm happy to leave it as is. Thanks.",
+        "createdAt" : "2019-07-15T15:36:24Z",
+        "updatedAt" : "2019-07-15T15:36:24Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27a88c270469e4521741825484d5b2c79aa5bdce",
+    "line" : 23,
+    "diffHunk" : "@@ -1,1 +537,541 @@      liftIO $ case usage of\n          HlintEnabled dir -> hlintSettings dir\n          HlintDisabled -> fail \"linter configuration unspecified\"\n\ngetHlintDiagnosticsRule :: Rules ()"
+  },
+  {
+    "id" : "e113b7b5-6678-45df-8d85-6631c02284d9",
+    "prId" : 2139,
+    "comments" : [
+      {
+        "id" : "833c9fcc-c9b0-4f90-9395-921afa8d5a68",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I wonder if `Info` is the correct priority here or if we should make it a warning. Probably a good idea to check what linters for other languages do. (But no need to address this as part of this PR).",
+        "createdAt" : "2019-07-15T07:01:01Z",
+        "updatedAt" : "2019-07-15T09:46:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08f7624d9ca99a0bff1f321559e5ab15937691ef",
+    "line" : 37,
+    "diffHunk" : "@@ -1,1 +560,564 @@        (file, LSP.Diagnostic {\n              _range = srcSpanToRange $ ideaSpan i\n            , _severity = Just LSP.DsInfo\n            , _code = Nothing\n            , _source = Just \"linter\""
+  },
+  {
+    "id" : "78087f81-5d20-4b4e-af40-ced3afb3ff58",
+    "prId" : 2139,
+    "comments" : [
+      {
+        "id" : "4b1102db-5a61-4f2e-a914-e84ba3bfbb0a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I would guess we already have this function somewhere else. I don't know where though.",
+        "createdAt" : "2019-07-15T14:05:06Z",
+        "updatedAt" : "2019-07-15T14:05:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a9feaf02-1829-4b43-89f2-7b9881218fe0",
+        "parentId" : "4b1102db-5a61-4f2e-a914-e84ba3bfbb0a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We don’t. There are multiple things called `SrcSpan`. This is the one from `haskell-src-exts` which is new.",
+        "createdAt" : "2019-07-15T14:07:22Z",
+        "updatedAt" : "2019-07-15T14:07:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08f7624d9ca99a0bff1f321559e5ab15937691ef",
+    "line" : 24,
+    "diffHunk" : "@@ -1,1 +547,551 @@        return ([diagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n    where\n      srcSpanToRange :: HSE.SrcSpan -> LSP.Range\n      srcSpanToRange span = Range {\n          _start = LSP.Position {"
+  },
+  {
+    "id" : "2c393da9-3d4f-4a7f-b114-a98eb84e5d48",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "f30e1678-35f3-4776-a995-5ea22448862f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This might look nicer if you only make it return a `Diagnostic` and you then call `(file, toDiagnostic file i)` above.",
+        "createdAt" : "2019-07-12T08:22:26Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3780849f-b3c8-4071-96ec-1a2af41c2bb1",
+        "parentId" : "f30e1678-35f3-4776-a995-5ea22448862f",
+        "author" : null,
+        "body" : "This piece isn't finished. Will come back to it.",
+        "createdAt" : "2019-07-12T09:43:17Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : 92,
+    "diffHunk" : "@@ -1,1 +548,552 @@      -- To-do : Improve this.\n      toDiagnostic file i = ideHintText file (T.pack $ show i)\n      ideHintText fp msg = (fp, LSP.Diagnostic {\n         _range = noRange,\n         _severity = Just LSP.DsInfo,"
+  },
+  {
+    "id" : "ac0d19d0-6976-42cc-8b99-e81bab00973c",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "80bff848-130c-42b0-826f-bea41e33a4fe",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I would just inline `ideHintText` into `toDiagnostic`.",
+        "createdAt" : "2019-07-12T08:25:05Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9725b495-2f87-4941-b8c5-199c9afc5a32",
+        "parentId" : "80bff848-130c-42b0-826f-bea41e33a4fe",
+        "author" : null,
+        "body" : "Again, not finished. It's a placeholder. Work in progress.",
+        "createdAt" : "2019-07-12T09:43:39Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : 91,
+    "diffHunk" : "@@ -1,1 +547,551 @@    where\n      -- To-do : Improve this.\n      toDiagnostic file i = ideHintText file (T.pack $ show i)\n      ideHintText fp msg = (fp, LSP.Diagnostic {\n         _range = noRange,"
+  }
+]

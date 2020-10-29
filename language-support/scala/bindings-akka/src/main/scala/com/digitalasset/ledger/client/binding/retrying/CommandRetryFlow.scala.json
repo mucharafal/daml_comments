@@ -1,0 +1,144 @@
+[
+  {
+    "id" : "3b90b6c3-02c6-44a4-9c2b-a716e913650f",
+    "prId" : 3061,
+    "comments" : [
+      {
+        "id" : "9716dc7d-e372-4260-8208-b0bcdb3986be",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Does this logic operate only on submission or on both submission and completion? Would this result in bugs if a completion would start to return an error code in `RETRYABLE_ERROR_CODES`?",
+        "createdAt" : "2019-09-27T11:57:26Z",
+        "updatedAt" : "2019-10-11T07:37:25Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dccfd8ff-a928-4fc9-b23a-4393866d9218",
+        "parentId" : "9716dc7d-e372-4260-8208-b0bcdb3986be",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This operates on whatever produces a `Completion` value. Unfortunately the client side command tracking mechanism produces such values it self, even though it may not have received it from the ledger. This is used to communicate timeouts (ABORTED) and backpressure (RESOURCE_EXHAUSTED). The reason why I didn't count the ABORTED status code as retryable is that ABORTED is also used for actual rejections in completions.",
+        "createdAt" : "2019-09-27T12:25:02Z",
+        "updatedAt" : "2019-10-11T07:37:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8a440f6b-6e5b-4d23-8b71-2b5687d87a6c",
+        "parentId" : "9716dc7d-e372-4260-8208-b0bcdb3986be",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "It's probably better to remove it altogether, because\r\n\r\n- it's very brittle\r\n- only works for *very* few cases\r\n- the application needs to handle failure anyway, because even the retry mechanism can run into an upper bound of retries and the command can still fail.",
+        "createdAt" : "2019-09-27T12:26:29Z",
+        "updatedAt" : "2019-10-11T07:37:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "976f93b1-42bf-4b2b-84fc-864ebae25309",
+        "parentId" : "9716dc7d-e372-4260-8208-b0bcdb3986be",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I agree with @gerolf-da, application should handle failures/retries.\r\nThe change looks good, does what it supposed to. I was actually going to ask about `ABORTED` and `UNAVAILABLE`... `ABORTED` case is explained above, how about `UNAVAILABLE`?\r\nHere is the link explaining GRPC error codes: https://github.com/grpc/grpc/blob/master/doc/statuscodes.md\r\n\r\n> The service is currently unavailable. This is most likely a transient condition, which can be corrected by retrying with a backoff. Note that it is not always safe to retry non-idempotent operations.\r\n\r\nI think it makes sense to add `UNAVAILABLE` to `RETRYABLE_ERROR_CODES`, all our commands are `idempotent`, right? The unique command id should prevent double submission.\r\n\r\n",
+        "createdAt" : "2019-09-27T14:58:57Z",
+        "updatedAt" : "2019-10-11T07:37:25Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "88433cae-a3c7-46d0-b080-4688a12a9f73",
+        "parentId" : "9716dc7d-e372-4260-8208-b0bcdb3986be",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "do we actually claim that command submission is `idempotent`?",
+        "createdAt" : "2019-09-27T15:05:26Z",
+        "updatedAt" : "2019-10-11T07:37:25Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9dd1b507-05d6-4c6e-b756-db4a54c8765e",
+        "parentId" : "9716dc7d-e372-4260-8208-b0bcdb3986be",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I guess we don't claim it at all, read the PR summary:\r\n\r\n>  Retrying completion failures with the same\r\ncommandId doesn't make sense, as the deduplication mechanism will kick\r\nin.\r\n\r\nWhat happens when deduplication mechanism kicks off?",
+        "createdAt" : "2019-09-27T15:10:00Z",
+        "updatedAt" : "2019-10-11T07:37:25Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b9938318-0968-4eb7-b6fe-29707e2a18a8",
+        "parentId" : "9716dc7d-e372-4260-8208-b0bcdb3986be",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "In case of a transaction, it gets rejected. But interestingly, the deduplication mechanism currently doesn't work on rejections. In that case storing the rejection fails with a sql exception.",
+        "createdAt" : "2019-09-30T08:48:34Z",
+        "updatedAt" : "2019-10-11T07:37:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5d2c0c717dd4ea9835ac6bf4d8c7b1c1925c67c0",
+    "line" : 8,
+    "diffHunk" : "@@ -1,1 +73,77 @@                  RetryLogger.logStopRetrying(request, status, nrOfRetries, firstSubmissionTime)\n                  PROPAGATE_PORT\n                } else if (RETRYABLE_ERROR_CODES.contains(status.code)) {\n                  RetryLogger.logNonFatal(request, status, nrOfRetries)\n                  RETRY_PORT"
+  }
+]

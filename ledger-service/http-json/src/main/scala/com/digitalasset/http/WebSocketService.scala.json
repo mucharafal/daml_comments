@@ -1,0 +1,303 @@
+[
+  {
+    "id" : "aa770704-d105-4d56-9557-74f049a53d64",
+    "prId" : 7109,
+    "comments" : [
+      {
+        "id" : "73e8af40-3085-4b8d-8b2c-579bb03bce8d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thank you for making the change! Much easier to follow now for me!",
+        "createdAt" : "2020-08-13T06:58:45Z",
+        "updatedAt" : "2020-08-13T06:59:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "073b6313a6a76aa9d1e126f727c4446e885d05a4",
+    "line" : 76,
+    "diffHunk" : "@@ -1,1 +414,418 @@      .keepAlive(config.heartBeatPer, () => TickTrigger)\n      .scan(zero) {\n        case ((None, _), TickTrigger) =>\n          // skip all ticks we don't have the offset yet\n          (None, TickTrigger)"
+  },
+  {
+    "id" : "881bb7fd-5bc7-4ed2-9cb1-e787151e57cc",
+    "prId" : 4886,
+    "comments" : [
+      {
+        "id" : "d697e925-6bc7-4500-ab4d-c46e0546e443",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "This occurring earlier in the stream means that empty (or emptied by means of filtering) steps will not cause offset to \"tick up\". You might have to `-\\/` on the heartbeat before this stage in the flow.",
+        "createdAt" : "2020-03-09T19:25:14Z",
+        "updatedAt" : "2020-03-11T19:23:44Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ca181993-3adc-4270-b363-7577a4413734",
+        "parentId" : "d697e925-6bc7-4500-ab4d-c46e0546e443",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "@S11001001 @hurryabit  is that really important to \"tick up\" empty events? You will get the heartbeat in any case if there is no activity matching the query. We either filter empty events out completely or we need to add some logic for conflating consecutive empty events, which would rather complicate the flow.\r\n\r\nIf you only care about the \"live\" marker, it can be sent explicitly.",
+        "createdAt" : "2020-03-11T13:01:13Z",
+        "updatedAt" : "2020-03-11T19:23:44Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "73e76dba-156a-4e58-8552-121e06e76aa6",
+        "parentId" : "d697e925-6bc7-4500-ab4d-c46e0546e443",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It is important, and a prime motivation for this feature.\r\n\r\nConsider the sequence of event blocks, before we filter out the empty ones. Each has a unique offset, representing when it happened, and therefore when the stream will pick up if you resume it.\r\n\r\nA block becomes empty in the stream for only one reason: we filtered out all the events in it. This feature is important to preserve so you don't get spammed with empty event blocks should you choose a particularly strict query (e.g. all key queries are quite strict).\r\n\r\nSuppose that you get a block, and then four hours pass. Suppose that there are empty event blocks in that time. Under the current code, the heartbeat will continue to emit the offset from the last non-empty event block. What we want is for it to emit the offset from the last _empty or non-empty_ event block, so that should you close the stream and resume, you won't necessarily be four hours in the past.\r\n\r\nI don't think this has to terribly affect the current flow; your present logic can work on `StepAndErrors`, possibly making `StepAndErrors` a full ADT (or not, do whatever works structurally), rather than the output of `render`, and an \"empty\" `StepAndErrors` that should be emitted anyway because it is a heartbeat can simply be `nonEmpty`.",
+        "createdAt" : "2020-03-11T18:31:09Z",
+        "updatedAt" : "2020-03-11T19:23:44Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ca34577f-7e89-48f5-b03a-865834f92cda",
+        "parentId" : "d697e925-6bc7-4500-ab4d-c46e0546e443",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "See: #4955",
+        "createdAt" : "2020-03-11T19:18:13Z",
+        "updatedAt" : "2020-03-11T19:23:44Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "41ee53013c9760d2123824d5705920e4ed550345",
+    "line" : 101,
+    "diffHunk" : "@@ -1,1 +314,318 @@        .insertDeleteStepSource(jwt, jwtPayload.party, resolved.toList, Terminates.Never)\n        .via(convertFilterContracts(fn))\n        .filter(_.nonEmpty)\n        .via(removePhantomArchives(remove = !Q.allowPhantonArchives))\n        .map(_.mapPos(Q.renderCreatedMetadata).render)"
+  },
+  {
+    "id" : "afda49f9-ee2e-4e78-a9a0-2908ab8076f8",
+    "prId" : 4363,
+    "comments" : [
+      {
+        "id" : "e20521cb-8b16-4fa3-8a15-22d2fc3aaa38",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "why don't we want to emit `errors` first? the client may decide to cancel the stream processing entirely based on what error(s) they receive.",
+        "createdAt" : "2020-02-05T13:37:27Z",
+        "updatedAt" : "2020-02-06T14:50:14Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3329d4af-766d-4d0d-adc8-ef88a6dfc91d",
+        "parentId" : "e20521cb-8b16-4fa3-8a15-22d2fc3aaa38",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "@hurryabit  ^^^",
+        "createdAt" : "2020-02-05T13:37:57Z",
+        "updatedAt" : "2020-02-06T14:50:14Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "05a46f69-087f-4662-8ffa-cbc696902572",
+        "parentId" : "e20521cb-8b16-4fa3-8a15-22d2fc3aaa38",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "This block assembles a single message; the client will get all this at once.",
+        "createdAt" : "2020-06-18T18:00:30Z",
+        "updatedAt" : "2020-06-18T18:00:31Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0eebf6edfa656f053fe4aa62ae2b225acfed08a5",
+    "line" : 69,
+    "diffHunk" : "@@ -1,1 +69,73 @@              val acj = inj(\"created\", ac)\n              acj copy (fields = acj.fields ++ pos)\n          } ++ errors.map(e => inj(\"error\", e.message)))\n    }\n"
+  },
+  {
+    "id" : "13b19693-1b6f-40e7-8631-e0278b33d7f5",
+    "prId" : 3796,
+    "comments" : [
+      {
+        "id" : "88f78750-b6e0-41a8-b060-7af4cb8ea95f",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Please do not hardcode the `keepAlive` setting, pass it through the `wsConfig`",
+        "createdAt" : "2019-12-11T20:51:45Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "de976ed59d6d521657884322490436c95dece760",
+    "line" : 55,
+    "diffHunk" : "@@ -1,1 +53,57 @@                wsConfig.maxBurst,\n                wsConfig.mode)\n      .keepAlive(5.seconds, () => TextMessage.Strict(heartBeat))\n      .watchTermination() {\n        (_, future) =>"
+  },
+  {
+    "id" : "38313616-05a7-4c91-9db3-896da0e4435b",
+    "prId" : 3796,
+    "comments" : [
+      {
+        "id" : "b3256126-7ed5-46c1-af67-476edeac392f",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "we probably don't want to consume all transactions from the very beginning all the time.",
+        "createdAt" : "2019-12-11T21:04:30Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a4a80e83-4316-459e-9b26-94f4c1cb98d6",
+        "parentId" : "b3256126-7ed5-46c1-af67-476edeac392f",
+        "author" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "body" : "yeah, same thoughts on this too, (see TODO the comment), maybe we can wrap the client request message with offset input",
+        "createdAt" : "2019-12-11T21:07:40Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "de976ed59d6d521657884322490436c95dece760",
+    "line" : 104,
+    "diffHunk" : "@@ -1,1 +102,106 @@      case \\/-(ids) =>\n        val filter = transactionFilterFor(jwtPayload.party, ids)\n        transactionClient.getTransactions(LedgerOffsetOrdering.ledgerBegin, None, transactionFilter = filter) // TODO: make offSet pass along with client message\n          .via(Flow[Transaction].filter(_.events.nonEmpty))\n          .map(tx => {"
+  },
+  {
+    "id" : "4118bea5-f7f4-4096-84f1-0fa809576e85",
+    "prId" : 3796,
+    "comments" : [
+      {
+        "id" : "b58fa6cd-1901-4368-a2a9-25c4b542dce3",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Please use `spray.json.JsValue#compactPrint` instead of `toString`",
+        "createdAt" : "2019-12-11T21:05:14Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1a59c83e-9562-4041-bc38-7d66ae1186d3",
+        "parentId" : "b58fa6cd-1901-4368-a2a9-25c4b542dce3",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "this is probably a question for @bame-da\r\nwe currently don't do any API Transaction cleanup, we serialize `com.digitalasset.ledger.api.v1.transaction.Transaction` to JSON as is. The JSON is going to be very noisy.\r\nIn any case if decide to clean it up, it should be done in a separate PR.",
+        "createdAt" : "2019-12-11T21:13:53Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "de976ed59d6d521657884322490436c95dece760",
+    "line" : 108,
+    "diffHunk" : "@@ -1,1 +106,110 @@          .map(tx => {\n            lfVToJson(tx) match {\n              case \\/-(a) => TextMessage(JsObject(\"transaction\" -> a).toString)\n              case -\\/(e) => wsErrorMessage(e.shows)\n            }"
+  }
+]

@@ -1,0 +1,652 @@
+[
+  {
+    "id" : "6fd08533-21be-4247-a6b9-d1614f8a029f",
+    "prId" : 7578,
+    "comments" : [
+      {
+        "id" : "834ab13d-502e-450b-94aa-e8953fa62267",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Do we still support decoding DAML-LF 1.5 or older? If we do, wouldn't that mean that we still have to deal with both cases, `actors` present or absent, in the interpreter and this change would not really buy us anything?",
+        "createdAt" : "2020-10-06T09:15:02Z",
+        "updatedAt" : "2020-10-07T07:21:25Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3572b139-9418-4deb-aa2d-0d2ea13d5571",
+        "parentId" : "834ab13d-502e-450b-94aa-e8953fa62267",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "DAML-LF 1.5 or latter are deprecated since #5321 that is before the release of SDK 1.0.0. \r\nWe will drop support of  DAML-LF 1.5 or older in the future however for the sake of consistency I prefer not to break reading older version.\r\n",
+        "createdAt" : "2020-10-06T09:24:40Z",
+        "updatedAt" : "2020-10-07T07:21:25Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2478ace645101483f34f6bc5e2c6ec8af2f19c37",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +1075,1079 @@            ),\n            cidE = decodeExpr(exercise.getCid, definition),\n            actorsE = if (versionIsOlderThan(LV.Features.noExerciseActor)) {\n              if (!exercise.hasActor)\n                throw ParseError(s\"Update.Exercise.actors is required by DAML-LF {1.$minor}\")"
+  },
+  {
+    "id" : "5a41ea21-6de1-4831-a006-ca764477aece",
+    "prId" : 4101,
+    "comments" : [
+      {
+        "id" : "bb1c014e-ed53-4ff1-8642-7499158aabcd",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "We need to version lfModule.getSynonymsList with something like \r\n\r\n```\r\n   if (versionIsOlderThan(LV.Features.typeSynonyms)) {\r\n        assertEmpty(lfModule.getSynonymsList, \"Module.synonyms\"))\r\n      } else if (!onlySerializableDataDefs) {\r\n        if (versionIsOlderThan(LV.Features.internedStrings)) {\r\n        // collect type synonyms\r\n        ... \r\n```\r\nassuming the following line is added to `daml-lf/language/src/main/scala/com/digitalasset/daml/lf/language/LanguageVersion.scala`\r\n\r\n```\r\n    val typeSynonyms = v1_dev\r\n```\r\n\r\n",
+        "createdAt" : "2020-01-20T09:56:15Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d1b0a03a-02dc-4200-a209-c72c551390ec",
+        "parentId" : "bb1c014e-ed53-4ff1-8642-7499158aabcd",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok, I'll have a look at what needs doing here...",
+        "createdAt" : "2020-01-20T19:48:29Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e33a8322-f892-47c5-a30b-59a87028e828",
+        "parentId" : "bb1c014e-ed53-4ff1-8642-7499158aabcd",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "This is done now. Thank you.",
+        "createdAt" : "2020-01-21T14:12:02Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e9b7ff4849afb993cbda3dc7bea03b90e9dd9c19",
+    "line" : 8,
+    "diffHunk" : "@@ -1,1 +150,154 @@      } else if (!onlySerializableDataDefs) {\n        // collect type synonyms\n        lfModule.getSynonymsList.asScala\n          .foreach { defn =>\n            val defName = handleDottedName("
+  },
+  {
+    "id" : "70739827-dbdd-4953-8194-b7edaf016601",
+    "prId" : 3817,
+    "comments" : [
+      {
+        "id" : "01686e41-6b4b-44de-96a5-c55e6822dd73",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we not map this to `BEqual` with an implicit parameter?",
+        "createdAt" : "2019-12-11T12:28:06Z",
+        "updatedAt" : "2019-12-11T12:30:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6b11a9de-c333-4724-8047-c8a84c52b821",
+        "parentId" : "01686e41-6b4b-44de-96a5-c55e6822dd73",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "The type of ``EQUAL_CONTRACT_ID`` contains a universal quantifier (``∀a. ContractId a -> ContractId a -> Bool``). I cannot represent it, using implicit parameters. \r\nIt is the same for `EQUAL_NUMERIC`.\r\n\r\n I do not think it is worthwhile to extend the implicit parameter feature to handle those two cases. ",
+        "createdAt" : "2019-12-11T12:38:20Z",
+        "updatedAt" : "2019-12-11T12:44:51Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9bcbc48e-1724-457c-9994-15fa92168e55",
+        "parentId" : "01686e41-6b4b-44de-96a5-c55e6822dd73",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah I see, thanks for the explanation! Might be worth capturing in a comment somewhere.",
+        "createdAt" : "2019-12-11T12:39:04Z",
+        "updatedAt" : "2019-12-11T12:39:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c08369b1-8fa6-4129-91be-19f22529dd12",
+        "parentId" : "01686e41-6b4b-44de-96a5-c55e6822dd73",
+        "author" : null,
+        "body" : "It's also the reason these two had separate representations in the Haskell AST 🙃 ",
+        "createdAt" : "2019-12-12T08:51:00Z",
+        "updatedAt" : "2019-12-12T08:51:00Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7211a4fb244cd3ddf7a3e698e6b86f78f4e02e2e",
+    "line" : 57,
+    "diffHunk" : "@@ -1,1 +1450,1454 @@        maxVersion = Some(genMap),\n        implicitParameters = List(TTypeRep)),\n      BuiltinFunctionInfo(EQUAL_CONTRACT_ID, BEqualContractId, maxVersion = Some(genMap)),\n      BuiltinFunctionInfo(TRACE, BTrace),\n      BuiltinFunctionInfo(COERCE_CONTRACT_ID, BCoerceContractId, minVersion = coerceContractId),"
+  },
+  {
+    "id" : "ffd9cba6-6083-4d33-becd-49bce273baff",
+    "prId" : 3817,
+    "comments" : [
+      {
+        "id" : "84526243-4b86-4528-94a9-522edaf853e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we not map this to `BEqual` with an implicit parameter?",
+        "createdAt" : "2019-12-11T12:29:48Z",
+        "updatedAt" : "2019-12-11T12:30:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0dafac38-c34d-4b5f-8011-e96869920c30",
+        "parentId" : "84526243-4b86-4528-94a9-522edaf853e5",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Same as ``EQUAL_CONTRACT_ID``",
+        "createdAt" : "2019-12-11T12:38:48Z",
+        "updatedAt" : "2019-12-11T12:38:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7211a4fb244cd3ddf7a3e698e6b86f78f4e02e2e",
+    "line" : 22,
+    "diffHunk" : "@@ -1,1 +1415,1419 @@      ),\n      BuiltinFunctionInfo(\n        EQUAL_NUMERIC,\n        BEqualNumeric,\n        minVersion = numeric,"
+  },
+  {
+    "id" : "e9bc5508-8d77-42e2-ac02-6bdf9c5a4070",
+    "prId" : 3726,
+    "comments" : [
+      {
+        "id" : "98712656-1278-45fa-bee1-f8b38b07e7ef",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Very minor.  `ModuleDecoder` constructor starts to have to many arguments for my little brain. I would consider using parameter names, when it is called.",
+        "createdAt" : "2019-12-04T13:22:46Z",
+        "updatedAt" : "2019-12-04T13:28:20Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "172715cbea18231150b7d6276af1c3f63490bc2f",
+    "line" : 10,
+    "diffHunk" : "@@ -1,1 +45,49 @@      modules = lfPackage.getModulesList.asScala\n        .map(\n          ModuleDecoder(\n            packageId,\n            internedStrings,"
+  },
+  {
+    "id" : "719f19eb-76c0-4f7f-9377-625c863f3539",
+    "prId" : 3703,
+    "comments" : [
+      {
+        "id" : "e908a89c-ae7c-4c37-81b7-112fffc3ce88",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Please add a reference to the issue. \r\nsomething like:\r\n```\r\n  // FIXME https://github.com/digital-asset/daml/issues/3616\r\n  // Comments\r\n```",
+        "createdAt" : "2019-12-03T08:35:33Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "49948495-d53f-49f9-a8c0-207137739ddf",
+        "parentId" : "e908a89c-ae7c-4c37-81b7-112fffc3ce88",
+        "author" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "body" : "ok\r\n",
+        "createdAt" : "2019-12-03T12:39:29Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1e084651-0a76-4362-a9c4-30421f918441",
+        "parentId" : "e908a89c-ae7c-4c37-81b7-112fffc3ce88",
+        "author" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "body" : "done\r\n",
+        "createdAt" : "2019-12-03T12:42:26Z",
+        "updatedAt" : "2019-12-03T12:42:26Z",
+        "lastEditedBy" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e10f3d85f2547f8c6f1968d814c0ffeba77445b",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +251,255 @@          case PLF.DefDataType.DataConsCase.SYNONYM =>\n            // FIXME https://github.com/digital-asset/daml/issues/3616\n            //assertSince(LV.Features.type_syn, \"DefDataType.DataCons.Synonym\") //TODO(NICK)\n            throw ParseError(\"DefDataType.DataCons.Synonym\") //TODO(NICK)\n          case PLF.DefDataType.DataConsCase.RECORD =>"
+  },
+  {
+    "id" : "4512ae16-e68c-4065-904f-2f4332594875",
+    "prId" : 3296,
+    "comments" : [
+      {
+        "id" : "26e84407-9b55-443b-a669-8f77d344c6b9",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Does this case need an `assertSince(LV.Features.internedStrings)`?",
+        "createdAt" : "2019-11-01T12:31:37Z",
+        "updatedAt" : "2019-11-01T16:19:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c879dc20-b4c8-4c73-bcbb-a7a13278bad4",
+        "parentId" : "26e84407-9b55-443b-a669-8f77d344c6b9",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "the check is done inside `getInternedName`.",
+        "createdAt" : "2019-11-01T13:30:21Z",
+        "updatedAt" : "2019-11-01T16:19:25Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e4b307bce38672100ce0d80a27efe67f1499f824",
+    "line" : 545,
+    "diffHunk" : "@@ -1,1 +629,633 @@          EVar(toName(lfExpr.getVarStr))\n\n        case PLF.Expr.SumCase.VAR_INTERNED_STR =>\n          EVar(getInternedName(lfExpr.getVarInternedStr, \"Expr.var_interned_id\"))\n"
+  },
+  {
+    "id" : "b8adcf08-8a50-456d-81a2-83d7cdf926e9",
+    "prId" : 3212,
+    "comments" : [
+      {
+        "id" : "0fd70036-ede5-4eaf-89ca-45bd75250240",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "If we don't always use `info.typ`, you could consider making it lazy to not allocate it when creating a value of `BuiltinTypeInfo`.",
+        "createdAt" : "2019-10-18T08:40:51Z",
+        "updatedAt" : "2019-10-18T11:09:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9467504c-bee3-4f3d-b807-8f69c928576d",
+        "parentId" : "0fd70036-ede5-4eaf-89ca-45bd75250240",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "There is a fix number of BuiltinTypeInfo allocated.",
+        "createdAt" : "2019-10-18T10:02:00Z",
+        "updatedAt" : "2019-10-18T11:09:58Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6025be33-a4c1-479d-854f-b731482003ea",
+        "parentId" : "0fd70036-ede5-4eaf-89ca-45bd75250240",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "one for each builtins. ",
+        "createdAt" : "2019-10-18T10:03:10Z",
+        "updatedAt" : "2019-10-18T11:09:58Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1f2e6f9eaac76e01efa864c9029c02a47427ae63",
+    "line" : 52,
+    "diffHunk" : "@@ -1,1 +1089,1093 @@      minVersion: LV = LV.Features.default\n  ) {\n    val typ = TBuiltin(bTyp)\n  }\n"
+  },
+  {
+    "id" : "dbf200d2-e797-4923-8d92-3c6d527cea61",
+    "prId" : 3067,
+    "comments" : [
+      {
+        "id" : "60580862-ce58-4f3f-9e00-7b5596cd9207",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : ":+1: ",
+        "createdAt" : "2019-10-02T18:51:48Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eb8a3c63a39ce4715734e5fd8e994ef0f0490499",
+    "line" : 743,
+    "diffHunk" : "@@ -1,1 +1044,1048 @@    LV.ordering.lt(languageVersion, minVersion)\n\n  private def assertUntil(maxVersion: LV, description: => String): Unit =\n    if (!versionIsOlderThan(maxVersion))\n      throw ParseError(s\"$description is not supported by DAML-LF 1.$minor\")"
+  },
+  {
+    "id" : "0ef766ba-d125-4053-9e07-a7a816a2030e",
+    "prId" : 3067,
+    "comments" : [
+      {
+        "id" : "7c2a59e0-b281-4935-b63a-835e5de5a203",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "should we consider memoizing some of these? At least the ones that actually wrap the string in something concrete rather than just type alias it.",
+        "createdAt" : "2019-10-03T16:59:53Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8381ffde-b326-414b-b0dc-7ef984e9b789",
+        "parentId" : "7c2a59e0-b281-4935-b63a-835e5de5a203",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I tried on spider model but only saw minor improvment.\r\nyou can tried yourself using https://github.com/digital-asset/daml/commit/58b9974d1364f2157ad3ed5af1fb4992a87bedc9.\r\n\r\nIf @hurryabit implement the sharing for expression, the memoization will be only an overhead.",
+        "createdAt" : "2019-10-03T17:57:14Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eb8a3c63a39ce4715734e5fd8e994ef0f0490499",
+    "line" : 165,
+    "diffHunk" : "@@ -1,1 +173,177 @@    private[this] def getInternedParty(id: Int): PLParty = {\n      assertSince(LV.Features.internedStrings, \"interned Party\")\n      toPartyLiteral(getInternedString(id))\n    }\n"
+  },
+  {
+    "id" : "7c4d1ef6-57c6-40aa-bf8a-c4b0a05f79b7",
+    "prId" : 2298,
+    "comments" : [
+      {
+        "id" : "14d19377-3081-481a-973d-df403ef71e54",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n          throw ParseError(\"nat type not supported\")\r\n```",
+        "createdAt" : "2019-07-29T18:26:50Z",
+        "updatedAt" : "2019-07-29T18:42:15Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "33e6b1950b738efc874e833e075c7c7044405865",
+    "line" : 16,
+    "diffHunk" : "@@ -1,1 +289,293 @@        case PLF.Type.SumCase.NAT =>\n          // FixMe: https://github.com/digital-asset/daml/issues/2289\n          throw new Error(\"nat type not supported\")\n\n        case PLF.Type.SumCase.SUM_NOT_SET =>"
+  },
+  {
+    "id" : "d72deff4-1fef-43c2-a52f-136444b5d35b",
+    "prId" : 2298,
+    "comments" : [
+      {
+        "id" : "7c9c1aa8-d3b8-4754-8827-4e1cf428baed",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n          throw ParseError(\"nat kind not supported\")\r\n```",
+        "createdAt" : "2019-07-29T18:27:20Z",
+        "updatedAt" : "2019-07-29T18:42:16Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "33e6b1950b738efc874e833e075c7c7044405865",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +247,251 @@        case PLF.Kind.SumCase.NAT =>\n          // FixMe: https://github.com/digital-asset/daml/issues/2289\n          throw new Error(\"nat kind not supported\")\n        case PLF.Kind.SumCase.SUM_NOT_SET =>\n          throw ParseError(\"Kind.SUM_NOT_SET\")"
+  },
+  {
+    "id" : "45e799ef-f426-48f6-8f8c-ea651ec17a8a",
+    "prId" : 1937,
+    "comments" : [
+      {
+        "id" : "080a444e-341d-4f26-b106-eedb2b160149",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "To accompany the `EncodeV1` suggestion.\r\n\r\n```suggestion\r\n  private[lf] val enumVersion: LanguageMinorVersion = \"6\"\r\n```",
+        "createdAt" : "2019-07-11T15:06:01Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7a9443ebd3345db86ae245d80d9ee2d9a5d9ab47",
+    "line" : 32,
+    "diffHunk" : "@@ -1,1 +706,710 @@  import LanguageMinorVersion.Implicits._\n\n  private[archive] val enumVersion: LanguageMinorVersion = \"6\"\n  private val internedIdsVersion: LanguageMinorVersion = \"6\"\n"
+  },
+  {
+    "id" : "3dcfd916-d8cd-49f6-b63b-e276f817f84b",
+    "prId" : 1614,
+    "comments" : [
+      {
+        "id" : "e6137a11-31ad-438a-a7d6-a3e7474d3f52",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "We cannot really represent anything bigger than `In32`, so why do we define it as `Int64` in protobuf message?\r\nSee: https://github.com/digital-asset/daml/blob/8e144420c4bb23d7bdd01e22aed22f9b7136eb99/daml-lf/data/src/main/scala/com/digitalasset/daml/lf/data/ImmArray.scala#L64",
+        "createdAt" : "2019-06-20T14:07:54Z",
+        "updatedAt" : "2019-06-26T07:32:46Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9ba7b24f-2db4-4275-a87e-5aa4808e1935",
+        "parentId" : "e6137a11-31ad-438a-a7d6-a3e7474d3f52",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "That's specific to the restrictions of the particular collections library this particular implementation happens to be using; nothing to do with the context of the LF language definition.",
+        "createdAt" : "2019-06-20T14:21:19Z",
+        "updatedAt" : "2019-06-26T07:32:46Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cdebfafb9ac009ed15ea8adb801c50def398bf27",
+    "line" : 99,
+    "diffHunk" : "@@ -1,1 +305,309 @@          val iidl = lfRef.getPackageRef.getInternedId\n          def outOfRange = ParseError(s\"invalid package ID table index $iidl\")\n          val iid = iidl.toInt\n          if (iidl != iid.toLong) throw outOfRange\n          internedPackageIds.lift(iid).getOrElse(throw outOfRange)"
+  }
+]

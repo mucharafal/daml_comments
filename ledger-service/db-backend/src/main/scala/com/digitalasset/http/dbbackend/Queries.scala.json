@@ -1,0 +1,115 @@
+[
+  {
+    "id" : "8b379c6e-dcd2-49ca-98f1-a8e774e78c99",
+    "prId" : 3461,
+    "comments" : [
+      {
+        "id" : "80a31834-0133-4cb2-843f-011236eae3c9",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Not really sure what warning we are trying to silence.",
+        "createdAt" : "2019-11-18T20:29:54Z",
+        "updatedAt" : "2019-11-19T19:20:44Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fc3f7fe1-8262-4a7d-8374-8bc5f3fd0f85",
+        "parentId" : "80a31834-0133-4cb2-843f-011236eae3c9",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Unused parameter `pas`.",
+        "createdAt" : "2019-11-19T17:29:35Z",
+        "updatedAt" : "2019-11-19T19:20:44Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "12c85def934039b766819823a7e2cf75c123b044",
+    "line" : 59,
+    "diffHunk" : "@@ -1,1 +142,146 @@    )\n\n  @silent // pas is demonstrably used; try taking it out\n  def insertContracts[F[_]: cats.Foldable: Functor, CA: JsonWriter](\n      dbcs: F[DBContract[SurrogateTpId, CA, Seq[String]]])("
+  },
+  {
+    "id" : "68866fe4-026a-49a3-8d1c-787cee761fd4",
+    "prId" : 3461,
+    "comments" : [
+      {
+        "id" : "c3ae86b9-cb7e-4dfd-89e8-0d1c17748cd9",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "is that something WIP?\r\nwhat do you plan to do with a contract that does not contain `templateId` value? It's type arg is `Unit`.",
+        "createdAt" : "2019-11-18T20:35:17Z",
+        "updatedAt" : "2019-11-19T19:20:44Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "41d49a84-642e-4057-b8fc-6598f1800e77",
+        "parentId" : "c3ae86b9-cb7e-4dfd-89e8-0d1c17748cd9",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "actually thinking about it... we can look up `templateId` by `contractId`, but why bother if we can fetch it from DB. Just trying to understand what is the use case for this function, don't think it is being used anywhere.",
+        "createdAt" : "2019-11-18T20:38:29Z",
+        "updatedAt" : "2019-11-19T19:20:44Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "147e83aa-1704-4298-bbb2-1f4ae8d1f8a7",
+        "parentId" : "c3ae86b9-cb7e-4dfd-89e8-0d1c17748cd9",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "> don't think it is being used anywhere\r\n\r\nIt's not and won't in this PR; it will be used for #3388.\r\n\r\n> what do you plan to do with a contract that does not contain templateId value?\r\n\r\nThe use of `Unit` here represents the fact that nothing useful can be put in that slot. Logically, the template ID is always the template ID that was passed as the `tpid` argument, but `tpid.type` will stop compiling at some point in the future, so I don't want to give the false impression that any template IDs are being \"looked up\". The caller can insert the `tpid` afterwards if they want by `copy`, but I suspect that will never be useful in practice.",
+        "createdAt" : "2019-11-19T17:35:59Z",
+        "updatedAt" : "2019-11-19T19:20:44Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "12c85def934039b766819823a7e2cf75c123b044",
+    "line" : 89,
+    "diffHunk" : "@@ -1,1 +184,188 @@      party: String,\n      tpid: SurrogateTpId,\n      predicate: Fragment): Query0[DBContract[Unit, JsValue, Unit]] = {\n    val q = sql\"\"\"SELECT (contract_id, create_arguments)\n                  FROM contract"
+  }
+]

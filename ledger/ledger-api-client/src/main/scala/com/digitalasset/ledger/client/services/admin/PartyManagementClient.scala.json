@@ -1,0 +1,172 @@
+[
+  {
+    "id" : "912165b5-cbaf-46bc-aabc-f69966ad90df",
+    "prId" : 5027,
+    "comments" : [
+      {
+        "id" : "6cf4c1a9-a062-4780-998d-6fb6c4a309bb",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "we are already using `scalaz.tag` in scala bindings, so I think `OneAnd` is appropriate here. There is no reason to call this method with an empty set. If you want all known parties, use `listKnownParties`.",
+        "createdAt" : "2020-03-16T15:56:26Z",
+        "updatedAt" : "2020-03-16T19:32:04Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6453b4d2-e626-4667-9c9b-6a4d61efcf9b",
+        "parentId" : "6cf4c1a9-a062-4780-998d-6fb6c4a309bb",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "However there are a bunch of other cases in scala bindings where `OneAnd[Set, X]` could have been used or just `Set`... so if you want to keep scala bindings consistent, let me know and I will remove `OneAnd` from the interface.",
+        "createdAt" : "2020-03-16T16:00:23Z",
+        "updatedAt" : "2020-03-16T19:32:04Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a37898d131259eede23b4eb7294eb643e0806282",
+    "line" : 30,
+    "diffHunk" : "@@ -1,1 +55,59 @@\n  def getParties(\n      parties: OneAnd[Set, Ref.Party],\n      token: Option[String] = None): Future[List[PartyDetails]] =\n    LedgerClient"
+  },
+  {
+    "id" : "f3b4be48-bd7f-40b4-bcff-09e95fc9870b",
+    "prId" : 1452,
+    "comments" : [
+      {
+        "id" : "0959e8e4-5415-4a59-8bce-351bba646f71",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "We currently use `String` for all party fields (e.g. [`CommandClient`](https://github.com/digital-asset/daml/blob/ff088efd94cffc523e56219bf7978251b0c617c5/ledger/ledger-api-client/src/main/scala/com/digitalasset/ledger/client/services/commands/CommandClient.scala#L102)), and I think we should stick with it.",
+        "createdAt" : "2019-06-07T10:46:46Z",
+        "updatedAt" : "2019-06-07T21:22:35Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a6568380-beba-4a18-9150-0a8eb9adfd92",
+        "parentId" : "0959e8e4-5415-4a59-8bce-351bba646f71",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Other clients like `TransactionClient` and `CommandClient` are defined in terms of the scalapb generated case classes.",
+        "createdAt" : "2019-06-07T10:51:15Z",
+        "updatedAt" : "2019-06-07T21:22:35Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "421a25a1-a011-40dd-9f4f-18370fa3e988",
+        "parentId" : "0959e8e4-5415-4a59-8bce-351bba646f71",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I see. I defined the `PartyManagementClient` in terms of `com.digitalasset.ledger.api.domain` types, I will change it to use the generated scalapb types.\r\n\r\nBy the way, if we don't want to use domain types, should we not change all usages `com.digitalasset.ledger.api.domain.LedgerId` to `String`?",
+        "createdAt" : "2019-06-07T12:36:31Z",
+        "updatedAt" : "2019-06-07T21:22:35Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ba6c4e02-940e-4eb7-bd7e-764e2ac1a655",
+        "parentId" : "0959e8e4-5415-4a59-8bce-351bba646f71",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Yes, that's a fair point. Also, this should really be @leo-da's and @S11001001's call.",
+        "createdAt" : "2019-06-07T13:11:14Z",
+        "updatedAt" : "2019-06-07T21:22:35Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "54938b03-5aa7-458f-9ecc-bcd6a0c3e5b3",
+        "parentId" : "0959e8e4-5415-4a59-8bce-351bba646f71",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "`Ref.Party` is extremely convenient to use; if it is the intended meaning you should use it, because it is just a `String` where we've checked that only legal Party characters have been used.\r\n\r\nI don't consider our use of `String` for Party in any Scala code to be principled, just that the good work that @remyhaemmerle-da has done tightening up the String subtypes in Engine and elsewhere hasn't propagated here yet. Therefore you should not feel obliged to be consistent with such prior uses of `String`; in fact I would prefer that you not.\r\n\r\nAs for domain types in general, @leo-da and I intend to push the Scala ecosystem _away_ from expressing _anything_ in terms of scalapb types, just as the Engine deals with values and transactions in terms of the `daml-lf/transaction` hand-written ADTs instead of the protoc output. In particular, we very much intend to universally remove the scalapb `Identifier`, and the transitive closure of all scalapb types that use it. So take that prejudice as you will.\r\n\r\nIn this case it seems preferable to use the domain types instead of scalapb as @rautenrieth-da has done. But _notwithstanding the above_ you may consider whether to use `Ref.Party` and whether to also use other domain types separately.",
+        "createdAt" : "2019-06-07T19:05:06Z",
+        "updatedAt" : "2019-06-07T21:22:35Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d2a53c10-e8d0-4b36-b973-9200778ffd6d",
+        "parentId" : "0959e8e4-5415-4a59-8bce-351bba646f71",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Thanks for the explanation and outlook, @S11001001 👍 ",
+        "createdAt" : "2019-06-08T08:59:59Z",
+        "updatedAt" : "2019-06-08T08:59:59Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "21be6910a5debd0672b0db0815d8993c33b21e53",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +4,8 @@package com.digitalasset.ledger.client.services.admin\n\nimport com.digitalasset.daml.lf.data.Ref.Party\nimport com.digitalasset.ledger.api.domain.{ParticipantId, PartyDetails}\nimport com.digitalasset.ledger.api.v1.admin.party_management_service.{"
+  }
+]

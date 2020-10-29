@@ -1,0 +1,149 @@
+[
+  {
+    "id" : "670fea16-5657-49ab-9415-f2ae006c5404",
+    "prId" : 4667,
+    "comments" : [
+      {
+        "id" : "317e4756-ef3d-401d-9983-1f839707a8e6",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Perhaps we would be better turning `PackageMetadata`'s package version field into a `Maybe`, given this function, the `packageMetadataFromFile` function, and the arbitrary version 0.0.0 being defaulted above in `getPackageMetadata`. Then we can just return a `PackageMetadata` here and in `packageMetadataFromFile`.",
+        "createdAt" : "2020-02-24T15:25:14Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "15165d24-e0df-4918-a657-dabc951a8ee1",
+        "parentId" : "317e4756-ef3d-401d-9983-1f839707a8e6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m a bit unsure about this. The only case where we really don’t have a version is `daml-prim`. I’m not sure we want to make the version optional in LF just to be able to handle this case.",
+        "createdAt" : "2020-02-24T15:41:25Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3f13a193-a29f-476f-a67f-94f144dbb0bf",
+        "parentId" : "317e4756-ef3d-401d-9983-1f839707a8e6",
+        "author" : null,
+        "body" : "You know more about it than me, so I'm happy to go with whatever way you think works best :-)",
+        "createdAt" : "2020-02-24T15:46:03Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4a9f4b9c-d64a-47ea-b80c-191a38d1a45f",
+        "parentId" : "317e4756-ef3d-401d-9983-1f839707a8e6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Alright, then I suggest to keep it like this for now to not leak GHC “defficiencies” into DAML-LF. As mentioned, I’d like to cleanup the whole code around `daml-prim`/`dam-stdlib` a bit and as part of that we can probably also put in more stricter enforcement that `daml-prim` is the only thing without a version (maybe something like `data DamlPackageMetadata = DamlPrim | DamlPackageMetadata PackageName PackageVersion`).",
+        "createdAt" : "2020-02-24T16:16:57Z",
+        "updatedAt" : "2020-02-24T16:16:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3ca16649213b3d91f9e034bf450be0d47d956019",
+    "line" : 47,
+    "diffHunk" : "@@ -1,1 +315,319 @@\n-- | Take a string of the form \"daml-stdlib-0.13.43\" and split it into (\"daml-stdlib\", Just \"0.13.43\")\nsplitUnitId :: UnitId -> (PackageName, Maybe PackageVersion)\nsplitUnitId (unitIdString -> unitId) = fromMaybe (PackageName (T.pack unitId), Nothing) $ do\n    (name, ver) <- stripInfixEnd \"-\" unitId"
+  },
+  {
+    "id" : "80749035-331c-4674-8624-6d39de2dc7fe",
+    "prId" : 2670,
+    "comments" : [
+      {
+        "id" : "1da262b3-e6c2-4347-9a10-34c6b8f63e49",
+        "parentId" : null,
+        "author" : null,
+        "body" : "I think this is an unrelated bug fix",
+        "createdAt" : "2019-08-27T17:47:09Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "140f8186-27dd-4d78-b73f-1c465d9b5ad8",
+        "parentId" : "1da262b3-e6c2-4347-9a10-34c6b8f63e49",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we get tests for these? I’m actually somewhat surprised we didn’t already hit this. It seems to be used in the DAML-LF typechecker and afaict it will error if the prism does not match so it shouldn’t be too hard to make a case that fails without this bugfix.",
+        "createdAt" : "2019-08-27T18:26:47Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d72a8bd2-9c82-44b2-bf10-2b35efa10050",
+        "parentId" : "1da262b3-e6c2-4347-9a10-34c6b8f63e49",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "IIRC, we only use them as getters. That's why the problem never showed up. Maybe we can just delete them?",
+        "createdAt" : "2019-08-28T09:39:29Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2c2900d7cd2fd33fbf5de9881afed0fec07bff1f",
+    "line" : 21,
+    "diffHunk" : "@@ -1,1 +191,195 @@\n_TUpdate :: Prism' Type Type\n_TUpdate = prism' TUpdate $ \\case\n  TUpdate typ -> Just typ\n  _ -> Nothing"
+  },
+  {
+    "id" : "0bee417e-6a42-4e48-98af-03e79e43e710",
+    "prId" : 2670,
+    "comments" : [
+      {
+        "id" : "164381af-b7b2-49ef-bdaa-2722f79b8dcf",
+        "parentId" : null,
+        "author" : null,
+        "body" : "This too.",
+        "createdAt" : "2019-08-27T17:47:26Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2c2900d7cd2fd33fbf5de9881afed0fec07bff1f",
+    "line" : 27,
+    "diffHunk" : "@@ -1,1 +196,200 @@\n_TScenario :: Prism' Type Type\n_TScenario = prism' TScenario $ \\case\n  TScenario typ -> Just typ\n  _ -> Nothing"
+  }
+]

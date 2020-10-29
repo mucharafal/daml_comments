@@ -1,0 +1,400 @@
+[
+  {
+    "id" : "0d3b7acf-a72b-4a69-bb88-2eee933e4451",
+    "prId" : 3703,
+    "comments" : [
+      {
+        "id" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n            , dataSerializable = IsSerializable False\r\n```\r\n\r\nFor reference, #3635 defines synonyms, but _does not_ define them as serializable. Therefore, presence of a synonym reference in a record or variant makes that record or variant unserializable, as well; I have not commented on that code change because the relevant function hasn't been updated in this PR, I believe. It is unsafe to simply extend the set of serializable types at will. cc @remyhaemmerle-da ",
+        "createdAt" : "2019-12-02T21:03:57Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "60c9c13f-b973-4169-9dfa-4a8c3f493961",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Thank you. And for further reference, the LF spec for type synonyms is updated by https://github.com/digital-asset/daml/pull/3694\r\n",
+        "createdAt" : "2019-12-02T21:27:00Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ee19b4c2-8195-48dd-966c-bf9d9c9ab8c8",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Your are right, the spec doesn't defined synonyms as serializable. I wonder, is that right?\r\nWhy not define a type-constructor defined by a type-synonym to be serializable, so long as the synonymized type is serializable.",
+        "createdAt" : "2019-12-02T21:38:57Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d90e5764-d83a-4877-9e23-85c227a73e1c",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Serializability is about values of a given type not about serializability of the type. Since we are not introducing new values, it doesn’t really make sense to talk about serializability of a type synonym and we should always use serializability of the underlying type. For the interface reader and Ledger API values we will always expand type synonyms.",
+        "createdAt" : "2019-12-03T07:51:35Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c4c6109f-c360-495e-ab83-cf0b100c12fa",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I agree with @S11001001. Currently `Serializability` is defined for types not for values.  \r\nTherefore: \r\nWe should specify how this works for type synonyms.  we need to add the following rule in the spec:\r\n```   \r\n     'synonym' T α₁ … αₙ ↦  σ₁  ∈  〚Ξ〛Mod  \r\n      ⊢ₛ  σ₁[α₁ ↦ τ₁, …, αₙ ↦ τₙ]\r\n    ———————————————————————————————————————————————————————————————— STyTypeSyn\r\n      ⊢ₛ  Mod:T τ₁ … τₙ\r\n```\r\n\r\nTo be consistent with the current philosophy of daml-lf, I also expect that type synonym definitions are annotated by the compiler with the `serializability` flag as any other definitions.    \r\n\r\n ",
+        "createdAt" : "2019-12-03T08:32:13Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d6d7cfec-8c41-45c1-abb7-98b6a2604514",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Sounds good :+1:",
+        "createdAt" : "2019-12-03T09:28:45Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "611db3b8-a451-48e8-955c-8b2d01849691",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "For, say, records we require that `t_1, ..., t_n` are serializable for `Mod:T t_1 ... t_n` to be serializable. The serializability inference works under that assumption. In fact, the `serializable` flag tells whether a type preserved serializability.",
+        "createdAt" : "2019-12-03T11:12:49Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d30642c8-7a94-4536-8816-aa7ed1285f93",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : null,
+        "body" : "Given that we only plan to use type synonyms at the moment for typeclasses, and thanks to dictionary sanitization the underlying fields will never be serializable (they're functions from unit), I don't think we need to worry about serializability for type synonyms at the moment.",
+        "createdAt" : "2019-12-03T11:27:54Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6344e58d-a3da-4c20-9af9-306fa17261cb",
+        "parentId" : "4828b379-96f6-458f-9eaa-324c82a5a71d",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I am fine with you proposal @associahedron. In this case, just for the sake of simplicity, set all type synonyms to Unseralizable, that is applied the change proposed by @S11001001.  ",
+        "createdAt" : "2019-12-03T12:36:55Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e10f3d85f2547f8c6f1968d814c0ffeba77445b",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +108,112 @@            { dataLocation = Nothing\n            , dataTypeCon = TypeConName [\"Syn\"]\n            , dataSerializable = IsSerializable True\n            , dataParams = []\n            , dataCons = DataSynonym TUnit"
+  },
+  {
+    "id" : "55362cd7-f8c4-49a0-9372-fc90685c86f9",
+    "prId" : 3477,
+    "comments" : [
+      {
+        "id" : "0802a1a1-73ff-47ff-a080-0477bb719681",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why can’t we support variants here? I know that it’s not possible to generate such code from DAML since we always build up a record (unless you manually write `Choice` instances) but it seems fairly easy to support this. in fact, it probably works out of the box unless you validate that the type is a record which I think you don’t do at the moment.\r\n\r\nIf we don’t support it as part of this PR, that’s fine as well but in that case I would like to keep the test case as an expected failure.",
+        "createdAt" : "2019-11-15T09:50:37Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3c5cae6d-50c3-4cfe-afaa-91e03ab55739",
+        "parentId" : "0802a1a1-73ff-47ff-a080-0477bb719681",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "The reason to change to a record type was because I wanted to test a cross-sdk exercise using DAML. I'll make the generated DALF have 2 choices: One with a record; one with a variant.",
+        "createdAt" : "2019-11-15T16:09:11Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "feb89d33-c62c-42d6-8623-b0954cddc11a",
+        "parentId" : "0802a1a1-73ff-47ff-a080-0477bb719681",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Sounds good :+1:",
+        "createdAt" : "2019-11-15T16:38:20Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "512df106-388b-42d5-91b8-7dce5f2df273",
+        "parentId" : "0802a1a1-73ff-47ff-a080-0477bb719681",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Looks like you didn’t do this? We still seem to only have one choice for a `Record`.\r\n- This is done now",
+        "createdAt" : "2019-11-19T08:07:11Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fc45e5c8-db18-4e6e-9001-89001cc36697",
+        "parentId" : "0802a1a1-73ff-47ff-a080-0477bb719681",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done now. \r\nBut I'm not really convinced of the utility of creating DALF for testing which is not of the form which would result from the daml compiler.",
+        "createdAt" : "2019-11-19T08:46:21Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "df46a0c0ece38f03f22149c7964ffc4d607dc43b",
+    "line" : 9,
+    "diffHunk" : "@@ -1,1 +55,59 @@            , dataSerializable = IsSerializable True\n            , dataParams = []\n            , dataCons = DataRecord [ (FieldName \"choiceArg\", TUnit) ]\n            }\n    let emptyRec = DefDataType"
+  },
+  {
+    "id" : "10f6dc59-ddcb-41a4-967f-7cd1b6c17e37",
+    "prId" : 3338,
+    "comments" : [
+      {
+        "id" : "fcab38ab-a866-4fea-910d-82b93b9952a3",
+        "parentId" : null,
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I like this idiom.",
+        "createdAt" : "2019-11-05T14:14:56Z",
+        "updatedAt" : "2019-11-05T14:15:14Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f9fc21dcf3180553445a6efd00ae19bc07f8523",
+    "line" : 53,
+    "diffHunk" : "@@ -1,1 +85,89 @@            , tplObservers = ENil TParty\n            , tplAgreement = mkEmptyText\n            , tplChoices = NM.fromList ([chc] <> [arc | withArchiveChoice])\n            , tplKey = Nothing\n            }"
+  },
+  {
+    "id" : "92115e0b-2a0a-4ac2-93be-95527f3a61b9",
+    "prId" : 3102,
+    "comments" : [
+      {
+        "id" : "519ed739-3a81-436e-83b6-1e13c60e91f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":see_no_evil: ",
+        "createdAt" : "2019-10-03T19:12:04Z",
+        "updatedAt" : "2019-10-03T19:14:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "848c41ec-9079-4e00-983a-6c926294a26b",
+        "parentId" : "519ed739-3a81-436e-83b6-1e13c60e91f9",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Let's make sure we import the stdlib qualified before our users find out we don't do it. ;)",
+        "createdAt" : "2019-10-04T07:55:20Z",
+        "updatedAt" : "2019-10-04T07:55:20Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c73d5fdd3c9729ce3c93f9f81072db0c6e5c93fa",
+    "line" : 30,
+    "diffHunk" : "@@ -1,1 +28,32 @@    let tplRec = DefDataType\n            { dataLocation = Nothing\n            , dataTypeCon = TypeConName [\"Template\"]\n            , dataSerializable = IsSerializable True\n            , dataParams = []"
+  },
+  {
+    "id" : "67e51c2a-fe40-45c4-a80e-eecb3cc50f84",
+    "prId" : 3102,
+    "comments" : [
+      {
+        "id" : "a2138ccd-bd98-4acc-93cf-fbca90b0da0b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "How do you expect this to be represented in DAML? Just ignore the choice name?",
+        "createdAt" : "2019-10-03T19:13:44Z",
+        "updatedAt" : "2019-10-03T19:14:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8226009d-fbf4-42c4-a24e-9551725c2fcb",
+        "parentId" : "a2138ccd-bd98-4acc-93cf-fbca90b0da0b",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Yep, ignore the choice name in DAML, expose it via its choice argument type and make sure we exercise the right choice at the DAML-LF level. ",
+        "createdAt" : "2019-10-04T07:54:48Z",
+        "updatedAt" : "2019-10-04T07:54:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c73d5fdd3c9729ce3c93f9f81072db0c6e5c93fa",
+    "line" : 48,
+    "diffHunk" : "@@ -1,1 +46,50 @@    let chc = TemplateChoice\n            { chcLocation = Nothing\n            , chcName = ChoiceName \"NotChoice\"\n            , chcConsuming = True\n            , chcControllers = tplParties"
+  }
+]

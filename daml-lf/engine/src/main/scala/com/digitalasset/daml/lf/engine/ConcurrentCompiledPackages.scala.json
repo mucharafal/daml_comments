@@ -1,0 +1,313 @@
+[
+  {
+    "id" : "af342269-47eb-4aa5-934d-adc0f9388c86",
+    "prId" : 7577,
+    "comments" : [
+      {
+        "id" : "0ca49575-bbe7-4628-93f3-911878ef0f49",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This seems fairly inefficient. You are effectively building up a linear search afaict. Any reason not to throw this stuff in a map?",
+        "createdAt" : "2020-10-08T08:44:10Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ec169ac1-15f7-45d6-8295-249214a3cec1",
+        "parentId" : "0ca49575-bbe7-4628-93f3-911878ef0f49",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```scala\r\nval signatureLookup: PartialFunction[PackageId, PackageSignature] = {\r\n  case `pkgId` => signature\r\n}\r\n```\r\nis syntactic sugar for\r\n```scala\r\nval signatureLookup: PartialFunction[PackageId, PackageSignature] =\r\n  new PartialFunction{\r\n    override def isDefinedAt(x: PackageId): Boolean = \r\n      x match {\r\n        case x if x == pkgId => true \r\n        case _ => false \r\n      }\r\n    override def apply(v1: PackageId): PackageSignature = \r\n      v1 match {\r\n        case v1 if v1 == pkgId => signature\r\n      }\r\n}\r\n```\r\n\r\nI think this is pretty constant\r\n",
+        "createdAt" : "2020-10-08T08:59:49Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3fedf656-6650-4f8a-b19f-f8ca712f1e2b",
+        "parentId" : "0ca49575-bbe7-4628-93f3-911878ef0f49",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It’s constant for this one but if you are building up the whole function as a chain of `orElse` of this type of partial function, you end up doing a linear search instead of a lookup to see if a package id is in there.",
+        "createdAt" : "2020-10-08T09:01:53Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "342ec271-9a34-4a6b-8277-94d9f4a2b5ce",
+        "parentId" : "0ca49575-bbe7-4628-93f3-911878ef0f49",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "In this case the lookup in  `signatureLookup orElse _signatures` is constant as `_signatures` is a Map (and not a chain of `orElse`).\r\nI prefer to not put the signature of `pkgId` into the mutable map `_signatures` before the compilation succeed. \r\n\r\n ",
+        "createdAt" : "2020-10-08T09:21:19Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2f8f2a3e-7b2d-45cb-af15-591bb3d9ea84",
+        "parentId" : "0ca49575-bbe7-4628-93f3-911878ef0f49",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah I see, I missed the fact that `_signatures` was a map. I thought we incrementally build up `_signatures` as a composition of a bunch of partial functions. Makes sense :+1: ",
+        "createdAt" : "2020-10-08T09:23:16Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d6d8aeac74d12178596915f46b0e6afbe8a23966",
+    "line" : 53,
+    "diffHunk" : "@@ -1,1 +88,92 @@            val signature = AstUtil.toSignature(pkg)\n            val signatureLookup: PartialFunction[PackageId, PackageSignature] = {\n              case `pkgId` => signature\n            }\n            // Compile the speedy definitions for this package."
+  },
+  {
+    "id" : "19ba4e72-6c9a-4c8c-b1a1-886d8357be34",
+    "prId" : 6512,
+    "comments" : [
+      {
+        "id" : "0c5ec6cf-fd41-4e52-979a-c0c27bf8a4ea",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This is unrelated. I've just learnt about from @SamirTalwar-DA in the change below and though it might be a good idea to _immediately_ apply my lesson here as well, given how small the PR is.",
+        "createdAt" : "2020-06-29T11:47:17Z",
+        "updatedAt" : "2020-06-29T12:47:24Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9ec8a59682399aa5dbac069527e4e9a52cdeb4e7",
+    "line" : 12,
+    "diffHunk" : "@@ -1,1 +30,34 @@    Option(_defns.get(dref))\n\n  override def profilingMode = _profilingMode\n  def profilingMode_=(profilingMode: speedy.Compiler.ProfilingMode) = {\n    _profilingMode = profilingMode"
+  },
+  {
+    "id" : "545c7807-ec75-4233-8dc7-25a08dfafeb2",
+    "prId" : 6471,
+    "comments" : [
+      {
+        "id" : "afaf16a6-04c2-4dab-a005-38bfd0ff8314",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Cannot you use `putIfAbsent` ?",
+        "createdAt" : "2020-06-24T08:06:11Z",
+        "updatedAt" : "2020-06-24T08:06:18Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c4e828d9-2cd2-4523-8fff-339df7c6a6c3",
+        "parentId" : "afaf16a6-04c2-4dab-a005-38bfd0ff8314",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Isn’t `putIfAbsent` strict in the value and will therefore compute all the other stuff even if don’t end up putting?",
+        "createdAt" : "2020-06-24T08:07:49Z",
+        "updatedAt" : "2020-06-24T08:07:49Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1e5aa5a4-8626-4273-995f-1636c0c87db2",
+        "parentId" : "afaf16a6-04c2-4dab-a005-38bfd0ff8314",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Yeah, unfortunately. Java's `Map` has `computeIfAbsent`, which is lazy, but there doesn't seem to be an equivalent in Scala.",
+        "createdAt" : "2020-06-24T08:37:27Z",
+        "updatedAt" : "2020-06-24T08:37:28Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3a12ec83-8b50-4dbc-8ad9-93502a331e49",
+        "parentId" : "afaf16a6-04c2-4dab-a005-38bfd0ff8314",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Oh, I see the original code used just that.",
+        "createdAt" : "2020-06-24T08:55:38Z",
+        "updatedAt" : "2020-06-24T08:55:38Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "386916e2-1f84-47e3-848e-9ba8f3f18ed0",
+        "parentId" : "afaf16a6-04c2-4dab-a005-38bfd0ff8314",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Could we not use `getOrElseUpdate` in this case ? ",
+        "createdAt" : "2020-06-24T10:01:10Z",
+        "updatedAt" : "2020-06-24T10:02:51Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7fd38322da34579ce1dedba06f9f2fc9ef7c6cfa",
+    "line" : 48,
+    "diffHunk" : "@@ -1,1 +85,89 @@          // package once. Other concurrent calls to add this package will block\n          // waiting for the first one to finish.\n          if (!_packages.contains(pkgId)) {\n            // Compile the speedy definitions for this package.\n            val defns ="
+  },
+  {
+    "id" : "fd2cc8f8-1ec0-4b61-9c47-3c94d2137a56",
+    "prId" : 3726,
+    "comments" : [
+      {
+        "id" : "2ad1ca3d-4be6-480d-96b4-b22df1619b8f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like the error for cyclical dependencies is gone. Is that intentional?",
+        "createdAt" : "2019-12-04T09:46:33Z",
+        "updatedAt" : "2019-12-04T12:11:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a7db68b8-278a-4994-a58e-fd96a2a6fad8",
+        "parentId" : "2ad1ca3d-4be6-480d-96b4-b22df1619b8f",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Yes, the cyclic check didn't make sense anymore as we could've easily encountered the same package multiple times (A depends on (B, C), B depends on C). We don't really need to worry about this since we cannot construct cycles as package ids are content hashes.",
+        "createdAt" : "2019-12-04T10:49:49Z",
+        "updatedAt" : "2019-12-04T12:11:21Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "172715cbea18231150b7d6276af1c3f63490bc2f",
+    "line" : 48,
+    "diffHunk" : "@@ -1,1 +58,62 @@          // Load dependencies of this package and transitively its dependencies.\n          for (dependency <- pkg.directDeps) {\n            if (!_packages.contains(dependency) && !state.seenDependencies.contains(dependency)) {\n              return ResultNeedPackage(\n                dependency, {"
+  },
+  {
+    "id" : "9c3c1438-849a-4a60-a19d-1c41282f9582",
+    "prId" : 3726,
+    "comments" : [
+      {
+        "id" : "915dbe21-dabd-4fdb-aeaf-f492dcc55345",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Nice! Looks even simpler than the code before!",
+        "createdAt" : "2019-12-04T12:39:14Z",
+        "updatedAt" : "2019-12-04T12:39:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "172715cbea18231150b7d6276af1c3f63490bc2f",
+    "line" : 83,
+    "diffHunk" : "@@ -1,1 +77,81 @@          // package once. Other concurrent calls to add this package will block\n          // waiting for the first one to finish.\n          _packages.computeIfAbsent(\n            pkgId, { _ =>\n              // Compile the speedy definitions for this package."
+  }
+]

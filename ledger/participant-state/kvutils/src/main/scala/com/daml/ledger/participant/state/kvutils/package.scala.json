@@ -1,0 +1,238 @@
+[
+  {
+    "id" : "63d166d5-56d9-4259-aeef-19f45ef2b849",
+    "prId" : 7215,
+    "comments" : [
+      {
+        "id" : "70a9baae-ef9f-4c3f-8666-729a3dbb98f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n```",
+        "createdAt" : "2020-08-25T10:59:07Z",
+        "updatedAt" : "2020-08-25T15:02:13Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0020dd8e089d897ae22c94ce2643c7d7f6073b04",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +34,38 @@\n  type CorrelationId = String\n\n  type Fingerprint = Bytes\n  type DamlStateMapWithFingerprints = Map[DamlStateKey, (Option[DamlStateValue], Fingerprint)]"
+  },
+  {
+    "id" : "f1f11e34-2a6c-455c-8088-43b10738044c",
+    "prId" : 6567,
+    "comments" : [
+      {
+        "id" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "My understanding is that a fingerprint will always be present but we'll only use it in pre-execution; hence, I am defining and using this value in the current (non-preexec) code path.",
+        "createdAt" : "2020-07-02T09:27:38Z",
+        "updatedAt" : "2020-07-02T12:20:39Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3693730d-92eb-4452-9665-d5e5ac558ee4",
+        "parentId" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "We only need fingerprints for pre-execution, hence, let's have two separate `CommitContext` implementations -- one should have DAML state input with fingerprints whereas the other without fingerprints. We won't even need to be able to access read input keys for normal execution. As we have the same committer implementations for pre-execution vs. normal execution it may lead to a bit of confusion, though.",
+        "createdAt" : "2020-07-02T14:43:45Z",
+        "updatedAt" : "2020-07-02T14:45:02Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1cd41e81-b9ae-4c86-9203-eb2925837f4b",
+        "parentId" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "It's a good idea, let's see if I can come up with something decent.",
+        "createdAt" : "2020-07-02T15:51:26Z",
+        "updatedAt" : "2020-07-02T15:51:27Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9e465977-3394-48fe-8c84-5725f028e12c",
+        "parentId" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I think the best moment to do that as cleanly as possible is after we bifurcate the code path into execution and pre-execution. Then, any shared logic left (if any) that still needs to discriminate between the two cases would take `Either[ExecutionCommitContext, PreexecutionCommitContext]` (both would inherit from a common `CommitContext` trait containing only the common parts). What do you think?",
+        "createdAt" : "2020-07-02T16:20:59Z",
+        "updatedAt" : "2020-07-02T16:22:34Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b10f47b1-049e-47e0-bf2b-e28c70db601e",
+        "parentId" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Agreed regarding bifurcating the code paths for the two execution methods later. However, right now the simplest approach would be to have access to the same set of properties in the context and the driver (`KeyValueCommitting` or parent `Committer` class) can do whatever they want with those and also may do some pre-execution specific logic. I would not suggest introducing an `Either` for this as it's going to complicate code unnecessarily. Instead, we may want to define different set of steps for pre-execution vs. normal execution for the different committers and share the steps that are common.",
+        "createdAt" : "2020-07-02T16:29:46Z",
+        "updatedAt" : "2020-07-02T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5143bf19-9e93-41f6-b386-0518dce160e3",
+        "parentId" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Yes, using separate steps can do it more cleanly. What's your suggestion for now though, leaving as it is if I understand correctly?",
+        "createdAt" : "2020-07-02T16:35:56Z",
+        "updatedAt" : "2020-07-02T16:35:56Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7d6efa49-63cb-4bab-87eb-3aae60a6944b",
+        "parentId" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Yes, let's leave it as-is for now and do a refactoring at a later step.",
+        "createdAt" : "2020-07-02T17:03:10Z",
+        "updatedAt" : "2020-07-02T17:03:11Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "523ba427-fccf-4008-9813-d7f83a00142b",
+        "parentId" : "d69e90a1-3e2a-4ea4-978a-c9e07077dbdd",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "@miklos-da If everything else looks at this stage, could you approve it?",
+        "createdAt" : "2020-07-03T07:04:23Z",
+        "updatedAt" : "2020-07-03T07:04:23Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "112848b33c7d7e20093c922504fa5e654512b27a",
+    "line" : 9,
+    "diffHunk" : "@@ -1,1 +35,39 @@  type Fingerprint = Bytes\n  type DamlStateMapWithFingerprints = Map[DamlStateKey, (Option[DamlStateValue], Fingerprint)]\n  val FingerprintPlaceholder: Fingerprint = ByteString.EMPTY\n\n  val MetricPrefix: MetricName = MetricName.DAML :+ \"kvutils\""
+  },
+  {
+    "id" : "59c4500d-517b-480f-bda6-40120cb11e72",
+    "prId" : 637,
+    "comments" : [
+      {
+        "id" : "36d36dc3-3f1c-48f4-9230-b9d847c31729",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "The `logEntries` list describes the ordering of log entries. The `logEntryMap` contains the data for `logEntries`. Entries in that map are expected to be immutable. We separate the ordering of log-entries from storing their data, as ...",
+        "createdAt" : "2019-04-25T13:56:35Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bd193a2f-c74d-41d6-a6a6-462b4e7b2720",
+        "parentId" : "36d36dc3-3f1c-48f4-9230-b9d847c31729",
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "Avoid explanations that use the word `might`. Ideally, explain exactly what's happening or give an explanation that is potentially too wide. Explanations that are \"open\" are often not helpful, as they just heighten uncertainty.\r\n\r\n",
+        "createdAt" : "2019-04-25T13:58:42Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d5b2167d99861a69fd3366ab5fb08acc35514642",
+    "line" : 20,
+    "diffHunk" : "@@ -1,1 +18,22 @@  * `kvState` describes auxilliary mutable state which may be created as part of one log entry and mutated by a later one.\n  * (e.g. a log entry might describe a DAML transaction containing contracts and the auxilliary mutable data may\n  * describe their activeness).\n  *\n  * While these can be represented in a key-value store directly, some implementations may"
+  }
+]

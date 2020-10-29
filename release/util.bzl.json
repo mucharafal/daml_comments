@@ -1,0 +1,115 @@
+[
+  {
+    "id" : "39f068b1-cdcf-43c9-a482-13acf6b5d66f",
+    "prId" : 5412,
+    "comments" : [
+      {
+        "id" : "2fb15812-cbed-41f4-b7ff-442ee8b01d40",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Do we need to run this on Windows? If not maybe just disable it there, given how directory outputs can be problematic.",
+        "createdAt" : "2020-04-03T10:29:51Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "771fc795-b58e-4961-b7a5-3b7b78b12c96",
+        "parentId" : "2fb15812-cbed-41f4-b7ff-442ee8b01d40",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Disabled on Windows.",
+        "createdAt" : "2020-04-03T11:54:37Z",
+        "updatedAt" : "2020-04-03T11:54:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "19ab45a39af18f11b36a390f3bb8b7df2e365380",
+    "line" : 24,
+    "diffHunk" : "@@ -1,1 +93,97 @@    ctx.actions.run_shell(\n        inputs = [ctx.file.ledger_api_tarball] + ctx.files.daml_lf_tarballs,\n        outputs = [tmp_dir],\n        tools = tools,\n        command = \"\"\""
+  },
+  {
+    "id" : "d86f4780-9e1b-4baf-8c03-91f610022838",
+    "prId" : 5412,
+    "comments" : [
+      {
+        "id" : "8f90db47-7331-40b3-a606-e7a20d5eb354",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I'm starting to think that we should implement our own versions of `pkg_tar` that can create `tar` and `zip` and don't have the leading `./` issue.",
+        "createdAt" : "2020-04-03T10:30:37Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3e40d763-2e78-45de-9ab7-7b078025f913",
+        "parentId" : "8f90db47-7331-40b3-a606-e7a20d5eb354",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I vaguely recall seeing issues that `pkg_zip` also has other problems where it breaks directory structures. But haven’t looked too deeply into it.",
+        "createdAt" : "2020-04-03T11:45:22Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "49d914a4-403e-4c46-a33a-dd209f13331e",
+        "parentId" : "8f90db47-7331-40b3-a606-e7a20d5eb354",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "One has to be a bit careful about how one uses it. As far as I understand the right intuition for these rules is that they originate from generating docker images. There you want to distinguish between paths that should always be placed at the filesystem root (e.g. `/usr/bin/...`) and those that should be placed under some path prefix. They use leading `./` for that distinction. I.e. paths that don't lead with `./` will always remain at the root of the archive independent of the `package_dir` attribute. Paths that do lead with `./` will be placed underneath `package_dir`. AFAIK `pkg_tar|zip` always apply the `./` prefrix, but this distinction matters on the `deps` attribute. If you pull in an archive that doesn't follow that convention you'll end up with surprises.",
+        "createdAt" : "2020-04-03T11:53:36Z",
+        "updatedAt" : "2020-04-03T11:53:36Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "19ab45a39af18f11b36a390f3bb8b7df2e365380",
+    "line" : 64,
+    "diffHunk" : "@@ -1,1 +133,137 @@    )\n\nprotos_zip = rule(\n    implementation = _protos_zip_impl,\n    attrs = {"
+  }
+]

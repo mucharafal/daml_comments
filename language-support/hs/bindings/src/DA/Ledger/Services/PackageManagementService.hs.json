@@ -1,0 +1,228 @@
+[
+  {
+    "id" : "7416d95a-9776-43d5-9a38-4cd69f20b00e",
+    "prId" : 2261,
+    "comments" : [
+      {
+        "id" : "72f35799-4901-41b3-9033-dd2fdd55bda6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Might be worth considering to prefix these field names. `size` seems a bit too generic (yes, Haskell records suck).",
+        "createdAt" : "2019-07-23T10:54:58Z",
+        "updatedAt" : "2019-07-23T10:55:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4a5151bc-bdfc-4e4c-a7a8-e69126276880",
+        "parentId" : "72f35799-4901-41b3-9033-dd2fdd55bda6",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "These short names correspond to the style adopted in:\r\n\r\nhttps://github.com/digital-asset/daml/blob/master/language-support/hs/bindings/src/DA/Ledger/Types.hs\r\n\r\nwhere it was an active decision to not uniquify field names, and instead use  `{-# LANGUAGE DuplicateRecordFields #-}` where necessary.\r\n\r\nSo far I am happy with this choice, but you may well disagree :)\r\n",
+        "createdAt" : "2019-07-23T12:26:25Z",
+        "updatedAt" : "2019-07-23T12:26:26Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6e04f55acf35ac9065ac1bb318f00d64fe53ba3f",
+    "line" : 23,
+    "diffHunk" : "@@ -1,1 +20,24 @@data PackageDetails = PackageDetails\n    { pid :: PackageId\n    , size :: Int\n    , knownSince :: Timestamp\n    , sourceDescription :: Text"
+  },
+  {
+    "id" : "1755345f-9c9a-4538-9179-252984b28410",
+    "prId" : 2261,
+    "comments" : [
+      {
+        "id" : "37fea858-c331-474b-856e-62a71f8a06d1",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        let rpc = LL.packageManagementServiceListKnownPackages service\r\n```\r\nI'll keep suggesting this until you tell me a reason why it's bad. :)",
+        "createdAt" : "2019-07-23T12:31:49Z",
+        "updatedAt" : "2019-07-23T12:34:31Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "305dfcb5-5c0a-4ecf-b914-62667f75f116",
+        "parentId" : "37fea858-c331-474b-856e-62a71f8a06d1",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Well... its clearly just a small matter of style.\r\nBut since the paint colour of this particular bike shed has been questioned, I will have to reply :)\r\n\r\nI prefer to focus here on the record values themselves rather than the record selector functions.\r\nThis makes it clear that `service` is a package of related RPCs, of which we only use one.\r\nBy using the functional selector style, it's not obvious the value is even a record.\r\n\r\nIt's related to how I don't normally like to use `fst` and prefer pattern matching to access elems.\r\n ",
+        "createdAt" : "2019-07-23T13:05:48Z",
+        "updatedAt" : "2019-07-23T13:05:48Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a3048c14-84ce-4ff0-9342-fdc2cfd7d202",
+        "parentId" : "37fea858-c331-474b-856e-62a71f8a06d1",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I agree that it's a matter of taste. We only have this discussion because Haskell's record system sucks so much. When I see code like `let Foo x y = foo` I instinctively wonder what happens if `foo` is a `Bar ...`? Oh, there's is no `Bar ...` case. And then I'm annoyed again I have to write or read the `Foo` constructor even though it doesn't carry too much useful information. Damn Haskell records.\r\nEven though I disagree with your particular choice of style, I'll stop bothering you about since it is indeed bike shedding.",
+        "createdAt" : "2019-07-23T13:16:32Z",
+        "updatedAt" : "2019-07-23T13:16:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ac4bb652-f211-4d16-95f6-0a4bccce217e",
+        "parentId" : "37fea858-c331-474b-856e-62a71f8a06d1",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Thank you.\r\n\r\n> When I see code like `let Foo x y = foo` I instinctively wonder what happens if `foo` is a `Bar`\r\n\r\nwe get a static error\r\n```\r\n    Pattern match(es) are non-exhaustive\r\n    In a pattern binding: Patterns not matched: (Bar _)\r\n```\r\n\r\nI think the issues with Haskell's record system stem from it taking a primary view that the fields are selector-functions, rather than record pattern match syntax (aka ML style)",
+        "createdAt" : "2019-07-23T13:32:48Z",
+        "updatedAt" : "2019-07-23T13:33:04Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6e04f55acf35ac9065ac1bb318f00d64fe53ba3f",
+    "line" : 33,
+    "diffHunk" : "@@ -1,1 +30,34 @@    withGRPCClient config $ \\client -> do\n        service <- LL.packageManagementServiceClient client\n        let LL.PackageManagementService {packageManagementServiceListKnownPackages=rpc} = service\n        let request = LL.ListKnownPackagesRequest\n        rpc (ClientNormalRequest request timeout emptyMdm)"
+  },
+  {
+    "id" : "6cd53c88-0264-467b-ada6-e9f16362916b",
+    "prId" : 2261,
+    "comments" : [
+      {
+        "id" : "17ed45e3-8e5f-405f-9859-30d3643406ec",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nraiseResponse = raiseList raisePackageDetails . LL.listKnownPackagesResponsePackageDetails\r\n```\r\nand remove the next two lines.",
+        "createdAt" : "2019-07-23T12:33:56Z",
+        "updatedAt" : "2019-07-23T12:34:31Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bc0fad18-2d2f-4e77-b20b-78fee8a1d221",
+        "parentId" : "17ed45e3-8e5f-405f-9859-30d3643406ec",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I prefer to have all the conversion code (most of it it is `Convert.hs`) to follow a common style.\r\nI like the `\\case` syntax, because it's the same whether the types have 1 or more variant.\r\nI don't see anything is gained by using a different syntax for the case of 1-variant",
+        "createdAt" : "2019-07-23T13:09:18Z",
+        "updatedAt" : "2019-07-23T13:09:18Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6e04f55acf35ac9065ac1bb318f00d64fe53ba3f",
+    "line" : 43,
+    "diffHunk" : "@@ -1,1 +40,44 @@\nraiseResponse ::  LL.ListKnownPackagesResponse -> Perhaps [PackageDetails]\nraiseResponse = \\case\n    LL.ListKnownPackagesResponse{..} ->\n        raiseList raisePackageDetails listKnownPackagesResponsePackageDetails"
+  },
+  {
+    "id" : "97b09967-aaa9-4242-a278-d8f88ca36a94",
+    "prId" : 2146,
+    "comments" : [
+      {
+        "id" : "057b49be-1f86-4781-812e-9bbb44cdf2b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we get a haddock comment here that explains when you will get back `Left`?",
+        "createdAt" : "2019-07-15T12:54:37Z",
+        "updatedAt" : "2019-07-15T13:23:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4972de14-cc63-43a1-b3ee-e0de3173a64c",
+        "parentId" : "057b49be-1f86-4781-812e-9bbb44cdf2b8",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok",
+        "createdAt" : "2019-07-15T13:18:19Z",
+        "updatedAt" : "2019-07-15T13:23:34Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "450a3ef00b954086e6def746c020486ccfc9de1a",
+    "line" : 15,
+    "diffHunk" : "@@ -1,1 +13,17 @@\n-- | Upload a DAR file to the ledger. If the ledger responds with `INVALID_ARGUMENT`, we return `Left details`.\nuploadDarFile :: ByteString -> LedgerService (Either String ()) -- Unlike other services, no LedgerId is needed. (why?!)\nuploadDarFile bytes =\n    makeLedgerService $ \\timeout config ->"
+  }
+]

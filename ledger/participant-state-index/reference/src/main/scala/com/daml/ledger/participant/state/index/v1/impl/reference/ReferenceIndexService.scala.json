@@ -1,0 +1,134 @@
+[
+  {
+    "id" : "bd6e6aa9-5539-4bf9-a90d-aa0f11ac5e55",
+    "prId" : 2304,
+    "comments" : [
+      {
+        "id" : "a96d53a1-a5a7-40e7-b354-2e7a133d396b",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "DAML well-authorization rules state that fetchByKey fails and aborts the transaction if:\r\na) you don’t have sufficient authorization\r\nb) you’re not a stakeholder of the contract you’re trying to fetch\r\n\r\nIn this context, it is not clear to me why wee need to call `canSeeContract`.\r\n1.  Why do we need to call it explicitly here? I would expect the DAML interpreter to convert positive result to a negative one based on b) above\r\n2. Why does submitter matter? Isn't it more about the actor of that specific fetch action?",
+        "createdAt" : "2019-07-29T09:06:31Z",
+        "updatedAt" : "2019-07-29T12:35:05Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "943286d9-bdd1-46e8-86a6-5ee436f9b976",
+        "parentId" : "a96d53a1-a5a7-40e7-b354-2e7a133d396b",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "We need to authorize the lookup, otherwise the submitter could call `lookupByKey` to check for the existence of keys that it should not be able to access.",
+        "createdAt" : "2019-07-29T09:40:52Z",
+        "updatedAt" : "2019-07-29T12:35:05Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "73c0d105-9934-40de-a3a7-5615c64c3e3b",
+        "parentId" : "a96d53a1-a5a7-40e7-b354-2e7a133d396b",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "See also the original implementation in Sandbox: https://github.com/digital-asset/daml/blob/master/ledger/sandbox/src/main/scala/com/digitalasset/platform/sandbox/stores/ledger/SandboxContractStore.scala#L33",
+        "createdAt" : "2019-07-29T09:45:07Z",
+        "updatedAt" : "2019-07-29T12:35:05Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5c98f89bf6eb59cfe18c2a97d41daf898fb97679",
+    "line" : 26,
+    "diffHunk" : "@@ -1,1 +361,365 @@            // note that we need to check visibility for keys, too, otherwise we leak the existence of a non-divulged\n            // contract if we return `Some`.\n            state.activeContracts.lookupContract(cid).flatMap {\n              case ac if canSeeContract(submitter, ac) => Some(cid)\n              case _ => None"
+  },
+  {
+    "id" : "bdf5c3b4-1686-4882-b4ce-6b001336a99a",
+    "prId" : 928,
+    "comments" : [
+      {
+        "id" : "6ad4062d-fbfd-4d9f-be5a-918c73b0ee12",
+        "parentId" : null,
+        "author" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "body" : "Nitpick: The fact that this function is necessary to be used in so many places feels wrong to me. It means that there's too much dependence on the mutable state here. This also means that all of these calls are completely async and have unpredictable completion time. Few ideas to explore:\r\n- make it acceptable for the interface of this service to return \"not ready\" error when called;\r\n- split the implementation into two classes: one for uninitialized state, which always returns \"not ready\" errors and one for initialized state which returns what it should.\r\n\r\nI think this will make the implementation cleaner (but may make the interface harder to use). Devil is in the details. Up to you.",
+        "createdAt" : "2019-05-06T08:44:03Z",
+        "updatedAt" : "2019-05-06T08:44:03Z",
+        "lastEditedBy" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7c38976d-9796-4205-8f82-e3f00a6e8a12",
+        "parentId" : "6ad4062d-fbfd-4d9f-be5a-918c73b0ee12",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "They are inherently asynchronous as the proper implementation likely will involve SQL queries.",
+        "createdAt" : "2019-05-06T08:54:09Z",
+        "updatedAt" : "2019-05-06T08:54:09Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f12fd3a4-e9b2-4efb-89eb-97a627d4f342",
+        "parentId" : "6ad4062d-fbfd-4d9f-be5a-918c73b0ee12",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "IMO, the async approach on the service side is better. An interface serving \"not ready\" error pushes clients to implementing an async layer on their side which leads to code repetition and errors. So I would not change anything.",
+        "createdAt" : "2019-05-06T10:52:56Z",
+        "updatedAt" : "2019-05-06T10:52:56Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "78b6a8d456473c1384d9ebb6b949bde06994f295",
+    "line" : 32,
+    "diffHunk" : "@@ -1,1 +91,95 @@  // Waits for state to be initialized (e.g. first\n  // update to arrive in order to established ledger beginning and current end) before calling the handler.\n  private def futureWithState[T](handler: IndexState => Future[T]): Future[T] = {\n    val s = StateController.getState\n    if (s.initialized) {"
+  }
+]

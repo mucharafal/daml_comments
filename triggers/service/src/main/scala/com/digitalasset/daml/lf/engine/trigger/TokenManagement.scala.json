@@ -1,0 +1,86 @@
+[
+  {
+    "id" : "10165343-485b-4a03-ba49-7d3e6d4c04cf",
+    "prId" : 6296,
+    "comments" : [
+      {
+        "id" : "1e4ca90a-50be-4121-9af7-a881c65b7629",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "You seem to encrypt the token in the `collectFirst` and then decrypt it here to check the party is valid. Perhaps split decryption from the decoding/validation and then save one decryption here. Minor point though.",
+        "createdAt" : "2020-06-10T19:53:09Z",
+        "updatedAt" : "2020-06-10T20:58:15Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "55b6854d7b7c96e69bc1c9cd22b4ed7f8dffb80f",
+    "line" : 102,
+    "diffHunk" : "@@ -1,1 +82,86 @@      // requirements of a party identifier.\n      case Some(credentials) =>\n        decodeCredentials(key, credentials) match {\n          case (party, _) =>\n            val ident = party.toString()"
+  },
+  {
+    "id" : "180d1136-1106-4a84-ae75-4ba5d08aa41b",
+    "prId" : 6296,
+    "comments" : [
+      {
+        "id" : "742fce8e-fba4-4088-8736-26bcfc387bcc",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Perhaps import this `Party`? Does it clash with `data.Ref.Party`?",
+        "createdAt" : "2020-06-10T19:54:22Z",
+        "updatedAt" : "2020-06-10T20:58:15Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "55b6854d7b7c96e69bc1c9cd22b4ed7f8dffb80f",
+    "line" : 77,
+    "diffHunk" : "@@ -1,1 +66,70 @@      credentials: UserCredentials): (com.daml.ledger.api.refinements.ApiTypes.Party, String) = {\n    val components = decrypt(key, credentials.token).token.split(\":\")\n    (com.daml.ledger.api.refinements.ApiTypes.Party(components(0)), components(1))\n  }\n"
+  },
+  {
+    "id" : "9caac6a2-bff4-4f46-bad6-5ebdfdf9fa97",
+    "prId" : 6279,
+    "comments" : [
+      {
+        "id" : "701a7c55-a3bb-4686-98bd-b43700a09c74",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "I think we need to validate the token. It's passed into an SQL query so it at least needs to not have single quotes in it. We should probably make sure the username is a valid party id otherwise ledger requests will fail.",
+        "createdAt" : "2020-06-09T19:53:42Z",
+        "updatedAt" : "2020-06-10T13:34:38Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b9464687f8f030036b33ef328663eeb5ef13160c",
+    "line" : 34,
+    "diffHunk" : "@@ -1,1 +23,27 @@    val token = credentials.token\n    val bytes = java.util.Base64.getDecoder.decode(token.getBytes())\n    val components = new String(bytes, StandardCharsets.UTF_8).split(\":\")\n    (components(0), components(1))\n  }"
+  }
+]

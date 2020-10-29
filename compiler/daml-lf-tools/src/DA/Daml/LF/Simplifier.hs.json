@@ -1,0 +1,793 @@
+[
+  {
+    "id" : "68e2cfe3-7ad2-48f4-b703-7f0ac7d6613a",
+    "prId" : 6519,
+    "comments" : [
+      {
+        "id" : "c544d59a-8994-4cd0-996d-5fadbea6b671",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Type level lambdas of kind `Nat` are essentially value level lambdas. Any thoughts on how to handle them?",
+        "createdAt" : "2020-06-29T13:43:09Z",
+        "updatedAt" : "2020-06-29T13:48:29Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "94c43665-4862-442f-8076-d413629f00d6",
+        "parentId" : "c544d59a-8994-4cd0-996d-5fadbea6b671",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Do you mean `ETyLam`? I can add special case to treat `ETyLam (_, KNat) _` as if it were a term lambdas. I wonder if those extra cases are worth the added complexity? Hmm...",
+        "createdAt" : "2020-06-29T13:56:49Z",
+        "updatedAt" : "2020-06-29T13:56:49Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "440feb2dd24c7f3dc86bb2c8dd4726f4c78d6f19",
+    "line" : 10,
+    "diffHunk" : "@@ -1,1 +478,482 @@alwaysLiftUnder :: ExprF (Expr, Info) -> Bool\nalwaysLiftUnder = \\case\n    ETmLamF _ (ETmLam _ _, _) -> False\n    ETmLamF _ _ -> True\n    _ -> False"
+  },
+  {
+    "id" : "34290843-2a2a-4d62-b82d-a737337423d6",
+    "prId" : 6430,
+    "comments" : [
+      {
+        "id" : "10148175-565e-4a73-bdc5-ac68ec676781",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not convinced we shouldn't lift lambdas at all. In a chain of lambdas, we should still lift the outermost lambda when possible. For instance, in\r\n```haskell\r\nf x y z =\r\n  let g a b = a+b\r\n  in f x (f y z)\r\n```\r\nI would expect the `g` to be lifted to the top-level.\r\n\r\nWe absolutely need tests for the constant lifter. We could either do very specific unit test with hand crafted ASTs or we could use the `jq` based approach.",
+        "createdAt" : "2020-06-22T08:45:03Z",
+        "updatedAt" : "2020-06-22T08:47:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c23800e29d2cb012b70b448ec9d35426a2ac7bbe",
+    "line" : 20,
+    "diffHunk" : "@@ -1,1 +490,494 @@    ENil _ -> False\n    ENone _ -> False\n    ETmLam _ _ -> False\n    EUpdate _ -> False\n    EScenario _ -> False"
+  },
+  {
+    "id" : "55db8f65-ee41-446b-9ee2-4fd87a5a92ae",
+    "prId" : 6274,
+    "comments" : [
+      {
+        "id" : "07343c5a-1e2d-4bf6-a980-0f6a610ddfe6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe that is a silly question but what is the difference between `Safe 0` and `Unsafe`?",
+        "createdAt" : "2020-06-09T14:49:10Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "10b589f5-9e94-4a10-bc56-34da2437ca64",
+        "parentId" : "07343c5a-1e2d-4bf6-a980-0f6a610ddfe6",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "There are no silly questions on such complicated matters!\r\n\r\nThe expression `1` is 0-safe because it does not raise any exceptions. (We do not consider `k`-safe for any `k > 0` because you cannot apply arguments to it.) The expression `1 + error \"boom\"` is unsafe and not 1-safe because it raises an exception. The difference between these two expressions is that it's ok for the simplifier to delete the former when it's dead code but not the latter (because of strictness).",
+        "createdAt" : "2020-06-09T16:17:19Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e1a0f615-608a-4792-a9d3-4c5ecdf0a455",
+        "parentId" : "07343c5a-1e2d-4bf6-a980-0f6a610ddfe6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh that makes sense, I think I got confused by looking at the code and seeing `BEError` marked as 0-safe and was thinking of `error \"abc\"` instead of `error`. Thanks for the explanation!",
+        "createdAt" : "2020-06-09T16:20:40Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e4f09ad2cfa366135e277a471a4bf8608bd948f",
+    "line" : 13,
+    "diffHunk" : "@@ -1,1 +257,261 @@infoUnstepELet x (Info fv sf _) = (s1, s2)\n  where\n    s1 = Info fv (sf `min` Safe 0) TCNeither\n    s2 = Info (freeExprVar x <> fv) sf TCNeither\n"
+  },
+  {
+    "id" : "e0d99a8e-7cfb-4fe5-81b0-a704f15fd414",
+    "prId" : 6274,
+    "comments" : [
+      {
+        "id" : "27256169-05e9-49e5-9af5-4f772bc2a78f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Where is the check that `x` is not free in `s2`? If we don’t need that for some reason the comment needs updating since it says exactly the opposite.",
+        "createdAt" : "2020-06-09T14:59:48Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3e5659c6-64c4-4e55-937f-be38219cfab5",
+        "parentId" : "27256169-05e9-49e5-9af5-4f772bc2a78f",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We don't need to check if `x` is free in `e2` since `let` are _non_-recursive. Would it help to comment to that effect?\r\n\r\nI assume the comment you're referring to is the one about repeated application of this rule and the one below. The \"if `x` is not free in `e3`\" is supposed to resemble the condition of the rule below. Given the confusion it has already caused, I would simply remove the if-clause. This shouldn't make a difference since there's only one rule for `(let x = e1 in e2) e3` anyway.",
+        "createdAt" : "2020-06-09T16:12:40Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "63435091-9ed0-4b58-8070-49d58bc70def",
+        "parentId" : "27256169-05e9-49e5-9af5-4f772bc2a78f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah a comment that lets are not recursive + removing the `if` (it’s already below at the case where there is the condition) sounds good, thanks!",
+        "createdAt" : "2020-06-09T16:23:11Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e4f09ad2cfa366135e277a471a4bf8608bd948f",
+    "line" : 56,
+    "diffHunk" : "@@ -1,1 +385,389 @@      -- are _not_ recursive.\n      ETmAppF (ETmLam (x, t) e1, s0) (e2, s2) ->\n        go $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)\n        where\n          s1 = infoUnstepETmapp x s0"
+  },
+  {
+    "id" : "95c06c48-8840-4e10-a751-81f0e9c1ba77",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "5cde4e6a-9e4b-4639-96db-065d93ecc17f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we not do constant lifting if the list of free variables is null?",
+        "createdAt" : "2020-05-26T11:03:38Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "79bdc312-7f65-4501-8c96-03b91c6ca7b1",
+        "parentId" : "5cde4e6a-9e4b-4639-96db-065d93ecc17f",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "The idea was to group together the constant liftings, so instead of doing one lift per application (for example), we will lift all the applications at once, as far as we can. This also prevents us from doing a constant lift in cases where the binding is already constant...\r\n\r\n(It might be better to also check isWorthLifting ... I think I'll experiment with that.)",
+        "createdAt" : "2020-05-26T11:15:50Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a8c0735c-d475-4361-8370-51e497337cd8",
+        "parentId" : "5cde4e6a-9e4b-4639-96db-065d93ecc17f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see that makes sense. Would be great to add a comment. Thanks for the explanation!",
+        "createdAt" : "2020-05-26T11:17:28Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 94,
+    "diffHunk" : "@@ -1,1 +374,378 @@        if freeVarsNull v' && not (alwaysLiftUnder es)\n          then pure (go world es)\n          else do -- constant lifting\n            es' <- forM es $ \\case\n              (e,i)"
+  },
+  {
+    "id" : "dceef17e-86bb-4ed4-9f85-760c0215908a",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "98ddca80-f859-4722-9a69-2b3f307b6887",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "A comment here that explains why we don’t lift everything would be nice. I.e., what are the performance tradeoffs, do we loose performance by lifting things that are “too small”, if so have we benchmarked that this is the right tradeoff, …?",
+        "createdAt" : "2020-05-26T11:09:57Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2405945b-cb7e-481b-b6a7-3475b85efdc7",
+        "parentId" : "98ddca80-f859-4722-9a69-2b3f307b6887",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should add `EUpdate` and `EScenario` to this list as well since they don't perform any computation.\r\n\r\nSpeedy's internal representation of `Update a` is currently equivalent to `Ledger# -> a`, similar to how Haskell uses `State RealWorld# a` for `IO a`. Thus, if we lift an update to the top-level, we always have to allocate a closure for it. If we leave it in place, we _can_ do something smarter. We're not doing that yet but I have it on my list. (Similarly for `Scenario a`.)\r\n\r\nNevertheless, lifting the children of `EUpdate` and `EScenario` if they are worth still seems like a good idea.\r\n\r\nFor example, in\r\n```haskell\r\nfoo x = do\r\n  _ <- bar x\r\n  _ <- bar 1\r\n  pure (1+1)\r\n```\r\nwe should neither lift `do _ <- bar 1; pure (1+1)` nor `pure (1+1)`. But we should lift `1+1`. Lifting `bar 1` is also fine since we have to allocate a closure for it anyway.",
+        "createdAt" : "2020-06-18T19:54:25Z",
+        "updatedAt" : "2020-06-18T20:11:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 179,
+    "diffHunk" : "@@ -1,1 +486,490 @@-- | Some terms are not worth lifting to the top level, because they don't\n-- require any computation.\nisWorthLifting :: Expr -> Bool\nisWorthLifting = \\case\n    EVar _ -> False"
+  },
+  {
+    "id" : "bfa5efce-9408-4746-8aed-b2259b82ef9f",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "57ad3d53-f81c-46c5-825c-cd629af50b7d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can this ever happen? If not, should we throw an error here?",
+        "createdAt" : "2020-06-17T13:00:10Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4752bb46-6788-47e8-a8b7-64dbacd40cb0",
+        "parentId" : "57ad3d53-f81c-46c5-825c-cd629af50b7d",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "It can happen when the information in the world is incomplete (e.g. it's part of a strongly connected component of definitions, or we are building with --incremental=yes). I can add a comment.",
+        "createdAt" : "2020-06-17T14:12:22Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 71,
+    "diffHunk" : "@@ -1,1 +351,355 @@                -- full typechecking. That happens when compiling with --incremental=yes,\n                -- or when simplifying mutually recursive functions.\n                Left _ ->\n                    pure e\n"
+  },
+  {
+    "id" : "395f78f2-2695-42da-b3f5-883ed7f7e45a",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "6db08bd8-b66c-40ee-970f-37910031f7ce",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I forgot why but I remember that it was important that we run the simplifier in topological order. Now we are adding new definitions so this becomes a bit more fuzzy. Maybe at least worth adding a comment why this is not an issue?",
+        "createdAt" : "2020-06-17T13:04:46Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e6bbb053-4a31-43d9-8441-466c9f44dd68",
+        "parentId" : "6db08bd8-b66c-40ee-970f-37910031f7ce",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "It's still in topological order (-:",
+        "createdAt" : "2020-06-17T14:23:22Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 59,
+    "diffHunk" : "@@ -1,1 +339,343 @@                Right ty -> do\n                    name <- freshExprVarNameFor e\n                    addDefValue DefValue\n                        { dvalBinder = (name, ty)\n                        , dvalBody = e"
+  },
+  {
+    "id" : "b7f6a8f1-2543-4590-bf7c-9f7184645862",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "155b3508-8e82-4d5f-8949-7aaa3bf7a50a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe a hashmap would be a better idea given that an `Expr` can be quite large?",
+        "createdAt" : "2020-06-17T13:08:09Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6c432238-253c-4689-8e37-c66f188f4dc3",
+        "parentId" : "155b3508-8e82-4d5f-8949-7aaa3bf7a50a",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Maybe. I'll look into it, but I'll leave it as a separate PR.",
+        "createdAt" : "2020-06-17T15:02:42Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 195,
+    "diffHunk" : "@@ -1,1 +502,506 @@    , sModule :: Module\n    , sReserved :: Set.Set ExprValName\n    , sCache :: Map.Map Expr ExprValName\n    , sFreshNamePrefix :: T.Text -- Prefix for fresh variable names.\n    }"
+  },
+  {
+    "id" : "cc6fc34c-5ac3-4e3c-8419-43af188a6959",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "6929c9de-5034-45b8-846d-caa933a6b363",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "My understanding of this function is that it indicates when we want to lift the children of a _closed_ term. If that's correct, the effect of this `ECaseF` case here is that we take closed `case` expressions apart. I'm not sure we want that. Even without this `ECaseF` here, we should still lift closed branches of open `case` expression because the (RHS of the) branch is a maximal closed expression itself.",
+        "createdAt" : "2020-06-18T18:28:04Z",
+        "updatedAt" : "2020-06-18T20:11:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 174,
+    "diffHunk" : "@@ -1,1 +481,485 @@    ETyLamF _ _ -> True\n    ETmLamF _ _ -> True\n    ECaseF _ _ -> True\n    _ -> False\n"
+  },
+  {
+    "id" : "5f9d5407-054b-40f7-b9b5-14f891f8a5e7",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "0e979d43-b49f-4691-b06a-4567f1b2fd38",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should only lift under a lambda if the thing we lift is not a lambda itself. Otherwise, we'll take top-level bindings of the form\r\n```haskell\r\nf _ x = x+x\r\n```\r\napart into\r\n```haskell\r\nf _ = f'\r\nf' x = x+x\r\n```\r\nThis performs worse during interpretation because we would need to go through the process of fully applying a closure twice.\r\nThis should not have significant impact but I suggest we change it nevertheless in order to make sure the simplifier does not end up making the code more complex.",
+        "createdAt" : "2020-06-18T18:49:52Z",
+        "updatedAt" : "2020-06-18T20:11:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 173,
+    "diffHunk" : "@@ -1,1 +480,484 @@alwaysLiftUnder = \\case\n    ETyLamF _ _ -> True\n    ETmLamF _ _ -> True\n    ECaseF _ _ -> True\n    _ -> False"
+  },
+  {
+    "id" : "819d29f3-df37-4435-9232-461542ef74c1",
+    "prId" : 6013,
+    "comments" : [
+      {
+        "id" : "2ff286bb-fdc3-4cb2-9cf4-fe97bdcf48f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks like you are reordering the values. I guess this doesn’t matter for anything?",
+        "createdAt" : "2020-05-18T15:59:54Z",
+        "updatedAt" : "2020-05-19T10:19:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "176edc98-9957-4d9e-a1f1-72ec3bb8f10c",
+        "parentId" : "2ff286bb-fdc3-4cb2-9cf4-fe97bdcf48f5",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I _think_ it's ok to reorder.",
+        "createdAt" : "2020-05-19T10:05:06Z",
+        "updatedAt" : "2020-05-19T10:19:18Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9fdc3e79215bbeec79dac936d74352b0a3bc8111",
+    "line" : 55,
+    "diffHunk" : "@@ -1,1 +389,393 @@                d' = simplifyDefValue w' dval\n            in NM.insert d' accum\n    in m { moduleValues = foldl' step NM.empty (topoSortDefValues m) }"
+  },
+  {
+    "id" : "514e5810-b2bb-4655-b6f9-14a17a9cf2ad",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "95f15924-bbc7-42df-a762-58b1cf305d3b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I wonder if we should tighten this to \"a bunch of type lambdas followed by something looking like `\\x. x.f unit`\"? But on the other hand, there shouldn't be any other structural record projections, are there?",
+        "createdAt" : "2020-05-08T19:47:18Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c7b31195-fe8f-419f-abb3-cf2a52c3a1bb",
+        "parentId" : "95f15924-bbc7-42df-a762-58b1cf305d3b",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Yeah, I don't think we get anything by making it more precise right now. 🤷 The only structural projections are the ones we insert for typeclass desugaring.",
+        "createdAt" : "2020-05-11T10:59:09Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : 117,
+    "diffHunk" : "@@ -1,1 +209,213 @@isTypeClassProjection DefValue{..} = go dvalBody\n  where\n    go :: Expr -> Bool\n    go (ETyLam _ e) = go e\n    go (ETmLam _ e) = go e"
+  },
+  {
+    "id" : "53b0bec6-f053-4fcf-ae72-52cb780d73d3",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "963c8b9e-b8cd-4c3d-a4f2-b351a5084781",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Shouldn't we allow `ETmAppF` for dictionaries as well in order to inline dictionaries like `instance Eq a => Eq [a]`?",
+        "createdAt" : "2020-05-08T20:03:15Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "310b4dcd-70b5-4dd5-86bc-42ea885a1d1b",
+        "parentId" : "963c8b9e-b8cd-4c3d-a4f2-b351a5084781",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Do these count as \"known typeclasses\"? AFAIK if you have a fixed `a`, GHC will specialize the typeclass, so we end up inlining them. But if you have a generic `a` then you aren't going to get inlining.",
+        "createdAt" : "2020-05-11T10:55:09Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "362dc43b-0ecf-4105-be88-d1e8ca4cf166",
+        "parentId" : "963c8b9e-b8cd-4c3d-a4f2-b351a5084781",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I think we can perhaps leave this (& further experiments with inlining) to a separate PR.",
+        "createdAt" : "2020-05-11T11:21:19Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : 141,
+    "diffHunk" : "@@ -1,1 +233,237 @@                TCDictionary (applySubstInExpr (typeSubst x ty) e)\n            _ ->\n                TCNeither\n\n    _ -> TCNeither"
+  },
+  {
+    "id" : "ce5aedf8-20e3-43bc-b3da-b38cb44e6620",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "3e5668b5-c26f-45f4-92f0-62a99cf41315",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Hasn't `typeclassStep` already remove all type applications?",
+        "createdAt" : "2020-05-08T20:05:17Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f263fc00-a192-4179-9d57-274381908791",
+        "parentId" : "3e5668b5-c26f-45f4-92f0-62a99cf41315",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Nope, because of type class specialization.",
+        "createdAt" : "2020-05-11T10:52:11Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : 183,
+    "diffHunk" : "@@ -1,1 +275,279 @@            Just (dvalBody dv)\n\n    ETyApp e t -> do\n        ETyLam (x,_) e' <- getTypeClassDictionary world e\n        Just (applySubstInExpr (typeSubst x t) e')"
+  },
+  {
+    "id" : "19b4c9ba-c797-40c0-8e1f-789618e75242",
+    "prId" : 2670,
+    "comments" : [
+      {
+        "id" : "f6a178f6-0d77-45c3-9389-c9476eb837ca",
+        "parentId" : null,
+        "author" : null,
+        "body" : "@hurryabit Just to confirm, type applications aren't counted here, right? Otherwise these numbers would have to be higher. (And so would the numbers for BEFoldl, BEFoldr, etc.) But then `BEMapEmpty` says `Safe 1` but it should be `Safe 0`? ",
+        "createdAt" : "2019-08-27T19:59:50Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "67bd07b3-2c24-4d4c-afc2-48e05b383a0d",
+        "parentId" : "f6a178f6-0d77-45c3-9389-c9476eb837ca",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Correct, type applications are not counted. (See the cases for `ETyApp` and `ETyLam` below.) The `Safe 1` for `BEMapEmpty` is wrong and must have slipped through my code review. I'll fix it in a separate PR.",
+        "createdAt" : "2019-08-28T09:47:06Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2c2900d7cd2fd33fbf5de9881afed0fec07bff1f",
+    "line" : 17,
+    "diffHunk" : "@@ -1,1 +137,141 @@      BENumericFromText   -> Safe 1\n      BEToTextNumeric     -> Safe 1\n      BERoundNumeric      -> Safe 1\n      BEAddInt64          -> Safe 1\n      BESubInt64          -> Safe 1"
+  },
+  {
+    "id" : "34855ecf-ccce-4b84-a2c6-70aa0875b535",
+    "prId" : 1480,
+    "comments" : [
+      {
+        "id" : "80c0f956-8c08-467a-816f-ccfb0ed45e59",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Since `CODE_POINTS_TO_TEXT` will throw an exception if there's an invalid code point, this should be\r\n```suggestion\r\n      BECodePointsToText  -> Safe 0\r\n```",
+        "createdAt" : "2019-06-03T13:10:09Z",
+        "updatedAt" : "2019-06-04T13:28:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f4d59d529f1dc909384d1bcbc58e2f901116e90b",
+    "line" : 4,
+    "diffHunk" : "@@ -1,1 +116,120 @@      BEGreater _         -> Safe 2\n      BEToText _          -> Safe 1\n      BECodePointsToText  -> Safe 1\n      BEAddDecimal        -> Safe 1\n      BESubDecimal        -> Safe 1"
+  }
+]

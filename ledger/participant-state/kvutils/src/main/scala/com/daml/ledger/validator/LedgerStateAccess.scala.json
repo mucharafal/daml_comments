@@ -1,0 +1,200 @@
+[
+  {
+    "id" : "3397f2fc-c3d2-4a69-9709-34ec349e8e4c",
+    "prId" : 7071,
+    "comments" : [
+      {
+        "id" : "04b23591-7883-4fc7-b290-b7f43acac669",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Can you add a wrapper class extending this `LedgerStateOperations` that is compatible with the old API so that updating to the latest DAML SDK can be done with a small change, please? This would be important for Java integrations such as Fabric, Besu, etc. Obviously, we will want to deprecate that helper class later.",
+        "createdAt" : "2020-08-17T10:03:26Z",
+        "updatedAt" : "2020-08-17T13:06:21Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5bd2f945-0a77-4305-b48e-bdab98aff88a",
+        "parentId" : "04b23591-7883-4fc7-b290-b7f43acac669",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "This should be good to go as `LedgerStateAccess.v1_4` and `LedgerStateOperations.v1_4`. Can you take a look please?",
+        "createdAt" : "2020-08-17T13:07:49Z",
+        "updatedAt" : "2020-08-17T13:07:50Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a36ed633-ab85-47e2-a71a-ca6220d9c6a9",
+        "parentId" : "04b23591-7883-4fc7-b290-b7f43acac669",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Gonna assume you're happy. 🙂 ",
+        "createdAt" : "2020-08-18T11:50:00Z",
+        "updatedAt" : "2020-08-18T11:50:00Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e9ee9cfaa064ba5ff5e30a2cb4389c7caaf47c71",
+    "line" : 73,
+    "diffHunk" : "@@ -1,1 +75,79 @@    * @return value corresponding to requested key or None in case it does not exist\n    */\n  def readState(key: Key)(implicit executionContext: ExecutionContext): Future[Option[Value]]\n\n  /**"
+  },
+  {
+    "id" : "b5e42e7d-935a-4ec4-b7b7-551b11810137",
+    "prId" : 7063,
+    "comments" : [
+      {
+        "id" : "ceb95a4a-3d9c-4154-bc79-05e807e9210a",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I'm not sure why you're removing the possibility to configure the execution context for the ledger state externally and even less why the execution context has to be a direct one. Can you elaborate?",
+        "createdAt" : "2020-08-10T07:23:02Z",
+        "updatedAt" : "2020-08-10T07:49:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d79fbbfd-6b8c-48ae-ac3d-521003ff6061",
+        "parentId" : "ceb95a4a-3d9c-4154-bc79-05e807e9210a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "This is not for actually reading the state; that gets the execution context from the underlying implementation. (Remind me to rant about why futures are broken in Scala one day.)\r\n\r\nThis is just specifying the context for the `.map(_.head)` operation. The direct execution context basically says \"use whatever context you used for the previous operation\" (similar to [`parasitic` from Scala 2.13](http://www.scala-lang.org/api/2.13.3/scala/concurrent/ExecutionContext$$parasitic$.html), but less nuanced; however, the docs there still apply).\r\n\r\nThis means that we don't need to provide an execution context to the `BatchingLedgerStateOperations` class, because it'll re-use whatever the underlying implementation uses.",
+        "createdAt" : "2020-08-10T07:45:16Z",
+        "updatedAt" : "2020-08-10T07:49:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "46e27e1c-1232-4c80-990c-6c80801e665f",
+        "parentId" : "ceb95a4a-3d9c-4154-bc79-05e807e9210a",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Right, I see now it is applied to `map`.",
+        "createdAt" : "2020-08-10T08:16:21Z",
+        "updatedAt" : "2020-08-10T08:16:21Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "17c0c212-ef15-434d-a304-9fdff6de1c5d",
+        "parentId" : "ceb95a4a-3d9c-4154-bc79-05e807e9210a",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Note that there is some non-determinism in the `DirectExecutionContext` (see this discussion on [StackOverflow](https://stackoverflow.com/questions/61792512/non-determinism-of-synchronous-execution-contexts-a-k-a-parasitic)).",
+        "createdAt" : "2020-08-17T07:40:58Z",
+        "updatedAt" : "2020-08-17T07:40:58Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b9f7ba79-d15c-4531-b35d-ea3f99e08300",
+        "parentId" : "ceb95a4a-3d9c-4154-bc79-05e807e9210a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Absolutely, but I think in this case it's all good.",
+        "createdAt" : "2020-08-17T07:52:00Z",
+        "updatedAt" : "2020-08-17T07:52:01Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "18d594e5fd16fa8e21875d091137dd6808a8611b",
+    "line" : 17,
+    "diffHunk" : "@@ -1,1 +70,74 @@abstract class BatchingLedgerStateOperations[LogResult] extends LedgerStateOperations[LogResult] {\n  override final def readState(key: Key): Future[Option[Value]] =\n    readState(Seq(key)).map(_.head)(DirectExecutionContext)\n\n  override final def writeState(key: Key, value: Value): Future[Unit] ="
+  },
+  {
+    "id" : "6a188e7a-cf7a-4d58-a3e6-bc7b9cd2fb76",
+    "prId" : 4532,
+    "comments" : [
+      {
+        "id" : "83341108-df30-405d-8ccb-956a58fe48b2",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Thanks for these improvements!",
+        "createdAt" : "2020-02-14T16:40:20Z",
+        "updatedAt" : "2020-02-15T15:45:04Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "68d515d40507c5874ecc55d80ce5abcafc53a013",
+    "line" : 23,
+    "diffHunk" : "@@ -1,1 +56,60 @@abstract class BatchingLedgerStateOperations(implicit executionContext: ExecutionContext)\n    extends LedgerStateOperations {\n  override final def readState(key: Key): Future[Option[Value]] =\n    readState(Seq(key)).map(_.head)\n"
+  }
+]

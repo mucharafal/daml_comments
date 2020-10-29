@@ -1,0 +1,68 @@
+[
+  {
+    "id" : "0a7e761c-a6d9-410f-9e01-19bb254a877e",
+    "prId" : 6736,
+    "comments" : [
+      {
+        "id" : "03b03723-a2e5-4e53-88f0-d322f7c9defc",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Does this use the logback config from the current SDK to run the platform version JAR, or, does this use the current SDK config to determine the location of the logback config in the platform version's SDK? Both of these seem bad, but the latter seems worse IMO.\r\n\r\nI don't know a way around this other than re-invoking daml-assistant for the necessary component with a modified DAML_SDK_VERSION, in the cases where the platform version /= SDK version. I.e. we shouldn't be invoking jars across SDK versions directly.\r\n\r\nIf the former, how often do logback configs change? Does running an SDK component with a different logback config affect our ability to hit compatibility targets? My guess is no...\r\n\r\nWe should try really hard to avoid getting into a situation that makes it difficult to change the SDK / platform in the future.",
+        "createdAt" : "2020-07-15T11:04:52Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0852003d-859d-4da6-9f98-b8fe6a40cd99",
+        "parentId" : "03b03723-a2e5-4e53-88f0-d322f7c9defc",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The logback arg is only used in the second argument to `withPlatformProcess` which is only used if we are running a component from the current SDK. If we run a component from the platform version we go via the assistant and don’t pass the logback config.\r\n\r\nAt least that’s what I intended to do, am I missing something?",
+        "createdAt" : "2020-07-15T11:25:10Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "01157a47-a6be-43e7-8262-aa512196ad79",
+        "parentId" : "03b03723-a2e5-4e53-88f0-d322f7c9defc",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Ah, I'm silly. Sorry, of course, you're doing the right thing, but I got worried prematurely and then got distracted and didn't read all the way down to `withPlatformProcess`. Oops, sorry.",
+        "createdAt" : "2020-07-15T11:38:04Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2f53428025130f41ac072e3ffe5471a3febc1495",
+    "line" : 136,
+    "diffHunk" : "@@ -1,1 +297,301 @@    -> IO a\nwithPlatformJar args logbackConf f = do\n    logbackArg <- getLogbackArg (damlSdkJarFolder </> logbackConf)\n    withPlatformProcess args (withJar damlSdkJar [logbackArg] args) f\n"
+  }
+]

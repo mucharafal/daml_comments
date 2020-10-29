@@ -1,0 +1,265 @@
+[
+  {
+    "id" : "b61a94b9-7ae4-40b5-98fb-c8717fd00c3f",
+    "prId" : 7629,
+    "comments" : [
+      {
+        "id" : "db42b066-4a6e-4fd2-95e6-eea32b25b008",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I think I’ve mentioned it before but I expect we need to make the mapping here pretty configurable. For auth0 you are very flexible in defining how scopes are mapped to the token but this isn’t necessarily true for all auth providers and some of them also use arbitrary other arguments. One idea would be to have a jsonnet template (or whatever other template format you come up with, I’m not familiar with what people use for this) to basically define the whole request body here as users need to.\r\n\r\nDefinitely not something for this PR, but something to keep in mind.",
+        "createdAt" : "2020-10-09T15:40:32Z",
+        "updatedAt" : "2020-10-09T15:43:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2e89d312-7f7b-4ce5-bdfb-0b7cac006768",
+        "parentId" : "db42b066-4a6e-4fd2-95e6-eea32b25b008",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, this is auth0 specific. What I've seen in other places is presets for known auth providers. Templating is a nice idea, I'll keep it in mind.",
+        "createdAt" : "2020-10-09T16:42:22Z",
+        "updatedAt" : "2020-10-09T16:42:22Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "58bb1ff30fa2ecc252322bac614323c81e9f5eb1",
+    "line" : 59,
+    "diffHunk" : "@@ -1,1 +107,111 @@            scope = Some(login.claims.toQueryString),\n            state = Some(requestId.toString),\n            audience = Some(\"https://daml.com/ledger-api\")\n          )\n          redirect(config.oauthAuth.withQuery(authorize.toQuery), StatusCodes.Found)"
+  },
+  {
+    "id" : "d4ad6e2d-06d4-4b91-9008-fe778b965c03",
+    "prId" : 7565,
+    "comments" : [
+      {
+        "id" : "e630af5e-7309-4762-92f6-2552b65f95f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I still feel like there must be some builtin pattern for checking the status code and then unmarshalling but I never found one :confused: ",
+        "createdAt" : "2020-10-05T12:00:09Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9310bb3f2b0980068c91493742150006dbe5c473",
+    "line" : 54,
+    "diffHunk" : "@@ -1,1 +126,130 @@                resp <- Http().singleRequest(req)\n                tokenResp <- if (resp.status != StatusCodes.OK) {\n                  Unmarshal(resp).to[String].flatMap { msg =>\n                    Future.failed(new RuntimeException(\n                      s\"Failed to retrieve token at ${req.uri} (${resp.status}): $msg\"))"
+  },
+  {
+    "id" : "9f6e7281-2bcd-4527-a806-f2206f926d7b",
+    "prId" : 7519,
+    "comments" : [
+      {
+        "id" : "76e9e51d-2246-4b6c-9fa0-c426f3c27e58",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I think we might want to make the authority here or probably even better just the full URL configurable. Consider a case where this is running behind NGINX. We might be listening on `localhost` but the external facing host will be different and the path could also be different (e.g. it could be behind some prefix).",
+        "createdAt" : "2020-09-30T08:05:40Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "87beb10c-14cc-4fd9-b1b2-24e9b65d6582",
+        "parentId" : "76e9e51d-2246-4b6c-9fa0-c426f3c27e58",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Good point",
+        "createdAt" : "2020-09-30T08:37:19Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4fd2cbb85e88ccc2b25624f1d6476ec839d66de0",
+    "line" : 31,
+    "diffHunk" : "@@ -1,1 +29,33 @@\n  // TODO[AH] Make the redirect URI configurable, especially the authority. E.g. when running behind nginx.\n  private def toRedirectUri(uri: Uri) =\n    Uri()\n      .withScheme(uri.scheme)"
+  },
+  {
+    "id" : "b6761c3e-4a1b-45f9-90ac-3306d343b67e",
+    "prId" : 7519,
+    "comments" : [
+      {
+        "id" : "f2106c6a-b201-4ca5-859f-9b006c629c77",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe worth extracting the request bodies into separate functions? Totally fine to leave that for separate PRs.",
+        "createdAt" : "2020-09-30T08:10:24Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dd55d313-4437-44ee-a5fc-1c87a8f16f47",
+        "parentId" : "f2106c6a-b201-4ca5-859f-9b006c629c77",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, that's probably better for readability, especially once the other endpoints are filled in. ",
+        "createdAt" : "2020-09-30T08:38:48Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4fd2cbb85e88ccc2b25624f1d6476ec839d66de0",
+    "line" : 50,
+    "diffHunk" : "@@ -1,1 +48,52 @@      path(\"login\") {\n        get {\n          parameters(('redirect_uri.as[Uri], 'claims))\n            .as[Request.Login](Request.Login) {\n              login =>"
+  },
+  {
+    "id" : "d645ae63-aaa0-4033-96fe-286f392dbcc4",
+    "prId" : 7519,
+    "comments" : [
+      {
+        "id" : "2fd9dbc2-84f9-47ad-9758-7917ccb01c1b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We probably need to make the scopes configurable to some degree. Some oauth providers (e.g. auth0) also allow you to use custom parameters instead of scopes to accomplish the same thing. Not quite sure what the best UX for that is and we don’t have to solve this in this PR but something to keep in mind for the future.",
+        "createdAt" : "2020-09-30T08:11:53Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2ae3db8c-793b-48f9-b054-f21c517019ef",
+        "parentId" : "2fd9dbc2-84f9-47ad-9758-7917ccb01c1b",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That's good to know, the implementation of that is probably best guided by a concrete use-case that requires that sort of thing. The mapping from claims to scope generally still needs work. ",
+        "createdAt" : "2020-09-30T08:40:37Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4fd2cbb85e88ccc2b25624f1d6476ec839d66de0",
+    "line" : 61,
+    "diffHunk" : "@@ -1,1 +59,63 @@                      clientId = config.clientId,\n                      redirectUri = toRedirectUri(request.uri),\n                      scope = Some(login.claims),\n                      state = Some(requestId.toString))\n                    redirect("
+  },
+  {
+    "id" : "b105947e-074d-4016-af09-ca41a470ee67",
+    "prId" : 7519,
+    "comments" : [
+      {
+        "id" : "ba9ecd08-aaa5-44b3-85de-210de3773fc0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe unauthorized would be a more appropriate status code?",
+        "createdAt" : "2020-09-30T08:13:03Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "668b0164-35c2-4598-a436-6c83c82d3a77",
+        "parentId" : "ba9ecd08-aaa5-44b3-85de-210de3773fc0",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "The idea behind 404 was that the login request under the given `state` was not found. 401 seems problematic, the `/cb` is part of the authentication flow, not something that requires authentication itself, also 401 requires a challenge in the [WWW-Authenticate header field](https://tools.ietf.org/html/rfc7235#section-3.1) which doesn't seem appropriate here. ",
+        "createdAt" : "2020-09-30T08:56:38Z",
+        "updatedAt" : "2020-09-30T09:47:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4fd2cbb85e88ccc2b25624f1d6476ec839d66de0",
+    "line" : 86,
+    "diffHunk" : "@@ -1,1 +84,88 @@                    redirectUri match {\n                      case None =>\n                        complete(StatusCodes.NotFound)\n                      case Some(redirectUri) =>\n                        val body = OAuthRequest.Token("
+  }
+]

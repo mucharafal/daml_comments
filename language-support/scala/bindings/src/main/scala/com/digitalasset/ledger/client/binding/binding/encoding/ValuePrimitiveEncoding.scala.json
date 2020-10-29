@@ -1,0 +1,106 @@
+[
+  {
+    "id" : "22af97fc-8cb1-4ed8-94c9-4927465dcfc4",
+    "prId" : 3522,
+    "comments" : [
+      {
+        "id" : "59f89cbf-c47e-45c1-a77a-e6bef5687bc7",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Finally, the choice of `imm.Map` will variously lead to overlapping instances here, which are rejected with a compiler error. And a good thing too, as they would have incompatible implementations, each wrong for the other. So `P.Map` or `P.GenMap` will need a newtype.",
+        "createdAt" : "2019-11-19T17:26:09Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "aac1e217-f7b3-4940-8f7f-b0b04b27b767",
+        "parentId" : "59f89cbf-c47e-45c1-a77a-e6bef5687bc7",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "We still have overlapping instances with `InsertOrdMap` (Since its implement `Map`).  \r\nDo you think I should use `SortedMap` for `P.Map` ?",
+        "createdAt" : "2019-11-21T22:14:59Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "31330760-b24f-47ee-a459-19413841d569",
+        "parentId" : "59f89cbf-c47e-45c1-a77a-e6bef5687bc7",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "No, use an unboxed newtype for `immutable.Map` as the value of `type P.TextMap` instead. ~If you [define `subst`](https://failex.blogspot.com/2017/04/the-high-cost-of-anyval-subclasses.html#markdown-header-when-is-a-label-a-string-when-is-it-not), you can set `val TextMap: ImmutableMapFactory[TextMap] = subst(Map)`.~\r\n\r\nNot sure why I was trying to make your life harder since `object OnlyPrimitive` substs everything automatically; naturally `override val TextMap = Map` will satisfy the abstract signature with no further ritual.",
+        "createdAt" : "2019-11-22T17:28:29Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8ee28d38-b7e5-4e17-bb58-db00249fd06d",
+        "parentId" : "59f89cbf-c47e-45c1-a77a-e6bef5687bc7",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "To make this perfectly smooth will require a few other changes:\r\n\r\n1. add `extends PrimitiveInstances` to `abstract class Primitive`\r\n2. define empty `abstract class PrimitiveInstances`\r\n3. in `object PrimitiveInstances`, define\r\n\r\n```scala\r\nimplicit def TextMapCanBuildFrom[K, V]\r\n    : CanBuildFrom[Primitive.TextMap.Coll, (K, V), Primitive.TextMap[K, V]] = ...\r\n```\r\n\r\nwhere implementation derives from `Primitive.TextMap.canBuildFrom` probably by means of some private member of `OnlyPrimitive`.\r\n\r\n4. use `-Xsource:2.13` where `map` and friends return the wrong type. We document that we expect Scala codegen users to use this option anyway.",
+        "createdAt" : "2019-11-22T17:55:03Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bf33c414-a276-4b02-8349-3526785807d8",
+        "parentId" : "59f89cbf-c47e-45c1-a77a-e6bef5687bc7",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "`binding` changes in ff923d997a; did not check the remainder of modules.",
+        "createdAt" : "2019-11-25T18:00:44Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "16fc9a85aea14851e9ec58117022ef66e1aee8ab",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +44,48 @@  implicit def valueTextMap[A: TC]: TC[P.TextMap[A]]\n\n  implicit def valueGenMap[K: TC, V: TC]: TC[P.GenMap[K, V]]\n}\n"
+  }
+]

@@ -1,0 +1,153 @@
+[
+  {
+    "id" : "92309d42-cc42-453d-a584-b88457346313",
+    "prId" : 4953,
+    "comments" : [
+      {
+        "id" : "3deab421-9cb8-43d4-a3aa-5f950087c47c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This reasonably does some defensive copying but the usages I see can either use an `InputStream` (when writing to the database) (`ByteArray` has a `newInput` method for that) and perhaps the `decodingStream` method on `BaseEncoding` to format the string for the API.",
+        "createdAt" : "2020-03-17T14:41:30Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "07198a54-3ca6-4238-ba9b-6d4f61da2246",
+        "parentId" : "3deab421-9cb8-43d4-a3aa-5f950087c47c",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I'll transform the reading and writing from the database to use `InputStream`. The string *for* the API would need to be encoded, and would end up being something like this:\r\n\r\n```\r\n  def toApiString(offset: Offset): Ref.LedgerString = {\r\n    val writer = new StringWriter()\r\n    val os = BaseEncoding.base16.encodingStream(writer)\r\n    ByteStreams.copy(offset.toInputStream, os)\r\n    Ref.LedgerString.assertFromString(writer.toString)\r\n  }\r\n```\r\nNot sure this is really worth it for >40 bytes.",
+        "createdAt" : "2020-03-17T16:48:42Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ad722050-f0ff-4752-bc00-4b8b729199b7",
+        "parentId" : "3deab421-9cb8-43d4-a3aa-5f950087c47c",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "See https://github.com/digital-asset/daml/pull/4953/commits/c2b39cd378e657de10e791b99fadfd84330c416f#diff-3c79ae69c286b56286dda4655d1eceb7R22-R27",
+        "createdAt" : "2020-03-17T17:25:41Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8c9c3ccf491dcebc26c083911d9714d2fa5d032f",
+    "line" : 48,
+    "diffHunk" : "@@ -1,1 +27,31 @@    Offset.comparator.compare(value, that.value)\n\n  def toByteArray: Array[Byte] = value.toByteArray\n\n  def toInputStream: InputStream = value.newInput()"
+  },
+  {
+    "id" : "855306ea-8b1a-44ed-b5fe-950f1e5a9d84",
+    "prId" : 4953,
+    "comments" : [
+      {
+        "id" : "cd37a8ab-fea4-4f28-9bbc-968284dfd828",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Just had a thought: shouldn't `Offset` have `equals` and `hashCode`? Sure, they're opaque, but you should at least be able to put them in a `Set` or check that a value sent over the wire is the same as one in memory.\r\n\r\nIt didn't need it before because it was a `case class` before.",
+        "createdAt" : "2020-03-17T17:38:31Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "eb82b186-592a-4fa4-a89a-0dbb0a020bef",
+        "parentId" : "cd37a8ab-fea4-4f28-9bbc-968284dfd828",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Value classes don't exist at runtime, so `ByteString`'s `hashCode` and `equals` are used already.",
+        "createdAt" : "2020-03-17T17:42:46Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ce44567d-d82c-49d7-8747-d4eed6e0c189",
+        "parentId" : "cd37a8ab-fea4-4f28-9bbc-968284dfd828",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Makes sense. I'd feel a lot more comfortable if `Offset` had some test cases though. (Not sure why I didn't notice that before.)",
+        "createdAt" : "2020-03-17T17:44:43Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0dece7af-3d43-428c-b582-ec2436255b0a",
+        "parentId" : "cd37a8ab-fea4-4f28-9bbc-968284dfd828",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "There's not a whole lot to `Offset` itself. There are test cases for `KVOffset`, but that is around checking the bit shifting magic (which as you pointed out only worked incidentally).",
+        "createdAt" : "2020-03-17T19:45:55Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8c9c3ccf491dcebc26c083911d9714d2fa5d032f",
+    "line" : 38,
+    "diffHunk" : "@@ -1,1 +22,26 @@  *\n  */\nfinal class Offset(private val value: ByteString) extends AnyVal with Ordered[Offset] {\n\n  override def compare(that: Offset): Int ="
+  }
+]

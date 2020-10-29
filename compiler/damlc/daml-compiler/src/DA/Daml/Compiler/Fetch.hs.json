@@ -1,0 +1,180 @@
+[
+  {
+    "id" : "bd804e1e-e7c3-4861-8620-cbd6fd436b4d",
+    "prId" : 5225,
+    "comments" : [
+      {
+        "id" : "d48af081-89b6-409a-afcb-e74724eb132a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This seems like a very arbitrary place for this to live in. Would it make sense to move this into the Haskell ledger bindings? Or maybe a helper library somewhere?",
+        "createdAt" : "2020-03-27T07:44:25Z",
+        "updatedAt" : "2020-03-27T17:24:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "10d4db63259ee00af10a40ad04d1b5e3a64d75dc",
+    "line" : 25,
+    "diffHunk" : "@@ -1,1 +23,27 @@import qualified SdkVersion\n\ndata LedgerArgs = LedgerArgs\n  { host :: String\n  , port :: Int"
+  },
+  {
+    "id" : "3eb0e6bc-e859-46c1-9a68-7956b1ae7a39",
+    "prId" : 5225,
+    "comments" : [
+      {
+        "id" : "aa298a48-82ec-439a-9e3b-6aa40c96db29",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Instead of returning a list from here and then doing a partial pattern match afterwards, how about we just return `((PackageId, Package), [(PackageId, Package)])` (or a non-empty list if you prefer that) from `downloadAllReachablePackages`?",
+        "createdAt" : "2020-03-27T07:45:42Z",
+        "updatedAt" : "2020-03-27T17:24:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "10d4db63259ee00af10a40ad04d1b5e3a64d75dc",
+    "line" : 38,
+    "diffHunk" : "@@ -1,1 +36,40 @@fetchDar :: LedgerArgs -> LF.PackageId -> FilePath -> IO Int\nfetchDar ledgerArgs rootPid saveAs = do\n  xs <- downloadAllReachablePackages ledgerArgs rootPid\n  [pkg] <- pure [ pkg | (pid,pkg) <- xs, pid == rootPid ]\n  let (dalf,pkgId) = LFArchive.encodeArchiveAndHash pkg"
+  },
+  {
+    "id" : "00c23545-4ff0-48f4-b99e-1b4d6d20764c",
+    "prId" : 5225,
+    "comments" : [
+      {
+        "id" : "d90e4581-c676-41bc-8876-8c9c049dd633",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    loop :: Map LF.PackageId LF.Package -> Set LF.PackageId -> IO Map LF.PackageId LF.Package\r\n```\r\nNot really worried about performance here (although I wouldn’t be surprised if people end up with a DAR referencing 100 packages) but using lists for maps and sets doesn’t show you that it’s unique. For pattern matching you can use `Set.minView`.",
+        "createdAt" : "2020-03-27T07:58:55Z",
+        "updatedAt" : "2020-03-27T17:24:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "10d4db63259ee00af10a40ad04d1b5e3a64d75dc",
+    "line" : 72,
+    "diffHunk" : "@@ -1,1 +70,74 @@downloadAllReachablePackages ledgerArgs pid = loop [] [pid]\n  where\n    loop :: [(LF.PackageId,LF.Package)] -> [LF.PackageId] -> IO [(LF.PackageId,LF.Package)]\n    loop acc = \\case\n      [] -> return acc"
+  },
+  {
+    "id" : "7070d98f-882c-418a-a724-09635230124e",
+    "prId" : 5225,
+    "comments" : [
+      {
+        "id" : "a0ff5dea-652d-4294-beaa-96c1a579796a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "At some point, I’m going to patch that protobuf library just so I don’t have to deal with lazy text values :slightly_smiling_face: ",
+        "createdAt" : "2020-03-27T08:03:17Z",
+        "updatedAt" : "2020-03-27T17:24:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "10d4db63259ee00af10a40ad04d1b5e3a64d75dc",
+    "line" : 100,
+    "diffHunk" : "@@ -1,1 +98,102 @@  where\n    convPid :: LF.PackageId -> L.PackageId\n    convPid (LF.PackageId text) = L.PackageId $ TL.fromStrict text\n\nrunWithLedgerArgs :: LedgerArgs -> L.LedgerService a -> IO a"
+  },
+  {
+    "id" : "65b52b56-a2f2-4f29-8539-da965eceb11c",
+    "prId" : 5225,
+    "comments" : [
+      {
+        "id" : "50d28944-fa74-4508-a63f-d0194ae9d68d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":+1: Thanks!",
+        "createdAt" : "2020-03-27T16:28:42Z",
+        "updatedAt" : "2020-03-27T17:24:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "09483d33-c3ed-4021-83d8-1c01f425be44",
+        "parentId" : "50d28944-fa74-4508-a63f-d0194ae9d68d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "woo hoo :)",
+        "createdAt" : "2020-03-27T16:31:43Z",
+        "updatedAt" : "2020-03-27T17:24:55Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "70bd6011-c2cd-4aae-a5bf-86374dd43bd3",
+        "parentId" : "50d28944-fa74-4508-a63f-d0194ae9d68d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Now, just hope I'll finally get green on on the CI...",
+        "createdAt" : "2020-03-27T16:32:12Z",
+        "updatedAt" : "2020-03-27T17:24:55Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "10d4db63259ee00af10a40ad04d1b5e3a64d75dc",
+    "line" : 48,
+    "diffHunk" : "@@ -1,1 +46,50 @@        , let bs = BSL.toStrict bsl\n        ]\n  let (pName,pVersion) = do\n        let LF.Package {packageMetadata} = pkg\n        case packageMetadata of"
+  }
+]

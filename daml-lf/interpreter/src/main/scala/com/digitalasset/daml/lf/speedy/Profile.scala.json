@@ -1,0 +1,162 @@
+[
+  {
+    "id" : "d949d33a-80a3-4301-9f30-f1f5d47bd5c7",
+    "prId" : 6151,
+    "comments" : [
+      {
+        "id" : "3fc1907f-dd86-4115-877a-ab62ede4461d",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I think `java.nio.file.Files` is your friend here.\r\n\r\n```suggestion\r\n        Files.write(path, Seq(toJson.compactPrint).asJava)\r\n```",
+        "createdAt" : "2020-05-29T11:53:33Z",
+        "updatedAt" : "2020-05-29T12:04:10Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d2c6b0b8-5cb6-4e3b-9d64-1feffde0c097",
+        "parentId" : "3fc1907f-dd86-4115-877a-ab62ede4461d",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Cool. I didn't know about that. I'll apply it in a follow-up PR.",
+        "createdAt" : "2020-05-29T13:02:48Z",
+        "updatedAt" : "2020-05-29T13:02:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fa42faf4fffb4e6c0891d323b87bdf1cb115576f",
+    "line" : 30,
+    "diffHunk" : "@@ -1,1 +95,99 @@        val writer = new BufferedWriter(new FileWriter(path.toFile()))\n        writer.write(this.toJson.compactPrint)\n        writer.close()\n      }\n    }"
+  },
+  {
+    "id" : "47d8bb67-60c3-42cf-baec-33467d34247c",
+    "prId" : 5957,
+    "comments" : [
+      {
+        "id" : "e085d6d7-297b-48f8-b79e-b4334929414b",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Perhaps you could use an unboxed newtype or `scalaz.Tag` for the `AnyRef` here? This would not entail any allocations. In the former case (bespoke newtype) we could also use it to proscribe the set of types permitted to be used for labels to those supported by `Event#label`, again without implying any allocation. To carry the latter to its conclusion,\r\n\r\n```scala\r\ntype Label = LabelModule.Module.T\r\n\r\nsealed abstract class LabelModule {\r\n  type T <: AnyRef\r\n  private def apply(t: AnyRef): T\r\n}\r\nobject LabelModule {\r\n  val Module: LabelModule = new LabelModule {\r\n    type T = AnyRef\r\n    override private def apply(t: T) = t\r\n  }\r\n\r\n  // assumes -Xsource:2.13 in clients, which we should just do always,\r\n  // this is in scope wherever the expected type is `Label`\r\n  implicit def fromAllowed[T: Allowed](t: T): Label = Module(t)\r\n\r\n  @implicitNotFound(msg = \"Values of type ${T} are not known, renderable Labels\")\r\n  final class Allowed[-T] private()\r\n  object Allowed {\r\n    private[this] val allowAll = new Allowed[Any]\r\n    implicit val anonClosure: Allowed[AnonymousClosure.type] = allowAll\r\n    implicit val str: Allowed[String] = allowAll\r\n    // and so on for other permitted labels\r\n  }\r\n}\r\n```",
+        "createdAt" : "2020-05-15T20:26:42Z",
+        "updatedAt" : "2020-05-18T16:23:38Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "001e0f11-1fec-4f14-8497-c75a032a6c16",
+        "parentId" : "e085d6d7-297b-48f8-b79e-b4334929414b",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I don't fully understand all the details of this. I'll play around with it and put it in a follow-up PR.",
+        "createdAt" : "2020-05-18T16:21:58Z",
+        "updatedAt" : "2020-05-18T16:23:38Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "da2d66d3-358a-4287-80e2-01fb0e13b73a",
+        "parentId" : "e085d6d7-297b-48f8-b79e-b4334929414b",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "#6371",
+        "createdAt" : "2020-06-16T19:03:35Z",
+        "updatedAt" : "2020-06-16T19:03:35Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b07b9b6bb0bb079c6a380804dc18a83f562c379",
+    "line" : 14,
+    "diffHunk" : "@@ -1,1 +12,16 @@  * since this might skew the profile. Instead, we convert the labels to strings\n  * when we write out the profile.\n  */\nfinal class Profile {\n  import Profile._"
+  },
+  {
+    "id" : "011f954b-a374-41e0-8cfc-0d3a41d63152",
+    "prId" : 5957,
+    "comments" : [
+      {
+        "id" : "19bd73e1-c867-4ed1-9714-33b67a263ec4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "@S11001001 @remyhaemmerle-da Is this `x.asScala.toList` construction alright or is there something better?",
+        "createdAt" : "2020-05-18T16:19:59Z",
+        "updatedAt" : "2020-05-18T16:23:38Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7e837903-83ee-4a15-bf8a-9bad0742e457",
+        "parentId" : "19bd73e1-c867-4ed1-9714-33b67a263ec4",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It is perfectly sensible. If your goal type is not `List`, then use whatever goal type you want instead with `to[...]` (we even support `ImmArray`).",
+        "createdAt" : "2020-05-18T16:24:54Z",
+        "updatedAt" : "2020-05-18T16:27:35Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b07b9b6bb0bb079c6a380804dc18a83f562c379",
+    "line" : 108,
+    "diffHunk" : "@@ -1,1 +106,110 @@        val frameIndices = new HashMap[String, Int]()\n        var endValue = 0L\n        val events = profile.events.asScala.toList.map { event =>\n          val eventType = if (event.open) \"O\" else \"C\"\n          val label = event.label"
+  }
+]

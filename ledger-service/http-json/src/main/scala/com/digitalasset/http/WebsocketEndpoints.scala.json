@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "ace5023c-a3e0-4dda-bca9-7ff2ddc84490",
+    "prId" : 3796,
+    "comments" : [
+      {
+        "id" : "0e6e77e2-7917-4267-9a7a-1dfee7c8ec6d",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I would call this endpoint `/transactions`, `connect` does not add anything to it. Unless it is a common practice to call websocket endpoints this way.\r\ncc @bame-da ",
+        "createdAt" : "2019-12-11T20:37:53Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "81a307f5-dac1-4841-8e8a-d955df28854f",
+        "parentId" : "0e6e77e2-7917-4267-9a7a-1dfee7c8ec6d",
+        "author" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "body" : "yeah, I added this trying to follow `contracts/search`, `command/create` convention and imply it's not a REST endpoint by `/connect` . On the other hand client may know from `ws://` so I can remove `/connect` if more people think it's useless",
+        "createdAt" : "2019-12-11T21:17:21Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "de976ed59d6d521657884322490436c95dece760",
+    "line" : 32,
+    "diffHunk" : "@@ -1,1 +30,34 @@\n  lazy val transactionWebSocket: PartialFunction[HttpRequest, Future[HttpResponse]] = {\n    case req@HttpRequest(GET, Uri.Path(\"/transaction/connect\"), _, _, _) =>\n      req.header[UpgradeToWebSocket] match {\n        case Some(upgradeReq) =>"
+  },
+  {
+    "id" : "d9fffcdf-cdf4-4cd4-93db-6334124ffbd7",
+    "prId" : 3796,
+    "comments" : [
+      {
+        "id" : "3041bd2c-5ea7-4ddf-9c04-9d5c86cce5fc",
+        "parentId" : null,
+        "author" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "body" : "Note: here we use subprotocols to find jwts, it should be in this format: `jwt.token.{bearer_token}, daml.ws.auth`\r\nThis `daml.ws.auth` is necessary to pass along the handshake to a specific subprotocol we accept. cc @bame-da @leo-da ",
+        "createdAt" : "2019-12-11T21:21:24Z",
+        "updatedAt" : "2019-12-11T21:42:46Z",
+        "lastEditedBy" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "de976ed59d6d521657884322490436c95dece760",
+    "line" : 58,
+    "diffHunk" : "@@ -1,1 +56,60 @@\n  private def findJwtFromSubProtocol(upgradeToWebSocket: UpgradeToWebSocket): Unauthorized \\/ Jwt = {\n    upgradeToWebSocket.requestedProtocols.collectFirst {\n      case p if p startsWith tokenPrefix => Jwt(p.replace(tokenPrefix, \"\"))\n    }.toRightDisjunction(Unauthorized(s\"Missing required $tokenPrefix.[token] in subprotocol\"))"
+  }
+]

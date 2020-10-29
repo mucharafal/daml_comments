@@ -1,0 +1,392 @@
+[
+  {
+    "id" : "4d9252a4-204d-43e4-aabd-8402abc1f3b3",
+    "prId" : 7546,
+    "comments" : [
+      {
+        "id" : "0a58f519-9cb2-453a-8823-aba42cb37a60",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m confused by this. `thisSdkVer` is now in the GHC format. However `edSdkVersions` is the one read from the manifest which with this change should now be the actual SDK version. What am I missing?",
+        "createdAt" : "2020-10-01T14:42:57Z",
+        "updatedAt" : "2020-10-02T09:53:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2dedf69e-653c-4592-9c71-7daff49d0288",
+        "parentId" : "0a58f519-9cb2-453a-8823-aba42cb37a60",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "You're missing nothing. I think I'm missing something now though. Where did we actually need the \"sanitized\" version? To me this looks like the only place we use the `PackageSdkVersion` is in the manifest.",
+        "createdAt" : "2020-10-01T15:03:23Z",
+        "updatedAt" : "2020-10-02T09:53:40Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9d23933c-9c8f-4506-a232-1e6f15fcb74f",
+        "parentId" : "0a58f519-9cb2-453a-8823-aba42cb37a60",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m a bit confused why CI even passes. Shouldn’t the comparison that dependencies have the same sdk version fail with this change? Does it only work because this is not a release build so the SDK version is 0.0.0? What happens if you set `DAML_SDK_RELEASE_VERSION` to a snapshot?\r\n\r\nAs to where this is used: We need to use the mangled version when building `daml-stdlib` and `daml-prim` but that is set in a Bazel build rather than our Haskell code. I’m not quite sure if we need the mangled version in our Haskell code.",
+        "createdAt" : "2020-10-01T15:54:22Z",
+        "updatedAt" : "2020-10-02T09:53:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "32fcee00-12dc-46d4-8352-4a96bf4890ff",
+        "parentId" : "0a58f519-9cb2-453a-8823-aba42cb37a60",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "It looks like we don't need the mangled version in our Haskell code at all. I've removed it and ran\r\n```sh\r\nDAML_SDK_RELEASE_VERSION=0.0.0-snapshot.20200930.5312.0.b9a1905d daml-sdk-head --skip-jars\r\n```\r\nThen I've built two projects `foo` and `bar` using that SDK where `bar` depends on `foo` and everything worked fine.\r\n\r\nI'm wondering if we should add a test for this but I assume it doesn't make too much sense since the release PRs for snapshot releases would catch such issues.",
+        "createdAt" : "2020-10-02T10:05:16Z",
+        "updatedAt" : "2020-10-02T10:05:16Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c0378ee0-fd38-414c-b7a5-d44846182e1a",
+        "parentId" : "0a58f519-9cb2-453a-8823-aba42cb37a60",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Ah, and\r\n```sh\r\nDAML_SDK_RELEASE_VERSION=0.0.0-snapshot.20200930.5312.0.b9a1905d bt //compiler/damlc/tests:packaging\r\n```\r\nworks as well.",
+        "createdAt" : "2020-10-02T10:11:33Z",
+        "updatedAt" : "2020-10-02T10:11:33Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2cf36bbdf603bc2c2de0942bc119265f4d64756f",
+    "line" : 14,
+    "diffHunk" : "@@ -1,1 +81,85 @@    depsExtracted <- mapM extractDar deps\n\n    let uniqSdkVersions = nubSort $ thisSdkVer : map edSdkVersions depsExtracted\n    let depsSdkVersions = map edSdkVersions depsExtracted\n    unless (all (== thisSdkVer) depsSdkVersions) $"
+  },
+  {
+    "id" : "3b404415-909c-4d61-be9f-7f80a6a3af41",
+    "prId" : 5222,
+    "comments" : [
+      {
+        "id" : "b2b6d846-ac1c-418e-80fc-53b1944feb2b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Feels weird to me to exit from anywhere other than a `main`, but I'll leave it to you to decide the style of the project. Is it worth trying to catch higher up and explicitly print and exit there?",
+        "createdAt" : "2020-03-26T18:35:15Z",
+        "updatedAt" : "2020-03-26T18:35:18Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "07d10265-70e2-4058-8916-5086a5d82bf2",
+        "parentId" : "b2b6d846-ac1c-418e-80fc-53b1944feb2b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`exitFailure` still throws an exception if you really want to catch it somewhere up. But generally, compilers can be much more lenient wtr to crashing than long-running processes and if we cannot initialize the package db everything is broken anyway.",
+        "createdAt" : "2020-03-26T18:38:30Z",
+        "updatedAt" : "2020-03-26T18:38:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3e4a9b2ad073c7ebe422a16088dab9642f2bfade",
+    "line" : 41,
+    "diffHunk" : "@@ -1,1 +516,520 @@    hPutStrLn stderr msg\n    hFlush stderr\n    exitFailure"
+  },
+  {
+    "id" : "3d8adb8d-8349-4062-962f-679b27e86e3d",
+    "prId" : 4547,
+    "comments" : [
+      {
+        "id" : "aa8c059d-c7b6-493e-b750-404195b57674",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Should say `daml damlc init` instead of `daml init`.\r\n\r\n`daml damlc init` should really be `daml damlc init-package-db` or so.",
+        "createdAt" : "2020-02-18T10:56:41Z",
+        "updatedAt" : "2020-02-18T10:56:42Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bdbde8693bbec46d4f6b6389be185d35834b653c",
+    "line" : 30,
+    "diffHunk" : "@@ -1,1 +225,229 @@    dbPath = projectPackageDatabase </> lfVersionString (optDamlLfVersion opts)\n    clearPackageDb = do\n        -- Since we reinitialize the whole package db during `daml init` anyway,\n        -- we clear the package db before to avoid\n        -- issues during SDk upgrades. Once we have a more clever mechanism than"
+  },
+  {
+    "id" : "5c4c5e29-ed7c-4399-a3c2-c85492488b71",
+    "prId" : 4421,
+    "comments" : [
+      {
+        "id" : "29314e77-e3e4-4537-b057-815041b753c4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Same here package ids might be useful.",
+        "createdAt" : "2020-02-06T12:17:47Z",
+        "updatedAt" : "2020-02-06T14:11:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "165839e4-2f7b-4931-90d8-7da49cb53ed9",
+        "parentId" : "29314e77-e3e4-4537-b057-815041b753c4",
+        "author" : null,
+        "body" : "Added here too",
+        "createdAt" : "2020-02-06T12:27:20Z",
+        "updatedAt" : "2020-02-06T14:11:54Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ded024d96b658daf9adac370050f78ba296dd20d",
+    "line" : 11,
+    "diffHunk" : "@@ -1,1 +163,167 @@            ]\n    when (not $ MS.null unitIdConflicts) $ do\n        fail $ \"Transitive dependencies with same unit id but conflicting package ids: \"\n            ++ intercalate \", \"\n                [ show k <> \" [\" <> intercalate \",\" (map show (Set.toList v)) <> \"]\""
+  },
+  {
+    "id" : "d7ecd222-9131-4c93-b40e-ce7bda9ed0c0",
+    "prId" : 4391,
+    "comments" : [
+      {
+        "id" : "e435c04d-e600-4a3f-bfd9-bb8b7a7428c1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe add a comment here “When compiling dummy interface files for a data-dependency we know all package flags so we don’t need to infer anything.”.",
+        "createdAt" : "2020-02-18T08:15:29Z",
+        "updatedAt" : "2020-02-18T11:12:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e29eddf5d338724158422a9fd62bf47e4131c5c1",
+    "line" : 14,
+    "diffHunk" : "@@ -1,1 +282,286 @@            -- When compiling dummy interface files for a data-dependency,\n            -- we know all package flags so we don’t need to infer anything.\n            , optInferDependantPackages = InferDependantPackages False\n            }\n"
+  },
+  {
+    "id" : "9bcdf38a-14eb-4f79-89f4-2bae1c6fd9ad",
+    "prId" : 3860,
+    "comments" : [
+      {
+        "id" : "7bfe0f34-d7cb-4c35-ab24-0c8b78fa3591",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Just to be sure, this is because\r\n> -- [...] This is _only_\r\n    -- relevant for `compile` which at the moment is only used for building daml-stdlib\r\n    -- and daml-prim.\r\n\r\n?",
+        "createdAt" : "2019-12-16T13:01:42Z",
+        "updatedAt" : "2019-12-16T13:01:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a782c68e-e3be-4b1b-b7c5-ddf05bda3b1d",
+        "parentId" : "7bfe0f34-d7cb-4c35-ab24-0c8b78fa3591",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "yep, I’ll remove it completely from the `Options` record in a follow up PR. the current state makes no sense.",
+        "createdAt" : "2019-12-16T13:04:08Z",
+        "updatedAt" : "2019-12-16T13:04:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "89e5cb64394b55687cea69a70479dd1ac91c74e6",
+    "line" : 92,
+    "diffHunk" : "@@ -1,1 +294,298 @@                opts\n                    { optWriteInterface = False\n                    , optIfaceDir = Nothing\n                    , optPackageDbs = projectPackageDatabaseAbs : optPackageDbs opts\n                    , optIsGenerated = True"
+  },
+  {
+    "id" : "8d9dab6f-06c8-4a39-aec8-24bc68d4ab51",
+    "prId" : 3749,
+    "comments" : [
+      {
+        "id" : "ecd56298-075f-474a-bac2-4806386ae56a",
+        "parentId" : null,
+        "author" : null,
+        "body" : "If possible extract `either (fail . DA.Pretty.renderPretty) pure` as a separate function (like `requiredE` from the daml-assistant codebase).\r\n\r\n```suggestion\r\n            requiredE $\r\n```",
+        "createdAt" : "2019-12-05T14:22:40Z",
+        "updatedAt" : "2019-12-06T08:28:36Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f7966e75-4b5b-4f8b-9614-5a9c5d1d9e3b",
+        "parentId" : "ecd56298-075f-474a-bac2-4806386ae56a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ll leave it for now but I agree that we should factor this out eventually.",
+        "createdAt" : "2019-12-06T08:30:51Z",
+        "updatedAt" : "2019-12-06T08:30:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1a0ffd6813e1bbccf2096df10bb480c1e97d5008",
+    "line" : 126,
+    "diffHunk" : "@@ -1,1 +102,106 @@    pkgs <- forM allDalfs $ \\(name, dalf) -> do\n        (pkgId, package) <-\n            either (fail . DA.Pretty.renderPretty) pure $\n            Archive.decodeArchive Archive.DecodeAsMain dalf\n        pure (pkgId, package, dalf, stringToUnitId (parseUnitId name pkgId))"
+  },
+  {
+    "id" : "50d74996-9d50-4cbd-bec1-e4501a933cf2",
+    "prId" : 3633,
+    "comments" : [
+      {
+        "id" : "587ba0ec-4622-4908-a112-c7b598fb8a84",
+        "parentId" : null,
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Would it be worth unifying all instances of the string \"Sdk\" into a single named variable?\r\n(I count 10 places in the code base)",
+        "createdAt" : "2019-11-26T16:19:05Z",
+        "updatedAt" : "2019-11-26T16:19:27Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f3b48a97-a280-4ba3-ab49-0bae81f18c3f",
+        "parentId" : "587ba0ec-4622-4908-a112-c7b598fb8a84",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "You're right there.",
+        "createdAt" : "2019-11-26T17:04:14Z",
+        "updatedAt" : "2019-11-26T17:04:14Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "88b0b56f-62c0-4a22-951a-05f75ac7bece",
+        "parentId" : "587ba0ec-4622-4908-a112-c7b598fb8a84",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I'll do it in a follow PR.",
+        "createdAt" : "2019-11-26T18:28:06Z",
+        "updatedAt" : "2019-11-26T18:28:06Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8db0a3656e6463846bbf7e0e4f7962b02bda3c26",
+    "line" : 9,
+    "diffHunk" : "@@ -1,1 +126,130 @@                        generateTemplateInstancesPkgFromLf\n                            getUid\n                            (Just \"Sdk\")\n                            pkgId\n                            dalf"
+  }
+]

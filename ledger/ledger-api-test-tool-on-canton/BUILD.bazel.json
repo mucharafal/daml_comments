@@ -1,0 +1,96 @@
+[
+  {
+    "id" : "eb296cfd-82df-4e5d-8651-5058d6aad74b",
+    "prId" : 7322,
+    "comments" : [
+      {
+        "id" : "0a1e9fcb-b6cc-4293-b727-94b00c88775c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I understand this was useful to find the issue, but I don't think it's a good idea to keep this on CI. It would mean that an error on a Canton conformance test would yield _extremely_ long and likely difficult to read logs.",
+        "createdAt" : "2020-09-04T11:05:47Z",
+        "updatedAt" : "2020-09-04T11:43:58Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9cf18b7f-2aa2-4a82-be8f-1f2a85d07455",
+        "parentId" : "0a1e9fcb-b6cc-4293-b727-94b00c88775c",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "Yeah, I considered this as well - indeed the log file has 300K lines.\r\n\r\nI will take a look at how long the log file is if I still only log canton at INFO, but set the DAML-repo classes to log at DEBUG. That ended up being key to tracking down the issue and also those logs are more familiar and easier to read for a \"general daml ledger\" audience.",
+        "createdAt" : "2020-09-04T11:24:28Z",
+        "updatedAt" : "2020-09-04T11:43:58Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1ae25bfe-aa8e-46e4-8abc-6f0f0be5904a",
+        "parentId" : "0a1e9fcb-b6cc-4293-b727-94b00c88775c",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "Ok, not logging canton at DEBUG gets the log down to about 64K while still providing insights into \"reads\" performed by the tests. Particularly many of the more \"obscure\", canton-concept lines (such as those gathering confirmation consensus) are now gone (except for the results logged at info).",
+        "createdAt" : "2020-09-04T11:48:51Z",
+        "updatedAt" : "2020-09-04T11:48:52Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7425c893bb55f8d43f90d38362173cbf77d2cb11",
+    "line" : 4,
+    "diffHunk" : "@@ -1,1 +55,59 @@        \":canton\",\n        \":canton.conf\",\n        \":logback-debug.xml\",\n        \"@coreutils_nix//:bin/base64\",\n        \"@curl_nix//:bin/curl\","
+  },
+  {
+    "id" : "69e248db-ac98-4e7d-a584-8ed69edf2041",
+    "prId" : 4918,
+    "comments" : [
+      {
+        "id" : "c3687384-824c-4298-988d-a33d118619c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Makes sense to me. Thanks for the workaround.",
+        "createdAt" : "2020-03-10T12:00:52Z",
+        "updatedAt" : "2020-03-10T12:00:56Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "98152ced1367727b60777734a318eb35be308e7d",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +68,72 @@    # NOTE (MK): Canton tries to access ~/.ammonite/cache for the coursier cache which fails with sandboxing\n    # and caching. This might be fixable by overriding COURSIER_CACHE.\n    tags = [\"local\"],\n    test_tool_args = [\n        \"--verbose\","
+  }
+]

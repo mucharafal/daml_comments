@@ -1,0 +1,245 @@
+[
+  {
+    "id" : "c21dc3b3-d9ac-4ccd-9fc7-52814a9171fb",
+    "prId" : 2159,
+    "comments" : [
+      {
+        "id" : "d415e4f0-b31a-424b-821e-88f1024a1c1d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Have you considered having one `for` loop over `skeleton`, `migrate`, `quickstart-java` and `quickstart-scala` that copies the `.gitignore` file? Would that be cleaner?",
+        "createdAt" : "2019-07-16T12:57:00Z",
+        "updatedAt" : "2019-07-16T13:05:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4382eae8-8c90-47e8-a782-129f763d48a9",
+        "parentId" : "d415e4f0-b31a-424b-821e-88f1024a1c1d",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Good point. There is actually more in common to all cases than I at first noticed. I've merged the loops and only kept the special cases.\r\n\r\n> *NOTE*: This is slightly changing the semantics of the template generation, in that with this changes, if a file exists under both `templates/quickstart-*` and the quickstart's original location, the quickstart will \"win\" (overwrite), whereas in the previous setup the templates one would win. This is not an issue right now as there is no common file.\r\n\r\nWe should probably work on moving all the templates to a single directory. I think my preference would be to have this build rule in `daml-assistant/BUILD.bazel` and all the templates (and only the templates) under `daml-assistant/templates`, so the script could just be\r\n```\r\nfor d in templates/*; do\r\n    mkdir -p $$OUT/$$d\r\n    cp -rL $$SRC/templates/* $$OUT/$$d/\r\n    cp $$SRC/default-gitignore $$OUT/$$d/.gitignore\r\ndone\r\n```\r\nand we don't need to remember to add to the Bazel script when we add a template. I'm not sure I have enough context to trust my preference though (e.g. I have no idea why the java and scala templates are elsewhere, or even why they're called quickstart-* rather than just java and scala).",
+        "createdAt" : "2019-07-16T13:16:17Z",
+        "updatedAt" : "2019-07-16T13:16:17Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c233560c-1c4a-46f3-8628-49edf4b6c0de",
+        "parentId" : "d415e4f0-b31a-424b-821e-88f1024a1c1d",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That preference sounds good to me.\r\n@associahedron @leo-da Do you know why the `quickstart-*` templates are living in a different place than the others?",
+        "createdAt" : "2019-07-16T13:27:55Z",
+        "updatedAt" : "2019-07-16T13:27:55Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "61046007-e22f-4210-9bba-0b1fd35d5d59",
+        "parentId" : "d415e4f0-b31a-424b-821e-88f1024a1c1d",
+        "author" : null,
+        "body" : "The `quickstart-java` template lives where it does because the template source code gets spliced into the docs by sphinx.",
+        "createdAt" : "2019-07-16T14:18:08Z",
+        "updatedAt" : "2019-07-16T14:18:24Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3e24a972c9ef6ce8a8e21ae10f5e27ed57106462",
+    "line" : 20,
+    "diffHunk" : "@@ -1,1 +25,29 @@            cp -rL $$SRC/$$d/* $$OUT/$$d/\n            cp $$SRC/default-gitignore $$OUT/$$d/.gitignore\n        done\n\n        ## special cases we should work to remove"
+  },
+  {
+    "id" : "64c0a4dd-4511-46dd-b501-623f057d2731",
+    "prId" : 1707,
+    "comments" : [
+      {
+        "id" : "11625fb5-5f1d-4488-bc68-64ee616985c3",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Are users meant to be able to run `daml new myproject migrate` to create a project based off the `migrate` template? What does that mean?\r\n\r\nIf not, it might be better to package this separately, not as part of the templates tarball.",
+        "createdAt" : "2019-06-17T12:01:32Z",
+        "updatedAt" : "2019-06-17T14:05:04Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2967a679-d05d-4f8e-907d-73da7306760a",
+        "parentId" : "11625fb5-5f1d-4488-bc68-64ee616985c3",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I think that would actually be fine. If a user wants to create his migration path manually, that's ok. We just provide the tools to automate it.",
+        "createdAt" : "2019-06-17T12:07:56Z",
+        "updatedAt" : "2019-06-17T14:05:04Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "51830c46-4903-4b1c-8a9d-8ba620e4052b",
+        "parentId" : "11625fb5-5f1d-4488-bc68-64ee616985c3",
+        "author" : null,
+        "body" : "👍 ",
+        "createdAt" : "2019-06-17T12:33:12Z",
+        "updatedAt" : "2019-06-17T14:05:04Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2c4e7e69876be18b89db41c246ef31aad2dcd83d",
+    "line" : 4,
+    "diffHunk" : "@@ -1,1 +6,10 @@    srcs = glob([\n        \"skeleton/**\",\n        \"migrate/**\",\n        \"quickstart-java/**\",\n        \"quickstart-scala/**\","
+  },
+  {
+    "id" : "2dcc4581-fda0-4dc4-905f-abd376c748c9",
+    "prId" : 991,
+    "comments" : [
+      {
+        "id" : "c7855f26-c845-48f7-8d36-104f0e248f58",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do we really need to have a `da-skeleton.yaml` file in this template? I don’t see us adding it to the old assistant ever.",
+        "createdAt" : "2019-05-08T06:53:06Z",
+        "updatedAt" : "2019-05-08T06:56:38Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "07b0624b-5071-410b-95b2-cf06ed17a7af",
+        "parentId" : "c7855f26-c845-48f7-8d36-104f0e248f58",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "@cocreature `da-skeleton.yaml` is copied from the `quickstart-java` by a bazel rule... but yeah we are removing it, so I guess I will remove it from the quickstart-java, so it does not get copied into quickstart-scala. Good catch!",
+        "createdAt" : "2019-05-08T13:42:04Z",
+        "updatedAt" : "2019-05-08T13:42:05Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "dc3e427b64de02a6d07fa8b771bdf1748c2c0e17",
+    "line" : 20,
+    "diffHunk" : "@@ -1,1 +32,36 @@        mkdir -p $$OUT/quickstart-scala\n        cp -r $(location //language-support/scala/examples:quickstart-scala-dir)/* $$OUT/quickstart-scala/\n        rm $$OUT/quickstart-scala/da-skeleton.yaml\n        cp -rL $$SRC/quickstart-scala/* $$OUT/quickstart-scala/\n"
+  },
+  {
+    "id" : "369d3d8b-57bb-4ce5-a8d1-f24319a9a403",
+    "prId" : 850,
+    "comments" : [
+      {
+        "id" : "1c859da4-f020-4d82-abab-54553d7ac423",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Can we have a ticket for that? Or are you planning to do that as a fairly immediate follow up? Seems like a very valuable cleanup.",
+        "createdAt" : "2019-05-02T22:28:41Z",
+        "updatedAt" : "2019-05-03T07:34:38Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "47d5b4a1-257a-4c26-a5bd-08c098bb1e3f",
+        "parentId" : "1c859da4-f020-4d82-abab-54553d7ac423",
+        "author" : null,
+        "body" : "Should be part of the da-assistant deprecation cleanup. I will create a ticket.",
+        "createdAt" : "2019-05-03T07:15:33Z",
+        "updatedAt" : "2019-05-03T07:34:38Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "56533c2a-6244-40a5-b72b-01d9e61de692",
+        "parentId" : "1c859da4-f020-4d82-abab-54553d7ac423",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "Moving the quickstart out of `//docs` would require you to copy it back during the docs build to make the `literalinclude` directives work. You have to do the extra work in one of the places so I don't see a strong case for moving it.",
+        "createdAt" : "2019-05-03T07:31:04Z",
+        "updatedAt" : "2019-05-03T07:34:38Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "767d99eb-7cab-4162-94c5-0edd2fc239db",
+        "parentId" : "1c859da4-f020-4d82-abab-54553d7ac423",
+        "author" : null,
+        "body" : "I see. It makes sense to me to put all the templates in one place (including the quickstart-java template), but that does sound a bit more involved. The da-assistant deprecation cleanup would still involve adding `daml.yaml.template` and removing `da-skeleton.yaml` from the template, wherever it is.",
+        "createdAt" : "2019-05-03T07:39:13Z",
+        "updatedAt" : "2019-05-03T07:39:23Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6adce111700d5fa1fa2edb0d843236f8dc474caf",
+    "line" : 21,
+    "diffHunk" : "@@ -1,1 +19,23 @@        # quickstart-java template\n        # right now, uses the preexisting quickstart-java rule and replaces the da.yaml template with a daml.yaml template\n        # in the future, move everything into //templates/quickstart-java and avoid untar, rm here\n        mkdir -p $$OUT/quickstart-java\n        tar xf $(location //docs:quickstart-java.tar.gz) --strip-components=1 -C $$OUT/quickstart-java"
+  }
+]

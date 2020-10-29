@@ -1,0 +1,877 @@
+[
+  {
+    "id" : "cd97f25f-5d5a-41b2-82cc-fa4be5b26529",
+    "prId" : 7404,
+    "comments" : [
+      {
+        "id" : "9f1f4b7a-d475-4bd0-b981-6ccbb2554f5b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is this synchronous, i.e., do the listeners actually receive the event before they are removed?",
+        "createdAt" : "2020-09-16T08:57:48Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ec0fdf79-3ab6-4d54-aab4-1e1d63dd4929",
+        "parentId" : "9f1f4b7a-d475-4bd0-b981-6ccbb2554f5b",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Yes.",
+        "createdAt" : "2020-09-16T09:41:39Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0b4318b65d3ff40751a756b838044db7b29d2aa",
+    "line" : 39,
+    "diffHunk" : "@@ -1,1 +556,560 @@    const closeStream = (status: { code: number; reason: string }): void => {\n      streamClosed = true;\n      emitter.emit('close', status);\n      emitter.removeAllListeners();\n    };"
+  },
+  {
+    "id" : "e007e426-652b-4deb-8b0e-84cc50cb4ed7",
+    "prId" : 7404,
+    "comments" : [
+      {
+        "id" : "0f2ed305-a72c-4159-9209-99e7c5803d7a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is there a reason why you chose 4001 and 4000 or are those somewhat arbitrary choices?",
+        "createdAt" : "2020-09-16T09:01:12Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3fc52526-c7ab-4f93-a79e-06c986f587c9",
+        "parentId" : "0f2ed305-a72c-4159-9209-99e7c5803d7a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Somewhat arbitrary, but <4000 is reserved for the protocol, 4000+ is for applications.",
+        "createdAt" : "2020-09-16T09:40:21Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0b4318b65d3ff40751a756b838044db7b29d2aa",
+    "line" : 56,
+    "diffHunk" : "@@ -1,1 +573,577 @@        } else {\n          // ws has closed too quickly / never managed to connect: we give up\n          closeStream({code: 4001, reason: 'ws connection failed'});\n        }\n      } // no else: if the stream is closed we don't need to keep a ws"
+  },
+  {
+    "id" : "3bcdaf56-1157-489c-af84-2caf1742c660",
+    "prId" : 7084,
+    "comments" : [
+      {
+        "id" : "41cc7f65-951c-4d05-9bfc-1d22623150c9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You need to change how we handle reconnects. The JSON API can return a `null` offset when it was ledger begin but it only accepts strings. The only way to get a null offset is if there were literally no transactions, so we basically reset and treat this as the initial connect with no event. If you want to be safe, reset `state` to `init` although afaict this isn’t necessary since the list of events will have been empty so we never called `change`.",
+        "createdAt" : "2020-08-11T11:52:34Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0464421e-fc44-488d-b8f3-0aa68899a280",
+        "parentId" : "41cc7f65-951c-4d05-9bfc-1d22623150c9",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Sorry not up to date on this issue. Is that considered correct behaviour from the JSON API? It seems really weird it would produce values it cannot consume, especially for a parameter that is specifically meant as \"this is an opaque thing you need to give back to me later on\".",
+        "createdAt" : "2020-08-11T12:30:27Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0afecb13-0463-491b-8ef2-a77db680447c",
+        "parentId" : "41cc7f65-951c-4d05-9bfc-1d22623150c9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It’s at least documented behavior. It seems reasonable to allow this but I would consider this a separate issue. Given that we can fix this only in the typescript libraries, I would fix it here for now.\r\n\r\nThere is also a bug in the JSON API where it returns `null` when it shouldn’t but that’s a separate issue. The issue addressed here cannot be hit on Sandbox since it will never return ledger begin on the ACS (but other ledgers might).",
+        "createdAt" : "2020-08-11T12:42:46Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cad754d1-c9aa-4084-9e2c-3a3fc3c4ac7d",
+        "parentId" : "41cc7f65-951c-4d05-9bfc-1d22623150c9",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "So now we don't send the `offset` message when our last offset is `null`. My understanding is that this will start the stream from the very beginning of transactions which is correct here.",
+        "createdAt" : "2020-08-11T13:16:12Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28338100f26fe98c42cd5c9b26169151d0e5fbac",
+    "line" : 8,
+    "diffHunk" : "@@ -1,1 +506,510 @@    let state = init;\n    let isReconnecting: boolean = false;\n    const emitter = new EventEmitter();\n    const onOpen = (): void => {\n      if (isReconnecting) {"
+  },
+  {
+    "id" : "5b90f803-44c8-47ca-ad62-62e34c896ad3",
+    "prId" : 7084,
+    "comments" : [
+      {
+        "id" : "5acf4033-9369-4cc9-afd9-fb40aace6313",
+        "parentId" : null,
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Do we have any case for distinguishing between undefined and null here? If not, could we simplify the type and not allow undefined, and start with `null` as the initial value?",
+        "createdAt" : "2020-08-11T12:33:20Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "178bfae2-8468-439e-9af7-adfefcaa6b23",
+        "parentId" : "5acf4033-9369-4cc9-afd9-fb40aace6313",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Quoting the comment from the source:\r\n```\r\n      // we try to reconnect if we could connect previously and we were live for at least\r\n      // 'reconnectThreshold'.\r\n```\r\nSo there is a difference, we will reconnect with `null` but not with `undefined`. The distinction here seems meaningful so I would argue for keeping it.",
+        "createdAt" : "2020-08-11T12:47:12Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28338100f26fe98c42cd5c9b26169151d0e5fbac",
+    "line" : 5,
+    "diffHunk" : "@@ -1,1 +503,507 @@    let ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n    let isLiveSince: undefined | number = undefined;\n    let lastOffset: undefined | null | string = undefined;\n    let state = init;\n    let isReconnecting: boolean = false;"
+  },
+  {
+    "id" : "0c740eaa-61f8-428e-b497-749a386af486",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "As far as I can tell, this is fully backwards compatible with `streamQuery`, i.e., any valid invocation of `streamQuery` is a valid invocation of `streamQueries` and will behave identical (in terms of performance, the request made to the JSON API and also the result returned to the user). Assuming that is correct, I’m leaning towards extending `streamQuery` instead of adding `streamQueries` and annoying our users with a deprecation cycle.\r\nWhat do you think?",
+        "createdAt" : "2020-08-10T07:30:06Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ed67b205-1c8a-4026-b60f-dcd421bec236",
+        "parentId" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "That was also my impression at first. Based on the existing signature of `streamQuery`, I assumed existing invocations would look like either\r\n```typescript\r\nstreamQuery(templateId)\r\n```\r\nor\r\n```typescript\r\nstreamQuery(templateId, query)\r\n```\r\nand it felt like it would be very natural (and backwards compatible) to extend it to also support\r\n```typescript\r\nstreamQuery(templateId, query1, query2)\r\n```\r\nUnfortunately, the current signature also allows\r\n```typescript\r\nstreamQuery(templateId, undefined)\r\n```\r\nwhich means a backwards-compatible signature would have to look like\r\n```typescript\r\nstreamQuery<T extends object, K, I extends string>(\r\n     template: Template<T, K, I>,\r\n     query?: Query<T>,\r\n     ...queries: Query<T>[]\r\n): ...\r\n```\r\nwhich in turn would force the resulting code to handle the case of\r\n```typescript\r\nstreamQuery(templateId, undefined, query1, query2)\r\n```\r\nwhich just seemed wrong. So when I reached that point I decided deprecation was a better approach. I believe we are still at a stage where it is more important to have a nice API for new users than to not bother existing users, especially when there is a way to make the change through a backwards-compatible deprecation cycle. And I kinda like the new name better, for the new feature set.\r\n\r\nThat said, my knowledge of TypeScript is still very sparse at the moment, so I'm very open to the idea that there may be a way to preserve backwards compatibility _and_ get sane semantics for the new version and I'm just not aware of it.",
+        "createdAt" : "2020-08-10T10:14:17Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bf213959-53dd-425a-8baa-dc16ef3e832d",
+        "parentId" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point! I forgot that in JS passing fewer parameters is basically equivalent to passing `undefined` (not entirely, you can differentiate them but almost nobody does). I see the following options:\r\n\r\n1. Break the behavior on `streamQuery(templateId, undefined)` immediately. Technically a breaking change but I expect nobody to run into this and the fix is trivial.\r\n2. Filter out `undefined` for the first query parameter or maybe even all query parameters. Should be easy to implement and makes this non-breaking.\r\n3. 2 but simultaneously deprecate passing `undefined` (in that case, we should only filter it out from the first query). You can define multiple type signatures for one function in typescript. It might be possible to only deprecate one of them to get nice deprecation warnings. Alternatively, just throw a `console.log` at it.\r\n4. The solution proposed in this PR.\r\n\r\nI’m leaning towards 3 as probably the safest option (I expect nobody will actually have to change anything) and we can get rid of the wart later. But I’m happy to be convinced here.",
+        "createdAt" : "2020-08-10T12:16:23Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cbeb0267-bbc6-4272-997a-7dd519f057ee",
+        "parentId" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "> But I’m happy to be convinced here.\r\n\r\nWell then, allow me to try 🙂\r\n\r\nI suspect \"nobody\" is actually using the raw `streamQuery`, instead of going through the [react bindings](https://github.com/digital-asset/daml/blob/master/language-support/ts/daml-react/createLedgerContext.ts#L122), which, by the way, do explicitly pass `undefined`. But it's still part of our public API so let's assume breaking it is a bad thing.\r\n\r\nI believe option 1 is strictly inferior to this PR because it's a breaking change with no upgrade path: your code will just not compile if you try to upgrade. That seems bad. In comparison, this PR adds a new name and leaves the existing one completely unchanged. You can upgrade to the next version, then have some time to fix all the deprecation warnings while your app keeps working.\r\n\r\nOptions 2 and 3 seem very messy, and with the kind of mess that sticks. We'd be committing to an API with a singular name accepting a list of things that, according to their type, can be undefined, but with documentation saying they shouldn't be, and an implementation that makes them harmless for now. If we can indeed deprecate just one signature, we don't gain anything over this PR; if we can't, we'll end up with the downsides of 1 again later on. Or we'll live with the mess forever.\r\n\r\nI don't quite understand why we'd shy away from a clean deprecation cycle, especially for a source-based language. However, there is another option you have not mentioned: keep `streamQuery` and `streamFetchByKey` exactly as they are right now, and add the two new functions with no deprecation. I believe that leaves our API overall a little bit confusing and clearly overlapping, but if you don't like deprecations I think that's the best approach.",
+        "createdAt" : "2020-08-10T14:54:42Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c5584fad-259c-432c-8d35-58df1618c795",
+        "parentId" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m not really worried about the deprecation cycle. That seems very reasonable. What I am slightly worried about is what seems like a fairly redundant name change. In this case, it somewhat makes sense but it still feels pretty arbitrary (the endpoint name is singular as well). Consider the case where we didn’t want to add more queries and just deprecate explicitly passing `undefined`. I have no idea what a sensible name would be there.\r\n\r\nAs for 3, we do gain something for the case where you explicitly pass a single query or don’t pass a query both of which need changing in this PR but not if we can only deprecate passing `undefined` explicitly.",
+        "createdAt" : "2020-08-10T15:17:09Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "94d8b1a4-fc70-4bd3-8768-71db65c7266c",
+        "parentId" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That said, your point that most people do not use this directly is pretty convincing. It does raise the question of what we do with the hooks though.",
+        "createdAt" : "2020-08-10T15:23:24Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8a4f7c78-2393-482f-b8eb-f6de3e8d95ac",
+        "parentId" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I personally think changing the name is a good thing, as that is what allows us to have a clean deprecation cycle where both versions can be present in parallel and consumers of the API can very easily spot which places need to be updated. I agree a good second name would be harder to find if you just wanted to remove the `undefined` option, but even then I would argue for a new `streamQuery2` method over changing the existing one. Maybe I'm weird, though.\r\n\r\nI think not having to change your code when the underlying behaviour has changed is actually a bad thing, so in my mind that counts against option 3.\r\n\r\nI'll take a look at the react bindings. Agree they probably need some sort of similar update.",
+        "createdAt" : "2020-08-10T16:24:37Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dff65a80-1cb9-42dd-b9dd-cd4c84431626",
+        "parentId" : "d5d2965c-eaf6-4143-ae47-77875c2cfb75",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Alright then let’s go with the new name here. I don’t mind tackling the react bindings in a separate PR.",
+        "createdAt" : "2020-08-10T16:28:06Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : 115,
+    "diffHunk" : "@@ -1,1 +661,665 @@   * @typeparam I The contract id type.\n   */\n  streamQueries<T extends object, K, I extends string>(\n    template: Template<T, K, I>,\n    queries: Query<T>[],"
+  },
+  {
+    "id" : "91e2a5e6-0e2b-4cac-8b29-8f710baa65c6",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "5e2d177f-bce7-4ce7-86f5-ad3379d2fe23",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Are the underscores not sufficient to silence `no-unused-vars`?",
+        "createdAt" : "2020-08-12T08:31:14Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "faa46350-f9bd-44dd-a356-dda6432c4cee",
+        "parentId" : "5e2d177f-bce7-4ce7-86f5-ad3379d2fe23",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Looks like they are, yes. I've removed the silencer for that one.",
+        "createdAt" : "2020-08-14T17:50:44Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "98020357-c52b-4575-8968-d0a8d08ddfb2",
+        "parentId" : "5e2d177f-bce7-4ce7-86f5-ad3379d2fe23",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Ah, no, they are not. Sorry, had forgotten linting is part of test, not build.",
+        "createdAt" : "2020-08-14T17:51:26Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2b03a013-5e9a-499a-9a1f-735b26b094dd",
+        "parentId" : "5e2d177f-bce7-4ce7-86f5-ad3379d2fe23",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks for checking! I guess I was too used to this from Haskell. It looks like you can configure ignore patterns but that’s definitely something for a different PR if we want to do this at all.",
+        "createdAt" : "2020-08-14T18:32:46Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : 194,
+    "diffHunk" : "@@ -1,1 +733,737 @@    function off(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n    function off(t: 'close', l: (e: StreamCloseEvent) => void): void;\n    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function\n    function off(_t: any, _l: any): any {}\n    // eslint-disable-next-line @typescript-eslint/no-empty-function"
+  },
+  {
+    "id" : "fa5599fd-f8c3-4aa6-a288-e82181a51a2b",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "c2523ebe-f1d6-470a-9603-9859a697ae49",
+        "parentId" : null,
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "@hurryabit I'm a bit confused why this has to be lazy. I tried to define `reconnectRequest` as a variable or a function of the contractId, but it wouldn't change the `contractIdAtOffset` field.",
+        "createdAt" : "2020-04-06T17:43:37Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7e558f5a-f2db-419f-b7ee-093c83f137c2",
+        "parentId" : "c2523ebe-f1d6-470a-9603-9859a697ae49",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This can't be a variable since that would mean that you always use `null` for `lastContractId`, which is the value when we execute this line. What do you mean by \"a function of the contract id\" in this context?",
+        "createdAt" : "2020-04-07T10:56:35Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b276d17d-2835-4a4b-aa58-0877dcc78e4d",
+        "parentId" : "c2523ebe-f1d6-470a-9603-9859a697ae49",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "a function of type `contractId -> lastContractId`",
+        "createdAt" : "2020-04-07T11:02:53Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 141,
+    "diffHunk" : "@@ -1,1 +626,630 @@    let lastContractId: ContractId<T> | null = null;\n    const request = [{templateId: template.templateId, key}];\n    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n      // NOTE(MH, #4564): We're very lenient here. We should not see a create"
+  },
+  {
+    "id" : "cd1f4207-06b5-4987-87d4-72aec9941575",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "98e99848-d33f-40e3-b558-4ecdac0911b2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I thought a bit more about this. I don't think we want to have been live for at least X seconds but rather have been connected for X seconds. Imagine your load balancer kills all connections after 1 minute and you set this threshold to 30 seconds. If it takes 40 seconds to go live because there's quite a lot of data coming from the ACS, we would not reconnect. But I would definitely consider a situation worthy of reconnecting.\r\n\r\nSince this is a non-breaking improvement, let's do it in a follow-up PR though.",
+        "createdAt" : "2020-04-14T09:29:01Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 97,
+    "diffHunk" : "@@ -1,1 +545,549 @@      const now = new Date().getTime();\n      // we try to reconnect if we could connect previously and we were live for at least\n      // 'reconnectThreshold'.\n      if (lastOffset !== undefined && isLiveSince !== undefined && now - isLiveSince >= this.reconnectThreshold) {\n        isLiveSince = undefined;"
+  },
+  {
+    "id" : "ec9279d8-db38-477e-bb34-006942219fc5",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "74fbf4f4-315b-430a-b6a1-217e88a65b47",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Let's better be safe than sorry:\r\n```suggestion\r\n        isReconnecting = true;\r\n        ws.removeEventListener('open', onOpen);\r\n        ws.removeEventListener('message', onMessage);\r\n        ws.removeEventListener('close', onClose);\r\n```",
+        "createdAt" : "2020-04-14T09:31:25Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 100,
+    "diffHunk" : "@@ -1,1 +548,552 @@      if (lastOffset !== undefined && isLiveSince !== undefined && now - isLiveSince >= this.reconnectThreshold) {\n        isLiveSince = undefined;\n        isReconnecting = true;\n        ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n        ws.addEventListener('open', onOpen);"
+  },
+  {
+    "id" : "cf98e1a8-ae6a-4101-8e99-8e8453cdb168",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "ed6d13a7-71b4-4292-8274-0fb11aff9059",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}];\r\n```",
+        "createdAt" : "2020-04-14T09:36:40Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 141,
+    "diffHunk" : "@@ -1,1 +626,630 @@    let lastContractId: ContractId<T> | null = null;\n    const request = [{templateId: template.templateId, key}];\n    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n      // NOTE(MH, #4564): We're very lenient here. We should not see a create"
+  },
+  {
+    "id" : "417bf413-5e4b-4fc6-9b57-7c507a16b27b",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "2ded00a7-587d-4feb-a682-81b0f26159b1",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I know I'm guilty of this myself... But I'm also still learning, particularly through reading code.\r\n```suggestion\r\n      lastContractId = contract !== null ? contract.contractId : null\r\n```",
+        "createdAt" : "2020-04-14T09:37:52Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 149,
+    "diffHunk" : "@@ -1,1 +642,646 @@        }\n      }\n      lastContractId = contract ? contract.contractId : null\n      return contract;\n    }"
+  },
+  {
+    "id" : "87550c0e-9d40-40ec-a571-c7e73c9bb54e",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "4226de82-ccf6-4138-9c1b-82c452d02124",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why is this an array when `request` is not?",
+        "createdAt" : "2020-04-14T09:38:10Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 122,
+    "diffHunk" : "@@ -1,1 +593,597 @@  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n    const request = {templateIds: [template.templateId], query};\n    const reconnectRequest = (): object[] => [request];\n    const change = (contracts: readonly CreateEvent<T, K, I>[], events: readonly Event<T, K, I>[]): CreateEvent<T, K, I>[] => {\n      const archiveEvents: Set<ContractId<T>> = new Set();"
+  },
+  {
+    "id" : "6fb52004-a3ae-44b9-a6a5-e6d6466ba086",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "cdccfbb4-46bd-4292-9fbf-77d4de814c7d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We need an `off` function to deregister the handler for the `live` event as well.",
+        "createdAt" : "2020-04-01T10:46:47Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bafd36d7-143c-41e2-af95-c5b6bf6a33f0",
+        "parentId" : "cdccfbb4-46bd-4292-9fbf-77d4de814c7d",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "added.",
+        "createdAt" : "2020-04-01T11:28:06Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : 4,
+    "diffHunk" : "@@ -1,1 +193,197 @@ */\nexport interface Stream<T extends object, K, I extends string, State> {\n  on(type: 'live', listener: (state: State) => void): void;\n  on(type: 'change', listener: (state: State, events: readonly Event<T, K, I>[]) => void): void;\n  on(type: 'close', listener: (closeEvent: StreamCloseEvent) => void): void;"
+  },
+  {
+    "id" : "9844a9d4-bd04-412f-90ba-a9a948992300",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "c029e848-1491-405d-8b6a-d3d97dec3216",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That is exactly what I had in mind. Awesome!",
+        "createdAt" : "2020-04-02T09:30:16Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : 43,
+    "diffHunk" : "@@ -1,1 +509,513 @@        if (isRecordWith('offset', json) && !isLive) {\n          isLive = true;\n          emitter.emit('live', state);\n        }\n      } else if (isRecordWith('warnings', json)) {"
+  },
+  {
+    "id" : "d8806329-e385-4a35-8889-db6a57802612",
+    "prId" : 4993,
+    "comments" : [
+      {
+        "id" : "2952f14b-35c4-4720-b605-2527e5c6dd53",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This function is not exported. Does it show up in the generated docs or do we need to do something to hide it explicitly? Same in many places below.",
+        "createdAt" : "2020-03-16T10:05:54Z",
+        "updatedAt" : "2020-03-16T10:08:19Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eb03a2fb12ffffc05a50686e27c9b62dc48c2bc5",
+    "line" : 43,
+    "diffHunk" : "@@ -1,1 +49,53 @@/**\n * Decoder for a [[CreateEvent]].\n */\nconst decodeCreateEvent = <T extends object, K, I extends string>(template: Template<T, K, I>): jtv.Decoder<CreateEvent<T, K, I>> => jtv.object({\n  templateId: jtv.constant(template.templateId),"
+  },
+  {
+    "id" : "4533e5f8-b1f3-440b-894f-eb35710d2eca",
+    "prId" : 4192,
+    "comments" : [
+      {
+        "id" : "dbbf2a8f-2841-482a-82d0-a2e03828abdf",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n  async create<T extends object, K>(template: Template<T, K>, payload: T): Promise<CreateEvent<T, K>> {\r\n```\r\n\r\nSeems more in the spirit of the change, no?",
+        "createdAt" : "2020-01-23T21:21:23Z",
+        "updatedAt" : "2020-01-23T21:21:58Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "57506288ad990fb12d56912dc7cd7978b9406ec5",
+    "line" : 6,
+    "diffHunk" : "@@ -1,1 +155,159 @@   * Create a contract for a given template.\n   */\n  async create<T extends object, K>(template: Template<T, K>, contractPayload: T): Promise<CreateEvent<T, K>> {\n    const command = {\n      templateId: template.templateId,"
+  },
+  {
+    "id" : "69f9bb8d-c579-4485-8e2e-32958e831034",
+    "prId" : 4192,
+    "comments" : [
+      {
+        "id" : "844b057b-ea2c-4510-8065-137291944164",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      payload,\r\n```",
+        "createdAt" : "2020-01-23T21:21:33Z",
+        "updatedAt" : "2020-01-23T21:21:59Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1e998705-c072-4966-aba1-79683a667cac",
+        "parentId" : "844b057b-ea2c-4510-8065-137291944164",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I guess, it is just in a few other places, @hurryabit refers to the entire command as a payload.",
+        "createdAt" : "2020-01-23T21:47:24Z",
+        "updatedAt" : "2020-01-23T21:47:25Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "941e76e0-a79c-45ce-ad84-3dd370be0a7b",
+        "parentId" : "844b057b-ea2c-4510-8065-137291944164",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Fair, well, whatever you think is best.",
+        "createdAt" : "2020-01-23T21:48:22Z",
+        "updatedAt" : "2020-01-23T21:48:22Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "57506288ad990fb12d56912dc7cd7978b9406ec5",
+    "line" : 10,
+    "diffHunk" : "@@ -1,1 +158,162 @@    const command = {\n      templateId: template.templateId,\n      payload: contractPayload,\n    };\n    const json = await this.submit('command/create', command);"
+  }
+]

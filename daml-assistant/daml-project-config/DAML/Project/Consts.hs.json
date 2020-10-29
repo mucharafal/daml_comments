@@ -1,0 +1,184 @@
+[
+  {
+    "id" : "4ccc026c-2e7f-4c2c-af6b-25512141716c",
+    "prId" : 1409,
+    "comments" : [
+      {
+        "id" : "23ca9bb5-4273-4b9c-a7e8-acd85cbe1bbb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m not sure I understand this function. Doesn’t setting `check` to `True` accomplish this? I don’t see how we can fall into the `Just projectPath` of `withProjectRoot` but have `mbProjectPath` be `Nothing`.",
+        "createdAt" : "2019-05-28T12:43:07Z",
+        "updatedAt" : "2019-05-28T12:44:38Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "21e91bc4-3c12-49bb-b4a9-8b434c2154a7",
+        "parentId" : "23ca9bb5-4273-4b9c-a7e8-acd85cbe1bbb",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "`withExpectProjectRoot` is internally the same as `withProjectRoot` with `check` set to `True`.If `check` is `True` then `withProjectRoot` will always provide `Just pPath` (or terminate the program). `withExpectProjectRoot` just makes this explicit in the types, so that the use-site doesn't have to worry about this. ",
+        "createdAt" : "2019-05-28T12:54:41Z",
+        "updatedAt" : "2019-05-28T12:54:41Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d857e43d-35b1-4728-9f4f-58530ff6f3ed",
+        "parentId" : "23ca9bb5-4273-4b9c-a7e8-acd85cbe1bbb",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m still confused. It looks like the only case where you use the additional argument in `withProjectRoot` is `withExpectProjectRoot` and there it will always be `Just`.",
+        "createdAt" : "2019-05-28T13:01:21Z",
+        "updatedAt" : "2019-05-28T13:01:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "abbe70aa-9c04-41db-a628-2b4ae9a09064",
+        "parentId" : "23ca9bb5-4273-4b9c-a7e8-acd85cbe1bbb",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I'm afraid I don't understand the question.\r\n\r\nThe motivation is this:\r\n\r\nBefore the use-site looked like this\r\n```\r\n    withProjectRoot' projectOpts $ \\_ -> do\r\n        projectPath <- maybe getProjectPath (pure . Just . unwrapProjectPath) (projectRoot projectOpts)\r\n        case projectPath of\r\n            ...\r\n```\r\nI.e. the project path discovery had to be repeated and there was always a case match on `projectPath`, which could be `Nothing` or `Just ...`.\r\n\r\nNow it looks like this\r\n```\r\n    withExpectProjectRoot (projectRoot projectOpts) \"daml test\" $ \\pPath _ -> do\r\n```\r\nI.e. the project path is directly available without repeating the discovery or having to do additional case matches.\r\n\r\nWe can do this because\r\n\r\n> It's an error to run damlc test outside a project if --files is not specified.\r\n",
+        "createdAt" : "2019-05-28T13:24:31Z",
+        "updatedAt" : "2019-05-28T13:24:31Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "71f51109-bd72-4fba-963c-b7dcb00c9912",
+        "parentId" : "23ca9bb5-4273-4b9c-a7e8-acd85cbe1bbb",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah I see, I missed the change in `runTestsInProjectOrFiles`. LGTM :+1:",
+        "createdAt" : "2019-05-28T13:27:14Z",
+        "updatedAt" : "2019-05-28T13:27:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fd5dc4f06ee964293f58572c5bc9d7738e6bd799",
+    "line" : 52,
+    "diffHunk" : "@@ -1,1 +177,181 @@\n-- | Same as 'withProjectRoot' but always requires project root.\nwithExpectProjectRoot\n    :: Maybe ProjectPath  -- ^ optionally specified project root\n    -> String  -- ^ command name for error message"
+  },
+  {
+    "id" : "07f1db6e-2d29-4813-bcb0-0b69c83ee387",
+    "prId" : 1401,
+    "comments" : [
+      {
+        "id" : "bb800534-8049-418f-89b6-f73f00a09166",
+        "parentId" : null,
+        "author" : null,
+        "body" : "I'm not a fan of bringing this into daml-project-config, since this is very much tied with damlc command-line option parsing.",
+        "createdAt" : "2019-05-27T10:18:02Z",
+        "updatedAt" : "2019-05-27T15:41:25Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ac86baef-bcb7-438f-b70c-48525ef0a53b",
+        "parentId" : "bb800534-8049-418f-89b6-f73f00a09166",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is it? I would argue that having an argument that enforces that `withProjectRoot` is run in a project and errors out if that is not the case is quite reasonable even if you completely ignore the CLI option parsing. The `String` argument might be a bit tied to details in damlc but it seems sufficiently general that I believe that this API would be useful for any tool invoked by the assistant so `daml-project-config` is not a bad place for this.",
+        "createdAt" : "2019-05-27T10:40:27Z",
+        "updatedAt" : "2019-05-27T15:41:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d933e973-156a-4391-93b5-3d80ee7c3023",
+        "parentId" : "bb800534-8049-418f-89b6-f73f00a09166",
+        "author" : null,
+        "body" : "Ok, that makes sense. :+1:",
+        "createdAt" : "2019-05-27T11:04:28Z",
+        "updatedAt" : "2019-05-27T15:41:25Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1fa158154d4ffa2f8af5a90e9160a33463d34b97",
+    "line" : 25,
+    "diffHunk" : "@@ -1,1 +141,145 @@-- | Whether we should check if a command is invoked inside of a project.\n-- The string is the command name used in error messages\ndata ProjectCheck = ProjectCheck String Bool\n\n-- | This function changes the working directory to the project root and calls"
+  },
+  {
+    "id" : "78c6f21c-e4ff-40c9-9e6c-f8b508bdeb06",
+    "prId" : 337,
+    "comments" : [
+      {
+        "id" : "39db7ff9-d23d-400e-b965-01d0f39066f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : ":tada: ",
+        "createdAt" : "2019-04-10T06:36:28Z",
+        "updatedAt" : "2019-04-10T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c63dc83e702244360b482149bc1bc3dfc388c2b4",
+    "line" : 23,
+    "diffHunk" : "@@ -1,1 +60,64 @@-- | File name of config file in DAML_PROJECT (the project path).\nprojectConfigName :: FilePath\nprojectConfigName = \"daml.yaml\"\n\n-- | File name of config file in DAML_SDK (the sdk path)"
+  }
+]

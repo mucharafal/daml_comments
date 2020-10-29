@@ -1,0 +1,96 @@
+[
+  {
+    "id" : "df35d8ec-7937-454b-b437-4d56d27a2e64",
+    "prId" : 4815,
+    "comments" : [
+      {
+        "id" : "da01b9b4-edda-4c6b-b577-bee427a30463",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "do we guarantee that `o.offset` > `this.offset` in the case when we append `LiveBegin(AbsoluteBookmark(_))` to another `LiveBegin(AbsoluteBookmark(_))`?\r\n\r\nelse it should be pseudo code:\r\n```\r\ncase ((LiveBegin(AbsoluteBookmark(x)), LiveBegin(AbsoluteBookmark(y))) if x < y => o\r\ncase ((LiveBegin(AbsoluteBookmark(x)), LiveBegin(AbsoluteBookmark(y))) if x>= y => this\r\n```",
+        "createdAt" : "2020-03-04T19:48:35Z",
+        "updatedAt" : "2020-03-04T19:54:19Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fa8dfb8a-f1bf-4dee-9142-bf34b6ad7041",
+        "parentId" : "da01b9b4-edda-4c6b-b577-bee427a30463",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "actually I see the comment above :), the proposed pseudo code will break associativity.\r\n",
+        "createdAt" : "2020-03-04T19:59:04Z",
+        "updatedAt" : "2020-03-04T19:59:04Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e44f33be-381e-4264-a05c-34976cea33c9",
+        "parentId" : "da01b9b4-edda-4c6b-b577-bee427a30463",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It might or might not be associative, but keep in mind the real intent of this semigroup is to preserve the offset _that appears later in the stream_, for which always yielding `o` in this scenario is correct. This intent is made explicit:\r\n\r\nhttps://github.com/digital-asset/daml/blob/f9057bea195abb547d6af2f89f8e09776a45f267/ledger-service/http-json/src/test/scala/com/digitalasset/http/util/ContractStreamStepTest.scala#L43-L50",
+        "createdAt" : "2020-03-04T20:28:42Z",
+        "updatedAt" : "2020-03-04T20:28:43Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "df23e5ac71f09839f830041a48f8e5b10db5831d",
+    "line" : 30,
+    "diffHunk" : "@@ -1,1 +35,39 @@      case (Acs(_) | LiveBegin(_), LiveBegin(LedgerBegin)) => this\n      case (LiveBegin(LedgerBegin), Acs(_) | LiveBegin(_)) |\n          (LiveBegin(AbsoluteBookmark(_)), LiveBegin(AbsoluteBookmark(_))) =>\n        o\n      case (LiveBegin(AbsoluteBookmark(off)), Acs(_)) => Txn(o.toInsertDelete, off)"
+  },
+  {
+    "id" : "26be7690-6657-4952-9b2d-0d2a0d48f2a8",
+    "prId" : 4465,
+    "comments" : [
+      {
+        "id" : "467c1c95-7d9e-47b0-9817-5e0a07488e6d",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Obviously just glorified `Option` for now, but will acquire one or two new decorations for #4509.",
+        "createdAt" : "2020-02-13T23:38:34Z",
+        "updatedAt" : "2020-02-13T23:38:34Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "00755241b71c6411dfc481b868ec92d51e51b319",
+    "line" : 59,
+    "diffHunk" : "@@ -1,1 +57,61 @@private[http] object ContractStreamStep extends WithLAV1[ContractStreamStep] {\n  case object LiveBegin extends ContractStreamStep[Nothing, Nothing]\n  final case class Txn[+D, +C](step: InsertDeleteStep[D, C]) extends ContractStreamStep[D, C]\n\n  def acs[C](inserts: Inserts[C]): ContractStreamStep[Nothing, C] ="
+  }
+]

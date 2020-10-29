@@ -1,0 +1,99 @@
+[
+  {
+    "id" : "b644c278-d4bc-49af-a710-93ae627da204",
+    "prId" : 1883,
+    "comments" : [
+      {
+        "id" : "bd6aa039-f507-4232-b0f4-35e9fcb9ecb0",
+        "parentId" : null,
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "Functions could have no (explicitly-stated) type but a doc comment.\r\n(as long as we still use the _parser_ AST... the type checker will give every function a type)",
+        "createdAt" : "2019-06-26T11:14:47Z",
+        "updatedAt" : "2019-06-26T11:19:31Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d53df89d-f085-438b-a7bc-2b5b160a0f6d",
+        "parentId" : "bd6aa039-f507-4232-b0f4-35e9fcb9ecb0",
+        "author" : null,
+        "body" : "Ah, makes sense! We should probably switch to typechecker AST like you were saying.",
+        "createdAt" : "2019-06-26T11:35:35Z",
+        "updatedAt" : "2019-06-26T11:35:35Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "66532706-2089-4d7c-89c3-7ef155a44ee5",
+        "parentId" : "bd6aa039-f507-4232-b0f4-35e9fcb9ecb0",
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "Maybe worth replacing the `FIXME`s by explanations?",
+        "createdAt" : "2019-06-26T21:33:38Z",
+        "updatedAt" : "2019-06-26T21:33:38Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "023585b3d078dac3a9410a8839a58cf2b50fd672",
+    "line" : 169,
+    "diffHunk" : "@@ -1,1 +183,187 @@        , maybe \"\" ((<> \" => \") . type2rst) fct_context\n        , maybe \"\" ((<> \"\\n\\n\") . type2rst) fct_type\n            -- FIXME: when would a function not have a type?\n        , maybe \"\" (indent 2 . docTextToRst) fct_descr\n        ]"
+  },
+  {
+    "id" : "87863064-9036-435b-a187-f74f25d086d6",
+    "prId" : 1883,
+    "comments" : [
+      {
+        "id" : "f0c053c0-e725-4aaf-96da-3139b0c34f7b",
+        "parentId" : null,
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "That construction `unwords . lines` might seem funny... the idea was to ensure the documentation text is a single line. Otherwise we need to  indent it correctly, which is a bit fiddly. \r\n\r\nHowever, it might be better to do that. As a principle, we should retain the line breaks in doc.text over multiple lines. More important for doc.s on modules and top-level declarations, though.  \r\n ",
+        "createdAt" : "2019-06-26T11:19:12Z",
+        "updatedAt" : "2019-06-26T11:19:31Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "56f6f392-f13c-4d8d-a1d2-910b125c6e2b",
+        "parentId" : "f0c053c0-e725-4aaf-96da-3139b0c34f7b",
+        "author" : null,
+        "body" : "Yeah, makes sense. I was thinking of introducing an intermediate representation in Render.RST (and Render.Markdown which has the same problems) to make it easier to indent things correctly. Some kind of \"rendered doc\" IR that can be converted to Rst or Markdown easily. Because right now there's a lot of duplication between the output modes of damldoc, and the same issues cropping up over and over again.",
+        "createdAt" : "2019-06-26T11:59:55Z",
+        "updatedAt" : "2019-06-26T12:01:37Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "023585b3d078dac3a9410a8839a58cf2b50fd672",
+    "line" : 104,
+    "diffHunk" : "@@ -1,1 +158,162 @@       [ [ prefix \"* - \" $ escapeTr_ (unFieldname fd_name)\n         , prefix \"  - \" $ type2rst fd_type\n         , prefix \"  - \" $ maybe \" \" (docTextToRst . DocText . T.unwords . T.lines . unDocText) fd_descr ] -- FIXME: this makes no sense\n       | FieldDoc{..} <- fds ]\n"
+  }
+]

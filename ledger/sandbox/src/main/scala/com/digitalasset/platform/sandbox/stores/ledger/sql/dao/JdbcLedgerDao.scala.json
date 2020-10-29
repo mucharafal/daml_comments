@@ -1,0 +1,454 @@
+[
+  {
+    "id" : "b6f03bd9-79e0-44cc-a3c8-9ef0cd9a84c3",
+    "prId" : 3553,
+    "comments" : [
+      {
+        "id" : "8fa992c6-39b0-4a63-954e-9a7dbe382046",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I like to do the decoding of the protobuf messages as part of processing the akka stream (compare `getLedgerEntries`), because then\r\n1) the decoding only happens when demand for more messages is requested from the sink (i.e. the API consumer)\r\n2) we don't do all the work upfront just to find out that the stream was broken.\r\n\r\nAdmittedly this is less of a problem for configuration than for transactions, but it'll ultimately be more sane to use the same \"process\".\r\n\r\nFor now, don't worry about it.",
+        "createdAt" : "2019-11-26T21:03:11Z",
+        "updatedAt" : "2019-11-27T14:09:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bc354b29-3116-4ef9-b491-9708b3e1ab49",
+        "parentId" : "8fa992c6-39b0-4a63-954e-9a7dbe382046",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "agree with the reasoning. I'll leave it as is for now though to land this beast...",
+        "createdAt" : "2019-11-27T09:31:33Z",
+        "updatedAt" : "2019-11-27T14:09:02Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "04d3118b43225ee033b4c9bba93102cdc650df6a",
+    "line" : 72,
+    "diffHunk" : "@@ -1,1 +185,189 @@      .map {\n        case (offset, typ, submissionId, participantIdRaw, rejectionReason, configBytes) =>\n          val config = Configuration\n            .decode(configBytes)\n            .fold(err => sys.error(s\"Failed to decode configuration: $err\"), identity)"
+  },
+  {
+    "id" : "31853905-ec54-47e1-ad9e-0d4f97a73b4a",
+    "prId" : 3362,
+    "comments" : [
+      {
+        "id" : "86b0b9a9-87a5-4938-b654-d53097a3ae45",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "We may want to name this so that it's clear this is the execution context in which Protobuf deserialization happens.",
+        "createdAt" : "2019-11-06T15:35:23Z",
+        "updatedAt" : "2019-11-08T07:39:39Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "52060f65-6a15-4dc3-9ce1-709ac77c8775",
+        "parentId" : "86b0b9a9-87a5-4938-b654-d53097a3ae45",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "yeah, i wasn't sure whether we should use a separate cached threadpool just for that. Right now I'm passing down the actorsystem's dispatcher, which also doesn't seem right, as it'll block scheduling of actor/stream work.",
+        "createdAt" : "2019-11-06T17:57:52Z",
+        "updatedAt" : "2019-11-08T07:39:39Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7225b1c6bd5a021028f65be952dc7015e923d713",
+    "line" : 15,
+    "diffHunk" : "@@ -1,1 +65,69 @@    dbType: DbType,\n    loggerFactory: NamedLoggerFactory,\n    executionContext: ExecutionContext)\n    extends LedgerDao {\n"
+  },
+  {
+    "id" : "58019d18-2047-41c1-8bb4-12bca3d23965",
+    "prId" : 3207,
+    "comments" : [
+      {
+        "id" : "1504b475-b0c3-40d3-993f-94739f122e36",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Can we execute these ~five~ six queries as a single transaction/roundtrip to the database? I'm also a bit worried by the length of this method.",
+        "createdAt" : "2019-10-16T16:35:38Z",
+        "updatedAt" : "2019-10-28T11:53:23Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f0c6fec2-3031-4ee5-bcb2-5e395c7b0c55",
+        "parentId" : "1504b475-b0c3-40d3-993f-94739f122e36",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "it already is a single transaction, but we can only batch execute inserts for a single table. We could however merge the tables `contract_witnesses`, `contract_signatories`, and `contract_observers` and have 3 separate columns or a \"denominator\" column only containing `w`, `s`, and `o` respectively.",
+        "createdAt" : "2019-10-17T07:03:18Z",
+        "updatedAt" : "2019-10-28T11:53:23Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "93c4f9e5-460c-4397-b754-735b67ae556d",
+        "parentId" : "1504b475-b0c3-40d3-993f-94739f122e36",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I think it's fine as is right now, thanks.",
+        "createdAt" : "2019-10-17T09:30:44Z",
+        "updatedAt" : "2019-10-28T11:53:23Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28bd9d4759b6852330b2524547277ae6809f6843",
+    "line" : 66,
+    "diffHunk" : "@@ -1,1 +401,405 @@    }\n\n    // Part 6: insert observers into the 'contract_observers' table\n    val namedObserversParams = contracts\n      .flatMap("
+  },
+  {
+    "id" : "d7bfdc6b-d92c-481e-b5e7-fe75e08e5d7f",
+    "prId" : 3207,
+    "comments" : [
+      {
+        "id" : "e3bb0ddc-8751-4e24-ac1a-5580545631a4",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "What are the chances that we'll decide to relax DAML party identifier restrictions so that `%` is a valid character, while forgetting about his line?",
+        "createdAt" : "2019-10-17T16:34:26Z",
+        "updatedAt" : "2019-10-28T11:53:23Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "194ac2c5-a356-451f-8591-609447060869",
+        "parentId" : "e3bb0ddc-8751-4e24-ac1a-5580545631a4",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Non-zero 😈 ",
+        "createdAt" : "2019-10-18T11:43:04Z",
+        "updatedAt" : "2019-10-28T11:53:23Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28bd9d4759b6852330b2524547277ae6809f6843",
+    "line" : 215,
+    "diffHunk" : "@@ -1,1 +1320,1324 @@      loggerFactory)\n\n  private val PARTY_SEPARATOR = '%'\n\n  sealed trait Queries {"
+  },
+  {
+    "id" : "d261ff55-1542-4926-9d23-b742fcf74721",
+    "prId" : 3180,
+    "comments" : [
+      {
+        "id" : "55ead091-38c5-45fe-abd9-e168b333ceb7",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "For consistency's sake, `ck` should rather be `coke`. :smile: ",
+        "createdAt" : "2019-10-15T09:14:22Z",
+        "updatedAt" : "2019-10-15T09:15:16Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "087fdf6ae541a8e9e9a1727d95b7e993edb6ffe9",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +146,150 @@    SQL(\n      \"\"\"select ck.contract_id from contract_keys ck\n        |left join contract_witnesses cowi on ck.contract_id = cowi.contract_id and cowi.witness = {party}\n        |left join contract_divulgences codi on ck.contract_id = codi.contract_id and codi.party = {party}\n        |where"
+  },
+  {
+    "id" : "bd2d0870-2136-4a7e-893d-09b13defa0e5",
+    "prId" : 2719,
+    "comments" : [
+      {
+        "id" : "f8509922-67c2-41fa-a1d5-54eb6ae3521b",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Would this force one extra roundtrip to the database for every call that saves the offset?",
+        "createdAt" : "2019-09-02T11:12:34Z",
+        "updatedAt" : "2019-09-02T13:20:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9fcdc0ee-3043-4dc7-9a0d-76f5c905e6ba",
+        "parentId" : "f8509922-67c2-41fa-a1d5-54eb6ae3521b",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "yes it would for each state update.",
+        "createdAt" : "2019-09-02T11:22:49Z",
+        "updatedAt" : "2019-09-02T13:20:59Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1480720df5055a1ee7c519e9ce61312cf6635c63",
+    "line" : 7,
+    "diffHunk" : "@@ -1,1 +111,115 @@    \"update parameters set external_ledger_end = {ExternalLedgerEnd}\")\n\n  private def updateExternalLedgerEnd(externalLedgerEnd: LedgerString)(\n      implicit conn: Connection): Unit = {\n    SQL_UPDATE_EXTERNAL_LEDGER_END"
+  },
+  {
+    "id" : "835f7e82-e528-4f0d-93e2-dea03ad8428d",
+    "prId" : 2425,
+    "comments" : [
+      {
+        "id" : "eeb5b513-d533-4b43-b2c0-185d750cf63f",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I'm a bit doubtful about this approach. I would rather use different implementations of some holder of queries for specific implementations rather than manually dispatching with cases.",
+        "createdAt" : "2019-08-23T15:21:36Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b67880ec-63d6-482b-b1f6-f3d13379ba71",
+        "parentId" : "eeb5b513-d533-4b43-b2c0-185d750cf63f",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "Conversation continued below",
+        "createdAt" : "2019-08-26T08:55:30Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1fee0715b6e5ad68a7c644fcc1d5e65f71f5a8ed",
+    "line" : 12,
+    "diffHunk" : "@@ -1,1 +52,56 @@    valueSerializer: ValueSerializer,\n    keyHasher: KeyHasher,\n    dbType: JdbcLedgerDao.DbType)\n    extends LedgerDao {\n"
+  },
+  {
+    "id" : "1ffcf947-b8f6-4b15-9101-d2ff3df2bc0f",
+    "prId" : 2425,
+    "comments" : [
+      {
+        "id" : "a5f11116-a2bc-4e08-8efb-2526ad3e0e13",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "To clarify my previous comment, I would make queries part of the implementation of this trait.",
+        "createdAt" : "2019-08-23T15:28:56Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a251348c-6a4c-4ffa-a861-5e739dafc713",
+        "parentId" : "a5f11116-a2bc-4e08-8efb-2526ad3e0e13",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "The downside of this is that many queries will be duplicated, and modifying a query in a DB-specific trait makes it easy to not modify the respective query in all the other traits.",
+        "createdAt" : "2019-08-26T07:15:05Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e17f5a94-a3d8-4a3b-b531-e21e66f6aeb1",
+        "parentId" : "a5f11116-a2bc-4e08-8efb-2526ad3e0e13",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "For reference, I initially started out on the inheritance approach which duplicated a lot of code: https://github.com/digital-asset/daml/commit/754fd7b60985325571850c65c28171d35242d1a4#diff-3c124d60ef536a91fb6039a3d6b350aa and got worried about the maintainability of multiple DAOs.\r\n\r\nBut we should be able to come up with something more scoped, i.e. only overriding \"non-standard\" SQL statements. Let me take a stab at this and see how this turns out. This may be what @stefanobaghino-da means too.\r\n\r\nAnother alternative could be to try to avoid Postgres-special syntax. For the \"on conflict .. do nothing\" this can mean standardizing on the H2db approach of adding a where clause filter to achieve the same effect. I did not do so since I was worried about causing perf regressions on the Postgres side. This would turn\r\n\r\n```\r\n  private val SQL_INSERT_PACKAGE =\r\n    dbType match {\r\n      case Postgres =>\r\n        \"\"\"insert into packages(package_id, upload_id, source_description, size, known_since, ledger_offset, package)\r\n          |select {package_id}, {upload_id}, {source_description}, {size}, {known_since}, ledger_end, {package}\r\n          |from parameters\r\n          |on conflict (package_id) do nothing\r\n          |\"\"\".stripMargin\r\n      case H2Database =>\r\n        \"\"\"insert into packages(package_id, upload_id, source_description, size, known_since, ledger_offset, package)\r\n          |select {package_id}, {upload_id}, {source_description}, {size}, {known_since}, ledger_end, {package}\r\n          |from parameters\r\n          |where {package_id} not in (select package_id from packages)\r\n          |\"\"\".stripMargin\r\n    }\r\n```\r\n\r\nto:\r\n\r\n```\r\n  private val SQL_INSERT_PACKAGE =\r\n    \"\"\"insert into packages(package_id, upload_id, source_description, size, known_since, ledger_offset, package)\r\n      |select {package_id}, {upload_id}, {source_description}, {size}, {known_since}, ledger_end, {package}\r\n      |from parameters\r\n      |where {package_id} not in (select package_id from packages)\"\"\".stripMargin\r\n```",
+        "createdAt" : "2019-08-26T07:34:34Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9b57be1e-115d-4280-bd76-7797e64aead4",
+        "parentId" : "a5f11116-a2bc-4e08-8efb-2526ad3e0e13",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "@stefanobaghino-da , I moved the Statement overrides into the trait. Please take a look at https://github.com/digital-asset/daml/pull/2425/commits/87be58d48544dab10c8d9432ae925aa773580725",
+        "createdAt" : "2019-08-26T08:55:59Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "42f865cb-6fd8-4384-9d37-1b0dcb24217b",
+        "parentId" : "a5f11116-a2bc-4e08-8efb-2526ad3e0e13",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yeah, I prefer this approach much more, thanks.",
+        "createdAt" : "2019-08-26T09:24:35Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "816abb33-e8fc-4992-a88c-ff3f6b957d4e",
+        "parentId" : "a5f11116-a2bc-4e08-8efb-2526ad3e0e13",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I've added a single comment on that commit, feel free to fulfill the requirement or disregard it, it's not that important.",
+        "createdAt" : "2019-08-26T09:25:09Z",
+        "updatedAt" : "2019-08-28T11:21:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1fee0715b6e5ad68a7c644fcc1d5e65f71f5a8ed",
+    "line" : 163,
+    "diffHunk" : "@@ -1,1 +1112,1116 @@      dbType)\n\n  sealed trait DbType {\n\n    def name: String"
+  }
+]
