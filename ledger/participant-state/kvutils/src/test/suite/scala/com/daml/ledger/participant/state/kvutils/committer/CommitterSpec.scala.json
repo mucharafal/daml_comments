@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "6074a9d8-42f0-4b36-8844-51355ce64a84",
+    "prId" : 6852,
+    "comments" : [
+      {
+        "id" : "c8d8c5f9-1354-444d-8032-bc94b8d47121",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n    \"do not throw in case neither out-of-time-bounds log entry nor min/max record time are set\" in {\r\n```",
+        "createdAt" : "2020-07-24T10:05:01Z",
+        "updatedAt" : "2020-07-24T10:29:13Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e74a3e98b1c9a6b60582189b86edb8a2836dca76",
+    "line" : null,
+    "diffHunk" : "@@ -88,7 +93,7 @@ class CommitterSpec extends WordSpec with Matchers with MockitoSugar {\n       actualOutOfTimeBoundsLogEntry.getEntry shouldBe aRejectionLogEntry\n     }\n \n-    \"throw in case no out-of-time-bounds log entry is set\" in {\n+    \"do not throw in case no out-of-time-bounds log entry and min/max record time is set\" in {"
+  },
+  {
+    "id" : "97e2fb9f-8f9f-497f-8f63-5535a00c126a",
+    "prId" : 6592,
+    "comments" : [
+      {
+        "id" : "5fa455e5-bbce-48cf-896c-639e66973954",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Please place all the values together",
+        "createdAt" : "2020-07-07T14:47:44Z",
+        "updatedAt" : "2020-07-10T16:13:44Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "55fbe3cc0a4ea1575e54fc6873803e8129a24e49",
+    "line" : 152,
+    "diffHunk" : "@@ -26,4 +80,63 @@ class CommitterSpec extends WordSpec with Matchers {\n       actualLogEntry.hasRecordTime shouldBe false\n     }\n   }\n+\n+  \"runSteps\" should {\n+    \"stop at first StepStop\" in {\n+      val expectedLogEntry = aLogEntry\n+      val instance = new Committer[Int] {\n+        override protected def steps: Iterable[(StepInfo, Step)] = Iterable[(StepInfo, Step)](\n+          (\"first\", (_, _) => StepContinue(1)),\n+          (\"second\", (_, _) => StepStop(expectedLogEntry)),\n+          (\"third\", (_, _) => StepStop(DamlLogEntry.getDefaultInstance))\n+        )\n+\n+        override protected val committerName: String = \"test\"\n+\n+        override protected def init(ctx: CommitContext, submission: DamlSubmission): Int = 0\n+\n+        override protected val metrics: Metrics = newMetrics()\n+      }\n+\n+      instance.runSteps(mock[CommitContext], aDamlSubmission) shouldBe expectedLogEntry\n+    }\n+\n+    \"throw in case there was no StepStop yielded\" in {\n+      val instance = new Committer[Int] {\n+        override protected def steps: Iterable[(StepInfo, Step)] = Iterable(\n+          (\"first\", (_, _) => StepContinue(1)),\n+          (\"second\", (_, _) => StepContinue(2))\n+        )\n+\n+        override protected val committerName: String = \"test\"\n+\n+        override protected def init(ctx: CommitContext, submission: DamlSubmission): Int = 0\n+\n+        override protected val metrics: Metrics = newMetrics()\n+      }\n+\n+      assertThrows[RuntimeException](instance.runSteps(mock[CommitContext], aDamlSubmission))\n+    }\n+  }\n+\n+  private val aLogEntry = DamlLogEntry.newBuilder"
+  },
+  {
+    "id" : "eda10053-fc76-4fc4-82db-bf9ee731488a",
+    "prId" : 6538,
+    "comments" : [
+      {
+        "id" : "d601f72b-3bb4-4d4e-82af-666a177af578",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Please add the copyright header.",
+        "createdAt" : "2020-07-01T09:46:05Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0bf505ac-cc69-41ec-b248-a517d06b2ca3",
+        "parentId" : "d601f72b-3bb4-4d4e-82af-666a177af578",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added.",
+        "createdAt" : "2020-07-01T12:48:27Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7fcd13b1e8abafa8318221497401dd1746cfe5e2",
+    "line" : 4,
+    "diffHunk" : "@@ -0,0 +1,26 @@\n+package com.daml.ledger.participant.state.kvutils.committer"
+  }
+]

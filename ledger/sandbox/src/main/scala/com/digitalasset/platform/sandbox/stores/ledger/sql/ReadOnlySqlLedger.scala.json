@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "37310ad1-3668-4a12-821a-be62f19ad56d",
+    "prId" : 3871,
+    "comments" : [
+      {
+        "id" : "3fa289a9-2fe1-4081-9f75-c2dc59e2a772",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Ah, yes, thanks.",
+        "createdAt" : "2019-12-20T15:41:06Z",
+        "updatedAt" : "2019-12-22T14:40:42Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0c6828ae4d7794fc12160eb51a23c06485aac526",
+    "line" : 31,
+    "diffHunk" : "@@ -32,38 +27,30 @@ import scala.concurrent.{ExecutionContext, Future}\n \n object ReadOnlySqlLedger {\n \n-  val noOfShortLivedConnections = 16\n+  val maxConnections = 16"
+  },
+  {
+    "id" : "ba20ca8e-c3e3-4e20-bd64-ea70a78f9d5b",
+    "prId" : 3871,
+    "comments" : [
+      {
+        "id" : "468ca4e7-5873-4da4-b479-81f140d5105b",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Why changing the execution context?",
+        "createdAt" : "2019-12-20T15:41:31Z",
+        "updatedAt" : "2019-12-22T14:40:42Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6f215830-bb1c-47b9-9fd8-c0f56366260b",
+        "parentId" : "468ca4e7-5873-4da4-b479-81f140d5105b",
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Makes no difference and it's one fewer edge case.",
+        "createdAt" : "2019-12-20T16:10:31Z",
+        "updatedAt" : "2019-12-22T14:40:42Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0c6828ae4d7794fc12160eb51a23c06485aac526",
+    "line" : 43,
+    "diffHunk" : "@@ -32,38 +27,30 @@ import scala.concurrent.{ExecutionContext, Future}\n \n object ReadOnlySqlLedger {\n \n-  val noOfShortLivedConnections = 16\n+  val maxConnections = 16\n \n   //jdbcUrl must have the user/password encoded in form of: \"jdbc:postgresql://localhost/test?user=fred&password=secret\"\n   def apply(\n       jdbcUrl: String,\n       ledgerId: Option[LedgerId],\n       loggerFactory: NamedLoggerFactory,\n       metrics: MetricRegistry,\n-  )(implicit mat: Materializer): Future[ReadOnlyLedger] = {\n-    implicit val ec: ExecutionContext = DEC\n-\n+  )(implicit mat: Materializer): Resource[ReadOnlyLedger] = {\n+    implicit val ec: ExecutionContext = mat.executionContext"
+  }
+]

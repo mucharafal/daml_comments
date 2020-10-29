@@ -1,0 +1,205 @@
+[
+  {
+    "id" : "37335789-a144-499d-828f-7cdd23b0d80e",
+    "prId" : 7577,
+    "comments" : [
+      {
+        "id" : "e2e898d3-18d0-47b6-a777-d052c88aa072",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I find it confusing that this function name contains `Interface`. Why not just `lookupPackage` or `lookupAbstractPackage`?",
+        "createdAt" : "2020-10-09T11:58:14Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "004dc29d-d809-4f0c-ba2a-7f1d45623a76",
+        "parentId" : "e2e898d3-18d0-47b6-a777-d052c88aa072",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-10-12T12:25:02Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d6d8aeac74d12178596915f46b0e6afbe8a23966",
+    "line" : null,
+    "diffHunk" : "@@ -6,16 +6,18 @@ package com.daml.lf.validation\n import com.daml.lf.data.Ref._\n import com.daml.lf.language.Ast\n \n-private[validation] class World(packages: PartialFunction[PackageId, Ast.Package]) {\n+private[validation] class World(\n+    signatures: PartialFunction[PackageId, Ast.AbstractPackage[_]]\n+) {\n \n-  def lookupPackage(ctx: => Context, pkgId: PackageId): Ast.Package =\n-    packages.lift(pkgId).getOrElse(throw EUnknownDefinition(ctx, LEPackage(pkgId)))\n+  def lookupPackageInterface(ctx: => Context, pkgId: PackageId): Ast.AbstractPackage[_] ="
+  },
+  {
+    "id" : "4ecd510d-f466-44a8-8c02-3072e7d1d6b0",
+    "prId" : 7577,
+    "comments" : [
+      {
+        "id" : "7884710e-0494-4807-9fb2-976489cf9a1c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Do we ever need a `World` that contains packages with expressions? If not, I think we should change the type to `Ast.PackageSignature`.",
+        "createdAt" : "2020-10-09T11:59:13Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "afff75a4-3523-44a9-825a-1966f0771626",
+        "parentId" : "7884710e-0494-4807-9fb2-976489cf9a1c",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Yes. It is explained in the description of the PR. \r\n> The Ast validation requires indistinctively the full ASTs or the signatures of the dependencies of the package it has to check.\r\nThe reason is that I do not want to do extra work on a package on a package (to convert it into a signature) before it is validated. Additionally having to generate the signature for the validation, oblige we either do it twice (one for validation and one for compilation) or we have to tide more closely the two phases in order to reuse the same `PackageSignature` in both case (this is not completely straightforward in the ledger) \r\n\r\n",
+        "createdAt" : "2020-10-09T12:16:45Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "867da568-d907-441e-8340-83a53e8998a3",
+        "parentId" : "7884710e-0494-4807-9fb2-976489cf9a1c",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That explanation makes sense. Thank you.\r\n\r\nI assume we never hold on to objects of type `World` for long and thus there's no danger of inadvertently holding on to a full package instead of a signature. Is that correct?",
+        "createdAt" : "2020-10-09T14:27:13Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bf7146ef-3006-40e3-a570-e5abaff8b772",
+        "parentId" : "7884710e-0494-4807-9fb2-976489cf9a1c",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Yes. ",
+        "createdAt" : "2020-10-09T14:31:12Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "88990511-34cf-48d5-9aab-1dff8956a78d",
+        "parentId" : "7884710e-0494-4807-9fb2-976489cf9a1c",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That's good to know. Merci.",
+        "createdAt" : "2020-10-09T14:39:17Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d6d8aeac74d12178596915f46b0e6afbe8a23966",
+    "line" : null,
+    "diffHunk" : "@@ -6,16 +6,18 @@ package com.daml.lf.validation\n import com.daml.lf.data.Ref._\n import com.daml.lf.language.Ast\n \n-private[validation] class World(packages: PartialFunction[PackageId, Ast.Package]) {\n+private[validation] class World(\n+    signatures: PartialFunction[PackageId, Ast.AbstractPackage[_]]"
+  },
+  {
+    "id" : "cea3496e-3786-420a-afea-557a275bbb47",
+    "prId" : 7050,
+    "comments" : [
+      {
+        "id" : "f8d11a76-3eca-4e97-b04d-10b11f0a54c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why would we want to add `ref` as well? I'm convinced that's the right thing to do.",
+        "createdAt" : "2020-08-07T06:17:37Z",
+        "updatedAt" : "2020-08-07T15:26:46Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edd5726604b0278196086666e0c0dae724cae3ff",
+    "line" : null,
+    "diffHunk" : "@@ -55,4 +58,38 @@ private[validation] class World(packages: PartialFunction[PackageId, Ast.Package\n         throw EUnknownDefinition(ctx, LEValue(name))\n     }\n \n+  def idsInModule(ctx: => Context, pkgId: PackageId, modName: ModuleName): Set[Identifier] =\n+    cacheModIdentifiers.getOrElseUpdate(\n+      (pkgId, modName),\n+      lookupModule(ctx, pkgId, modName).definitions.values.foldLeft(Set.empty[Identifier])(idsInDef)\n+    )\n+\n+  private[this] val cacheModIdentifiers =\n+    mutable.Map.empty[(PackageId, ModuleName), Set[Identifier]]\n+\n+  private[this] def idsInType(acc: Set[Identifier], typ0: Ast.Type): Set[Identifier] =\n+    typ0 match {\n+      case Ast.TSynApp(typeSynName, _) =>\n+        TypeTraversable(typ0).foldLeft(acc + typeSynName)(idsInType)\n+      case Ast.TTyCon(typeConName) =>\n+        acc + typeConName\n+      case otherwise =>\n+        TypeTraversable(otherwise).foldLeft(acc)(idsInType)\n+    }\n+\n+  private[this] def idsInExpr(acc: Set[Identifier], expr0: Ast.Expr): Set[Identifier] =\n+    expr0 match {\n+      case Ast.EVal(valRef) =>\n+        acc + valRef\n+      case Ast.EAbs(binder @ _, body, ref) =>"
+  }
+]

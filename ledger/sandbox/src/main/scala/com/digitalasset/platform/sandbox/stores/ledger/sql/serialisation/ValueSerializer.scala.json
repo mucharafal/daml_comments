@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "c3266f54-6ce2-4b3a-94c0-f259b0d11223",
+    "prId" : 444,
+    "comments" : [
+      {
+        "id" : "682667f4-f601-49ad-9005-e1b7b49243cb",
+        "parentId" : null,
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "hashing is quite tricky here, because protobuf serialization is not canonical, that is, there is no single bytestring that corresponds to a protobuf message.\r\n\r\nwe can merge with the current semantics for now, but please abstract out the hashing in this object (say `valueHasher`) and add a comment noting this pitfall, and linking an issue about this in the SQL milestone.",
+        "createdAt" : "2019-04-15T15:07:56Z",
+        "updatedAt" : "2019-04-16T07:25:47Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2caa7f293aac7972574e45eb2989deaffe86da96",
+    "line" : 20,
+    "diffHunk" : "@@ -0,0 +1,48 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.stores.ledger.sql.serialisation\n+\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, VersionedValue}\n+import com.digitalasset.daml.lf.value.ValueCoder.DecodeError\n+import com.digitalasset.daml.lf.value.{ValueCoder, ValueOuterClass}\n+\n+trait ValueSerializer {\n+  def serialiseValue(\n+      value: VersionedValue[AbsoluteContractId]): Either[ValueCoder.EncodeError, Array[Byte]]\n+\n+  def deserialiseValue(blob: Array[Byte]): Either[DecodeError, VersionedValue[AbsoluteContractId]]\n+}\n+\n+/**\n+  * This is a preliminary serializer using protobuf as a payload type. Our goal on the long run is to use JSON as a payload.\n+  */\n+object ValueSerializer extends ValueSerializer {"
+  }
+]

@@ -1,0 +1,320 @@
+[
+  {
+    "id" : "36d790ce-28ae-4ce2-a888-86f1c5417d80",
+    "prId" : 5140,
+    "comments" : [
+      {
+        "id" : "b05c12bb-629e-4cdd-beb8-8e40d303b3cd",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "We often use two of these together, and the operation is becoming a little costly. Perhaps it'd be useful to have a function that extracts a triple of `(Long, Long, Long)`, and use that above?",
+        "createdAt" : "2020-03-23T16:15:04Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9262b9e2-4cbd-46e3-b32a-ffec22d7231b",
+        "parentId" : "b05c12bb-629e-4cdd-beb8-8e40d303b3cd",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "`middleIndex` and `lowestIndex` are used only once (+1 in the test).\r\nI prefer not touch this, I will let the original designer refactor that. ",
+        "createdAt" : "2020-03-23T16:59:14Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f294ff3bf6e8f914a9259daabba5a33e2634244d",
+    "line" : null,
+    "diffHunk" : "@@ -35,13 +36,14 @@ object KVOffset {\n     val middle = BigInt(second) << ((end - lowestStart) * 8)\n     val lowest = BigInt(third)\n     val bytes = (maxValuePlusOne | highest | middle | lowest).toByteArray.drop(1) // this retains leading zeros\n-    Offset.fromBytes(bytes)\n+    Offset(data.Bytes.fromByteArray(bytes))\n   }\n \n   def highestIndex(offset: Offset): Long =\n-    BigInt(offset.toByteArray.slice(highestStart, middleStart)).toLong\n+    BigInt(Offset.unwrap(offset).toByteArray.slice(highestStart, middleStart)).toLong\n   def middleIndex(offset: Offset): Long =\n-    BigInt(offset.toByteArray.slice(middleStart, lowestStart)).toLong\n-  def lowestIndex(offset: Offset): Long = BigInt(offset.toByteArray.slice(lowestStart, end)).toLong\n+    BigInt(Offset.unwrap(offset).toByteArray.slice(middleStart, lowestStart)).toLong\n+  def lowestIndex(offset: Offset): Long =\n+    BigInt(Offset.unwrap(offset).toByteArray.slice(lowestStart, end)).toLong"
+  },
+  {
+    "id" : "9b436e08-7e32-49bd-b418-9081b0eebed7",
+    "prId" : 5140,
+    "comments" : [
+      {
+        "id" : "1a1facc3-0d12-4cdc-9819-e8ecc1dc9f09",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "calling `toByteArray` on `Offset` directly should work, right?",
+        "createdAt" : "2020-03-23T17:12:17Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "157cfa7d-7926-4f07-b6b6-4ad6d9963794",
+        "parentId" : "1a1facc3-0d12-4cdc-9819-e8ecc1dc9f09",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-03-23T17:25:14Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f294ff3bf6e8f914a9259daabba5a33e2634244d",
+    "line" : null,
+    "diffHunk" : "@@ -35,13 +35,14 @@ object KVOffset {\n     val middle = BigInt(second) << ((end - lowestStart) * 8)\n     val lowest = BigInt(third)\n     val bytes = (maxValuePlusOne | highest | middle | lowest).toByteArray.drop(1) // this retains leading zeros\n-    Offset.fromBytes(bytes)\n+    Offset.fromByteArray(bytes)\n   }\n \n   def highestIndex(offset: Offset): Long =\n-    BigInt(offset.toByteArray.slice(highestStart, middleStart)).toLong\n+    BigInt(offset.bytes.toByteArray.slice(highestStart, middleStart)).toLong"
+  },
+  {
+    "id" : "a80ecd92-6744-4b03-ad07-cc32d907267c",
+    "prId" : 5140,
+    "comments" : [
+      {
+        "id" : "c3c6f4d5-e26d-4114-aa4e-5eee5b92b6ea",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Same as above.",
+        "createdAt" : "2020-03-23T17:12:25Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bb1421b0-0983-44a8-84b7-f3fdde3d98c0",
+        "parentId" : "c3c6f4d5-e26d-4114-aa4e-5eee5b92b6ea",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-03-23T17:25:18Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f294ff3bf6e8f914a9259daabba5a33e2634244d",
+    "line" : null,
+    "diffHunk" : "@@ -35,13 +35,14 @@ object KVOffset {\n     val middle = BigInt(second) << ((end - lowestStart) * 8)\n     val lowest = BigInt(third)\n     val bytes = (maxValuePlusOne | highest | middle | lowest).toByteArray.drop(1) // this retains leading zeros\n-    Offset.fromBytes(bytes)\n+    Offset.fromByteArray(bytes)\n   }\n \n   def highestIndex(offset: Offset): Long =\n-    BigInt(offset.toByteArray.slice(highestStart, middleStart)).toLong\n+    BigInt(offset.bytes.toByteArray.slice(highestStart, middleStart)).toLong\n   def middleIndex(offset: Offset): Long =\n-    BigInt(offset.toByteArray.slice(middleStart, lowestStart)).toLong\n-  def lowestIndex(offset: Offset): Long = BigInt(offset.toByteArray.slice(lowestStart, end)).toLong\n+    BigInt(offset.bytes.toByteArray.slice(middleStart, lowestStart)).toLong"
+  },
+  {
+    "id" : "e281a7a1-907f-4bff-8528-03953675557e",
+    "prId" : 5140,
+    "comments" : [
+      {
+        "id" : "e09d2e87-07ea-4d18-8b8f-aa4ba0af1e5d",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Same as above.",
+        "createdAt" : "2020-03-23T17:12:34Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f089d849-a46c-4cf2-9f69-fb985d3c3cc2",
+        "parentId" : "e09d2e87-07ea-4d18-8b8f-aa4ba0af1e5d",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed\r\n",
+        "createdAt" : "2020-03-23T17:25:26Z",
+        "updatedAt" : "2020-03-23T22:49:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f294ff3bf6e8f914a9259daabba5a33e2634244d",
+    "line" : null,
+    "diffHunk" : "@@ -35,13 +35,14 @@ object KVOffset {\n     val middle = BigInt(second) << ((end - lowestStart) * 8)\n     val lowest = BigInt(third)\n     val bytes = (maxValuePlusOne | highest | middle | lowest).toByteArray.drop(1) // this retains leading zeros\n-    Offset.fromBytes(bytes)\n+    Offset.fromByteArray(bytes)\n   }\n \n   def highestIndex(offset: Offset): Long =\n-    BigInt(offset.toByteArray.slice(highestStart, middleStart)).toLong\n+    BigInt(offset.bytes.toByteArray.slice(highestStart, middleStart)).toLong\n   def middleIndex(offset: Offset): Long =\n-    BigInt(offset.toByteArray.slice(middleStart, lowestStart)).toLong\n-  def lowestIndex(offset: Offset): Long = BigInt(offset.toByteArray.slice(lowestStart, end)).toLong\n+    BigInt(offset.bytes.toByteArray.slice(middleStart, lowestStart)).toLong\n+  def lowestIndex(offset: Offset): Long =\n+    BigInt(offset.bytes.toByteArray.slice(lowestStart, end)).toLong"
+  },
+  {
+    "id" : "56b02fc9-49b5-4107-8392-8f47bf5010e2",
+    "prId" : 4953,
+    "comments" : [
+      {
+        "id" : "d8133a39-ee96-4a10-b1f5-d115551975a0",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "You could use `end * 8` here for clarity.",
+        "createdAt" : "2020-03-16T15:05:35Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "690605f6-cdbe-4930-9e34-f4e26c8b1ce6",
+        "parentId" : "d8133a39-ee96-4a10-b1f5-d115551975a0",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "And perhaps rename it to `maxValuePlusOne` or something?",
+        "createdAt" : "2020-03-16T15:06:14Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8c9c3ccf491dcebc26c083911d9714d2fa5d032f",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,47 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils\n+\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+object KVOffset {\n+  private[kvutils] val highestStart = 0\n+  private[kvutils] val middleStart = 8\n+  private[kvutils] val lowestStart = 12\n+  private[kvutils] val end = 16\n+\n+  private val evil = BigInt(1) << 128"
+  },
+  {
+    "id" : "9a77753a-081d-4216-9335-fac5c65bdd39",
+    "prId" : 4953,
+    "comments" : [
+      {
+        "id" : "c6cd2d1b-39c3-442c-b549-d9818cb1582b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "These bit-shifts only work by accident. If, for example, `middleStart` was `9` and `lowestStart` was `13`, they wouldn't work: you'd shift `highest` by `9` when it should be `7`, and `middle` by `4` when it should be `3`.\r\n\r\nYou need to use `end - middleStart` and `end - lowestStart` (and implicitly `end - end` for `lowest`, which is unnecessary because it's always `0`).",
+        "createdAt" : "2020-03-17T13:26:13Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a3915fc1-24aa-497f-9aef-68c202b08d74",
+        "parentId" : "c6cd2d1b-39c3-442c-b549-d9818cb1582b",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "good catch. thanks. I shouldn't have trusted those \"nice\" numbers to just work out.",
+        "createdAt" : "2020-03-17T16:33:58Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8c9c3ccf491dcebc26c083911d9714d2fa5d032f",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,47 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils\n+\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+object KVOffset {\n+  private[kvutils] val highestStart = 0\n+  private[kvutils] val middleStart = 8\n+  private[kvutils] val lowestStart = 12\n+  private[kvutils] val end = 16\n+\n+  private val maxValuePlusOne = BigInt(1) << (end * 8)\n+\n+  def onlyKeepHighestIndex(offset: Offset): Offset = {\n+    val highest = highestIndex(offset)\n+    fromLong(highest)\n+  }\n+\n+  def setMiddleIndex(offset: Offset, middle: Int): Offset = {\n+    val highest = highestIndex(offset)\n+    val lowest = lowestIndex(offset)\n+    fromLong(highest.toLong, middle, lowest.toInt)\n+  }\n+\n+  def setLowestIndex(offset: Offset, lowest: Int): Offset = {\n+    val highest = highestIndex(offset)\n+    val middle = middleIndex(offset)\n+    fromLong(highest.toLong, middle.toInt, lowest)\n+  }\n+\n+  def fromLong(first: Long, second: Int = 0, third: Int = 0): Offset = {\n+    val highest = BigInt(first) << ((middleStart - highestStart) * 8)\n+    val middle = BigInt(second) << ((lowestStart - middleStart) * 8)\n+    val lowest = BigInt(third)"
+  }
+]

@@ -1,0 +1,931 @@
+[
+  {
+    "id" : "e457db8c-f8ee-4ee4-a12e-72aa24200e35",
+    "prId" : 7682,
+    "comments" : [
+      {
+        "id" : "2b714e7c-e8a7-4c8d-a7bb-cb4c85813246",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n    } else if (tokenParties == parties.toSet.toSet[String]) {\r\n```",
+        "createdAt" : "2020-10-14T14:05:39Z",
+        "updatedAt" : "2020-10-14T14:06:43Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5e048518-f3db-4863-be6f-e96ba25300c5",
+        "parentId" : "2b714e7c-e8a7-4c8d-a7bb-cb4c85813246",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do you really mean `toSet` twice or `toList` followed by `toSet`?",
+        "createdAt" : "2020-10-14T14:10:02Z",
+        "updatedAt" : "2020-10-14T14:10:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4b330583-82cd-46dc-aea1-993e58c8d6ed",
+        "parentId" : "2b714e7c-e8a7-4c8d-a7bb-cb4c85813246",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Or maybe just `toSet` once?",
+        "createdAt" : "2020-10-14T14:10:22Z",
+        "updatedAt" : "2020-10-14T14:10:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3698144a-3f21-4b7d-bea3-2f4be7cd6a09",
+        "parentId" : "2b714e7c-e8a7-4c8d-a7bb-cb4c85813246",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I really mean `toSet` twice.",
+        "createdAt" : "2020-10-14T14:17:17Z",
+        "updatedAt" : "2020-10-14T14:17:17Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a7acb8ff-fa27-4cec-8005-3cbc089d3155",
+        "parentId" : "2b714e7c-e8a7-4c8d-a7bb-cb4c85813246",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "The first `toSet` doesn't take a type parameter; the second one does, which is where you can do the widen that you're doing with natural transformation to `List` and then using covariance in the merged code. The second `toSet` will return the receiver with its type changed.",
+        "createdAt" : "2020-10-14T14:19:18Z",
+        "updatedAt" : "2020-10-14T14:19:18Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d165b82f6311b3a5837d25035bd9c78b1f3b5e0c",
+    "line" : 297,
+    "diffHunk" : "@@ -850,18 +873,19 @@ class JsonLedgerClient(\n       new RuntimeException(\"setTime is not supported when running DAML Script over the JSON API.\"))\n   }\n \n-  // Check that the party in the token matches the given party.\n-  private def validateTokenParty(party: Ref.Party, what: String): Future[Unit] = {\n-    tokenPayload.party match {\n-      case None =>\n-        Future.failed(\n-          new RuntimeException(\n-            s\"Tried to $what as ${party} but token does not provide a unique party identifier\"))\n-      case Some(tokenParty) if (!(tokenParty == party)) =>\n-        Future.failed(\n-          new RuntimeException(\n-            s\"Tried to $what as ${party} but token is only valid for $tokenParty\"))\n-      case _ => Future.unit\n+  // Check that the parties in the token are a superset of the given parties.\n+  private def validateTokenParties(parties: OneAnd[Set, Ref.Party], what: String): Future[Unit] = {\n+    val tokenParties = Set(tokenPayload.readAs ++ tokenPayload.actAs: _*)\n+    // First check is just for a nicer error message and would be covered by the second\n+    if (tokenParties.isEmpty) {\n+      Future.failed(\n+        new RuntimeException(\n+          s\"Tried to $what as ${parties.toList.mkString(\" \")} but token contains no parties.\"))\n+    } else if (tokenParties == Set[String](parties.toList: _*)) {"
+  },
+  {
+    "id" : "d8dbd98f-6347-4f48-b4cf-c9db5f938741",
+    "prId" : 7501,
+    "comments" : [
+      {
+        "id" : "1ef429c7-a9e9-4900-8d58-849cdb3b5464",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Same here.",
+        "createdAt" : "2020-09-29T08:19:22Z",
+        "updatedAt" : "2020-09-29T08:57:50Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b25c1c36b2946c9654397dda20c730c43a9168fc",
+    "line" : null,
+    "diffHunk" : "@@ -388,6 +388,7 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n     outputTransactionVersions = transaction.TransactionVersions.DevOutputVersions,\n     traceLog = traceLog,\n   )\n+  val onLedger = machine.withOnLedger(\"IdeClient\")(identity)"
+  },
+  {
+    "id" : "fc2da5c4-60a6-4d1e-b02e-b5c59bff29ad",
+    "prId" : 7378,
+    "comments" : [
+      {
+        "id" : "0084e830-6f6d-4ef0-b3c8-309e032b4ad4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This seems strictly slower than what we did before: We get an `SValue` for all commands from speedy. Then you convert it to a `Value` only to then convert it back to `SValue`s here. While you can argue that this is not a noticeable performance loss, I’m at least somewhat cautious in doing this without having measured it.",
+        "createdAt" : "2020-09-14T07:24:25Z",
+        "updatedAt" : "2020-09-14T11:23:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9ce737f7c67beb87c4261e01e86fd50436368ede",
+    "line" : 173,
+    "diffHunk" : "@@ -461,44 +438,19 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n       }\n   }\n \n-  // Translate from a ledger command to an Update expression\n-  // corresponding to the same command.\n-  private def translateCommand(cmd: ScriptLedgerClient.Command): speedy.Command = {\n-    // Ledger commands like create or exercise look pretty complicated in\n-    // SExpr. Therefore we express them in the high-level AST and compile them\n-    // to a function that we apply to the arguments.\n-    cmd match {\n-      case ScriptLedgerClient.CreateCommand(tplId, arg) =>\n-        speedy.Command.Create(tplId, arg)\n-      case ScriptLedgerClient.ExerciseCommand(tplId, cid, choice, arg) =>\n-        speedy.Command.Exercise(tplId, SContractId(cid), choice, arg)\n-      case ScriptLedgerClient.CreateAndExerciseCommand(tplId, tpl, choice, arg) =>\n-        speedy.Command.CreateAndExercise(tplId, tpl, choice, arg)\n-      case ScriptLedgerClient.ExerciseByKeyCommand(tplId, key, choice, arg) =>\n-        speedy.Command.ExerciseByKey(tplId, key, choice, arg)\n-    }\n-  }\n-\n-  // Translate a list of commands submitted by the given party\n-  // into an expression corresponding to a scenario commit of the same\n-  // commands of type `Scenario ()`.\n-  private def translateCommands(commands: List[ScriptLedgerClient.Command]): SExpr = {\n-    val cmds: ImmArray[speedy.Command] = ImmArray(commands.map(translateCommand(_)))\n-    compiledPackages.compiler.unsafeCompile(cmds)\n-  }\n-\n   // unsafe version of submit that does not clear the commit.\n   private def unsafeSubmit(\n       party: SParty,\n-      commands: List[ScriptLedgerClient.Command],\n+      commands: List[command.Command],\n       optLocation: Option[Location])(implicit ec: ExecutionContext)\n     : Future[Either[StatusRuntimeException, Seq[ScriptLedgerClient.CommandResult]]] = Future {\n     // Clear state at the beginning like in SBSBeginCommit for scenarios.\n     machine.commitLocation = optLocation\n     machine.returnValue = null\n     machine.localContracts = Map.empty\n     machine.globalDiscriminators = Set.empty\n-    val translated = translateCommands(commands)\n+    val speedyCommands = preprocessor.unsafePreprocessCommands(commands.to[ImmArray])._1"
+  },
+  {
+    "id" : "83835bf4-6f8e-4f9b-a641-de376eb1e65f",
+    "prId" : 7354,
+    "comments" : [
+      {
+        "id" : "6d9c585d-1919-47d0-81da-2a61adfc87db",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The implementation over the JSON API is a huge mess (for all methods). I’ll open an issue to clean this up separately.",
+        "createdAt" : "2020-09-09T09:40:26Z",
+        "updatedAt" : "2020-09-10T15:45:07Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c78f22bbc802132f3022ab3407596ba027a98cd0",
+    "line" : 107,
+    "diffHunk" : "@@ -728,6 +773,38 @@ class JsonLedgerClient(\n       })\n     }\n   }\n+  override def queryContractKey(party: SParty, templateId: Identifier, key: SValue)("
+  },
+  {
+    "id" : "0781f8b0-bc44-459f-9412-738ec894d64d",
+    "prId" : 7354,
+    "comments" : [
+      {
+        "id" : "10e5e1de-6a17-4326-a11c-777f2a7f06e0",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Patterns on LHS of `<-` always add a `withFilter` in `for`s.\r\n\r\n```suggestion\r\n      _ <- validateTokenParty(party, \"queryContractKey\")\r\n```",
+        "createdAt" : "2020-09-10T15:42:59Z",
+        "updatedAt" : "2020-09-10T15:45:07Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "97446f71-edf0-4a9e-aae2-5970d73a6131",
+        "parentId" : "10e5e1de-6a17-4326-a11c-777f2a7f06e0",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks! I keep forgetting that.",
+        "createdAt" : "2020-09-10T15:45:21Z",
+        "updatedAt" : "2020-09-10T15:45:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c78f22bbc802132f3022ab3407596ba027a98cd0",
+    "line" : null,
+    "diffHunk" : "@@ -728,6 +773,38 @@ class JsonLedgerClient(\n       })\n     }\n   }\n+  override def queryContractKey(party: SParty, templateId: Identifier, key: SValue)(\n+      implicit ec: ExecutionContext,\n+      mat: Materializer) = {\n+    val req = HttpRequest(\n+      method = HttpMethods.POST,\n+      uri = uri.withPath(uri.path./(\"v1\")./(\"fetch\")),\n+      entity = HttpEntity(\n+        ContentTypes.`application/json`,\n+        JsonLedgerClient.FetchKeyArgs(templateId, key.toValue).toJson.prettyPrint),\n+      headers = List(Authorization(OAuth2BearerToken(token.value)))\n+    )\n+    for {\n+      () <- validateTokenParty(party, \"queryContractKey\")"
+  },
+  {
+    "id" : "29636078-bcf4-4562-894a-7f43bd0018d4",
+    "prId" : 7291,
+    "comments" : [
+      {
+        "id" : "88853d31-90e5-4827-81e8-848f0b5d766e",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Either update the comment or drop it completely  \r\n```suggestion\r\n```",
+        "createdAt" : "2020-09-01T09:27:08Z",
+        "updatedAt" : "2020-09-01T09:46:05Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b7bb21a057ab02ee56a99cd1bafb07278dc5bab",
+    "line" : null,
+    "diffHunk" : "@@ -351,7 +351,7 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n       effectiveAt = scenarioRunner.ledger.currentTime)\n     // Filter to contracts of the given template id."
+  },
+  {
+    "id" : "840259e2-0602-4118-aac1-d788a87297c4",
+    "prId" : 7191,
+    "comments" : [
+      {
+        "id" : "90dff847-89be-44a6-9846-6f68840782c5",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "How does this work? `result` is no longer a `Try[…]`, as of #7179.",
+        "createdAt" : "2020-08-20T10:07:39Z",
+        "updatedAt" : "2020-08-20T14:41:28Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dc1bd211-185c-47e6-af42-4575a8fada0d",
+        "parentId" : "90dff847-89be-44a6-9846-6f68840782c5",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed.",
+        "createdAt" : "2020-08-20T11:27:13Z",
+        "updatedAt" : "2020-08-20T14:41:28Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70f101648d63ed5b1a0139dc7bfabfd6182f8bab",
+    "line" : null,
+    "diffHunk" : "@@ -427,10 +428,10 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n                     // Capture the result and exit.\n                     result = results.toSeq\n                 }\n-              case Right(Left(x)) =>\n-                throw new RuntimeException(s\"Unexpected abort: $x\")\n-              case Left(msg) =>\n-                throw new RuntimeException(msg)\n+              case PartialTransaction.IncompleteTransaction(ptx) =>\n+                result = Failure(new RuntimeException(s\"Unexpected abort: $ptx\"))"
+  },
+  {
+    "id" : "8db592b6-a74b-490c-9bd7-54735b0e09e9",
+    "prId" : 7191,
+    "comments" : [
+      {
+        "id" : "ad4b56e1-1592-405c-80ba-d93e869fc160",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n                throw new RuntimeException(s\"Cannot serialize the transaction: $msg\")\r\n```",
+        "createdAt" : "2020-08-20T13:03:02Z",
+        "updatedAt" : "2020-08-20T14:41:28Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "25ce7f97-8740-4e7f-99b2-7c993c0709be",
+        "parentId" : "ad4b56e1-1592-405c-80ba-d93e869fc160",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I think you missed this one.",
+        "createdAt" : "2020-08-20T14:26:43Z",
+        "updatedAt" : "2020-08-20T14:41:28Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70f101648d63ed5b1a0139dc7bfabfd6182f8bab",
+    "line" : null,
+    "diffHunk" : "@@ -427,9 +428,9 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n                     // Capture the result and exit.\n                     result = results.toSeq\n                 }\n-              case Right(Left(x)) =>\n-                throw new RuntimeException(s\"Unexpected abort: $x\")\n-              case Left(msg) =>\n+              case PartialTransaction.IncompleteTransaction(ptx) =>\n+                throw new RuntimeException(s\"Unexpected abort: $ptx\")\n+              case PartialTransaction.SerializationError(msg) =>\n                 throw new RuntimeException(msg)"
+  },
+  {
+    "id" : "a23ef7a0-8b84-4e30-9b05-61b919e77eae",
+    "prId" : 7189,
+    "comments" : [
+      {
+        "id" : "f4d625b6-d33a-4af4-a8fe-4490cb7b1e25",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Any chance we can do better than a `RuntimeException`?",
+        "createdAt" : "2020-08-19T18:51:30Z",
+        "updatedAt" : "2020-08-19T18:51:54Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4dd87fcd-15b6-4c18-98ea-0c9719817bb5",
+        "parentId" : "f4d625b6-d33a-4af4-a8fe-4490cb7b1e25",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I will let that for `daml-application-runtime` team.",
+        "createdAt" : "2020-08-20T07:15:51Z",
+        "updatedAt" : "2020-08-20T07:15:51Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5b860f2c-cc98-4097-ac16-15d59102ed6e",
+        "parentId" : "f4d625b6-d33a-4af4-a8fe-4490cb7b1e25",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Fair point, I need to brush up my knowledge of sensible exception types in Scala.",
+        "createdAt" : "2020-08-20T07:23:32Z",
+        "updatedAt" : "2020-08-20T07:27:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4bea54adfba4d217c92a95e3c59673890277c712",
+    "line" : 15,
+    "diffHunk" : "@@ -434,6 +433,10 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n                     // Capture the result and exit.\n                     result = Success(Right(results.toSeq))\n                 }\n+              case Right(Left(x)) =>\n+                result = Failure(new RuntimeException(s\"Unexpected abort: $x\"))"
+  },
+  {
+    "id" : "0e8a156f-3ef1-44a4-aec9-71b114ed24e5",
+    "prId" : 7172,
+    "comments" : [
+      {
+        "id" : "b42c69f6-6bf9-4b6b-8969-49c18e61f588",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Should we do this in a finally block or something like that?",
+        "createdAt" : "2020-08-18T16:19:18Z",
+        "updatedAt" : "2020-08-18T16:28:00Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "49fbaf50-0b8e-4e2b-9262-38a2500dd7ca",
+        "parentId" : "b42c69f6-6bf9-4b6b-8969-49c18e61f588",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "The only `throw` is the `Unexpected node` exception, though to be safe it's probably better to use a finally block. At this point it's a bit weird though to use `Future.fromTry` in a `try` block. Maybe a follow-up refactoring would be to not use `fromTry` but just wrap the whole thing in `Future()`?",
+        "createdAt" : "2020-08-18T16:26:54Z",
+        "updatedAt" : "2020-08-18T16:28:00Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c64d282c-9267-4d5f-8fcb-5443b560f6d4",
+        "parentId" : "b42c69f6-6bf9-4b6b-8969-49c18e61f588",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah wrapping everything in a future sounds reasonable.",
+        "createdAt" : "2020-08-18T16:28:01Z",
+        "updatedAt" : "2020-08-18T16:28:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ac45caa421671779e9d4422ee1d6517448083963",
+    "line" : null,
+    "diffHunk" : "@@ -471,6 +465,11 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n             new RuntimeException(\"FATAL: Encountered scenario instruction getParty in DAML Script\"))\n       }\n     }\n+    // Reset the machine"
+  },
+  {
+    "id" : "e97d4dca-1f36-4f63-833e-21ad227eceaa",
+    "prId" : 7154,
+    "comments" : [
+      {
+        "id" : "f4b3ae5f-abc4-45ec-9ad1-31a34dce1297",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I guess if we want to go for FATAL, this should also be FATAL?",
+        "createdAt" : "2020-08-17T12:17:32Z",
+        "updatedAt" : "2020-08-17T13:18:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "455b0dd7-67a1-4303-87ab-b2f112ca5990",
+        "parentId" : "f4b3ae5f-abc4-45ec-9ad1-31a34dce1297",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Agreed, done.",
+        "createdAt" : "2020-08-17T13:12:11Z",
+        "updatedAt" : "2020-08-17T13:18:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bf2b913218c5de31a221d04ff253bd69be6ff762",
+    "line" : null,
+    "diffHunk" : "@@ -441,16 +441,38 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n                   result = Success(Right(results.toSeq))\n               }\n           }\n+        case SResultFinalValue(v) =>\n+          // The final result should always be unit.\n+          result = Failure(new RuntimeException(s\"Unexpected non-unit final result: $v\"))"
+  },
+  {
+    "id" : "d716ad8a-96d8-453b-adf4-9ba827cf0465",
+    "prId" : 7154,
+    "comments" : [
+      {
+        "id" : "b9b61da2-9245-43dc-8fc9-62450e67ed61",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What happens if you have a `getTime` call in a choice that you call via DAML Script? I would expect that you will hit this in this case. The one handled by the DAML Script runner is `getTime` outside of a transaction.",
+        "createdAt" : "2020-08-17T12:20:19Z",
+        "updatedAt" : "2020-08-17T13:18:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "af2eecc8-1d34-4da3-a314-132533e4fc5e",
+        "parentId" : "b9b61da2-9245-43dc-8fc9-62450e67ed61",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Indeed, I've extended the time test-case and changed this bit to handle this case.",
+        "createdAt" : "2020-08-17T13:13:02Z",
+        "updatedAt" : "2020-08-17T13:18:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bf2b913218c5de31a221d04ff253bd69be6ff762",
+    "line" : null,
+    "diffHunk" : "@@ -441,16 +441,38 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n                   result = Success(Right(results.toSeq))\n               }\n           }\n+        case SResultFinalValue(v) =>\n+          // The final result should always be unit.\n+          result = Failure(new RuntimeException(s\"Unexpected non-unit final result: $v\"))\n         case SResultScenarioCommit(_, _, _, _) =>\n           result = Failure(\n             new RuntimeException(\"FATAL: Encountered scenario commit in DAML Script\"))\n         case SResultError(err) =>\n           // Capture the error and exit.\n           result = Failure(err)\n-        case err =>\n-          // TODO: Figure out when we hit this\n-          // Capture the error (but not as SError) and exit.\n-          result = Failure(new RuntimeException(s\"FAILED: $err\"))\n+        case SResultNeedTime(callback @ _) =>"
+  },
+  {
+    "id" : "1a61787c-5cde-4425-9e57-2ef1bafe981a",
+    "prId" : 7154,
+    "comments" : [
+      {
+        "id" : "6c354a0e-84b4-4c6f-9332-f40380275728",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It you want to be consistent the errors from here on could all start with `Encountered scenario instruction`.",
+        "createdAt" : "2020-08-17T12:21:42Z",
+        "updatedAt" : "2020-08-17T13:18:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "81337ffa-b4ad-495a-a575-9fe46bfb74ff",
+        "parentId" : "6c354a0e-84b4-4c6f-9332-f40380275728",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Good point, I've made the messages more consistent.",
+        "createdAt" : "2020-08-17T13:12:27Z",
+        "updatedAt" : "2020-08-17T13:18:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bf2b913218c5de31a221d04ff253bd69be6ff762",
+    "line" : 23,
+    "diffHunk" : "@@ -441,16 +441,38 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n                   result = Success(Right(results.toSeq))\n               }\n           }\n+        case SResultFinalValue(v) =>\n+          // The final result should always be unit.\n+          result = Failure(new RuntimeException(s\"Unexpected non-unit final result: $v\"))\n         case SResultScenarioCommit(_, _, _, _) =>\n           result = Failure(\n             new RuntimeException(\"FATAL: Encountered scenario commit in DAML Script\"))\n         case SResultError(err) =>\n           // Capture the error and exit.\n           result = Failure(err)\n-        case err =>\n-          // TODO: Figure out when we hit this\n-          // Capture the error (but not as SError) and exit.\n-          result = Failure(new RuntimeException(s\"FAILED: $err\"))\n+        case SResultNeedTime(callback @ _) =>\n+          result = Failure(\n+            new RuntimeException(\n+              \"FATAL: GetTime should have been handled by the DAML Script runner\"))\n+        case SResultNeedPackage(pkg, callback @ _) =>\n+          result = Failure(\n+            new RuntimeException(\n+              s\"FATAL: Missing package $pkg should have been reported at Script compilation\"))\n+        case SResultScenarioInsertMustFail(committers @ _, optLocation @ _) =>"
+  },
+  {
+    "id" : "9b40dae1-6231-4012-b460-c00ba48996fc",
+    "prId" : 7141,
+    "comments" : [
+      {
+        "id" : "d2ebb105-3e9a-4294-856e-e5e79cf917e7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Does `disclosures` include signatories?",
+        "createdAt" : "2020-08-17T07:38:52Z",
+        "updatedAt" : "2020-08-17T07:52:04Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "16418cbe-730b-45bb-aae8-cdf985dbb779",
+        "parentId" : "d2ebb105-3e9a-4294-856e-e5e79cf917e7",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, printing out `ledgerParties` at [this `listKnownParties`](https://github.com/digital-asset/daml/pull/7141/files/f6638674e0b44cb4312366bd2c85ea1b076f1dd9#diff-cccb5410aed907fe161d04a35b70330cR451) shows that it includes `alice`, `alice1`, and `bob`. `alice` is only a signatory, not an observer at this point. As I understand it `disclosures` contains [`informeesOfNode`](https://github.com/digital-asset/daml/blob/19f002bb23ac4c48b408432dfaf1ee42f87a219a/daml-lf/transaction/src/main/scala/com/digitalasset/daml/lf/transaction/NodeInfo.scala#L22) which includes signatories.",
+        "createdAt" : "2020-08-17T08:35:53Z",
+        "updatedAt" : "2020-08-17T08:35:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6638674e0b44cb4312366bd2c85ea1b076f1dd9",
+    "line" : 15,
+    "diffHunk" : "@@ -469,16 +470,43 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n       })\n   }\n \n+  // All parties known to the ledger. This may include parties that were not\n+  // allocated explicitly, e.g. parties created by `partyFromText`.\n+  private def getLedgerParties(): Iterable[Ref.Party] = {\n+    scenarioRunner.ledger.ledgerData.nodeInfos.values.flatMap(_.disclosures.keys)"
+  },
+  {
+    "id" : "49786aa1-a6a6-472b-845d-0472a39d8b14",
+    "prId" : 7076,
+    "comments" : [
+      {
+        "id" : "263cbca6-8b2a-4e89-b015-3e30ab3e2085",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I am slightly worried that we are effectively replicating a significant part of the logic of `submit`. What happens if we replace the whole implementation here by something that catches `SError` and flips it?",
+        "createdAt" : "2020-08-11T14:47:31Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c715b275-e695-46cf-880c-24593f7562e9",
+        "parentId" : "263cbca6-8b2a-4e89-b015-3e30ab3e2085",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "By catching `SError` you mean the `SResultError` branch? AFAIU that's not enough as we also want to flip in other cases, e.g. on `commitTransaction` error in `SResultScenarioCommit`. Conversely we don't always want to recover from `Failure`, e.g. AFAIU we don't want to recover from `Failure(new RuntimeException(s\"Unexpected abort: $x\"))`. The other `submit` implementations use `Left` for errors that should be caught by `submitMustFail` but the `Left` parameter is restricted to `StatusRuntimeException` which doesn't really work in this case.\r\n\r\nAn alternative might be to use a more general or a trait associated type instead of `StatusRuntimeException` and then use `Success(Left(_))` in `IdeClient.submit` for errors that `submitMustFail` should catch.",
+        "createdAt" : "2020-08-11T15:44:28Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2d6e0039-051b-4617-a809-ce494f5457f2",
+        "parentId" : "263cbca6-8b2a-4e89-b015-3e30ab3e2085",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Side note: SResultScenarioCommit was a bug, fixed in https://github.com/digital-asset/daml/pull/7089. Doesn’t change anything here.\r\n\r\nThere are a few cases to consider here:\r\n1. The future completes successfully. In that case, we want to turn it into a failure.\r\n2. The future fails with `SError`. This includes calls to `error` as well as `ScenarioErrorCommitError` which we will get back from a failed commit for things like authorization errors.\r\n3. Other stuff, e.g., the wildcard match at the end which we hope not to hit.\r\n\r\nMy idea would be to call `submit` and then handle the three cases.\r\n1. This is an actual failure. We expected things to fail and they didn’t.\r\n2. This is the successful case. We expected a failure during submission and we got one.\r\n3. This is a crash, something went wrong.",
+        "createdAt" : "2020-08-11T16:12:55Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7416b4e1-6bcc-4db6-8d54-780017ac26b8",
+        "parentId" : "263cbca6-8b2a-4e89-b015-3e30ab3e2085",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Ah, I see. That seems to be possible. I've pushed a commit implementing this.",
+        "createdAt" : "2020-08-11T16:39:12Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b4069aeb0cabd660fe58e5ec6b9b3c3164957f2",
+    "line" : 31,
+    "diffHunk" : "@@ -463,6 +476,73 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n     Future.fromTry(result)\n   }\n \n+  override def submitMustFail(party: SParty, commands: List[ScriptLedgerClient.Command])("
+  },
+  {
+    "id" : "d2ac7224-1479-4f70-b039-a0e6147b3bd6",
+    "prId" : 7076,
+    "comments" : [
+      {
+        "id" : "252fe2f9-29f8-4f2b-a415-7191d3b3497b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We expect to never hit this right? Because in the script service you will always run against the current script library. If so, it might be useful to add a comment.",
+        "createdAt" : "2020-08-11T16:47:29Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "060d44ed-063e-4a11-83de-1034af1f134a",
+        "parentId" : "252fe2f9-29f8-4f2b-a415-7191d3b3497b",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, it's only listed for completeness. I've added a comment.",
+        "createdAt" : "2020-08-12T08:10:25Z",
+        "updatedAt" : "2020-08-12T08:10:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b4069aeb0cabd660fe58e5ec6b9b3c3164957f2",
+    "line" : 38,
+    "diffHunk" : "@@ -463,6 +476,19 @@ class IdeClient(val compiledPackages: CompiledPackages) extends ScriptLedgerClie\n     Future.fromTry(result)\n   }\n \n+  override def submitMustFail(party: SParty, commands: List[ScriptLedgerClient.Command])(\n+      implicit ec: ExecutionContext,\n+      mat: Materializer): Future[Either[Unit, Unit]] = {\n+    submit(party, commands)\n+      .map({\n+        case Right(_) => Left(())\n+        case Left(_) => Right(())"
+  },
+  {
+    "id" : "9dcfa32e-773e-4690-87c2-2ec0bd6fcfaf",
+    "prId" : 5211,
+    "comments" : [
+      {
+        "id" : "b7bf5887-8a7a-4e30-b457-911d84ce076d",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Agreed, validation is probably the best answer for now.",
+        "createdAt" : "2020-03-27T09:27:42Z",
+        "updatedAt" : "2020-03-27T10:23:32Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6226b8e83eea9fbd0ca6b2e4f6c1675dfc79391",
+    "line" : 52,
+    "diffHunk" : "@@ -209,3 +219,361 @@ class GrpcLedgerClient(val grpcClient: LedgerClient) extends ScriptLedgerClient\n         throw new ConverterException(\"Invalid tree event Empty\")\n     }\n }\n+\n+// Current limitations and issues when running DAML script over the JSON API:\n+// 1. Multi-command submissions are not supported. This is simply not possible until\n+//    we have an endpoint for this in the JSON API.\n+// 2. Party allocation is not yet implemented. While this would be possible, it’s not\n+//    all that useful. For local testing, there is no reason to run DAML Script over the\n+//    JSON API (and it wouldn’t work properly due to the requirement for JWTs) and for\n+//    interacting with a production ledger, you usually don’t need it. But it’s simple enough\n+//    that we might implement it anyway.\n+// 3. This is the biggest issue imho: parties are kind of a mess. `submit` and `query` pretend\n+//    that you can choose the party you submitting commands as. However, this is not the case\n+//    for the JSON API since it always infers the party from the JWT (which also means it does\n+//    not support multi-party tokens). I don’t have a great answer for this. For interacting\n+//    with a production ledger, this is probably not super important since you usually act as\n+//    only one party there. So at least initially, we’re probably best off by just adding validation\n+//    that ensures that the party you pass to `submit` and `query` matches."
+  },
+  {
+    "id" : "2afc3a9c-f32f-4c51-9163-cf71e6522b23",
+    "prId" : 5211,
+    "comments" : [
+      {
+        "id" : "1741cc3e-1682-439f-badb-41e3636afdd4",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "How does this handle errors returned by the JSON API? Does akka turn this into a failing future automatically?",
+        "createdAt" : "2020-03-27T09:36:26Z",
+        "updatedAt" : "2020-03-27T10:23:32Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "88ec811e-7205-4572-8e4e-922feb7d863f",
+        "parentId" : "1741cc3e-1682-439f-badb-41e3636afdd4",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "No, it will fail during unmarshalling atm. Fixing that is part of making `submitMustFail` work. I’ve extended the comment for that.",
+        "createdAt" : "2020-03-27T10:11:40Z",
+        "updatedAt" : "2020-03-27T10:23:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6226b8e83eea9fbd0ca6b2e4f6c1675dfc79391",
+    "line" : 151,
+    "diffHunk" : "@@ -209,3 +219,361 @@ class GrpcLedgerClient(val grpcClient: LedgerClient) extends ScriptLedgerClient\n         throw new ConverterException(\"Invalid tree event Empty\")\n     }\n }\n+\n+// Current limitations and issues when running DAML script over the JSON API:\n+// 1. Multi-command submissions are not supported. This is simply not possible until\n+//    we have an endpoint for this in the JSON API.\n+// 2. Party allocation is not yet implemented. While this would be possible, it’s not\n+//    all that useful. For local testing, there is no reason to run DAML Script over the\n+//    JSON API (and it wouldn’t work properly due to the requirement for JWTs) and for\n+//    interacting with a production ledger, you usually don’t need it. But it’s simple enough\n+//    that we might implement it anyway.\n+// 3. This is the biggest issue imho: parties are kind of a mess. `submit` and `query` pretend\n+//    that you can choose the party you submitting commands as. However, this is not the case\n+//    for the JSON API since it always infers the party from the JWT (which also means it does\n+//    not support multi-party tokens). I don’t have a great answer for this. For interacting\n+//    with a production ledger, this is probably not super important since you usually act as\n+//    only one party there. So at least initially, we’re probably best off by just adding validation\n+//    that ensures that the party you pass to `submit` and `query` matches.\n+// 4. `submitMustFail` is not yet supported. No fundamental reason for this but it’s also not\n+//    very useful in a production ledger.\n+class JsonLedgerClient(\n+    uri: Uri,\n+    token: String,\n+    envIface: EnvironmentInterface,\n+    actorSystem: ActorSystem)\n+    extends ScriptLedgerClient {\n+  import JsonLedgerClient.JsonProtocol._\n+\n+  implicit val system = actorSystem\n+  implicit val executionContext = system.dispatcher\n+\n+  private def damlLfTypeLookup(id: Identifier) =\n+    envIface.typeDecls.get(id).map(_.`type`)\n+\n+  override def query(party: SParty, templateId: Identifier)(\n+      implicit ec: ExecutionContext,\n+      mat: Materializer) = {\n+    val req = HttpRequest(\n+      method = HttpMethods.POST,\n+      uri = uri.withPath(uri.path./(\"v1\")./(\"query\")),\n+      entity = HttpEntity(\n+        ContentTypes.`application/json`,\n+        JsonLedgerClient.QueryArgs(templateId).toJson.prettyPrint),\n+      headers = List(Authorization(OAuth2BearerToken(token)))\n+    )\n+    Http()\n+      .singleRequest(req)\n+      .flatMap { resp =>\n+        if (resp.status.isSuccess) {\n+          Unmarshal(resp.entity).to[JsonLedgerClient.QueryResponse]\n+        } else {\n+          throw new RuntimeException(s\"Failed to query ledger: $resp\")\n+        }\n+      }\n+      .map {\n+        case JsonLedgerClient.QueryResponse(results) =>\n+          val ctx = templateId.qualifiedName\n+          val ifaceType = Converter.toIfaceType(ctx, TTyCon(templateId)).right.get\n+          val parsedResults = results.map(r => {\n+            val payload = r.payload.convertTo[Value[AbsoluteContractId]](\n+              LfValueCodec.apiValueJsonReader(ifaceType, damlLfTypeLookup(_)))\n+            val cid = ContractIdString.assertFromString(r.contractId)\n+            ScriptLedgerClient.ActiveContract(templateId, AbsoluteContractId(cid), payload)\n+          })\n+          parsedResults\n+      }\n+  }\n+  override def submit(\n+      applicationId: ApplicationId,\n+      party: SParty,\n+      commands: List[ScriptLedgerClient.Command])(\n+      implicit ec: ExecutionContext,\n+      mat: Materializer) = {\n+    commands match {\n+      case Nil => Future { Right(List()) }\n+      case command :: Nil =>\n+        command match {\n+          case ScriptLedgerClient.CreateCommand(tplId, argument) =>\n+            create(tplId, argument).map(r => Right(List(r)))\n+\n+          case ScriptLedgerClient.ExerciseCommand(tplId, cid, choice, argument) =>\n+            exercise(tplId, cid, choice, argument).map(r => Right(List(r)))\n+\n+          case ScriptLedgerClient.ExerciseByKeyCommand(tplId, key, choice, argument) =>\n+            exerciseByKey(tplId, key, choice, argument).map(r => Right(List(r)))\n+          case ScriptLedgerClient.CreateAndExerciseCommand(tplId, template, choice, argument) =>\n+            createAndExercise(tplId, template, choice, argument)\n+        }\n+      case _ =>\n+        throw new RuntimeException(\n+          \"Multi-command submissions are not supported by the HTTP JSON API.\")\n+    }\n+  }\n+  override def allocateParty(partyIdHint: String, displayName: String)(\n+      implicit ec: ExecutionContext,\n+      mat: Materializer) = {\n+    throw new RuntimeException(\"allocateParty is not supported by the JSON API.\")\n+  }\n+\n+  private def create(\n+      tplId: Identifier,\n+      argument: Value[AbsoluteContractId]): Future[ScriptLedgerClient.CreateResult] = {\n+    val ctx = tplId.qualifiedName\n+    val ifaceType = Converter.toIfaceType(ctx, TTyCon(tplId)).right.get\n+    val jsonArgument = LfValueCodec.apiValueToJsValue(argument)\n+    val req = HttpRequest(\n+      method = HttpMethods.POST,\n+      uri = uri.withPath(uri.path./(\"v1\")./(\"create\")),\n+      entity = HttpEntity(\n+        ContentTypes.`application/json`,\n+        JsonLedgerClient.CreateArgs(tplId, jsonArgument).toJson.prettyPrint),\n+      headers = List(Authorization(OAuth2BearerToken(token)))\n+    )\n+    Http()\n+      .singleRequest(req)\n+      .flatMap { resp =>"
+  }
+]

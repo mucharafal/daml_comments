@@ -1,0 +1,105 @@
+[
+  {
+    "id" : "a3dee2b3-464f-45de-93d3-b2dac0232c3d",
+    "prId" : 4101,
+    "comments" : [
+      {
+        "id" : "8d2bd729-6b0c-4d6f-832a-723d5000399a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`ValueTranslator` translates incoming Ledger API values to speedy expressions so it only has to handle serializable types. Therefore, you can just error out here using `fail` like we do for `TForall` and `TStruct`.",
+        "createdAt" : "2020-01-20T08:01:14Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f016483f-434a-41de-a8e3-d88371c00fe7",
+        "parentId" : "8d2bd729-6b0c-4d6f-832a-723d5000399a",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "@cocreature is right. Just handle this case as `TForall` and `TStruct`.",
+        "createdAt" : "2020-01-20T12:02:04Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "91bec66f-6e1c-46e7-af19-e65b0b38d3cd",
+        "parentId" : "8d2bd729-6b0c-4d6f-832a-723d5000399a",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok, done",
+        "createdAt" : "2020-01-20T19:44:46Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e9b7ff4849afb993cbda3dc7bea03b90e9dd9c19",
+    "line" : null,
+    "diffHunk" : "@@ -51,6 +51,7 @@ private[engine] class ValueTranslator(compiledPackages: CompiledPackages) {\n \n       def go(typ: Type): Type =\n         typ match {\n+          case TSynApp(_, _) => throw new RuntimeException(\"TODO #3616,ValueTranslator\")"
+  },
+  {
+    "id" : "c425bbd7-2bd8-423c-acd4-d6e843372c81",
+    "prId" : 2707,
+    "comments" : [
+      {
+        "id" : "d44b83d7-d0ef-44ba-8fda-8bf6994856d9",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion \r\n        (ty, value).match2 {\r\n        // after importing the increasingly misnamed ScalazEqual._\r\n```\r\n\r\nAnd related reorganization of the `case`s.",
+        "createdAt" : "2019-08-29T15:25:38Z",
+        "updatedAt" : "2019-08-29T16:36:26Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f89e66955496eac5e2785b610ccd2be09d262aa6",
+    "line" : 114,
+    "diffHunk" : "@@ -0,0 +1,290 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.engine\n+\n+import java.util\n+\n+import com.digitalasset.daml.lf.CompiledPackages\n+import com.digitalasset.daml.lf.data.Ref.Name\n+import com.digitalasset.daml.lf.data._\n+import com.digitalasset.daml.lf.language.Ast._\n+import com.digitalasset.daml.lf.language.Util._\n+import com.digitalasset.daml.lf.speedy.SValue\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value._\n+\n+import scala.annotation.tailrec\n+import scala.collection.immutable.HashMap\n+\n+private[engine] object ValueTranslator {\n+\n+  private def ArrayList[X](as: X*): util.ArrayList[X] = {\n+    val a = new util.ArrayList[X](as.length)\n+    as.foreach(a.add)\n+    a\n+  }\n+\n+  // we use this for easier error handling in translateValues\n+  private final case class ValueTranslationException(err: Error)\n+      extends RuntimeException(err.toString, null, true, false)\n+\n+  private def fail(s: String): Nothing =\n+    throw ValueTranslationException(Error(s))\n+\n+}\n+\n+private[engine] class ValueTranslator(compiledPackages: CompiledPackages) {\n+\n+  import ValueTranslator._\n+\n+  // note: all the types in params must be closed.\n+  //\n+  // this is not tail recursive, but it doesn't really matter, since types are bounded\n+  // by what's in the source, which should be short enough...\n+  private[this] def replaceParameters(params: ImmArray[(TypeVarName, Type)], typ0: Type): Type =\n+    if (params.isEmpty) { // optimization\n+      typ0\n+    } else {\n+      val paramsMap: Map[TypeVarName, Type] = Map(params.toSeq: _*)\n+\n+      def go(typ: Type): Type =\n+        typ match {\n+          case TVar(v) =>\n+            paramsMap.get(v) match {\n+              case None =>\n+                fail(s\"Got out of bounds type variable $v when replacing parameters\")\n+              case Some(ty) => ty\n+            }\n+          case TTyCon(_) | TBuiltin(_) | TNat(_) => typ\n+          case TApp(tyfun, arg) => TApp(go(tyfun), go(arg))\n+          case forall: TForall =>\n+            fail(\n+              s\"Unexpected forall when replacing parameters in command translation -- all types should be serializable, and foralls are not: $forall\")\n+          case tuple: TTuple =>\n+            fail(\n+              s\"Unexpected tuple when replacing parameters in command translation -- all types should be serializable, and tuples are not: $tuple\")\n+        }\n+\n+      go(typ0)\n+    }\n+\n+  private[this] def labeledRecordToMap(\n+      fields: ImmArray[(Option[String], Value[AbsoluteContractId])])\n+    : Option[Map[String, Value[AbsoluteContractId]]] = {\n+    @tailrec\n+    def go(\n+        fields: ImmArray[(Option[String], Value[AbsoluteContractId])],\n+        map: Map[String, Value[AbsoluteContractId]])\n+      : Option[Map[String, Value[AbsoluteContractId]]] = {\n+      fields match {\n+        case ImmArray() => Some(map)\n+        case ImmArrayCons((None, _), _) => None\n+        case ImmArrayCons((Some(label), value), tail) =>\n+          go(tail, map + (label -> value))\n+      }\n+    }\n+    go(fields, Map.empty)\n+  }\n+\n+  // since we get these values from third-party users of the library, check the recursion limit\n+  // here, too.\n+  private[engine] def translateValue(\n+      ty0: Type,\n+      v0: VersionedValue[AbsoluteContractId]): Result[SValue] = {\n+    import SValue._\n+    import scalaz.std.option._\n+    import scalaz.syntax.traverse.ToTraverseOps\n+\n+    def exceptionToResultError[A](x: => Result[A]): Result[A] =\n+      try {\n+        x\n+      } catch {\n+        case ValueTranslationException(err) => ResultError(err)\n+      }\n+\n+    def go(nesting: Int, ty: Type, value: Value[AbsoluteContractId]): Result[SValue] = {\n+      // we use this to restart when we get a new package that allows us to make progress.\n+      def restart = exceptionToResultError(go(nesting, ty, value))\n+\n+      if (nesting > Value.MAXIMUM_NESTING) {\n+        fail(s\"Provided value exceeds maximum nesting level of ${Value.MAXIMUM_NESTING}\")\n+      } else {\n+        val newNesting = nesting + 1\n+        (ty, value) match {"
+  }
+]

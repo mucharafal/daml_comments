@@ -1,0 +1,86 @@
+[
+  {
+    "id" : "30f245c4-66ef-41d8-b7dc-3d6a8b4c5ae8",
+    "prId" : 2247,
+    "comments" : [
+      {
+        "id" : "7ac97ee7-8c9f-4837-8a70-26e497556a87",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Here speaks the friend of `match%bind`. :)",
+        "createdAt" : "2019-07-22T15:02:55Z",
+        "updatedAt" : "2019-07-22T15:06:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "209bca18d216a336e7cf23b4df124642400f16f9",
+    "line" : 36,
+    "diffHunk" : "@@ -0,0 +1,42 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE GADTs #-}\n+\n+module DA.Ledger.Services.TimeService (getTime,setTime) where\n+\n+import DA.Ledger.LedgerService\n+import DA.Ledger.Stream\n+import DA.Ledger.Types\n+import Network.GRPC.HighLevel.Generated\n+import DA.Ledger.GrpcWrapUtils\n+import DA.Ledger.Convert\n+import qualified Com.Digitalasset.Ledger.Api.V1.Testing.TimeService as LL\n+import Google.Protobuf.Empty (Empty(..))\n+\n+getTime :: LedgerId -> LedgerService (Stream Timestamp)\n+getTime lid =\n+    makeLedgerService $ \\timeout config -> do\n+    let request = LL.GetTimeRequest (unLedgerId lid)\n+    asyncStreamGen $ \\stream ->\n+        withGRPCClient config $ \\client -> do\n+            service <- LL.timeServiceClient client\n+            let LL.TimeService {timeServiceGetTime=rpc} = service\n+            sendToStream timeout request raiseGetTimeResponse stream rpc\n+\n+-- | If the ledger responds with `StatusInvalidArgument`, we return `Left details` otherwise we return `Right ()`\n+setTime :: LedgerId -> Timestamp -> Timestamp -> LedgerService (Either String ())\n+setTime lid currentTime newTime  =\n+    makeLedgerService $ \\timeout config ->\n+    withGRPCClient config $ \\client -> do\n+        service <- LL.timeServiceClient client\n+        let LL.TimeService {timeServiceSetTime=rpc} = service\n+        let request = LL.SetTimeRequest (unLedgerId lid) (Just (lowerTimestamp currentTime)) (Just (lowerTimestamp newTime))\n+        rpc (ClientNormalRequest request timeout emptyMdm)\n+            >>= \\case"
+  },
+  {
+    "id" : "52487a39-3033-4de4-a21e-0b6381215253",
+    "prId" : 2247,
+    "comments" : [
+      {
+        "id" : "ed30175d-7f20-4fdb-a9b2-46ca4fcedc3c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        let rpc = LL.timeServiceSetTime service\r\n```\r\nSame above.",
+        "createdAt" : "2019-07-22T15:03:14Z",
+        "updatedAt" : "2019-07-22T15:06:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "209bca18d216a336e7cf23b4df124642400f16f9",
+    "line" : 33,
+    "diffHunk" : "@@ -0,0 +1,42 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE GADTs #-}\n+\n+module DA.Ledger.Services.TimeService (getTime,setTime) where\n+\n+import DA.Ledger.LedgerService\n+import DA.Ledger.Stream\n+import DA.Ledger.Types\n+import Network.GRPC.HighLevel.Generated\n+import DA.Ledger.GrpcWrapUtils\n+import DA.Ledger.Convert\n+import qualified Com.Digitalasset.Ledger.Api.V1.Testing.TimeService as LL\n+import Google.Protobuf.Empty (Empty(..))\n+\n+getTime :: LedgerId -> LedgerService (Stream Timestamp)\n+getTime lid =\n+    makeLedgerService $ \\timeout config -> do\n+    let request = LL.GetTimeRequest (unLedgerId lid)\n+    asyncStreamGen $ \\stream ->\n+        withGRPCClient config $ \\client -> do\n+            service <- LL.timeServiceClient client\n+            let LL.TimeService {timeServiceGetTime=rpc} = service\n+            sendToStream timeout request raiseGetTimeResponse stream rpc\n+\n+-- | If the ledger responds with `StatusInvalidArgument`, we return `Left details` otherwise we return `Right ()`\n+setTime :: LedgerId -> Timestamp -> Timestamp -> LedgerService (Either String ())\n+setTime lid currentTime newTime  =\n+    makeLedgerService $ \\timeout config ->\n+    withGRPCClient config $ \\client -> do\n+        service <- LL.timeServiceClient client\n+        let LL.TimeService {timeServiceSetTime=rpc} = service"
+  },
+  {
+    "id" : "2492a192-4636-4040-ae87-7187e06f1cc1",
+    "prId" : 2247,
+    "comments" : [
+      {
+        "id" : "9b1e9ea8-2d2e-4d22-bd4d-9077e90bd2ce",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm surprised `getTime` is a streaming API. :thinking: ",
+        "createdAt" : "2019-07-22T15:04:57Z",
+        "updatedAt" : "2019-07-22T15:06:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "209bca18d216a336e7cf23b4df124642400f16f9",
+    "line" : 17,
+    "diffHunk" : "@@ -0,0 +1,42 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE GADTs #-}\n+\n+module DA.Ledger.Services.TimeService (getTime,setTime) where\n+\n+import DA.Ledger.LedgerService\n+import DA.Ledger.Stream\n+import DA.Ledger.Types\n+import Network.GRPC.HighLevel.Generated\n+import DA.Ledger.GrpcWrapUtils\n+import DA.Ledger.Convert\n+import qualified Com.Digitalasset.Ledger.Api.V1.Testing.TimeService as LL\n+import Google.Protobuf.Empty (Empty(..))\n+\n+getTime :: LedgerId -> LedgerService (Stream Timestamp)"
+  }
+]

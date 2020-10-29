@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "be5580dd-9507-4356-88be-7273cc653a88",
+    "prId" : 3903,
+    "comments" : [
+      {
+        "id" : "62a317fc-eac0-4e7d-9715-b9c517091e99",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Looks like [`ActorAttributes.supervisionStrategy`, etc. are pure functions](https://github.com/akka/akka/blob/v2.6.1/akka-stream/src/main/scala/akka/stream/Attributes.scala#555), so this doesn't do anything any more. If everything is still working with this change, we can probably delete it (and `decider`) entirely.\r\n\r\nI don't know why this was done in the first place, though, so I'd be wary. If we want to make sure this still works, we need to set it on the stream itself:\r\n\r\n```scala\r\nSource(…)\r\n  .blah\r\n  .toMat(sink)(Keep.right)\r\n  .withAttributes(ActorAttributes.supervisionStrategy(decider(system))\r\n```\r\n",
+        "createdAt" : "2019-12-19T13:12:09Z",
+        "updatedAt" : "2019-12-19T14:11:18Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c2445d4b-e6ad-4ffd-804f-92fb629f186e",
+        "parentId" : "62a317fc-eac0-4e7d-9715-b9c517091e99",
+        "author" : {
+          "login" : "dasormeter",
+          "name" : "Brian Healey",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25179017?u=80e3160e2447461bd5847fe928a3e6fa9f6793fc&v=4"
+        },
+        "body" : "removed",
+        "createdAt" : "2019-12-19T14:11:31Z",
+        "updatedAt" : "2019-12-19T14:11:31Z",
+        "lastEditedBy" : {
+          "login" : "dasormeter",
+          "name" : "Brian Healey",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25179017?u=80e3160e2447461bd5847fe928a3e6fa9f6793fc&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c86938d339fca4debd3a42491d5ca8f6832f6056",
+    "line" : null,
+    "diffHunk" : "@@ -35,8 +35,8 @@ trait AkkaTest extends BeforeAndAfterAll with LazyLogging { self: Suite =>\n   protected implicit val scheduler: Scheduler = system.scheduler\n   protected implicit val schedulerService: ScheduledExecutorService =\n     Executors.newSingleThreadScheduledExecutor()\n-  protected implicit val materializer: ActorMaterializer = ActorMaterializer(\n-    ActorMaterializerSettings(system).withSupervisionStrategy(decider(system)))\n+  protected implicit val materializer: Materializer = Materializer(system)\n+  ActorAttributes.supervisionStrategy(decider(system))"
+  }
+]

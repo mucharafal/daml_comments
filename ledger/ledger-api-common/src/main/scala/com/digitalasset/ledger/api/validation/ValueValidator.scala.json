@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "64dac717-9e89-49da-aa2b-9205ef10e206",
+    "prId" : 3506,
+    "comments" : [
+      {
+        "id" : "59bf9127-ed97-442a-afde-bebe6dbc784d",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "We can potentially avoid some work by checking for the presence of the `value` field before validating the `key` value.",
+        "createdAt" : "2019-11-18T13:15:21Z",
+        "updatedAt" : "2019-11-18T17:43:48Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f7bc2545-257d-4161-8153-ca4e767e2452",
+        "parentId" : "59bf9127-ed97-442a-afde-bebe6dbc784d",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I inverted line 118 and 119. ",
+        "createdAt" : "2019-11-18T13:21:43Z",
+        "updatedAt" : "2019-11-18T17:43:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "31295b4b7463e48ebb10cb54ccf9f2c6f55cda43",
+    "line" : 102,
+    "diffHunk" : "@@ -100,28 +91,42 @@ object ValueValidator {\n     case Sum.Optional(o) =>\n       o.value.fold[Either[StatusRuntimeException, domain.Value]](Right(Lf.ValueNone))(\n         validateValue(_).map(v => Lf.ValueOptional(Some(v))))\n-    case Sum.Map(m) =>\n-      val entries = m.entries\n+    case Sum.Map(map0) =>\n+      val map = map0.entries\n         .foldLeft[Either[StatusRuntimeException, FrontStack[(String, domain.Value)]]](\n           Right(FrontStack.empty)) {\n-          case (acc, ApiMap.Entry(key, value0)) =>\n+          case (acc, api.Map.Entry(key, value0)) =>\n             for {\n               tail <- acc\n               v <- requirePresence(value0, \"value\")\n               validatedValue <- validateValue(v)\n             } yield (key -> validatedValue) +: tail\n         }\n-\n       for {\n-        list <- entries\n-        map <- SortedLookupList.fromImmArray(list.toImmArray).left.map(invalidArgument)\n+        entries <- map\n+        map <- SortedLookupList.fromImmArray(entries.toImmArray).left.map(invalidArgument)\n       } yield Lf.ValueMap(map)\n \n+    case Sum.GenMap(genMap0) =>\n+      val genMap = genMap0.entries\n+        .foldLeft[Either[StatusRuntimeException, BackStack[(domain.Value, domain.Value)]]](\n+          Right(BackStack.empty)) {\n+          case (acc, api.GenMap.Entry(key0, value0)) =>\n+            for {\n+              stack <- acc\n+              key <- requirePresence(key0, \"key\")\n+              validatedKey <- validateValue(key)\n+              value <- requirePresence(value0, \"value\")"
+  }
+]

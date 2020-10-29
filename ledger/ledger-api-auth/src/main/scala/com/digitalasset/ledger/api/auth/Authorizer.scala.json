@@ -1,0 +1,532 @@
+[
+  {
+    "id" : "14906efa-6ef6-470b-97a8-4ee2cd7c7c39",
+    "prId" : 6857,
+    "comments" : [
+      {
+        "id" : "e18710dc-17fd-402a-bbd1-c33073935bee",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Perhaps the various `Claims` methods could return an `AuthorizationResult`?",
+        "createdAt" : "2020-07-24T13:53:24Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9872e5d13001fd1fe900cfabf9fff26f901ba05a",
+    "line" : null,
+    "diffHunk" : "@@ -7,37 +7,79 @@ import java.time.Instant\n \n import com.daml.ledger.api.auth.interceptor.AuthorizationInterceptor\n import com.daml.ledger.api.v1.transaction_filter.TransactionFilter\n+import com.daml.logging.ContextualizedLogger\n+import com.daml.logging.LoggingContext.newLoggingContext\n import com.daml.platform.server.api.validation.ErrorFactories.permissionDenied\n import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}\n \n import scala.concurrent.Future\n \n+sealed abstract class AuthorizationResult {\n+  def flatMap(f: Unit => AuthorizationResult): AuthorizationResult = this match {\n+    case Authorized => f(())\n+    case e: NotAuthorized => e\n+  }\n+  def map(f: Unit => Unit): AuthorizationResult = this match {\n+    case Authorized => Authorized\n+    case e: NotAuthorized => e\n+  }\n+  def isAuthorized: Boolean = this match {\n+    case Authorized => true\n+    case NotAuthorized(_) => false\n+  }\n+}\n+case object Authorized extends AuthorizationResult\n+final case class NotAuthorized(error: String) extends AuthorizationResult\n+\n /** A simple helper that allows services to use authorization claims\n   * that have been stored by [[AuthorizationInterceptor]].\n   */\n final class Authorizer(now: () => Instant, ledgerId: String, participantId: String) {\n \n+  private val logger = ContextualizedLogger.get(this.getClass)\n+\n   /** Validates all properties of claims that do not depend on the request,\n     * such as expiration time or ledger ID. */\n-  private def valid(claims: Claims): Boolean =\n-    claims.notExpired(now()) &&\n-      claims.validForLedger(ledgerId) &&\n-      claims.validForParticipant(participantId)\n+  private def valid(claims: Claims): AuthorizationResult =\n+    for {\n+      _ <- if (claims.notExpired(now())) Authorized else NotAuthorized(\"Claims expired\")"
+  },
+  {
+    "id" : "910fcde6-d26a-407a-9333-b2166e19763f",
+    "prId" : 6857,
+    "comments" : [
+      {
+        "id" : "10908257-9d84-4b83-87a2-4604828e06ed",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "These two lines are rather long. I would recommend making a private method out of each to increase readability.",
+        "createdAt" : "2020-07-27T05:59:13Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1754ca89-ef3f-4ad0-924b-780dc991d52e",
+        "parentId" : "10908257-9d84-4b83-87a2-4604828e06ed",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "not using fold but `.map(...).getOrElse(...)` let's you get rid of the explicit type annotation, because `validForApplication(id)` already determines the type:\r\n```scala\r\n_ <- applicationId.map(claims.validForApplication).getOrElse(Right()))\r\n``` \r\n\r\nmight still be a long line though.",
+        "createdAt" : "2020-07-27T06:30:17Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9872e5d13001fd1fe900cfabf9fff26f901ba05a",
+    "line" : null,
+    "diffHunk" : "@@ -48,9 +71,15 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n       applicationId: Option[String],\n       call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n     authorize(call) { claims =>\n-      valid(claims) &&\n-      parties.forall(claims.canReadAs) &&\n-      applicationId.forall(claims.validForApplication)\n+      for {\n+        _ <- valid(claims)\n+        _ <- parties.foldLeft[Either[AuthorizationError, Unit]](Right(()))((acc, e) =>\n+          acc.flatMap(_ => claims.canReadAs(e)))\n+        _ <- applicationId.fold[Either[AuthorizationError, Unit]](Right(()))(id =>\n+          claims.validForApplication(id))"
+  },
+  {
+    "id" : "0b07a0d6-7bb7-47d7-82f7-c2b643e7efc0",
+    "prId" : 6857,
+    "comments" : [
+      {
+        "id" : "9450128e-85f1-4fb2-b01b-2431024a913a",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This is quite long, it would be probably better to factor it out in a private method. Looking at the previous method, it appears that you can factor out the folding and pass the function that actually performs the check (something like `forall`, but on an `Either` -- not sure whether something like this exists already).",
+        "createdAt" : "2020-07-27T06:00:54Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9872e5d13001fd1fe900cfabf9fff26f901ba05a",
+    "line" : null,
+    "diffHunk" : "@@ -60,8 +89,13 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n       parties: Iterable[String],\n       call: Req => Future[Res]): Req => Future[Res] =\n     authorize(call) { claims =>\n-      valid(claims) &&\n-      parties.forall(claims.canReadAs)\n+      for {\n+        _ <- valid(claims)\n+        _ <- parties.foldLeft[Either[AuthorizationError, Unit]](Right(()))((acc, e) =>\n+          acc.flatMap(_ => claims.canReadAs(e)))"
+  },
+  {
+    "id" : "491941ea-e807-42e5-9789-cebc0cdbbcd4",
+    "prId" : 6857,
+    "comments" : [
+      {
+        "id" : "76d0d077-c842-4ecb-8a7e-f920c159f483",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "As above, I would factor the folding out.",
+        "createdAt" : "2020-07-27T06:01:33Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9872e5d13001fd1fe900cfabf9fff26f901ba05a",
+    "line" : null,
+    "diffHunk" : "@@ -72,9 +106,14 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n       applicationId: Option[String],\n       call: Req => Future[Res]): Req => Future[Res] =\n     authorize(call) { claims =>\n-      valid(claims) &&\n-      party.forall(claims.canActAs) &&\n-      applicationId.forall(claims.validForApplication)\n+      for {\n+        _ <- valid(claims)\n+        _ <- party.fold[Either[AuthorizationError, Unit]](Right(()))(p => claims.canActAs(p))\n+        _ <- applicationId.fold[Either[AuthorizationError, Unit]](Right(()))(id =>"
+  },
+  {
+    "id" : "e6e20cc0-e3dd-4978-b8d3-9254a3af1409",
+    "prId" : 6857,
+    "comments" : [
+      {
+        "id" : "0a4dac02-1d07-42b2-bfce-069c081e4441",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "1. If you want to keep the claims around, here I would recommend creating a function that takes the claims and returns a `Seq[(String, String)]` (passing it with a `:_ *). Note that everywhere else in we use lower-case keys for logging context.\r\n2. I'm not entirely sure we should create a whole new logging context here (putting the entirety of the claims in it), as we only have a single line that already reports the exact error with the information as to what went wrong and how. Logging contexts are useful when you have a nested series of calls that need to enrich the information along the way. If you think we should have a logging context by the time we get here and enrich it with the claims information, I would recommend doing it up the call stack.",
+        "createdAt" : "2020-07-27T06:07:57Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0b66724a-902f-4ad2-a0f9-cce71a729d27",
+        "parentId" : "0a4dac02-1d07-42b2-bfce-069c081e4441",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "> I'm not entirely sure we should create a whole new logging context here\r\n\r\nThe only reason to use the logging context here is to make sure the error uses the same formatting as all other log messages. For example, in case we want to make ContextualizedLogger write JSON objects.\r\n\r\nWithout the entire claims in the log line, there is indeed no reason to use a `ContextualizedLogger`.",
+        "createdAt" : "2020-07-27T07:57:43Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7879e6c8-a467-4d44-b177-4e8c20ec9874",
+        "parentId" : "0a4dac02-1d07-42b2-bfce-069c081e4441",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "What do you think about tackling this with the rest of the story around using our contextual logging more? I think that we should create logging contexts when receiving a request and pushing them down the call stack to enrich them, but I would refrain from putting extra keys in the logging context only for formatting a single line.",
+        "createdAt" : "2020-07-27T08:23:54Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1bd4249e-476e-48a9-a3ab-1e92e0c40274",
+        "parentId" : "0a4dac02-1d07-42b2-bfce-069c081e4441",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'd rather we didn't just do string munging because our logging API makes it hard to add extra one-off key-value pairs. Strings just need parsing later.\r\n\r\nIf we find ourselves doing this a lot, let's make an abstraction that handles it.",
+        "createdAt" : "2020-07-27T12:16:07Z",
+        "updatedAt" : "2020-07-27T12:16:07Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "95b40b0c-d890-4d92-bf76-c5e6c9026c37",
+        "parentId" : "0a4dac02-1d07-42b2-bfce-069c081e4441",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I have removed the extra key-value pair because, as @stefanobaghino-da mentioned, the important information is already in the error message. The class now uses a plain logger.",
+        "createdAt" : "2020-07-27T12:29:17Z",
+        "updatedAt" : "2020-07-27T12:29:17Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bd366c3a-fb2e-41b1-a695-7104ef561688",
+        "parentId" : "0a4dac02-1d07-42b2-bfce-069c081e4441",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Not sure why we want to throw away useful information, but I'm happy to ship this for now until we re-evaluate logging in a more holistic fashion.",
+        "createdAt" : "2020-07-27T13:27:10Z",
+        "updatedAt" : "2020-07-27T13:27:10Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9872e5d13001fd1fe900cfabf9fff26f901ba05a",
+    "line" : null,
+    "diffHunk" : "@@ -96,10 +135,21 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n     }\n \n   private def ongoingAuthorization[Res](scso: ServerCallStreamObserver[Res], claims: Claims) =\n-    new OngoingAuthorizationObserver[Res](scso, claims, _.notExpired(now()), permissionDenied())\n+    new OngoingAuthorizationObserver[Res](\n+      scso,\n+      claims,\n+      _.notExpired(now()),\n+      authorizationError => {\n+        // Note: only put the claims in the context, as the request can be huge\n+        newLoggingContext(\"Claims\" -> claims.toString) { implicit logCtx =>"
+  },
+  {
+    "id" : "658fb9d9-a9c9-49e6-94ba-87332804897f",
+    "prId" : 6857,
+    "comments" : [
+      {
+        "id" : "6e7890c7-6017-4b56-9968-2bab09d31a49",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Same as above.",
+        "createdAt" : "2020-07-27T06:08:44Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9872e5d13001fd1fe900cfabf9fff26f901ba05a",
+    "line" : null,
+    "diffHunk" : "@@ -108,29 +158,43 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n         .fold(\n           observer.onError(_),\n           claims =>\n-            if (authorized(claims))\n-              call(\n-                request,\n-                if (claims.expiration.isDefined)\n-                  ongoingAuthorization(scso, claims)\n-                else\n-                  scso\n-              )\n-            else observer.onError(permissionDenied())\n+            authorized(claims) match {\n+              case Right(_) =>\n+                call(\n+                  request,\n+                  if (claims.expiration.isDefined)\n+                    ongoingAuthorization(scso, claims)\n+                  else\n+                    scso\n+                )\n+              case Left(authorizationError) =>\n+                // Note: only put the claims in the context, as the request can be huge\n+                newLoggingContext(\"Claims\" -> claims.toString) { implicit logCtx =>"
+  },
+  {
+    "id" : "8bb2c28f-c76c-43ca-b28b-51abfb3eb108",
+    "prId" : 6857,
+    "comments" : [
+      {
+        "id" : "a82aa4af-6511-4912-b49e-1e114aed9209",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Same as above.",
+        "createdAt" : "2020-07-27T06:08:57Z",
+        "updatedAt" : "2020-07-27T12:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9872e5d13001fd1fe900cfabf9fff26f901ba05a",
+    "line" : null,
+    "diffHunk" : "@@ -108,29 +158,43 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n         .fold(\n           observer.onError(_),\n           claims =>\n-            if (authorized(claims))\n-              call(\n-                request,\n-                if (claims.expiration.isDefined)\n-                  ongoingAuthorization(scso, claims)\n-                else\n-                  scso\n-              )\n-            else observer.onError(permissionDenied())\n+            authorized(claims) match {\n+              case Right(_) =>\n+                call(\n+                  request,\n+                  if (claims.expiration.isDefined)\n+                    ongoingAuthorization(scso, claims)\n+                  else\n+                    scso\n+                )\n+              case Left(authorizationError) =>\n+                // Note: only put the claims in the context, as the request can be huge\n+                newLoggingContext(\"Claims\" -> claims.toString) { implicit logCtx =>\n+                  logger.warn(s\"Permission denied. Reason: ${authorizationError.reason}.\")\n+                }\n+                observer.onError(permissionDenied())\n+          }\n         )\n     }\n \n   private def authorize[Req, Res](call: Req => Future[Res])(\n-      authorized: Claims => Boolean,\n+      authorized: Claims => Either[AuthorizationError, Unit],\n   ): Req => Future[Res] =\n     request =>\n       AuthorizationInterceptor\n         .extractClaimsFromContext()\n         .fold(\n           Future.failed,\n           claims =>\n-            if (authorized(claims)) call(request)\n-            else Future.failed(permissionDenied())\n+            authorized(claims) match {\n+              case Right(_) => call(request)\n+              case Left(authorizationError) =>\n+                // Note: only put the claims in the context, as the request can be huge\n+                newLoggingContext(\"Claims\" -> claims.toString) { implicit logCtx =>"
+  },
+  {
+    "id" : "b8385197-57bd-4d7d-847e-5438bc790d0a",
+    "prId" : 6342,
+    "comments" : [
+      {
+        "id" : "8154c3c9-e0eb-4c83-b071-7797bf8ed9ad",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "```suggestion\r\n      applicationId.forall(id => claims.validForApplication(id))\r\n```",
+        "createdAt" : "2020-06-15T08:06:27Z",
+        "updatedAt" : "2020-06-15T09:08:19Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bff92d20-6ebb-4057-a95a-fd8870a07da4",
+        "parentId" : "8154c3c9-e0eb-4c83-b071-7797bf8ed9ad",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/6342/commits/ff4634c0194a0406a2adbdcb5581920730307d38",
+        "createdAt" : "2020-06-15T09:10:28Z",
+        "updatedAt" : "2020-06-15T09:10:28Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "37e3b6c4311f180c3cce2813e7b2af5bc50501fc",
+    "line" : null,
+    "diffHunk" : "@@ -19,93 +19,71 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n \n   /** Validates all properties of claims that do not depend on the request,\n     * such as expiration time or ledger ID. */\n-  private def validClaims(claims: Claims): Boolean =\n-    claims.notExpired(now()) && claims.validForLedger(ledgerId) && claims.validForParticipant(\n-      participantId)\n+  private def valid(claims: Claims): Boolean =\n+    claims.notExpired(now()) &&\n+      claims.validForLedger(ledgerId) &&\n+      claims.validForParticipant(participantId)\n \n   def requirePublicClaimsOnStream[Req, Res](\n       call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(c => validClaims(c) && c.isPublic, call)\n+    authorize(call) { claims =>\n+      valid(claims) && claims.isPublic\n+    }\n \n   def requirePublicClaims[Req, Res](call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(c => validClaims(c) && c.isPublic, call)\n-\n-  def requireAdminClaimsOnStream[Req, Res](\n-      call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(c => validClaims(c) && c.isAdmin, call)\n+    authorize(call) { claims =>\n+      valid(claims) && claims.isPublic\n+    }\n \n   def requireAdminClaims[Req, Res](call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(c => validClaims(c) && c.isAdmin, call)\n-\n-  def requireNotExpiredOnStream[Req, Res](\n-      call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(validClaims, call)\n-\n-  def requireNotExpired[Req, Res](call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(validClaims, call)\n+    authorize(call) { claims =>\n+      valid(claims) && claims.isAdmin\n+    }\n \n   /** Wraps a streaming call to verify whether some Claims authorize to read as all parties\n     * of the given set. Authorization is always granted for an empty collection of parties.\n     */\n   def requireReadClaimsForAllPartiesOnStream[Req, Res](\n       parties: Iterable[String],\n+      applicationId: Option[String],\n       call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(c => validClaims(c) && parties.forall(p => c.canReadAs(p)), call)\n+    authorize(call) { claims =>\n+      valid(claims) &&\n+      parties.forall(p => claims.canReadAs(p)) &&\n+      applicationId.forall(id => claims.applicationId.forall(_ == id))\n+    }\n \n   /** Wraps a single call to verify whether some Claims authorize to read as all parties\n     * of the given set. Authorization is always granted for an empty collection of parties.\n     */\n   def requireReadClaimsForAllParties[Req, Res](\n       parties: Iterable[String],\n       call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(c => validClaims(c) && parties.forall(p => c.canReadAs(p)), call)\n-\n-  /** Wraps a single call to verify whether some Claims authorize to act as all parties\n-    * of the given set. Authorization is always granted for an empty collection of parties.\n-    */\n-  def requireActClaimsForAllParties[Req, Res](\n-      parties: Iterable[String],\n-      call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(c => validClaims(c) && parties.forall(p => c.canActAs(p)), call)\n-\n-  /** Checks whether the current Claims authorize to read as the given party, if any.\n-    * Note: A missing party does NOT result in an authorization error.\n-    */\n-  def requireReadClaimsForPartyOnStream[Req, Res](\n-      party: Option[String],\n-      call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    requireReadClaimsForAllPartiesOnStream(party.toList, call)\n-\n-  /** Checks whether the current Claims authorize to read as the given party, if any.\n-    * Note: A missing party does NOT result in an authorization error.\n-    */\n-  def requireReadClaimsForParty[Req, Res](\n-      party: Option[String],\n-      call: Req => Future[Res]): Req => Future[Res] =\n-    requireReadClaimsForAllParties(party.toList, call)\n+    authorize(call) { claims =>\n+      valid(claims) &&\n+      parties.forall(p => claims.canReadAs(p))\n+    }\n \n   /** Checks whether the current Claims authorize to act as the given party, if any.\n-    * Note: A missing party does NOT result in an authorization error.\n+    * Note: A missing party or applicationId does NOT result in an authorization error.\n     */\n   def requireActClaimsForParty[Req, Res](\n       party: Option[String],\n+      applicationId: Option[String],\n       call: Req => Future[Res]): Req => Future[Res] =\n-    requireActClaimsForAllParties(party.toList, call)\n+    authorize(call) { claims =>\n+      valid(claims) &&\n+      party.forall(p => claims.canActAs(p)) &&\n+      applicationId.forall(id => claims.applicationId.forall(_ == id))"
+  },
+  {
+    "id" : "4c2f90d0-635b-4d8d-9195-26134be37732",
+    "prId" : 6342,
+    "comments" : [
+      {
+        "id" : "c5a22e95-eb4b-48d8-9a89-ad8881a733f8",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "```suggestion\r\n      applicationId.forall(id => claims.validForApplication(id))\r\n```",
+        "createdAt" : "2020-06-15T08:06:49Z",
+        "updatedAt" : "2020-06-15T09:08:19Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "31f89307-8291-4bd6-ab5c-58604caf5a71",
+        "parentId" : "c5a22e95-eb4b-48d8-9a89-ad8881a733f8",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/6342/commits/ff4634c0194a0406a2adbdcb5581920730307d38",
+        "createdAt" : "2020-06-15T09:10:33Z",
+        "updatedAt" : "2020-06-15T09:10:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "37e3b6c4311f180c3cce2813e7b2af5bc50501fc",
+    "line" : null,
+    "diffHunk" : "@@ -19,93 +19,71 @@ final class Authorizer(now: () => Instant, ledgerId: String, participantId: Stri\n \n   /** Validates all properties of claims that do not depend on the request,\n     * such as expiration time or ledger ID. */\n-  private def validClaims(claims: Claims): Boolean =\n-    claims.notExpired(now()) && claims.validForLedger(ledgerId) && claims.validForParticipant(\n-      participantId)\n+  private def valid(claims: Claims): Boolean =\n+    claims.notExpired(now()) &&\n+      claims.validForLedger(ledgerId) &&\n+      claims.validForParticipant(participantId)\n \n   def requirePublicClaimsOnStream[Req, Res](\n       call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(c => validClaims(c) && c.isPublic, call)\n+    authorize(call) { claims =>\n+      valid(claims) && claims.isPublic\n+    }\n \n   def requirePublicClaims[Req, Res](call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(c => validClaims(c) && c.isPublic, call)\n-\n-  def requireAdminClaimsOnStream[Req, Res](\n-      call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(c => validClaims(c) && c.isAdmin, call)\n+    authorize(call) { claims =>\n+      valid(claims) && claims.isPublic\n+    }\n \n   def requireAdminClaims[Req, Res](call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(c => validClaims(c) && c.isAdmin, call)\n-\n-  def requireNotExpiredOnStream[Req, Res](\n-      call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(validClaims, call)\n-\n-  def requireNotExpired[Req, Res](call: Req => Future[Res]): Req => Future[Res] =\n-    wrapSingleCall(validClaims, call)\n+    authorize(call) { claims =>\n+      valid(claims) && claims.isAdmin\n+    }\n \n   /** Wraps a streaming call to verify whether some Claims authorize to read as all parties\n     * of the given set. Authorization is always granted for an empty collection of parties.\n     */\n   def requireReadClaimsForAllPartiesOnStream[Req, Res](\n       parties: Iterable[String],\n+      applicationId: Option[String],\n       call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(c => validClaims(c) && parties.forall(p => c.canReadAs(p)), call)\n+    authorize(call) { claims =>\n+      valid(claims) &&\n+      parties.forall(p => claims.canReadAs(p)) &&\n+      applicationId.forall(id => claims.applicationId.forall(_ == id))"
+  },
+  {
+    "id" : "c3773add-a825-4ed5-b281-929e06e54702",
+    "prId" : 3548,
+    "comments" : [
+      {
+        "id" : "8f57b270-8cae-4112-9b58-c7edb1fc2115",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "lol thx",
+        "createdAt" : "2019-11-20T13:18:57Z",
+        "updatedAt" : "2019-11-21T10:15:56Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "faf1a4d4bbff4fe8a96e7c40f32b4d3237c54ca6",
+    "line" : 33,
+    "diffHunk" : "@@ -44,51 +44,69 @@ final class Authorizer(now: () => Instant) {\n   def requireNotExpired[Req, Res](call: Req => Future[Res]): Req => Future[Res] =\n     wrapSingleCall(_.notExpired(now()), call)\n \n-  /** Wraps a streaming call to verify whether some Claims authorize to act as all parties\n+  /** Wraps a streaming call to verify whether some Claims authorize to read as all parties\n     * of the given set. Authorization is always granted for an empty collection of parties.\n     */\n-  def requireClaimsForAllPartiesOnStream[Req, Res](\n+  def requireReadClaimsForAllPartiesOnStream[Req, Res](\n       parties: Iterable[String],\n       call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n-    wrapStream(c => c.notExpired(now()) && parties.forall(p => c.canActAs(p)), call)\n+    wrapStream(c => c.notExpired(now()) && parties.forall(p => c.canReadAs(p)), call)\n+\n+  /** Wraps a single call to verify whether some Claims authorize to read as all parties\n+    * of the given set. Authorization is always granted for an empty collection of parties.\n+    */\n+  def requireReadClaimsForAllParties[Req, Res](\n+      parties: Iterable[String],\n+      call: Req => Future[Res]): Req => Future[Res] =\n+    wrapSingleCall(c => c.notExpired(now()) && parties.forall(p => c.canReadAs(p)), call)\n \n   /** Wraps a single call to verify whether some Claims authorize to act as all parties\n     * of the given set. Authorization is always granted for an empty collection of parties.\n     */\n-  def requireClaimsForAllParties[Req, Res](\n+  def requireActClaimsForAllParties[Req, Res](\n       parties: Iterable[String],\n       call: Req => Future[Res]): Req => Future[Res] =\n     wrapSingleCall(c => c.notExpired(now()) && parties.forall(p => c.canActAs(p)), call)\n \n-  /** Checks whether the current Claims authorize to act as the given party, if any.\n-    * Note: An missing party does NOT result in an authorization error."
+  },
+  {
+    "id" : "57cd6bc3-61a2-41d7-9f45-8ef9808f8fc8",
+    "prId" : 3286,
+    "comments" : [
+      {
+        "id" : "8bc67d7e-96e2-4800-9deb-96878fa8f48e",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "These methods are easier to use than before, but we might need to refactor them once more when we add the feature that the Authorizer fills in missing request information.",
+        "createdAt" : "2019-10-30T10:34:40Z",
+        "updatedAt" : "2019-10-31T15:48:18Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "24edf925-bec4-4b52-9481-18d421cb649f",
+        "parentId" : "8bc67d7e-96e2-4800-9deb-96878fa8f48e",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I'll be more than happy to find a way to make this work. Hopefully the component that checks claims and the one that fills in information from the claims to the request can be pulled apart.",
+        "createdAt" : "2019-10-30T17:29:54Z",
+        "updatedAt" : "2019-10-31T15:48:18Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "20a4635add5f912c6e6c5fd78e06de61846a1171",
+    "line" : 30,
+    "diffHunk" : "@@ -0,0 +1,128 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.ledger.api.auth\n+\n+import java.time.Clock\n+\n+import com.digitalasset.ledger.api.auth.interceptor.AuthorizationInterceptor\n+import com.digitalasset.ledger.api.v1.transaction_filter.TransactionFilter\n+import com.digitalasset.platform.server.api.validation.ErrorFactories.permissionDenied\n+import io.grpc.stub.StreamObserver\n+\n+import scala.concurrent.Future\n+\n+object Authorizer {\n+\n+  private def authError = permissionDenied(\"You are not authorized to use this resource\")\n+\n+}\n+\n+/** A simple helper that allows services to use authorization claims\n+  * that have been stored by [[AuthorizationInterceptor]].\n+  */\n+final class Authorizer(clock: Clock) {\n+\n+  import Authorizer.authError\n+\n+  def requirePublicClaimsOnStream[Req, Res](\n+      call: (Req, StreamObserver[Res]) => Unit): (Req, StreamObserver[Res]) => Unit =\n+    wrapStream(_.isPublic(clock), call)\n+\n+  def requirePublicClaims[Req, Res](call: Req => Future[Res]): Req => Future[Res] ="
+  }
+]

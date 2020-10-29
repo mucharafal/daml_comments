@@ -1,0 +1,339 @@
+[
+  {
+    "id" : "bd8720c2-1eff-4b4c-97be-0f14c17e0f26",
+    "prId" : 7400,
+    "comments" : [
+      {
+        "id" : "a16701b0-2818-4009-b181-2823c4d2b14d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should add a bunch of tests that show that authorization errors are now thrown before any subsequent evaluation/execution errors. I suggest we do this in a similar style but a separate file and I would be ok with doing it in a follow-up PR if that PR is the next to follow.",
+        "createdAt" : "2020-09-17T15:44:05Z",
+        "updatedAt" : "2020-09-17T15:49:12Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2ddcd0a6-5c3a-427b-b2b2-e8e8b2d43684",
+        "parentId" : "a16701b0-2818-4009-b181-2823c4d2b14d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "yup",
+        "createdAt" : "2020-09-17T16:58:08Z",
+        "updatedAt" : "2020-09-17T16:58:08Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a360635b966cdfe27bfd3cd6e156308321238660",
+    "line" : 4,
+    "diffHunk" : "@@ -66,7 +66,6 @@\n -- @ERROR EvUpdExercWithoutActorsErr_1 OK\n -- @ERROR EvUpdExercWithoutActorsErr_2 OK\n -- @ERROR exercise of C_BadActorCheck_1\n--- @ERROR Aborted: BadActorCheck_2 OK"
+  },
+  {
+    "id" : "a53e97ab-7f40-41e9-b8fa-727f49edcf0f",
+    "prId" : 6958,
+    "comments" : [
+      {
+        "id" : "cd8c6417-6bbc-47f2-918e-4e13673b0599",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "```suggestion\r\n  pure (foldl f identity [1] (error \"EvExpFoldlErr3 failed\"))\r\n```",
+        "createdAt" : "2020-08-03T10:24:53Z",
+        "updatedAt" : "2020-08-03T10:48:02Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "292b93f3-abc2-44f8-9589-89afc67d91c9",
+        "parentId" : "cd8c6417-6bbc-47f2-918e-4e13673b0599",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Good catch. Thanks a lot!",
+        "createdAt" : "2020-08-03T10:29:01Z",
+        "updatedAt" : "2020-08-03T10:48:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f121ef613a90634e2dd1a2c06afc2a6816e8903a",
+    "line" : null,
+    "diffHunk" : "@@ -171,6 +177,42 @@ evExpRecUpdErr2_3 = scenario do\n -- evaluation of struct fields during typeclass desugaring, and we don't have\n -- a way to construct LF structs directly.\n \n+evExpFoldrErr1 = scenario do\n+  pure (foldr f 0 [1, 2])\n+  where\n+    f 2 0 = error \"EvExpFoldrErr1 OK\"\n+    f _ _ = error \"EvExpFoldrErr1 failed\"\n+\n+evExpFoldrErr2 = scenario do\n+  pure (foldr f 0 [1, 2])\n+  where\n+    f 1 = error \"EvExpFoldrErr2 OK\"\n+    f _ = error \"EvExpFoldrErr2 failed\"\n+\n+evExpFoldrErr3 = scenario do\n+  pure (foldr f identity [1] (error \"EvExpFoldrErr3 failed\"))\n+  where\n+    f: Int -> (Int -> Int) -> (Int -> Int)\n+    f _ = error \"EvExpFoldrErr3 OK\"\n+\n+evExpFoldlErr1 = scenario do\n+  pure (foldl f 0 [1, 2])\n+  where\n+    f 0 1 = error \"EvExpFoldlErr1 OK\"\n+    f _ _ = error \"EvExpFoldlErr1 failed\"\n+\n+evExpFoldlErr2 = scenario do\n+  pure (foldl f 0 [1, 2])\n+  where\n+    f 0 = error \"EvExpFoldlErr2 OK\"\n+    f _ = error \"EvExpFoldlErr2 failed\"\n+\n+evExpFoldlErr3 = scenario do\n+  pure (foldr f identity [1] (error \"EvExpFoldlErr3 failed\"))"
+  },
+  {
+    "id" : "cfd3fd84-5b05-44a8-87b0-38a46e3a876f",
+    "prId" : 6867,
+    "comments" : [
+      {
+        "id" : "91ad483d-ab82-4313-be6e-c1445d21a66a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What happens if we `fetch self` here? Adding a test for whatever this does might be useful too.",
+        "createdAt" : "2020-07-27T10:56:13Z",
+        "updatedAt" : "2020-07-27T14:36:06Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e7aa53d9-542c-4e47-82f9-8b37c745bdca",
+        "parentId" : "91ad483d-ab82-4313-be6e-c1445d21a66a",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I'm sure it does the same thing right now, but it can't hurt to add a test. :) ",
+        "createdAt" : "2020-07-27T14:33:38Z",
+        "updatedAt" : "2020-07-27T14:36:06Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bca1a367-99d8-480e-8e70-2d73229e523f",
+        "parentId" : "91ad483d-ab82-4313-be6e-c1445d21a66a",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Added!",
+        "createdAt" : "2020-07-27T14:36:13Z",
+        "updatedAt" : "2020-07-27T14:36:13Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9d0c743f6386697c27bf1f9dad3dc5bd2def557e",
+    "line" : 94,
+    "diffHunk" : "@@ -366,3 +377,200 @@ evUpdCreateWithKeyErr2 = scenario do\n   submit p do\n     create (T_EvUpdCreateWithKeyErr2 p)\n     error \"EvUpdCreateWithKeyErr2 failed\"\n+\n+-- | `controller P can ...` syntax adds `P` to the observers,\n+-- so if `P` causes an error, this is triggered on create,\n+-- instead of on exercise.\n+template T_ControllerCanAddsObserver\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    controller (error @Party \"controllerCanAddsObserver OK\") can\n+      C_ControllerCanAddsObserver: ()\n+        do pure ()\n+\n+controllerCanAddsObserver = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    create (T_ControllerCanAddsObserver p)\n+    error \"controllerCanAddsObserver failed\"\n+\n+-- | `choice ... controller P ...` doesn't add `P` as observer.\n+-- This test is here to contrast with the previous.\n+template T_ChoiceControllerDoesntAddObserver\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice CY : ()\n+      controller (error @Party \"choiceControllerDoesntAddObserver failed\")\n+        do pure ()\n+\n+choiceControllerDoesntAddObserver = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    create (T_ChoiceControllerDoesntAddObserver p)\n+    error \"choiceControllerDoesntAddObserver OK\"\n+\n+-- | Verify that contract inactivity is checked before interpreting\n+-- the rest of the update.\n+template T_DoubleArchive\n+  with\n+    p : Party\n+  where\n+    signatory p\n+\n+doubleArchive = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_DoubleArchive p)\n+    archive c\n+    archive c\n+    abort \"doubleArchive failed\"\n+\n+-- | Verify that a consuming choice's update is interpreted with a\n+-- ledger state where the template has already been consumed.\n+template T_EvUpdExercConsumErr\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice C_EvUpdExercConsumErr : ()\n+      controller p\n+        do\n+          archive self"
+  },
+  {
+    "id" : "e610e754-f9e1-42f3-ae65-18b7703bd01a",
+    "prId" : 6867,
+    "comments" : [
+      {
+        "id" : "0f5d0c4d-776f-4886-ad34-4654ecdb3448",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n-- \"correct\" with respect to the choice, but there is no authorization.\r\n```",
+        "createdAt" : "2020-07-27T11:26:52Z",
+        "updatedAt" : "2020-07-27T14:36:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9d0c743f6386697c27bf1f9dad3dc5bd2def557e",
+    "line" : null,
+    "diffHunk" : "@@ -366,3 +377,200 @@ evUpdCreateWithKeyErr2 = scenario do\n   submit p do\n     create (T_EvUpdCreateWithKeyErr2 p)\n     error \"EvUpdCreateWithKeyErr2 failed\"\n+\n+-- | `controller P can ...` syntax adds `P` to the observers,\n+-- so if `P` causes an error, this is triggered on create,\n+-- instead of on exercise.\n+template T_ControllerCanAddsObserver\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    controller (error @Party \"controllerCanAddsObserver OK\") can\n+      C_ControllerCanAddsObserver: ()\n+        do pure ()\n+\n+controllerCanAddsObserver = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    create (T_ControllerCanAddsObserver p)\n+    error \"controllerCanAddsObserver failed\"\n+\n+-- | `choice ... controller P ...` doesn't add `P` as observer.\n+-- This test is here to contrast with the previous.\n+template T_ChoiceControllerDoesntAddObserver\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice CY : ()\n+      controller (error @Party \"choiceControllerDoesntAddObserver failed\")\n+        do pure ()\n+\n+choiceControllerDoesntAddObserver = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    create (T_ChoiceControllerDoesntAddObserver p)\n+    error \"choiceControllerDoesntAddObserver OK\"\n+\n+-- | Verify that contract inactivity is checked before interpreting\n+-- the rest of the update.\n+template T_DoubleArchive\n+  with\n+    p : Party\n+  where\n+    signatory p\n+\n+doubleArchive = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_DoubleArchive p)\n+    archive c\n+    archive c\n+    abort \"doubleArchive failed\"\n+\n+-- | Verify that a consuming choice's update is interpreted with a\n+-- ledger state where the template has already been consumed.\n+template T_EvUpdExercConsumErr\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice C_EvUpdExercConsumErr : ()\n+      controller p\n+        do\n+          archive self\n+          error \"EvUpdExercConsumErr failed (1)\"\n+\n+evUpdExercConsumErr = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercConsumErr p)\n+    exercise c C_EvUpdExercConsumErr\n+    abort \"EvUpdExercConsumErr failed (2)\"\n+\n+-- | Verify that a nonconsuming choice's update is interpreted with\n+-- the original ledger state (template hasn't been consumed).\n+template T_EvUpdExercNonConsumErr\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    nonconsuming choice C_EvUpdExercNonConsumErr : ()\n+      controller p\n+        do\n+          archive self\n+          error \"EvUpdExercNonConsumErr OK\"\n+\n+evUpdExercNonConsumErr = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercNonConsumErr p)\n+    exercise c C_EvUpdExercNonConsumErr\n+    abort \"EvUpdExercNonConsumErr failed\"\n+\n+-- | Verify that the exercising party is evaluated\n+-- when the exercise is performed, not after.\n+template T_EvUpdExercWithoutActorsErr_1\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice C_EvUpdExercWithoutActorsErr_1 : () with\n+      controller (error @Party \"EvUpdExercWithoutActorsErr_1 OK\")\n+        do abort \"EvUpdExercWithoutActorsErr_1 failed (1)\"\n+\n+evUpdExercWithoutActorsErr_1 = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercWithoutActorsErr_1 p)\n+    exercise c C_EvUpdExercWithoutActorsErr_1\n+    abort \"EvUpdExercWithoutActorsErr_1 failed (2)\"\n+\n+-- | Show that the exercising party is evaluated before\n+-- we check that the contract is still active.\n+template T_EvUpdExercWithoutActorsErr_2\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice C_EvUpdExercWithoutActorsErr_2 : () with\n+      controller (error @Party \"EvUpdExercWithoutActorsErr_2 OK\")\n+        do abort \"EvUpdExercWithoutActorsErr_2 failed (1)\"\n+\n+evUpdExercWithoutActorsErr_2 = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercWithoutActorsErr_2 p)\n+    archive c\n+    exercise c C_EvUpdExercWithoutActorsErr_2\n+    abort \"EvUpdExercWithoutActorsErr_2 failed (2)\"\n+\n+-- | Checks that an authorization / bad actor check occurs\n+-- at some point during submission.\n+template T_BadActorCheck_1\n+  with\n+    p1 : Party\n+    p2 : Party\n+  where\n+    signatory p1\n+    controller p2 can\n+      C_BadActorCheck_1 : ()\n+        do pure ()\n+\n+badActorCheck_1 = scenario do\n+  p1 <- getParty \"Alice\"\n+  p2 <- getParty \"Bob\"\n+  submit p1 do\n+    c <- create (T_BadActorCheck_1 p1 p2)\n+    exercise c C_BadActorCheck_1\n+  error \"BadActorCheck_1 failed\"\n+\n+-- | Checks that the bad actor does not occur before running the update,\n+-- for an 'exercise_without_actor', since the exercis actor is always\n+-- \"correct\" with respect to the choic, but there is no authorization."
+  },
+  {
+    "id" : "d3eee917-a42e-4b63-abf5-979722d27819",
+    "prId" : 6867,
+    "comments" : [
+      {
+        "id" : "6359c558-0547-4b19-96ed-30ee282e5094",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n-- for an 'exercise_without_actor', since the exercise actor is always\r\n```",
+        "createdAt" : "2020-07-27T11:36:30Z",
+        "updatedAt" : "2020-07-27T14:36:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9d0c743f6386697c27bf1f9dad3dc5bd2def557e",
+    "line" : null,
+    "diffHunk" : "@@ -366,3 +377,200 @@ evUpdCreateWithKeyErr2 = scenario do\n   submit p do\n     create (T_EvUpdCreateWithKeyErr2 p)\n     error \"EvUpdCreateWithKeyErr2 failed\"\n+\n+-- | `controller P can ...` syntax adds `P` to the observers,\n+-- so if `P` causes an error, this is triggered on create,\n+-- instead of on exercise.\n+template T_ControllerCanAddsObserver\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    controller (error @Party \"controllerCanAddsObserver OK\") can\n+      C_ControllerCanAddsObserver: ()\n+        do pure ()\n+\n+controllerCanAddsObserver = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    create (T_ControllerCanAddsObserver p)\n+    error \"controllerCanAddsObserver failed\"\n+\n+-- | `choice ... controller P ...` doesn't add `P` as observer.\n+-- This test is here to contrast with the previous.\n+template T_ChoiceControllerDoesntAddObserver\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice CY : ()\n+      controller (error @Party \"choiceControllerDoesntAddObserver failed\")\n+        do pure ()\n+\n+choiceControllerDoesntAddObserver = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    create (T_ChoiceControllerDoesntAddObserver p)\n+    error \"choiceControllerDoesntAddObserver OK\"\n+\n+-- | Verify that contract inactivity is checked before interpreting\n+-- the rest of the update.\n+template T_DoubleArchive\n+  with\n+    p : Party\n+  where\n+    signatory p\n+\n+doubleArchive = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_DoubleArchive p)\n+    archive c\n+    archive c\n+    abort \"doubleArchive failed\"\n+\n+-- | Verify that a consuming choice's update is interpreted with a\n+-- ledger state where the template has already been consumed.\n+template T_EvUpdExercConsumErr\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice C_EvUpdExercConsumErr : ()\n+      controller p\n+        do\n+          archive self\n+          error \"EvUpdExercConsumErr failed (1)\"\n+\n+evUpdExercConsumErr = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercConsumErr p)\n+    exercise c C_EvUpdExercConsumErr\n+    abort \"EvUpdExercConsumErr failed (2)\"\n+\n+-- | Verify that a nonconsuming choice's update is interpreted with\n+-- the original ledger state (template hasn't been consumed).\n+template T_EvUpdExercNonConsumErr\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    nonconsuming choice C_EvUpdExercNonConsumErr : ()\n+      controller p\n+        do\n+          archive self\n+          error \"EvUpdExercNonConsumErr OK\"\n+\n+evUpdExercNonConsumErr = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercNonConsumErr p)\n+    exercise c C_EvUpdExercNonConsumErr\n+    abort \"EvUpdExercNonConsumErr failed\"\n+\n+-- | Verify that the exercising party is evaluated\n+-- when the exercise is performed, not after.\n+template T_EvUpdExercWithoutActorsErr_1\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice C_EvUpdExercWithoutActorsErr_1 : () with\n+      controller (error @Party \"EvUpdExercWithoutActorsErr_1 OK\")\n+        do abort \"EvUpdExercWithoutActorsErr_1 failed (1)\"\n+\n+evUpdExercWithoutActorsErr_1 = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercWithoutActorsErr_1 p)\n+    exercise c C_EvUpdExercWithoutActorsErr_1\n+    abort \"EvUpdExercWithoutActorsErr_1 failed (2)\"\n+\n+-- | Show that the exercising party is evaluated before\n+-- we check that the contract is still active.\n+template T_EvUpdExercWithoutActorsErr_2\n+  with\n+    p : Party\n+  where\n+    signatory p\n+    choice C_EvUpdExercWithoutActorsErr_2 : () with\n+      controller (error @Party \"EvUpdExercWithoutActorsErr_2 OK\")\n+        do abort \"EvUpdExercWithoutActorsErr_2 failed (1)\"\n+\n+evUpdExercWithoutActorsErr_2 = scenario do\n+  p <- getParty \"Alice\"\n+  submit p do\n+    c <- create (T_EvUpdExercWithoutActorsErr_2 p)\n+    archive c\n+    exercise c C_EvUpdExercWithoutActorsErr_2\n+    abort \"EvUpdExercWithoutActorsErr_2 failed (2)\"\n+\n+-- | Checks that an authorization / bad actor check occurs\n+-- at some point during submission.\n+template T_BadActorCheck_1\n+  with\n+    p1 : Party\n+    p2 : Party\n+  where\n+    signatory p1\n+    controller p2 can\n+      C_BadActorCheck_1 : ()\n+        do pure ()\n+\n+badActorCheck_1 = scenario do\n+  p1 <- getParty \"Alice\"\n+  p2 <- getParty \"Bob\"\n+  submit p1 do\n+    c <- create (T_BadActorCheck_1 p1 p2)\n+    exercise c C_BadActorCheck_1\n+  error \"BadActorCheck_1 failed\"\n+\n+-- | Checks that the bad actor does not occur before running the update,\n+-- for an 'exercise_without_actor', since the exercis actor is always"
+  },
+  {
+    "id" : "0ba9a16b-49ee-4fcb-ada0-37626fe241b8",
+    "prId" : 6598,
+    "comments" : [
+      {
+        "id" : "b850ede0-60dc-4223-bdc7-decccefa7bc5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We really need `submitMustFailMsg` orwhatever we call the extension that lets you match on the error.",
+        "createdAt" : "2020-07-21T10:54:39Z",
+        "updatedAt" : "2020-07-21T15:04:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b5b8d6f9826b681bfc839a684099b92c822db82",
+    "line" : 14,
+    "diffHunk" : "@@ -0,0 +1,360 @@\n+-- Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.\n+-- All rights reserved.\n+\n+-- Here we test that evaluation order proceeds as we expect. We do this by\n+-- raising multiple errors and seeing which one percolates to the top (i.e.\n+-- which error was evaluated first).\n+--\n+-- (Convention: When testing a rule in the operational semantics, we use the\n+-- rule's name in the error message itself. If there are multiple tests for\n+-- the same rule, we use `R_1`, `R_2`, `R_3`, and so on. This is why there is\n+-- `evExpRecUpdErr1`, `evExpRecUpdErr2_1`, and `evExpRecUpdErr2_2`, for example.)\n+--\n+-- @ERROR Aborted: overApply OK"
+  },
+  {
+    "id" : "a1cb19e0-096d-4a67-b8fd-b8783546489f",
+    "prId" : 6598,
+    "comments" : [
+      {
+        "id" : "88c0fb3e-114e-4aa6-8d69-5a5087d92f72",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe worth including a test for this anyway? I like seeing tests fail when I fix a bug :slightly_smiling_face: ",
+        "createdAt" : "2020-07-21T10:59:43Z",
+        "updatedAt" : "2020-07-21T15:04:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3ee87a2c-ddad-4cc3-8b00-bd05a6652ac9",
+        "parentId" : "88c0fb3e-114e-4aa6-8d69-5a5087d92f72",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "You're right :-) I'll add the test.",
+        "createdAt" : "2020-07-21T11:36:08Z",
+        "updatedAt" : "2020-07-21T15:04:55Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0b5b8d6f9826b681bfc839a684099b92c822db82",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,360 @@\n+-- Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.\n+-- All rights reserved.\n+\n+-- Here we test that evaluation order proceeds as we expect. We do this by\n+-- raising multiple errors and seeing which one percolates to the top (i.e.\n+-- which error was evaluated first).\n+--\n+-- (Convention: When testing a rule in the operational semantics, we use the\n+-- rule's name in the error message itself. If there are multiple tests for\n+-- the same rule, we use `R_1`, `R_2`, `R_3`, and so on. This is why there is\n+-- `evExpRecUpdErr1`, `evExpRecUpdErr2_1`, and `evExpRecUpdErr2_2`, for example.)\n+--\n+-- @ERROR Aborted: overApply OK\n+-- @ERROR Aborted: EvExpAppErr1 OK\n+-- @ERROR Aborted: EvExpAppErr2 OK\n+-- @ERROR Aborted: EvExpLetErr OK\n+-- @ERROR Aborted: EvExpCaseErr OK\n+-- @ERROR Aborted: EvExpCase_1 OK\n+-- @ERROR Aborted: EvExpCase_2 OK\n+-- @ERROR Aborted: EvExpConsErr1 OK\n+-- @ERROR Aborted: EvExpConsErr2 OK\n+-- @ERROR Aborted: EvExpBuiltinErr OK\n+-- @ERROR Aborted: EvExpRecConErr_1 OK\n+-- @ERROR Aborted: EvExpRecConErr_2 OK\n+-- @ERROR Aborted: EvExpRecConErr_3 OK\n+-- @ERROR Aborted: EvExpRecConErr_4 OK\n+-- @ERROR Aborted: EvExpRecUpdErr1 OK\n+-- @ERROR Aborted: EvExpRecUpdErr2_1 OK\n+-- @ERROR Aborted: EvExpRecUpdErr2_2 OK\n+-- @ERROR Aborted: EvExpUpPureErr OK\n+-- @ERROR Aborted: EvExpUpBindErr OK\n+-- @ERROR Aborted: EvExpUpCreateErr OK\n+-- @ERROR Aborted: EvExpUpFetchErr OK\n+-- @ERROR Aborted: EvExpUpExerciseWithoutActorsErr1 OK\n+-- @ERROR Aborted: EvExpUpExerciseWithoutActorsErr2 OK\n+-- @ERROR Aborted: EvExpUpFetchByKeyErr OK\n+-- @ERROR Aborted: EvExpUpLookupByKeyErr OK\n+-- @ERROR Aborted: abort2 OK\n+-- @ERROR Aborted: EvUpdBindErr1_1 OK\n+-- @ERROR Aborted: EvUpdBindErr1_2 OK\n+-- @ERROR Aborted: EvUpdBindErr2 OK\n+-- @ERROR Aborted: EvUpdBindErr3 OK\n+-- @ERROR Aborted: EvUpdCreateErr1 OK\n+-- @ERROR Template pre-condition violated in: create SemanticsEvalOrder:T_EvUpdCreateFail\n+-- @ERROR Aborted: EvUpdCreateErr2 OK\n+-- @ERROR Aborted: EvUpdCreateErr3 OK\n+-- @ERROR Aborted: EvUpdCreateErr4_1 OK\n+-- @ERROR Aborted: EvUpdCreateErr4_2 OK\n+-- @ERROR Aborted: EvUpdCreateWithKeyErr1 OK\n+-- @ERROR Aborted: EvUpdCreateWithKeyErr2 OK\n+module SemanticsEvalOrder where\n+\n+overApply = scenario do\n+  let f x = error \"overApply OK\"\n+  let _ = f 1 (error \"overApply Failed\")\n+  let _ = f 1 2\n+  pure ()\n+\n+evExpAppErr1 = scenario do\n+  let _ = (error \"EvExpAppErr1 OK\") (error \"EvExpAppErr1 failed\")\n+  pure ()\n+\n+evExpAppErr2 = scenario do\n+  let f _ _ = error \"EvExpAppErr2 failed\"\n+  let _ = f 1 (error \"EvExpAppErr2 OK\")\n+  pure ()\n+\n+evExpLetErr = scenario do\n+    let _ = error \"EvExpLetErr OK\"\n+    let _ = error \"EvExpLetErr bad\"\n+    error \"EvExpLetErr failed\"\n+    -- ^ The evaluation order goes \"bad\" if you\n+    -- use a multiple-binding \"let\", as in,\n+    --\n+    --    let _ = error \"EvExpLetErr OK\""
+  },
+  {
+    "id" : "be3af821-ad26-49ad-8f11-0b67bbcdb1c2",
+    "prId" : 6598,
+    "comments" : [
+      {
+        "id" : "84f5540a-a579-4b85-987e-2abe36014d63",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This feels so wrong. I'm very sad we do all this extra work to get a rather unintuitive behaviour. Nothing we can do about it now though.",
+        "createdAt" : "2020-07-21T12:00:32Z",
+        "updatedAt" : "2020-07-21T15:04:55Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b5b8d6f9826b681bfc839a684099b92c822db82",
+    "line" : 159,
+    "diffHunk" : "@@ -0,0 +1,362 @@\n+-- Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.\n+-- All rights reserved.\n+\n+-- Here we test that evaluation order proceeds as we expect. We do this by\n+-- raising multiple errors and seeing which one percolates to the top (i.e.\n+-- which error was evaluated first).\n+--\n+-- (Convention: When testing a rule in the operational semantics, we use the\n+-- rule's name in the error message itself. If there are multiple tests for\n+-- the same rule, we use `R_1`, `R_2`, `R_3`, and so on. This is why there is\n+-- `evExpRecUpdErr1`, `evExpRecUpdErr2_1`, and `evExpRecUpdErr2_2`, for example.)\n+--\n+-- @ERROR Aborted: overApply OK\n+-- @ERROR Aborted: EvExpAppErr1 OK\n+-- @ERROR Aborted: EvExpAppErr2 OK\n+-- @ERROR Aborted: EvExpLetErr OK\n+-- @ERROR Aborted: ghcReordersMultiLets OK\n+-- @ERROR Aborted: EvExpCaseErr OK\n+-- @ERROR Aborted: EvExpCase_1 OK\n+-- @ERROR Aborted: EvExpCase_2 OK\n+-- @ERROR Aborted: EvExpConsErr1 OK\n+-- @ERROR Aborted: EvExpConsErr2 OK\n+-- @ERROR Aborted: EvExpBuiltinErr OK\n+-- @ERROR Aborted: EvExpRecConErr_1 OK\n+-- @ERROR Aborted: EvExpRecConErr_2 OK\n+-- @ERROR Aborted: EvExpRecConErr_3 OK\n+-- @ERROR Aborted: EvExpRecConErr_4 OK\n+-- @ERROR Aborted: EvExpRecUpdErr1 OK\n+-- @ERROR Aborted: EvExpRecUpdErr2_1 OK\n+-- @ERROR Aborted: EvExpRecUpdErr2_2 OK\n+-- @ERROR Aborted: EvExpUpPureErr OK\n+-- @ERROR Aborted: EvExpUpBindErr OK\n+-- @ERROR Aborted: EvExpUpCreateErr OK\n+-- @ERROR Aborted: EvExpUpFetchErr OK\n+-- @ERROR Aborted: EvExpUpExerciseWithoutActorsErr1 OK\n+-- @ERROR Aborted: EvExpUpExerciseWithoutActorsErr2 OK\n+-- @ERROR Aborted: EvExpUpFetchByKeyErr OK\n+-- @ERROR Aborted: EvExpUpLookupByKeyErr OK\n+-- @ERROR Aborted: abort2 OK\n+-- @ERROR Aborted: EvUpdBindErr1_1 OK\n+-- @ERROR Aborted: EvUpdBindErr1_2 OK\n+-- @ERROR Aborted: EvUpdBindErr2 OK\n+-- @ERROR Aborted: EvUpdBindErr3 OK\n+-- @ERROR Aborted: EvUpdCreateErr1 OK\n+-- @ERROR Template pre-condition violated in: create SemanticsEvalOrder:T_EvUpdCreateFail\n+-- @ERROR Aborted: EvUpdCreateErr2 OK\n+-- @ERROR Aborted: EvUpdCreateErr3 OK\n+-- @ERROR Aborted: EvUpdCreateErr4_1 OK\n+-- @ERROR Aborted: EvUpdCreateErr4_2 OK\n+-- @ERROR Aborted: EvUpdCreateWithKeyErr1 OK\n+-- @ERROR Aborted: EvUpdCreateWithKeyErr2 OK\n+module SemanticsEvalOrder where\n+\n+overApply = scenario do\n+  let f x = error \"overApply OK\"\n+  let _ = f 1 (error \"overApply Failed\")\n+  let _ = f 1 2\n+  pure ()\n+\n+evExpAppErr1 = scenario do\n+  let _ = (error \"EvExpAppErr1 OK\") (error \"EvExpAppErr1 failed\")\n+  pure ()\n+\n+evExpAppErr2 = scenario do\n+  let f _ _ = error \"EvExpAppErr2 failed\"\n+  let _ = f 1 (error \"EvExpAppErr2 OK\")\n+  pure ()\n+\n+evExpLetErr = scenario do\n+    let _ = error \"EvExpLetErr OK\"\n+    let _ = error \"EvExpLetErr bad\"\n+    error \"EvExpLetErr failed\"\n+\n+-- | The following \"multiple-binding let\" behavior is caused by GHC.\n+-- This is tracked in issue #6788. We would love to get rid of this\n+-- reordering behavior, but it's very much tied with a part of GHC\n+-- that we don't control. So we track this behavior here.\n+ghcReordersMultiLets = scenario do\n+    let _ = error \"ghcReordersMultiLets failed in a good way -- close the issue & update the test\"\n+        _ = error \"ghcReordersMultiLets OK\"\n+    error \"ghcReordersMultiLets failed in a bad way\"\n+\n+evExpCaseErr = scenario do\n+  case error \"EvExpCaseErr OK\" of\n+    None -> error \"EvExpCaseErr failed\"\n+    Some _ -> error \"EvExpCaseErr failed\"\n+\n+evExpCase_1 = scenario do\n+  case None of\n+    None -> error \"EvExpCase_1 OK\"\n+    Some _ -> error \"EvExpCase_1 failed\"\n+\n+evExpCase_2 = scenario do\n+  case Some 1 of\n+    None -> error \"EvExpCase_2 failed\"\n+    Some _ -> error \"EvExpCase_2 OK\"\n+\n+evExpConsErr1 = scenario do\n+  pure ( error \"EvExpConsErr1 OK\"\n+      :: error \"EvExpConsErr1 failed\"\n+      :: error \"EvExpConsErr1 failed\")\n+\n+evExpConsErr2 = scenario do\n+  pure ( 10\n+      :: error \"EvExpConsErr2 OK\"\n+      :: error \"EvExpConsErr2 failed\")\n+\n+evExpBuiltinErr = scenario do\n+  let _ : Int = error \"EvExpBuiltinErr OK\" + error \"EvExpBuiltinErr failed\"\n+  pure ()\n+\n+\n+data R1 = R1 { a: Int, b: Int }\n+\n+evExpRecConErr_1 = scenario do\n+  pure R1 { a = error \"EvExpRecConErr_1 OK\", b = error \"EvExpRecConErr_1 failed\" }\n+\n+evExpRecConErr_2 = scenario do\n+  pure R1 { b = error \"EvExpRecConErr_2 failed\", a = error \"EvExpRecConErr_2 OK\" }\n+\n+data R2 = R2 { d: Int, c: Int }\n+  -- ^ Checking that there isn't a dependence on the field names.\n+  -- There should be a dependence on the definition order according to the LF spec.\n+\n+evExpRecConErr_3 = scenario do\n+  pure R2 { d = error \"EvExpRecConErr_3 OK\", c = error \"EvExpRecConErr_3 failed\" }\n+\n+evExpRecConErr_4 = scenario do\n+  pure R2 { c = error \"EvExpRecConErr_4 failed\", d = error \"EvExpRecConErr_4 OK\"  }\n+\n+evExpRecUpdErr1 = scenario do\n+  pure (error \"EvExpRecUpdErr1 OK\" : R1)\n+    { a = error \"EvExpRecUpdErr1 failed\", b = error \"EvExpRecUpdErr1 failed\" }\n+\n+evExpRecUpdErr2_1 = scenario do\n+  pure (R1 {a=0, b=0})\n+    { a = error \"EvExpRecUpdErr2_1 OK\", b = error \"EvExpRecUpdErr2_1 failed\" }\n+\n+evExpRecUpdErr2_2 = scenario do\n+  pure (R1 {a=0, b=0})\n+    { b = error \"EvExpRecUpdErr2_2 OK\", a = error \"EvExpRecUpdErr2_2 failed\" }\n+  -- ^ Note that record update depends on the order the fields appear in\n+  -- code, rather than the order in which fields were defined.\n+\n+-- Can't test LF struct evaluation order from DAML, since we purposely avoid\n+-- evaluation of struct fields during typeclass desugaring, and we don't have\n+-- a way to construct LF structs directly.\n+\n+evExpUpPureErr = scenario do\n+  let _ : Update () = pure (error \"EvExpUpPureErr OK\")\n+  pure ()\n+\n+evExpUpBindErr = scenario do"
+  }
+]

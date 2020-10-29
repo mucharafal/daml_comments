@@ -1,0 +1,561 @@
+[
+  {
+    "id" : "fe77dc6e-edc9-4bae-bc98-7f816871ac39",
+    "prId" : 2147,
+    "comments" : [
+      {
+        "id" : "d9e6330d-c3ac-4c5c-92bb-499c3b23d2a2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Might be helpful to add a comment pointing the reader to the `package_app` logic.",
+        "createdAt" : "2019-07-15T13:08:17Z",
+        "updatedAt" : "2019-07-16T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ac71adbd-59f5-4cb8-ad4b-33925876aaea",
+        "parentId" : "d9e6330d-c3ac-4c5c-92bb-499c3b23d2a2",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Good point, I added a comment.",
+        "createdAt" : "2019-07-15T13:23:18Z",
+        "updatedAt" : "2019-07-16T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d449cbf9a4b454e6345de93e636b8044fe4cb34e",
+    "line" : null,
+    "diffHunk" : "@@ -5,71 +5,45 @@\n -- but since we also want support for locating runfiles in JARs\n -- it is simpler to have all code located here.\n module DA.Bazel.Runfiles\n-  ( locateRunfiles\n-  , locateRunfilesMb\n+  ( create\n+  , rlocation\n+  , locateRunfiles\n   , mainWorkspace\n   ) where\n \n-import Control.Monad.Trans.Maybe\n-import Data.Foldable\n-import Data.List\n-import Data.List.Split (splitOn)\n+import qualified Bazel.Runfiles\n import System.Directory\n import System.Environment\n import System.FilePath\n \n mainWorkspace :: String\n mainWorkspace = \"com_github_digital_asset_daml\"\n \n-locateRunfiles :: FilePath -> IO FilePath\n-locateRunfiles target = do\n-    dirOrError <- locateRunfilesMb target\n-    case dirOrError of\n-        Left e -> error e\n-        Right d -> pure d\n-\n-locateRunfilesMb :: FilePath -> IO (Either String FilePath)\n-locateRunfilesMb target = do\n-    execPath <- getExecutablePath\n-    mbDir <- runMaybeT . asum . map MaybeT $\n-        [ do let jarResources = takeDirectory execPath </> \"resources\"\n-             hasJarResources <- doesDirectoryExist jarResources\n-             pure $ if hasJarResources\n-                 then Just jarResources\n-                 else Nothing\n-        , do let runfilesDir = execPath <> \".runfiles\"\n-             hasTarget <- doesPathExist (runfilesDir </> target)\n-             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n-             if hasTarget\n-                then pure $ Just(runfilesDir </> target)\n-             else if hasManifest\n-                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n-             else pure Nothing\n-        , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n-             pure (fmap (</> target) mbDir)\n-        ]\n-    pure $ maybe (Left $ \"Could not locate runfiles for target: \" <> target) Right mbDir\n-\n-lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe FilePath)\n-lookupTargetInManifestFile manifestPath target = do\n-    manifestFile <- readFile manifestPath\n-    let manifest = map lineToTuple (lines manifestFile)\n-    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n-    pure $ asum [findExact targetNormalised manifest, findDir targetNormalised manifest]\n+data Runfiles\n+  = Resources FilePath\n+  | BazelRunfiles Bazel.Runfiles.Runfiles\n+\n+create :: IO Runfiles\n+create = do\n+  execPath <- getExecutablePath\n+  let jarResources = takeDirectory execPath </> \"resources\"\n+  hasJarResources <- doesDirectoryExist jarResources\n+  if hasJarResources\n+      then pure $! Resources jarResources\n+      else BazelRunfiles <$> Bazel.Runfiles.create\n+\n+rlocation :: Runfiles -> FilePath -> IO FilePath\n+rlocation (Resources resources) fp = do\n+  let shortPath = resources </> takeFileName fp"
+  },
+  {
+    "id" : "34901b18-3f87-49c9-ade4-a60f829e7b1b",
+    "prId" : 2147,
+    "comments" : [
+      {
+        "id" : "5a4f2572-4f30-4290-b2c4-efbd1dae13b4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "fwiw, `shortPath` will already be forced here due to `doesPathExist` but it’s probably still worth keeping for consistency. I would however factor it out into `pure $! if shortPathExists then shortPath else fullPath`.",
+        "createdAt" : "2019-07-15T13:09:41Z",
+        "updatedAt" : "2019-07-16T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "19c3cf91-09e3-47d1-af14-a376bc1841e0",
+        "parentId" : "5a4f2572-4f30-4290-b2c4-efbd1dae13b4",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, the `$!` is more of a reflex ;). Agreed, looks better the way you suggest.",
+        "createdAt" : "2019-07-15T13:23:56Z",
+        "updatedAt" : "2019-07-16T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d449cbf9a4b454e6345de93e636b8044fe4cb34e",
+    "line" : null,
+    "diffHunk" : "@@ -5,71 +5,45 @@\n -- but since we also want support for locating runfiles in JARs\n -- it is simpler to have all code located here.\n module DA.Bazel.Runfiles\n-  ( locateRunfiles\n-  , locateRunfilesMb\n+  ( create\n+  , rlocation\n+  , locateRunfiles\n   , mainWorkspace\n   ) where\n \n-import Control.Monad.Trans.Maybe\n-import Data.Foldable\n-import Data.List\n-import Data.List.Split (splitOn)\n+import qualified Bazel.Runfiles\n import System.Directory\n import System.Environment\n import System.FilePath\n \n mainWorkspace :: String\n mainWorkspace = \"com_github_digital_asset_daml\"\n \n-locateRunfiles :: FilePath -> IO FilePath\n-locateRunfiles target = do\n-    dirOrError <- locateRunfilesMb target\n-    case dirOrError of\n-        Left e -> error e\n-        Right d -> pure d\n-\n-locateRunfilesMb :: FilePath -> IO (Either String FilePath)\n-locateRunfilesMb target = do\n-    execPath <- getExecutablePath\n-    mbDir <- runMaybeT . asum . map MaybeT $\n-        [ do let jarResources = takeDirectory execPath </> \"resources\"\n-             hasJarResources <- doesDirectoryExist jarResources\n-             pure $ if hasJarResources\n-                 then Just jarResources\n-                 else Nothing\n-        , do let runfilesDir = execPath <> \".runfiles\"\n-             hasTarget <- doesPathExist (runfilesDir </> target)\n-             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n-             if hasTarget\n-                then pure $ Just(runfilesDir </> target)\n-             else if hasManifest\n-                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n-             else pure Nothing\n-        , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n-             pure (fmap (</> target) mbDir)\n-        ]\n-    pure $ maybe (Left $ \"Could not locate runfiles for target: \" <> target) Right mbDir\n-\n-lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe FilePath)\n-lookupTargetInManifestFile manifestPath target = do\n-    manifestFile <- readFile manifestPath\n-    let manifest = map lineToTuple (lines manifestFile)\n-    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n-    pure $ asum [findExact targetNormalised manifest, findDir targetNormalised manifest]\n+data Runfiles\n+  = Resources FilePath\n+  | BazelRunfiles Bazel.Runfiles.Runfiles\n+\n+create :: IO Runfiles\n+create = do\n+  execPath <- getExecutablePath\n+  let jarResources = takeDirectory execPath </> \"resources\"\n+  hasJarResources <- doesDirectoryExist jarResources\n+  if hasJarResources\n+      then pure $! Resources jarResources\n+      else BazelRunfiles <$> Bazel.Runfiles.create\n+\n+rlocation :: Runfiles -> FilePath -> IO FilePath\n+rlocation (Resources resources) fp = do\n+  let shortPath = resources </> takeFileName fp\n+  let fullPath = resources </> fp\n+  shortPathExists <- doesPathExist shortPath\n+  if shortPathExists\n+      then pure $! shortPath"
+  },
+  {
+    "id" : "4efc4995-0452-46f7-b492-74bc0d433c9c",
+    "prId" : 2147,
+    "comments" : [
+      {
+        "id" : "fa165740-d18c-4e6d-9473-51eef45399bd",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`create` is a weird name for a function that doesn’t seem to create anything (based on looking at the source) (but ofc that’s not something addressable as part of this PR).",
+        "createdAt" : "2019-07-15T13:11:52Z",
+        "updatedAt" : "2019-07-16T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3992268a-a5ae-46c5-a206-6072b7eef2f6",
+        "parentId" : "fa165740-d18c-4e6d-9473-51eef45399bd",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "It is indeed. This is following the `bazel-runfiles` API, which in turn is following the [Bazel specification](https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub).\r\n\r\n> Every language's library will have a similar interface:\r\n>\r\n> a Create method that inspects the environment and/or argv[0] to determine the runfiles strategy (manifest-based or directory-based; see below), initializes runfiles handling and returns a Runfiles object",
+        "createdAt" : "2019-07-15T13:16:53Z",
+        "updatedAt" : "2019-07-16T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "59a7ba40-0dd0-4f42-94b7-c0f66fab7adb",
+        "parentId" : "fa165740-d18c-4e6d-9473-51eef45399bd",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "TIL, thanks! Makes sense to keep that name in that case.",
+        "createdAt" : "2019-07-15T13:20:02Z",
+        "updatedAt" : "2019-07-16T16:30:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d449cbf9a4b454e6345de93e636b8044fe4cb34e",
+    "line" : null,
+    "diffHunk" : "@@ -5,71 +5,45 @@\n -- but since we also want support for locating runfiles in JARs\n -- it is simpler to have all code located here.\n module DA.Bazel.Runfiles\n-  ( locateRunfiles\n-  , locateRunfilesMb\n+  ( create\n+  , rlocation\n+  , locateRunfiles\n   , mainWorkspace\n   ) where\n \n-import Control.Monad.Trans.Maybe\n-import Data.Foldable\n-import Data.List\n-import Data.List.Split (splitOn)\n+import qualified Bazel.Runfiles\n import System.Directory\n import System.Environment\n import System.FilePath\n \n mainWorkspace :: String\n mainWorkspace = \"com_github_digital_asset_daml\"\n \n-locateRunfiles :: FilePath -> IO FilePath\n-locateRunfiles target = do\n-    dirOrError <- locateRunfilesMb target\n-    case dirOrError of\n-        Left e -> error e\n-        Right d -> pure d\n-\n-locateRunfilesMb :: FilePath -> IO (Either String FilePath)\n-locateRunfilesMb target = do\n-    execPath <- getExecutablePath\n-    mbDir <- runMaybeT . asum . map MaybeT $\n-        [ do let jarResources = takeDirectory execPath </> \"resources\"\n-             hasJarResources <- doesDirectoryExist jarResources\n-             pure $ if hasJarResources\n-                 then Just jarResources\n-                 else Nothing\n-        , do let runfilesDir = execPath <> \".runfiles\"\n-             hasTarget <- doesPathExist (runfilesDir </> target)\n-             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n-             if hasTarget\n-                then pure $ Just(runfilesDir </> target)\n-             else if hasManifest\n-                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n-             else pure Nothing\n-        , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n-             pure (fmap (</> target) mbDir)\n-        ]\n-    pure $ maybe (Left $ \"Could not locate runfiles for target: \" <> target) Right mbDir\n-\n-lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe FilePath)\n-lookupTargetInManifestFile manifestPath target = do\n-    manifestFile <- readFile manifestPath\n-    let manifest = map lineToTuple (lines manifestFile)\n-    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n-    pure $ asum [findExact targetNormalised manifest, findDir targetNormalised manifest]\n+data Runfiles\n+  = Resources FilePath\n+  | BazelRunfiles Bazel.Runfiles.Runfiles\n+\n+create :: IO Runfiles\n+create = do\n+  execPath <- getExecutablePath\n+  let jarResources = takeDirectory execPath </> \"resources\"\n+  hasJarResources <- doesDirectoryExist jarResources\n+  if hasJarResources\n+      then pure $! Resources jarResources\n+      else BazelRunfiles <$> Bazel.Runfiles.create"
+  },
+  {
+    "id" : "4332b6e0-307b-439c-a629-8e7ddd043977",
+    "prId" : 801,
+    "comments" : [
+      {
+        "id" : "357810bb-5e32-4c2b-be18-f5dd42c7c7d7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    let targetNormalised = intercalate \"/\" (splitPath (normalise target))\r\n```",
+        "createdAt" : "2019-05-03T06:55:47Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ade2545d-e3eb-44e1-9e60-f003b56ec0aa",
+        "parentId" : "357810bb-5e32-4c2b-be18-f5dd42c7c7d7",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "`splitPath` leaves separators in splitted output",
+        "createdAt" : "2019-05-06T14:31:27Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "13f0ac35-365d-416f-84a5-99c568136e61",
+        "parentId" : "357810bb-5e32-4c2b-be18-f5dd42c7c7d7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh good point, try `splitDirectories`",
+        "createdAt" : "2019-05-06T14:32:31Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "eaea7290-0a84-44de-85ba-43408fc5196f",
+        "parentId" : "357810bb-5e32-4c2b-be18-f5dd42c7c7d7",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "`splitDirectories` leaves the root untouched, for example `c:\\\\`, where there's `c:/` in `MANIFEST` files",
+        "createdAt" : "2019-05-07T13:05:26Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bc3a7648-2368-4ebd-b00a-29364264d1c2",
+        "parentId" : "357810bb-5e32-4c2b-be18-f5dd42c7c7d7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Too bad, in that case, let’s just stay with `splitOn \"\\\\\"`.",
+        "createdAt" : "2019-05-07T13:06:19Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "97954afca99180f7e40db47d0383fc6aa23e2da1",
+    "line" : 56,
+    "diffHunk" : "@@ -21,18 +23,43 @@ mainWorkspace = \"com_github_digital_asset_daml\"\n locateRunfiles :: FilePath -> IO FilePath\n locateRunfiles target = do\n     execPath <- getExecutablePath\n-    mbDir <-runMaybeT . asum . map MaybeT $\n+    mbDir <- runMaybeT . asum . map MaybeT $\n         [ do let jarResources = takeDirectory execPath </> \"resources\"\n              hasJarResources <- doesDirectoryExist jarResources\n              pure $ if hasJarResources\n                  then Just jarResources\n                  else Nothing\n         , do let runfilesDir = execPath <> \".runfiles\"\n-             hasRunfiles <- doesDirectoryExist runfilesDir\n-             pure $ if hasRunfiles\n-                 then Just (runfilesDir </> target)\n-                 else Nothing\n+             hasTarget <- doesPathExist (runfilesDir </> target)\n+             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n+             if hasTarget\n+                then pure $ Just(runfilesDir </> target)\n+             else if hasManifest\n+                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n+             else pure $ Nothing\n         , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n              pure (fmap (</> target) mbDir)\n         ]\n     maybe (error \"Could not locate runfiles\") pure mbDir\n+\n+lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe String)\n+lookupTargetInManifestFile manifestPath target = do\n+    manifestFile <- readFile manifestPath\n+    let manifest = map lineToTuple (lines manifestFile)\n+    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))"
+  },
+  {
+    "id" : "a95cebc8-e57a-41cd-801e-d6a9d2a81872",
+    "prId" : 801,
+    "comments" : [
+      {
+        "id" : "ed50b433-6512-4568-a34f-7b95ba44f0bf",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I would just inline this in the line below, I don’t think giving it a name really helps.",
+        "createdAt" : "2019-05-03T06:56:30Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "80591521-0635-4f8e-8427-806617789cb6",
+        "parentId" : "ed50b433-6512-4568-a34f-7b95ba44f0bf",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "thx, applied",
+        "createdAt" : "2019-05-06T14:31:46Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "97954afca99180f7e40db47d0383fc6aa23e2da1",
+    "line" : null,
+    "diffHunk" : "@@ -21,18 +23,43 @@ mainWorkspace = \"com_github_digital_asset_daml\"\n locateRunfiles :: FilePath -> IO FilePath\n locateRunfiles target = do\n     execPath <- getExecutablePath\n-    mbDir <-runMaybeT . asum . map MaybeT $\n+    mbDir <- runMaybeT . asum . map MaybeT $\n         [ do let jarResources = takeDirectory execPath </> \"resources\"\n              hasJarResources <- doesDirectoryExist jarResources\n              pure $ if hasJarResources\n                  then Just jarResources\n                  else Nothing\n         , do let runfilesDir = execPath <> \".runfiles\"\n-             hasRunfiles <- doesDirectoryExist runfilesDir\n-             pure $ if hasRunfiles\n-                 then Just (runfilesDir </> target)\n-                 else Nothing\n+             hasTarget <- doesPathExist (runfilesDir </> target)\n+             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n+             if hasTarget\n+                then pure $ Just(runfilesDir </> target)\n+             else if hasManifest\n+                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n+             else pure $ Nothing\n         , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n              pure (fmap (</> target) mbDir)\n         ]\n     maybe (error \"Could not locate runfiles\") pure mbDir\n+\n+lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe String)\n+lookupTargetInManifestFile manifestPath target = do\n+    manifestFile <- readFile manifestPath\n+    let manifest = map lineToTuple (lines manifestFile)\n+    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n+    let targetEntryFinal = asum [(findExact targetNormalised manifest), (findDir targetNormalised manifest)]"
+  },
+  {
+    "id" : "6b15f1f2-53c1-4d46-b14e-358d7d7dbf89",
+    "prId" : 801,
+    "comments" : [
+      {
+        "id" : "7a139f43-3b7c-4692-8d50-7741c6342318",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\nlineToTuple line = case splitOn \" \" line of\r\n  [a, b] -> (a, b)\r\n  _ -> error $ \"Expected a line with two entries separated by space but got \" <> show line\r\n```",
+        "createdAt" : "2019-05-03T06:58:03Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "11e6de7b-cf32-4ea7-a653-9284a33eceb8",
+        "parentId" : "7a139f43-3b7c-4692-8d50-7741c6342318",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "thx, applied",
+        "createdAt" : "2019-05-06T14:31:55Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "97954afca99180f7e40db47d0383fc6aa23e2da1",
+    "line" : null,
+    "diffHunk" : "@@ -21,18 +23,43 @@ mainWorkspace = \"com_github_digital_asset_daml\"\n locateRunfiles :: FilePath -> IO FilePath\n locateRunfiles target = do\n     execPath <- getExecutablePath\n-    mbDir <-runMaybeT . asum . map MaybeT $\n+    mbDir <- runMaybeT . asum . map MaybeT $\n         [ do let jarResources = takeDirectory execPath </> \"resources\"\n              hasJarResources <- doesDirectoryExist jarResources\n              pure $ if hasJarResources\n                  then Just jarResources\n                  else Nothing\n         , do let runfilesDir = execPath <> \".runfiles\"\n-             hasRunfiles <- doesDirectoryExist runfilesDir\n-             pure $ if hasRunfiles\n-                 then Just (runfilesDir </> target)\n-                 else Nothing\n+             hasTarget <- doesPathExist (runfilesDir </> target)\n+             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n+             if hasTarget\n+                then pure $ Just(runfilesDir </> target)\n+             else if hasManifest\n+                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n+             else pure $ Nothing\n         , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n              pure (fmap (</> target) mbDir)\n         ]\n     maybe (error \"Could not locate runfiles\") pure mbDir\n+\n+lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe String)\n+lookupTargetInManifestFile manifestPath target = do\n+    manifestFile <- readFile manifestPath\n+    let manifest = map lineToTuple (lines manifestFile)\n+    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n+    let targetEntryFinal = asum [(findExact targetNormalised manifest), (findDir targetNormalised manifest)]\n+    pure $ targetEntryFinal\n+\n+lineToTuple :: String -> (String, String)\n+lineToTuple line = let"
+  },
+  {
+    "id" : "d0e61137-442e-4e97-94f1-fcba3915ffc9",
+    "prId" : 801,
+    "comments" : [
+      {
+        "id" : "75126103-e24a-47af-ad4a-8f3ca46632c7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n-- | Given a list of entries in the `MANIFEST` file, try to find an exact match for the given path.\r\nfindExact :: String -> [(String, String)] -> Maybe String\r\n```",
+        "createdAt" : "2019-05-03T06:59:08Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "97954afca99180f7e40db47d0383fc6aa23e2da1",
+    "line" : null,
+    "diffHunk" : "@@ -21,18 +23,43 @@ mainWorkspace = \"com_github_digital_asset_daml\"\n locateRunfiles :: FilePath -> IO FilePath\n locateRunfiles target = do\n     execPath <- getExecutablePath\n-    mbDir <-runMaybeT . asum . map MaybeT $\n+    mbDir <- runMaybeT . asum . map MaybeT $\n         [ do let jarResources = takeDirectory execPath </> \"resources\"\n              hasJarResources <- doesDirectoryExist jarResources\n              pure $ if hasJarResources\n                  then Just jarResources\n                  else Nothing\n         , do let runfilesDir = execPath <> \".runfiles\"\n-             hasRunfiles <- doesDirectoryExist runfilesDir\n-             pure $ if hasRunfiles\n-                 then Just (runfilesDir </> target)\n-                 else Nothing\n+             hasTarget <- doesPathExist (runfilesDir </> target)\n+             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n+             if hasTarget\n+                then pure $ Just(runfilesDir </> target)\n+             else if hasManifest\n+                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n+             else pure $ Nothing\n         , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n              pure (fmap (</> target) mbDir)\n         ]\n     maybe (error \"Could not locate runfiles\") pure mbDir\n+\n+lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe String)\n+lookupTargetInManifestFile manifestPath target = do\n+    manifestFile <- readFile manifestPath\n+    let manifest = map lineToTuple (lines manifestFile)\n+    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n+    let targetEntryFinal = asum [(findExact targetNormalised manifest), (findDir targetNormalised manifest)]\n+    pure $ targetEntryFinal\n+\n+lineToTuple :: String -> (String, String)\n+lineToTuple line = let\n+    lineSplit = splitOn \" \" line\n+    in (lineSplit!!0, lineSplit!!1)\n+\n+findExact :: String -> [(String, String)] -> Maybe(String)"
+  },
+  {
+    "id" : "9a74ae09-6bfa-4f35-af47-818cc3edd7e2",
+    "prId" : 801,
+    "comments" : [
+      {
+        "id" : "6ee22a6d-075b-4de4-a3e2-6e2856332a06",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n-- | The `MANIFEST` file only contains file paths not directories so use this to lookup a directory.\r\nfindDir :: String -> [(String, String)] -> Maybe String\r\n```",
+        "createdAt" : "2019-05-03T07:00:11Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "97954afca99180f7e40db47d0383fc6aa23e2da1",
+    "line" : null,
+    "diffHunk" : "@@ -21,18 +23,43 @@ mainWorkspace = \"com_github_digital_asset_daml\"\n locateRunfiles :: FilePath -> IO FilePath\n locateRunfiles target = do\n     execPath <- getExecutablePath\n-    mbDir <-runMaybeT . asum . map MaybeT $\n+    mbDir <- runMaybeT . asum . map MaybeT $\n         [ do let jarResources = takeDirectory execPath </> \"resources\"\n              hasJarResources <- doesDirectoryExist jarResources\n              pure $ if hasJarResources\n                  then Just jarResources\n                  else Nothing\n         , do let runfilesDir = execPath <> \".runfiles\"\n-             hasRunfiles <- doesDirectoryExist runfilesDir\n-             pure $ if hasRunfiles\n-                 then Just (runfilesDir </> target)\n-                 else Nothing\n+             hasTarget <- doesPathExist (runfilesDir </> target)\n+             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n+             if hasTarget\n+                then pure $ Just(runfilesDir </> target)\n+             else if hasManifest\n+                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n+             else pure $ Nothing\n         , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n              pure (fmap (</> target) mbDir)\n         ]\n     maybe (error \"Could not locate runfiles\") pure mbDir\n+\n+lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe String)\n+lookupTargetInManifestFile manifestPath target = do\n+    manifestFile <- readFile manifestPath\n+    let manifest = map lineToTuple (lines manifestFile)\n+    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n+    let targetEntryFinal = asum [(findExact targetNormalised manifest), (findDir targetNormalised manifest)]\n+    pure $ targetEntryFinal\n+\n+lineToTuple :: String -> (String, String)\n+lineToTuple line = let\n+    lineSplit = splitOn \" \" line\n+    in (lineSplit!!0, lineSplit!!1)\n+\n+findExact :: String -> [(String, String)] -> Maybe(String)\n+findExact path entries = fmap snd (find (\\(k,_) -> k == path) entries)\n+\n+findDir :: String -> [(String, String)] -> Maybe(String)"
+  },
+  {
+    "id" : "95e3c465-4ec0-4d9d-9503-d95ae0b8a5f0",
+    "prId" : 801,
+    "comments" : [
+      {
+        "id" : "1465ddce-4170-411e-9b6a-01c2af3f5563",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\nfindDir path entries = do\r\n  (k, v) <- \r\n      find \r\n          (\\(k, _) -> path `isPrefixOf` k && drop (length path) k `isSuffixOf` v) \r\n          entries\r\n  -- The length of the file suffix after the directory\r\n  let fileLength = length k - length path\r\n  pure $ take (length v - fileLength) v\r\n```",
+        "createdAt" : "2019-05-03T07:13:11Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "400cb8df-c154-42fc-ad29-e38b5f9cb9c1",
+        "parentId" : "1465ddce-4170-411e-9b6a-01c2af3f5563",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "thx, applied",
+        "createdAt" : "2019-05-06T14:32:16Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "97954afca99180f7e40db47d0383fc6aa23e2da1",
+    "line" : null,
+    "diffHunk" : "@@ -21,18 +23,43 @@ mainWorkspace = \"com_github_digital_asset_daml\"\n locateRunfiles :: FilePath -> IO FilePath\n locateRunfiles target = do\n     execPath <- getExecutablePath\n-    mbDir <-runMaybeT . asum . map MaybeT $\n+    mbDir <- runMaybeT . asum . map MaybeT $\n         [ do let jarResources = takeDirectory execPath </> \"resources\"\n              hasJarResources <- doesDirectoryExist jarResources\n              pure $ if hasJarResources\n                  then Just jarResources\n                  else Nothing\n         , do let runfilesDir = execPath <> \".runfiles\"\n-             hasRunfiles <- doesDirectoryExist runfilesDir\n-             pure $ if hasRunfiles\n-                 then Just (runfilesDir </> target)\n-                 else Nothing\n+             hasTarget <- doesPathExist (runfilesDir </> target)\n+             hasManifest <- doesFileExist (runfilesDir </> \"MANIFEST\")\n+             if hasTarget\n+                then pure $ Just(runfilesDir </> target)\n+             else if hasManifest\n+                then lookupTargetInManifestFile (runfilesDir </> \"MANIFEST\") target\n+             else pure $ Nothing\n         , do mbDir <- lookupEnv \"RUNFILES_DIR\"\n              pure (fmap (</> target) mbDir)\n         ]\n     maybe (error \"Could not locate runfiles\") pure mbDir\n+\n+lookupTargetInManifestFile :: FilePath -> FilePath -> IO (Maybe String)\n+lookupTargetInManifestFile manifestPath target = do\n+    manifestFile <- readFile manifestPath\n+    let manifest = map lineToTuple (lines manifestFile)\n+    let targetNormalised = intercalate \"/\" (splitOn \"\\\\\" (normalise target))\n+    let targetEntryFinal = asum [(findExact targetNormalised manifest), (findDir targetNormalised manifest)]\n+    pure $ targetEntryFinal\n+\n+lineToTuple :: String -> (String, String)\n+lineToTuple line = let\n+    lineSplit = splitOn \" \" line\n+    in (lineSplit!!0, lineSplit!!1)\n+\n+findExact :: String -> [(String, String)] -> Maybe(String)\n+findExact path entries = fmap snd (find (\\(k,_) -> k == path) entries)\n+\n+findDir :: String -> [(String, String)] -> Maybe(String)\n+findDir path entries = let"
+  },
+  {
+    "id" : "9c0aa5a9-5971-40dc-bf7e-0751ebefd98c",
+    "prId" : 801,
+    "comments" : [
+      {
+        "id" : "9affede7-ea42-49bd-bea7-d4ac6cdad8de",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "How about calling this `locateRunfiles` and the other one `locateRunfilesMb` given that `locateRunfiles` seems to be more common?",
+        "createdAt" : "2019-05-07T13:19:19Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "79cb79b7-daab-4d17-9e64-14b64176c3c1",
+        "parentId" : "9affede7-ea42-49bd-bea7-d4ac6cdad8de",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "Makes sense, done. I also extended Windows CI build to cover whole `//ledger/sandbox/...` as it works now on Windows.",
+        "createdAt" : "2019-05-07T13:27:28Z",
+        "updatedAt" : "2019-05-08T09:23:19Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "97954afca99180f7e40db47d0383fc6aa23e2da1",
+    "line" : null,
+    "diffHunk" : "@@ -6,33 +6,70 @@\n -- it is simpler to have all code located here.\n module DA.Bazel.Runfiles\n   ( locateRunfiles\n+  , locateRunfilesOrThrowError\n   , mainWorkspace\n   ) where\n \n import Control.Monad.Trans.Maybe\n import Data.Foldable\n+import Data.List\n+import Data.List.Split (splitOn)\n import System.Directory\n import System.Environment\n import System.FilePath\n \n mainWorkspace :: String\n mainWorkspace = \"com_github_digital_asset_daml\"\n \n-locateRunfiles :: FilePath -> IO FilePath\n+locateRunfilesOrThrowError :: FilePath -> IO FilePath"
+  }
+]

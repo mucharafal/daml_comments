@@ -1,0 +1,158 @@
+[
+  {
+    "id" : "be1cf5f4-4cce-4dae-894b-35927cc77ef8",
+    "prId" : 1863,
+    "comments" : [
+      {
+        "id" : "9521cadf-ddff-4fc1-bc7b-a9a50a741889",
+        "parentId" : null,
+        "author" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "body" : "This wont work in the tool, since the test tool passes a dar file at a different than the default location.",
+        "createdAt" : "2019-06-26T08:21:05Z",
+        "updatedAt" : "2019-07-02T14:37:06Z",
+        "lastEditedBy" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "70fd44f8-7eec-46f0-aaf3-749b20142c44",
+        "parentId" : "9521cadf-ddff-4fc1-bc7b-a9a50a741889",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "yes, but this is identical to the state what we have now. I wanted to centralise this logic first and foremost. We can think about how to make it dynamic later.",
+        "createdAt" : "2019-06-26T14:54:29Z",
+        "updatedAt" : "2019-07-02T14:37:06Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "369e4c81-a06f-4b14-8896-6294bf6515ee",
+        "parentId" : "9521cadf-ddff-4fc1-bc7b-a9a50a741889",
+        "author" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "body" : "This will break Ledger API Test Tool, which is our publicly exposed tool.",
+        "createdAt" : "2019-06-27T09:15:23Z",
+        "updatedAt" : "2019-07-02T14:37:06Z",
+        "lastEditedBy" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e29ce53e6f59efffb82e0f630db2da4fe305580f",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,89 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.apitesting\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.archive.UniversalArchiveReader\n+import com.digitalasset.ledger.api.v1.command_service.SubmitAndWaitRequest\n+import com.digitalasset.ledger.api.v1.command_submission_service.SubmitRequest\n+import com.digitalasset.ledger.api.v1.commands.Command.Command.Create\n+import com.digitalasset.ledger.api.v1.commands.{Command, Commands, CreateCommand}\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset.LedgerBoundary.{\n+  LEDGER_BEGIN,\n+  LEDGER_END\n+}\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset.Value.Boundary\n+import com.digitalasset.ledger.api.v1.transaction_filter.{\n+  Filters,\n+  InclusiveFilters,\n+  TransactionFilter\n+}\n+import com.digitalasset.ledger.api.v1.value.Value.Sum.Party\n+import com.digitalasset.ledger.api.v1.value.{Identifier, Record, RecordField, Value}\n+import com.digitalasset.platform.PlatformApplications.Config\n+import com.google.protobuf.timestamp.Timestamp\n+import scalaz.syntax.tag._\n+\n+object TransactionFilters {\n+  def allForParty(party: String) = TransactionFilter(Map(party -> Filters()))\n+\n+  def onlyTemplatesByParty(templatesByParty: Map[String, Seq[Identifier]]) =\n+    TransactionFilter(\n+      templatesByParty.mapValues(templateIds => Filters(Some(InclusiveFilters(templateIds)))))\n+}\n+\n+object LedgerOffsets {\n+  val LedgerBegin = LedgerOffset(Boundary(LEDGER_BEGIN))\n+  val LedgerEnd = LedgerOffset(Boundary(LEDGER_END))\n+}\n+\n+object TestParties {\n+  val Alice = \"Alice\"\n+  val Bob = \"Bob\"\n+}\n+\n+object TestUtils {\n+\n+  private lazy val ParsedPackageId: String =\n+    UniversalArchiveReader().readFile(Config.defaultDarFile).get.main._1 // Test.dar"
+  },
+  {
+    "id" : "9e6392da-cb3c-4bc7-8c4a-4f4d148f72ba",
+    "prId" : 1863,
+    "comments" : [
+      {
+        "id" : "179ddcb9-af9d-40fa-8a4f-a716baf33c4f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "body" : "This will have to be plugged into the machinery I am setting up to control if identifiers are randomized or not. My draft for this is here: https://github.com/digital-asset/daml/pull/1735/files#diff-5f0c4de564dbea036385a0cda87b7fd9R5",
+        "createdAt" : "2019-06-26T08:25:26Z",
+        "updatedAt" : "2019-07-02T14:37:06Z",
+        "lastEditedBy" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "834d793a-3831-4b87-b81b-eb9343d042e0",
+        "parentId" : "179ddcb9-af9d-40fa-8a4f-a716baf33c4f",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "ok, let me know when that lands. Note, that this part of the code is not used yet. ",
+        "createdAt" : "2019-06-26T14:48:54Z",
+        "updatedAt" : "2019-07-02T14:37:06Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e29ce53e6f59efffb82e0f630db2da4fe305580f",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,89 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.apitesting\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.archive.UniversalArchiveReader\n+import com.digitalasset.ledger.api.v1.command_service.SubmitAndWaitRequest\n+import com.digitalasset.ledger.api.v1.command_submission_service.SubmitRequest\n+import com.digitalasset.ledger.api.v1.commands.Command.Command.Create\n+import com.digitalasset.ledger.api.v1.commands.{Command, Commands, CreateCommand}\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset.LedgerBoundary.{\n+  LEDGER_BEGIN,\n+  LEDGER_END\n+}\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset.Value.Boundary\n+import com.digitalasset.ledger.api.v1.transaction_filter.{\n+  Filters,\n+  InclusiveFilters,\n+  TransactionFilter\n+}\n+import com.digitalasset.ledger.api.v1.value.Value.Sum.Party\n+import com.digitalasset.ledger.api.v1.value.{Identifier, Record, RecordField, Value}\n+import com.digitalasset.platform.PlatformApplications.Config\n+import com.google.protobuf.timestamp.Timestamp\n+import scalaz.syntax.tag._\n+\n+object TransactionFilters {\n+  def allForParty(party: String) = TransactionFilter(Map(party -> Filters()))\n+\n+  def onlyTemplatesByParty(templatesByParty: Map[String, Seq[Identifier]]) =\n+    TransactionFilter(\n+      templatesByParty.mapValues(templateIds => Filters(Some(InclusiveFilters(templateIds)))))\n+}\n+\n+object LedgerOffsets {\n+  val LedgerBegin = LedgerOffset(Boundary(LEDGER_BEGIN))\n+  val LedgerEnd = LedgerOffset(Boundary(LEDGER_END))\n+}\n+\n+object TestParties {\n+  val Alice = \"Alice\"\n+  val Bob = \"Bob\"\n+}\n+\n+object TestUtils {\n+\n+  private lazy val ParsedPackageId: String =\n+    UniversalArchiveReader().readFile(Config.defaultDarFile).get.main._1 // Test.dar\n+\n+  val TestTemplateIds = TestTemplateIdentifiers(ParsedPackageId)\n+\n+}\n+\n+class TestUtils(\n+    ledgerContext: LedgerContext,\n+    applicationId: String = \"test-application\",\n+    workflowId: String = \"test-workflow\") {\n+\n+  private val LedgerEffectiveTime = Timestamp(0L, 0)\n+  private val MaximumRecordTime =\n+    LedgerEffectiveTime.copy(seconds = LedgerEffectiveTime.seconds + 30L)\n+\n+  private def randomCommandId: String = UUID.randomUUID().toString"
+  },
+  {
+    "id" : "93a2db75-8a26-4ea8-bc7c-f0990e22723d",
+    "prId" : 1863,
+    "comments" : [
+      {
+        "id" : "ac343003-0c2c-461f-a2d0-4315dcf270ab",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This is just a reminder for myself: use this to address https://github.com/digital-asset/daml/pull/1961#discussion_r299088736 once this has been merged. Thanks @gaboraranyossy-da.",
+        "createdAt" : "2019-07-01T16:21:41Z",
+        "updatedAt" : "2019-07-02T14:37:06Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e29ce53e6f59efffb82e0f630db2da4fe305580f",
+    "line" : 32,
+    "diffHunk" : "@@ -0,0 +1,43 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.apitesting\n+\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset.LedgerBoundary.{\n+  LEDGER_BEGIN,\n+  LEDGER_END\n+}\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset.Value.Boundary\n+import com.digitalasset.ledger.api.v1.transaction_filter.{\n+  Filters,\n+  InclusiveFilters,\n+  TransactionFilter\n+}\n+import com.digitalasset.ledger.api.v1.value.Identifier\n+\n+object TransactionFilters {\n+\n+  def empty = TransactionFilter()\n+\n+  def allForParties(parties: String*) =\n+    TransactionFilter(parties.map(_ -> Filters()).toMap)\n+\n+  def templatesByParty(templatesByParty: (String, Seq[Identifier])*) =\n+    TransactionFilter(\n+      templatesByParty.toMap.mapValues(templateIds => Filters(Some(InclusiveFilters(templateIds)))))\n+\n+}\n+\n+object LedgerOffsets {"
+  }
+]

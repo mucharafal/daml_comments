@@ -1,0 +1,396 @@
+[
+  {
+    "id" : "b06cf99f-572a-4d3d-9c1d-3c9fafa27566",
+    "prId" : 6929,
+    "comments" : [
+      {
+        "id" : "4483e6b1-347b-4d88-a2fe-6958ad668466",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Why the name \"Repl\"?",
+        "createdAt" : "2020-08-05T09:16:39Z",
+        "updatedAt" : "2020-08-05T09:33:27Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dd3d2829-061c-414c-860f-769b60e53fb3",
+        "parentId" : "4483e6b1-347b-4d88-a2fe-6958ad668466",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Because I cannot remember how to spin up an actor system and copy-pasted it from the REPL :facepalm: fixed :slightly_smiling_face: ",
+        "createdAt" : "2020-08-05T09:33:50Z",
+        "updatedAt" : "2020-08-05T09:33:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d7136081cbd5f48ac1469018460abf8cbcb69dda",
+    "line" : null,
+    "diffHunk" : "@@ -14,13 +20,23 @@ import io.grpc.stub.StreamObserver\n import io.grpc.{Status, StatusRuntimeException}\n import io.grpc.netty.NettyServerBuilder\n \n+import scala.concurrent.ExecutionContext\n+import scala.util.{Success, Failure}\n import scala.collection.concurrent.TrieMap\n import scala.collection.JavaConverters._\n import scala.util.control.NonFatal\n \n object ScenarioServiceMain extends App {\n   // default to 128MB\n   val maxMessageSize = args.headOption.map(_.toInt).getOrElse(128 * 1024 * 1024)\n+\n+  // Needed for the akka Ledger bindings used by DAML Script.\n+  val system = ActorSystem(\"Repl\")\n+  implicit val sequencer: ExecutionSequencerFactory =\n+    new AkkaExecutionSequencerPool(\"ReplPool\")(system)"
+  },
+  {
+    "id" : "42042269-7b08-49cd-a68d-5602fd19e27b",
+    "prId" : 6929,
+    "comments" : [
+      {
+        "id" : "5021ebc8-4445-4c8d-9b17-8205808fe532",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "😺 ",
+        "createdAt" : "2020-08-07T05:42:34Z",
+        "updatedAt" : "2020-08-07T05:45:36Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "241068d5-bdb2-4137-9fe6-69a90e470a82",
+        "parentId" : "5021ebc8-4445-4c8d-9b17-8205808fe532",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Welcome to Scala :grin: ",
+        "createdAt" : "2020-08-07T06:56:30Z",
+        "updatedAt" : "2020-08-07T06:56:31Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d7136081cbd5f48ac1469018460abf8cbcb69dda",
+    "line" : 54,
+    "diffHunk" : "@@ -56,7 +73,11 @@ object ScenarioService {\n     Status.NOT_FOUND.withDescription(s\" context $id not found!\").asRuntimeException\n }\n \n-class ScenarioService extends ScenarioServiceGrpc.ScenarioServiceImplBase {\n+class ScenarioService(\n+    implicit ec: ExecutionContext,\n+    esf: ExecutionSequencerFactory,"
+  },
+  {
+    "id" : "39812be1-da47-4dee-ac08-0ca8e99c9b1e",
+    "prId" : 5296,
+    "comments" : [
+      {
+        "id" : "04a6b119-6f51-47e9-bb50-9b8c69035f2f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`remy.catcha`? :slightly_smiling_face: ",
+        "createdAt" : "2020-03-31T10:33:21Z",
+        "updatedAt" : "2020-03-31T10:58:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "82ad165fe963f3750aa68238a25e26ec5aa3fde5",
+    "line" : null,
+    "diffHunk" : "@@ -88,18 +88,20 @@ class ScenarioService extends ScenarioServiceGrpc.ScenarioServiceImplBase {\n             .interpretScenario(packageId, scenarioId.getName)\n             .map {\n               case (ledger, machine, errOrValue) =>\n-                val builder = RunScenarioResponse.newBuilder\n-                errOrValue match {\n-                  case Left(err) =>\n-                    builder.setError(\n-                      Conversions(context.homePackageId)\n-                        .convertScenarioError(ledger, machine, err),\n-                    )\n-                  case Right(value) =>\n-                    val conv = Conversions(context.homePackageId)\n-                    builder.setResult(conv.convertScenarioResult(ledger, machine, value))\n+                remy.catcha {"
+  },
+  {
+    "id" : "895d2a0e-952f-4853-8115-730818901cef",
+    "prId" : 4576,
+    "comments" : [
+      {
+        "id" : "eab8cdce-a09d-4210-a474-0914921bf73c",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can I propose `InetAddress.getLoopbackAddress.getHostName`? It'll return `\"localhost\"`.",
+        "createdAt" : "2020-02-18T15:24:44Z",
+        "updatedAt" : "2020-03-05T14:37:23Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e35b1bc5-b9e7-4720-935d-3b7d99a7e792",
+        "parentId" : "eab8cdce-a09d-4210-a474-0914921bf73c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Oh, actually, you can pass an `InetAddress` to `InetSocketAddress`, so you can do:\r\n\r\n```suggestion\r\n      .forAddress(new InetSocketAddress(InetAddress.getLoopbackAddress, 0)) // any free port\r\n```\r\n\r\n(Don't apply this; it won't work because imports.)",
+        "createdAt" : "2020-02-18T15:26:11Z",
+        "updatedAt" : "2020-03-05T14:37:23Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "383164a2-f874-4567-ab66-80c40c6658ad",
+        "parentId" : "eab8cdce-a09d-4210-a474-0914921bf73c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "iirc we’ve had some issues with using `localhost` on the scenario service in our alpine docker container (glibc, musl dns crap). I _think_ that was on the client side but it would be good to confirm that before.",
+        "createdAt" : "2020-02-18T15:28:04Z",
+        "updatedAt" : "2020-03-05T14:37:23Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "48414688-7858-40e1-84e8-08d0066c8982",
+        "parentId" : "eab8cdce-a09d-4210-a474-0914921bf73c",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Is it documented to always return localhost? Also localhost requires DNS resolution, which sometimes gets broken when you don't have an internet connection, whereas 127.0.0.1 always works as expected.",
+        "createdAt" : "2020-02-18T15:43:34Z",
+        "updatedAt" : "2020-03-05T14:37:23Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ead7b7e1-c750-4219-95ab-941ece4d7ea0",
+        "parentId" : "eab8cdce-a09d-4210-a474-0914921bf73c",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Also if we assume it always returns localhost, what would be the advantage over 127.0.0.1? It _should_ resolve to the same thing, but why go through DNS?",
+        "createdAt" : "2020-02-18T15:44:37Z",
+        "updatedAt" : "2020-03-05T14:37:23Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fc096e4f-9298-4bd9-a08d-64300b323a2c",
+        "parentId" : "eab8cdce-a09d-4210-a474-0914921bf73c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Whatever's using it will probably call `getHostAddress`, which will return `\"127.0.0.1\"`, so no need for a lookup there. It also means it'll use `\"::1\"` on IPv6 compatible systems. And `InetSocketAddress` will convert your string into an `InetAddress` anyway, so you might as well save it the effort and give it one already.\r\n\r\nMy main reasoning is because I don't like magic numbers and I prefer when you can use a meaningfully-named constant, but I am not hugely passionate about this, so by all means, feel free to keep it as it is. 🙂 ",
+        "createdAt" : "2020-02-18T15:53:16Z",
+        "updatedAt" : "2020-03-05T14:37:23Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "04f99ef4392a3194be644c805a945861ccd61110",
+    "line" : null,
+    "diffHunk" : "@@ -18,8 +20,8 @@ object ScenarioServiceMain extends App {\n   // default to 128MB\n   val maxMessageSize = args.headOption.map(_.toInt).getOrElse(128 * 1024 * 1024)\n   val server =\n-    ServerBuilder\n-      .forPort(0) // any free port\n+    NettyServerBuilder\n+      .forAddress(new InetSocketAddress(\"127.0.0.1\", 0)) // any free port"
+  },
+  {
+    "id" : "f53fbe6a-20d2-4005-8de5-891d8a24b5dc",
+    "prId" : 4539,
+    "comments" : [
+      {
+        "id" : "ae74b510-696e-4c3d-81b0-96b2ecc3d83a",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Why not [`Set.diff`](https://www.scala-lang.org/api/2.12.3/scala/collection/Set.html#diff(that:scala.collection.GenSet[A]):This)?",
+        "createdAt" : "2020-02-17T10:29:23Z",
+        "updatedAt" : "2020-02-17T11:58:41Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "978d3987-bec4-44fa-8ebd-375ac8267b8d",
+        "parentId" : "ae74b510-696e-4c3d-81b0-96b2ecc3d83a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "that’s the wrong way around, I want to keep the elements in `ctxIds`. `contexts.keySet.diff(ctxIds)` would remove them.",
+        "createdAt" : "2020-02-17T10:38:59Z",
+        "updatedAt" : "2020-02-17T11:58:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8f23ff33-59aa-4ef1-84ff-eb4a0fcf1eb7",
+        "parentId" : "ae74b510-696e-4c3d-81b0-96b2ecc3d83a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "nvm, you are completely right. I’ve switched to `Set.diff`.",
+        "createdAt" : "2020-02-17T11:56:56Z",
+        "updatedAt" : "2020-02-17T11:58:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9cba08d9287a949bdc51c33a1a1583a48cf6b458",
+    "line" : null,
+    "diffHunk" : "@@ -158,7 +159,8 @@ class ScenarioService extends ScenarioServiceGrpc.ScenarioServiceImplBase {\n       respObs: StreamObserver[GCContextsResponse],\n   ): Unit = {\n     val ctxIds = req.getContextIdsList.asScala.toSet\n-    contexts = contexts.filterKeys(ctxId => ctxIds.contains(ctxId));\n+    val ctxToRemove = contexts.keySet.filter(ctxId => !ctxIds.contains(ctxId))"
+  },
+  {
+    "id" : "b58581d5-638b-456c-84b3-9a2a011699e8",
+    "prId" : 1970,
+    "comments" : [
+      {
+        "id" : "c8c7d538-2f93-4e61-93ca-fe327df38cf9",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "If we start piling up command line options here, we should a proper parser for it. Let's wait until then though.",
+        "createdAt" : "2019-07-02T11:40:19Z",
+        "updatedAt" : "2019-07-02T11:49:42Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cae2661b-4f67-492c-af61-226ff0d2cbdb",
+        "parentId" : "c8c7d538-2f93-4e61-93ca-fe327df38cf9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah for now, I can’t be bothered to figure out CLI parsers in Scala :trollface: ",
+        "createdAt" : "2019-07-02T11:43:07Z",
+        "updatedAt" : "2019-07-02T11:49:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c48864812b9ae7d83844fe88fe52b1305db02418",
+    "line" : 6,
+    "diffHunk" : "@@ -14,7 +14,8 @@ import scala.collection.JavaConverters._\n import scala.util.control.NonFatal\n \n object ScenarioServiceMain extends App {\n-  val maxMessageSize = 128 * 1024 * 1024 // 128MB\n+  // default to 128MB\n+  val maxMessageSize = args.headOption.map(_.toInt).getOrElse(128 * 1024 * 1024)"
+  }
+]

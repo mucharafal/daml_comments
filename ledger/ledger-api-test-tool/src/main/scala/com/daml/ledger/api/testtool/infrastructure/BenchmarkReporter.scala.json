@@ -1,0 +1,95 @@
+[
+  {
+    "id" : "51c0cdf4-9ff8-4d19-b6f7-b742eda240a5",
+    "prId" : 5377,
+    "comments" : [
+      {
+        "id" : "18bf9a2e-531e-4291-b6a0-d47d999c2443",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Obviously this won't compile (you'll need to change the code below and the calling code), but I think this makes more sense:\r\n\r\n```suggestion\r\nclass FileOutputBenchmarkReporter(path: Path) extends BenchmarkReporter {\r\n```\r\n\r\nUse `Paths.get` to construct a `Path`.",
+        "createdAt" : "2020-04-02T13:10:18Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70cc33cce879b665e8969f8d4f92cb39b9b489d5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,41 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.api.testtool.infrastructure\n+\n+import java.util.concurrent.atomic.AtomicReference\n+\n+trait BenchmarkReporter {\n+\n+  protected def addReport(key: String, value: Double): Unit\n+\n+  def forKey(parentKey: String)(key: String, value: Double): Unit =\n+    addReport(parentKey + \".\" + key, value)\n+\n+}\n+\n+object BenchmarkReporter {\n+  val toFile = new FileOutputBenchmarkReporter(\"benchmark.dat\")\n+}\n+\n+class FileOutputBenchmarkReporter(filename: String) extends BenchmarkReporter {"
+  },
+  {
+    "id" : "936c0242-4e07-4f0d-856e-fcdbcdb05347",
+    "prId" : 5377,
+    "comments" : [
+      {
+        "id" : "5f240656-3633-4a2d-a642-ee1c19d13af8",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I think this can be simplified to:\r\n\r\n```suggestion\r\n    Files.write(path, Seq(s\"$key=$value\").asJava, StandardOpenOption.APPEND);\r\n```",
+        "createdAt" : "2020-04-02T13:11:17Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70cc33cce879b665e8969f8d4f92cb39b9b489d5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,41 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.api.testtool.infrastructure\n+\n+import java.util.concurrent.atomic.AtomicReference\n+\n+trait BenchmarkReporter {\n+\n+  protected def addReport(key: String, value: Double): Unit\n+\n+  def forKey(parentKey: String)(key: String, value: Double): Unit =\n+    addReport(parentKey + \".\" + key, value)\n+\n+}\n+\n+object BenchmarkReporter {\n+  val toFile = new FileOutputBenchmarkReporter(\"benchmark.dat\")\n+}\n+\n+class FileOutputBenchmarkReporter(filename: String) extends BenchmarkReporter {\n+\n+  import java.io._\n+\n+  private val outfile = new AtomicReference[Option[PrintWriter]](None)\n+\n+  override def addReport(key: String, value: Double): Unit = synchronized {\n+    val pw = outfile.get() match {\n+      case None =>\n+        val pw = new PrintWriter(new File(filename))\n+        outfile.set(Some(pw))\n+        pw\n+      case Some(pw) => pw\n+    }\n+    pw.write(key)\n+    pw.write(\"=\")\n+    pw.write(value.toString)\n+    pw.write(\"\\n\")\n+    pw.flush()"
+  },
+  {
+    "id" : "af16b1a2-e6fd-4eca-b152-d933af59164a",
+    "prId" : 5377,
+    "comments" : [
+      {
+        "id" : "4e246291-5b68-4929-a727-b55e5252481a",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "In the DAML build, this is gonna end up writing to a Bazel temporary directory. I suggest passing this in through a switch (and if it's not provided, write to STDOUT).",
+        "createdAt" : "2020-04-06T10:24:33Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70cc33cce879b665e8969f8d4f92cb39b9b489d5",
+    "line" : null,
+    "diffHunk" : "@@ -15,27 +17,12 @@ trait BenchmarkReporter {\n }\n \n object BenchmarkReporter {\n-  val toFile = new FileOutputBenchmarkReporter(\"benchmark.dat\")\n+  val toFile = new FileOutputBenchmarkReporter(Paths.get(\"benchmark.dat\"))"
+  }
+]

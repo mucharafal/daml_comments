@@ -1,0 +1,33 @@
+[
+  {
+    "id" : "69d21369-4597-4f77-a19d-6cbf7a3a5f65",
+    "prId" : 2021,
+    "comments" : [
+      {
+        "id" : "8a39712d-2ae3-4a8f-b49a-027db84dcc43",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That might be easier to read as\r\n```haskell\r\ndalfDependencies0 <- getDalfDependencies file\r\nlet dalfDependencies = [ ... | (unitId, pkg) <- Map.toList dalfDependencies0 ]\r\n```\r\n(I with `let` was not recursive by default and we could drop the `0` suffix...)",
+        "createdAt" : "2019-07-05T09:17:17Z",
+        "updatedAt" : "2019-07-05T09:22:23Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2b9eed53a06802ecce5c0c041a1c7083f34c3072",
+    "line" : null,
+    "diffHunk" : "@@ -102,10 +105,10 @@ buildDar service file mbExposedModules pkgName sdkVersion buildDataFiles dalfInp\n               show (S.toList missingExposed)\n       let dalf = encodeArchiveLazy pkg\n       -- get all dalf dependencies.\n-      deps <- getDalfDependencies file\n-      dalfDependencies<- forM deps $ \\(DalfDependency depName fp) -> do\n-        pkgDalf <- liftIO $ BS.readFile fp\n-        return (depName, pkgDalf)\n+      dalfDependencies <-\n+          fmap\n+              (map (\\(unitId, pkg) -> (T.pack $ unitIdString unitId, dalfPackageBytes pkg)) . Map.toList)\n+              (getDalfDependencies file)"
+  }
+]

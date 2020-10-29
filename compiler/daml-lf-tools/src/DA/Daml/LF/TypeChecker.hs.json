@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "79908436-7c53-4d59-85df-8161e1b8b008",
+    "prId" : 5219,
+    "comments" : [
+      {
+        "id" : "7da8c09b-869c-41e8-bf4b-56d5abc8ab2f",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Would it make sense to deliver the errors and the warnings in one go, i.e., append the diagnostics rather than branch here?",
+        "createdAt" : "2020-03-26T17:12:11Z",
+        "updatedAt" : "2020-03-26T17:37:16Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a0c3136b-a047-4239-9ea5-6345b7551bcd",
+        "parentId" : "7da8c09b-869c-41e8-bf4b-56d5abc8ab2f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Changed, not sure how useful it is in practice given that things are pretty bad if the LF typechecker fails but it doesn’t do any harm.",
+        "createdAt" : "2020-03-26T17:37:44Z",
+        "updatedAt" : "2020-03-26T17:37:44Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "665f6e8821c0da979ddb3a800d0b3ccca0652576",
+    "line" : null,
+    "diffHunk" : "@@ -20,36 +19,39 @@ import qualified DA.Daml.LF.TypeChecker.PartyLiterals as PartyLits\n import qualified DA.Daml.LF.TypeChecker.Recursion as Recursion\n import qualified DA.Daml.LF.TypeChecker.Serializability as Serializability\n import qualified DA.Daml.LF.TypeChecker.NameCollision as NameCollision\n+import Development.IDE.Types.Diagnostics\n \n checkModule ::\n      World\n   -> Version\n   -> Module\n-  -> Either Error ()\n+  -> [Diagnostic]\n checkModule world0 version m = do\n   checkModuleInWorld (extendWorldSelf m world0) version m\n \n checkPackage ::\n      World\n   -> Version\n-  -> Either Error ()\n-checkPackage world version = do\n-  let package = getWorldSelf world\n-  let modules = NM.toList (packageModules package)\n-  forM_ modules $ \\m -> do\n-    checkModuleInWorld world version m\n+  -> [Diagnostic]\n+checkPackage world version = concatMap (checkModuleInWorld world version) modules\n+    where\n+      package = getWorldSelf world\n+      modules = NM.toList (packageModules package)\n \n-checkModuleInWorld :: World -> Version -> Module -> Either Error ()\n-checkModuleInWorld world version m = do\n-    runGamma world version $ do\n-      -- We must call `Recursion.checkModule` before `Check.checkModule`\n-      -- or else we might loop, attempting to expand recursive type synonyms\n-      Recursion.checkModule m\n-      Check.checkModule m\n-      Serializability.checkModule m\n-      PartyLits.checkModule m\n-    NameCollision.runCheckModuleDeps world m\n+checkModuleInWorld :: World -> Version -> Module -> [Diagnostic]\n+checkModuleInWorld world version m =\n+    case typeCheckResult of\n+        Left err -> [toDiagnostic DsError err]\n+        Right () -> NameCollision.runCheckModuleDeps world m"
+  }
+]

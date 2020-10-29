@@ -1,0 +1,136 @@
+[
+  {
+    "id" : "1582916e-bfe1-4cae-a6c0-3a34f70bf458",
+    "prId" : 6344,
+    "comments" : [
+      {
+        "id" : "ce1a38a3-c939-482c-8eb2-f195d6a9a993",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "You should be able to unconditionally remove the `var` from the substitution. If it's not in the domain, the substitution won't change.\r\n```suggestion\r\n    ELet (Binding (var,ty) e1) e2 ->\r\n      let s' = removeSubst s var\r\n      in ELet (Binding (var,ty) (substituteTm s e1)) (substituteTm s' e2)\r\n```\r\nThe same applies to `ETmLam` above.",
+        "createdAt" : "2020-06-15T09:11:28Z",
+        "updatedAt" : "2020-06-15T09:41:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ab5289eb91f2d01eb193ec32886c6117516bcb25",
+    "line" : null,
+    "diffHunk" : "@@ -83,13 +101,15 @@ instance SubstTm Expr where\n     ETmApp e1 e2 -> ETmApp (substituteTm s e1) (substituteTm s e2)\n     ETyApp e t -> ETyApp (substituteTm s e) t\n     ETmLam (x,t) e -> if x `elem` substDom s\n-      then ETmLam (x,t) e\n+      then ETmLam (x,t) (substituteTm (removeSubst s x) e)\n       else ETmLam (x,t) (substituteTm s e)\n     ETyLam (a,k) e -> ETyLam (a,k) (substituteTm s e)\n     ECase e cs -> ECase (substituteTm s e)\n       $ map (\\CaseAlternative{..} -> CaseAlternative altPattern (substituteTm s altExpr)) cs\n-    ELet Binding{..} e -> ELet (Binding bindingBinder $ substituteTm s bindingBound)\n-      (substituteTm s e)\n+    ELet (Binding (var,ty) e1) e2 -> if var `elem` substDom s\n+      then let s' = removeSubst s var\n+           in ELet (Binding (var,ty) (substituteTm s e1)) (substituteTm s' e2)\n+      else ELet (Binding (var,ty) (substituteTm s e1)) (substituteTm s e2)"
+  },
+  {
+    "id" : "f7cc06f5-86de-4b4a-8a5c-07892e8dbb21",
+    "prId" : 6344,
+    "comments" : [
+      {
+        "id" : "d6b2d424-e3aa-47f3-8e98-0b091d9fa8c3",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "These two functions don't do harm but aren't strictly needed anymore. I'm fine either way, keeping them or removing them. You call. 😸 ",
+        "createdAt" : "2020-06-15T09:44:21Z",
+        "updatedAt" : "2020-06-15T09:44:34Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8a97da67-d438-417b-b6b7-befb62eb74cd",
+        "parentId" : "d6b2d424-e3aa-47f3-8e98-0b091d9fa8c3",
+        "author" : {
+          "login" : "Gertjan423",
+          "name" : "Gert-Jan Bottu",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/5838382?u=b47bd98f384562b45de5cd99b73da4c1aac7aceb&v=4"
+        },
+        "body" : "They are still used in the `daml-lf-verification` branch, which will be merged in master at some point in the future. So I suggest just keeping them :) ",
+        "createdAt" : "2020-06-15T09:51:14Z",
+        "updatedAt" : "2020-06-15T09:51:14Z",
+        "lastEditedBy" : {
+          "login" : "Gertjan423",
+          "name" : "Gert-Jan Bottu",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/5838382?u=b47bd98f384562b45de5cd99b73da4c1aac7aceb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ab5289eb91f2d01eb193ec32886c6117516bcb25",
+    "line" : 5,
+    "diffHunk" : "@@ -7,6 +7,8 @@ module DA.Daml.LF.Verify.Subst\n   , singleExprSubst\n   , singleTypeSubst\n   , createExprSubst\n+  , emptyExprSubst\n+  , concatExprSubst"
+  },
+  {
+    "id" : "af73678d-0226-4778-896a-2c1fb40fa74b",
+    "prId" : 5472,
+    "comments" : [
+      {
+        "id" : "db49b7d0-d528-4a57-9ba8-d655dc63c1fe",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Note that https://github.com/digital-asset/daml/pull/5759/files#diff-e76788b91fa035f0eae27bcac373f8d0 also adds substitution for LF. Ideally you should just be able to remove your implementation and use that instead. I expect #5759 to land tomorrow so if it’s a drop in replacement it might be worth doing before merging. If not, I’m fine with cleaning it up later.\r\n\r\nEither way, I’ll refrain from reviewing the substitution code here in detail assuming we can hopefully kill it soon.",
+        "createdAt" : "2020-05-07T19:33:39Z",
+        "updatedAt" : "2020-05-19T20:39:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2d7c840ec94d841cd4a9d3f0bd85eabff75e5d3a",
+    "line" : 15,
+    "diffHunk" : "@@ -0,0 +1,157 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- | Term substitions for DAML LF static verification\n+module DA.Daml.LF.Verify.Subst\n+  ( ExprSubst\n+  , singleExprSubst\n+  , singleTypeSubst\n+  , createExprSubst\n+  , SubstTm(..)\n+  , SubstTy(..)\n+  ) where\n+\n+import Control.Lens hiding (Context)"
+  },
+  {
+    "id" : "7969d0bb-9fdb-4b14-a116-d63580231ff9",
+    "prId" : 5472,
+    "comments" : [
+      {
+        "id" : "d61d01a4-66af-4de6-a18c-146731480ada",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We're about to land another implementation of substitution for DAML-LF in https://github.com/digital-asset/daml/pull/5759. We should switch the code here over to use @sofiafaro-da's implementation once it has landed.",
+        "createdAt" : "2020-05-11T08:45:19Z",
+        "updatedAt" : "2020-05-19T20:39:29Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2d7c840ec94d841cd4a9d3f0bd85eabff75e5d3a",
+    "line" : 5,
+    "diffHunk" : "@@ -0,0 +1,157 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- | Term substitions for DAML LF static verification\n+module DA.Daml.LF.Verify.Subst"
+  }
+]

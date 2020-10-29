@@ -1,0 +1,172 @@
+[
+  {
+    "id" : "7e2cff0f-9dd8-46be-a1e9-b8555fbd093a",
+    "prId" : 4667,
+    "comments" : [
+      {
+        "id" : "4a5fdb09-9089-4a48-a985-d2d2452a09f4",
+        "parentId" : null,
+        "author" : null,
+        "body" : "```suggestion\r\n-- | Take a string of the form \"daml-stdlib-0.13.43\" and split it into (\"daml-stdlib\", Just \"0.13.43\")\r\n```",
+        "createdAt" : "2020-02-24T15:22:21Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3ca16649213b3d91f9e034bf450be0d47d956019",
+    "line" : null,
+    "diffHunk" : "@@ -281,3 +283,39 @@ getPackageMetadata :: Version -> PackageName -> Maybe PackageVersion -> Maybe Pa\n getPackageMetadata lfVer pkgName mbPkgVersion = do\n     guard (lfVer `supports` featurePackageMetadata)\n     Just (PackageMetadata pkgName (fromMaybe (PackageVersion \"0.0.0\") mbPkgVersion))\n+\n+-- | Given the name of a DALF and the decoded package return package metadata.\n+--\n+-- For newer DAML-LF versions this is taken directly from the\n+-- package metadata in DAML-LF. For older versions, we instead infer\n+-- metadata from the filename.\n+packageMetadataFromFile :: FilePath -> Package -> PackageId -> (PackageName, Maybe PackageVersion)\n+packageMetadataFromFile file pkg pkgId\n+    | Just (PackageMetadata name version) <- packageMetadata pkg =\n+          -- GHC insists on daml-prim not having a version so we filter it out.\n+          (name, version <$ guard (name /= PackageName \"daml-prim\"))\n+    | otherwise = splitUnitId (unitIdFromFile file pkgId)\n+\n+-- Get the name of a file and an expeted package id of the package, get the unit id\n+-- by stripping away the package name at the end.\n+-- E.g., if 'package-name-123abc' is given and the known package id is\n+-- '123abc', then 'package-name' is returned as unit id.\n+unitIdFromFile :: FilePath -> PackageId -> UnitId\n+unitIdFromFile file (PackageId pkgId) =\n+    (stringToUnitId . fromMaybe name . stripPkgId name . T.unpack) pkgId\n+    where name = takeBaseName file\n+\n+-- Strip the package id from the end of a dalf file name\n+-- TODO (drsk) This needs to become a hard error\n+stripPkgId :: String -> String -> Maybe String\n+stripPkgId baseName expectedPkgId = do\n+    (unitId, pkgId) <- stripInfixEnd \"-\" baseName\n+    guard $ pkgId == expectedPkgId\n+    pure unitId\n+\n+-- | Take a string of the form daml-stdlib-\"0.13.43\" and split it into (\"daml-stdlib\", Just \"0.13.43\")"
+  },
+  {
+    "id" : "4384e555-a059-4e65-9c13-efc3c9f33386",
+    "prId" : 4667,
+    "comments" : [
+      {
+        "id" : "78fea67f-2196-4653-84e2-41333534fc6d",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Perhaps we would be better turning `PackageMetadata`'s package version field into a `Maybe`, given this function, the `packageMetadataFromFile` function, and the arbitrary version 0.0.0 being defaulted above in `getPackageMetadata`. Then we can just return a `PackageMetadata` here and in `packageMetadataFromFile`.",
+        "createdAt" : "2020-02-24T15:25:14Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "74065692-fe10-4ce6-81d4-fdad9194353d",
+        "parentId" : "78fea67f-2196-4653-84e2-41333534fc6d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m a bit unsure about this. The only case where we really don’t have a version is `daml-prim`. I’m not sure we want to make the version optional in LF just to be able to handle this case.",
+        "createdAt" : "2020-02-24T15:41:25Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4110fe54-4b89-40b5-a519-6cc35e0ead1f",
+        "parentId" : "78fea67f-2196-4653-84e2-41333534fc6d",
+        "author" : null,
+        "body" : "You know more about it than me, so I'm happy to go with whatever way you think works best :-)",
+        "createdAt" : "2020-02-24T15:46:03Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9578e9ed-241c-4b8a-84f1-60330d73809c",
+        "parentId" : "78fea67f-2196-4653-84e2-41333534fc6d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Alright, then I suggest to keep it like this for now to not leak GHC “defficiencies” into DAML-LF. As mentioned, I’d like to cleanup the whole code around `daml-prim`/`dam-stdlib` a bit and as part of that we can probably also put in more stricter enforcement that `daml-prim` is the only thing without a version (maybe something like `data DamlPackageMetadata = DamlPrim | DamlPackageMetadata PackageName PackageVersion`).",
+        "createdAt" : "2020-02-24T16:16:57Z",
+        "updatedAt" : "2020-02-24T16:16:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3ca16649213b3d91f9e034bf450be0d47d956019",
+    "line" : 47,
+    "diffHunk" : "@@ -281,3 +283,39 @@ getPackageMetadata :: Version -> PackageName -> Maybe PackageVersion -> Maybe Pa\n getPackageMetadata lfVer pkgName mbPkgVersion = do\n     guard (lfVer `supports` featurePackageMetadata)\n     Just (PackageMetadata pkgName (fromMaybe (PackageVersion \"0.0.0\") mbPkgVersion))\n+\n+-- | Given the name of a DALF and the decoded package return package metadata.\n+--\n+-- For newer DAML-LF versions this is taken directly from the\n+-- package metadata in DAML-LF. For older versions, we instead infer\n+-- metadata from the filename.\n+packageMetadataFromFile :: FilePath -> Package -> PackageId -> (PackageName, Maybe PackageVersion)\n+packageMetadataFromFile file pkg pkgId\n+    | Just (PackageMetadata name version) <- packageMetadata pkg =\n+          -- GHC insists on daml-prim not having a version so we filter it out.\n+          (name, version <$ guard (name /= PackageName \"daml-prim\"))\n+    | otherwise = splitUnitId (unitIdFromFile file pkgId)\n+\n+-- Get the name of a file and an expeted package id of the package, get the unit id\n+-- by stripping away the package name at the end.\n+-- E.g., if 'package-name-123abc' is given and the known package id is\n+-- '123abc', then 'package-name' is returned as unit id.\n+unitIdFromFile :: FilePath -> PackageId -> UnitId\n+unitIdFromFile file (PackageId pkgId) =\n+    (stringToUnitId . fromMaybe name . stripPkgId name . T.unpack) pkgId\n+    where name = takeBaseName file\n+\n+-- Strip the package id from the end of a dalf file name\n+-- TODO (drsk) This needs to become a hard error\n+stripPkgId :: String -> String -> Maybe String\n+stripPkgId baseName expectedPkgId = do\n+    (unitId, pkgId) <- stripInfixEnd \"-\" baseName\n+    guard $ pkgId == expectedPkgId\n+    pure unitId\n+\n+-- | Take a string of the form daml-stdlib-\"0.13.43\" and split it into (\"daml-stdlib\", Just \"0.13.43\")\n+splitUnitId :: UnitId -> (PackageName, Maybe PackageVersion)"
+  },
+  {
+    "id" : "a183553f-5309-4264-9706-11e7917f8fd8",
+    "prId" : 2670,
+    "comments" : [
+      {
+        "id" : "b6fe0b84-57cd-4953-8ea8-1903dd975aaa",
+        "parentId" : null,
+        "author" : null,
+        "body" : "I think this is an unrelated bug fix",
+        "createdAt" : "2019-08-27T17:47:09Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "97178d87-a8c2-458e-91f8-3c33af381de0",
+        "parentId" : "b6fe0b84-57cd-4953-8ea8-1903dd975aaa",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we get tests for these? I’m actually somewhat surprised we didn’t already hit this. It seems to be used in the DAML-LF typechecker and afaict it will error if the prism does not match so it shouldn’t be too hard to make a case that fails without this bugfix.",
+        "createdAt" : "2019-08-27T18:26:47Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4452aea8-5890-4f39-81ae-49eac4d980a8",
+        "parentId" : "b6fe0b84-57cd-4953-8ea8-1903dd975aaa",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "IIRC, we only use them as getters. That's why the problem never showed up. Maybe we can just delete them?",
+        "createdAt" : "2019-08-28T09:39:29Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2c2900d7cd2fd33fbf5de9881afed0fec07bff1f",
+    "line" : 21,
+    "diffHunk" : "@@ -189,15 +190,20 @@ _TOptional = prism' TOptional $ \\case\n   _ -> Nothing\n \n _TUpdate :: Prism' Type Type\n-_TUpdate = prism' TList $ \\case\n+_TUpdate = prism' TUpdate $ \\case"
+  },
+  {
+    "id" : "985288e4-f91c-4e08-9d06-7b878d95ea94",
+    "prId" : 2670,
+    "comments" : [
+      {
+        "id" : "e444f175-165c-4c23-b9fe-c7a0b6d4899c",
+        "parentId" : null,
+        "author" : null,
+        "body" : "This too.",
+        "createdAt" : "2019-08-27T17:47:26Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2c2900d7cd2fd33fbf5de9881afed0fec07bff1f",
+    "line" : 27,
+    "diffHunk" : "@@ -189,15 +190,20 @@ _TOptional = prism' TOptional $ \\case\n   _ -> Nothing\n \n _TUpdate :: Prism' Type Type\n-_TUpdate = prism' TList $ \\case\n+_TUpdate = prism' TUpdate $ \\case\n   TUpdate typ -> Just typ\n   _ -> Nothing\n \n _TScenario :: Prism' Type Type\n-_TScenario = prism' TList $ \\case\n+_TScenario = prism' TScenario $ \\case"
+  }
+]

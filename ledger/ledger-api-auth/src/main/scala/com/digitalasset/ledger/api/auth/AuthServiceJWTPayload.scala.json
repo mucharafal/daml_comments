@@ -1,0 +1,96 @@
+[
+  {
+    "id" : "93935317-d043-4da7-8a81-ff415a91c9eb",
+    "prId" : 3283,
+    "comments" : [
+      {
+        "id" : "77a1c8ba-740f-4401-83e6-d8ec6f3ef567",
+        "parentId" : null,
+        "author" : {
+          "login" : "da-tanabe",
+          "name" : "Davin K. Tanabe",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19478290?u=c4eed11976b50dbaed21ccb17371a74a7e802541&v=4"
+        },
+        "body" : "&lt;bike-shedding&gt;I find the terms \"actAs\" and \"readAs\" a little confusing…why not something closer to DAML/Ledger API terms (like submitter/witness)? Is getting a list of package IDs through the `PackageService` considered reading? (I would think not, but someone else might think yes)&lt;/bike-shedding&gt;",
+        "createdAt" : "2019-10-30T14:38:38Z",
+        "updatedAt" : "2019-11-07T21:24:55Z",
+        "lastEditedBy" : {
+          "login" : "da-tanabe",
+          "name" : "Davin K. Tanabe",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19478290?u=c4eed11976b50dbaed21ccb17371a74a7e802541&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5745bee4e7b5679372438fb65bfc553a184a767b",
+    "line" : 40,
+    "diffHunk" : "@@ -0,0 +1,170 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.ledger.api.auth\n+\n+import java.time.Instant\n+import java.time.format.DateTimeFormatter\n+\n+import spray.json._\n+\n+/** The JWT token payload used in [[AuthServiceJWT]]\n+  *\n+  *\n+  * @param ledgerId       If set, the token is only valid for the given ledger ID.\n+  *                       May also be used to fill in missing ledger ID fields in ledger API requests.\n+  *\n+  * @param participantId  If set, the token is only valid for the given participant ID.\n+  *                       May also be used to fill in missing participant ID fields in ledger API requests.\n+  *\n+  * @param applicationId  If set, the token is only valid for the given application ID.\n+  *                       May also be used to fill in missing application ID fields in ledger API requests.\n+  *\n+  * @param exp            If set, the token is only valid before the given instant.\n+  *                       Note: This is a registered claim in JWT\n+  *\n+  * @param admin          Whether the token bearer is authorized to use admin endpoints of the ledger API.\n+  *\n+  * @param actAs          List of parties the token bearer can act as.\n+  *                       May also be used to fill in missing party fields in ledger API requests (e.g., submitter).\n+  *\n+  * @param readAs         List of parties the token bearer can read data for.\n+  *                       May also be used to fill in missing party fields in ledger API requests (e.g., transaction filter).\n+  */\n+case class AuthServiceJWTPayload(\n+    ledgerId: Option[String],\n+    participantId: Option[String],\n+    applicationId: Option[String],\n+    exp: Option[Instant],\n+    admin: Boolean,\n+    actAs: List[String],\n+    readAs: List[String]"
+  },
+  {
+    "id" : "59054208-60e5-470c-a087-dff2f865de7e",
+    "prId" : 3283,
+    "comments" : [
+      {
+        "id" : "0bf5664e-5e38-4847-9484-8cff18e6d5b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "@stefanobaghino-da: We can probably restrict this to`Optional[String]` because we anyway don't support commands with multiple submitters. WDYT?",
+        "createdAt" : "2019-11-04T14:48:21Z",
+        "updatedAt" : "2019-11-07T21:24:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8a990156-b543-43c1-9cd8-fe2d10f1e889",
+        "parentId" : "0bf5664e-5e38-4847-9484-8cff18e6d5b8",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "We don't support filling in the information for the user but you can still have multiple parties, right? And you would have to have them on the token _and_ provide them in the API call, if I'm not mistaken.",
+        "createdAt" : "2019-11-04T14:50:00Z",
+        "updatedAt" : "2019-11-07T21:24:55Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8edadd6d-ae52-4346-aac6-0451022527f8",
+        "parentId" : "0bf5664e-5e38-4847-9484-8cff18e6d5b8",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "👍 ",
+        "createdAt" : "2019-11-04T15:41:14Z",
+        "updatedAt" : "2019-11-07T21:24:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5745bee4e7b5679372438fb65bfc553a184a767b",
+    "line" : 39,
+    "diffHunk" : "@@ -0,0 +1,173 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.ledger.api.auth\n+\n+import java.time.Instant\n+import java.time.format.DateTimeFormatter\n+\n+import spray.json._\n+\n+/** The JWT token payload used in [[AuthServiceJWT]]\n+  *\n+  *\n+  * @param ledgerId       If set, the token is only valid for the given ledger ID.\n+  *                       May also be used to fill in missing ledger ID fields in ledger API requests.\n+  *\n+  * @param participantId  If set, the token is only valid for the given participant ID.\n+  *                       May also be used to fill in missing participant ID fields in ledger API requests.\n+  *\n+  * @param applicationId  If set, the token is only valid for the given application ID.\n+  *                       May also be used to fill in missing application ID fields in ledger API requests.\n+  *\n+  * @param exp            If set, the token is only valid before the given instant.\n+  *                       Note: This is a registered claim in JWT\n+  *\n+  * @param admin          Whether the token bearer is authorized to use admin endpoints of the ledger API.\n+  *\n+  * @param actAs          List of parties the token bearer can act as.\n+  *                       May also be used to fill in missing party fields in ledger API requests (e.g., submitter).\n+  *\n+  * @param readAs         List of parties the token bearer can read data for.\n+  *                       May also be used to fill in missing party fields in ledger API requests (e.g., transaction filter).\n+  */\n+case class AuthServiceJWTPayload(\n+    ledgerId: Option[String],\n+    participantId: Option[String],\n+    applicationId: Option[String],\n+    exp: Option[Instant],\n+    admin: Boolean,\n+    actAs: List[String],"
+  }
+]

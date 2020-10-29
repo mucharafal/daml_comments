@@ -1,0 +1,68 @@
+[
+  {
+    "id" : "e4602527-64e8-424d-b218-a7456e06098d",
+    "prId" : 3341,
+    "comments" : [
+      {
+        "id" : "e1e170a3-36b8-4a5b-a4cc-39541e7a4d89",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we throw the exception only to immediately catch it? Is there something stopping us from returning `Left`?",
+        "createdAt" : "2019-11-05T14:25:37Z",
+        "updatedAt" : "2019-11-05T15:53:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fc632f34-0b1c-4cd8-b7b7-f8b0c7dc210b",
+        "parentId" : "e1e170a3-36b8-4a5b-a4cc-39541e7a4d89",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, the exception is thrown within a callback passed to [`mapContractId`](https://github.com/digital-asset/daml/blob/288576682606272a030ac73b2be3ffce30a18812/daml-lf/interpreter/src/main/scala/com/digitalasset/daml/lf/speedy/SValue.scala#L81). The callback has to be of type `V.ContractId => V.ContractId`, so it can't return `Either`.",
+        "createdAt" : "2019-11-05T15:46:50Z",
+        "updatedAt" : "2019-11-05T15:53:01Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9b4b513f-0eb5-4b3b-9bfd-b8a663878337",
+        "parentId" : "e1e170a3-36b8-4a5b-a4cc-39541e7a4d89",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That makes a lot of sense, thanks for the explanation!",
+        "createdAt" : "2019-11-05T16:20:56Z",
+        "updatedAt" : "2019-11-05T16:20:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d3fe342274d41c33d0bef94e7eb4b2b0ad501bd8",
+    "line" : 36,
+    "diffHunk" : "@@ -88,25 +90,33 @@ object Converter {\n     SRecord(ty, fieldNames, args)\n   }\n \n-  private def toLedgerRecord(v: SValue) = {\n-    lfValueToApiRecord(\n-      true,\n-      v.toValue.mapContractId {\n-        case rcoid: RelativeContractId =>\n-          throw new RuntimeException(s\"Unexpected contract id $rcoid\")\n-        case acoid: AbsoluteContractId => acoid\n-      }\n-    )\n+  private def toLedgerRecord(v: SValue): Either[String, value.Record] = {\n+    try {"
+  }
+]

@@ -1,0 +1,83 @@
+[
+  {
+    "id" : "d50c1972-0ce8-429b-8b3d-cf3ce6f77ee6",
+    "prId" : 4802,
+    "comments" : [
+      {
+        "id" : "c0f7bf1c-34d0-4212-9d67-497ae021fb6f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Previously we returned a promise that was completed by `resetAndRestartServer()`. Now we basically always signal that reset is over. Was this intentional?",
+        "createdAt" : "2020-03-04T10:01:26Z",
+        "updatedAt" : "2020-03-04T13:15:13Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "38bbcf6b-dc7d-4289-a11c-52d4f76b9836",
+        "parentId" : "c0f7bf1c-34d0-4212-9d67-497ae021fb6f",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Yes. Rather than the Sandbox code having to run the reset operation asynchronously, I moved the behavior to the SandboxResetService in https://github.com/digital-asset/daml/pull/4802/commits/9bacd95e56236f9932ce4f5232a8bb86c6a4758d.\r\n\r\nWe can do this because in Sandbox Classic™, we _actually_ wait until the API services have been closed, and in Sandbox Next, we wait until everything has been `.release()`d (and also check the API services have been closed).",
+        "createdAt" : "2020-03-04T10:20:57Z",
+        "updatedAt" : "2020-03-04T13:15:13Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "97ef26113c6aa971ce6ba16c78bf26810e827c9b",
+    "line" : null,
+    "diffHunk" : "@@ -69,14 +69,14 @@ class SandboxResetService(\n       throw new StatusRuntimeException(\n         Status.FAILED_PRECONDITION.withDescription(\"Sandbox server is currently being resetted\"))\n \n-    val servicesAreDown = Promise[Unit]()\n-    // We need to run this asynchronously since otherwise we have a deadlock: `buildAndStartServer` will block\n-    // until all the in flight requests have been served, so we need to schedule this in another thread so that\n-    // the code that clears the in flight request is not in an in flight request itself.\n-    getEc().execute({ () =>\n-      logger.info(s\"Stopping and starting the server.\")\n-      servicesAreDown.completeWith(resetAndRestartServer())\n-    })\n-    servicesAreDown.future\n+    logger.info(s\"Stopping and starting the server.\")\n+\n+    // We need to run this asynchronously since otherwise we have a deadlock: `buildAndStartServer`\n+    // will block until all the in flight requests have been served, so we need to schedule this in\n+    // another thread so that the code that clears the in flight request is not in an in flight\n+    // request itself.\n+    resetAndRestartServer()\n+\n+    Future.successful(())"
+  },
+  {
+    "id" : "7ce7b246-7a11-48c2-9bad-6cb87821b67e",
+    "prId" : 292,
+    "comments" : [
+      {
+        "id" : "a92e9e6b-c854-4756-8e79-1171d5ddc768",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "you need to change the calling side as well, as types will not match",
+        "createdAt" : "2019-04-08T15:09:45Z",
+        "updatedAt" : "2019-04-08T16:45:56Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4c38f8027d9aa9dba9166583192a1ebb62f65060",
+    "line" : 49,
+    "diffHunk" : "@@ -55,26 +55,21 @@ class SandboxResetService(\n     logger.info(\"Closing all services...\")\n     closeAllServices()\n \n-    // If completing the returned future races with andThen (or its execution), the shutdown will hang.\n-    // This is why we complete the Future after the callback.\n-    // The root cause of this behavior has been investigated yet.\n-    val p = Promise[Empty]()\n-    p.future\n-      .andThen({\n-        case _ =>\n-          logger.info(\"Awaiting termination...\")\n-          if (!server.awaitTermination(1L, TimeUnit.SECONDS)) {\n-            logger.warn(\n-              \"Server did not terminate gracefully in one second. \" +\n-                \"Clients probably did not disconnect. \" +\n-                \"Proceeding with forced termination.\")\n-            server.shutdownNow()\n-          }\n-          logger.info(\"Rebuilding server...\")\n-          buildAndStartServer()\n-          logger.info(\"Server reset complete.\")\n-      })(getEc())\n-    p.success(Empty())\n-    p.future\n+    // We need to run this asynchronously since otherwise we have a deadlock: `buildAndStartServer` will block\n+    // until all the in flight requests have been served, so we need to schedule this in another thread so that\n+    // the code that clears the in flight request is not in an in flight request itself.\n+    getEc().execute({ () =>"
+  }
+]

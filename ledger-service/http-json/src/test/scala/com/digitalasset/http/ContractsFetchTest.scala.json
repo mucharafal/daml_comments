@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "23090a2b-0c4b-4146-9644-548402aecb25",
+    "prId" : 4253,
+    "comments" : [
+      {
+        "id" : "6901450b-7c15-4579-b8db-fc0a1e02de86",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "why is it an accident? we want all right deletes in the `xy`, don't we? these can be deletes for the inserts from the previous batch.",
+        "createdAt" : "2020-01-29T18:52:17Z",
+        "updatedAt" : "2020-01-30T17:11:35Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "97cdbfef-4a6e-4e31-aab3-5729e42cb070",
+        "parentId" : "6901450b-7c15-4579-b8db-fc0a1e02de86",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "If a right delete is in the left inserts, whether it is present or not is semantically irrelevant. I added a test in ac4b035293 on account of this.",
+        "createdAt" : "2020-01-30T17:11:38Z",
+        "updatedAt" : "2020-01-30T17:11:39Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "12dabbaf787e985dcab1c08dfbb4941b17bb54bf",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,72 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.http\n+\n+import com.digitalasset.daml.lf.data.FlatSpecCheckLaws\n+import ContractsFetch.InsertDeleteStep\n+\n+import org.scalatest.prop.GeneratorDrivenPropertyChecks\n+import org.scalatest.{FlatSpec, Matchers}\n+import scalaz.{Equal, Monoid}\n+import scalaz.syntax.semigroup._\n+import scalaz.scalacheck.ScalazProperties\n+\n+@SuppressWarnings(Array(\"org.wartremover.warts.Any\"))\n+class ContractsFetchTest\n+    extends FlatSpec\n+    with Matchers\n+    with FlatSpecCheckLaws\n+    with GeneratorDrivenPropertyChecks {\n+  import ContractsFetchTest._\n+\n+  behavior of \"InsertDeleteStep append monoid\"\n+\n+  checkLaws(ScalazProperties.monoid.laws[IDS])\n+\n+  behavior of \"InsertDeleteStep.appendWithCid\"\n+\n+  it should \"never insert a deleted item\" in forAll { (x: IDS, y: IDS) =>\n+    val xy = x |+| y.copy(inserts = y.inserts filterNot x.deletes)\n+    xy.inserts.toSet intersect xy.deletes shouldBe empty\n+  }\n+\n+  it should \"preserve every left delete\" in forAll { (x: IDS, y: IDS) =>\n+    val xy = x |+| y\n+    // preservation of right deletes is an accident, not an invariant"
+  }
+]

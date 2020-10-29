@@ -1,0 +1,146 @@
+[
+  {
+    "id" : "0ac94a36-c8f0-425c-9964-02c9df122980",
+    "prId" : 5029,
+    "comments" : [
+      {
+        "id" : "7cb0f2d0-de73-4959-972a-8061c7324055",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Why are these not prefixed with `create_`?",
+        "createdAt" : "2020-03-17T07:47:08Z",
+        "updatedAt" : "2020-03-17T08:13:39Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "55abe2db-649c-46b4-a2b1-fd86d50ac767",
+        "parentId" : "7cb0f2d0-de73-4959-972a-8061c7324055",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Originally in the proposal they were supposed to go into their own table and I thought it was unnecessary do add them afterwards, but I can add it.",
+        "createdAt" : "2020-03-17T07:55:35Z",
+        "updatedAt" : "2020-03-17T08:13:39Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "597f9680-7cc5-43bb-b037-af5d88bc508b",
+        "parentId" : "7cb0f2d0-de73-4959-972a-8061c7324055",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "More importantly, I just noticed that only `key_value` should be kept, the others should go away.",
+        "createdAt" : "2020-03-17T08:05:42Z",
+        "updatedAt" : "2020-03-17T08:13:39Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bd57808b-cbf7-4586-9689-c81e22f2ceeb",
+        "parentId" : "7cb0f2d0-de73-4959-972a-8061c7324055",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/5029/commits/580296f46e11bdbf48ffee6d6071962630781dae",
+        "createdAt" : "2020-03-17T08:14:58Z",
+        "updatedAt" : "2020-03-17T08:14:58Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "580296f46e11bdbf48ffee6d6071962630781dae",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,76 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- contains all events for all transactions\n+create table participant_events\n+(\n+    event_id varchar primary key not null,\n+    event_offset bigint not null,\n+    contract_id varchar not null,\n+    transaction_id varchar not null,\n+    ledger_effective_time timestamp not null,\n+    template_package_id varchar not null,\n+    template_name varchar not null,\n+    node_index int not null,               -- post-traversal order of an event within a transaction\n+    is_root boolean not null,\n+\n+    -- these fields can be null if the transaction originated in another participant\n+    command_id varchar,\n+    workflow_id varchar,                   -- null unless provided by a Ledger API call\n+    application_id varchar,\n+    submitter varchar,\n+\n+    -- non-null iff this event is a create\n+    create_argument bytea,\n+    create_signatories varchar array,\n+    create_observers varchar array,\n+    create_agreement_text varchar,         -- null if agreement text is not provided\n+    create_consumed_at varchar,            -- null if the contract created by this event is active\n+    key_template_package_id varchar,       -- null if the contract created by this event has no key\n+    key_template_name varchar,             -- null if the contract created by this event has no key\n+    key_value bytea,                       -- null if the contract created by this event has no key"
+  },
+  {
+    "id" : "4bea301d-3f3e-403c-8962-7a8037eb4d3f",
+    "prId" : 5029,
+    "comments" : [
+      {
+        "id" : "f9856f91-41ed-422e-b4b9-2975d326a086",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "We don't need an index on `exercise_consuming`, because the join via the index `participant_event_flat_transaction_witnesses` does the \"filtering\" naturally for us, right?",
+        "createdAt" : "2020-03-17T07:48:24Z",
+        "updatedAt" : "2020-03-17T08:13:39Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "baca4f55-9305-4b01-a08f-083ca40e5c62",
+        "parentId" : "f9856f91-41ed-422e-b4b9-2975d326a086",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "We need it because the `ExercisedEvent` in the `TransactionTree` stream also tells whether an exercise is consuming or not.",
+        "createdAt" : "2020-03-17T07:55:10Z",
+        "updatedAt" : "2020-03-17T08:13:39Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "580296f46e11bdbf48ffee6d6071962630781dae",
+    "line" : 32,
+    "diffHunk" : "@@ -0,0 +1,76 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- contains all events for all transactions\n+create table participant_events\n+(\n+    event_id varchar primary key not null,\n+    event_offset bigint not null,\n+    contract_id varchar not null,\n+    transaction_id varchar not null,\n+    ledger_effective_time timestamp not null,\n+    template_package_id varchar not null,\n+    template_name varchar not null,\n+    node_index int not null,               -- post-traversal order of an event within a transaction\n+    is_root boolean not null,\n+\n+    -- these fields can be null if the transaction originated in another participant\n+    command_id varchar,\n+    workflow_id varchar,                   -- null unless provided by a Ledger API call\n+    application_id varchar,\n+    submitter varchar,\n+\n+    -- non-null iff this event is a create\n+    create_argument bytea,\n+    create_signatories varchar array,\n+    create_observers varchar array,\n+    create_agreement_text varchar,         -- null if agreement text is not provided\n+    create_consumed_at varchar,            -- null if the contract created by this event is active\n+    key_template_package_id varchar,       -- null if the contract created by this event has no key\n+    key_template_name varchar,             -- null if the contract created by this event has no key\n+    key_value bytea,                       -- null if the contract created by this event has no key\n+\n+    -- non-null iff this event is an exercise\n+    exercise_consuming boolean,"
+  }
+]

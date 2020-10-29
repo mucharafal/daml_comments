@@ -1,0 +1,80 @@
+[
+  {
+    "id" : "c794902b-1bec-4697-a437-01e6873d074f",
+    "prId" : 7593,
+    "comments" : [
+      {
+        "id" : "038762a6-8fa8-43e6-86b6-ecab67231de0",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n      mat,\r\n    )\r\n```",
+        "createdAt" : "2020-10-07T15:20:13Z",
+        "updatedAt" : "2020-10-07T15:42:08Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "32fe45def3644018b639489ac3e03ea28f298aeb",
+    "line" : null,
+    "diffHunk" : "@@ -122,9 +123,15 @@ private[apiserver] object ApiPackageManagementService {\n       readBackend: IndexPackagesService,\n       transactionsService: IndexTransactionsService,\n       writeBackend: WritePackagesService,\n+      managementServiceTimeout: Duration,\n   )(implicit mat: Materializer, loggingContext: LoggingContext)\n     : PackageManagementServiceGrpc.PackageManagementService with GrpcApiService =\n-    new ApiPackageManagementService(readBackend, transactionsService, writeBackend, mat)\n+    new ApiPackageManagementService(\n+      readBackend,\n+      transactionsService,\n+      writeBackend,\n+      managementServiceTimeout,\n+      mat)"
+  },
+  {
+    "id" : "f2409545-3c80-43ee-8821-b965f9aacbb9",
+    "prId" : 7430,
+    "comments" : [
+      {
+        "id" : "d9c919ad-403f-4b61-bc0f-5a4116524640",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Do any of those streams need to be explicitly closed?",
+        "createdAt" : "2020-09-17T15:52:43Z",
+        "updatedAt" : "2020-09-18T14:38:37Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cdd323fc-d4ed-4887-adb5-81395a99884d",
+        "parentId" : "d9c919ad-403f-4b61-bc0f-5a4116524640",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Good question. It seems that `DarReader#readArchive` close the stream given in argument.\r\n\r\n```scala\r\n\r\n  /** Reads an archive from a ZipInputStream. The stream will be closed by this function! */\r\n  def readArchive(\r\n      name: String,\r\n      darStream: ZipInputStream,\r\n      entrySizeThreshold: Int = EntrySizeThreshold,\r\n  ): Try[Dar[A]] = ...\r\n```",
+        "createdAt" : "2020-09-17T16:04:37Z",
+        "updatedAt" : "2020-09-18T14:38:37Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1e489af38d29d2a55fd0ec4762f661ccb54731bd",
+    "line" : 30,
+    "diffHunk" : "@@ -79,22 +80,29 @@ private[apiserver] final class ApiPackageManagementService private (\n       .andThen(logger.logErrorsOnCall[ListKnownPackagesResponse])\n   }\n \n+  private[this] val darReader = DarReader { case (_, x) => Try(Archive.parseFrom(x)) }\n+\n+  def decodeAndValidate(stream: ZipInputStream): Try[Dar[Archive]] =\n+    for {\n+      dar <- darReader.readArchive(\"package-upload\", stream)\n+      packages <- Try(dar.all.iterator.map(Decode.decodeArchive).toMap)\n+      _ <- Validation.checkPackages(packages).toTry\n+    } yield dar\n+\n   override def uploadDarFile(request: UploadDarFileRequest): Future[UploadDarFileResponse] = {\n     val submissionId =\n       if (request.submissionId.isEmpty)\n         SubmissionId.assertFromString(UUID.randomUUID().toString)\n       else\n         SubmissionId.assertFromString(request.submissionId)\n \n+    val stream = new ZipInputStream(new ByteArrayInputStream(request.darFile.toByteArray))"
+  }
+]

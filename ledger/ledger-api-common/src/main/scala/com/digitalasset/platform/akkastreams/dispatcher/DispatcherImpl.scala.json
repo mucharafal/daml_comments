@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "a653c67a-66cc-494a-b248-721b7c5ea239",
+    "prId" : 3415,
+    "comments" : [
+      {
+        "id" : "ad135c2f-ed40-41a0-b1bb-cf4099fc22af",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This is the fix(tm).",
+        "createdAt" : "2019-11-11T14:44:43Z",
+        "updatedAt" : "2019-11-11T14:44:44Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "86141535bc62202020e7867033479bada3e4177b",
+    "line" : 50,
+    "diffHunk" : "@@ -98,9 +98,10 @@ final class DispatcherImpl[Index: Ordering](\n         new IllegalArgumentException(\n           s\"$name: Invalid start index: '$start' before zero index '$zeroIndex'\"))\n     else {\n-      val s = state.get\n-      s.getSignalDispatcher.fold(Source.failed[(Index, T)](closedError))(\n-        _.subscribe(signalOnSubscribe = Some(s.getLastIndex))\n+      state.get.getSignalDispatcher.fold(Source.failed[(Index, T)](closedError))(\n+        _.subscribe(signalOnSubscribe = true)\n+        // This needs to call getHead directly, otherwise this subscription might miss a Signal being emitted\n+          .map(_ => getHead())"
+  }
+]

@@ -1,0 +1,255 @@
+[
+  {
+    "id" : "53ff8c7e-f96a-44c8-910c-147cba548fd6",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "cb1eb856-16c3-403b-8063-5b8de7a889d7",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "If you are using pre-execution then you should only lock ledger state when committing.",
+        "createdAt" : "2020-07-24T16:00:25Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c5edd8cf-56d4-4e47-acd6-448f0cac8a00",
+        "parentId" : "cb1eb856-16c3-403b-8063-5b8de7a889d7",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "(And on every single read as the map is not synchronized) This means enabling concurrent pre-execution that currently does not pass conformance. See [this PR](https://github.com/digital-asset/daml/pull/6862) for concurrent pre-execution.",
+        "createdAt" : "2020-07-24T17:05:02Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : 59,
+    "diffHunk" : "@@ -0,0 +1,100 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import akka.stream.Materializer\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Fingerprint}\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.daml.ledger.validator.LedgerStateOperations.Value\n+import com.daml.ledger.validator.SubmissionValidator.RawKeyValuePairs\n+import com.daml.ledger.validator.caching.{\n+  CacheUpdatePolicy,\n+  CachingDamlLedgerStateReaderWithFingerprints\n+}\n+import com.daml.ledger.validator.{\n+  LedgerStateAccess,\n+  StateAccessingValidatingCommitter,\n+  StateKeySerializationStrategy\n+}\n+import com.daml.timer.RetryStrategy\n+\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.{Failure, Success}\n+\n+/**\n+  * A pre-executing validating committer based on [[LedgerStateAccess]] (that does not provide fingerprints\n+  * alongside values), parametric in the logic that produces a fingerprint given a value.\n+  *\n+  * @param now The record time provider.\n+  * @param keySerializationStrategy The key serializer used for state keys.\n+  * @param validator The pre-execution validator.\n+  * @param valueToFingerprint The logic that produces a fingerprint given a value.\n+  * @param postExecutionFinalizer The post-execution finalizer that will also perform conflicts detection and\n+  *                               time bounds checks.\n+  * @param stateValueCache The cache instance for state values.\n+  * @param cacheUpdatePolicy The caching policy for values.\n+  * @param materializer The Akka materializer.\n+  * @tparam LogResult type of the offset used for a log entry.\n+  */\n+class PreExecutingValidatingCommitter[LogResult](\n+    now: () => Instant,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    validator: PreExecutingSubmissionValidator[RawKeyValuePairs],\n+    valueToFingerprint: Option[Value] => Fingerprint,\n+    postExecutionFinalizer: PostExecutionFinalizerWithFingerprintsFromValues[LogResult],\n+    stateValueCache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    cacheUpdatePolicy: CacheUpdatePolicy)(implicit materializer: Materializer)\n+    extends StateAccessingValidatingCommitter[LogResult] {\n+\n+  /**\n+    * Pre-executes and then finalizes a submission.\n+    */\n+  override def commit(\n+      correlationId: String,\n+      submissionEnvelope: Bytes,\n+      submittingParticipantId: ParticipantId,\n+      ledgerStateAccess: LedgerStateAccess[LogResult])(\n+      implicit executionContext: ExecutionContext): Future[SubmissionResult] =\n+    // Fidelity level 1: sequential pre-execution. Implemented as: the pre-post-exec pipeline is a single transaction.\n+    ledgerStateAccess.inTransaction { ledgerStateOperations =>"
+  },
+  {
+    "id" : "b1df95f4-d871-434d-9997-41ec64e015aa",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "61ff6cb5-9ea3-4a24-9e27-ad6cea1b8bdf",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "For pre-execution we shouldn't need new instances of `LedgerStateReader` for every request.",
+        "createdAt" : "2020-07-24T16:01:47Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dc8b8ddd-1f90-48df-935c-8244d9ab354a",
+        "parentId" : "61ff6cb5-9ea3-4a24-9e27-ad6cea1b8bdf",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "We do, but only because the transaction is opened every time a commit operation is initiated (and only in the context of the transaction we have access to the operations).",
+        "createdAt" : "2020-08-03T16:44:24Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : 66,
+    "diffHunk" : "@@ -0,0 +1,100 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import akka.stream.Materializer\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Fingerprint}\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.daml.ledger.validator.LedgerStateOperations.Value\n+import com.daml.ledger.validator.SubmissionValidator.RawKeyValuePairs\n+import com.daml.ledger.validator.caching.{\n+  CacheUpdatePolicy,\n+  CachingDamlLedgerStateReaderWithFingerprints\n+}\n+import com.daml.ledger.validator.{\n+  LedgerStateAccess,\n+  StateAccessingValidatingCommitter,\n+  StateKeySerializationStrategy\n+}\n+import com.daml.timer.RetryStrategy\n+\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.{Failure, Success}\n+\n+/**\n+  * A pre-executing validating committer based on [[LedgerStateAccess]] (that does not provide fingerprints\n+  * alongside values), parametric in the logic that produces a fingerprint given a value.\n+  *\n+  * @param now The record time provider.\n+  * @param keySerializationStrategy The key serializer used for state keys.\n+  * @param validator The pre-execution validator.\n+  * @param valueToFingerprint The logic that produces a fingerprint given a value.\n+  * @param postExecutionFinalizer The post-execution finalizer that will also perform conflicts detection and\n+  *                               time bounds checks.\n+  * @param stateValueCache The cache instance for state values.\n+  * @param cacheUpdatePolicy The caching policy for values.\n+  * @param materializer The Akka materializer.\n+  * @tparam LogResult type of the offset used for a log entry.\n+  */\n+class PreExecutingValidatingCommitter[LogResult](\n+    now: () => Instant,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    validator: PreExecutingSubmissionValidator[RawKeyValuePairs],\n+    valueToFingerprint: Option[Value] => Fingerprint,\n+    postExecutionFinalizer: PostExecutionFinalizerWithFingerprintsFromValues[LogResult],\n+    stateValueCache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    cacheUpdatePolicy: CacheUpdatePolicy)(implicit materializer: Materializer)\n+    extends StateAccessingValidatingCommitter[LogResult] {\n+\n+  /**\n+    * Pre-executes and then finalizes a submission.\n+    */\n+  override def commit(\n+      correlationId: String,\n+      submissionEnvelope: Bytes,\n+      submittingParticipantId: ParticipantId,\n+      ledgerStateAccess: LedgerStateAccess[LogResult])(\n+      implicit executionContext: ExecutionContext): Future[SubmissionResult] =\n+    // Fidelity level 1: sequential pre-execution. Implemented as: the pre-post-exec pipeline is a single transaction.\n+    ledgerStateAccess.inTransaction { ledgerStateOperations =>\n+      for {\n+        preExecutionOutput <- validator\n+          .validate(\n+            submissionEnvelope,\n+            correlationId,\n+            submittingParticipantId,\n+            CachingDamlLedgerStateReaderWithFingerprints("
+  },
+  {
+    "id" : "1c899f1e-59b6-4cc2-bf2f-2b259bd1a2d1",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "c6d6b600-2c05-4db8-b5a3-c716e0e0f2c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please add that to the backlog and remove this TODO.",
+        "createdAt" : "2020-08-04T09:25:53Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "40280b71-86a8-486c-a1dd-947dd1c8dca4",
+        "parentId" : "c6d6b600-2c05-4db8-b5a3-c716e0e0f2c0",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:29:47Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,94 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import akka.stream.Materializer\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Fingerprint}\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.daml.ledger.validator.LedgerStateOperations.Value\n+import com.daml.ledger.validator.caching.{\n+  CacheUpdatePolicy,\n+  CachingDamlLedgerStateReaderWithFingerprints\n+}\n+import com.daml.ledger.validator.{LedgerStateAccess, StateKeySerializationStrategy}\n+import com.daml.timer.RetryStrategy\n+\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.{Failure, Success}\n+\n+/**\n+  * A pre-executing validating committer based on [[LedgerStateAccess]] (that does not provide fingerprints\n+  * alongside values), parametric in the logic that produces a fingerprint given a value.\n+  *\n+  * @param now The record time provider.\n+  * @param keySerializationStrategy The key serializer used for state keys.\n+  * @param validator The pre-execution validator.\n+  * @param valueToFingerprint The logic that produces a fingerprint given a value.\n+  * @param postExecutionFinalizer The post-execution finalizer that will also perform conflicts detection and\n+  *                               time bounds checks.\n+  * @param stateValueCache The cache instance for state values.\n+  * @param cacheUpdatePolicy The caching policy for values.\n+  * @param materializer The Akka materializer.\n+  * @tparam LogResult type of the offset used for a log entry.\n+  */\n+class PreExecutingValidatingCommitter[LogResult](\n+    now: () => Instant,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    validator: PreExecutingSubmissionValidator[AnnotatedRawKeyValuePairs],\n+    valueToFingerprint: Option[Value] => Fingerprint,\n+    postExecutionFinalizer: PostExecutionFinalizerWithFingerprintsFromValues[LogResult],\n+    stateValueCache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    cacheUpdatePolicy: CacheUpdatePolicy)(implicit materializer: Materializer) {\n+\n+  /**\n+    * Pre-executes and then finalizes a submission.\n+    */\n+  def commit(\n+      correlationId: String,\n+      submissionEnvelope: Bytes,\n+      submittingParticipantId: ParticipantId,\n+      ledgerStateAccess: LedgerStateAccess[LogResult])(\n+      implicit executionContext: ExecutionContext): Future[SubmissionResult] =\n+    // Fidelity level 1: sequential pre-execution. Implemented as: the pre-post-exec pipeline is a single transaction.\n+    ledgerStateAccess.inTransaction { ledgerStateOperations =>\n+      for {\n+        preExecutionOutput <- validator\n+          .validate(\n+            submissionEnvelope,\n+            correlationId,\n+            submittingParticipantId,\n+            CachingDamlLedgerStateReaderWithFingerprints(\n+              stateValueCache,\n+              cacheUpdatePolicy,\n+              new LedgerStateReaderWithFingerprintsFromValues(\n+                ledgerStateOperations,\n+                valueToFingerprint),\n+              keySerializationStrategy,\n+            )\n+          )\n+        submissionResult <- retry {\n+          case PostExecutionFinalizerWithFingerprintsFromValues.Conflict => true\n+        } { (_, _) =>\n+          postExecutionFinalizer.conflictDetectAndFinalize(\n+            now,\n+            preExecutionOutput,\n+            ledgerStateOperations)\n+        }.transform {\n+          case Failure(PostExecutionFinalizerWithFingerprintsFromValues.Conflict) =>\n+            Success(SubmissionResult.Acknowledged) // But it will simply be dropped.\n+          case result => result\n+        }\n+      } yield submissionResult\n+    }\n+\n+  // TODO consider adding to [[RetryStrategy]] a pre-built exponential backoff strategy"
+  },
+  {
+    "id" : "b1310e25-a4aa-49ce-95a0-17e605e7c0cd",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "8ff9e529-c527-4f52-8a79-f1dfaa8d9b0c",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n    * Pre-executes and then commits a submission.\r\n```",
+        "createdAt" : "2020-08-04T09:32:24Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ade70b1d-0ede-4bca-9778-0eec3b178058",
+        "parentId" : "8ff9e529-c527-4f52-8a79-f1dfaa8d9b0c",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:29:38Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,94 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import akka.stream.Materializer\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Fingerprint}\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.daml.ledger.validator.LedgerStateOperations.Value\n+import com.daml.ledger.validator.caching.{\n+  CacheUpdatePolicy,\n+  CachingDamlLedgerStateReaderWithFingerprints\n+}\n+import com.daml.ledger.validator.{LedgerStateAccess, StateKeySerializationStrategy}\n+import com.daml.timer.RetryStrategy\n+\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.{Failure, Success}\n+\n+/**\n+  * A pre-executing validating committer based on [[LedgerStateAccess]] (that does not provide fingerprints\n+  * alongside values), parametric in the logic that produces a fingerprint given a value.\n+  *\n+  * @param now The record time provider.\n+  * @param keySerializationStrategy The key serializer used for state keys.\n+  * @param validator The pre-execution validator.\n+  * @param valueToFingerprint The logic that produces a fingerprint given a value.\n+  * @param postExecutionFinalizer The post-execution finalizer that will also perform conflicts detection and\n+  *                               time bounds checks.\n+  * @param stateValueCache The cache instance for state values.\n+  * @param cacheUpdatePolicy The caching policy for values.\n+  * @param materializer The Akka materializer.\n+  * @tparam LogResult type of the offset used for a log entry.\n+  */\n+class PreExecutingValidatingCommitter[LogResult](\n+    now: () => Instant,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    validator: PreExecutingSubmissionValidator[AnnotatedRawKeyValuePairs],\n+    valueToFingerprint: Option[Value] => Fingerprint,\n+    postExecutionFinalizer: PostExecutionFinalizerWithFingerprintsFromValues[LogResult],\n+    stateValueCache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    cacheUpdatePolicy: CacheUpdatePolicy)(implicit materializer: Materializer) {\n+\n+  /**\n+    * Pre-executes and then finalizes a submission."
+  },
+  {
+    "id" : "35f0e5bb-2b8a-4f47-b9e3-261d434bc418",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "03f2136a-7a03-450d-8cd1-71082414ab41",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Can you reword this comment so that you don't reference 'fidelity level 1', please? I.e., you don't have context for that when reading this code. Just stating the fact that you perform the full pipeline in a single transaction should be enough.",
+        "createdAt" : "2020-08-04T09:33:50Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d1954067-d42a-40d6-848e-877bbffecc76",
+        "parentId" : "03f2136a-7a03-450d-8cd1-71082414ab41",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:29:22Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,94 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import akka.stream.Materializer\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Fingerprint}\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.daml.ledger.validator.LedgerStateOperations.Value\n+import com.daml.ledger.validator.caching.{\n+  CacheUpdatePolicy,\n+  CachingDamlLedgerStateReaderWithFingerprints\n+}\n+import com.daml.ledger.validator.{LedgerStateAccess, StateKeySerializationStrategy}\n+import com.daml.timer.RetryStrategy\n+\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.{Failure, Success}\n+\n+/**\n+  * A pre-executing validating committer based on [[LedgerStateAccess]] (that does not provide fingerprints\n+  * alongside values), parametric in the logic that produces a fingerprint given a value.\n+  *\n+  * @param now The record time provider.\n+  * @param keySerializationStrategy The key serializer used for state keys.\n+  * @param validator The pre-execution validator.\n+  * @param valueToFingerprint The logic that produces a fingerprint given a value.\n+  * @param postExecutionFinalizer The post-execution finalizer that will also perform conflicts detection and\n+  *                               time bounds checks.\n+  * @param stateValueCache The cache instance for state values.\n+  * @param cacheUpdatePolicy The caching policy for values.\n+  * @param materializer The Akka materializer.\n+  * @tparam LogResult type of the offset used for a log entry.\n+  */\n+class PreExecutingValidatingCommitter[LogResult](\n+    now: () => Instant,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    validator: PreExecutingSubmissionValidator[AnnotatedRawKeyValuePairs],\n+    valueToFingerprint: Option[Value] => Fingerprint,\n+    postExecutionFinalizer: PostExecutionFinalizerWithFingerprintsFromValues[LogResult],\n+    stateValueCache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    cacheUpdatePolicy: CacheUpdatePolicy)(implicit materializer: Materializer) {\n+\n+  /**\n+    * Pre-executes and then finalizes a submission.\n+    */\n+  def commit(\n+      correlationId: String,\n+      submissionEnvelope: Bytes,\n+      submittingParticipantId: ParticipantId,\n+      ledgerStateAccess: LedgerStateAccess[LogResult])(\n+      implicit executionContext: ExecutionContext): Future[SubmissionResult] =\n+    // Fidelity level 1: sequential pre-execution. Implemented as: the pre-post-exec pipeline is a single transaction."
+  }
+]

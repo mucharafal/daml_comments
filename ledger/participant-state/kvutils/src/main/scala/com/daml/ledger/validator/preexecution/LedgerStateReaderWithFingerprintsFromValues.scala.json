@@ -1,0 +1,161 @@
+[
+  {
+    "id" : "34cd413a-4dfd-4638-87d7-c436c2371aa4",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "a751795c-ead5-4cbf-b8fc-1fa3aaff2d9e",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Embedded `yield`s are hard to read -- can you simplify this, please?",
+        "createdAt" : "2020-07-24T15:39:36Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e56ccb11-a2a0-42d6-b022-d9f7fa114b15",
+        "parentId" : "a751795c-ead5-4cbf-b8fc-1fa3aaff2d9e",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-03T16:46:40Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,35 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+import com.daml.ledger.participant.state.kvutils.Fingerprint\n+import com.daml.ledger.validator.LedgerStateOperations\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+/**\n+  * An in-transaction ledger state reader that also returns value fingerprints based on their value.\n+  *\n+  * It is useful to implement pre-execution for ledgers providing [[LedgerStateOperations]],\n+  * i.e. that don't directly provide fingerprints along with read values.\n+  *\n+  * @param ledgerStateOperations The operations that can access actual ledger storage as part of a transaction.\n+  *                              Only reads will be used.\n+  * @param valueToFingerprint The logic producing a [[Fingerprint]] given a value.\n+  * @param executionContext The execution context for [[ledgerStateOperations]].\n+  * @tparam LogResult Type of the offset used for a log entry by [[ledgerStateOperations]].\n+  */\n+class LedgerStateReaderWithFingerprintsFromValues[LogResult](\n+    ledgerStateOperations: LedgerStateOperations[LogResult],\n+    valueToFingerprint: Option[Value] => Fingerprint)(implicit executionContext: ExecutionContext)\n+    extends LedgerStateReaderWithFingerprints {\n+\n+  override def read(keys: Seq[Key]): Future[Seq[(Option[Value], Fingerprint)]] =\n+    for {\n+      readResult <- ledgerStateOperations.readState(keys)\n+    } yield"
+  },
+  {
+    "id" : "3fa10297-008c-423d-8bf5-7c130155abb9",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "64f02f95-3104-4be4-9407-a7519fa90da9",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "What do you mean by 'in-transaction' here?",
+        "createdAt" : "2020-08-04T09:18:44Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b78b01fe-883d-4e27-ba83-9d30fc52949d",
+        "parentId" : "64f02f95-3104-4be4-9407-a7519fa90da9",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Removed as it's implied by using the state operations.",
+        "createdAt" : "2020-08-04T12:30:13Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,32 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+import com.daml.ledger.participant.state.kvutils.Fingerprint\n+import com.daml.ledger.validator.LedgerStateOperations\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+/**\n+  * An in-transaction ledger state reader that also returns value fingerprints based on their value."
+  },
+  {
+    "id" : "0e179403-35c0-4c9e-8bb0-fe5a86cb2365",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "0bcf51f6-b587-4924-ae1f-1b4ba374f0da",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "... `also generates fingerprints for the read values.`",
+        "createdAt" : "2020-08-04T09:19:32Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0d8b5eb7-067f-47bb-af34-ed2789cc689a",
+        "parentId" : "0bcf51f6-b587-4924-ae1f-1b4ba374f0da",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:30:08Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,32 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+import com.daml.ledger.participant.state.kvutils.Fingerprint\n+import com.daml.ledger.validator.LedgerStateOperations\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+/**\n+  * An in-transaction ledger state reader that also returns value fingerprints based on their value."
+  }
+]

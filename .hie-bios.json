@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "900c35e1-3da0-4b22-9124-44fa4d3ff357",
+    "prId" : 4751,
+    "comments" : [
+      {
+        "id" : "c29fbd70-d640-4a07-8c24-a4a45856527f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":crying_cat_face: I wonder if `hie-bios` should make it possible to reuse the logic for flag filtering even if you define your own `.hie-bios` file.",
+        "createdAt" : "2020-03-06T10:29:44Z",
+        "updatedAt" : "2020-03-13T14:49:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c4effe6e73ed32b826e28e6091a3749a7954c800",
+    "line" : 11,
+    "diffHunk" : "@@ -1,2 +1,29 @@\n-#!/bin/sh\n-cat \"$HIE_BIOS_ARGS\" | sed \"s/'//g\" | sed \"s/-qg//g\" | sed \"s/+RTS.*-RTS//\" | sed \"s|/bazel-out|bazel-out|g\" | sed \"s/-fexternal-interpreter//g\" | tr \" \" \"\\n\" > \"$HIE_BIOS_OUTPUT\"\n+#!/usr/bin/env bash\n+set -euo pipefail\n+hie_bios_flags() {\n+  bazel build //compiler/damlc:damlc@ghci \\\n+    --output_groups=hie_bios \\\n+    --experimental_show_artifacts \\\n+    2>&1 \\\n+    | awk '\n+      BEGIN { rts_opts = false }"
+  },
+  {
+    "id" : "7107877d-48c1-4f55-b626-2e299e5db4a3",
+    "prId" : 1692,
+    "comments" : [
+      {
+        "id" : "22879fec-0603-492a-a638-002f93590e3b",
+        "parentId" : null,
+        "author" : {
+          "login" : "ndmitchell",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1651197?u=2a7f401a0bc6c1e722d5fbecc923715861c4567c&v=4"
+        },
+        "body" : "Where does da-ghci get its list of include files from? Do we have this list hardcoded twice? (Not that that is a problem - I'd rather it zero - but if not, two is fine)",
+        "createdAt" : "2019-06-16T13:06:08Z",
+        "updatedAt" : "2019-06-16T13:12:28Z",
+        "lastEditedBy" : {
+          "login" : "ndmitchell",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1651197?u=2a7f401a0bc6c1e722d5fbecc923715861c4567c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "de2f06c0-e0c0-4350-a528-33944accec08",
+        "parentId" : "22879fec-0603-492a-a638-002f93590e3b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`da-ghci` lists all files explicitly rather than going via include paths. I’ve talked to @aherrmann-da about this and it looks like we can probably change that at which point we can just reuse that.",
+        "createdAt" : "2019-06-16T13:21:13Z",
+        "updatedAt" : "2019-06-16T13:21:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e05ebb8820f25f55c3cda4bf9ade371d372e38a6",
+    "line" : 3,
+    "diffHunk" : "@@ -0,0 +1,3 @@\n+#!/bin/sh\n+bazel run --define hie_bios_ghci=True //daml-foundations/daml-tools/da-hs-damlc-app:da-hs-damlc-app@ghci | sed \"s/'//g\" | sed \"s/-qg//g\" | sed \"s/+RTS.*-RTS//\" | sed \"s|/bazel-out|bazel-out|g\" | sed \"s/-fexternal-interpreter//g\"\n+echo -idaml-foundations/daml-ghc/ide/src -icompiler/scenario-service/client/src -icompiler/daml-lf-ast/src -icompiler/haskell-ide-core/src -idaml-foundations/daml-ghc/ghc-compiler/src -icompiler/daml-lf-proto/src -idaml-foundations/daml-ghc/ghc-compiler/src -ilibs-haskell/da-hs-base/src -ilibs-haskell/bazel-runfiles/src -icompiler/daml-lf-tools/src -ibazel-out/k8-fastbuild/genfiles/daml-lf/archive -ilibs-haskell/prettyprinter-syntax/src -ibazel-out/k8-fastbuild/genfiles/compiler/scenario-service/protos"
+  }
+]

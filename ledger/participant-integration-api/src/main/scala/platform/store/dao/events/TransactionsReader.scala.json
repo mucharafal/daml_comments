@@ -1,0 +1,258 @@
+[
+  {
+    "id" : "a7c111e5-ab8d-4d38-b393-ff1dee99a388",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "a815c214-5c9d-49b5-8c3d-3ccad80b1864",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'd love it if we could have sequences in the logging without using `mkString`, that got serialized to a JSON array.",
+        "createdAt" : "2020-07-31T09:47:47Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8c4937a2-7a72-4426-b9f5-b7cc304aa8d0",
+        "parentId" : "a815c214-5c9d-49b5-8c3d-3ccad80b1864",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I would too and I definitely do not like having this kind of bespoke formatting embedded in how we use structured logging (see my comments about principles to follow when using structured logging), but I think we'd need to have some serious design discussion about it. I believe there's a lot of value in having complex values in the structured logging framework (i.e. arrays and objects). E.g. we could dump the entire update received by the indexer and basically build https://github.com/digital-asset/daml/issues/6609 _on top of logging_, which in my opinion is a huge win. If we do that, it's very important that we make sure that the design fits well with the Logstash Logback Encoder. I'll open a ticket to make sure we can have a discussion at a later point.",
+        "createdAt" : "2020-07-31T11:03:46Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0a86fdff-4ec2-4447-8774-7dad5511eb90",
+        "parentId" : "a815c214-5c9d-49b5-8c3d-3ccad80b1864",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Happy for this to be captured in an issue and handled later.",
+        "createdAt" : "2020-07-31T11:39:49Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3288f508-e881-4a80-b12b-2df91b0f775b",
+        "parentId" : "a815c214-5c9d-49b5-8c3d-3ccad80b1864",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Created https://github.com/digital-asset/daml/issues/6945",
+        "createdAt" : "2020-07-31T12:24:13Z",
+        "updatedAt" : "2020-07-31T12:24:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -105,31 +106,38 @@ private[dao] final class TransactionsReader(\n   def lookupFlatTransactionById(\n       transactionId: TransactionId,\n       requestingParties: Set[Party],\n-  ): Future[Option[GetFlatTransactionResponse]] = {\n-    val query =\n-      EventsTable.prepareLookupFlatTransactionById(sqlFunctions)(transactionId, requestingParties)\n-    dispatcher\n-      .executeSql(\n-        databaseMetrics = dbMetrics.lookupFlatTransactionById,\n-        extraLog = Some(s\"tx: $transactionId, parties = ${requestingParties.mkString(\", \")}\"),\n-      ) { implicit connection =>\n-        query.asVectorOf(EventsTable.rawFlatEventParser)\n+  )(implicit loggingContext: LoggingContext): Future[Option[GetFlatTransactionResponse]] =\n+    withEnrichedLoggingContext(\n+      \"transactionId\" -> transactionId,\n+      \"parties\" -> requestingParties.mkString(\", \"),"
+  },
+  {
+    "id" : "cacc45fa-7e81-4997-968f-c6c0b15202d2",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "a5df6b4e-3238-4a4b-964e-5ba3e4348ad7",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Same here.",
+        "createdAt" : "2020-07-31T09:48:01Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a265e9af-df73-4fed-910d-7cbf3fce211c",
+        "parentId" : "a5df6b4e-3238-4a4b-964e-5ba3e4348ad7",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Same reply. :slightly_smiling_face: ",
+        "createdAt" : "2020-07-31T11:04:05Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fb8e5ea6-07b2-414f-bbe5-93be8c0c9c52",
+        "parentId" : "a5df6b4e-3238-4a4b-964e-5ba3e4348ad7",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Created https://github.com/digital-asset/daml/issues/6945",
+        "createdAt" : "2020-07-31T12:24:52Z",
+        "updatedAt" : "2020-07-31T12:24:52Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -169,30 +177,31 @@ private[dao] final class TransactionsReader(\n   def lookupTransactionTreeById(\n       transactionId: TransactionId,\n       requestingParties: Set[Party],\n-  ): Future[Option[GetTransactionResponse]] = {\n-    val query =\n-      EventsTable.prepareLookupTransactionTreeById(sqlFunctions)(transactionId, requestingParties)\n-    dispatcher\n-      .executeSql(\n-        databaseMetrics = dbMetrics.lookupTransactionTreeById,\n-        extraLog = Some(s\"tx: $transactionId, parties = ${requestingParties.mkString(\", \")}\"),\n-      ) { connection =>\n-        query.asVectorOf(EventsTable.rawTreeEventParser)(connection)\n-      }\n-      .flatMap(\n-        rawEvents =>\n-          Timed.value(\n-            timer = dbMetrics.lookupTransactionTreeById.translationTimer,\n-            value = Future.traverse(rawEvents)(deserializeEntry(verbose = true))\n-        ))\n-      .map(EventsTable.Entry.toGetTransactionResponse)\n-  }\n+  )(implicit loggingContext: LoggingContext): Future[Option[GetTransactionResponse]] =\n+    withEnrichedLoggingContext(\n+      \"transactionId\" -> transactionId,\n+      \"parties\" -> requestingParties.mkString(\", \"),"
+  },
+  {
+    "id" : "9f42b33d-4965-416f-b236-5617e03454e8",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "8abfa8cc-544e-4019-be17-3f1a85a0742a",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Pull these keys up the call stack, likely no reason to add them here.",
+        "createdAt" : "2020-07-31T10:14:16Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2de66284-04a9-489d-8b5f-e62dfc5842e9",
+        "parentId" : "8abfa8cc-544e-4019-be17-3f1a85a0742a",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Indeed, the callers already add the relevant keys to the context. Removing.",
+        "createdAt" : "2020-07-31T11:34:29Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -105,31 +106,38 @@ private[dao] final class TransactionsReader(\n   def lookupFlatTransactionById(\n       transactionId: TransactionId,\n       requestingParties: Set[Party],\n-  ): Future[Option[GetFlatTransactionResponse]] = {\n-    val query =\n-      EventsTable.prepareLookupFlatTransactionById(sqlFunctions)(transactionId, requestingParties)\n-    dispatcher\n-      .executeSql(\n-        databaseMetrics = dbMetrics.lookupFlatTransactionById,\n-        extraLog = Some(s\"tx: $transactionId, parties = ${requestingParties.mkString(\", \")}\"),\n-      ) { implicit connection =>\n-        query.asVectorOf(EventsTable.rawFlatEventParser)\n+  )(implicit loggingContext: LoggingContext): Future[Option[GetFlatTransactionResponse]] =\n+    withEnrichedLoggingContext("
+  },
+  {
+    "id" : "fcad7227-5434-4d83-a32c-295bb29460f9",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "58600272-6d76-49f9-acc9-7820e97b10f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "These keys can likely be pulled up the stack instead of being added here.",
+        "createdAt" : "2020-07-31T10:14:48Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -169,30 +177,31 @@ private[dao] final class TransactionsReader(\n   def lookupTransactionTreeById(\n       transactionId: TransactionId,\n       requestingParties: Set[Party],\n-  ): Future[Option[GetTransactionResponse]] = {\n-    val query =\n-      EventsTable.prepareLookupTransactionTreeById(sqlFunctions)(transactionId, requestingParties)\n-    dispatcher\n-      .executeSql(\n-        databaseMetrics = dbMetrics.lookupTransactionTreeById,\n-        extraLog = Some(s\"tx: $transactionId, parties = ${requestingParties.mkString(\", \")}\"),\n-      ) { connection =>\n-        query.asVectorOf(EventsTable.rawTreeEventParser)(connection)\n-      }\n-      .flatMap(\n-        rawEvents =>\n-          Timed.value(\n-            timer = dbMetrics.lookupTransactionTreeById.translationTimer,\n-            value = Future.traverse(rawEvents)(deserializeEntry(verbose = true))\n-        ))\n-      .map(EventsTable.Entry.toGetTransactionResponse)\n-  }\n+  )(implicit loggingContext: LoggingContext): Future[Option[GetTransactionResponse]] =\n+    withEnrichedLoggingContext("
+  }
+]

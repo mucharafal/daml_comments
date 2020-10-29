@@ -1,0 +1,267 @@
+[
+  {
+    "id" : "3d4c325e-c75b-406f-a6fb-1664f7bad169",
+    "prId" : 5326,
+    "comments" : [
+      {
+        "id" : "a0cc0163-d1d1-46fb-9a24-3915501321f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "With `templateIds` above reverting to `Set`, this avoids the situation where `h` is in `t`.\r\n\r\n```suggestion\r\n            val h = tids.head\r\n            domain.GetActiveContractsRequest(OneAnd(h, tids - h), q getOrElse Map.empty)\r\n```",
+        "createdAt" : "2020-04-02T15:44:22Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "db239f1e-fb92-412f-ab14-1c6cd61e5e3f",
+        "parentId" : "a0cc0163-d1d1-46fb-9a24-3915501321f9",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "good catch, thanks!",
+        "createdAt" : "2020-04-02T17:47:51Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d819a228-16a3-4027-b481-a822214fbf57",
+        "parentId" : "a0cc0163-d1d1-46fb-9a24-3915501321f9",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Set.head is partial. Wanted to avoid it.",
+        "createdAt" : "2020-04-02T17:54:33Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ec1ff0c0-58ba-4a83-84f1-0157d52971a8",
+        "parentId" : "a0cc0163-d1d1-46fb-9a24-3915501321f9",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "so, headOption it is.",
+        "createdAt" : "2020-04-02T18:00:56Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1efdaeb153f0a8e7ae67dc78d8febf70042fdc1b",
+    "line" : null,
+    "diffHunk" : "@@ -245,20 +245,23 @@ object JsonProtocol extends DefaultJsonProtocol {\n     */\n   implicit val GetActiveContractsRequestFormat: RootJsonReader[domain.GetActiveContractsRequest] = {\n     case class GACR(\n-        templateIds: Set[domain.TemplateId.OptionalPkg],\n+        templateIds: Vector[domain.TemplateId.OptionalPkg],\n         query: Option[Map[String, JsValue]])\n     val validKeys = Set(\"templateIds\", \"query\")\n     implicit val primitive: JsonReader[GACR] = jsonFormat2(GACR.apply)\n     jsv =>\n       {\n         val GACR(tids, q) = jsv.convertTo[GACR]\n         val extras = jsv.asJsObject.fields.keySet diff validKeys\n-        if (tids.isEmpty)\n-          deserializationError(\"search requires at least one item in 'templateIds'\")\n-        else if (extras.nonEmpty)\n+        if (extras.nonEmpty)\n           deserializationError(\n             s\"unsupported query fields ${extras}; likely should be within 'query' subobject\")\n-        domain.GetActiveContractsRequest(tids, q getOrElse Map.empty)\n+        tids match {\n+          case Vector() =>\n+            deserializationError(\"search requires at least one item in 'templateIds'\")\n+          case h +: t =>\n+            domain.GetActiveContractsRequest(OneAnd(h, t.toSet), q getOrElse Map.empty)"
+  },
+  {
+    "id" : "f2fc2f6b-30ef-4b10-93e6-43db74995dc7",
+    "prId" : 5326,
+    "comments" : [
+      {
+        "id" : "d4415b7f-a5c9-4705-b9bd-3124926eabc4",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I suggest reverting in concert with the previously-mentioned change.",
+        "createdAt" : "2020-04-02T15:44:56Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1efdaeb153f0a8e7ae67dc78d8febf70042fdc1b",
+    "line" : null,
+    "diffHunk" : "@@ -245,20 +245,23 @@ object JsonProtocol extends DefaultJsonProtocol {\n     */\n   implicit val GetActiveContractsRequestFormat: RootJsonReader[domain.GetActiveContractsRequest] = {\n     case class GACR(\n-        templateIds: Set[domain.TemplateId.OptionalPkg],\n+        templateIds: Vector[domain.TemplateId.OptionalPkg],"
+  },
+  {
+    "id" : "b210a9a9-90c2-4c26-9592-eacd1b7de166",
+    "prId" : 5326,
+    "comments" : [
+      {
+        "id" : "cd31a1cf-2d54-494c-b15f-fe254e5503f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Do we need to decode these?\r\n\r\n```suggestion\r\n  implicit def SyncResponseFormat[R: JsonWriter]: RootJsonWriter[domain.SyncResponse[R]] =\r\n```\r\n\r\nIf it's because `OkResponseFormat` needs the reader, then I have the same question there.",
+        "createdAt" : "2020-04-02T15:47:15Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c7a76546-c14f-4a52-b40a-03b1ac23c395",
+        "parentId" : "cd31a1cf-2d54-494c-b15f-fe254e5503f5",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I use the reader in testing, just wanted to have both in one place.",
+        "createdAt" : "2020-04-02T17:52:56Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1efdaeb153f0a8e7ae67dc78d8febf70042fdc1b",
+    "line" : 70,
+    "diffHunk" : "@@ -348,12 +345,37 @@ object JsonProtocol extends DefaultJsonProtocol {\n       }\n     }\n \n-  implicit val WarningsWrapperFormat: RootJsonFormat[domain.WarningsWrapper] =\n-    jsonFormat1(domain.WarningsWrapper)\n+  implicit val AsyncWarningsWrapperFormat: RootJsonFormat[domain.AsyncWarningsWrapper] =\n+    jsonFormat1(domain.AsyncWarningsWrapper)\n \n   implicit val UnknownTemplateIdsFormat: RootJsonFormat[domain.UnknownTemplateIds] = jsonFormat1(\n     domain.UnknownTemplateIds)\n \n   implicit val UnknownPartiesFormat: RootJsonFormat[domain.UnknownParties] = jsonFormat1(\n     domain.UnknownParties)\n+\n+  implicit def OkResponseFormat[R: JsonFormat]: RootJsonFormat[domain.OkResponse[R]] =\n+    jsonFormat3(domain.OkResponse[R])\n+\n+  implicit val ErrorResponseFormat: RootJsonFormat[domain.ErrorResponse] =\n+    jsonFormat3(domain.ErrorResponse)\n+\n+  implicit def SyncResponseFormat[R: JsonFormat]: RootJsonFormat[domain.SyncResponse[R]] ="
+  },
+  {
+    "id" : "1f035069-b935-453e-9da3-478574852b99",
+    "prId" : 5326,
+    "comments" : [
+      {
+        "id" : "74e14763-728a-41cc-8b68-21320755f744",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "If we do need to decode them, best avoid ambiguity:\r\n\r\n```suggestion\r\n        case JsObject(fields) =>\r\n          (fields get resultKey, fields get errorKey) match {\r\n            case (Some(result), None) => OkResponseFormat[R].read(json)\r\n            case (None, Some(errors)) => ErrorResponseFormat.read(json)\r\n            // error cases\r\n```",
+        "createdAt" : "2020-04-02T16:29:20Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1efdaeb153f0a8e7ae67dc78d8febf70042fdc1b",
+    "line" : null,
+    "diffHunk" : "@@ -348,12 +345,37 @@ object JsonProtocol extends DefaultJsonProtocol {\n       }\n     }\n \n-  implicit val WarningsWrapperFormat: RootJsonFormat[domain.WarningsWrapper] =\n-    jsonFormat1(domain.WarningsWrapper)\n+  implicit val AsyncWarningsWrapperFormat: RootJsonFormat[domain.AsyncWarningsWrapper] =\n+    jsonFormat1(domain.AsyncWarningsWrapper)\n \n   implicit val UnknownTemplateIdsFormat: RootJsonFormat[domain.UnknownTemplateIds] = jsonFormat1(\n     domain.UnknownTemplateIds)\n \n   implicit val UnknownPartiesFormat: RootJsonFormat[domain.UnknownParties] = jsonFormat1(\n     domain.UnknownParties)\n+\n+  implicit def OkResponseFormat[R: JsonFormat]: RootJsonFormat[domain.OkResponse[R]] =\n+    jsonFormat3(domain.OkResponse[R])\n+\n+  implicit val ErrorResponseFormat: RootJsonFormat[domain.ErrorResponse] =\n+    jsonFormat3(domain.ErrorResponse)\n+\n+  implicit def SyncResponseFormat[R: JsonFormat]: RootJsonFormat[domain.SyncResponse[R]] =\n+    new RootJsonFormat[domain.SyncResponse[R]] {\n+      private val resultKey = \"result\"\n+      private val errorsKey = \"errors\"\n+\n+      override def write(obj: domain.SyncResponse[R]): JsValue = obj match {\n+        case a: domain.OkResponse[_] => OkResponseFormat[R].write(a)\n+        case b: domain.ErrorResponse => ErrorResponseFormat.write(b)\n+      }\n+\n+      override def read(json: JsValue): domain.SyncResponse[R] = json match {\n+        case JsObject(fields) if fields.contains(resultKey) => OkResponseFormat[R].read(json)\n+        case JsObject(fields) if fields.contains(errorsKey) => ErrorResponseFormat.read(json)"
+  },
+  {
+    "id" : "cb49a657-ca7a-458c-9680-bc16bbe4735a",
+    "prId" : 5223,
+    "comments" : [
+      {
+        "id" : "7b26f7cc-8a6a-4d9d-aaa8-988355bd7a49",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "we might want to move it from `com.daml.http.json.Protocol`, this class contains JSON format definitions for `com.daml.http.domain`.... `AbsoluteContractId` is `com.daml.lf.value`. But I don't think this should be done as part of this PR.",
+        "createdAt" : "2020-05-01T19:37:17Z",
+        "updatedAt" : "2020-05-04T21:18:48Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4c6c7c118876a03f4fb995d33280f39a4f00a91b",
+    "line" : 4,
+    "diffHunk" : "@@ -30,6 +30,17 @@ object JsonProtocol extends DefaultJsonProtocol with ExtraFormats {\n   implicit val ContractIdFormat: JsonFormat[domain.ContractId] =\n     taggedJsonFormat[String, domain.ContractIdTag]\n \n+  implicit val AbsoluteContractIdFormat: JsonFormat[AbsoluteContractId] ="
+  },
+  {
+    "id" : "3af5b05d-c2f6-446d-a954-4c77badfa521",
+    "prId" : 4049,
+    "comments" : [
+      {
+        "id" : "48fd7c3f-fe44-4299-a581-ac26328eda79",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "There's no value here from not building fields in the functional style; use `++`.",
+        "createdAt" : "2020-01-16T22:57:10Z",
+        "updatedAt" : "2020-01-16T23:31:28Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "dc1f1004025f4f941b2843d0aa7936355a41fc9c",
+    "line" : null,
+    "diffHunk" : "@@ -215,8 +215,41 @@ object JsonProtocol extends DefaultJsonProtocol {\n   implicit val CreateCommandFormat: RootJsonFormat[domain.CreateCommand[JsObject]] = jsonFormat3(\n     domain.CreateCommand[JsObject])\n \n-  implicit val ExerciseCommandFormat: RootJsonFormat[domain.ExerciseCommand[JsValue]] =\n-    jsonFormat5(domain.ExerciseCommand[JsValue])\n+  implicit val ExerciseCommandFormat\n+    : RootJsonFormat[domain.ExerciseCommand[JsValue, domain.ContractLocator[JsValue]]] =\n+    new RootJsonFormat[domain.ExerciseCommand[JsValue, domain.ContractLocator[JsValue]]] {\n+      @SuppressWarnings(Array(\"org.wartremover.warts.NonUnitStatements\"))\n+      override def write(\n+          obj: domain.ExerciseCommand[JsValue, domain.ContractLocator[JsValue]]): JsValue = {\n+\n+        val reference: JsObject =\n+          ContractLocatorFormat.write(obj.reference).asJsObject(\"reference must be an object\")\n+\n+        val fields = new collection.mutable.ListBuffer[(String, JsValue)]\n+        fields.sizeHint(5)\n+        fields ++= reference.fields.toList\n+        fields += \"choice\" -> obj.choice.toJson\n+        fields += \"argument\" -> obj.argument.toJson\n+        if (obj.meta.isDefined)\n+          fields += \"meta\" -> obj.meta.toJson"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id" : "03cf9930-25dd-4cde-8f74-e38ac5fec8d9",
+    "prId" : 4586,
+    "comments" : [
+      {
+        "id" : "1b6b033a-b1a1-4c87-8cd0-7c28c1e2cdbc",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      event.signatories.exists(parties) || event.observers\r\n```\r\n\r\n(and similarly for `observers`)",
+        "createdAt" : "2020-02-18T19:13:13Z",
+        "updatedAt" : "2020-02-19T09:57:39Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b5c7b7079fe5153e8414bbbc44fac97fd697da4b",
+    "line" : null,
+    "diffHunk" : "@@ -26,6 +30,15 @@ object TransactionTreeTrimmer {\n     case Kind.Empty => false\n   }\n \n+  private def exerciseEventOrStakeholder(parties: Set[String]): TreeEvent.Kind => Boolean = {\n+    case Kind.Created(event) =>\n+      event.signatories.toSet.intersect(parties).nonEmpty || event.observers.toSet"
+  },
+  {
+    "id" : "700a37ad-51a0-4e43-956c-146423c39e0c",
+    "prId" : 4586,
+    "comments" : [
+      {
+        "id" : "71e92655-f7e6-4e61-8a06-18aeb6acf450",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "are you sure that `templateIds.isEmpty` does not change the existing behavior?",
+        "createdAt" : "2020-02-21T15:46:47Z",
+        "updatedAt" : "2020-02-21T15:46:48Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "060273d6-30f0-4ca8-8015-2422c850252c",
+        "parentId" : "71e92655-f7e6-4e61-8a06-18aeb6acf450",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I see you moved this check from `streamTransactions`. So, it is all right.",
+        "createdAt" : "2020-02-21T15:49:36Z",
+        "updatedAt" : "2020-02-21T15:49:36Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b5c7b7079fe5153e8414bbbc44fac97fd697da4b",
+    "line" : 10,
+    "diffHunk" : "@@ -8,8 +8,12 @@ import com.digitalasset.ledger.api.v1.transaction.{TransactionTree, TreeEvent}\n import com.digitalasset.ledger.api.v1.value.Identifier\n \n object TransactionTreeTrimmer {\n-  def trim(templateIds: Set[Identifier]): TransactionTree => TransactionTree = {\n-    val shouldKeep: TreeEvent.Kind => Boolean = containsTemplateId(templateIds.map(asTuple))\n+  def trim(\n+      parties: Set[String],\n+      templateIds: Set[Identifier]): TransactionTree => TransactionTree = {\n+    val shouldKeep: TreeEvent.Kind => Boolean = event =>\n+      (templateIds.isEmpty || containsTemplateId(templateIds.map(asTuple))(event)) &&"
+  }
+]

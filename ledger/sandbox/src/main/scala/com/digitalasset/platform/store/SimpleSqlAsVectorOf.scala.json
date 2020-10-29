@@ -1,0 +1,152 @@
+[
+  {
+    "id" : "d831933f-1e52-4a69-9f7f-71c6be2b5a58",
+    "prId" : 5181,
+    "comments" : [
+      {
+        "id" : "721e0c31-acd2-4940-89d6-03dba01bc521",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "`book`?",
+        "createdAt" : "2020-03-25T12:33:16Z",
+        "updatedAt" : "2020-03-25T14:43:37Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "66ada46a-c70d-4f96-92c0-bb4578056162",
+        "parentId" : "721e0c31-acd2-4940-89d6-03dba01bc521",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : ":spaghetti: ",
+        "createdAt" : "2020-03-25T12:40:33Z",
+        "updatedAt" : "2020-03-25T14:43:37Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d6d70888-acc9-4468-9c86-7e66b5968d6f",
+        "parentId" : "721e0c31-acd2-4940-89d6-03dba01bc521",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/5181/commits/12b7494cef9085100bd028912b4d637cbb95aa81",
+        "createdAt" : "2020-03-25T12:45:49Z",
+        "updatedAt" : "2020-03-25T14:43:37Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "de51a118c24adc46da99a09073bee4661f4203ba",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,54 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.store\n+\n+import java.sql.Connection\n+\n+import anorm.{Cursor, Row, RowParser, SimpleSql}\n+\n+import scala.util.control.NonFatal\n+import scala.util.{Failure, Success, Try}\n+\n+object SimpleSqlAsVectorOf {\n+\n+  private def throwNonFatal(throwable: Throwable): Nothing =\n+    throwable match { case NonFatal(exception) => throw exception }\n+\n+  implicit final class SimpleSqlAsVectorOf(val sql: SimpleSql[Row]) extends AnyVal {\n+\n+    /**\n+      * Returns the result of [[sql]] as a [[Vector]].\n+      *\n+      * Allows to avoid linear operations in lists when using the default\n+      * [[anorm.ResultSetParser]]s (e.g. when retrieving the result set\n+      * length in [[com.digitalasset.platform.store.dao.PaginatingAsyncStream]]\n+      *\n+      * @param parser knows how to turn each row in an [[A]]\n+      * @param conn an implicit JDBC connection\n+      * @tparam A the type of each item in the result\n+      * @throws Throwable if either the query execution or parsing fails\n+      * @return the query result as a vector\n+      */\n+    @throws[Throwable]\n+    def asVectorOf[A](parser: RowParser[A])(implicit conn: Connection): Vector[A] = {\n+\n+      @annotation.tailrec\n+      def go(results: Vector[A])(cursor: Option[Cursor]): Try[Vector[A]] =\n+        cursor match {\n+          case Some(cursor) =>\n+            cursor.row.as(parser) match {\n+              case Success(book) => go(results :+ book)(cursor.next)"
+  },
+  {
+    "id" : "ba1ac26f-7159-435c-ac70-19ed1020e36f",
+    "prId" : 5181,
+    "comments" : [
+      {
+        "id" : "810d27a4-e049-40f9-896b-73bac8c5993d",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "So on a fatal error, we throw a pattern match failure? Why not just throw it anyway? I mean, it shouldn't have made it this far, but if it did…",
+        "createdAt" : "2020-03-25T14:32:23Z",
+        "updatedAt" : "2020-03-25T14:43:37Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ac06b698-2cf8-4cd2-b328-1dbc14925822",
+        "parentId" : "810d27a4-e049-40f9-896b-73bac8c5993d",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I was probably thinking too hard about this, I'll simply throw whatever I have at hand.",
+        "createdAt" : "2020-03-25T14:42:28Z",
+        "updatedAt" : "2020-03-25T14:43:37Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b5071e89-5068-406e-9b6e-a8b2fba94e13",
+        "parentId" : "810d27a4-e049-40f9-896b-73bac8c5993d",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Adddressed by https://github.com/digital-asset/daml/pull/5181/commits/de58777549851b469ba52e5d7d96020882baf1c1",
+        "createdAt" : "2020-03-25T14:43:54Z",
+        "updatedAt" : "2020-03-25T14:43:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "de51a118c24adc46da99a09073bee4661f4203ba",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,54 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.store\n+\n+import java.sql.Connection\n+\n+import anorm.{Cursor, Row, RowParser, SimpleSql}\n+\n+import scala.util.control.NonFatal\n+import scala.util.{Failure, Success, Try}\n+\n+object SimpleSqlAsVectorOf {\n+\n+  private def throwNonFatal(throwable: Throwable): Nothing =\n+    throwable match { case NonFatal(exception) => throw exception }\n+\n+  implicit final class SimpleSqlAsVectorOf(val sql: SimpleSql[Row]) extends AnyVal {\n+\n+    /**\n+      * Returns the result of [[sql]] as a [[Vector]].\n+      *\n+      * Allows to avoid linear operations in lists when using the default\n+      * [[anorm.ResultSetParser]]s (e.g. when retrieving the result set\n+      * length in [[com.digitalasset.platform.store.dao.PaginatingAsyncStream]]\n+      *\n+      * @param parser knows how to turn each row in an [[A]]\n+      * @param conn an implicit JDBC connection\n+      * @tparam A the type of each item in the result\n+      * @throws Throwable if either the query execution or parsing fails\n+      * @return the query result as a vector\n+      */\n+    @throws[Throwable]\n+    def asVectorOf[A](parser: RowParser[A])(implicit conn: Connection): Vector[A] = {\n+\n+      @annotation.tailrec\n+      def go(results: Vector[A])(cursor: Option[Cursor]): Try[Vector[A]] =\n+        cursor match {\n+          case Some(cursor) =>\n+            cursor.row.as(parser) match {\n+              case Success(value) => go(results :+ value)(cursor.next)\n+              case Failure(f) => Failure(f)\n+            }\n+          case _ => Try(results)\n+        }\n+\n+      sql\n+        .withResult(go(Vector.empty))\n+        .fold(es => throwNonFatal(es.head), _.fold(throwNonFatal, identity))"
+  }
+]

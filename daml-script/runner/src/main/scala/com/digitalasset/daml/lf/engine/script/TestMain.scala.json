@@ -1,0 +1,268 @@
+[
+  {
+    "id" : "26071f93-de42-4545-823a-7e5b2def8da9",
+    "prId" : 5076,
+    "comments" : [
+      {
+        "id" : "e97546c6-0986-4533-bc58-84d79402dcab",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe worth factoring this out to a top-level definition? I’m also not a huge fan of `unapply`, I always find it a bit hart to read and iirc it also breaks completeness checks. Can we just separate this in two steps: First use `collect` as a `mapMaybe` where the function is something like the current `unapply` (you can turn a function returning an optional into a partial function using `Function.unlift` I believe or just define it directly as a partial function). Then we have a list of all scripts. And then in a second step run them.",
+        "createdAt" : "2020-03-18T17:39:38Z",
+        "updatedAt" : "2020-03-19T10:58:00Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dae423b0-f281-49ef-9d9b-927fd4a1960e",
+        "parentId" : "e97546c6-0986-4533-bc58-84d79402dcab",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "`Function.unlift` is a good hint, thanks! It turns out that making `Script.fromIdentifier|Dar` pure allows to simplify this bit. I've pulled it out into a separate step that collects all test scripts that take no arguments into a list using `collect(Function.unlift ...)`",
+        "createdAt" : "2020-03-19T11:01:18Z",
+        "updatedAt" : "2020-03-19T11:01:18Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "01051d0c28be1ed94c820d9f5e2f51db6762c6cb",
+    "line" : null,
+    "diffHunk" : "@@ -123,29 +122,46 @@ object TestMain extends StrictLogging {\n           success = new AtomicBoolean(true)\n           _ <- Future.sequence {\n             dar.main._2.modules.flatMap {\n-              case (moduleName, module) =>\n+              case (moduleName, module) => {\n+                object ScriptDefinition {"
+  },
+  {
+    "id" : "d5b9d405-320f-4f56-a997-3989f7b37f3f",
+    "prId" : 4581,
+    "comments" : [
+      {
+        "id" : "05ad25ca-0c96-484d-a6be-85eb9c3a1fb8",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Not strictly a problem but prefer `Option` over `Some` as a constructor (try `Some(null)` and `Option(null)`).",
+        "createdAt" : "2020-02-18T15:20:06Z",
+        "updatedAt" : "2020-02-18T16:20:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "09c9ba76-146c-4900-9dc1-2744b2ac35f6",
+        "parentId" : "05ad25ca-0c96-484d-a6be-85eb9c3a1fb8",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Even when you can guarantee it's not `null`? I'm happy to change it, but we use `Some(…)` all over the place.",
+        "createdAt" : "2020-02-18T15:55:46Z",
+        "updatedAt" : "2020-02-18T16:20:51Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d6e1109c232c3009ef399fb97b86a4e91ad577ed",
+    "line" : 5,
+    "diffHunk" : "@@ -90,7 +90,7 @@ object TestMain extends StrictLogging {\n             val (apiParameters, cleanup) = if (config.ledgerHost.isEmpty) {\n               val sandboxConfig = SandboxConfig.default.copy(\n                 port = 0, // Automatically choose a free port.\n-                timeProviderType = config.timeProviderType,\n+                timeProviderType = Some(config.timeProviderType),"
+  },
+  {
+    "id" : "9f1a65e8-c598-4dce-8404-a22ea20ac197",
+    "prId" : 3942,
+    "comments" : [
+      {
+        "id" : "09fcc986-8c09-41d4-8fc8-822ac148ba0d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I guess `sandbox.port` points to the resolved port instead of `0`? Otherwise I don’t understand how we can connect. ",
+        "createdAt" : "2020-01-03T14:28:21Z",
+        "updatedAt" : "2020-01-03T14:28:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d9fdaeef-285e-4040-8113-0934d4b85832",
+        "parentId" : "09fcc986-8c09-41d4-8fc8-822ac148ba0d",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, exactly. The `SandboxServer` object exposes the selected port. So, fortunately no need for `portFile` or the like.",
+        "createdAt" : "2020-01-03T14:40:11Z",
+        "updatedAt" : "2020-01-03T14:40:11Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "24313170-b0d6-40d7-ac49-26503dad8c52",
+        "parentId" : "09fcc986-8c09-41d4-8fc8-822ac148ba0d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Great, thanks for the confirmation :+1:",
+        "createdAt" : "2020-01-03T14:42:23Z",
+        "updatedAt" : "2020-01-03T14:42:23Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d45355030b57940f959167de80e892f4e800fb6f",
+    "line" : 4,
+    "diffHunk" : "@@ -93,6 +93,7 @@ object TestMain extends StrictLogging {\n           case None =>\n             val (apiParameters, cleanup) = if (config.ledgerHost.isEmpty) {\n               val sandboxConfig = SandboxConfig.default.copy(\n+                port = 0, // Automatically choose a free port."
+  },
+  {
+    "id" : "d13335a2-b72c-4eda-8d85-5ae9d1603e1d",
+    "prId" : 3918,
+    "comments" : [
+      {
+        "id" : "4b693fe5-1e8a-4010-88ad-6e4062d69731",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Seems like a useful logging statement. Is there a reason why it is disabled?",
+        "createdAt" : "2020-01-03T08:19:06Z",
+        "updatedAt" : "2020-01-03T12:32:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a05b894f-8f56-4e50-aaed-a6913302992e",
+        "parentId" : "4b693fe5-1e8a-4010-88ad-6e4062d69731",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Good catch, I've enabled logging and uncommented this.",
+        "createdAt" : "2020-01-03T09:14:06Z",
+        "updatedAt" : "2020-01-03T12:32:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c7a846c9d2d4667f802a5f078072d5c44f982816",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,162 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.engine.script\n+\n+import java.io.FileInputStream\n+\n+import akka.actor.ActorSystem\n+import akka.stream._\n+import java.time.Instant\n+import java.util.concurrent.atomic.AtomicBoolean\n+\n+import scala.concurrent.{Await, ExecutionContext, Future}\n+import scala.concurrent.duration.Duration\n+import scala.io.Source\n+import scalaz.syntax.traverse._\n+import spray.json._\n+import com.digitalasset.api.util.TimeProvider\n+import com.digitalasset.daml.lf.archive.{Dar, DarReader}\n+import com.digitalasset.daml.lf.archive.Decode\n+import com.digitalasset.daml.lf.data.Ref.{Identifier, PackageId, QualifiedName}\n+import com.digitalasset.daml.lf.language.Ast\n+import com.digitalasset.daml.lf.language.Ast.Package\n+import com.digitalasset.daml_lf_dev.DamlLf\n+import com.digitalasset.grpc.adapter.{AkkaExecutionSequencerPool, ExecutionSequencerFactory}\n+import com.digitalasset.ledger.api.refinements.ApiTypes.ApplicationId\n+import com.digitalasset.ledger.client.configuration.{\n+  CommandClientConfiguration,\n+  LedgerClientConfiguration,\n+  LedgerIdRequirement\n+}\n+import com.digitalasset.ledger.client.services.commands.CommandUpdater\n+import com.digitalasset.platform.sandbox.SandboxServer\n+import com.digitalasset.platform.sandbox.config.SandboxConfig\n+import com.digitalasset.platform.services.time.TimeProviderType\n+import com.google.protobuf.ByteString\n+\n+import scala.util.control.NonFatal\n+import scala.util.{Failure, Success}\n+\n+object TestMain {\n+\n+  def main(args: Array[String]): Unit = {\n+\n+    TestConfig.parse(args) match {\n+      case None => sys.exit(1)\n+      case Some(config) => {\n+        val encodedDar: Dar[(PackageId, DamlLf.ArchivePayload)] =\n+          DarReader().readArchiveFromFile(config.darPath).get\n+        val dar: Dar[(PackageId, Package)] = encodedDar.map {\n+          case (pkgId, pkgArchive) => Decode.readArchivePayload(pkgId, pkgArchive)\n+        }\n+\n+        val applicationId = ApplicationId(\"Script Test\")\n+        val clientConfig = LedgerClientConfiguration(\n+          applicationId = ApplicationId.unwrap(applicationId),\n+          ledgerIdRequirement = LedgerIdRequirement(\"\", enabled = false),\n+          commandClient = CommandClientConfiguration.default,\n+          sslContext = None\n+        )\n+        val timeProvider: TimeProvider =\n+          config.timeProviderType match {\n+            case TimeProviderType.Static => TimeProvider.Constant(Instant.EPOCH)\n+            case TimeProviderType.WallClock => TimeProvider.UTC\n+            case _ =>\n+              throw new RuntimeException(s\"Unexpected TimeProviderType: $config.timeProviderType\")\n+          }\n+        val commandUpdater = new CommandUpdater(\n+          timeProviderO = Some(timeProvider),\n+          ttl = config.commandTtl,\n+          overrideTtl = true)\n+\n+        val system: ActorSystem = ActorSystem(\"ScriptTest\")\n+        implicit val sequencer: ExecutionSequencerFactory =\n+          new AkkaExecutionSequencerPool(\"ScriptTestPool\")(system)\n+        implicit val materializer: Materializer = Materializer(system)\n+        implicit val ec: ExecutionContext = system.dispatcher\n+\n+        val runner = new Runner(dar, applicationId, commandUpdater)\n+        val (participantParams, participantCleanup) = config.participantConfig match {\n+          case Some(file) => {\n+            val source = Source.fromFile(file)\n+            val fileContent = try {\n+              source.mkString\n+            } finally {\n+              source.close\n+            }\n+            val jsVal = fileContent.parseJson\n+            import ParticipantsJsonProtocol._\n+            (jsVal.convertTo[Participants[ApiParameters]], () => ())\n+          }\n+          case None =>\n+            val (apiParameters, cleanup) = if (config.ledgerHost.isEmpty) {\n+              val sandboxConfig = SandboxConfig.default.copy(\n+                timeProviderType = config.timeProviderType\n+              )\n+              val sandbox = new SandboxServer(sandboxConfig)\n+              val sandboxClosed = new AtomicBoolean(false)\n+\n+              def closeSandbox(): Unit = {\n+                if (sandboxClosed.compareAndSet(false, true)) sandbox.close()\n+              }\n+\n+              try Runtime.getRuntime.addShutdownHook(new Thread(() => closeSandbox()))\n+              catch {\n+                case NonFatal(t) =>\n+                  //logger.error(\"Shutting down Sandbox application because of initialization error\", t)"
+  },
+  {
+    "id" : "f8431912-8cbd-461e-9ee4-a2651706d48b",
+    "prId" : 3918,
+    "comments" : [
+      {
+        "id" : "9e734184-258e-403c-8928-499d9efc9d30",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "No need to address this as part of this PR but afaict this will always launch on port 6865. It would be nice if we could just choose an arbitrary free port by binding to port 0.",
+        "createdAt" : "2020-01-03T08:20:45Z",
+        "updatedAt" : "2020-01-03T12:32:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b936bf02-6661-4ecb-bf04-f511a17885d2",
+        "parentId" : "9e734184-258e-403c-8928-499d9efc9d30",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, that would be a good improvement. Might also allow us to remove the `exclusive` tag on the test.",
+        "createdAt" : "2020-01-03T09:14:41Z",
+        "updatedAt" : "2020-01-03T12:32:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c7a846c9d2d4667f802a5f078072d5c44f982816",
+    "line" : 95,
+    "diffHunk" : "@@ -0,0 +1,162 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.engine.script\n+\n+import java.io.FileInputStream\n+\n+import akka.actor.ActorSystem\n+import akka.stream._\n+import java.time.Instant\n+import java.util.concurrent.atomic.AtomicBoolean\n+\n+import scala.concurrent.{Await, ExecutionContext, Future}\n+import scala.concurrent.duration.Duration\n+import scala.io.Source\n+import scalaz.syntax.traverse._\n+import spray.json._\n+import com.digitalasset.api.util.TimeProvider\n+import com.digitalasset.daml.lf.archive.{Dar, DarReader}\n+import com.digitalasset.daml.lf.archive.Decode\n+import com.digitalasset.daml.lf.data.Ref.{Identifier, PackageId, QualifiedName}\n+import com.digitalasset.daml.lf.language.Ast\n+import com.digitalasset.daml.lf.language.Ast.Package\n+import com.digitalasset.daml_lf_dev.DamlLf\n+import com.digitalasset.grpc.adapter.{AkkaExecutionSequencerPool, ExecutionSequencerFactory}\n+import com.digitalasset.ledger.api.refinements.ApiTypes.ApplicationId\n+import com.digitalasset.ledger.client.configuration.{\n+  CommandClientConfiguration,\n+  LedgerClientConfiguration,\n+  LedgerIdRequirement\n+}\n+import com.digitalasset.ledger.client.services.commands.CommandUpdater\n+import com.digitalasset.platform.sandbox.SandboxServer\n+import com.digitalasset.platform.sandbox.config.SandboxConfig\n+import com.digitalasset.platform.services.time.TimeProviderType\n+import com.google.protobuf.ByteString\n+\n+import scala.util.control.NonFatal\n+import scala.util.{Failure, Success}\n+\n+object TestMain {\n+\n+  def main(args: Array[String]): Unit = {\n+\n+    TestConfig.parse(args) match {\n+      case None => sys.exit(1)\n+      case Some(config) => {\n+        val encodedDar: Dar[(PackageId, DamlLf.ArchivePayload)] =\n+          DarReader().readArchiveFromFile(config.darPath).get\n+        val dar: Dar[(PackageId, Package)] = encodedDar.map {\n+          case (pkgId, pkgArchive) => Decode.readArchivePayload(pkgId, pkgArchive)\n+        }\n+\n+        val applicationId = ApplicationId(\"Script Test\")\n+        val clientConfig = LedgerClientConfiguration(\n+          applicationId = ApplicationId.unwrap(applicationId),\n+          ledgerIdRequirement = LedgerIdRequirement(\"\", enabled = false),\n+          commandClient = CommandClientConfiguration.default,\n+          sslContext = None\n+        )\n+        val timeProvider: TimeProvider =\n+          config.timeProviderType match {\n+            case TimeProviderType.Static => TimeProvider.Constant(Instant.EPOCH)\n+            case TimeProviderType.WallClock => TimeProvider.UTC\n+            case _ =>\n+              throw new RuntimeException(s\"Unexpected TimeProviderType: $config.timeProviderType\")\n+          }\n+        val commandUpdater = new CommandUpdater(\n+          timeProviderO = Some(timeProvider),\n+          ttl = config.commandTtl,\n+          overrideTtl = true)\n+\n+        val system: ActorSystem = ActorSystem(\"ScriptTest\")\n+        implicit val sequencer: ExecutionSequencerFactory =\n+          new AkkaExecutionSequencerPool(\"ScriptTestPool\")(system)\n+        implicit val materializer: Materializer = Materializer(system)\n+        implicit val ec: ExecutionContext = system.dispatcher\n+\n+        val runner = new Runner(dar, applicationId, commandUpdater)\n+        val (participantParams, participantCleanup) = config.participantConfig match {\n+          case Some(file) => {\n+            val source = Source.fromFile(file)\n+            val fileContent = try {\n+              source.mkString\n+            } finally {\n+              source.close\n+            }\n+            val jsVal = fileContent.parseJson\n+            import ParticipantsJsonProtocol._\n+            (jsVal.convertTo[Participants[ApiParameters]], () => ())\n+          }\n+          case None =>\n+            val (apiParameters, cleanup) = if (config.ledgerHost.isEmpty) {\n+              val sandboxConfig = SandboxConfig.default.copy("
+  }
+]

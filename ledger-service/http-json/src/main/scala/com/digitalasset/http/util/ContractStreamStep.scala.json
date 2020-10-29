@@ -1,0 +1,96 @@
+[
+  {
+    "id" : "c8020788-4422-4cc8-9ba0-6c6f6d062441",
+    "prId" : 4815,
+    "comments" : [
+      {
+        "id" : "5c4d33cb-e000-4993-982b-bd934b419675",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "do we guarantee that `o.offset` > `this.offset` in the case when we append `LiveBegin(AbsoluteBookmark(_))` to another `LiveBegin(AbsoluteBookmark(_))`?\r\n\r\nelse it should be pseudo code:\r\n```\r\ncase ((LiveBegin(AbsoluteBookmark(x)), LiveBegin(AbsoluteBookmark(y))) if x < y => o\r\ncase ((LiveBegin(AbsoluteBookmark(x)), LiveBegin(AbsoluteBookmark(y))) if x>= y => this\r\n```",
+        "createdAt" : "2020-03-04T19:48:35Z",
+        "updatedAt" : "2020-03-04T19:54:19Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0a2ff601-6daf-45a6-94c0-c0ba70046f80",
+        "parentId" : "5c4d33cb-e000-4993-982b-bd934b419675",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "actually I see the comment above :), the proposed pseudo code will break associativity.\r\n",
+        "createdAt" : "2020-03-04T19:59:04Z",
+        "updatedAt" : "2020-03-04T19:59:04Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3d2649b5-82b0-48f7-9017-474690006dcc",
+        "parentId" : "5c4d33cb-e000-4993-982b-bd934b419675",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It might or might not be associative, but keep in mind the real intent of this semigroup is to preserve the offset _that appears later in the stream_, for which always yielding `o` in this scenario is correct. This intent is made explicit:\r\n\r\nhttps://github.com/digital-asset/daml/blob/f9057bea195abb547d6af2f89f8e09776a45f267/ledger-service/http-json/src/test/scala/com/digitalasset/http/util/ContractStreamStepTest.scala#L43-L50",
+        "createdAt" : "2020-03-04T20:28:42Z",
+        "updatedAt" : "2020-03-04T20:28:43Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "df23e5ac71f09839f830041a48f8e5b10db5831d",
+    "line" : 30,
+    "diffHunk" : "@@ -29,11 +29,13 @@ private[http] sealed abstract class ContractStreamStep[+D, +C] extends Product w\n         Txn(toInsertDelete, off)\n       case (Acs(_) | Txn(_, _), Txn(ostep, off)) =>\n         Txn(toInsertDelete append ostep, off)\n-      case (LiveBegin(_), Txn(_, _) | LiveBegin(_)) => o\n+      case (LiveBegin(_), Txn(_, _)) => o\n       // the following cases should never happen in a real stream; we attempt to\n       // provide definitions that make `append` totally associative, anyway\n-      case (Acs(_), LiveBegin(LedgerBegin)) => this\n-      case (LiveBegin(LedgerBegin), Acs(_)) => o\n+      case (Acs(_) | LiveBegin(_), LiveBegin(LedgerBegin)) => this\n+      case (LiveBegin(LedgerBegin), Acs(_) | LiveBegin(_)) |\n+          (LiveBegin(AbsoluteBookmark(_)), LiveBegin(AbsoluteBookmark(_))) =>"
+  },
+  {
+    "id" : "ef034b83-4723-40dd-9c8e-9d819822043b",
+    "prId" : 4465,
+    "comments" : [
+      {
+        "id" : "4713a0dd-5993-4f5f-adaf-164a71c85d18",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Obviously just glorified `Option` for now, but will acquire one or two new decorations for #4509.",
+        "createdAt" : "2020-02-13T23:38:34Z",
+        "updatedAt" : "2020-02-13T23:38:34Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "00755241b71c6411dfc481b868ec92d51e51b319",
+    "line" : 59,
+    "diffHunk" : "@@ -0,0 +1,63 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.http\n+package util\n+\n+import InsertDeleteStep.{Cid, Inserts}\n+\n+import scalaz.\\/\n+import scalaz.std.tuple._\n+import scalaz.syntax.functor._\n+\n+import scala.collection.generic.CanBuildFrom\n+\n+private[http] sealed abstract class ContractStreamStep[+D, +C] extends Product with Serializable {\n+  import ContractStreamStep._\n+\n+  def toInsertDelete: InsertDeleteStep[D, C] = this match {\n+    case LiveBegin => InsertDeleteStep(Vector.empty, Map.empty)\n+    case Txn(step) => step\n+  }\n+\n+  /** Forms a monoid with 0 = LiveBegin */\n+  def append[DD >: D, CC >: C: Cid](o: ContractStreamStep[DD, CC]): ContractStreamStep[DD, CC] =\n+    (this, o) match {\n+      case (_, LiveBegin) => this\n+      case (LiveBegin, _) => o\n+      case _ => Txn(toInsertDelete append o.toInsertDelete)\n+    }\n+\n+  def mapPreservingIds[CC](f: C => CC): ContractStreamStep[D, CC] =\n+    mapStep(_ mapPreservingIds f)\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\"))\n+  def partitionBimap[LD, DD, LC, CC, LDS, LCS](f: D => (LD \\/ DD), g: C => (LC \\/ CC))(\n+      implicit LDS: CanBuildFrom[Map[String, D], LD, LDS],\n+      LCS: CanBuildFrom[Inserts[C], LC, LCS],\n+  ): (LDS, LCS, ContractStreamStep[DD, CC]) =\n+    this match {\n+      case LiveBegin => (LDS().result(), LCS().result(), LiveBegin)\n+      case Txn(step) => step partitionBimap (f, g) map (Txn(_))\n+    }\n+\n+  def mapStep[DD, CC](\n+      f: InsertDeleteStep[D, C] => InsertDeleteStep[DD, CC]): ContractStreamStep[DD, CC] =\n+    this match {\n+      case LiveBegin => LiveBegin\n+      case Txn(step) => Txn(f(step))\n+    }\n+\n+  def nonEmpty: Boolean = this match {\n+    case LiveBegin => true // unnatural wrt `toInsertDelete`, but what nonEmpty is used for here\n+    case Txn(step) => step.nonEmpty\n+  }\n+}\n+\n+private[http] object ContractStreamStep extends WithLAV1[ContractStreamStep] {\n+  case object LiveBegin extends ContractStreamStep[Nothing, Nothing]\n+  final case class Txn[+D, +C](step: InsertDeleteStep[D, C]) extends ContractStreamStep[D, C]"
+  }
+]

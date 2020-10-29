@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "42946efc-3744-4308-96b7-fb54b24a9f19",
+    "prId" : 5315,
+    "comments" : [
+      {
+        "id" : "211b5a0b-080c-4c5f-b0db-ecefe7ea8fd2",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Are you sure none of these are nullable because they may come from a remote participant and these details are not known?",
+        "createdAt" : "2020-03-31T15:35:29Z",
+        "updatedAt" : "2020-03-31T17:43:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "64ea030e-f21d-4567-80ea-df7e79739e79",
+        "parentId" : "211b5a0b-080c-4c5f-b0db-ecefe7ea8fd2",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "If that's the case, then it shouldn't be in the completion in the first place.",
+        "createdAt" : "2020-03-31T15:43:47Z",
+        "updatedAt" : "2020-03-31T17:43:59Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "28223f41-b023-4647-90ad-053330ad20a3",
+        "parentId" : "211b5a0b-080c-4c5f-b0db-ecefe7ea8fd2",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Right, thanks.",
+        "createdAt" : "2020-03-31T15:45:11Z",
+        "updatedAt" : "2020-03-31T17:43:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2beee020cac3ccd86a87358e05512687af93e7d4",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,37 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+---------------------------------------------------------------------------------------------------\n+-- V16: Delete checkpoints\n+--\n+-- Checkpoints/heartbeats are no longer stored and previously stored checkpoints\n+-- can be removed.\n+---------------------------------------------------------------------------------------------------\n+\n+\n+-- ledger_entries\n+delete from ledger_entries where typ = 'checkpoint';\n+\n+alter table ledger_entries drop constraint check_entry;\n+alter table ledger_entries add constraint check_entry check (\n+    (typ = 'transaction' and transaction_id is not null and effective_at is not null and transaction is not null and (\n+      (submitter is null and application_id is null and command_id is null) or\n+      (submitter is not null and application_id is not null and command_id is not null)\n+    )) or\n+    (typ = 'rejection' and command_id is not null and application_id is not null and submitter is not null and\n+     rejection_type is not null and rejection_description is not null)\n+);\n+\n+\n+-- participant_command_completions\n+delete from participant_command_completions\n+where application_id is null and submitting_party is null and command_id is null;\n+\n+alter table participant_command_completions\n+alter column application_id TYPE varchar not null;\n+\n+alter table participant_command_completions\n+alter column submitting_party TYPE varchar not null;\n+\n+alter table participant_command_completions\n+alter column command_id TYPE varchar not null;"
+  }
+]

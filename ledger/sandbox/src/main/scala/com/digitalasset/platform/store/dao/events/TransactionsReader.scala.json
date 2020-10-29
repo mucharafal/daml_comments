@@ -1,0 +1,922 @@
+[
+  {
+    "id" : "53acb776-f4cb-4018-9c1a-9b490d93d31a",
+    "prId" : 6658,
+    "comments" : [
+      {
+        "id" : "556687cd-dad2-4ad5-972e-587d61ee4962",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I personally dislike the idea of having implicit `java.sql.Connection`s passed around. It is not a typeclass and it is not a unique type.",
+        "createdAt" : "2020-07-15T13:52:23Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "256e4da7-dde5-47a6-915e-a327b1369c18",
+        "parentId" : "556687cd-dad2-4ad5-972e-587d61ee4962",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "You're right, but that is how anorm's API is designed.\r\n\r\nIf you like, we can introduce a phantom type variable and subtype to hold it, so we can conform to anorm's API while having it be a \"real\" typeclass in our own code. But that ought to be a separate PR, I think.",
+        "createdAt" : "2020-07-15T14:12:18Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "18aa50e0-5388-4550-a514-5911f160fb60",
+        "parentId" : "556687cd-dad2-4ad5-972e-587d61ee4962",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "or just pass the implicit `Connection` explicitly everywhere in our code. But in any case it is a totally different topic, `anorm` encourages this and we do pass implicit `Connection` in a ~few~ bunch of other places.  Don't want to start another `implicit` vs explicit flame war :)\r\n\r\nBut I will definitely bring this up next time we have a team meeting.",
+        "createdAt" : "2020-07-15T15:29:38Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69f55443bf44c1520d2dc1c24b1aa8bee88b4d46",
+    "line" : null,
+    "diffHunk" : "@@ -72,17 +72,15 @@ private[dao] final class TransactionsReader(\n \n     val requestedRangeF = getEventSeqIdRange(startExclusive, endInclusive)\n \n-    val query = (range: EventsRange[Long]) =>\n-      (connection: Connection) => {\n-        logger.debug(s\"getFlatTransactions query($range)\")\n-        EventsTable\n-          .preparePagedGetFlatTransactions(sqlFunctions)(\n-            range = range,\n-            filter = filter,\n-            pageSize = pageSize,\n-          )\n-          .withFetchSize(Some(pageSize))\n-          .asVectorOf(EventsTable.rawFlatEventParser)(connection)\n+    val query = (range: EventsRange[Long]) => { implicit connection: Connection =>"
+  },
+  {
+    "id" : "091a4905-f351-45a1-8e8c-153fc5a24d55",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "468b81d6-5c91-48ec-a7a3-fb49aae42ec1",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "What does `0` mean here?",
+        "createdAt" : "2020-06-26T14:18:28Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "35aa647a-8630-4a61-901f-756875b9fe99",
+        "parentId" : "468b81d6-5c91-48ec-a7a3-fb49aae42ec1",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "You mean `0` in `eventsRange0`? It is for the initial state, `eventsRange1` -- next state",
+        "createdAt" : "2020-06-26T22:16:51Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -62,41 +62,53 @@ private[dao] final class TransactionsReader(\n       filter: FilterRelation,\n       verbose: Boolean,\n   ): Source[(Offset, GetTransactionsResponse), NotUsed] = {\n-    val events: Source[EventsTable.Entry[Event], NotUsed] =\n-      PaginatingAsyncStream.streamFrom((startExclusive, Option.empty[Int]), getOffset[Event]) {\n-        case (prevOffset, prevNodeIndex) =>\n-          val query =\n-            EventsTable\n-              .preparePagedGetFlatTransactions(sqlFunctions)(\n-                startExclusive = prevOffset,\n-                endInclusive = endInclusive,\n-                filter = filter,\n-                pageSize = pageSize,\n-                previousEventNodeIndex = prevNodeIndex,\n-              )\n-              .withFetchSize(Some(pageSize))\n-          val rawEventsFuture =\n-            dispatcher.executeSql(dbMetrics.getFlatTransactions) { implicit connection =>\n-              query.asVectorOf(EventsTable.rawFlatEventParser)\n-            }\n-          rawEventsFuture.flatMap(\n-            rawEvents =>\n-              Timed.future(\n-                future = Future.traverse(rawEvents)(deserializeEntry(verbose)),\n-                timer = dbMetrics.getFlatTransactions.translationTimer,\n+\n+    val eventsRangeF: Future[EventsRange[Long]] = dispatcher.executeSql(dbMetrics.getRowIdRange) {\n+      connection =>\n+        EventsRange.eventsRange(EventsRange(startExclusive, endInclusive))(connection)\n+    }\n+\n+    def getEvents(eventsRange0: EventsRange[Long]): Source[EventsTable.Entry[Event], NotUsed] ="
+  },
+  {
+    "id" : "9fbaa54e-5a86-4246-9ce9-5d4121b324e4",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "507c1892-6198-4e9a-908c-41fd3cd44ae1",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Would it make sense to shoot the two queries in a single transaction? The round-trip could be detrimental.",
+        "createdAt" : "2020-06-26T14:19:51Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d0ecf462-6fbe-4541-bdfb-fe82c234310c",
+        "parentId" : "507c1892-6198-4e9a-908c-41fd3cd44ae1",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Mmmmh, looks like it's not feasible. Not easily, at least.",
+        "createdAt" : "2020-06-26T14:23:26Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f2f16550-e499-4222-9a17-3fb5b418f15c",
+        "parentId" : "507c1892-6198-4e9a-908c-41fd3cd44ae1",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I was thinking about this, did not find an easy way to fuse this query into the same transaction context as the pagination query... but in any case we only need to run this query once, before we get the first page, after this we use `row_id` for pagination.",
+        "createdAt" : "2020-06-26T22:26:29Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a7396946-f0b4-4b68-a77e-8b9058d04596",
+        "parentId" : "507c1892-6198-4e9a-908c-41fd3cd44ae1",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "BTW @S11001001 implemented `SqlSequence` which we can use: https://github.com/digital-asset/daml/blob/1adc69efadac2f1e34547b1d66faa260f2b68f1e/ledger/sandbox/src/main/scala/com/digitalasset/platform/store/dao/events/SqlSequence.scala",
+        "createdAt" : "2020-06-26T22:57:06Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -62,41 +62,53 @@ private[dao] final class TransactionsReader(\n       filter: FilterRelation,\n       verbose: Boolean,\n   ): Source[(Offset, GetTransactionsResponse), NotUsed] = {\n-    val events: Source[EventsTable.Entry[Event], NotUsed] =\n-      PaginatingAsyncStream.streamFrom((startExclusive, Option.empty[Int]), getOffset[Event]) {\n-        case (prevOffset, prevNodeIndex) =>\n-          val query =\n-            EventsTable\n-              .preparePagedGetFlatTransactions(sqlFunctions)(\n-                startExclusive = prevOffset,\n-                endInclusive = endInclusive,\n-                filter = filter,\n-                pageSize = pageSize,\n-                previousEventNodeIndex = prevNodeIndex,\n-              )\n-              .withFetchSize(Some(pageSize))\n-          val rawEventsFuture =\n-            dispatcher.executeSql(dbMetrics.getFlatTransactions) { implicit connection =>\n-              query.asVectorOf(EventsTable.rawFlatEventParser)\n-            }\n-          rawEventsFuture.flatMap(\n-            rawEvents =>\n-              Timed.future(\n-                future = Future.traverse(rawEvents)(deserializeEntry(verbose)),\n-                timer = dbMetrics.getFlatTransactions.translationTimer,\n+\n+    val eventsRangeF: Future[EventsRange[Long]] = dispatcher.executeSql(dbMetrics.getRowIdRange) {\n+      connection =>\n+        EventsRange.eventsRange(EventsRange(startExclusive, endInclusive))(connection)\n+    }"
+  },
+  {
+    "id" : "a801375b-28b5-4395-b55a-8a525dbbd280",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "fbb80a9a-3522-421b-a32c-7901ed256e2e",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Does this maintain the existing order? I believe we should return transaction in the right order.",
+        "createdAt" : "2020-06-26T14:21:34Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4e40027f-4331-4227-826b-ba7e75bc6fb8",
+        "parentId" : "fbb80a9a-3522-421b-a32c-7901ed256e2e",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "it keeps the order... it is exactly the same thing. The only difference is we don't need to wrap the result collection into akka `Source`.",
+        "createdAt" : "2020-06-26T18:55:36Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : 74,
+    "diffHunk" : "@@ -62,41 +62,53 @@ private[dao] final class TransactionsReader(\n       filter: FilterRelation,\n       verbose: Boolean,\n   ): Source[(Offset, GetTransactionsResponse), NotUsed] = {\n-    val events: Source[EventsTable.Entry[Event], NotUsed] =\n-      PaginatingAsyncStream.streamFrom((startExclusive, Option.empty[Int]), getOffset[Event]) {\n-        case (prevOffset, prevNodeIndex) =>\n-          val query =\n-            EventsTable\n-              .preparePagedGetFlatTransactions(sqlFunctions)(\n-                startExclusive = prevOffset,\n-                endInclusive = endInclusive,\n-                filter = filter,\n-                pageSize = pageSize,\n-                previousEventNodeIndex = prevNodeIndex,\n-              )\n-              .withFetchSize(Some(pageSize))\n-          val rawEventsFuture =\n-            dispatcher.executeSql(dbMetrics.getFlatTransactions) { implicit connection =>\n-              query.asVectorOf(EventsTable.rawFlatEventParser)\n-            }\n-          rawEventsFuture.flatMap(\n-            rawEvents =>\n-              Timed.future(\n-                future = Future.traverse(rawEvents)(deserializeEntry(verbose)),\n-                timer = dbMetrics.getFlatTransactions.translationTimer,\n+\n+    val eventsRangeF: Future[EventsRange[Long]] = dispatcher.executeSql(dbMetrics.getRowIdRange) {\n+      connection =>\n+        EventsRange.eventsRange(EventsRange(startExclusive, endInclusive))(connection)\n+    }\n+\n+    def getEvents(eventsRange0: EventsRange[Long]): Source[EventsTable.Entry[Event], NotUsed] =\n+      PaginatingAsyncStream.streamFrom(\n+        eventsRange0,\n+        getEventsRange[Event](eventsRange0.endInclusive)) { eventsRange1 =>\n+        val query =\n+          EventsTable\n+            .preparePagedGetFlatTransactions(sqlFunctions)(\n+              range = eventsRange1,\n+              filter = filter,\n+              pageSize = pageSize,\n             )\n+            .withFetchSize(Some(pageSize))\n+        val rawEvents =\n+          dispatcher.executeSql(dbMetrics.getFlatTransactions) { implicit connection =>\n+            query.asVectorOf(EventsTable.rawFlatEventParser)\n+          }\n+        rawEvents.flatMap(\n+          es =>\n+            Timed.future(\n+              future = Future.traverse(es)(deserializeEntry(verbose)),\n+              timer = dbMetrics.getTransactionTrees.translationTimer,\n           )\n+        )\n       }\n \n+    val events: Source[EventsTable.Entry[Event], NotUsed] =\n+      Source.future(eventsRangeF).flatMapConcat(r => getEvents(r))\n+\n     groupContiguous(events)(by = _.transactionId)\n-      .flatMapConcat { events =>\n+      .mapConcat { events =>"
+  },
+  {
+    "id" : "a8876f9e-b884-4763-b3db-bbe409cb8339",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "d03879c5-4de5-4e8b-bd6f-c8f11c38d6b5",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Could `eventsRangeForFirstPage` be a more telling name?",
+        "createdAt" : "2020-06-26T14:22:36Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "efd06961-39f9-448b-873a-c96613f9d5df",
+        "parentId" : "d03879c5-4de5-4e8b-bd6f-c8f11c38d6b5",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "it is NOT for the first page only. This function is used to extracts `row_ids`/`EventsRange[Long]` from the passed `TreeEvent`/`Event`, it is used for the pagination.",
+        "createdAt" : "2020-06-26T22:20:09Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -126,36 +138,44 @@ private[dao] final class TransactionsReader(\n       requestingParties: Set[Party],\n       verbose: Boolean,\n   ): Source[(Offset, GetTransactionTreesResponse), NotUsed] = {\n-    val events: Source[EventsTable.Entry[TreeEvent], NotUsed] =\n-      PaginatingAsyncStream.streamFrom((startExclusive, Option.empty[Int]), getOffset[TreeEvent]) {\n-        case (prevOffset, prevNodeIndex) =>\n-          val query =\n-            EventsTable\n-              .preparePagedGetTransactionTrees(sqlFunctions)(\n-                startExclusive = prevOffset,\n-                endInclusive = endInclusive,\n-                requestingParties = requestingParties,\n-                pageSize = pageSize,\n-                previousEventNodeIndex = prevNodeIndex\n-              )\n-              .withFetchSize(Some(pageSize))\n-          val rawEvents =\n-            dispatcher.executeSql(dbMetrics.getTransactionTrees) { implicit connection =>\n-              query.asVectorOf(EventsTable.rawTreeEventParser)\n-            }\n-          rawEvents.flatMap(\n-            es =>\n-              Timed.future(\n-                future = Future.traverse(es)(deserializeEntry(verbose)),\n-                timer = dbMetrics.getTransactionTrees.translationTimer,\n+\n+    val eventsRangeF: Future[EventsRange[Long]] = dispatcher.executeSql(dbMetrics.getRowIdRange) {\n+      connection =>\n+        EventsRange.eventsRange(EventsRange(startExclusive, endInclusive))(connection)\n+    }\n+\n+    def getEvents(eventsRange0: EventsRange[Long]): Source[EventsTable.Entry[TreeEvent], NotUsed] ="
+  },
+  {
+    "id" : "65aa9101-42ee-4113-b267-46e7cc241b7d",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "76742b6c-1acf-4d02-8973-8350d413a5db",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I would prefer not having nested definitions, unless necessary. It looks like `streamEvents` can be brought out of the function's scope (and made `private`) just by passing in the `filter`, which sounds fine.",
+        "createdAt" : "2020-06-29T07:53:14Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5ec28aa7-da15-4237-9f6c-c4e3efc5e2ee",
+        "parentId" : "76742b6c-1acf-4d02-8973-8350d413a5db",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It looks like you can probably also re-use the function where a flat transaction is used by passing in the proper parser.",
+        "createdAt" : "2020-06-29T07:55:00Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5ba912c9-c44a-4a23-be29-75f9cd0c36e8",
+        "parentId" : "76742b6c-1acf-4d02-8973-8350d413a5db",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "yes you can, this entire class was not DRY initially, but I can try to make sure we are properly re-using abstractions, it is just the purpose of this PR was NOT cleaning things up.",
+        "createdAt" : "2020-06-29T13:34:08Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -62,41 +62,53 @@ private[dao] final class TransactionsReader(\n       filter: FilterRelation,\n       verbose: Boolean,\n   ): Source[(Offset, GetTransactionsResponse), NotUsed] = {\n-    val events: Source[EventsTable.Entry[Event], NotUsed] =\n-      PaginatingAsyncStream.streamFrom((startExclusive, Option.empty[Int]), getOffset[Event]) {\n-        case (prevOffset, prevNodeIndex) =>\n-          val query =\n-            EventsTable\n-              .preparePagedGetFlatTransactions(sqlFunctions)(\n-                startExclusive = prevOffset,\n-                endInclusive = endInclusive,\n-                filter = filter,\n-                pageSize = pageSize,\n-                previousEventNodeIndex = prevNodeIndex,\n-              )\n-              .withFetchSize(Some(pageSize))\n-          val rawEventsFuture =\n-            dispatcher.executeSql(dbMetrics.getFlatTransactions) { implicit connection =>\n-              query.asVectorOf(EventsTable.rawFlatEventParser)\n-            }\n-          rawEventsFuture.flatMap(\n-            rawEvents =>\n-              Timed.future(\n-                future = Future.traverse(rawEvents)(deserializeEntry(verbose)),\n-                timer = dbMetrics.getFlatTransactions.translationTimer,\n+\n+    val eventsRangeF: Future[EventsRange[Long]] = dispatcher.executeSql(dbMetrics.getRowIdRange) {\n+      connection =>\n+        EventsRange.rowIdRange(EventsRange(startExclusive, endInclusive))(connection)\n+    }\n+\n+    def streamEvents(eventsRange0: EventsRange[Long]): Source[EventsTable.Entry[Event], NotUsed] =\n+      PaginatingAsyncStream.streamFrom(\n+        eventsRange0,\n+        getEventsRange[Event](eventsRange0.endInclusive)) { eventsRange1 =>\n+        val query =\n+          EventsTable\n+            .preparePagedGetFlatTransactions(sqlFunctions)(\n+              range = eventsRange1,\n+              filter = filter,\n+              pageSize = pageSize,\n             )\n+            .withFetchSize(Some(pageSize))\n+        val rawEvents =\n+          dispatcher.executeSql(dbMetrics.getFlatTransactions) { implicit connection =>\n+            query.asVectorOf(EventsTable.rawFlatEventParser)\n+          }\n+        rawEvents.flatMap(\n+          es =>\n+            Timed.future(\n+              future = Future.traverse(es)(deserializeEntry(verbose)),\n+              timer = dbMetrics.getTransactionTrees.translationTimer,\n           )\n+        )\n       }"
+  },
+  {
+    "id" : "a8585f97-d6eb-4e5e-a661-9a93a43a67dd",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "41d7f2a1-6478-4aab-a16e-9a6e262b96db",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      implicit connection =>\r\n        EventsRange.rowIdRange(EventsRange(startExclusive, endInclusive))\r\n```",
+        "createdAt" : "2020-06-29T18:57:09Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -62,41 +62,53 @@ private[dao] final class TransactionsReader(\n       filter: FilterRelation,\n       verbose: Boolean,\n   ): Source[(Offset, GetTransactionsResponse), NotUsed] = {\n-    val events: Source[EventsTable.Entry[Event], NotUsed] =\n-      PaginatingAsyncStream.streamFrom((startExclusive, Option.empty[Int]), getOffset[Event]) {\n-        case (prevOffset, prevNodeIndex) =>\n-          val query =\n-            EventsTable\n-              .preparePagedGetFlatTransactions(sqlFunctions)(\n-                startExclusive = prevOffset,\n-                endInclusive = endInclusive,\n-                filter = filter,\n-                pageSize = pageSize,\n-                previousEventNodeIndex = prevNodeIndex,\n-              )\n-              .withFetchSize(Some(pageSize))\n-          val rawEventsFuture =\n-            dispatcher.executeSql(dbMetrics.getFlatTransactions) { implicit connection =>\n-              query.asVectorOf(EventsTable.rawFlatEventParser)\n-            }\n-          rawEventsFuture.flatMap(\n-            rawEvents =>\n-              Timed.future(\n-                future = Future.traverse(rawEvents)(deserializeEntry(verbose)),\n-                timer = dbMetrics.getFlatTransactions.translationTimer,\n+\n+    val eventsRangeF: Future[EventsRange[Long]] = dispatcher.executeSql(dbMetrics.getRowIdRange) {\n+      connection =>\n+        EventsRange.rowIdRange(EventsRange(startExclusive, endInclusive))(connection)"
+  },
+  {
+    "id" : "3c6d74ff-8374-456b-b803-e3af2b52e51e",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "41671a97-e17b-41ba-8e1d-1abbd879d2b0",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      .executeSql(dbMetrics.getAcsRowIdRange) { implicit connection =>\r\n        EventsRange.rowIdRangeFromStart(activeAt)\r\n```",
+        "createdAt" : "2020-06-29T18:58:15Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -186,33 +207,48 @@ private[dao] final class TransactionsReader(\n       filter: FilterRelation,\n       verbose: Boolean,\n   ): Source[GetActiveContractsResponse, NotUsed] = {\n-    val events =\n-      PaginatingAsyncStream.streamFrom((Offset.beforeBegin, Option.empty[Int]), getOffset[Event]) {\n-        case (prevOffset, prevNodeIndex) =>\n-          val query =\n-            EventsTable\n-              .preparePagedGetActiveContracts(sqlFunctions)(\n-                lastOffsetFromPrevPage = prevOffset,\n-                activeAt = activeAt,\n-                filter = filter,\n-                pageSize = pageSize,\n-                lastEventNodeIndexFromPrevPage = prevNodeIndex,\n-              )\n-              .withFetchSize(Some(pageSize))\n-          val rawEvents =\n-            dispatcher.executeSql(dbMetrics.getActiveContracts) { implicit connection =>\n-              query.asVectorOf(EventsTable.rawFlatEventParser)\n-            }\n-          Timed.future(\n-            future = rawEvents.flatMap(Future.traverse(_)(deserializeEntry(verbose))),\n-            timer = dbMetrics.getActiveContracts.translationTimer,\n+\n+    // contains offsets and row IDs\n+    val eventsRangeF: Future[EventsRange[(Offset, Long)]] = dispatcher\n+      .executeSql(dbMetrics.getAcsRowIdRange) { connection =>\n+        EventsRange.rowIdRangeFromStart(activeAt)(connection)"
+  },
+  {
+    "id" : "f07f18eb-d586-4183-9ebd-2db5c5686573",
+    "prId" : 6083,
+    "comments" : [
+      {
+        "id" : "a873b115-9200-4d25-bafb-b19afbcba380",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I'm not entirely sure about this one: why do we need to start from `Offset.begin`? Can use use `activeAt` as the offset for the first page?",
+        "createdAt" : "2020-05-29T07:37:49Z",
+        "updatedAt" : "2020-05-29T14:50:34Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ff61c19e-e9ca-4792-8fe4-86b4ada254cf",
+        "parentId" : "a873b115-9200-4d25-bafb-b19afbcba380",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "how do I get `activeAt` offset?",
+        "createdAt" : "2020-05-29T12:48:29Z",
+        "updatedAt" : "2020-05-29T14:50:34Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7422e81f-ea87-4f1d-a28e-2d9294015b38",
+        "parentId" : "a873b115-9200-4d25-bafb-b19afbcba380",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Is it not a parameter of this method?",
+        "createdAt" : "2020-05-29T13:12:18Z",
+        "updatedAt" : "2020-05-29T14:50:34Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "be9336cc-78fd-4ee9-8883-6c14c690a533",
+        "parentId" : "a873b115-9200-4d25-bafb-b19afbcba380",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "As discussed, I'm wrong, marking as resolved.",
+        "createdAt" : "2020-05-29T13:20:15Z",
+        "updatedAt" : "2020-05-29T14:50:34Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6fc616a4c4006e700ebe1e9c0a9d52519af9130a",
+    "line" : null,
+    "diffHunk" : "@@ -174,14 +182,15 @@ private[dao] final class TransactionsReader(\n       verbose: Boolean,\n   ): Source[GetActiveContractsResponse, NotUsed] = {\n     val events =\n-      PaginatingAsyncStream(pageSize) { offset =>\n+      PaginatingAsyncStream(Offset.begin, eventDetails) { (prevOffset, prevNodeIndex) =>"
+  },
+  {
+    "id" : "b748d6a0-fca3-42f8-a24b-feb90a356e15",
+    "prId" : 6043,
+    "comments" : [
+      {
+        "id" : "8573530e-a481-40b7-b164-bea79a80e6a0",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Can you elaborate `es`, please?",
+        "createdAt" : "2020-05-20T10:30:30Z",
+        "updatedAt" : "2020-05-20T12:50:19Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e96ceedb-1ffe-4d63-b8fb-12af3d2597d8",
+        "parentId" : "8573530e-a481-40b7-b164-bea79a80e6a0",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/6043/commits/b49c2ae5f520d554734406e597d11350877e28b6",
+        "createdAt" : "2020-05-20T10:59:22Z",
+        "updatedAt" : "2020-05-20T12:50:19Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8099e08c-1ddc-47d9-bc98-7685f0da402a",
+        "parentId" : "8573530e-a481-40b7-b164-bea79a80e6a0",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "No it wasn't. 😛 ",
+        "createdAt" : "2020-05-20T12:18:14Z",
+        "updatedAt" : "2020-05-20T12:50:19Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2936235bdbd9010386da40a1297477eb856f678a",
+    "line" : 31,
+    "diffHunk" : "@@ -127,9 +129,12 @@ private[dao] final class TransactionsReader(\n           dispatcher.executeSql(dbMetrics.getTransactionTrees) { implicit connection =>\n             query.asVectorOf(EventsTable.rawTreeEventParser)\n           }\n-        Timed.future(\n-          future = rawEvents.flatMap(Future.traverse(_)(deserializeEntry(verbose))),\n-          timer = dbMetrics.getTransactionTrees.translationTimer,\n+        rawEvents.flatMap(\n+          es =>"
+  },
+  {
+    "id" : "bd86412b-fa2d-4a79-b05d-fb66eccf795f",
+    "prId" : 5917,
+    "comments" : [
+      {
+        "id" : "8f6685c6-1cbd-417b-a32a-2c8beeff81a0",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I think these could potentially be moved to the `Metrics` class.",
+        "createdAt" : "2020-05-11T08:21:23Z",
+        "updatedAt" : "2020-05-11T08:21:46Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3bc13f6d-aa25-4e8c-abb0-a849d24ddfe7",
+        "parentId" : "8f6685c6-1cbd-417b-a32a-2c8beeff81a0",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Good point. Ideally I would also want to pass in the timer as a parameter to `DbDispatcher#runSQL`. Do you think I can tackle it in one go as a separate contribution?",
+        "createdAt" : "2020-05-11T08:26:51Z",
+        "updatedAt" : "2020-05-11T08:26:52Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2da1d8ba-bfac-4cfb-ab44-62bb023caf6e",
+        "parentId" : "8f6685c6-1cbd-417b-a32a-2c8beeff81a0",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Fine with me.",
+        "createdAt" : "2020-05-11T08:32:40Z",
+        "updatedAt" : "2020-05-11T08:32:40Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7932b8b7-c864-4183-938b-98daa27cbe0e",
+        "parentId" : "8f6685c6-1cbd-417b-a32a-2c8beeff81a0",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed in https://github.com/digital-asset/daml/pull/5927",
+        "createdAt" : "2020-05-11T10:48:07Z",
+        "updatedAt" : "2020-05-11T10:48:07Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b924b0df2cdd7cf19f2aa64e3afdcc719f4fc149",
+    "line" : 32,
+    "diffHunk" : "@@ -29,8 +30,28 @@ private[dao] final class TransactionsReader(\n     dispatcher: DbDispatcher,\n     executionContext: ExecutionContext,\n     pageSize: Int,\n+    metrics: Metrics,\n ) {\n \n+  // Metrics names\n+  private val getFlatTransactions: String = \"get_flat_transactions\"\n+  private val lookupFlatTransactionById: String = \"lookup_flat_transaction_by_id\"\n+  private val getTransactionTrees: String = \"get_transaction_trees\"\n+  private val lookupTransactionTreeById: String = \"lookup_transaction_tree_by_id\"\n+  private val getActiveContracts: String = \"get_active_contracts\"\n+\n+  // Timers for deserialization on per-query basis\n+  private val getFlatTransactionsDeserializationTimer =\n+    metrics.daml.index.db.deserialization(getFlatTransactions)\n+  private val lookupFlatTransactionByIdDeserializationTimer =\n+    metrics.daml.index.db.deserialization(lookupFlatTransactionById)\n+  private val getTransactionTreesDeserializationTimer =\n+    metrics.daml.index.db.deserialization(getTransactionTrees)\n+  private val lookupTransactionTreeByIdDeserializationTimer =\n+    metrics.daml.index.db.deserialization(lookupTransactionTreeById)\n+  private val getActiveContractsDeserializationTimer =\n+    metrics.daml.index.db.deserialization(getActiveContracts)"
+  },
+  {
+    "id" : "4d156e60-9054-4298-8179-04906fcdf434",
+    "prId" : 5378,
+    "comments" : [
+      {
+        "id" : "e1b9a399-a017-45b2-9440-733148f9dd89",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Is the type ascription needed here or did you mean to put `activeAt = activeAt`?",
+        "createdAt" : "2020-04-02T17:27:38Z",
+        "updatedAt" : "2020-04-02T18:25:15Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d4a786a9-dab2-45e4-b64f-7076389104ba",
+        "parentId" : "e1b9a399-a017-45b2-9440-733148f9dd89",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I meant what you said. I noticed this in the upcoming integration PR, it's fixed there, thanks!",
+        "createdAt" : "2020-04-02T17:39:18Z",
+        "updatedAt" : "2020-04-02T18:25:15Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "23511414d8d85dc31e984cd18a9b331a8752ca2d",
+    "line" : 32,
+    "diffHunk" : "@@ -126,4 +130,32 @@ private[dao] final class TransactionsReader(\n       .map(EventsTable.Entry.toGetTransactionResponse)(executionContext)\n   }\n \n+  def getActiveContracts(\n+      activeAt: Offset,\n+      filter: FilterRelation,\n+      verbose: Boolean,\n+  ): Source[(Offset, GetActiveContractsResponse), NotUsed] = {\n+    val events =\n+      PaginatingAsyncStream(pageSize) { offset =>\n+        val query =\n+          EventsTable\n+            .preparePagedGetActiveContracts(\n+              activeAt: Offset,"
+  },
+  {
+    "id" : "73849c3c-452f-43af-8542-d2da6b50640c",
+    "prId" : 5091,
+    "comments" : [
+      {
+        "id" : "72ddcc98-8f87-432c-af2d-8bbe65aa544a",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It was done on purpose because I'm adding another method here, please undo this!",
+        "createdAt" : "2020-03-19T16:41:49Z",
+        "updatedAt" : "2020-03-20T14:39:34Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "caeb6aea-f658-426a-93f5-b0cd7e848554",
+        "parentId" : "72ddcc98-8f87-432c-af2d-8bbe65aa544a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Will do!",
+        "createdAt" : "2020-03-19T16:50:28Z",
+        "updatedAt" : "2020-03-20T14:39:34Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "654c6ac2-42b9-4279-8118-431ac09aeb65",
+        "parentId" : "72ddcc98-8f87-432c-af2d-8bbe65aa544a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'll leave this PR for now and pick it up again when #5089 is merged, to ensure I don't cause conflicts.",
+        "createdAt" : "2020-03-19T17:23:28Z",
+        "updatedAt" : "2020-03-20T14:39:34Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ae5872bb-93ec-471b-a2c8-be3f79f1630b",
+        "parentId" : "72ddcc98-8f87-432c-af2d-8bbe65aa544a",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "If you just drop this file from the change list I believe there should be no conflicts, but thanks for caring. :slightly_smiling_face: ",
+        "createdAt" : "2020-03-19T17:36:38Z",
+        "updatedAt" : "2020-03-20T14:39:34Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b4262af0-6772-4159-aa6f-c7fb53e42704",
+        "parentId" : "72ddcc98-8f87-432c-af2d-8bbe65aa544a",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Honestly, I'm not a great fan of using the functional interface functionality, because it makes it harder to find where a certain type is being instantiated. At least IntelliJ doesn't cope well (or at all) with it.",
+        "createdAt" : "2020-03-19T20:06:38Z",
+        "updatedAt" : "2020-03-20T14:39:34Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c1f4d798-a18f-49c5-9a92-cd3dc616fd4d",
+        "parentId" : "72ddcc98-8f87-432c-af2d-8bbe65aa544a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I switched it because IntelliJ told me to. Happy to avoid doing this in the future if people find it confusing.",
+        "createdAt" : "2020-03-20T08:44:15Z",
+        "updatedAt" : "2020-03-20T14:39:34Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bef22174-8bfc-4ad7-a685-28c514227e02",
+        "parentId" : "72ddcc98-8f87-432c-af2d-8bbe65aa544a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Threw away this commit.",
+        "createdAt" : "2020-03-20T14:37:43Z",
+        "updatedAt" : "2020-03-20T14:39:34Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d3cf8839b6f6b186f8bec7348f27339747eb6a4e",
+    "line" : null,
+    "diffHunk" : "@@ -15,23 +15,18 @@ private[dao] object TransactionsReader {\n   def apply(\n       dispatcher: DbDispatcher,\n       dbType: DbType,\n-      executionContext: ExecutionContext): TransactionsReader =\n-    new TransactionsReader {\n-      override def lookupFlatTransactionById(\n-          transactionId: TransactionId,\n-          requestingParties: Set[Party],\n-      ): Future[Option[GetFlatTransactionResponse]] = {\n-        val query = EventsTable\n-          .prepareLookupFlatTransactionById(transactionId, requestingParties)\n-        dispatcher\n-          .executeSql(\n-            description = \"lookup_flat_transaction_by_id\",\n-            extraLog = Some(s\"tx: $transactionId, parties = ${requestingParties.mkString(\", \")}\"),\n-          ) { implicit connection =>\n-            query.as(EventsTable.flatEventParser.*)\n-          }\n-          .map(RawFlatEvent.aggregate)(executionContext)\n-      }\n+  )(implicit executionContext: ExecutionContext): TransactionsReader =\n+    (transactionId: TransactionId, requestingParties: Set[Party]) => {\n+      val query = EventsTable\n+        .prepareLookupFlatTransactionById(transactionId, requestingParties)\n+      dispatcher\n+        .executeSql(\n+          description = \"lookup_flat_transaction_by_id\",\n+          extraLog = Some(s\"tx: $transactionId, parties = ${requestingParties.mkString(\", \")}\"),\n+        ) { implicit connection =>\n+          query.as(EventsTable.flatEventParser.*)\n+        }\n+        .map(RawFlatEvent.aggregate)"
+  }
+]

@@ -1,0 +1,851 @@
+[
+  {
+    "id" : "ef131461-7e48-4c47-82ba-6056e0ad6cc6",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "8bbc4824-05d2-4155-8de4-f019fb00733a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is currently my biggest gripe with this approach. For the trigger service, GET requests are not completely unreasonable but it still feels very arbitrary and weird. I don’t have a great solution here so very happy to hear any suggestions.",
+        "createdAt" : "2020-09-15T13:41:09Z",
+        "updatedAt" : "2020-09-15T14:01:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7fd8891f-83fd-4677-9c56-a8cf35aff09b",
+        "parentId" : "8bbc4824-05d2-4155-8de4-f019fb00733a",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I think it's a reasonable restriction. This isn't a general-purpose middleware, why make things more complicated on the client side?",
+        "createdAt" : "2020-09-15T14:00:01Z",
+        "updatedAt" : "2020-09-15T14:01:35Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2dea5f0a-0eb9-4db2-a5fa-364e51cff53f",
+        "parentId" : "8bbc4824-05d2-4155-8de4-f019fb00733a",
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "i don't see a way to remove this restriction and still have this solution work in a browser seamlessly without removing the proxying behavior by replacing it with a trust relationship between an external website and the middleware component",
+        "createdAt" : "2020-09-15T14:19:21Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 69,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of\n+   claims. If the user has already authenticade and is authorized for\n+   those claims, it will return an access token (an opaque\n+   blob to the trigger service) for at least those claims and a\n+   refresh token (another opaque blob). If not, it will return an\n+   unauthorized status code.\n+\n+2. /login If /auth returned unauthorized, the trigger service will\n+   redirect users to this. The parameters will include the requested\n+   claims as well as the URL that the users tried to access originally\n+   (e.g., the endpoint to start a trigger). This will start an auth\n+   flow, e.g., an OAuth2 authorization code grant ending with the auth\n+   service setting a cookie with the access and refresh token and\n+   redirecting to the original URL. At this point, the request to\n+   /auth will succeed (based on the cookie).\n+\n+3. /refresh This accepts a refresh token and returns a new access\n+   token and optionally a new refresh token (or fails).\n+\n+### Auth Middleware Implementation based on OAuth2 Authorization Code Grant\n+\n+1. /auth checks for the presence of a cookie with the tokens in it.\n+2. /login starts an OAuth2 authorization code grant flow. After the\n+   redirect URI is called by the authorization server, the middleware\n+   makes a request to get the tokens, sets them in cookies and\n+   redirects back to the original URI.\n+3. /refresh simply proxies to the refresh endpoint on the\n+   authorization server adding the client id and secret.\n+\n+Note that the auth middleware does not need to persist any state in\n+this model. The trigger service does need to persist at least the\n+refresh token and potentially the access token.\n+\n+## Issues\n+\n+1. This only works if the original request was a GET"
+  },
+  {
+    "id" : "cc9dd1c9-9fe1-4576-8707-4fee159a381b",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "ba072a60-6d10-4b75-846a-6f5ddcfc6bec",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n   claims. If the user has already authenticated and is authorized for\r\n```",
+        "createdAt" : "2020-09-15T13:50:18Z",
+        "updatedAt" : "2020-09-15T14:01:35Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of\n+   claims. If the user has already authenticade and is authorized for"
+  },
+  {
+    "id" : "d3d7e147-b10e-4dc2-82a1-3da5ba89cd98",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "53634f47-5df8-4409-88b1-e94c205c2299",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Can these fail independently? You could fail and receive a new refresh token anyway, and in case the new token ≠ the old one, an implementation may permanently reject the prior token and require use of the new one.",
+        "createdAt" : "2020-09-15T13:55:26Z",
+        "updatedAt" : "2020-09-15T14:01:35Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8200a196-7349-443e-8f18-78ee85c5d1e8",
+        "parentId" : "53634f47-5df8-4409-88b1-e94c205c2299",
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "in general, the refresh tokens are statefully validated, and the access tokens are statelessly validated, meaning that you can not invalidate an access token except by deny-listing it by id, and further implying that a failure to validate a refresh token has no effect by default on the validity of any previously granted access tokens",
+        "createdAt" : "2020-09-15T14:16:03Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "94beccfa-c0fc-46f2-a541-df48fda76262",
+        "parentId" : "53634f47-5df8-4409-88b1-e94c205c2299",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "By “these” you mean the access token and the refresh token? In OAuth2 at least, they cannot fail independently. You always get a new access token if the request succeeds and optionally a new refresh token. If you do not get a new refresh token this just means that that the existing refresh token is still valid.",
+        "createdAt" : "2020-09-15T14:25:42Z",
+        "updatedAt" : "2020-09-15T14:25:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 51,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of\n+   claims. If the user has already authenticade and is authorized for\n+   those claims, it will return an access token (an opaque\n+   blob to the trigger service) for at least those claims and a\n+   refresh token (another opaque blob). If not, it will return an\n+   unauthorized status code.\n+\n+2. /login If /auth returned unauthorized, the trigger service will\n+   redirect users to this. The parameters will include the requested\n+   claims as well as the URL that the users tried to access originally\n+   (e.g., the endpoint to start a trigger). This will start an auth\n+   flow, e.g., an OAuth2 authorization code grant ending with the auth\n+   service setting a cookie with the access and refresh token and\n+   redirecting to the original URL. At this point, the request to\n+   /auth will succeed (based on the cookie).\n+\n+3. /refresh This accepts a refresh token and returns a new access\n+   token and optionally a new refresh token (or fails)."
+  },
+  {
+    "id" : "b01457ef-bcff-4f3c-8723-b069e45c4de8",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "95bd94cc-be75-4451-bb0e-9a1a2ab5ba96",
+        "parentId" : null,
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "👏 so you decided to go with the code grant. ",
+        "createdAt" : "2020-09-15T14:08:36Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "93152271-aa9f-4d70-8391-401850d6b211",
+        "parentId" : "95bd94cc-be75-4451-bb0e-9a1a2ab5ba96",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "At least I want to support this as it seems like the most natural model for the trigger service. I do believe that you can fit a client credentials grant in there if you want to. In this case, the middleware would act as follows:\r\n\r\n/login would somehow check that the user is authorized to interact with the trigger service. This is deliberately outside of the client credentials grant so I don’t think there is a standard solution to this. One option would be to just require the user to authenticate as some admin user with whatever authentication mechanism you have. If that is successful, the middleware makes the request to get the token and then proceeds as the middleware for the authorization code grant.",
+        "createdAt" : "2020-09-15T14:37:34Z",
+        "updatedAt" : "2020-09-15T14:37:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 5,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant"
+  },
+  {
+    "id" : "22e5ebbd-1abd-448f-a983-1d6ac994fa8a",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "0d4b62a3-a223-4c1b-b503-43a82ead376d",
+        "parentId" : null,
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "curious how compatible with the authorization code grant you will be, if you're not exchanging the granted code with specifically an OAuth2 tenant for an access token?",
+        "createdAt" : "2020-09-15T14:09:25Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2fd1d032-2585-429a-a69d-8042e780dc93",
+        "parentId" : "0d4b62a3-a223-4c1b-b503-43a82ead376d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not quite sure what you are getting at. The auth middleware is exchanging the granted code with the authorization server for the token.",
+        "createdAt" : "2020-09-15T14:26:19Z",
+        "updatedAt" : "2020-09-15T14:26:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5428c31c-c131-41fd-97e8-7fb875eb3735",
+        "parentId" : "0d4b62a3-a223-4c1b-b503-43a82ead376d",
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "ok! yea I was a bit overly focused on the semantics of 'compatible' here. this makes sense. ",
+        "createdAt" : "2020-09-15T14:29:16Z",
+        "updatedAt" : "2020-09-15T14:29:17Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 7,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific"
+  },
+  {
+    "id" : "9ef0eb18-8c33-436c-a079-6074c86bb641",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "fb981c1a-101a-45a3-ab23-83f442f50934",
+        "parentId" : null,
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "👏 curious about the mechanism for verifying the consent here: is it the grant itself, or some user metadata that was the result of a previous authentication step?",
+        "createdAt" : "2020-09-15T14:10:14Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fe55981c-5332-4596-a5b5-72fa324c0616",
+        "parentId" : "fb981c1a-101a-45a3-ab23-83f442f50934",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That’s up to the middleware. One option would be that the middleware translates the required claims to OAuth2 claims and includes those when redirecting to `/authorize`.",
+        "createdAt" : "2020-09-15T14:27:44Z",
+        "updatedAt" : "2020-09-15T14:27:44Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 12,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent."
+  },
+  {
+    "id" : "4aa297aa-0ffd-481c-a5ac-8293abffa5a7",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "cdb8da1f-d939-40ac-bc1d-73441b840a96",
+        "parentId" : null,
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "ok in this sense the auth middleware will trust an upstream identity provider which implies that there is a requirement for some agreement on the claims as furnished by that provider and the claims that the middleware understands, right?",
+        "createdAt" : "2020-09-15T14:14:51Z",
+        "updatedAt" : "2020-09-15T14:25:18Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c4430dce-51c7-4764-958a-4dc0e32bfd81",
+        "parentId" : "cdb8da1f-d939-40ac-bc1d-73441b840a96",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The middleware has to translate between claims (a ledger concept) and OAuth2 claims/custom parameters in the authorize request/…. We assume that at the end we do get a ledger token back from the middleware which in turn gets it from the authorization server.",
+        "createdAt" : "2020-09-15T14:28:50Z",
+        "updatedAt" : "2020-09-15T14:28:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 34,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of"
+  },
+  {
+    "id" : "743b2f7a-f0c3-4aaa-8b6f-5272d31738a1",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "96eef8ed-97b0-47f5-925d-d92149611b35",
+        "parentId" : null,
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "using cookies is a bold choice here; it keeps the state out of the auth middleware but it does mean you are now beholden to cursed cross browser cookie control implementation wrinkles",
+        "createdAt" : "2020-09-15T14:16:42Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "27eaf6bd-d226-4896-9e58-9bd6e147a143",
+        "parentId" : "96eef8ed-97b0-47f5-925d-d92149611b35",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Very open for other ideas. This was mostly copied from the existing Oauth2 proxies assuming that if it works for them,a it works for us and while brothers might be weird cookies are at least reasonably secure.",
+        "createdAt" : "2020-09-15T14:32:04Z",
+        "updatedAt" : "2020-09-15T14:32:04Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 48,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of\n+   claims. If the user has already authenticated and is authorized for\n+   those claims, it will return an access token (an opaque\n+   blob to the trigger service) for at least those claims and a\n+   refresh token (another opaque blob). If not, it will return an\n+   unauthorized status code.\n+\n+2. /login If /auth returned unauthorized, the trigger service will\n+   redirect users to this. The parameters will include the requested\n+   claims as well as the URL that the users tried to access originally\n+   (e.g., the endpoint to start a trigger). This will start an auth\n+   flow, e.g., an OAuth2 authorization code grant ending with the auth\n+   service setting a cookie with the access and refresh token and\n+   redirecting to the original URL. At this point, the request to\n+   /auth will succeed (based on the cookie)."
+  },
+  {
+    "id" : "c3033eb3-b7f2-4824-b672-5296e6c433d6",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "077249e4-4bcb-4f59-98f2-4432cb546500",
+        "parentId" : null,
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "👏 ",
+        "createdAt" : "2020-09-15T14:17:06Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 63,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of\n+   claims. If the user has already authenticated and is authorized for\n+   those claims, it will return an access token (an opaque\n+   blob to the trigger service) for at least those claims and a\n+   refresh token (another opaque blob). If not, it will return an\n+   unauthorized status code.\n+\n+2. /login If /auth returned unauthorized, the trigger service will\n+   redirect users to this. The parameters will include the requested\n+   claims as well as the URL that the users tried to access originally\n+   (e.g., the endpoint to start a trigger). This will start an auth\n+   flow, e.g., an OAuth2 authorization code grant ending with the auth\n+   service setting a cookie with the access and refresh token and\n+   redirecting to the original URL. At this point, the request to\n+   /auth will succeed (based on the cookie).\n+\n+3. /refresh This accepts a refresh token and returns a new access\n+   token and optionally a new refresh token (or fails).\n+\n+### Auth Middleware Implementation based on OAuth2 Authorization Code Grant\n+\n+1. /auth checks for the presence of a cookie with the tokens in it.\n+2. /login starts an OAuth2 authorization code grant flow. After the\n+   redirect URI is called by the authorization server, the middleware\n+   makes a request to get the tokens, sets them in cookies and\n+   redirects back to the original URI.\n+3. /refresh simply proxies to the refresh endpoint on the\n+   authorization server adding the client id and secret.\n+\n+Note that the auth middleware does not need to persist any state in"
+  },
+  {
+    "id" : "40ddf797-10d3-4207-8751-512fdc6d19bf",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "e1df4c64-9c95-48a7-b629-ddbd7ab2736e",
+        "parentId" : null,
+        "author" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "body" : "nice. so the auth middleware is effectively an oauth2 application secret holding cookie processor proxy",
+        "createdAt" : "2020-09-15T14:17:35Z",
+        "updatedAt" : "2020-09-15T14:19:59Z",
+        "lastEditedBy" : {
+          "login" : "maxdeliso-da",
+          "name" : "Max DeLiso",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/55150381?u=83b9d54d0c53fa89fd8640fb93bf29a1c65cf3fb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fac51e1a-bb50-412e-8f0a-17329008614e",
+        "parentId" : "e1df4c64-9c95-48a7-b629-ddbd7ab2736e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Exactly",
+        "createdAt" : "2020-09-15T14:32:13Z",
+        "updatedAt" : "2020-09-15T14:32:13Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 61,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of\n+   claims. If the user has already authenticated and is authorized for\n+   those claims, it will return an access token (an opaque\n+   blob to the trigger service) for at least those claims and a\n+   refresh token (another opaque blob). If not, it will return an\n+   unauthorized status code.\n+\n+2. /login If /auth returned unauthorized, the trigger service will\n+   redirect users to this. The parameters will include the requested\n+   claims as well as the URL that the users tried to access originally\n+   (e.g., the endpoint to start a trigger). This will start an auth\n+   flow, e.g., an OAuth2 authorization code grant ending with the auth\n+   service setting a cookie with the access and refresh token and\n+   redirecting to the original URL. At this point, the request to\n+   /auth will succeed (based on the cookie).\n+\n+3. /refresh This accepts a refresh token and returns a new access\n+   token and optionally a new refresh token (or fails).\n+\n+### Auth Middleware Implementation based on OAuth2 Authorization Code Grant\n+\n+1. /auth checks for the presence of a cookie with the tokens in it.\n+2. /login starts an OAuth2 authorization code grant flow. After the\n+   redirect URI is called by the authorization server, the middleware\n+   makes a request to get the tokens, sets them in cookies and\n+   redirects back to the original URI.\n+3. /refresh simply proxies to the refresh endpoint on the\n+   authorization server adding the client id and secret."
+  },
+  {
+    "id" : "74618929-1a1e-4f94-b820-67a812ec491e",
+    "prId" : 7394,
+    "comments" : [
+      {
+        "id" : "274ba3d2-99b9-495f-af70-aaf1aa4455fa",
+        "parentId" : null,
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "This is missing that it passes along the cookies from the user.",
+        "createdAt" : "2020-10-01T12:06:19Z",
+        "updatedAt" : "2020-10-01T12:06:19Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5357a86d0f627e31a3230356a58c925f8c1f55d4",
+    "line" : 35,
+    "diffHunk" : "@@ -0,0 +1,95 @@\n+# Design for Trigger Service Authentication/Authorization\n+\n+## Goals\n+\n+- Be compatible with an OAuth2 authorization code grant\n+  https://tools.ietf.org/html/rfc6749#section-4.1\n+- Do not require OAuth2 or any other specific\n+  authentication/authorization protocol from the IAM. In other words,\n+  the communication with the IAM must be pluggable.\n+- Do not rely on wildcard access for the trigger service, it should\n+  only be able to start triggers on behalf of a party if a user that\n+  controls that party has given consent.\n+- Support long-running triggers without constant user\n+  interaction. Since auth tokens are often short-lived (e.g., expire\n+  after 1h), this implies some mechanism for token refresh.\n+\n+## Design\n+\n+This involves 3 components:\n+\n+1. The trigger service provided by DA.\n+2. An auth middleware. DA provides an implementation of this for at\n+   least the OAuth2 authorization code grant but this is completely\n+   pluggable so if the DA-provided middleware does not cover the IAM\n+   infrastructure of a client, they can implement their own.\n+3. The IAM. This is the entity that signs Ledger API tokens. This is\n+   not provided by DA. The Ledger is configured to trust this entity.\n+\n+### Auth Middleware API\n+\n+The auth middleware provides a few endpoints (the names don’t matter\n+all that much, they just need to be fixed once).\n+\n+1. /auth The trigger service, will contact this endpoint with a set of\n+   claims. If the user has already authenticated and is authorized for"
+  },
+  {
+    "id" : "0e2b66df-129c-4efc-9f92-75515f1ef629",
+    "prId" : 6725,
+    "comments" : [
+      {
+        "id" : "8779e5cf-0630-4cea-a3c1-0b553c7ec6b0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe it would be nice to just write the token to a file?",
+        "createdAt" : "2020-07-14T18:48:05Z",
+        "updatedAt" : "2020-07-14T18:51:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "60f114522bfde5760bbd92538f260bd67281b758",
+    "line" : 36,
+    "diffHunk" : "@@ -53,3 +53,60 @@ We can directly check that the credential is still valid before requesting a new\n For a party using the trigger service after the first time, we will look up their service account and see if there is a valid SA credential associated with it.\n Depending on that, we enter the flow at step 4 (requesting a new SA credential) or step 7 (`login` with an existing credential).\n \n+## Example flow using the command line\n+\n+In one terminal window, run a sandbox which the auth service will use as its \"admin ledger\".\n+(It is an implementation choice of the auth service to use a DAML ledger for managing users, service accounts, credentials, etc).\n+```\n+❯ daml sandbox\n+```\n+\n+In another terminal window, build and run the auth service.\n+We run with the \"test mode\" which allows us to authorize users using basic username/password credentials.\n+```\n+❯ make clean assembly\n+❯ DABL_AUTHENTICATION_SERVICE_TEST_MODE=true java -jar target/scala-2.12/authentication-service-assembly-0.1.jar\n+```\n+\n+In a third window, we'll execute requests to the auth service using `curl`.\n+\n+```\n+❯ curl -X POST localhost:8089/sa/secure/authorize -u user:pass\n+{\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEtcy1lMDZmZDVjMy00NWM1LTRjZGQtYTI1OC1iMmIzMmIyNjA3NDYifQ.eyJpc3MiOiJsb2NhbGhvc3QvbG9naW4iLCJzdWIiOiJ1c2VyIiwiZXhwIjoxNTk0ODI3NTIwLCJsZWRnZXJJZCI6Ii5hdXRoIiwicGFydHkiOiJ1c2VyIiwicmlnaHRzIjpbInJlYWQiLCJ3cml0ZTpjcmVhdGUiLCJ3cml0ZTpleGVyY2lzZSJdfQ.NiOHuA3Zm6yAs2ThSlXzlGyffbjauJLBjlnD8k8Qi-BBsya45bD0k4cLr-NMcUeabyoEHWVdDuPm7CoUCRkMqePBU5Q9FcwNyU3pqUdiRwmsLLEnFfaSi5mXV9JDH8qlw59LBLXOu5_D2i3p5mC4WB6hvLjqocJG7hguG5pmYZ4\"}\n+```\n+\n+```\n+❯ curl -X GET localhost:8089/sa/secure/me --oauth2-bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEtcy1lMDZmZDVjMy00NWM1LTRjZGQtYTI1OC1iMmIzMmIyNjA3NDYifQ.eyJpc3MiOiJsb2NhbGhvc3QvbG9naW4iLCJzdWIiOiJ1c2VyIiwiZXhwIjoxNTk0ODI3NTIwLCJsZWRnZXJJZCI6Ii5hdXRoIiwicGFydHkiOiJ1c2VyIiwicmlnaHRzIjpbInJlYWQiLCJ3cml0ZTpjcmVhdGUiLCJ3cml0ZTpleGVyY2lzZSJdfQ.NiOHuA3Zm6yAs2ThSlXzlGyffbjauJLBjlnD8k8Qi-BBsya45bD0k4cLr-NMcUeabyoEHWVdDuPm7CoUCRkMqePBU5Q9FcwNyU3pqUdiRwmsLLEnFfaSi5mXV9JDH8qlw59LBLXOu5_D2i3p5mC4WB6hvLjqocJG7hguG5pmYZ4"
+  },
+  {
+    "id" : "ba24771a-32fb-41fb-aafb-4f2529bf1eda",
+    "prId" : 6725,
+    "comments" : [
+      {
+        "id" : "1df974ea-2333-45a0-a1df-5c8dc982963a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Does this request do anything or is this just to view the output?",
+        "createdAt" : "2020-07-14T18:48:47Z",
+        "updatedAt" : "2020-07-14T18:51:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "45a18d5e-fe55-4efa-b141-c901783b259a",
+        "parentId" : "1df974ea-2333-45a0-a1df-5c8dc982963a",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Just views the output. This won't actually be used in the auth flow, though it's nice to confirm the previous command worked when running manually.",
+        "createdAt" : "2020-07-14T18:56:59Z",
+        "updatedAt" : "2020-07-14T18:56:59Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "60f114522bfde5760bbd92538f260bd67281b758",
+    "line" : 48,
+    "diffHunk" : "@@ -53,3 +53,60 @@ We can directly check that the credential is still valid before requesting a new\n For a party using the trigger service after the first time, we will look up their service account and see if there is a valid SA credential associated with it.\n Depending on that, we enter the flow at step 4 (requesting a new SA credential) or step 7 (`login` with an existing credential).\n \n+## Example flow using the command line\n+\n+In one terminal window, run a sandbox which the auth service will use as its \"admin ledger\".\n+(It is an implementation choice of the auth service to use a DAML ledger for managing users, service accounts, credentials, etc).\n+```\n+❯ daml sandbox\n+```\n+\n+In another terminal window, build and run the auth service.\n+We run with the \"test mode\" which allows us to authorize users using basic username/password credentials.\n+```\n+❯ make clean assembly\n+❯ DABL_AUTHENTICATION_SERVICE_TEST_MODE=true java -jar target/scala-2.12/authentication-service-assembly-0.1.jar\n+```\n+\n+In a third window, we'll execute requests to the auth service using `curl`.\n+\n+```\n+❯ curl -X POST localhost:8089/sa/secure/authorize -u user:pass\n+{\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEtcy1lMDZmZDVjMy00NWM1LTRjZGQtYTI1OC1iMmIzMmIyNjA3NDYifQ.eyJpc3MiOiJsb2NhbGhvc3QvbG9naW4iLCJzdWIiOiJ1c2VyIiwiZXhwIjoxNTk0ODI3NTIwLCJsZWRnZXJJZCI6Ii5hdXRoIiwicGFydHkiOiJ1c2VyIiwicmlnaHRzIjpbInJlYWQiLCJ3cml0ZTpjcmVhdGUiLCJ3cml0ZTpleGVyY2lzZSJdfQ.NiOHuA3Zm6yAs2ThSlXzlGyffbjauJLBjlnD8k8Qi-BBsya45bD0k4cLr-NMcUeabyoEHWVdDuPm7CoUCRkMqePBU5Q9FcwNyU3pqUdiRwmsLLEnFfaSi5mXV9JDH8qlw59LBLXOu5_D2i3p5mC4WB6hvLjqocJG7hguG5pmYZ4\"}\n+```\n+\n+```\n+❯ curl -X GET localhost:8089/sa/secure/me --oauth2-bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEtcy1lMDZmZDVjMy00NWM1LTRjZGQtYTI1OC1iMmIzMmIyNjA3NDYifQ.eyJpc3MiOiJsb2NhbGhvc3QvbG9naW4iLCJzdWIiOiJ1c2VyIiwiZXhwIjoxNTk0ODI3NTIwLCJsZWRnZXJJZCI6Ii5hdXRoIiwicGFydHkiOiJ1c2VyIiwicmlnaHRzIjpbInJlYWQiLCJ3cml0ZTpjcmVhdGUiLCJ3cml0ZTpleGVyY2lzZSJdfQ.NiOHuA3Zm6yAs2ThSlXzlGyffbjauJLBjlnD8k8Qi-BBsya45bD0k4cLr-NMcUeabyoEHWVdDuPm7CoUCRkMqePBU5Q9FcwNyU3pqUdiRwmsLLEnFfaSi5mXV9JDH8qlw59LBLXOu5_D2i3p5mC4WB6hvLjqocJG7hguG5pmYZ4\n+{\n+  \"user\": \"sa-user-21a4c943-57cc-46e7-b07e-380d2c780622\"\n+}\n+```\n+\n+We'll write `--oauth2-bearer ...` in the following requests to refer to same bearer token as used above.\n+Also note that the service account `request` below refers to a `test-ledger` id of the ledger we are\n+granting authentication to (not the admin ledger).\n+```\n+❯ curl -X POST localhost:8089/sa/secure/request/test-ledger -H \"Content-type: application/json\" -d '{\"nonce\": \"random-nonce\"}' --oauth2-bearer ...\n+\n+❯ curl -X GET localhost:8089/sa/secure --oauth2-bearer ..."
+  },
+  {
+    "id" : "7927ef86-e89f-444b-9d84-6fdd6f66d6e5",
+    "prId" : 6725,
+    "comments" : [
+      {
+        "id" : "002ce976-7af6-4882-a3b4-4c18917d4bbb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It might be nice if you add short comments how the curl commands releate to the description above.",
+        "createdAt" : "2020-07-14T18:51:04Z",
+        "updatedAt" : "2020-07-14T18:51:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9cb15369-b8bc-4999-8e7d-e3ea20e6b3b4",
+        "parentId" : "002ce976-7af6-4882-a3b4-4c18917d4bbb",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "You're probably right - the commands correspond 1-1 to the earlier steps, besides the `me` request. Maybe I should just leave that one out and it will be clearer.",
+        "createdAt" : "2020-07-14T18:59:01Z",
+        "updatedAt" : "2020-07-14T18:59:01Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a6928359-1e53-4bb6-b0ad-f037e3d25604",
+        "parentId" : "002ce976-7af6-4882-a3b4-4c18917d4bbb",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "I'll likely merge this as is and consider refining later.",
+        "createdAt" : "2020-07-14T19:00:07Z",
+        "updatedAt" : "2020-07-14T19:00:07Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "60f114522bfde5760bbd92538f260bd67281b758",
+    "line" : 56,
+    "diffHunk" : "@@ -53,3 +53,60 @@ We can directly check that the credential is still valid before requesting a new\n For a party using the trigger service after the first time, we will look up their service account and see if there is a valid SA credential associated with it.\n Depending on that, we enter the flow at step 4 (requesting a new SA credential) or step 7 (`login` with an existing credential).\n \n+## Example flow using the command line\n+\n+In one terminal window, run a sandbox which the auth service will use as its \"admin ledger\".\n+(It is an implementation choice of the auth service to use a DAML ledger for managing users, service accounts, credentials, etc).\n+```\n+❯ daml sandbox\n+```\n+\n+In another terminal window, build and run the auth service.\n+We run with the \"test mode\" which allows us to authorize users using basic username/password credentials.\n+```\n+❯ make clean assembly\n+❯ DABL_AUTHENTICATION_SERVICE_TEST_MODE=true java -jar target/scala-2.12/authentication-service-assembly-0.1.jar\n+```\n+\n+In a third window, we'll execute requests to the auth service using `curl`.\n+\n+```\n+❯ curl -X POST localhost:8089/sa/secure/authorize -u user:pass\n+{\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEtcy1lMDZmZDVjMy00NWM1LTRjZGQtYTI1OC1iMmIzMmIyNjA3NDYifQ.eyJpc3MiOiJsb2NhbGhvc3QvbG9naW4iLCJzdWIiOiJ1c2VyIiwiZXhwIjoxNTk0ODI3NTIwLCJsZWRnZXJJZCI6Ii5hdXRoIiwicGFydHkiOiJ1c2VyIiwicmlnaHRzIjpbInJlYWQiLCJ3cml0ZTpjcmVhdGUiLCJ3cml0ZTpleGVyY2lzZSJdfQ.NiOHuA3Zm6yAs2ThSlXzlGyffbjauJLBjlnD8k8Qi-BBsya45bD0k4cLr-NMcUeabyoEHWVdDuPm7CoUCRkMqePBU5Q9FcwNyU3pqUdiRwmsLLEnFfaSi5mXV9JDH8qlw59LBLXOu5_D2i3p5mC4WB6hvLjqocJG7hguG5pmYZ4\"}\n+```\n+\n+```\n+❯ curl -X GET localhost:8089/sa/secure/me --oauth2-bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEtcy1lMDZmZDVjMy00NWM1LTRjZGQtYTI1OC1iMmIzMmIyNjA3NDYifQ.eyJpc3MiOiJsb2NhbGhvc3QvbG9naW4iLCJzdWIiOiJ1c2VyIiwiZXhwIjoxNTk0ODI3NTIwLCJsZWRnZXJJZCI6Ii5hdXRoIiwicGFydHkiOiJ1c2VyIiwicmlnaHRzIjpbInJlYWQiLCJ3cml0ZTpjcmVhdGUiLCJ3cml0ZTpleGVyY2lzZSJdfQ.NiOHuA3Zm6yAs2ThSlXzlGyffbjauJLBjlnD8k8Qi-BBsya45bD0k4cLr-NMcUeabyoEHWVdDuPm7CoUCRkMqePBU5Q9FcwNyU3pqUdiRwmsLLEnFfaSi5mXV9JDH8qlw59LBLXOu5_D2i3p5mC4WB6hvLjqocJG7hguG5pmYZ4\n+{\n+  \"user\": \"sa-user-21a4c943-57cc-46e7-b07e-380d2c780622\"\n+}\n+```\n+\n+We'll write `--oauth2-bearer ...` in the following requests to refer to same bearer token as used above.\n+Also note that the service account `request` below refers to a `test-ledger` id of the ledger we are\n+granting authentication to (not the admin ledger).\n+```\n+❯ curl -X POST localhost:8089/sa/secure/request/test-ledger -H \"Content-type: application/json\" -d '{\"nonce\": \"random-nonce\"}' --oauth2-bearer ...\n+\n+❯ curl -X GET localhost:8089/sa/secure --oauth2-bearer ...\n+{\"serviceAccounts\":[{\"creds\":[],\"nonce\":\"random-nonce\",\"serviceAccount\":\"sa-d007e6a6-7af6-41de-890d-96647c4b23f8\"}]}\n+\n+❯ curl -X POST localhost:8089/sa/secure/sa-d007e6a6-7af6-41de-890d-96647c4b23f8/credRequest --oauth2-bearer ...\n+\n+❯ curl -X GET localhost:8089/sa/secure --oauth2-bearer ...\n+{\"serviceAccounts\":[{\"creds\":[{\"credId\":\"cred-80f27291-7fce-4b0d-b77f-cd3671edf474\"}],\"nonce\":\"random-nonce\",\"serviceAccount\":\"sa-d007e6a6-7af6-41de-890d-96647c4b23f8\"}]}\n+\n+❯ curl -X GET localhost:8089/sa/secure/cred/cred-80f27291-7fce-4b0d-b77f-cd3671edf474 --oauth2-bearer ..."
+  },
+  {
+    "id" : "2d258157-e8d2-4044-8b67-5ac2b6d010c3",
+    "prId" : 6659,
+    "comments" : [
+      {
+        "id" : "cb5e0fac-c932-4f25-8f92-e35e65abc0e2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This feels a bit out of place. Maybe also add explanations for the first 3?",
+        "createdAt" : "2020-07-09T09:47:11Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "be551cc1-10fe-4960-8317-0d3750265628",
+        "parentId" : "cb5e0fac-c932-4f25-8f92-e35e65abc0e2",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Reworded",
+        "createdAt" : "2020-07-09T15:04:15Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5ef884cb57cd501155631e52f5071c726c6e4a87",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,51 @@\n+# Trigger Service Authentication\n+\n+The trigger service is a client of the\n+[reference authentication service](https://github.com/digital-asset/ref-ledger-authenticator),\n+which we'll just call the \"auth service\".\n+It is used to obtain tokens used to access the ledger on behalf of trigger service users.\n+\n+## Auth service concepts\n+\n+The auth service has the following important entities:\n+ * user\n+ * service account (SA)\n+ * SA credential\n+ * SA token\n+\n+The SA token is a JWT token eventually used for ledger access."
+  },
+  {
+    "id" : "91c1a8a7-247c-40af-be85-ae71ddc9ccfb",
+    "prId" : 6659,
+    "comments" : [
+      {
+        "id" : "e863605d-3bf0-468c-aff5-0aeddf428e4b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe that is just me but calling the token and credential an `entity` sounds weird to me.",
+        "createdAt" : "2020-07-09T09:51:13Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5ef884cb57cd501155631e52f5071c726c6e4a87",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,51 @@\n+# Trigger Service Authentication\n+\n+The trigger service is a client of the\n+[reference authentication service](https://github.com/digital-asset/ref-ledger-authenticator),\n+which we'll just call the \"auth service\".\n+It is used to obtain tokens used to access the ledger on behalf of trigger service users.\n+\n+## Auth service concepts\n+\n+The auth service has the following important entities:"
+  },
+  {
+    "id" : "b6f017b7-5b0b-4d52-9717-674cd8359da1",
+    "prId" : 6659,
+    "comments" : [
+      {
+        "id" : "6ade7fcb-9eca-41fe-9d87-c2bf7e7fe50c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "My understanding is that outside of the test mode, `ref-ledger-authenticator` talks to an underlying IAM, e.g., Auth0. Currently the docs seem to ignore that distinction but I think it’s important to point out which part is responsible for what and who defines things like the expiration dates (presumably the IAM and not ref-ledger-authenticator?).",
+        "createdAt" : "2020-07-09T10:02:54Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c8d32ca0-e774-41ae-804f-c71d4a8e2eb0",
+        "parentId" : "6ade7fcb-9eca-41fe-9d87-c2bf7e7fe50c",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "I believe the only difference with the test mode is that requests to `authorize` use basic auth (ignoring the password) instead of OAuth2, for which you would use a token issuer like Auth0. The validity windows are defined in a config file in the auth service itself.",
+        "createdAt" : "2020-07-09T15:38:33Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c52b42be-5b06-4599-8c2f-bca951e3283a",
+        "parentId" : "6ade7fcb-9eca-41fe-9d87-c2bf7e7fe50c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Isn’t auth0 signing the token? If so, I’m not sure how ref-ledger-authenticator can decide on the expiration date.",
+        "createdAt" : "2020-07-09T15:40:53Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "303cbb09-91d0-4cdf-8b18-e084ea421cb8",
+        "parentId" : "6ade7fcb-9eca-41fe-9d87-c2bf7e7fe50c",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "I see, I think you're right. In the ref-ledger-authenticator there is a JwtJwkAuthenticator interface with a sample implementation that reads expiration details from a config file. I think for production it would be swapped out with Auth0, and I guess then those details would be configured separately.",
+        "createdAt" : "2020-07-09T16:15:54Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "68764214-3903-4205-bab8-4660cc9757a4",
+        "parentId" : "6ade7fcb-9eca-41fe-9d87-c2bf7e7fe50c",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "However, my understanding is this only applies to the bearer token used to authenticate with the auth service itself, not the SA credentials and tokens. Will get confirmation on this.",
+        "createdAt" : "2020-07-09T16:18:57Z",
+        "updatedAt" : "2020-07-09T16:20:14Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5ef884cb57cd501155631e52f5071c726c6e4a87",
+    "line" : 22,
+    "diffHunk" : "@@ -0,0 +1,51 @@\n+# Trigger Service Authentication\n+\n+The trigger service is a client of the\n+[reference authentication service](https://github.com/digital-asset/ref-ledger-authenticator),\n+which we'll just call the \"auth service\".\n+It is used to obtain tokens used to access the ledger on behalf of trigger service users.\n+\n+## Auth service concepts\n+\n+The auth service has the following important entities:\n+ * user\n+ * service account (SA)\n+ * SA credential\n+ * SA token\n+\n+The SA token is a JWT token eventually used for ledger access.\n+\n+In general, each entity in the list can have a one-to-many relationship with an entity later in the list.\n+For our purposes, users and service accounts correspond one-to-one and represent parties using the trigger service.\n+Service accounts do not expire.\n+\n+However, both SA credentials and SA tokens have validity windows: 30 days for an SA credential and 1 day for an SA token."
+  }
+]

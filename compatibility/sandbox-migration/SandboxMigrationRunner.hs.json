@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "b4986d94-50dc-48bb-a419-0032b97f1c65",
+    "prId" : 5826,
+    "comments" : [
+      {
+        "id" : "6b39777e-7f86-41ad-8d56-c6caf6b3fa5c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I haven’t looked too closely so far but I expect we probably have to fix this in the ledger tests as well. I’ll leave that for a separate PR.",
+        "createdAt" : "2020-05-04T18:40:08Z",
+        "updatedAt" : "2020-05-05T12:26:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c063ecb7-b3fb-4dc0-9c98-fdedf028cb25",
+        "parentId" : "6b39777e-7f86-41ad-8d56-c6caf6b3fa5c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I ended up fixing the `Sandbox` module in this PR and switched over to this.",
+        "createdAt" : "2020-05-05T08:09:57Z",
+        "updatedAt" : "2020-05-05T12:26:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a45ae358e3674284db714b0c7cde86472cb069d9",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,177 @@\n+{-# LANGUAGE DerivingStrategies #-}\n+{-# LANGUAGE DuplicateRecordFields #-}\n+module Main (main) where\n+\n+-- This test runs through the following steps:\n+-- 1. Start postgres\n+-- 2. Start the oldest version of sandbox.\n+-- 3. Upload a DAR using the same SDK version.\n+-- 4. Stop sandbox.\n+-- 5. In a loop over all versions:\n+--    1. Start sandbox of the given version.\n+--    1. Run a script for querying and creating new contracts.\n+--    2. Stop sandbox.\n+-- 6. Stop postgres.\n+\n+import Control.Monad\n+import qualified Data.Aeson as A\n+import Data.Foldable\n+import qualified Data.Text as T\n+import GHC.Generics\n+import Options.Applicative\n+import Sandbox (readPortFile, maxRetries)\n+import System.Environment\n+import System.FilePath\n+import System.IO.Extra\n+import System.Process\n+import WithPostgres (withPostgres)\n+\n+data Options = Options\n+  { scriptDar :: FilePath\n+  , modelDar :: FilePath\n+  , scriptAssistant :: FilePath\n+  -- ^ Assistant binary used to run DAML Script\n+  , platformAssistants :: [FilePath]\n+  -- ^ Ordered list of assistant binaries that will be used to run sandbox.\n+  -- We run through migrations in the order of the list\n+  }\n+\n+optsParser :: Parser Options\n+optsParser = Options\n+    <$> strOption (long \"script-dar\")\n+    <*> strOption (long \"model-dar\")\n+    <*> strOption (long \"script-assistant\")\n+    <*> many (strArgument mempty)\n+\n+main :: IO ()\n+main = do\n+    -- Limit sandbox and DAML Script memory.\n+    setEnv \"_JAVA_OPTIONS\" \"-Xms128m -Xmx1g\"\n+    Options{..} <- execParser (info optsParser fullDesc)\n+    withPostgres $ \\jdbcUrl -> do\n+        initialPlatform : _ <- pure platformAssistants\n+        hPutStrLn stderr \"--> Uploading model DAR\"\n+        withSandbox initialPlatform jdbcUrl $ \\p ->\n+            callProcess initialPlatform\n+                [ \"ledger\"\n+                , \"upload-dar\", modelDar\n+                , \"--host=localhost\", \"--port=\" <> show p\n+                ]\n+        hPutStrLn stderr \"<-- Uploaded model DAR\"\n+        void $ foldlM (testVersion scriptAssistant scriptDar jdbcUrl) [] platformAssistants\n+        pure ()\n+\n+testVersion :: FilePath -> FilePath -> T.Text -> [Tuple2 (ContractId T) T] -> FilePath -> IO [Tuple2 (ContractId T) T]\n+testVersion scriptAssistant scriptDar jdbcUrl prevTs assistant = do\n+    let note = takeFileName (takeDirectory assistant)\n+    hPutStrLn stderr (\"--> Testing \" <> note)\n+    withSandbox assistant jdbcUrl $ \\port ->\n+        withTempFile $ \\inputFile ->\n+        withTempFile $ \\outputFile -> do\n+        A.encodeFile inputFile (ScriptInput testProposer testAccepter note)\n+        callProcess scriptAssistant\n+            [ \"script\"\n+            , \"--dar\"\n+            , scriptDar\n+            , \"--ledger-host=localhost\"\n+            , \"--ledger-port=\" <> show port\n+            , \"--input-file\", inputFile\n+            , \"--output-file\", outputFile\n+            , \"--script-name=Script:run\"\n+            ]\n+        Just Result{..} <- A.decodeFileStrict' outputFile\n+        -- Test that all proposals are archived.\n+        unless (null oldTProposals) $\n+            fail (\"Expected no old TProposals but got \" <> show oldTProposals)\n+        unless (null newTProposals) $\n+            fail (\"Expected no new TProposals but got \" <> show newTProposals)\n+        unless (prevTs == oldTs) $\n+            fail (\"Active ts should not have changed after migration: \" <> show (prevTs, oldTs))\n+        -- Test that no T contracts got archived.\n+        let missingTs = filter (`notElem` newTs) oldTs\n+        unless (null missingTs) $\n+            fail (\"The following contracts got lost during the migration: \" <> show missingTs)\n+        -- Test that only one new T contract is not archived.\n+        let addedTs = filter (`notElem` oldTs) newTs\n+        case addedTs of\n+            [Tuple2 _ t] -> do\n+                let expected = T testProposer testAccepter note\n+                unless (t == expected) $\n+                    fail (\"Expected \" <> show expected <> \" but got \" <> show t)\n+            _ -> fail (\"Expected 1 new T contract but got: \" <> show addedTs)\n+        hPutStrLn stderr (\"<-- Tested \" <> note)\n+        pure newTs\n+\n+testProposer :: Party\n+testProposer = Party \"proposer\"\n+\n+testAccepter :: Party\n+testAccepter = Party \"accepter\"\n+\n+-- The datatypes are defined such that the autoderived Aeson instances\n+-- match the DAML-LF JSON encoding.\n+\n+newtype ContractId t = ContractId T.Text\n+  deriving newtype A.FromJSON\n+  deriving stock (Eq, Show)\n+newtype Party = Party T.Text\n+  deriving newtype (A.FromJSON, A.ToJSON)\n+  deriving stock (Eq, Show)\n+\n+data T = T\n+  { proposer :: Party\n+  , accepter :: Party\n+  , note :: String\n+  } deriving (Eq, Generic, Show)\n+\n+instance A.FromJSON T\n+\n+data TProposal = TProposal\n+  { proposer :: Party\n+  , accepter :: Party\n+  , note :: T.Text\n+  } deriving (Generic, Show)\n+\n+instance A.FromJSON TProposal\n+\n+data ScriptInput = ScriptInput\n+  { _1 :: Party\n+  , _2 :: Party\n+  , _3 :: String\n+  } deriving Generic\n+\n+instance A.ToJSON ScriptInput\n+\n+data Tuple2 a b = Tuple2\n+  { _1 :: a\n+  , _2 :: b\n+  } deriving (Eq, Generic, Show)\n+\n+instance (A.FromJSON a, A.FromJSON b) => A.FromJSON (Tuple2 a b)\n+\n+data Result = Result\n+  { oldTProposals :: [Tuple2 (ContractId TProposal) TProposal]\n+  , newTProposals :: [Tuple2 (ContractId TProposal) TProposal]\n+  , oldTs :: [Tuple2 (ContractId T) T]\n+  , newTs :: [Tuple2 (ContractId T) T]\n+  } deriving Generic\n+\n+instance A.FromJSON Result\n+\n+withSandbox :: FilePath -> T.Text -> (Int -> IO a) -> IO a\n+withSandbox assistant jdbcUrl f =\n+    withTempFile $ \\portFile ->\n+    withCreateProcess (proc assistant (args portFile)) { create_group = True } $ \\_ _ _ ph -> do\n+        p <- readPortFile maxRetries portFile\n+        r <- f p\n+        -- This is a shell process so we need to kill the whole process group.\n+        interruptProcessGroupOf ph"
+  },
+  {
+    "id" : "630edf4c-04ae-43f1-b571-439e8d8b51fb",
+    "prId" : 5826,
+    "comments" : [
+      {
+        "id" : "a7e00cdf-745e-4a09-9a20-12f800f15603",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n--    2. Run a script for querying and creating new contracts.\r\n--    3. Stop sandbox.\r\n```",
+        "createdAt" : "2020-05-05T12:22:27Z",
+        "updatedAt" : "2020-05-05T12:26:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c210866f-4bd4-4108-8f18-b48f15a22a32",
+        "parentId" : "a7e00cdf-745e-4a09-9a20-12f800f15603",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Counting to 3 seems to be too hard for me :facepalm: ",
+        "createdAt" : "2020-05-05T12:26:53Z",
+        "updatedAt" : "2020-05-05T12:26:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a45ae358e3674284db714b0c7cde86472cb069d9",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,181 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE DerivingStrategies #-}\n+{-# LANGUAGE DuplicateRecordFields #-}\n+module Main (main) where\n+\n+-- This test runs through the following steps:\n+-- 1. Start postgres\n+-- 2. Start the oldest version of sandbox.\n+-- 3. Upload a DAR using the same SDK version.\n+-- 4. Stop sandbox.\n+-- 5. In a loop over all versions:\n+--    1. Start sandbox of the given version.\n+--    1. Run a script for querying and creating new contracts.\n+--    2. Stop sandbox."
+  }
+]

@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "b1fe1639-4132-4574-84ff-8bf3606fc24f",
+    "prId" : 972,
+    "comments" : [
+      {
+        "id" : "7d2c0bb3-05a0-4dbc-a334-f4563b0e05ad",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "These already have an Eq on them. I assume the unique counts might be different? If so, could we get a comment to that effect. Perhaps also put this in UtilGHC?",
+        "createdAt" : "2019-05-07T12:19:49Z",
+        "updatedAt" : "2019-05-07T12:34:22Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5bf1e041-bc51-45ce-ac2d-9c5a9d2d4bf0",
+        "parentId" : "7d2c0bb3-05a0-4dbc-a334-f4563b0e05ad",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Uniques and source spans, I’ve added a comment. I’ll move it to `UtiGHC`once we end up using it somewhere else.",
+        "createdAt" : "2019-05-07T12:22:55Z",
+        "updatedAt" : "2019-05-07T12:34:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6564c2dc73eb4acc62c3ad880dc2f9231e5bba0b",
+    "line" : 81,
+    "diffHunk" : "@@ -74,10 +86,36 @@ atPoint tcs srcSpans pos = do\n         Just name -> any (`isInfixOf` show name) [\"==\", \"showsPrec\"]\n         Nothing -> False\n \n-locationsAtPoint :: Position -> [SpanInfo] -> [Location]\n-locationsAtPoint pos = map srcSpanToLocation\n-                     . mapMaybe (SpanInfo.getSrcSpan . spaninfoSource)\n-                     . spansAtPoint pos\n+locationsAtPoint :: IdeOptions -> PackageDynFlags -> Position -> [SpanInfo] -> Action [Location]\n+locationsAtPoint IdeOptions{..} pkgState pos =\n+    fmap (map srcSpanToLocation) .\n+    mapMaybeM (getSpan . spaninfoSource) .\n+    spansAtPoint pos\n+  where getSpan :: SpanSource -> Action (Maybe SrcSpan)\n+        getSpan NoSource = pure Nothing\n+        getSpan (Span sp) = pure $ Just sp\n+        getSpan (Named name) = case nameSrcSpan name of\n+            sp@(RealSrcSpan _) -> pure $ Just sp\n+            UnhelpfulSpan _ -> runMaybeT $ do\n+                -- This case usually arises when the definition is in an external package.\n+                -- In this case the interface files contain garbage source spans\n+                -- so we instead read the .hie files to get useful source spans.\n+                let mod = nameModule name\n+                let unitId = moduleUnitId mod\n+                pkgConfig <- MaybeT $ pure $ lookupPackageConfig unitId pkgState\n+                hiePath <- MaybeT $ liftIO $ optLocateHieFile pkgConfig mod\n+                hieFile <- MaybeT $ use (GetHieFile hiePath) \"\"\n+                avail <- MaybeT $ pure $ listToMaybe (filterAvails (eqName name) $ hie_exports hieFile)\n+                srcPath <- MaybeT $ liftIO $ optLocateSrcFile pkgConfig mod\n+                -- The location will point to the source file used during compilation.\n+                -- This file might no longer exists and even if it does the path will be relative\n+                -- to the compilation directory which we don’t know.\n+                let span = setFileName srcPath $ nameSrcSpan $ availName avail\n+                pure span\n+        eqName :: Name -> Name -> Bool\n+        eqName n n' = nameOccName n == nameOccName n' && nameModule n == nameModule n'"
+  }
+]

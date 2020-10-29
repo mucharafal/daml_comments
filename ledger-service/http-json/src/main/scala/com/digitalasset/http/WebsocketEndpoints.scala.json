@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "8c5202d7-1c2c-45eb-a8ae-749133a74b22",
+    "prId" : 3796,
+    "comments" : [
+      {
+        "id" : "56dedde5-4ef6-4d64-b43d-0487b2f89a32",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I would call this endpoint `/transactions`, `connect` does not add anything to it. Unless it is a common practice to call websocket endpoints this way.\r\ncc @bame-da ",
+        "createdAt" : "2019-12-11T20:37:53Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1e15f8eb-3801-4a4c-8974-408e694291eb",
+        "parentId" : "56dedde5-4ef6-4d64-b43d-0487b2f89a32",
+        "author" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "body" : "yeah, I added this trying to follow `contracts/search`, `command/create` convention and imply it's not a REST endpoint by `/connect` . On the other hand client may know from `ws://` so I can remove `/connect` if more people think it's useless",
+        "createdAt" : "2019-12-11T21:17:21Z",
+        "updatedAt" : "2019-12-11T21:29:33Z",
+        "lastEditedBy" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "de976ed59d6d521657884322490436c95dece760",
+    "line" : 32,
+    "diffHunk" : "@@ -0,0 +1,63 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.http\n+\n+import akka.http.scaladsl.model.HttpMethods._\n+import akka.http.scaladsl.model._\n+import akka.http.scaladsl.model.ws.{Message, UpgradeToWebSocket}\n+import akka.stream.Materializer\n+import akka.stream.scaladsl.Flow\n+import com.digitalasset.jwt.domain.Jwt\n+import com.digitalasset.ledger.api.refinements.{ApiTypes => lar}\n+import com.typesafe.scalalogging.StrictLogging\n+import scalaz.syntax.std.option._\n+import scalaz.{-\\/, \\/, \\/-}\n+import scala.concurrent.{ExecutionContext, Future}\n+import EndpointsCompanion._\n+\n+object WebsocketEndpoints {\n+  private val tokenPrefix: String = \"jwt.token.\"\n+  private val wsProtocol: String = \"daml.ws.auth\"\n+}\n+\n+class WebsocketEndpoints(ledgerId: lar.LedgerId,\n+                         decodeJwt: ValidateJwt,\n+                         webSocketService: WebSocketService)\n+                        (implicit mat: Materializer, ec: ExecutionContext) extends StrictLogging {\n+\n+  import WebsocketEndpoints._\n+\n+  lazy val transactionWebSocket: PartialFunction[HttpRequest, Future[HttpResponse]] = {\n+    case req@HttpRequest(GET, Uri.Path(\"/transaction/connect\"), _, _, _) =>"
+  },
+  {
+    "id" : "7fcbef1a-4e80-4814-bcfd-9d693bc691fa",
+    "prId" : 3796,
+    "comments" : [
+      {
+        "id" : "35aed15d-681c-4d57-a68a-9ea3eb8f4540",
+        "parentId" : null,
+        "author" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "body" : "Note: here we use subprotocols to find jwts, it should be in this format: `jwt.token.{bearer_token}, daml.ws.auth`\r\nThis `daml.ws.auth` is necessary to pass along the handshake to a specific subprotocol we accept. cc @bame-da @leo-da ",
+        "createdAt" : "2019-12-11T21:21:24Z",
+        "updatedAt" : "2019-12-11T21:42:46Z",
+        "lastEditedBy" : {
+          "login" : "lima-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/54044170?u=8e4a52a939c52393e885bbbedc55fef26e05eb55&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "de976ed59d6d521657884322490436c95dece760",
+    "line" : 58,
+    "diffHunk" : "@@ -0,0 +1,63 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.http\n+\n+import akka.http.scaladsl.model.HttpMethods._\n+import akka.http.scaladsl.model._\n+import akka.http.scaladsl.model.ws.{Message, UpgradeToWebSocket}\n+import akka.stream.Materializer\n+import akka.stream.scaladsl.Flow\n+import com.digitalasset.jwt.domain.Jwt\n+import com.digitalasset.ledger.api.refinements.{ApiTypes => lar}\n+import com.typesafe.scalalogging.StrictLogging\n+import scalaz.syntax.std.option._\n+import scalaz.{-\\/, \\/, \\/-}\n+import scala.concurrent.{ExecutionContext, Future}\n+import EndpointsCompanion._\n+\n+object WebsocketEndpoints {\n+  private val tokenPrefix: String = \"jwt.token.\"\n+  private val wsProtocol: String = \"daml.ws.auth\"\n+}\n+\n+class WebsocketEndpoints(ledgerId: lar.LedgerId,\n+                         decodeJwt: ValidateJwt,\n+                         webSocketService: WebSocketService)\n+                        (implicit mat: Materializer, ec: ExecutionContext) extends StrictLogging {\n+\n+  import WebsocketEndpoints._\n+\n+  lazy val transactionWebSocket: PartialFunction[HttpRequest, Future[HttpResponse]] = {\n+    case req@HttpRequest(GET, Uri.Path(\"/transaction/connect\"), _, _, _) =>\n+      req.header[UpgradeToWebSocket] match {\n+        case Some(upgradeReq) =>\n+          connect(upgradeReq, Some(wsProtocol))\n+        case None => Future.successful(httpResponseError(InvalidUserInput(s\"Cannot upgrade client's connection to websocket\")))\n+      }\n+  }\n+\n+  private[http] def connect(req: UpgradeToWebSocket, protocol: Option[String]): Future[HttpResponse] = {\n+    protocol.map(req.requestedProtocols.contains(_)) match {\n+      case Some(valid) if valid => handleWebsocketRequest(req, protocol)\n+      case _ => Future.successful(httpResponseError(Unauthorized(s\"Missing required $tokenPrefix.[token] or $wsProtocol subprotocol\")))\n+    }\n+  }\n+\n+\n+  private def handleWebsocketRequest(req: UpgradeToWebSocket, protocol: Option[String]):Future[HttpResponse] = {\n+    findJwtFromSubProtocol(req).flatMap(decodeAndParsePayload(_, decodeJwt)) match {\n+      case \\/-((jwt, jwtPayload)) =>\n+        val handler: Flow[Message, Message, _] = webSocketService.transactionMessageHandler(jwt, jwtPayload)\n+        Future.successful(req.handleMessages(handler, protocol))\n+      case -\\/(e) => Future.successful(httpResponseError(e))\n+    }\n+  }\n+\n+  private def findJwtFromSubProtocol(upgradeToWebSocket: UpgradeToWebSocket): Unauthorized \\/ Jwt = {\n+    upgradeToWebSocket.requestedProtocols.collectFirst {"
+  }
+]

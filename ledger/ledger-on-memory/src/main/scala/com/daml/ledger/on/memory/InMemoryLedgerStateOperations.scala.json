@@ -1,0 +1,146 @@
+[
+  {
+    "id" : "f167362d-3d65-417a-85d5-71b8ddaf7f8f",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "4174a117-600e-47a6-8647-9d3c81f1b721",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "If you're going to split this stuff out, keep splitting.",
+        "createdAt" : "2020-05-20T07:12:10Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ca4cb930-021d-452e-ac43-179f3e5878f3",
+        "parentId" : "4174a117-600e-47a6-8647-9d3c81f1b721",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Extracted `InMemoryLedgerStateAccess` into its own file.",
+        "createdAt" : "2020-05-20T10:22:08Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cbbdee08-2e16-4429-86e5-a5ae6f6b1937",
+        "parentId" : "4174a117-600e-47a6-8647-9d3c81f1b721",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "You moved `InMemoryLedgerStateOperations` out into its own file, but took `InMemoryLedgerStateAccess` with it. I find this confusing. `InMemoryLedgerStateAccess` is a higher-level API, but it's buried in a file named after a lower-level API. I suggest splitting it into its own file.",
+        "createdAt" : "2020-05-20T10:56:24Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "917f8c94-ad36-4015-b73d-dd0f56340b85",
+        "parentId" : "4174a117-600e-47a6-8647-9d3c81f1b721",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Thanks for the confirmation.",
+        "createdAt" : "2020-05-20T11:22:24Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,55 @@\n+package com.daml.ledger.on.memory\n+\n+import com.daml.ledger.on.memory.InMemoryLedgerReaderWriter.Index\n+import com.daml.ledger.on.memory.InMemoryState.MutableLog\n+import com.daml.ledger.participant.state.kvutils.KVOffset\n+import com.daml.ledger.participant.state.kvutils.api.LedgerRecord\n+import com.daml.ledger.participant.state.v1.Offset\n+import com.daml.ledger.validator.{\n+  BatchingLedgerStateOperations,\n+  LedgerStateAccess,\n+  LedgerStateOperations,\n+  TimedLedgerStateOperations\n+}\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+import com.daml.metrics.Metrics\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+private[memory] final class InMemoryLedgerStateOperations(\n+    log: InMemoryState.MutableLog,\n+    state: InMemoryState.MutableState,\n+)(implicit executionContext: ExecutionContext)\n+    extends BatchingLedgerStateOperations[Index] {\n+  import InMemoryLedgerStateOperations.appendEntry\n+\n+  override def readState(keys: Seq[Key]): Future[Seq[Option[Value]]] =\n+    Future.successful(keys.map(state.get))\n+\n+  override def writeState(keyValuePairs: Seq[(Key, Value)]): Future[Unit] = {\n+    state ++= keyValuePairs\n+    Future.unit\n+  }\n+\n+  override def appendToLog(key: Key, value: Value): Future[Index] =\n+    Future.successful(appendEntry(log, LedgerRecord(_, key, value)))\n+}\n+\n+private[memory] class InMemoryLedgerStateAccess(state: InMemoryState, metrics: Metrics)(\n+    implicit executionContext: ExecutionContext)\n+    extends LedgerStateAccess[Index] {\n+  override def inTransaction[T](body: LedgerStateOperations[Index] => Future[T]): Future[T] =\n+    state.write { (log, state) =>\n+      body(new TimedLedgerStateOperations(new InMemoryLedgerStateOperations(log, state), metrics))\n+    }\n+}"
+  },
+  {
+    "id" : "a66c9838-513b-4f5e-a10e-fd7a9f433860",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "442c592c-937c-42c8-ae05-053f1f17db85",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Please move it to the imports above if possible.",
+        "createdAt" : "2020-05-20T15:50:31Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0194ffc5-66e8-4b55-a184-1b1454b73cfc",
+        "parentId" : "442c592c-937c-42c8-ae05-053f1f17db85",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "An import from the companion object should be in the class's scope -- see: https://docs.scala-lang.org/tour/singleton-objects.html",
+        "createdAt" : "2020-05-25T09:46:52Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : 21,
+    "diffHunk" : "@@ -0,0 +1,43 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.on.memory\n+\n+import com.daml.ledger.on.memory.InMemoryLedgerReaderWriter.Index\n+import com.daml.ledger.on.memory.InMemoryState.MutableLog\n+import com.daml.ledger.participant.state.kvutils.KVOffset\n+import com.daml.ledger.participant.state.kvutils.api.LedgerRecord\n+import com.daml.ledger.participant.state.v1.Offset\n+import com.daml.ledger.validator.BatchingLedgerStateOperations\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+private[memory] final class InMemoryLedgerStateOperations(\n+    log: InMemoryState.MutableLog,\n+    state: InMemoryState.MutableState,\n+)(implicit executionContext: ExecutionContext)\n+    extends BatchingLedgerStateOperations[Index] {\n+  import InMemoryLedgerStateOperations.appendEntry"
+  }
+]

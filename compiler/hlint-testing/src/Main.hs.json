@@ -1,0 +1,287 @@
+[
+  {
+    "id" : "57819055-7380-47a7-b88e-a7cd3a1502de",
+    "prId" : 2050,
+    "comments" : [
+      {
+        "id" : "deada25f-b842-4523-a0e8-8c09834ed665",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You probably want to use `locateRunfiles` for this. The logic for runfiles is different on Windows so this will not work.",
+        "createdAt" : "2019-07-09T07:01:59Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "287f74ab-6774-4df2-80da-43cc8c166468",
+        "parentId" : "deada25f-b842-4523-a0e8-8c09834ed665",
+        "author" : null,
+        "body" : "What is `locateRunfiles` and where do I get it from?",
+        "createdAt" : "2019-07-09T08:55:43Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "83616c33-971b-44f1-b67a-c0eb576daf08",
+        "parentId" : "deada25f-b842-4523-a0e8-8c09834ed665",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/blob/784fc1b8dda6d38ac0f5f3a3795bfbded4eba3ad/libs-haskell/bazel-runfiles/src/DA/Bazel/Runfiles.hs#L24 You should find various examples of how to use it in our codebase.",
+        "createdAt" : "2019-07-09T08:58:55Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5e684ffc-4a56-4246-a759-1cb236902c93",
+        "parentId" : "deada25f-b842-4523-a0e8-8c09834ed665",
+        "author" : null,
+        "body" : "Ok, will do. Thanks!\r\n",
+        "createdAt" : "2019-07-09T09:24:08Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f2f3f97dbb2251675d45e69b6f039e60903bdbbe",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- A little program to help prove the use of hlint with DAML.\n+\n+{-# OPTIONS_GHC -Wno-missing-fields #-}\n+\n+module Main (main) where\n+\n+import \"ghc-lib-parser\" HsSyn\n+import \"ghc-lib-parser\" Config\n+import \"ghc-lib-parser\" DynFlags\n+import \"ghc-lib-parser\" Platform\n+import \"ghc-lib-parser\" StringBuffer\n+import \"ghc-lib-parser\" Fingerprint\n+import \"ghc-lib-parser\" Lexer\n+import \"ghc-lib-parser\" ErrUtils\n+import qualified \"ghc-lib-parser\" Parser\n+import \"ghc-lib-parser\" FastString\n+import \"ghc-lib-parser\" Outputable\n+import \"ghc-lib-parser\" SrcLoc\n+import \"ghc-lib-parser\" Panic\n+import \"ghc-lib-parser\" HscTypes\n+import \"ghc-lib-parser\" HeaderInfo\n+import \"ghc-lib-parser\" ApiAnnotation\n+import \"ghc-lib-parser\" GHC.LanguageExtensions.Type\n+\n+import Control.Monad\n+import Control.Monad.Extra\n+import System.FilePath\n+import System.Environment\n+import System.IO.Extra\n+import qualified Data.Map as Map\n+import Data.List\n+\n+import Language.Haskell.HLint4\n+\n+{- To test, create a file e.g. ~/Test.daml with contents\n+   ```\n+   daml 1.2\n+   module Main where\n+\n+   main : IO ()\n+   main = print $ 3 + 4\n+   ```\n+   then, bazel run //compiler/hlint-testing:hlint-test ~/Test.daml.\n+\n+   For the above module, we expect output like,\n+   ```\n+   [/Users/shaynefletcher/Test.daml:1:1: Ignore: Use module export list\n+    Found:\n+      module Main where\n+    Perhaps:\n+      module Main (\n+              module Main\n+          ) where\n+    Note: an explicit list is usally better\n+    ]\n+    ```\n+-}\n+\n+-- Calculate the HLint data directory from the exe path. It seems\n+-- bazel automatically copies the data directory to a location\n+-- relative to it.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  exePath <- getExecutablePath\n+  return $ takeDirectory exePath </> \"hlint-test.runfiles/haskell_hlint/data\""
+  },
+  {
+    "id" : "a23166a8-b181-43e2-85f6-eb100ce44c97",
+    "prId" : 2050,
+    "comments" : [
+      {
+        "id" : "d5e77497-f7ca-4318-8e31-e642902a3039",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Silently doing nothing when you get `Nothing` seems like a bad idea. This should emit an error.",
+        "createdAt" : "2019-07-09T07:04:12Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "df76cc3f-6c95-40e2-81e5-9f781e435f91",
+        "parentId" : "d5e77497-f7ca-4318-8e31-e642902a3039",
+        "author" : null,
+        "body" : "In this console application, `parsePragmasIntoDynFlags` prints an error message so it's not actually silent. When we seat it into the IDE we'll do better.",
+        "createdAt" : "2019-07-09T08:57:02Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f2f3f97dbb2251675d45e69b6f039e60903bdbbe",
+    "line" : 90,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- A little program to help prove the use of hlint with DAML.\n+\n+{-# OPTIONS_GHC -Wno-missing-fields #-}\n+\n+module Main (main) where\n+\n+import \"ghc-lib-parser\" HsSyn\n+import \"ghc-lib-parser\" Config\n+import \"ghc-lib-parser\" DynFlags\n+import \"ghc-lib-parser\" Platform\n+import \"ghc-lib-parser\" StringBuffer\n+import \"ghc-lib-parser\" Fingerprint\n+import \"ghc-lib-parser\" Lexer\n+import \"ghc-lib-parser\" ErrUtils\n+import qualified \"ghc-lib-parser\" Parser\n+import \"ghc-lib-parser\" FastString\n+import \"ghc-lib-parser\" Outputable\n+import \"ghc-lib-parser\" SrcLoc\n+import \"ghc-lib-parser\" Panic\n+import \"ghc-lib-parser\" HscTypes\n+import \"ghc-lib-parser\" HeaderInfo\n+import \"ghc-lib-parser\" ApiAnnotation\n+import \"ghc-lib-parser\" GHC.LanguageExtensions.Type\n+\n+import Control.Monad\n+import Control.Monad.Extra\n+import System.FilePath\n+import System.Environment\n+import System.IO.Extra\n+import qualified Data.Map as Map\n+import Data.List\n+\n+import Language.Haskell.HLint4\n+\n+{- To test, create a file e.g. ~/Test.daml with contents\n+   ```\n+   daml 1.2\n+   module Main where\n+\n+   main : IO ()\n+   main = print $ 3 + 4\n+   ```\n+   then, bazel run //compiler/hlint-testing:hlint-test ~/Test.daml.\n+\n+   For the above module, we expect output like,\n+   ```\n+   [/Users/shaynefletcher/Test.daml:1:1: Ignore: Use module export list\n+    Found:\n+      module Main where\n+    Perhaps:\n+      module Main (\n+              module Main\n+          ) where\n+    Note: an explicit list is usally better\n+    ]\n+    ```\n+-}\n+\n+-- Calculate the HLint data directory from the exe path. It seems\n+-- bazel automatically copies the data directory to a location\n+-- relative to it.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  exePath <- getExecutablePath\n+  return $ takeDirectory exePath </> \"hlint-test.runfiles/haskell_hlint/data\"\n+\n+hlintSettings :: IO (ParseFlags, [Classify], Hint)\n+hlintSettings = do\n+    hlintDataDir <- getHlintDataDir\n+    putStrLn $ \"Data dir is \" ++ hlintDataDir\n+    (fixities, classify, hints) <-\n+      findSettings (readSettingsFile (Just hlintDataDir)) Nothing\n+    return (parseFlagsAddFixities fixities defaultParseFlags, classify, hints)\n+\n+analyzeModule :: Located (HsModule GhcPs) -> ApiAnns -> IO ()\n+analyzeModule modu anns = do\n+  (_, classify, hint) <- hlintSettings\n+  print $ applyHints classify hint [createModuleEx anns modu]\n+\n+main :: IO ()\n+main = do\n+  args <- getArgs\n+  case args of\n+    [file] -> do\n+      s <- readFile' file\n+      flags <-\n+        parsePragmasIntoDynFlags\n+          (defaultDynFlags fakeSettings fakeLlvmConfig) file s\n+      whenJust flags $ \\flags ->"
+  },
+  {
+    "id" : "95bc195f-efd9-456f-99a8-9e57dcf8a81a",
+    "prId" : 2050,
+    "comments" : [
+      {
+        "id" : "d0f7f1e3-be7d-4a8f-9797-63afd09b4b16",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```\r\nplatform = Platform\r\n    { platformWordSize = 8\r\n    , platformOS = OSUnknown\r\n    , platformUnregistered = True\r\n    }\r\n```\r\nThat looks a bit more consistent imho and matches what we do elsewhere (and even what you do here in the same file for `Settings`).",
+        "createdAt" : "2019-07-09T07:07:14Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "023ad556-b280-4bfb-9fe9-5877f2147aee",
+        "parentId" : "d0f7f1e3-be7d-4a8f-9797-63afd09b4b16",
+        "author" : null,
+        "body" : "Note, all this stuff relating to GHC parsing is just for this POC. The IDE already has all this code we wont be replicating it. That said, looks a bit more consistent with what?",
+        "createdAt" : "2019-07-09T08:58:34Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d885b2fd-0ed2-42b6-9057-95513ba35c0a",
+        "parentId" : "d0f7f1e3-be7d-4a8f-9797-63afd09b4b16",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "More consistent with the style we use for formatting records in other places (and the one you use for `Settings` a few lines above).",
+        "createdAt" : "2019-07-09T08:59:43Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "213d8f9e-70ca-4bdb-81f1-b803310e0446",
+        "parentId" : "d0f7f1e3-be7d-4a8f-9797-63afd09b4b16",
+        "author" : null,
+        "body" : "Ah got you now.",
+        "createdAt" : "2019-07-09T09:47:22Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f2f3f97dbb2251675d45e69b6f039e60903bdbbe",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- A little program to help prove the use of hlint with DAML.\n+\n+{-# OPTIONS_GHC -Wno-missing-fields #-}\n+\n+module Main (main) where\n+\n+import \"ghc-lib-parser\" HsSyn\n+import \"ghc-lib-parser\" Config\n+import \"ghc-lib-parser\" DynFlags\n+import \"ghc-lib-parser\" Platform\n+import \"ghc-lib-parser\" StringBuffer\n+import \"ghc-lib-parser\" Fingerprint\n+import \"ghc-lib-parser\" Lexer\n+import \"ghc-lib-parser\" ErrUtils\n+import qualified \"ghc-lib-parser\" Parser\n+import \"ghc-lib-parser\" FastString\n+import \"ghc-lib-parser\" Outputable\n+import \"ghc-lib-parser\" SrcLoc\n+import \"ghc-lib-parser\" Panic\n+import \"ghc-lib-parser\" HscTypes\n+import \"ghc-lib-parser\" HeaderInfo\n+import \"ghc-lib-parser\" ApiAnnotation\n+import \"ghc-lib-parser\" GHC.LanguageExtensions.Type\n+\n+import Control.Monad\n+import Control.Monad.Extra\n+import System.FilePath\n+import System.Environment\n+import System.IO.Extra\n+import qualified Data.Map as Map\n+import Data.List\n+\n+import Language.Haskell.HLint4\n+\n+{- To test, create a file e.g. ~/Test.daml with contents\n+   ```\n+   daml 1.2\n+   module Main where\n+\n+   main : IO ()\n+   main = print $ 3 + 4\n+   ```\n+   then, bazel run //compiler/hlint-testing:hlint-test ~/Test.daml.\n+\n+   For the above module, we expect output like,\n+   ```\n+   [/Users/shaynefletcher/Test.daml:1:1: Ignore: Use module export list\n+    Found:\n+      module Main where\n+    Perhaps:\n+      module Main (\n+              module Main\n+          ) where\n+    Note: an explicit list is usally better\n+    ]\n+    ```\n+-}\n+\n+-- Calculate the HLint data directory from the exe path. It seems\n+-- bazel automatically copies the data directory to a location\n+-- relative to it.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  exePath <- getExecutablePath\n+  return $ takeDirectory exePath </> \"hlint-test.runfiles/haskell_hlint/data\"\n+\n+hlintSettings :: IO (ParseFlags, [Classify], Hint)\n+hlintSettings = do\n+    hlintDataDir <- getHlintDataDir\n+    putStrLn $ \"Data dir is \" ++ hlintDataDir\n+    (fixities, classify, hints) <-\n+      findSettings (readSettingsFile (Just hlintDataDir)) Nothing\n+    return (parseFlagsAddFixities fixities defaultParseFlags, classify, hints)\n+\n+analyzeModule :: Located (HsModule GhcPs) -> ApiAnns -> IO ()\n+analyzeModule modu anns = do\n+  (_, classify, hint) <- hlintSettings\n+  print $ applyHints classify hint [createModuleEx anns modu]\n+\n+main :: IO ()\n+main = do\n+  args <- getArgs\n+  case args of\n+    [file] -> do\n+      s <- readFile' file\n+      flags <-\n+        parsePragmasIntoDynFlags\n+          (defaultDynFlags fakeSettings fakeLlvmConfig) file s\n+      whenJust flags $ \\flags ->\n+         case parse file (flags `gopt_set` Opt_KeepRawTokenStream)s of\n+            PFailed _ loc err ->\n+              putStrLn (showSDoc flags (pprLocErrMsg (mkPlainErrMsg flags loc err)))\n+            POk s m -> do\n+              let (wrns, errs) = getMessages s flags\n+              report flags wrns\n+              report flags errs\n+              when (null errs) $ analyzeModule m (harvestAnns s)\n+    _ -> fail \"Exactly one file argument required\"\n+  where\n+    report flags msgs =\n+      sequence_\n+        [ putStrLn $ showSDoc flags msg\n+        | msg <- pprErrMsgBagWithLoc msgs\n+        ]\n+    harvestAnns pst =\n+      ( Map.fromListWith (++) $ annotations pst\n+      , Map.fromList ((noSrcSpan, comment_q pst) : annotations_comments pst)\n+      )\n+\n+parse :: String -> DynFlags -> String -> ParseResult (Located (HsModule GhcPs))\n+parse filename flags str =\n+  unP Parser.parseModule parseState\n+  where\n+    location = mkRealSrcLoc (mkFastString filename) 1 1\n+    buffer = stringToStringBuffer str\n+    parseState = mkPState flags buffer location\n+\n+parsePragmasIntoDynFlags :: DynFlags -> FilePath -> String -> IO (Maybe DynFlags)\n+parsePragmasIntoDynFlags flags filepath str =\n+  catchErrors $ do\n+    let opts = getOptions flags (stringToStringBuffer str) filepath\n+    (flags, _, _) <- parseDynamicFilePragma flags opts\n+    return $ Just (foldl' xopt_set flags xExtensionsSet)\n+  where\n+    catchErrors :: IO (Maybe DynFlags) -> IO (Maybe DynFlags)\n+    catchErrors act = handleGhcException reportErr\n+                        (handleSourceError reportErr act)\n+    reportErr e = do putStrLn $ \"error : \" ++ show e; return Nothing\n+\n+xExtensionsSet :: [Extension]\n+xExtensionsSet =\n+  [ RecordPuns, RecordWildCards, LambdaCase, TupleSections, BlockArguments, ViewPatterns\n+  , NumericUnderscores\n+  , DuplicateRecordFields, DisambiguateRecordFields\n+  , ScopedTypeVariables, ExplicitForAll\n+  , DataKinds, KindSignatures, RankNTypes, TypeApplications\n+  , ConstraintKinds\n+  , MultiParamTypeClasses, FlexibleInstances, GeneralizedNewtypeDeriving, TypeSynonymInstances\n+  , DefaultSignatures, StandaloneDeriving, FunctionalDependencies, DeriveFunctor\n+  , RebindableSyntax, OverloadedStrings\n+  , Strict, StrictData\n+  , MonadComprehensions\n+  , PackageImports\n+  , DamlSyntax\n+  ]\n+\n+fakeSettings :: Settings\n+fakeSettings = Settings\n+  { sTargetPlatform=platform\n+  , sPlatformConstants=platformConstants\n+  , sProjectVersion=cProjectVersion\n+  , sProgramName=\"ghc\"\n+  , sOpt_P_fingerprint=fingerprint0\n+  }\n+  where\n+    platform =\n+      Platform{platformWordSize=8"
+  },
+  {
+    "id" : "c386e13e-df9a-47bf-b3b9-634cbbec3a7d",
+    "prId" : 2050,
+    "comments" : [
+      {
+        "id" : "e4b76f39-c9c4-4828-ab16-fcb781efe685",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "At least within a single new file we should try to be consistent with 4-space vs 2-space indentation.",
+        "createdAt" : "2019-07-09T07:07:56Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "00924baf-6228-4577-b856-7db7ed8a11df",
+        "parentId" : "e4b76f39-c9c4-4828-ab16-fcb781efe685",
+        "author" : null,
+        "body" : "Yes, OK, just an emacs thing will fix.",
+        "createdAt" : "2019-07-09T08:59:30Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f2f3f97dbb2251675d45e69b6f039e60903bdbbe",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- A little program to help prove the use of hlint with DAML.\n+\n+{-# OPTIONS_GHC -Wno-missing-fields #-}\n+\n+module Main (main) where\n+\n+import \"ghc-lib-parser\" HsSyn\n+import \"ghc-lib-parser\" Config\n+import \"ghc-lib-parser\" DynFlags\n+import \"ghc-lib-parser\" Platform\n+import \"ghc-lib-parser\" StringBuffer\n+import \"ghc-lib-parser\" Fingerprint\n+import \"ghc-lib-parser\" Lexer\n+import \"ghc-lib-parser\" ErrUtils\n+import qualified \"ghc-lib-parser\" Parser\n+import \"ghc-lib-parser\" FastString\n+import \"ghc-lib-parser\" Outputable\n+import \"ghc-lib-parser\" SrcLoc\n+import \"ghc-lib-parser\" Panic\n+import \"ghc-lib-parser\" HscTypes\n+import \"ghc-lib-parser\" HeaderInfo\n+import \"ghc-lib-parser\" ApiAnnotation\n+import \"ghc-lib-parser\" GHC.LanguageExtensions.Type\n+\n+import Control.Monad\n+import Control.Monad.Extra\n+import System.FilePath\n+import System.Environment\n+import System.IO.Extra\n+import qualified Data.Map as Map\n+import Data.List\n+\n+import Language.Haskell.HLint4\n+\n+{- To test, create a file e.g. ~/Test.daml with contents\n+   ```\n+   daml 1.2\n+   module Main where\n+\n+   main : IO ()\n+   main = print $ 3 + 4\n+   ```\n+   then, bazel run //compiler/hlint-testing:hlint-test ~/Test.daml.\n+\n+   For the above module, we expect output like,\n+   ```\n+   [/Users/shaynefletcher/Test.daml:1:1: Ignore: Use module export list\n+    Found:\n+      module Main where\n+    Perhaps:\n+      module Main (\n+              module Main\n+          ) where\n+    Note: an explicit list is usally better\n+    ]\n+    ```\n+-}\n+\n+-- Calculate the HLint data directory from the exe path. It seems\n+-- bazel automatically copies the data directory to a location\n+-- relative to it.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  exePath <- getExecutablePath\n+  return $ takeDirectory exePath </> \"hlint-test.runfiles/haskell_hlint/data\"\n+\n+hlintSettings :: IO (ParseFlags, [Classify], Hint)\n+hlintSettings = do\n+    hlintDataDir <- getHlintDataDir"
+  },
+  {
+    "id" : "9eadf725-0e8a-4982-8278-e4ad8d474bfc",
+    "prId" : 2050,
+    "comments" : [
+      {
+        "id" : "fb83738e-b4af-496e-9f74-2f1764ea2a7c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    Note: an explicit list is usually better\r\n```",
+        "createdAt" : "2019-07-09T07:08:14Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "50fe187d-d249-4f69-8a6b-87683749d1c2",
+        "parentId" : "fb83738e-b4af-496e-9f74-2f1764ea2a7c",
+        "author" : null,
+        "body" : "Ha. You found a `hlint` bug (probably of my making though) :)",
+        "createdAt" : "2019-07-09T09:00:44Z",
+        "updatedAt" : "2019-07-09T09:52:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f2f3f97dbb2251675d45e69b6f039e60903bdbbe",
+    "line" : 58,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- A little program to help prove the use of hlint with DAML.\n+\n+{-# OPTIONS_GHC -Wno-missing-fields #-}\n+\n+module Main (main) where\n+\n+import \"ghc-lib-parser\" HsSyn\n+import \"ghc-lib-parser\" Config\n+import \"ghc-lib-parser\" DynFlags\n+import \"ghc-lib-parser\" Platform\n+import \"ghc-lib-parser\" StringBuffer\n+import \"ghc-lib-parser\" Fingerprint\n+import \"ghc-lib-parser\" Lexer\n+import \"ghc-lib-parser\" ErrUtils\n+import qualified \"ghc-lib-parser\" Parser\n+import \"ghc-lib-parser\" FastString\n+import \"ghc-lib-parser\" Outputable\n+import \"ghc-lib-parser\" SrcLoc\n+import \"ghc-lib-parser\" Panic\n+import \"ghc-lib-parser\" HscTypes\n+import \"ghc-lib-parser\" HeaderInfo\n+import \"ghc-lib-parser\" ApiAnnotation\n+import \"ghc-lib-parser\" GHC.LanguageExtensions.Type\n+\n+import Control.Monad\n+import Control.Monad.Extra\n+import System.FilePath\n+import System.Environment\n+import System.IO.Extra\n+import qualified Data.Map as Map\n+import Data.List\n+\n+import Language.Haskell.HLint4\n+\n+{- To test, create a file e.g. ~/Test.daml with contents\n+   ```\n+   daml 1.2\n+   module Main where\n+\n+   main : IO ()\n+   main = print $ 3 + 4\n+   ```\n+   then, bazel run //compiler/hlint-testing:hlint-test ~/Test.daml.\n+\n+   For the above module, we expect output like,\n+   ```\n+   [/Users/shaynefletcher/Test.daml:1:1: Ignore: Use module export list\n+    Found:\n+      module Main where\n+    Perhaps:\n+      module Main (\n+              module Main\n+          ) where\n+    Note: an explicit list is usally better"
+  }
+]

@@ -1,0 +1,420 @@
+[
+  {
+    "id" : "17d2dd48-75b0-4388-9340-f840133f6a02",
+    "prId" : 1700,
+    "comments" : [
+      {
+        "id" : "97435783-f3ee-4b51-ba79-eac11750c490",
+        "parentId" : null,
+        "author" : null,
+        "body" : "ah, this is wrong, I need to fix this.",
+        "createdAt" : "2019-06-17T09:53:22Z",
+        "updatedAt" : "2019-06-17T10:52:15Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bcd9c7cf18037659957f089b88603a42ebfe51c7",
+    "line" : null,
+    "diffHunk" : "@@ -159,14 +159,14 @@ handleCommand env@Env{..} = \\case\n                     Right vs -> (`elem` vs)\n \n             versionAttrs v = catMaybes\n-                [ \"active\"\n-                    <$ guard (Just v == envSdkVersion)\n-                , \"default\"\n-                    <$ guard (Just v == defaultVersionM)\n-                , \"assistant\"\n-                    <$ guard (Just v == asstVersion)\n+                [ \"project SDK version from daml.yaml\"\n+                    <$ guard (Just v == envSdkVersion && isJust envProjectPath)"
+  },
+  {
+    "id" : "311cc6c5-5b7f-48b6-a230-3c1b885897c0",
+    "prId" : 1229,
+    "comments" : [
+      {
+        "id" : "773b1369-dfb3-455c-816f-56c3af1c96d8",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do we still need this now that there is a new semver release?",
+        "createdAt" : "2019-05-20T07:00:30Z",
+        "updatedAt" : "2019-05-20T07:01:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ead71dbc-6d91-40f6-b4f9-413cabae63d0",
+        "parentId" : "773b1369-dfb3-455c-816f-56c3af1c96d8",
+        "author" : null,
+        "body" : "I'll test & remove this in a separate PR :)",
+        "createdAt" : "2019-05-20T07:46:34Z",
+        "updatedAt" : "2019-05-20T07:46:34Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1312d4657e0ca5d7d9237e637770ef32dca0ee86",
+    "line" : 153,
+    "diffHunk" : "@@ -66,74 +93,117 @@ main = displayErrors $ do\n                 , \"\"\n                 ]\n \n-    case userCommand of\n+-- | Perform auto-install if SDK version is given but SDK path is missing,\n+-- and auto-installs are not disabled in the $DAML_HOME/daml-config.yaml.\n+-- Returns the Env updated with the installed SdkPath.\n+autoInstall :: Env -> IO Env\n+autoInstall env@Env{..} = do\n+    damlConfigE <- tryConfig $ readDamlConfig envDamlPath\n+    let doAutoInstallE = queryDamlConfigRequired [\"auto-install\"] =<< damlConfigE\n+        doAutoInstall = fromRight True doAutoInstallE\n+\n+    if doAutoInstall && isJust envSdkVersion && isNothing envSdkPath then do\n+        -- sdk is missing, so let's install it!\n+        let sdkVersion = fromJust envSdkVersion\n+            isLatest\n+                | Just (DamlAssistantSdkVersion v) <- envDamlAssistantSdkVersion =\n+                    sdkVersion > v\n+                | otherwise =\n+                    True\n+            options = InstallOptions\n+                { iTargetM = Nothing\n+                , iQuiet = QuietInstall False\n+                , iActivate = ActivateInstall isLatest\n+                , iForce = ForceInstall False\n+                , iSetPath = SetPath True\n+                }\n+            installEnv = InstallEnv\n+                { options = options\n+                , damlPath = envDamlPath\n+                , targetVersionM = Just sdkVersion\n+                , projectPathM = Nothing\n+                , output = hPutStrLn stderr\n+                    -- Print install messages to stderr since the install\n+                    -- is only happening because of some other command,\n+                    -- and we don't want to mess up the other command's\n+                    -- output / have the install messages be gobbled\n+                    -- up by a pipe.\n+                }\n+        versionInstall installEnv sdkVersion\n+        pure env { envSdkPath = Just (defaultSdkPath envDamlPath sdkVersion) }\n+\n+    else\n+        pure env\n+\n+handleCommand :: Env -> Command -> IO ()\n+handleCommand env@Env{..} = \\case\n+\n+    Builtin Version -> do\n+        installedVersionsE <- tryAssistant $ getInstalledSdkVersions envDamlPath\n+        defaultVersionM <- tryAssistantM $ getDefaultSdkVersion envDamlPath\n+\n+        let asstVersion = unwrapDamlAssistantSdkVersion <$> envDamlAssistantSdkVersion\n+            envVersions = catMaybes\n+                [ envSdkVersion\n+                , envLatestStableSdkVersion\n+                , asstVersion\n+                ]\n \n-        Builtin Version -> do\n-            installedVersionsE <- tryAssistant $ getInstalledSdkVersions envDamlPath\n-            defaultVersionM <- tryAssistantM $ getDefaultSdkVersion envDamlPath\n+            isInstalled =\n+                case installedVersionsE of\n+                    Left _ -> const True\n+                    Right vs -> (`elem` vs)\n+\n+            versionAttrs v = catMaybes\n+                [ \"active\"\n+                    <$ guard (Just v == envSdkVersion)\n+                , \"default\"\n+                    <$ guard (Just v == defaultVersionM)\n+                , \"assistant\"\n+                    <$ guard (Just v == asstVersion)\n+                , \"latest release\"\n+                    <$ guard (Just v == envLatestStableSdkVersion)\n+                , \"not installed\"\n+                    <$ guard (not (isInstalled v))\n+                ]\n \n-            let asstVersion = unwrapDamlAssistantSdkVersion <$> envDamlAssistantSdkVersion\n-                envVersions = catMaybes\n-                    [ envSdkVersion\n-                    , envLatestStableSdkVersion\n-                    , asstVersion\n+            -- | Workaround for Data.SemVer old unfixed bug (see https://github.com/brendanhay/semver/pull/6)"
+  },
+  {
+    "id" : "bd3516b3-7e25-4f9e-af40-9e2d332433f5",
+    "prId" : 1114,
+    "comments" : [
+      {
+        "id" : "604651ca-3612-4c9c-a3da-c6b9dbe43db4",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Yes, run screaming from code with obvious flaws that hasn't been patched in years.",
+        "createdAt" : "2019-05-13T18:37:36Z",
+        "updatedAt" : "2019-05-13T18:39:18Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f6076eb8-9c08-4a96-9b99-1807049dea6c",
+        "parentId" : "604651ca-3612-4c9c-a3da-c6b9dbe43db4",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "fwiw, that fix was just merged after I left a comment on the issue.",
+        "createdAt" : "2019-05-14T06:49:53Z",
+        "updatedAt" : "2019-05-14T06:49:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f1ad3c9a-faf5-405d-82e8-1ca45cb7dbfe",
+        "parentId" : "604651ca-3612-4c9c-a3da-c6b9dbe43db4",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "And we’ve got a new release!",
+        "createdAt" : "2019-05-14T06:54:56Z",
+        "updatedAt" : "2019-05-14T06:54:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6bdc9bc6e0f0f2fc10335ac0b7514d05de69f8dd",
+    "line" : 89,
+    "diffHunk" : "@@ -69,15 +71,56 @@ main = displayErrors $ do\n     case userCommand of\n \n         Builtin Version -> do\n-            putStr . unlines $\n-              [ \"SDK version: \"\n-              <> maybe \"unknown\" versionToString envSdkVersion\n-              , \"Latest stable release: \"\n-              <> maybe \"unknown\" versionToString envLatestStableSdkVersion\n-              , \"Assistant version: \"\n-              <> maybe \"unknown\" (versionToString . unwrapDamlAssistantSdkVersion)\n-                 envDamlAssistantSdkVersion\n-              ]\n+            installedVersionsE <- tryAssistant $ getInstalledSdkVersions envDamlPath\n+            defaultVersionM <- tryAssistantM $ getDefaultSdkVersion envDamlPath\n+\n+            let asstVersion = unwrapDamlAssistantSdkVersion <$> envDamlAssistantSdkVersion\n+                envVersions = catMaybes\n+                    [ envSdkVersion\n+                    , envLatestStableSdkVersion\n+                    , asstVersion\n+                    ]\n+\n+                isInstalled =\n+                    case installedVersionsE of\n+                        Left _ -> const True\n+                        Right vs -> (`elem` vs)\n+\n+                versionAttrs v = catMaybes\n+                    [ \"active\"\n+                        <$ guard (Just v == envSdkVersion)\n+                    , \"default\"\n+                        <$ guard (Just v == defaultVersionM)\n+                    , \"assistant\"\n+                        <$ guard (Just v == asstVersion)\n+                    , \"latest release\"\n+                        <$ guard (Just v == envLatestStableSdkVersion)\n+                    , \"not installed\"\n+                        <$ guard (not (isInstalled v))\n+                    ]\n+\n+                -- | Workaround for Data.SemVer old unfixed bug (see https://github.com/brendanhay/semver/pull/6)"
+  },
+  {
+    "id" : "f9581abf-5128-4497-bd94-d55eb6b38c83",
+    "prId" : 1114,
+    "comments" : [
+      {
+        "id" : "178ed480-d908-4ed3-ad1e-008982f9f65a",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Ouch. Or fork SemVer.",
+        "createdAt" : "2019-05-13T18:37:58Z",
+        "updatedAt" : "2019-05-13T18:39:18Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6bdc9bc6e0f0f2fc10335ac0b7514d05de69f8dd",
+    "line" : 94,
+    "diffHunk" : "@@ -69,15 +71,56 @@ main = displayErrors $ do\n     case userCommand of\n \n         Builtin Version -> do\n-            putStr . unlines $\n-              [ \"SDK version: \"\n-              <> maybe \"unknown\" versionToString envSdkVersion\n-              , \"Latest stable release: \"\n-              <> maybe \"unknown\" versionToString envLatestStableSdkVersion\n-              , \"Assistant version: \"\n-              <> maybe \"unknown\" (versionToString . unwrapDamlAssistantSdkVersion)\n-                 envDamlAssistantSdkVersion\n-              ]\n+            installedVersionsE <- tryAssistant $ getInstalledSdkVersions envDamlPath\n+            defaultVersionM <- tryAssistantM $ getDefaultSdkVersion envDamlPath\n+\n+            let asstVersion = unwrapDamlAssistantSdkVersion <$> envDamlAssistantSdkVersion\n+                envVersions = catMaybes\n+                    [ envSdkVersion\n+                    , envLatestStableSdkVersion\n+                    , asstVersion\n+                    ]\n+\n+                isInstalled =\n+                    case installedVersionsE of\n+                        Left _ -> const True\n+                        Right vs -> (`elem` vs)\n+\n+                versionAttrs v = catMaybes\n+                    [ \"active\"\n+                        <$ guard (Just v == envSdkVersion)\n+                    , \"default\"\n+                        <$ guard (Just v == defaultVersionM)\n+                    , \"assistant\"\n+                        <$ guard (Just v == asstVersion)\n+                    , \"latest release\"\n+                        <$ guard (Just v == envLatestStableSdkVersion)\n+                    , \"not installed\"\n+                        <$ guard (not (isInstalled v))\n+                    ]\n+\n+                -- | Workaround for Data.SemVer old unfixed bug (see https://github.com/brendanhay/semver/pull/6)\n+                -- TODO: move away from Data.SemVer...\n+                versionCompare v1 v2 =\n+                    if v1 == v2\n+                        then EQ\n+                        else compare v1 v2"
+  },
+  {
+    "id" : "ebde3144-061d-4002-8670-4606da4c8664",
+    "prId" : 1114,
+    "comments" : [
+      {
+        "id" : "80e7c993-0cce-4329-9b0c-ae648e35ca2a",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Should this padding code exist somewhere else as a utility?",
+        "createdAt" : "2019-05-13T18:38:43Z",
+        "updatedAt" : "2019-05-13T18:39:18Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "25815cda-6b0c-4c85-8ada-731d1bf0e41e",
+        "parentId" : "80e7c993-0cce-4329-9b0c-ae648e35ca2a",
+        "author" : null,
+        "body" : "Probably! I'll extract it out if/when it becomes useful elsewhere.",
+        "createdAt" : "2019-05-14T06:45:05Z",
+        "updatedAt" : "2019-05-14T06:45:05Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6bdc9bc6e0f0f2fc10335ac0b7514d05de69f8dd",
+    "line" : 98,
+    "diffHunk" : "@@ -69,15 +71,56 @@ main = displayErrors $ do\n     case userCommand of\n \n         Builtin Version -> do\n-            putStr . unlines $\n-              [ \"SDK version: \"\n-              <> maybe \"unknown\" versionToString envSdkVersion\n-              , \"Latest stable release: \"\n-              <> maybe \"unknown\" versionToString envLatestStableSdkVersion\n-              , \"Assistant version: \"\n-              <> maybe \"unknown\" (versionToString . unwrapDamlAssistantSdkVersion)\n-                 envDamlAssistantSdkVersion\n-              ]\n+            installedVersionsE <- tryAssistant $ getInstalledSdkVersions envDamlPath\n+            defaultVersionM <- tryAssistantM $ getDefaultSdkVersion envDamlPath\n+\n+            let asstVersion = unwrapDamlAssistantSdkVersion <$> envDamlAssistantSdkVersion\n+                envVersions = catMaybes\n+                    [ envSdkVersion\n+                    , envLatestStableSdkVersion\n+                    , asstVersion\n+                    ]\n+\n+                isInstalled =\n+                    case installedVersionsE of\n+                        Left _ -> const True\n+                        Right vs -> (`elem` vs)\n+\n+                versionAttrs v = catMaybes\n+                    [ \"active\"\n+                        <$ guard (Just v == envSdkVersion)\n+                    , \"default\"\n+                        <$ guard (Just v == defaultVersionM)\n+                    , \"assistant\"\n+                        <$ guard (Just v == asstVersion)\n+                    , \"latest release\"\n+                        <$ guard (Just v == envLatestStableSdkVersion)\n+                    , \"not installed\"\n+                        <$ guard (not (isInstalled v))\n+                    ]\n+\n+                -- | Workaround for Data.SemVer old unfixed bug (see https://github.com/brendanhay/semver/pull/6)\n+                -- TODO: move away from Data.SemVer...\n+                versionCompare v1 v2 =\n+                    if v1 == v2\n+                        then EQ\n+                        else compare v1 v2\n+\n+                versions = nubSortBy versionCompare (envVersions ++ fromRight [] installedVersionsE)\n+                versionTable = [ (versionToText v, versionAttrs v) | v <- versions ]\n+                versionWidth = maximum (1 : map (T.length . fst) versionTable)"
+  },
+  {
+    "id" : "edad5d96-2100-44fa-bf81-a189ae1c04d4",
+    "prId" : 857,
+    "comments" : [
+      {
+        "id" : "62584661-7d56-4927-b44c-25b4cd37cc02",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    let isInstall = listToMaybe rawArgs == Just \"install\"\r\n```",
+        "createdAt" : "2019-05-02T15:36:53Z",
+        "updatedAt" : "2019-05-03T07:55:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a897efb630f77fb5d37d4fe312478c4a2f61a0aa",
+    "line" : null,
+    "diffHunk" : "@@ -16,16 +16,20 @@ import DAML.Assistant.Util\n import System.FilePath\n import System.Directory\n import System.Process\n+import System.Environment\n import System.Exit\n import System.IO\n import Control.Exception.Safe\n import Data.Maybe\n+import Data.List.Extra\n import Control.Monad.Extra\n \n -- | Run the assistant and exit.\n main :: IO ()\n main = displayErrors $ do\n-    env@Env{..} <- getDamlEnv\n+    rawArgs <- getArgs\n+    let isInstall = notNull rawArgs && head rawArgs == \"install\""
+  },
+  {
+    "id" : "5ea4b202-0af5-4058-9437-5de1d7cb09ff",
+    "prId" : 857,
+    "comments" : [
+      {
+        "id" : "9300b640-394b-4d09-ad08-2705b73f7430",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "```suggestion\r\n    let isInstall = [\"install\"] `isPrefixOf` rawArgs\r\n```\r\n\r\nPretty much code golf at this point, but i think this version reads semantically nicer.",
+        "createdAt" : "2019-05-02T22:19:03Z",
+        "updatedAt" : "2019-05-03T07:55:24Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "59ba8f28-8e1b-47f3-8dd6-5f075382e0f4",
+        "parentId" : "9300b640-394b-4d09-ad08-2705b73f7430",
+        "author" : null,
+        "body" : "I'm not going to use this suggestion because I think the test above is easier to generalize to more commands that are already planned (e.g. `daml update` and `daml uninstall`, not yet implemented).",
+        "createdAt" : "2019-05-03T07:44:17Z",
+        "updatedAt" : "2019-05-03T07:55:24Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5668ab30-03f4-4d2c-9796-d2977c6f7595",
+        "parentId" : "9300b640-394b-4d09-ad08-2705b73f7430",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Given it's a bit of a hack, and you plan to generalise it using it more, any reason not to just rerun the command line parser here to determine what type of command it is?",
+        "createdAt" : "2019-05-03T07:46:12Z",
+        "updatedAt" : "2019-05-03T07:55:24Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ee082557-94f4-40a2-93c6-bbd7ddf2c4b8",
+        "parentId" : "9300b640-394b-4d09-ad08-2705b73f7430",
+        "author" : null,
+        "body" : "You mean, run it for the first time here, and run it again later with more info.\r\n\r\nPart of the problem is that determining the full set of available commands requires knowing the SDK version and the SDK config. The problem comes when we use optparse-applicative to generate `--help` tables, for example.\r\n\r\nI think this can all be refactored and made proper with optparse-applicative, but it's not trivial and still requires two passes over the command-line. Not sure it's worth it over the simple solution...",
+        "createdAt" : "2019-05-03T07:54:24Z",
+        "updatedAt" : "2019-05-03T07:55:24Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "38167510-653a-4d4e-9f77-6954dd291213",
+        "parentId" : "9300b640-394b-4d09-ad08-2705b73f7430",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "I struggle to believe there's not a command line you'll misparse if you write the parsing logic twice. But perhaps anyone who writes \"odd\" command lines deserves the pain. I leave it to you.",
+        "createdAt" : "2019-05-03T09:05:50Z",
+        "updatedAt" : "2019-05-03T09:05:50Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a897efb630f77fb5d37d4fe312478c4a2f61a0aa",
+    "line" : 14,
+    "diffHunk" : "@@ -25,7 +26,9 @@ import Control.Monad.Extra\n -- | Run the assistant and exit.\n main :: IO ()\n main = displayErrors $ do\n-    env@Env{..} <- getDamlEnv\n+    rawArgs <- getArgs\n+    let isInstall = listToMaybe rawArgs == Just \"install\""
+  },
+  {
+    "id" : "fb3b1c4a-1a7d-4083-8df9-01e84c21bbe8",
+    "prId" : 758,
+    "comments" : [
+      {
+        "id" : "79eb48c7-8d23-4917-8dd4-fe6e3f00b7e0",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Is `test1` the best variable name we can come up with?",
+        "createdAt" : "2019-04-29T10:50:08Z",
+        "updatedAt" : "2019-05-02T12:28:55Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "53895d4c-59fe-488a-a13e-4a2daa515685",
+        "parentId" : "79eb48c7-8d23-4917-8dd4-fe6e3f00b7e0",
+        "author" : null,
+        "body" : "This is a good question.",
+        "createdAt" : "2019-04-29T11:20:42Z",
+        "updatedAt" : "2019-05-02T12:28:55Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fc6256c0aa30c13f75615acecbf56bdd80036de3",
+    "line" : null,
+    "diffHunk" : "@@ -17,21 +17,64 @@ import System.FilePath\n import System.Directory\n import System.Process\n import System.Exit\n+import System.IO\n import Control.Exception.Safe\n import Data.Maybe\n+import Control.Monad.Extra\n \n -- | Run the assistant and exit.\n main :: IO ()\n-main = do\n+main = displayErrors $ do\n     env@Env{..} <- getDamlEnv\n     sdkConfigM <- mapM readSdkConfig envSdkPath\n     sdkCommandsM <- mapM (fromRightM throwIO . listSdkCommands) sdkConfigM\n     userCommand <- getCommand (fromMaybe [] sdkCommandsM)\n+\n+    whenJust envLatestStableSdkVersion $ \\latestVersion -> do\n+        let isHead = maybe False isHeadVersion envSdkVersion\n+            test1 = not isHead && isJust envProjectPath && envSdkVersion < Just latestVersion"
+  },
+  {
+    "id" : "d4f07957-1062-4432-9cb0-f87acc06d48f",
+    "prId" : 758,
+    "comments" : [
+      {
+        "id" : "099403d5-ade0-4ad7-955e-142f2fc01bf1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It is probably a good idea to point out that this can require changes to your project.\r\nHow about:\r\n> We recommend to upgrade your project to the latest stable version XXX. To do so, set the sdk-version in the project config daml.yaml to XXX and take a look at the changelog <url> for any changes that might be required.",
+        "createdAt" : "2019-04-29T11:49:57Z",
+        "updatedAt" : "2019-05-02T12:28:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fc6256c0aa30c13f75615acecbf56bdd80036de3",
+    "line" : 39,
+    "diffHunk" : "@@ -17,21 +17,64 @@ import System.FilePath\n import System.Directory\n import System.Process\n import System.Exit\n+import System.IO\n import Control.Exception.Safe\n import Data.Maybe\n+import Control.Monad.Extra\n \n -- | Run the assistant and exit.\n main :: IO ()\n-main = do\n+main = displayErrors $ do\n     env@Env{..} <- getDamlEnv\n     sdkConfigM <- mapM readSdkConfig envSdkPath\n     sdkCommandsM <- mapM (fromRightM throwIO . listSdkCommands) sdkConfigM\n     userCommand <- getCommand (fromMaybe [] sdkCommandsM)\n+\n+    whenJust envLatestStableSdkVersion $ \\latestVersion -> do\n+        let isHead = maybe False isHeadVersion envSdkVersion\n+            test1 = not isHead && isJust envProjectPath && envSdkVersion < Just latestVersion\n+            test2 = not isHead && not test1 && isJust envDamlAssistantSdkVersion &&\n+                fmap unwrapDamlAssistantSdkVersion envDamlAssistantSdkVersion <\n+                Just latestVersion\n+\n+        -- Project SDK version is outdated.\n+        when test1 $ do\n+            hPutStrLn stderr . unlines $\n+                [ \"WARNING: Using an outdated version of the DAML SDK in project.\"\n+                , \"\"\n+                , \"Please set the sdk-version in the project config daml.yaml\""
+  },
+  {
+    "id" : "abd85656-3e83-4203-997c-b5855bcf4a49",
+    "prId" : 758,
+    "comments" : [
+      {
+        "id" : "d706b927-a71f-42d2-aef2-bcab8da2aaf7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "While `test2` is obviously better than `test1` since `2 > 1`, you might want to consider changing this as well :smile:",
+        "createdAt" : "2019-04-29T12:14:13Z",
+        "updatedAt" : "2019-05-02T12:28:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fc6256c0aa30c13f75615acecbf56bdd80036de3",
+    "line" : null,
+    "diffHunk" : "@@ -17,21 +17,64 @@ import System.FilePath\n import System.Directory\n import System.Process\n import System.Exit\n+import System.IO\n import Control.Exception.Safe\n import Data.Maybe\n+import Control.Monad.Extra\n \n -- | Run the assistant and exit.\n main :: IO ()\n-main = do\n+main = displayErrors $ do\n     env@Env{..} <- getDamlEnv\n     sdkConfigM <- mapM readSdkConfig envSdkPath\n     sdkCommandsM <- mapM (fromRightM throwIO . listSdkCommands) sdkConfigM\n     userCommand <- getCommand (fromMaybe [] sdkCommandsM)\n+\n+    whenJust envLatestStableSdkVersion $ \\latestVersion -> do\n+        let isHead = maybe False isHeadVersion envSdkVersion\n+            test1 = not isHead && isJust envProjectPath && envSdkVersion < Just latestVersion\n+            test2 = not isHead && not test1 && isJust envDamlAssistantSdkVersion &&\n+                fmap unwrapDamlAssistantSdkVersion envDamlAssistantSdkVersion <\n+                Just latestVersion\n+\n+        -- Project SDK version is outdated.\n+        when test1 $ do\n+            hPutStrLn stderr . unlines $\n+                [ \"WARNING: Using an outdated version of the DAML SDK in project.\"\n+                , \"\"\n+                , \"Please set the sdk-version in the project config daml.yaml\"\n+                , \"to the latest stable version \" <> versionToString latestVersion\n+                    <> \" like this:\"\n+                , \"\"\n+                , \"sdk-version: \" <> versionToString latestVersion\n+                , \"\"\n+                ]\n+\n+        -- DAML assistant is outdated.\n+        when test2 $ do"
+  }
+]

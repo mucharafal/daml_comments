@@ -1,0 +1,102 @@
+[
+  {
+    "id" : "4d8bc5a0-89de-4bda-80e8-f61638f370f2",
+    "prId" : 2769,
+    "comments" : [
+      {
+        "id" : "b84ce0d5-2bf2-4c75-97d3-6cfbd1e0f02c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    echo \"Usage: ./export-package.sh TARGET_DIR\"\r\n```\r\nOr even better use `${BASH_SOURCE[0]}`",
+        "createdAt" : "2019-09-09T07:03:50Z",
+        "updatedAt" : "2019-09-09T13:05:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1bc3928e-31af-43c2-84ca-cbe6193cf6cd",
+        "parentId" : "b84ce0d5-2bf2-4c75-97d3-6cfbd1e0f02c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Good catch! I changed to use `${BASH_SOURCE[0]}` as you suggested.\r\n\r\n\r\n",
+        "createdAt" : "2019-09-09T11:31:25Z",
+        "updatedAt" : "2019-09-09T13:05:34Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2840f59983348b1d315b9a72962459f74f8d8da7",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,28 @@\n+#!/usr/bin/env bash\n+# Copyright (c) 2019 The DAML Authors. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+set -eou pipefail\n+\n+if [ \"$#\" -ne 1 ]; then\n+    echo \"Expected exactly one argument.\"\n+    echo \"Usage: ./build_packages.sh TARGET_DIR\""
+  },
+  {
+    "id" : "fd9576b0-cebe-4567-a7a8-8a122458f4d0",
+    "prId" : 2769,
+    "comments" : [
+      {
+        "id" : "cbd0235e-0424-4749-947e-cf67c8f3b4f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I would just throw this in a temp dir instead of cluttering the working tree.",
+        "createdAt" : "2019-09-09T07:04:25Z",
+        "updatedAt" : "2019-09-09T13:05:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d13a712a-2232-4625-81b3-5fbd9171b327",
+        "parentId" : "cbd0235e-0424-4749-947e-cf67c8f3b4f4",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I left this as it was.\r\nThe nice think about using a fixed `gen` is that the `stack build` can be tested in this directory.",
+        "createdAt" : "2019-09-09T11:32:36Z",
+        "updatedAt" : "2019-09-09T13:05:34Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2840f59983348b1d315b9a72962459f74f8d8da7",
+    "line" : 21,
+    "diffHunk" : "@@ -0,0 +1,28 @@\n+#!/usr/bin/env bash\n+# Copyright (c) 2019 The DAML Authors. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+set -eou pipefail\n+\n+if [ \"$#\" -ne 1 ]; then\n+    echo \"Expected exactly one argument.\"\n+    echo \"Usage: ./build_packages.sh TARGET_DIR\"\n+    exit 1\n+fi\n+\n+cd \"$(dirname ${BASH_SOURCE[0]})\"\n+\n+TARGET_DIR=$1\n+\n+bazel build //ledger-api/grpc-definitions:google-protobuf-haskellpb-sources //ledger-api/grpc-definitions:google-rpc-haskellpb-sources //ledger-api/grpc-definitions:ledger-api-haskellpb-sources //ledger-api/grpc-definitions:ledger-api-haskellpb-sources-admin //ledger-api/grpc-definitions:ledger-api-haskellpb-sources-testing\n+\n+BAZEL_BIN=$(bazel info bazel-bin)\n+\n+rm -rf gen"
+  }
+]

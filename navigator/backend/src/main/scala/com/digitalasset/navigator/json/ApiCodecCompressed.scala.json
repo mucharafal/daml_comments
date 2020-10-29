@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "76b56df3-c627-4bfc-81c8-7a2a2eee4ba7",
+    "prId" : 2053,
+    "comments" : [
+      {
+        "id" : "3a6b0c15-563d-4336-a417-71d4ef378f92",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "* [x] add inverse",
+        "createdAt" : "2019-07-11T15:33:29Z",
+        "updatedAt" : "2019-07-15T17:48:24Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1699d1a72a141e994b450b4078470a298e34bab3",
+    "line" : null,
+    "diffHunk" : "@@ -34,35 +35,48 @@ object ApiCodecCompressed {\n     case v: Model.ApiEnum => apiEnumToJsValue(v)\n     case v: Model.ApiList => apiListToJsValue(v)\n     case Model.ApiText(v) => JsString(v)\n-    case Model.ApiInt64(v) => JsString(v.toString)\n-    case Model.ApiDecimal(v) => JsString(v)\n+    case Model.ApiInt64(v) => JsString((v: Long).toString)\n+    case Model.ApiDecimal(v) => JsString(v.decimalToString)\n     case Model.ApiBool(v) => JsBoolean(v)\n-    case Model.ApiContractId(v) => JsString(v.toString)\n+    case Model.ApiContractId(v) => JsString(v)\n     case t: Model.ApiTimestamp => JsString(t.toIso8601)\n     case d: Model.ApiDate => JsString(d.toIso8601)\n-    case Model.ApiParty(v) => JsString(v.toString)\n-    case Model.ApiUnit() => JsObject.empty\n+    case Model.ApiParty(v) => JsString(v)\n+    case Model.ApiUnit => JsObject.empty\n     // Note: Optional needs to be boxed, otherwise the following values are indistinguishable:\n     // None, Some(None), Some(Some(None)), ...\n     case Model.ApiOptional(None) => JsObject(fieldNone -> JsObject.empty)\n     case Model.ApiOptional(Some(v)) => JsObject(fieldSome -> apiValueToJsValue(v))\n     case v: Model.ApiMap =>\n       apiMapToJsValue(v)\n+    case _: Model.ApiImpossible => serializationError(\"impossible! tuples are not serializable\")\n   }\n \n-  def apiListToJsValue(value: Model.ApiList): JsValue =\n-    JsArray(value.elements.map(apiValueToJsValue).toVector)\n-\n-  def apiVariantToJsValue(value: Model.ApiVariant): JsValue =\n-    JsObject(Map(value.constructor -> apiValueToJsValue(value.value)))\n-\n-  def apiEnumToJsValue(value: Model.ApiEnum): JsValue =\n-    JsString(value.constructor)\n-\n-  def apiRecordToJsValue(value: Model.ApiRecord): JsValue =\n-    JsObject(value.fields.map(f => f.label -> apiValueToJsValue(f.value)).toMap)\n+  private[this] def apiListToJsValue(value: Model.ApiList): JsValue =\n+    JsArray(value.values.map(apiValueToJsValue).toImmArray.toSeq: _*)\n+\n+  private[this] def apiVariantToJsValue(value: Model.ApiVariant): JsValue =\n+    JsObject(Map((value.variant: String) -> apiValueToJsValue(value.value)))\n+\n+  private[this] def apiEnumToJsValue(value: Model.ApiEnum): JsValue =\n+    JsString(value.value)\n+\n+  private[this] def apiRecordToJsValue(value: Model.ApiRecord): JsValue =\n+    value match {\n+      case FullyNamedApiRecord(_, fields) =>\n+        JsObject(fields.toSeq.map {\n+          case (flabel, fvalue) => (flabel: String) -> apiValueToJsValue(fvalue)\n+        }.toMap)\n+      case _ =>\n+        // TODO SC the inverse function doesn't recognize this format, yet, and\n+        // anyway it should only be done with accurate type information"
+  },
+  {
+    "id" : "531db4f7-1a44-4145-bf41-27c82ab15723",
+    "prId" : 2053,
+    "comments" : [
+      {
+        "id" : "95f60a49-cce2-4b8c-a038-79a6485e55aa",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Could be a candidate to use `CanBuildFrom`.\r\n```suggestion\r\n    JsArray(value.values.map(apiValueToJsValue)(FrontStack.`FrontStack canBuildFrom`): _*)\r\n```",
+        "createdAt" : "2019-07-12T09:26:49Z",
+        "updatedAt" : "2019-07-15T17:48:24Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1699d1a72a141e994b450b4078470a298e34bab3",
+    "line" : 51,
+    "diffHunk" : "@@ -34,35 +35,45 @@ object ApiCodecCompressed {\n     case v: Model.ApiEnum => apiEnumToJsValue(v)\n     case v: Model.ApiList => apiListToJsValue(v)\n     case Model.ApiText(v) => JsString(v)\n-    case Model.ApiInt64(v) => JsString(v.toString)\n-    case Model.ApiDecimal(v) => JsString(v)\n+    case Model.ApiInt64(v) => JsString((v: Long).toString)\n+    case Model.ApiDecimal(v) => JsString(v.decimalToString)\n     case Model.ApiBool(v) => JsBoolean(v)\n-    case Model.ApiContractId(v) => JsString(v.toString)\n+    case Model.ApiContractId(v) => JsString(v)\n     case t: Model.ApiTimestamp => JsString(t.toIso8601)\n     case d: Model.ApiDate => JsString(d.toIso8601)\n-    case Model.ApiParty(v) => JsString(v.toString)\n-    case Model.ApiUnit() => JsObject.empty\n+    case Model.ApiParty(v) => JsString(v)\n+    case Model.ApiUnit => JsObject.empty\n     // Note: Optional needs to be boxed, otherwise the following values are indistinguishable:\n     // None, Some(None), Some(Some(None)), ...\n     case Model.ApiOptional(None) => JsObject(fieldNone -> JsObject.empty)\n     case Model.ApiOptional(Some(v)) => JsObject(fieldSome -> apiValueToJsValue(v))\n     case v: Model.ApiMap =>\n       apiMapToJsValue(v)\n+    case _: Model.ApiImpossible => serializationError(\"impossible! tuples are not serializable\")\n   }\n \n-  def apiListToJsValue(value: Model.ApiList): JsValue =\n-    JsArray(value.elements.map(apiValueToJsValue).toVector)\n-\n-  def apiVariantToJsValue(value: Model.ApiVariant): JsValue =\n-    JsObject(Map(value.constructor -> apiValueToJsValue(value.value)))\n-\n-  def apiEnumToJsValue(value: Model.ApiEnum): JsValue =\n-    JsString(value.constructor)\n-\n-  def apiRecordToJsValue(value: Model.ApiRecord): JsValue =\n-    JsObject(value.fields.map(f => f.label -> apiValueToJsValue(f.value)).toMap)\n+  private[this] def apiListToJsValue(value: Model.ApiList): JsValue =\n+    JsArray(value.values.map(apiValueToJsValue).toImmArray.toSeq: _*)"
+  },
+  {
+    "id" : "a3f6faf5-678b-41c8-a0eb-7ec242d0253a",
+    "prId" : 204,
+    "comments" : [
+      {
+        "id" : "79112bc3-c129-4058-9af8-f014bc61daf1",
+        "parentId" : null,
+        "author" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "body" : "as discussed, please convert it to an object directly, e.g.\r\n\r\n```\r\n{\r\n  k1: v1,\r\n  k2: v1,\r\n  ...\r\n}\r\n```",
+        "createdAt" : "2019-04-08T16:29:56Z",
+        "updatedAt" : "2019-04-10T15:57:15Z",
+        "lastEditedBy" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6360ed29-e120-4c73-9d94-ccbd00f277dc",
+        "parentId" : "79112bc3-c129-4058-9af8-f014bc61daf1",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-04-10T12:21:19Z",
+        "updatedAt" : "2019-04-10T15:57:15Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5dfaaa695898670824b20acf017518eda840e671",
+    "line" : 21,
+    "diffHunk" : "@@ -53,6 +58,14 @@ object ApiCodecCompressed {\n   def apiRecordToJsValue(value: Model.ApiRecord): JsValue =\n     JsObject(value.fields.map(f => f.label -> apiValueToJsValue(f.value)).toMap)\n \n+  private[this] val fieldKey = \"key\"\n+  private[this] val fieldValue = \"value\"\n+\n+  def apiMapToJsValue(value: Model.ApiMap): JsValue ="
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "4f342c37-68e1-4ad3-bf24-d30d423ddf42",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "6ed151b8-d55a-40d2-8109-18fc1109c45f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Please move the metrics to `ledger/metrics/src/main/scala/com/daml/metrics/Metrics.scala`",
+        "createdAt" : "2020-05-19T09:40:06Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "aa40f582-1ce8-467c-8f20-26a40fa4f706",
+        "parentId" : "6ed151b8-d55a-40d2-8109-18fc1109c45f",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Moved.",
+        "createdAt" : "2020-05-19T13:11:35Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,150 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.Counter\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlLogEntry.PayloadCase._\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlLogEntry,\n+  DamlStateKey,\n+  DamlStateValue\n+}\n+import com.daml.lf.value.ValueCoder\n+import com.daml.logging.{ContextualizedLogger, LoggingContext}\n+import com.daml.metrics.{MetricName, Metrics}\n+\n+class ConflictDetection(val metrics: Metrics) {\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  /**\n+    * Detect conflicts in a log entry and attempt to recover.\n+    * @param invalidatedKeys  set of keys that have been written up until now. We assume that a key\n+    *                         whose value hasn't been changed is not part of this set.\n+    * @param inputState input state used for the submission\n+    * @param logEntry log entry generated from processing the submission\n+    * @param outputState  output state generated from processing the submission\n+    * @param logCtx logging context to use\n+    * @return pair of invalidated keys and output log entry and state; in case a conflict cannot be\n+    *         recovered None is output\n+    */\n+  def detectConflictsAndRecover(\n+      invalidatedKeys: collection.Set[DamlStateKey],\n+      inputState: Map[DamlStateKey, Option[DamlStateValue]],\n+      logEntry: DamlLogEntry,\n+      outputState: Map[DamlStateKey, DamlStateValue])(implicit logCtx: LoggingContext)\n+    : Option[(collection.Set[DamlStateKey], (DamlLogEntry, Map[DamlStateKey, DamlStateValue]))] = {\n+    val newInvalidatedKeys = outputState.collect {\n+      case (key, outputValue)\n+          if changedStateValueOf(key, inputState.getOrElse(key, None), outputValue) =>\n+        key\n+    }.toSet\n+    val conflictingKeys = (inputState.keySet union outputState.keySet) intersect invalidatedKeys\n+    if (conflictingKeys.isEmpty) {\n+      // No conflicting keys, nothing to change.\n+      Metrics.accepted.inc()\n+      Some((newInvalidatedKeys, (logEntry, outputState)))\n+    } else {\n+      // Conflicting keys.\n+      produceRejectionOrDropSubmission(logEntry, conflictingKeys)\n+        .map(logEntryAndState => newInvalidatedKeys -> logEntryAndState)\n+    }\n+  }\n+\n+  private def changedStateValueOf(\n+      key: DamlStateKey,\n+      inputValueMaybe: Option[DamlStateValue],\n+      outputValue: DamlStateValue)(implicit logCtx: LoggingContext): Boolean =\n+    inputValueMaybe.forall { inputValue =>\n+      val contentsDiffer = inputValue.hashCode() != outputValue\n+        .hashCode() || inputValue != outputValue\n+      if (!contentsDiffer) {\n+        logger.trace(s\"Dropped key=$key from conflicting key set as its value has not been altered\")\n+        Metrics.removedTransientKey.inc()\n+      }\n+      contentsDiffer\n+    }\n+\n+  private def produceRejectionOrDropSubmission(\n+      logEntry: DamlLogEntry,\n+      conflictingKeys: Set[DamlStateKey])(implicit loggingContext: LoggingContext)\n+    : Option[(DamlLogEntry, Map[DamlStateKey, DamlStateValue])] = {\n+    Metrics.conflicted.inc()\n+\n+    logEntry.getPayloadCase match {\n+      case TRANSACTION_ENTRY =>\n+        Metrics.recovered.inc()\n+        val reason = explainConflict(conflictingKeys)\n+        val transactionRejectionEntry = transactionRejectionEntryFrom(logEntry, reason)\n+        logger.trace(s\"Recovered a conflicted transaction, details='$reason'\")\n+        Some((transactionRejectionEntry, Map.empty))\n+\n+      case PARTY_ALLOCATION_ENTRY | PACKAGE_UPLOAD_ENTRY | CONFIGURATION_ENTRY |\n+          TRANSACTION_REJECTION_ENTRY | CONFIGURATION_REJECTION_ENTRY |\n+          PACKAGE_UPLOAD_REJECTION_ENTRY | PARTY_ALLOCATION_REJECTION_ENTRY =>\n+        logger.trace(s\"Dropping conflicting submission (${logEntry.getPayloadCase})\")\n+        Metrics.dropped.inc()\n+        None\n+\n+      case PAYLOAD_NOT_SET =>\n+        sys.error(\"conflictDetectAndRecover: PAYLOAD_NOT_SET\")\n+    }\n+  }\n+\n+  // Attempt to produce a useful message by collecting the first conflicting\n+  // contract id or contract key.\n+  private def explainConflict(conflictingKeys: Iterable[DamlStateKey]): String =\n+    conflictingKeys\n+      .collectFirst {\n+        case key if key.hasContractKey =>\n+          // NOTE(JM): We show the template id as the other piece of data we have is the contract key\n+          // hash, which isn't very useful as it's an implementation detail not exposed over ledger-api.\n+          val templateId =\n+            ValueCoder\n+              .decodeIdentifier(key.getContractKey.getTemplateId)\n+              .map(_.toString)\n+              .getOrElse(\"<unknown>\")\n+          s\"Contract key conflicts in contract template $templateId\"\n+\n+        case key if key.getContractId.nonEmpty =>\n+          s\"Conflict on contract ${key.getContractId}\"\n+\n+        case key if key.hasCommandDedup =>\n+          \"Conflict on command deduplication, this command has already been processed.\"\n+\n+        case key if key.hasConfiguration =>\n+          \"Ledger configuration has changed\"\n+      }\n+      .getOrElse(\"Unspecified conflict\")\n+\n+  private def transactionRejectionEntryFrom(\n+      logEntry: DamlLogEntry,\n+      reason: String): DamlLogEntry = {\n+    val builder = DamlLogEntry.newBuilder\n+    builder.setRecordTime(logEntry.getRecordTime)\n+    builder.getTransactionRejectionEntryBuilder\n+      .setSubmitterInfo(logEntry.getTransactionEntry.getSubmitterInfo)\n+      .getInconsistentBuilder\n+      .setDetails(reason)\n+    builder.build\n+  }\n+\n+  private[batch] object Metrics {"
+  },
+  {
+    "id" : "7d65f679-a5b7-4d88-9f56-8d26039a6840",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "6a7c30b1-f15d-467a-9361-981d94f0863e",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Should be `kvutils`.",
+        "createdAt" : "2020-05-19T09:40:20Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6c70a616-ff64-4acb-8695-730f15698ecc",
+        "parentId" : "6a7c30b1-f15d-467a-9361-981d94f0863e",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Good catch!",
+        "createdAt" : "2020-05-19T13:13:08Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,150 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.Counter\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlLogEntry.PayloadCase._\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlLogEntry,\n+  DamlStateKey,\n+  DamlStateValue\n+}\n+import com.daml.lf.value.ValueCoder\n+import com.daml.logging.{ContextualizedLogger, LoggingContext}\n+import com.daml.metrics.{MetricName, Metrics}\n+\n+class ConflictDetection(val metrics: Metrics) {\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  /**\n+    * Detect conflicts in a log entry and attempt to recover.\n+    * @param invalidatedKeys  set of keys that have been written up until now. We assume that a key\n+    *                         whose value hasn't been changed is not part of this set.\n+    * @param inputState input state used for the submission\n+    * @param logEntry log entry generated from processing the submission\n+    * @param outputState  output state generated from processing the submission\n+    * @param logCtx logging context to use\n+    * @return pair of invalidated keys and output log entry and state; in case a conflict cannot be\n+    *         recovered None is output\n+    */\n+  def detectConflictsAndRecover(\n+      invalidatedKeys: collection.Set[DamlStateKey],\n+      inputState: Map[DamlStateKey, Option[DamlStateValue]],\n+      logEntry: DamlLogEntry,\n+      outputState: Map[DamlStateKey, DamlStateValue])(implicit logCtx: LoggingContext)\n+    : Option[(collection.Set[DamlStateKey], (DamlLogEntry, Map[DamlStateKey, DamlStateValue]))] = {\n+    val newInvalidatedKeys = outputState.collect {\n+      case (key, outputValue)\n+          if changedStateValueOf(key, inputState.getOrElse(key, None), outputValue) =>\n+        key\n+    }.toSet\n+    val conflictingKeys = (inputState.keySet union outputState.keySet) intersect invalidatedKeys\n+    if (conflictingKeys.isEmpty) {\n+      // No conflicting keys, nothing to change.\n+      Metrics.accepted.inc()\n+      Some((newInvalidatedKeys, (logEntry, outputState)))\n+    } else {\n+      // Conflicting keys.\n+      produceRejectionOrDropSubmission(logEntry, conflictingKeys)\n+        .map(logEntryAndState => newInvalidatedKeys -> logEntryAndState)\n+    }\n+  }\n+\n+  private def changedStateValueOf(\n+      key: DamlStateKey,\n+      inputValueMaybe: Option[DamlStateValue],\n+      outputValue: DamlStateValue)(implicit logCtx: LoggingContext): Boolean =\n+    inputValueMaybe.forall { inputValue =>\n+      val contentsDiffer = inputValue.hashCode() != outputValue\n+        .hashCode() || inputValue != outputValue\n+      if (!contentsDiffer) {\n+        logger.trace(s\"Dropped key=$key from conflicting key set as its value has not been altered\")\n+        Metrics.removedTransientKey.inc()\n+      }\n+      contentsDiffer\n+    }\n+\n+  private def produceRejectionOrDropSubmission(\n+      logEntry: DamlLogEntry,\n+      conflictingKeys: Set[DamlStateKey])(implicit loggingContext: LoggingContext)\n+    : Option[(DamlLogEntry, Map[DamlStateKey, DamlStateValue])] = {\n+    Metrics.conflicted.inc()\n+\n+    logEntry.getPayloadCase match {\n+      case TRANSACTION_ENTRY =>\n+        Metrics.recovered.inc()\n+        val reason = explainConflict(conflictingKeys)\n+        val transactionRejectionEntry = transactionRejectionEntryFrom(logEntry, reason)\n+        logger.trace(s\"Recovered a conflicted transaction, details='$reason'\")\n+        Some((transactionRejectionEntry, Map.empty))\n+\n+      case PARTY_ALLOCATION_ENTRY | PACKAGE_UPLOAD_ENTRY | CONFIGURATION_ENTRY |\n+          TRANSACTION_REJECTION_ENTRY | CONFIGURATION_REJECTION_ENTRY |\n+          PACKAGE_UPLOAD_REJECTION_ENTRY | PARTY_ALLOCATION_REJECTION_ENTRY =>\n+        logger.trace(s\"Dropping conflicting submission (${logEntry.getPayloadCase})\")\n+        Metrics.dropped.inc()\n+        None\n+\n+      case PAYLOAD_NOT_SET =>\n+        sys.error(\"conflictDetectAndRecover: PAYLOAD_NOT_SET\")\n+    }\n+  }\n+\n+  // Attempt to produce a useful message by collecting the first conflicting\n+  // contract id or contract key.\n+  private def explainConflict(conflictingKeys: Iterable[DamlStateKey]): String =\n+    conflictingKeys\n+      .collectFirst {\n+        case key if key.hasContractKey =>\n+          // NOTE(JM): We show the template id as the other piece of data we have is the contract key\n+          // hash, which isn't very useful as it's an implementation detail not exposed over ledger-api.\n+          val templateId =\n+            ValueCoder\n+              .decodeIdentifier(key.getContractKey.getTemplateId)\n+              .map(_.toString)\n+              .getOrElse(\"<unknown>\")\n+          s\"Contract key conflicts in contract template $templateId\"\n+\n+        case key if key.getContractId.nonEmpty =>\n+          s\"Conflict on contract ${key.getContractId}\"\n+\n+        case key if key.hasCommandDedup =>\n+          \"Conflict on command deduplication, this command has already been processed.\"\n+\n+        case key if key.hasConfiguration =>\n+          \"Ledger configuration has changed\"\n+      }\n+      .getOrElse(\"Unspecified conflict\")\n+\n+  private def transactionRejectionEntryFrom(\n+      logEntry: DamlLogEntry,\n+      reason: String): DamlLogEntry = {\n+    val builder = DamlLogEntry.newBuilder\n+    builder.setRecordTime(logEntry.getRecordTime)\n+    builder.getTransactionRejectionEntryBuilder\n+      .setSubmitterInfo(logEntry.getTransactionEntry.getSubmitterInfo)\n+      .getInconsistentBuilder\n+      .setDetails(reason)\n+    builder.build\n+  }\n+\n+  private[batch] object Metrics {\n+    private val Prefix = MetricName.DAML :+ \"pkvutils\" :+ \"conflict_detection\""
+  }
+]

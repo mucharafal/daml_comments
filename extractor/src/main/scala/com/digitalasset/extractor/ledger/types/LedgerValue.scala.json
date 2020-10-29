@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "a6008fce-fe14-48fa-9e9e-3e150a2c41b3",
+    "prId" : 3614,
+    "comments" : [
+      {
+        "id" : "d6bff273-90d1-4e22-bf3c-172b4e001262",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I know that you are not changing the error here, but it would be nice if we added some context. Can we add the key for which the value is not defined?",
+        "createdAt" : "2019-11-26T18:05:43Z",
+        "updatedAt" : "2019-11-28T11:58:33Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "05e5ca4876afa3aad5d4ada6974080808ad75b07",
+    "line" : null,
+    "diffHunk" : "@@ -87,15 +85,25 @@ object LedgerValue {\n   private def convertOptional(apiOptional: api.value.Optional) =\n     apiOptional.value traverseU (_.convert) map (V.ValueOptional(_))\n \n-  private def convertMap(apiMap: api.value.Map): String \\/ OfCid[V.ValueTextMap] =\n+  private def convertTextMap(apiMap: api.value.Map): String \\/ OfCid[V.ValueTextMap] =\n     for {\n       entries <- apiMap.entries.toList.traverseU {\n-        case api.value.Map.Entry(_, None) => -\\/(\"value must be defined\")\n         case api.value.Map.Entry(k, Some(v)) => v.sum.convert.map(k -> _)\n+        case api.value.Map.Entry(_, None) => -\\/(\"value must be defined\")"
+  },
+  {
+    "id" : "c0b823cb-6067-4cbb-9744-2f6432275e67",
+    "prId" : 1117,
+    "comments" : [
+      {
+        "id" : "0ea7322a-a263-4fd6-94e4-8cd18b631ffe",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "yeah that stuff I can't review in the browser :)",
+        "createdAt" : "2019-05-15T16:57:57Z",
+        "updatedAt" : "2019-05-15T22:56:55Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a933c9948d4fd9990fc99ba78d4a2703561922c0",
+    "line" : null,
+    "diffHunk" : "@@ -61,55 +35,74 @@ object LedgerValue {\n       case Sum.Record(apiRecord) => convertRecord(apiRecord)\n       case Sum.Optional(apiOptional) => convertOptional(apiOptional)\n       case Sum.Map(map) => convertMap(map)\n-      case Sum.Bool(value) => Bool(value).right\n-      case Sum.ContractId(value) => ContractId(value).right\n-      case Sum.Int64(value) => Int64(value).right\n-      case Sum.Decimal(value) => Decimal(value).right\n-      case Sum.Text(value) => Text(value).right\n-      case Sum.Timestamp(value) => Timestamp(value).right\n-      case Sum.Party(value) => Party(value).right\n-      case Sum.Date(value) => Date(value).right\n-      case Sum.Unit(_) => Unit.right\n-      case Sum.Empty => Empty.right\n+      case Sum.Bool(value) => V.ValueBool(value).right\n+      case Sum.ContractId(value) => V.ValueContractId(value).right\n+      case Sum.Int64(value) => V.ValueInt64(value).right\n+      case Sum.Decimal(value) => lfdata.Decimal.fromString(value).disjunction map V.ValueDecimal\n+      case Sum.Text(value) => V.ValueText(value).right\n+      case Sum.Timestamp(value) =>\n+        lfdata.Time.Timestamp.fromLong(value).disjunction map V.ValueTimestamp\n+      case Sum.Party(value) => Ref.Party.fromString(value).disjunction map V.ValueParty\n+      case Sum.Date(value) => lfdata.Time.Date.fromDaysSinceEpoch(value).disjunction map V.ValueDate\n+      case Sum.Unit(_) => V.ValueUnit.right\n+      case Sum.Empty => -\\/(\"uninitialized Value\")\n     }\n   }\n \n   private def convertList(apiList: api.value.List) = {\n     for {\n       values <- apiList.elements.toList.traverseU(_.convert)\n-    } yield ValueList(values)\n+    } yield V.ValueList(FrontStack(values))\n   }\n \n   private def convertVariant(apiVariant: api.value.Variant) = {\n     for {\n+      tycon <- apiVariant.variantId traverseU convertIdentifier map (_.flatten)\n+      ctor <- Ref.Name.fromString(apiVariant.constructor).disjunction\n       apiValue <- variantValueLens(apiVariant)\n       value <- apiValue.convert\n-    } yield Variant(apiVariant.constructor, value)\n+    } yield V.ValueVariant(tycon, ctor, value)\n   }\n \n   private def convertRecord(apiRecord: api.value.Record) = {\n     for {\n-      fields <- apiRecord.fields.toList.traverseU(_.convert)\n-    } yield Record(fields)\n+      tycon <- apiRecord.recordId traverseU convertIdentifier map (_.flatten)\n+      // TODO SC: local RecordField may be elided, in which case convert\n+      // should just produce the tuple made here\n+      fields <- ImmArray(apiRecord.fields).traverseU(_.convert flatMap {"
+  }
+]

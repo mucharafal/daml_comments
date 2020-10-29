@@ -1,0 +1,96 @@
+[
+  {
+    "id" : "ccfa649d-8136-435d-97ed-5037ab239717",
+    "prId" : 1524,
+    "comments" : [
+      {
+        "id" : "c295a580-90f9-4ada-ac49-c1cf2b7a70c1",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Please update the comment with the changes (e.g. the concept of \"accepted transaction\" doesn't exist anymore).",
+        "createdAt" : "2019-06-05T09:22:11Z",
+        "updatedAt" : "2019-06-05T09:45:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "09f2df0d8f6b3153eae65a73c61d0a16ceb4fb77",
+    "line" : 213,
+    "diffHunk" : "@@ -235,28 +151,27 @@ class SandboxIndexService(\n               case Some(LedgerOffset.Absolute(end)) =>\n                 stream\n                   .takeWhile(\n-                    { item =>\n-                      //note that we can have gaps in the increasing offsets!\n-                      (item.offset.toLong + 1) < end.toLong //api offsets are +1 compared to backend offsets\n+                    {\n+                      case (offset, _) =>\n+                        //note that we can have gaps in the increasing offsets!\n+                        (offset + 1) < end.toLong //api offsets are +1 compared to backend offsets\n                     },\n                     inclusive = true // we need this to be inclusive otherwise the stream will be hanging until a new element from upstream arrives\n                   )\n-                  .filter(_.offset.toLong < end.toLong)\n+                  .filter(_._1 < end.toLong)\n             }\n             // we MUST do the offset comparison BEFORE collecting only the accepted transactions,"
+  },
+  {
+    "id" : "59821133-0238-4092-870f-d9195d42196e",
+    "prId" : 1524,
+    "comments" : [
+      {
+        "id" : "d3db9d41-0589-4515-8cbe-6f4c5a8bec2d",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Hm, not sure but before we were collecting transaction only when they had an `appId` and `commandId` (see line 300 and 301). We don't do that anymore and it even seems that `LedgerEntry.Transaction` always has an application Id, submitting party, and command Id. I think we might need to change that if we want to reuse it for the IndexService+ReadService implementation (where we might not always have those fields).",
+        "createdAt" : "2019-06-05T09:28:58Z",
+        "updatedAt" : "2019-06-05T09:45:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6094a1bd-d96e-470a-9129-1f9abcee080b",
+        "parentId" : "d3db9d41-0589-4515-8cbe-6f4c5a8bec2d",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "good point, but I'd consider doing that only when approaching our 2. milestone. I would start that with a gap analysis and lay out a plan of actions upfront.",
+        "createdAt" : "2019-06-05T09:43:01Z",
+        "updatedAt" : "2019-06-05T09:45:55Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0b3ef2dc-7cb7-41ad-ab09-d88220ed7980",
+        "parentId" : "d3db9d41-0589-4515-8cbe-6f4c5a8bec2d",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "agreed 👍 ",
+        "createdAt" : "2019-06-05T10:59:10Z",
+        "updatedAt" : "2019-06-05T10:59:10Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "09f2df0d8f6b3153eae65a73c61d0a16ceb4fb77",
+    "line" : 282,
+    "diffHunk" : "@@ -286,53 +213,30 @@ class SandboxIndexService(\n     val converter = new OffsetConverter()\n     converter.toAbsolute(begin).flatMapConcat {\n       case LedgerOffset.Absolute(absBegin) =>\n-        ledgerSyncEvents(Some(absBegin)).collect {\n-          case LedgerSyncEvent\n-                .AcceptedTransaction(\n-                _,\n-                transactionId,\n-                Some(submitter),\n-                _,\n-                recordTime,\n-                offset,\n-                _,\n-                _,\n-                Some(appId),\n-                Some(commandId))\n-              if (appId == applicationId.unwrap && parties.contains(submitter)) =>\n+        ledger.ledgerEntries(Some(absBegin.toLong)).collect {\n+          case (offset, t: LedgerEntry.Transaction)"
+  }
+]

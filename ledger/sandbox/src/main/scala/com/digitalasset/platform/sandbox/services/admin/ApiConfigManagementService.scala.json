@@ -1,0 +1,183 @@
+[
+  {
+    "id" : "1723b9bf-db6f-4129-a2ec-6cf956c59ad4",
+    "prId" : 3756,
+    "comments" : [
+      {
+        "id" : "bcb438e3-d19a-4ba6-a44d-1face9e894f1",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "If you wire up the default through the indexer, you will solve some corner cases but not all, a ledger api client can come while indexer is still starting up for the first time, so you still need this.",
+        "createdAt" : "2019-12-06T08:58:14Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7a1b5f91-8195-454a-a8e1-b40ed6c5790d",
+        "parentId" : "bcb438e3-d19a-4ba6-a44d-1face9e894f1",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "that would be fine, we'd just reject commands until everything is up. we wouldn't even have packages if indexer isn't up yet...",
+        "createdAt" : "2019-12-06T11:10:26Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6e626a81c096637c202b8d3ca5d09dfa4e41393",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,207 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.admin\n+\n+import akka.stream.ActorMaterializer\n+import akka.stream.scaladsl.Sink\n+import com.daml.ledger.participant.state.index.v2.IndexConfigManagementService\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.{Configuration, SubmissionResult, WriteConfigService}\n+import com.digitalasset.api.util.{DurationConversion, TimeProvider, TimestampConversion}\n+import com.digitalasset.daml.lf.data.Time\n+import com.digitalasset.ledger.api.domain\n+import com.digitalasset.ledger.api.v1.admin.config_management_service.ConfigManagementServiceGrpc.ConfigManagementService\n+import com.digitalasset.ledger.api.v1.admin.config_management_service._\n+import com.digitalasset.platform.api.grpc.GrpcApiService\n+import com.digitalasset.platform.common.logging.NamedLoggerFactory\n+import com.digitalasset.platform.common.util.{DirectExecutionContext => DE}\n+import com.digitalasset.platform.server.api.validation\n+import com.digitalasset.platform.server.api.validation.ErrorFactories\n+import io.grpc.{ServerServiceDefinition, StatusRuntimeException}\n+\n+import scala.compat.java8.FutureConverters\n+import scala.concurrent.duration.{Duration, FiniteDuration}\n+import scala.concurrent.{ExecutionContext, Future, TimeoutException}\n+import scala.util.{Failure, Success}\n+\n+class ApiConfigManagementService private (\n+    index: IndexConfigManagementService,\n+    writeService: WriteConfigService,\n+    timeProvider: TimeProvider,\n+    defaultConfiguration: Configuration,\n+    materializer: ActorMaterializer,\n+    loggerFactory: NamedLoggerFactory\n+) extends ConfigManagementService\n+    with GrpcApiService {\n+\n+  protected val logger = loggerFactory.getLogger(this.getClass)\n+\n+  override def close(): Unit = ()\n+\n+  override def bindService(): ServerServiceDefinition =\n+    ConfigManagementServiceGrpc.bindService(this, DE)\n+\n+  override def getTimeModel(request: GetTimeModelRequest): Future[GetTimeModelResponse] =\n+    index\n+      .lookupConfiguration()\n+      .flatMap {\n+        case None =>\n+          // TODO(JM): Gnarly. Should the default configuration instead be wired through the index"
+  },
+  {
+    "id" : "3907f192-9e5a-47ea-b006-65a9cbcd8877",
+    "prId" : 3756,
+    "comments" : [
+      {
+        "id" : "b9fb9c4f-a410-467e-8cd2-bedef76e6442",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "We need to be a bit more generous here, it takes time to propagate the data from the ledger through the indexer to ledger api service.",
+        "createdAt" : "2019-12-06T09:35:29Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4868fd2f-1550-45fc-b759-2781f271d585",
+        "parentId" : "b9fb9c4f-a410-467e-8cd2-bedef76e6442",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "yep definitely crossed my mind, but couldn't figure out what is \"more generous\" so left it like this. double the ttl?",
+        "createdAt" : "2019-12-06T11:11:11Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e4d2fdc9-66dc-41bd-926c-b0735c3e8ebf",
+        "parentId" : "b9fb9c4f-a410-467e-8cd2-bedef76e6442",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/3756#discussion_r354748885",
+        "createdAt" : "2019-12-13T15:20:01Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6e626a81c096637c202b8d3ca5d09dfa4e41393",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,207 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.admin\n+\n+import akka.stream.ActorMaterializer\n+import akka.stream.scaladsl.Sink\n+import com.daml.ledger.participant.state.index.v2.IndexConfigManagementService\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.{Configuration, SubmissionResult, WriteConfigService}\n+import com.digitalasset.api.util.{DurationConversion, TimeProvider, TimestampConversion}\n+import com.digitalasset.daml.lf.data.Time\n+import com.digitalasset.ledger.api.domain\n+import com.digitalasset.ledger.api.v1.admin.config_management_service.ConfigManagementServiceGrpc.ConfigManagementService\n+import com.digitalasset.ledger.api.v1.admin.config_management_service._\n+import com.digitalasset.platform.api.grpc.GrpcApiService\n+import com.digitalasset.platform.common.logging.NamedLoggerFactory\n+import com.digitalasset.platform.common.util.{DirectExecutionContext => DE}\n+import com.digitalasset.platform.server.api.validation\n+import com.digitalasset.platform.server.api.validation.ErrorFactories\n+import io.grpc.{ServerServiceDefinition, StatusRuntimeException}\n+\n+import scala.compat.java8.FutureConverters\n+import scala.concurrent.duration.{Duration, FiniteDuration}\n+import scala.concurrent.{ExecutionContext, Future, TimeoutException}\n+import scala.util.{Failure, Success}\n+\n+class ApiConfigManagementService private (\n+    index: IndexConfigManagementService,\n+    writeService: WriteConfigService,\n+    timeProvider: TimeProvider,\n+    defaultConfiguration: Configuration,\n+    materializer: ActorMaterializer,\n+    loggerFactory: NamedLoggerFactory\n+) extends ConfigManagementService\n+    with GrpcApiService {\n+\n+  protected val logger = loggerFactory.getLogger(this.getClass)\n+\n+  override def close(): Unit = ()\n+\n+  override def bindService(): ServerServiceDefinition =\n+    ConfigManagementServiceGrpc.bindService(this, DE)\n+\n+  override def getTimeModel(request: GetTimeModelRequest): Future[GetTimeModelResponse] =\n+    index\n+      .lookupConfiguration()\n+      .flatMap {\n+        case None =>\n+          // TODO(JM): Gnarly. Should the default configuration instead be wired through the index\n+          // and stored into parameters on indexer init?\n+          Future.successful(configToResponse(defaultConfiguration))\n+        case Some((_, config)) =>\n+          Future.successful(configToResponse(config))\n+      }(DE)\n+\n+  private def configToResponse(config: Configuration): GetTimeModelResponse = {\n+    val tm = config.timeModel\n+    GetTimeModelResponse(\n+      configurationGeneration = config.generation,\n+      timeModel = Some(\n+        TimeModel(\n+          minTransactionLatency = Some(DurationConversion.toProto(tm.minTransactionLatency)),\n+          maxClockSkew = Some(DurationConversion.toProto(tm.maxClockSkew)),\n+          maxTtl = Some(DurationConversion.toProto(tm.maxTtl))\n+        ))\n+    )\n+  }\n+\n+  override def setTimeModel(request: SetTimeModelRequest): Future[SetTimeModelResponse] = {\n+    /* All asynchronous calls executed directly in current thread. */\n+    implicit val ec: ExecutionContext = DE\n+\n+    for {\n+      // Validate and convert the request parameters\n+      params <- validateParameters(request).fold(Future.failed(_), Future.successful(_))\n+\n+      // Lookup latest configuration to check generation and to extend it with the new time model.\n+      optConfigAndOffset <- index.lookupConfiguration()\n+      pollOffset = optConfigAndOffset.map(_._1)\n+      currentConfig = optConfigAndOffset.map(_._2).getOrElse(defaultConfiguration)\n+\n+      // Verify that we're modifying the current configuration.\n+      _ <- if (request.configurationGeneration != currentConfig.generation) {\n+        Future.failed(ErrorFactories.invalidArgument(\n+          s\"Mismatching configuration generation, expected ${currentConfig.generation}, received ${request.configurationGeneration}\"))\n+      } else {\n+        Future.successful(())\n+      }\n+\n+      // Create the new extended configuration.\n+      newConfig = currentConfig.copy(\n+        generation = currentConfig.generation + 1,\n+        timeModel = params.newTimeModel\n+      )\n+\n+      // Submit configuration to the ledger, and start polling for the result.\n+      submissionResult <- FutureConverters\n+        .toScala(\n+          writeService.submitConfiguration(\n+            params.maximumRecordTime,\n+            request.submissionId, /* FIXME validate, SubmissionId in #3391 */\n+            newConfig\n+          ))\n+\n+      result <- submissionResult match {\n+        case SubmissionResult.Acknowledged =>\n+          // Ledger acknowledged. Start polling to wait for the result to land in the index.\n+          // FIXME(JM): We should wait slightly longer than maxTtl? How much longer?\n+          val maxTtl = Duration.fromNanos(currentConfig.timeModel.maxTtl.toNanos)\n+          val timeToLive = if (params.timeToLive < maxTtl) params.timeToLive else maxTtl\n+          pollUntilPersisted(request.submissionId, pollOffset, timeToLive).flatMap {\n+            case accept: domain.ConfigurationEntry.Accepted =>\n+              Future.successful(SetTimeModelResponse(accept.configuration.generation))\n+            case rejected: domain.ConfigurationEntry.Rejected =>\n+              // TODO(JM): Reconsider error kind. E.g. emit deadline exceeded when MRT exceeds?\n+              Future.failed(ErrorFactories.aborted(rejected.rejectionReason))\n+          }\n+        case SubmissionResult.Overloaded =>\n+          Future.failed(ErrorFactories.resourceExhausted(\"Resource exhausted\"))\n+        case SubmissionResult.InternalError(reason) =>\n+          Future.failed(ErrorFactories.internal(reason))\n+        case SubmissionResult.NotSupported =>\n+          Future.failed(\n+            ErrorFactories.unimplemented(\"Setting of time model not supported by this ledger\"))\n+      }\n+    } yield result\n+  }\n+\n+  private case class SetTimeModelParameters(\n+      newTimeModel: v1.TimeModel,\n+      maximumRecordTime: Time.Timestamp,\n+      timeToLive: FiniteDuration\n+  )\n+\n+  private def validateParameters(\n+      request: SetTimeModelRequest): Either[StatusRuntimeException, SetTimeModelParameters] = {\n+    import validation.FieldValidations._\n+    for {\n+      pTimeModel <- requirePresence(request.newTimeModel, \"new_time_model\")\n+      pMinTransactionLatency <- requirePresence(\n+        pTimeModel.minTransactionLatency,\n+        \"min_transaction_latency\")\n+      pMaxClockSkew <- requirePresence(pTimeModel.maxClockSkew, \"max_clock_skew\")\n+      pMaxTtl <- requirePresence(pTimeModel.maxTtl, \"max_ttl\")\n+      newTimeModel <- v1.TimeModel(\n+        minTransactionLatency = DurationConversion.fromProto(pMinTransactionLatency),\n+        maxClockSkew = DurationConversion.fromProto(pMaxClockSkew),\n+        maxTtl = DurationConversion.fromProto(pMaxTtl)\n+      ) match {\n+        case Failure(err) => Left(ErrorFactories.invalidArgument(err.toString))\n+        case Success(ok) => Right(ok)\n+      }\n+      // FIXME(JM): The maximum record time should be constrained, probably by the current active time model?\n+      pMaxRecordTime <- requirePresence(request.maximumRecordTime, \"maximum_record_time\")\n+      mrtInstant = TimestampConversion.toInstant(pMaxRecordTime)\n+      timeToLive = {"
+  },
+  {
+    "id" : "562bb655-ac39-47e3-8496-d9c29e078a7b",
+    "prId" : 3756,
+    "comments" : [
+      {
+        "id" : "b62a14b2-adbe-4954-af2a-1497c98b4dce",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "There's always a fuzzy window of time towards the end of TTL. I'd say this needs to be compensated by users by picking a reasonably/generously large TTL to begin with.",
+        "createdAt" : "2019-12-06T09:57:48Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d3ef7814-b543-4008-88e1-3babb222e197",
+        "parentId" : "b62a14b2-adbe-4954-af2a-1497c98b4dce",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "agreed. ",
+        "createdAt" : "2019-12-12T16:41:13Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6e626a81c096637c202b8d3ca5d09dfa4e41393",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,207 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.admin\n+\n+import akka.stream.ActorMaterializer\n+import akka.stream.scaladsl.Sink\n+import com.daml.ledger.participant.state.index.v2.IndexConfigManagementService\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.{Configuration, SubmissionResult, WriteConfigService}\n+import com.digitalasset.api.util.{DurationConversion, TimeProvider, TimestampConversion}\n+import com.digitalasset.daml.lf.data.Time\n+import com.digitalasset.ledger.api.domain\n+import com.digitalasset.ledger.api.v1.admin.config_management_service.ConfigManagementServiceGrpc.ConfigManagementService\n+import com.digitalasset.ledger.api.v1.admin.config_management_service._\n+import com.digitalasset.platform.api.grpc.GrpcApiService\n+import com.digitalasset.platform.common.logging.NamedLoggerFactory\n+import com.digitalasset.platform.common.util.{DirectExecutionContext => DE}\n+import com.digitalasset.platform.server.api.validation\n+import com.digitalasset.platform.server.api.validation.ErrorFactories\n+import io.grpc.{ServerServiceDefinition, StatusRuntimeException}\n+\n+import scala.compat.java8.FutureConverters\n+import scala.concurrent.duration.{Duration, FiniteDuration}\n+import scala.concurrent.{ExecutionContext, Future, TimeoutException}\n+import scala.util.{Failure, Success}\n+\n+class ApiConfigManagementService private (\n+    index: IndexConfigManagementService,\n+    writeService: WriteConfigService,\n+    timeProvider: TimeProvider,\n+    defaultConfiguration: Configuration,\n+    materializer: ActorMaterializer,\n+    loggerFactory: NamedLoggerFactory\n+) extends ConfigManagementService\n+    with GrpcApiService {\n+\n+  protected val logger = loggerFactory.getLogger(this.getClass)\n+\n+  override def close(): Unit = ()\n+\n+  override def bindService(): ServerServiceDefinition =\n+    ConfigManagementServiceGrpc.bindService(this, DE)\n+\n+  override def getTimeModel(request: GetTimeModelRequest): Future[GetTimeModelResponse] =\n+    index\n+      .lookupConfiguration()\n+      .flatMap {\n+        case None =>\n+          // TODO(JM): Gnarly. Should the default configuration instead be wired through the index\n+          // and stored into parameters on indexer init?\n+          Future.successful(configToResponse(defaultConfiguration))\n+        case Some((_, config)) =>\n+          Future.successful(configToResponse(config))\n+      }(DE)\n+\n+  private def configToResponse(config: Configuration): GetTimeModelResponse = {\n+    val tm = config.timeModel\n+    GetTimeModelResponse(\n+      configurationGeneration = config.generation,\n+      timeModel = Some(\n+        TimeModel(\n+          minTransactionLatency = Some(DurationConversion.toProto(tm.minTransactionLatency)),\n+          maxClockSkew = Some(DurationConversion.toProto(tm.maxClockSkew)),\n+          maxTtl = Some(DurationConversion.toProto(tm.maxTtl))\n+        ))\n+    )\n+  }\n+\n+  override def setTimeModel(request: SetTimeModelRequest): Future[SetTimeModelResponse] = {\n+    /* All asynchronous calls executed directly in current thread. */\n+    implicit val ec: ExecutionContext = DE\n+\n+    for {\n+      // Validate and convert the request parameters\n+      params <- validateParameters(request).fold(Future.failed(_), Future.successful(_))\n+\n+      // Lookup latest configuration to check generation and to extend it with the new time model.\n+      optConfigAndOffset <- index.lookupConfiguration()\n+      pollOffset = optConfigAndOffset.map(_._1)\n+      currentConfig = optConfigAndOffset.map(_._2).getOrElse(defaultConfiguration)\n+\n+      // Verify that we're modifying the current configuration.\n+      _ <- if (request.configurationGeneration != currentConfig.generation) {\n+        Future.failed(ErrorFactories.invalidArgument(\n+          s\"Mismatching configuration generation, expected ${currentConfig.generation}, received ${request.configurationGeneration}\"))\n+      } else {\n+        Future.successful(())\n+      }\n+\n+      // Create the new extended configuration.\n+      newConfig = currentConfig.copy(\n+        generation = currentConfig.generation + 1,\n+        timeModel = params.newTimeModel\n+      )\n+\n+      // Submit configuration to the ledger, and start polling for the result.\n+      submissionResult <- FutureConverters\n+        .toScala(\n+          writeService.submitConfiguration(\n+            params.maximumRecordTime,\n+            request.submissionId, /* FIXME validate, SubmissionId in #3391 */\n+            newConfig\n+          ))\n+\n+      result <- submissionResult match {\n+        case SubmissionResult.Acknowledged =>\n+          // Ledger acknowledged. Start polling to wait for the result to land in the index.\n+          // FIXME(JM): We should wait slightly longer than maxTtl? How much longer?"
+  }
+]

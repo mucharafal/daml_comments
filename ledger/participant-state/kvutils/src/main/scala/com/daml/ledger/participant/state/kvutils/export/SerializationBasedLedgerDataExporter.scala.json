@@ -1,0 +1,87 @@
+[
+  {
+    "id" : "77515b4a-8fe8-4d74-9ac9-1bca3e2cdba3",
+    "prId" : 7258,
+    "comments" : [
+      {
+        "id" : "0d963b1d-4197-4e16-aaa0-e9f9b199f8ce",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please don't sort the write-set here. I.e., this way we are hiding the fact if the producer of the write-set is non-deterministic.",
+        "createdAt" : "2020-08-31T13:23:25Z",
+        "updatedAt" : "2020-08-31T13:23:25Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "97f58da8-6101-4958-b5a2-35bb5c7d9d54",
+        "parentId" : "0d963b1d-4197-4e16-aaa0-e9f9b199f8ce",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Why does it matter if it's sorted here or just before writing to the file?\r\n\r\nThis code was simply moved from https://github.com/digital-asset/daml/pull/7258/files#diff-11c44df5a2377a0c67fbbbb179af44ebL88.",
+        "createdAt" : "2020-08-31T13:30:52Z",
+        "updatedAt" : "2020-08-31T13:30:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "366bfa25-1827-4fff-8024-6e6b4ccb3ee4",
+        "parentId" : "0d963b1d-4197-4e16-aaa0-e9f9b199f8ce",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Sorry, wrong location. It comes from https://github.com/digital-asset/daml/pull/7258/files#diff-4db1eab737dbe983bba6541fe2b1ec34L33.",
+        "createdAt" : "2020-08-31T15:31:47Z",
+        "updatedAt" : "2020-08-31T15:31:47Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8b70a3e5-0031-4772-a095-781221d4ed5e",
+        "parentId" : "0d963b1d-4197-4e16-aaa0-e9f9b199f8ce",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "It matters because then we won't know if we generated the baseline in a non-deterministic order or not.",
+        "createdAt" : "2020-08-31T16:20:18Z",
+        "updatedAt" : "2020-08-31T16:20:33Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c2289c2f32e1319b1b1881bbb9185ecef38a930b",
+    "line" : 53,
+    "diffHunk" : "@@ -0,0 +1,70 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.export\n+\n+import java.io.DataOutputStream\n+import java.time.Instant\n+import java.util.concurrent.locks.StampedLock\n+\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+\n+/**\n+  * Enables exporting ledger data to an output stream.\n+  * This class is thread-safe.\n+  */\n+final class SerializationBasedLedgerDataExporter(output: DataOutputStream)\n+    extends LedgerDataExporter {\n+\n+  private val outputLock = new StampedLock\n+\n+  override def addSubmission(submissionInfo: SubmissionInfo): SubmissionAggregator = {\n+    new InMemorySubmissionAggregator(submissionInfo, SerializationBasedLedgerDataWriter)\n+  }\n+\n+  object SerializationBasedLedgerDataWriter extends LedgerDataWriter {\n+    override def write(submissionInfo: SubmissionInfo, writeSet: Seq[(Key, Value)]): Unit = {\n+      val stamp = outputLock.writeLock()\n+      try {\n+        serializeEntry(submissionInfo, writeSet)\n+        output.flush()\n+      } finally {\n+        outputLock.unlock(stamp)\n+      }\n+    }\n+\n+    private def serializeEntry(\n+        submissionInfo: SubmissionInfo,\n+        writeSet: Seq[(Key, Value)],\n+    ): Unit = {\n+      serializeSubmissionInfo(submissionInfo)\n+      serializeWriteSet(writeSet)\n+    }\n+\n+    private def serializeSubmissionInfo(submissionInfo: SubmissionInfo): Unit = {\n+      output.writeUTF(submissionInfo.correlationId)\n+      writeBytes(submissionInfo.submissionEnvelope)\n+      writeInstant(submissionInfo.recordTimeInstant)\n+      output.writeUTF(submissionInfo.participantId)\n+    }\n+\n+    private def serializeWriteSet(writeSet: WriteSet): Unit = {\n+      output.writeInt(writeSet.size)\n+      for ((key, value) <- writeSet.sortBy(_._1.asReadOnlyByteBuffer())) {"
+  }
+]

@@ -1,0 +1,342 @@
+[
+  {
+    "id" : "d74cbb0c-623c-4abc-8eb0-89dfb35c587a",
+    "prId" : 2032,
+    "comments" : [
+      {
+        "id" : "3a846b33-3fdc-4b8b-9060-5d9202513207",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Is this `TODO` note still valid?",
+        "createdAt" : "2019-07-08T09:01:42Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "675f46a9-4453-48d7-9531-c3ac2a23855b",
+        "parentId" : "3a846b33-3fdc-4b8b-9060-5d9202513207",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Good point. This is actually not a todo but a generally valid statement. I'll rephrase the comment.",
+        "createdAt" : "2019-07-08T09:16:39Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "594fec41-e459-4f29-ae17-74045b903c5f",
+        "parentId" : "3a846b33-3fdc-4b8b-9060-5d9202513207",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Addressed in 9bf50c0.",
+        "createdAt" : "2019-07-08T09:48:17Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2d3ff888f4f9c9e53de8d799e9090ca48d516338",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,465 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.tests.integration.ledger.api\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.language.{\n+  LanguageVersion,\n+  LanguageMajorVersion => LMajV,\n+  LanguageMinorVersion => LMinV\n+}\n+import com.digitalasset.ledger.api.testing.utils.{\n+  AkkaBeforeAndAfterAll,\n+  SuiteResourceManagementAroundEach\n+}\n+import com.digitalasset.ledger.api.v1.value.{Optional, Record, RecordField, Value}\n+import com.digitalasset.platform.apitesting.LedgerContextExtensions._\n+import com.digitalasset.platform.apitesting.TestParties._\n+import com.digitalasset.platform.apitesting.{MultiLedgerFixture, TestIdsGenerator, TestTemplateIds}\n+import com.digitalasset.platform.participant.util.ValueConversions._\n+import com.digitalasset.daml.lf.transaction.VersionTimeline.Implicits._\n+import com.google.rpc.code.Code\n+import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n+import org.scalatest.{AsyncWordSpec, Matchers, OptionValues}\n+\n+class ContractKeysIT\n+    extends AsyncWordSpec\n+    with AkkaBeforeAndAfterAll\n+    with MultiLedgerFixture\n+    with SuiteResourceManagementAroundEach\n+    with ScalaFutures\n+    with AsyncTimeLimitedTests\n+    with Matchers\n+    with OptionValues {\n+\n+  protected val testTemplateIds = new TestTemplateIds(config)\n+  protected val templateIds = testTemplateIds.templateIds\n+  protected val testIdsGenerator = new TestIdsGenerator(config)\n+\n+  private lazy val dummyTemplates =\n+    List(templateIds.dummy, templateIds.dummyFactory, templateIds.dummyWithParam)\n+  private val operator = Grace\n+  private val receiver = Heidi\n+  private val giver = Alice\n+  private val owner = Bob\n+  private val delegate = Charlie\n+  private val observers = List(Eve, Frank)\n+\n+  private val emptyRecordValue = Value(Value.Sum.Record(Record()))\n+\n+  /** This should be the same version as the dar version. */\n+  protected val languageVersion: LanguageVersion = LanguageVersion(LMajV.V1, LMinV.Dev)\n+\n+  override protected def config: Config = Config.default\n+\n+  \"Working with contract keys\" should {\n+\n+    \"permit fetching a divulged contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) =\n+        RecordField(label, Some(Value(Value.Sum.Party(party))))\n+\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate"
+  },
+  {
+    "id" : "38388b98-03bc-42be-9273-1e6b7be87f0a",
+    "prId" : 2032,
+    "comments" : [
+      {
+        "id" : "901f45b0-5a8e-42aa-b58a-41be7deb8348",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This seems to appear in more than one test, it's probably worth pulling it out (and maybe call is `record`, `makeRecord`, `partyRecord` or something along these lines).",
+        "createdAt" : "2019-07-08T09:04:46Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5edd2362-214b-42af-83a0-40cb37adaf7e",
+        "parentId" : "901f45b0-5a8e-42aa-b58a-41be7deb8348",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I'd rather have this done in a separate PR.",
+        "createdAt" : "2019-07-08T09:49:44Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2d3ff888f4f9c9e53de8d799e9090ca48d516338",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,465 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.tests.integration.ledger.api\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.language.{\n+  LanguageVersion,\n+  LanguageMajorVersion => LMajV,\n+  LanguageMinorVersion => LMinV\n+}\n+import com.digitalasset.ledger.api.testing.utils.{\n+  AkkaBeforeAndAfterAll,\n+  SuiteResourceManagementAroundEach\n+}\n+import com.digitalasset.ledger.api.v1.value.{Optional, Record, RecordField, Value}\n+import com.digitalasset.platform.apitesting.LedgerContextExtensions._\n+import com.digitalasset.platform.apitesting.TestParties._\n+import com.digitalasset.platform.apitesting.{MultiLedgerFixture, TestIdsGenerator, TestTemplateIds}\n+import com.digitalasset.platform.participant.util.ValueConversions._\n+import com.digitalasset.daml.lf.transaction.VersionTimeline.Implicits._\n+import com.google.rpc.code.Code\n+import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n+import org.scalatest.{AsyncWordSpec, Matchers, OptionValues}\n+\n+class ContractKeysIT\n+    extends AsyncWordSpec\n+    with AkkaBeforeAndAfterAll\n+    with MultiLedgerFixture\n+    with SuiteResourceManagementAroundEach\n+    with ScalaFutures\n+    with AsyncTimeLimitedTests\n+    with Matchers\n+    with OptionValues {\n+\n+  protected val testTemplateIds = new TestTemplateIds(config)\n+  protected val templateIds = testTemplateIds.templateIds\n+  protected val testIdsGenerator = new TestIdsGenerator(config)\n+\n+  private lazy val dummyTemplates =\n+    List(templateIds.dummy, templateIds.dummyFactory, templateIds.dummyWithParam)\n+  private val operator = Grace\n+  private val receiver = Heidi\n+  private val giver = Alice\n+  private val owner = Bob\n+  private val delegate = Charlie\n+  private val observers = List(Eve, Frank)\n+\n+  private val emptyRecordValue = Value(Value.Sum.Record(Record()))\n+\n+  /** This should be the same version as the dar version. */\n+  protected val languageVersion: LanguageVersion = LanguageVersion(LMajV.V1, LMinV.Dev)\n+\n+  override protected def config: Config = Config.default\n+\n+  \"Working with contract keys\" should {\n+\n+    \"permit fetching a divulged contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) ="
+  },
+  {
+    "id" : "9dc33a9e-f110-41f0-8626-75952c75c454",
+    "prId" : 2032,
+    "comments" : [
+      {
+        "id" : "ce0b4384-cf04-4641-bb9c-23ab18db57f8",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Would it make sense to split the whole test case according to the language features, instead of branching midway through them?",
+        "createdAt" : "2019-07-08T09:06:05Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1b6a7132-9ead-4b51-a38d-0788ffcd4a8d",
+        "parentId" : "ce0b4384-cf04-4641-bb9c-23ab18db57f8",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "It would, but this file is merely extracting the tests related to contract keys from `CommandTransactionChecks.scala`. For that reason I'd rather not modify them at the same time.",
+        "createdAt" : "2019-07-08T09:22:39Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2d3ff888f4f9c9e53de8d799e9090ca48d516338",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,465 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.tests.integration.ledger.api\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.language.{\n+  LanguageVersion,\n+  LanguageMajorVersion => LMajV,\n+  LanguageMinorVersion => LMinV\n+}\n+import com.digitalasset.ledger.api.testing.utils.{\n+  AkkaBeforeAndAfterAll,\n+  SuiteResourceManagementAroundEach\n+}\n+import com.digitalasset.ledger.api.v1.value.{Optional, Record, RecordField, Value}\n+import com.digitalasset.platform.apitesting.LedgerContextExtensions._\n+import com.digitalasset.platform.apitesting.TestParties._\n+import com.digitalasset.platform.apitesting.{MultiLedgerFixture, TestIdsGenerator, TestTemplateIds}\n+import com.digitalasset.platform.participant.util.ValueConversions._\n+import com.digitalasset.daml.lf.transaction.VersionTimeline.Implicits._\n+import com.google.rpc.code.Code\n+import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n+import org.scalatest.{AsyncWordSpec, Matchers, OptionValues}\n+\n+class ContractKeysIT\n+    extends AsyncWordSpec\n+    with AkkaBeforeAndAfterAll\n+    with MultiLedgerFixture\n+    with SuiteResourceManagementAroundEach\n+    with ScalaFutures\n+    with AsyncTimeLimitedTests\n+    with Matchers\n+    with OptionValues {\n+\n+  protected val testTemplateIds = new TestTemplateIds(config)\n+  protected val templateIds = testTemplateIds.templateIds\n+  protected val testIdsGenerator = new TestIdsGenerator(config)\n+\n+  private lazy val dummyTemplates =\n+    List(templateIds.dummy, templateIds.dummyFactory, templateIds.dummyWithParam)\n+  private val operator = Grace\n+  private val receiver = Heidi\n+  private val giver = Alice\n+  private val owner = Bob\n+  private val delegate = Charlie\n+  private val observers = List(Eve, Frank)\n+\n+  private val emptyRecordValue = Value(Value.Sum.Record(Record()))\n+\n+  /** This should be the same version as the dar version. */\n+  protected val languageVersion: LanguageVersion = LanguageVersion(LMajV.V1, LMinV.Dev)\n+\n+  override protected def config: Config = Config.default\n+\n+  \"Working with contract keys\" should {\n+\n+    \"permit fetching a divulged contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) =\n+        RecordField(label, Some(Value(Value.Sum.Party(party))))\n+\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate\n+      // unique keys. This is not so great though, it'd be better to have a clean environment.\n+      val key = s\"${UUID.randomUUID.toString}-key\"\n+      val odArgs = Seq(\n+        pf(\"owner\", owner),\n+        pf(\"delegate\", delegate)\n+      )\n+      val delegatedCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl3\"),\n+        owner,\n+        templateIds.delegated,\n+        Record(\n+          Some(templateIds.delegated),\n+          Seq(pf(\"owner\", owner), RecordField(value = Some(Value(Value.Sum.Text(key))))))\n+      )\n+      val delegationCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl4\"),\n+        owner,\n+        templateIds.delegation,\n+        Record(Some(templateIds.delegation), odArgs))\n+      val showIdCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl5\"),\n+        owner,\n+        templateIds.showDelegated,\n+        Record(Some(templateIds.showDelegated), odArgs))\n+      for {\n+        delegatedEv <- delegatedCreate\n+        delegationEv <- delegationCreate\n+        showIdEv <- showIdCreate\n+        fetchArg = Record(\n+          None,\n+          Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+        lookupArg = (expected: Option[String]) =>\n+          Record(\n+            None,\n+            Seq(\n+              pf(\"\", owner),\n+              RecordField(value = Some(Value(Value.Sum.Text(key)))),\n+              RecordField(value = expected match {\n+                case None => Value(Value.Sum.Optional(Optional(None)))\n+                case Some(cid) => Value(Value.Sum.Optional(Optional(Some(cid.asContractId))))\n+              })\n+            )\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl6\"),\n+          submitter = owner,\n+          template = templateIds.showDelegated,\n+          contractId = showIdEv.contractId,\n+          choice = \"ShowIt\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl7\"),\n+          submitter = delegate,\n+          template = templateIds.delegation,\n+          contractId = delegationEv.contractId,\n+          choice = \"FetchDelegated\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {"
+  },
+  {
+    "id" : "fce109b8-629d-44e7-bb8c-a2e16d00c0ba",
+    "prId" : 2032,
+    "comments" : [
+      {
+        "id" : "3d237397-0c4a-4288-84cc-0573bc712afb",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Minor: double comment token. :slightly_smiling_face: ",
+        "createdAt" : "2019-07-08T09:06:59Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3f46c426-b6be-42f4-970f-b99db5083260",
+        "parentId" : "3d237397-0c4a-4288-84cc-0573bc712afb",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Addressed in 9bf50c0.",
+        "createdAt" : "2019-07-08T09:49:14Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2d3ff888f4f9c9e53de8d799e9090ca48d516338",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,465 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.tests.integration.ledger.api\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.language.{\n+  LanguageVersion,\n+  LanguageMajorVersion => LMajV,\n+  LanguageMinorVersion => LMinV\n+}\n+import com.digitalasset.ledger.api.testing.utils.{\n+  AkkaBeforeAndAfterAll,\n+  SuiteResourceManagementAroundEach\n+}\n+import com.digitalasset.ledger.api.v1.value.{Optional, Record, RecordField, Value}\n+import com.digitalasset.platform.apitesting.LedgerContextExtensions._\n+import com.digitalasset.platform.apitesting.TestParties._\n+import com.digitalasset.platform.apitesting.{MultiLedgerFixture, TestIdsGenerator, TestTemplateIds}\n+import com.digitalasset.platform.participant.util.ValueConversions._\n+import com.digitalasset.daml.lf.transaction.VersionTimeline.Implicits._\n+import com.google.rpc.code.Code\n+import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n+import org.scalatest.{AsyncWordSpec, Matchers, OptionValues}\n+\n+class ContractKeysIT\n+    extends AsyncWordSpec\n+    with AkkaBeforeAndAfterAll\n+    with MultiLedgerFixture\n+    with SuiteResourceManagementAroundEach\n+    with ScalaFutures\n+    with AsyncTimeLimitedTests\n+    with Matchers\n+    with OptionValues {\n+\n+  protected val testTemplateIds = new TestTemplateIds(config)\n+  protected val templateIds = testTemplateIds.templateIds\n+  protected val testIdsGenerator = new TestIdsGenerator(config)\n+\n+  private lazy val dummyTemplates =\n+    List(templateIds.dummy, templateIds.dummyFactory, templateIds.dummyWithParam)\n+  private val operator = Grace\n+  private val receiver = Heidi\n+  private val giver = Alice\n+  private val owner = Bob\n+  private val delegate = Charlie\n+  private val observers = List(Eve, Frank)\n+\n+  private val emptyRecordValue = Value(Value.Sum.Record(Record()))\n+\n+  /** This should be the same version as the dar version. */\n+  protected val languageVersion: LanguageVersion = LanguageVersion(LMajV.V1, LMinV.Dev)\n+\n+  override protected def config: Config = Config.default\n+\n+  \"Working with contract keys\" should {\n+\n+    \"permit fetching a divulged contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) =\n+        RecordField(label, Some(Value(Value.Sum.Party(party))))\n+\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate\n+      // unique keys. This is not so great though, it'd be better to have a clean environment.\n+      val key = s\"${UUID.randomUUID.toString}-key\"\n+      val odArgs = Seq(\n+        pf(\"owner\", owner),\n+        pf(\"delegate\", delegate)\n+      )\n+      val delegatedCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl3\"),\n+        owner,\n+        templateIds.delegated,\n+        Record(\n+          Some(templateIds.delegated),\n+          Seq(pf(\"owner\", owner), RecordField(value = Some(Value(Value.Sum.Text(key))))))\n+      )\n+      val delegationCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl4\"),\n+        owner,\n+        templateIds.delegation,\n+        Record(Some(templateIds.delegation), odArgs))\n+      val showIdCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl5\"),\n+        owner,\n+        templateIds.showDelegated,\n+        Record(Some(templateIds.showDelegated), odArgs))\n+      for {\n+        delegatedEv <- delegatedCreate\n+        delegationEv <- delegationCreate\n+        showIdEv <- showIdCreate\n+        fetchArg = Record(\n+          None,\n+          Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+        lookupArg = (expected: Option[String]) =>\n+          Record(\n+            None,\n+            Seq(\n+              pf(\"\", owner),\n+              RecordField(value = Some(Value(Value.Sum.Text(key)))),\n+              RecordField(value = expected match {\n+                case None => Value(Value.Sum.Optional(Optional(None)))\n+                case Some(cid) => Value(Value.Sum.Optional(Optional(Some(cid.asContractId))))\n+              })\n+            )\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl6\"),\n+          submitter = owner,\n+          template = templateIds.showDelegated,\n+          contractId = showIdEv.contractId,\n+          choice = \"ShowIt\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl7\"),\n+          submitter = delegate,\n+          template = templateIds.delegation,\n+          contractId = delegationEv.contractId,\n+          choice = \"FetchDelegated\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"SDVl8\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"SDVl8\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"SDVl9\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"SDVl9\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+      } yield (succeed)\n+    }\n+\n+    \"reject fetching an undisclosed contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) =\n+        RecordField(label, Some(Value(Value.Sum.Party(party))))\n+\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate\n+      // unique keys. This is not so great though, it'd be better to have a clean environment.\n+      val key = s\"${UUID.randomUUID.toString}-key\"\n+      val delegatedCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"TDVl3\"),\n+        owner,\n+        templateIds.delegated,\n+        Record(\n+          Some(templateIds.delegated),\n+          Seq(pf(\"owner\", owner), RecordField(value = Some(Value(Value.Sum.Text(key))))))\n+      )\n+      val delegationCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"TDVl4\"),\n+        owner,\n+        templateIds.delegation,\n+        Record(Some(templateIds.delegation), Seq(pf(\"owner\", owner), pf(\"delegate\", delegate)))\n+      )\n+      for {\n+        delegatedEv <- delegatedCreate\n+        delegationEv <- delegationCreate\n+        fetchArg = Record(\n+          None,\n+          Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+        lookupArg = (expected: Option[String]) =>\n+          Record(\n+            None,\n+            Seq(\n+              pf(\"\", owner),\n+              RecordField(value = Some(Value(Value.Sum.Text(key)))),\n+              RecordField(value = expected match {\n+                case None => Value(Value.Sum.Optional(Optional(None)))\n+                case Some(cid) => Value(Value.Sum.Optional(Optional(Some(cid.asContractId))))\n+              }),\n+            )\n+        )\n+        fetchResult <- ctx.testingHelpers.failingExercise(\n+          testIdsGenerator.testCommandId(\"TDVl5\"),\n+          submitter = delegate,\n+          template = templateIds.delegation,\n+          contractId = delegationEv.contractId,\n+          choice = \"FetchDelegated\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+          Code.INVALID_ARGUMENT,\n+          pattern = \"dependency error: couldn't find contract\"\n+        )\n+        // this fetch still fails even if we do not check that the submitter\n+        // is in the lookup maintainer, since we have the visibility check\n+        // implement as part of #753.\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"TDVl6\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+            Code.INVALID_ARGUMENT,\n+            \"couldn't find key\",\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"TDVl6\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"TDVl7\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"TDVl7\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+      } yield (succeed)\n+    }\n+\n+    //      // this is basically a port of"
+  },
+  {
+    "id" : "2b488363-3acb-42a6-8242-228dc24724cd",
+    "prId" : 2032,
+    "comments" : [
+      {
+        "id" : "7754726c-77d4-47e6-867a-19e37a78fed1",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "The notes from the previous test case apply to this as well.",
+        "createdAt" : "2019-07-08T09:07:40Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5230d385-cb36-45a9-a01d-08583e039c01",
+        "parentId" : "7754726c-77d4-47e6-867a-19e37a78fed1",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Addressed in 9bf50c0.",
+        "createdAt" : "2019-07-08T09:49:22Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2d3ff888f4f9c9e53de8d799e9090ca48d516338",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,465 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.tests.integration.ledger.api\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.language.{\n+  LanguageVersion,\n+  LanguageMajorVersion => LMajV,\n+  LanguageMinorVersion => LMinV\n+}\n+import com.digitalasset.ledger.api.testing.utils.{\n+  AkkaBeforeAndAfterAll,\n+  SuiteResourceManagementAroundEach\n+}\n+import com.digitalasset.ledger.api.v1.value.{Optional, Record, RecordField, Value}\n+import com.digitalasset.platform.apitesting.LedgerContextExtensions._\n+import com.digitalasset.platform.apitesting.TestParties._\n+import com.digitalasset.platform.apitesting.{MultiLedgerFixture, TestIdsGenerator, TestTemplateIds}\n+import com.digitalasset.platform.participant.util.ValueConversions._\n+import com.digitalasset.daml.lf.transaction.VersionTimeline.Implicits._\n+import com.google.rpc.code.Code\n+import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n+import org.scalatest.{AsyncWordSpec, Matchers, OptionValues}\n+\n+class ContractKeysIT\n+    extends AsyncWordSpec\n+    with AkkaBeforeAndAfterAll\n+    with MultiLedgerFixture\n+    with SuiteResourceManagementAroundEach\n+    with ScalaFutures\n+    with AsyncTimeLimitedTests\n+    with Matchers\n+    with OptionValues {\n+\n+  protected val testTemplateIds = new TestTemplateIds(config)\n+  protected val templateIds = testTemplateIds.templateIds\n+  protected val testIdsGenerator = new TestIdsGenerator(config)\n+\n+  private lazy val dummyTemplates =\n+    List(templateIds.dummy, templateIds.dummyFactory, templateIds.dummyWithParam)\n+  private val operator = Grace\n+  private val receiver = Heidi\n+  private val giver = Alice\n+  private val owner = Bob\n+  private val delegate = Charlie\n+  private val observers = List(Eve, Frank)\n+\n+  private val emptyRecordValue = Value(Value.Sum.Record(Record()))\n+\n+  /** This should be the same version as the dar version. */\n+  protected val languageVersion: LanguageVersion = LanguageVersion(LMajV.V1, LMinV.Dev)\n+\n+  override protected def config: Config = Config.default\n+\n+  \"Working with contract keys\" should {\n+\n+    \"permit fetching a divulged contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) =\n+        RecordField(label, Some(Value(Value.Sum.Party(party))))\n+\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate\n+      // unique keys. This is not so great though, it'd be better to have a clean environment.\n+      val key = s\"${UUID.randomUUID.toString}-key\"\n+      val odArgs = Seq(\n+        pf(\"owner\", owner),\n+        pf(\"delegate\", delegate)\n+      )\n+      val delegatedCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl3\"),\n+        owner,\n+        templateIds.delegated,\n+        Record(\n+          Some(templateIds.delegated),\n+          Seq(pf(\"owner\", owner), RecordField(value = Some(Value(Value.Sum.Text(key))))))\n+      )\n+      val delegationCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl4\"),\n+        owner,\n+        templateIds.delegation,\n+        Record(Some(templateIds.delegation), odArgs))\n+      val showIdCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl5\"),\n+        owner,\n+        templateIds.showDelegated,\n+        Record(Some(templateIds.showDelegated), odArgs))\n+      for {\n+        delegatedEv <- delegatedCreate\n+        delegationEv <- delegationCreate\n+        showIdEv <- showIdCreate\n+        fetchArg = Record(\n+          None,\n+          Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+        lookupArg = (expected: Option[String]) =>\n+          Record(\n+            None,\n+            Seq(\n+              pf(\"\", owner),\n+              RecordField(value = Some(Value(Value.Sum.Text(key)))),\n+              RecordField(value = expected match {\n+                case None => Value(Value.Sum.Optional(Optional(None)))\n+                case Some(cid) => Value(Value.Sum.Optional(Optional(Some(cid.asContractId))))\n+              })\n+            )\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl6\"),\n+          submitter = owner,\n+          template = templateIds.showDelegated,\n+          contractId = showIdEv.contractId,\n+          choice = \"ShowIt\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl7\"),\n+          submitter = delegate,\n+          template = templateIds.delegation,\n+          contractId = delegationEv.contractId,\n+          choice = \"FetchDelegated\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"SDVl8\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"SDVl8\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"SDVl9\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"SDVl9\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+      } yield (succeed)\n+    }\n+\n+    \"reject fetching an undisclosed contract\" in allFixtures { ctx =>"
+  },
+  {
+    "id" : "8bdab06c-9f82-42aa-81c9-26a2282e3ddd",
+    "prId" : 2032,
+    "comments" : [
+      {
+        "id" : "dc5c13d7-f21e-41ab-885f-ee839f45d511",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This line says failing but the following is not a `failingExercise`, am I missing something?",
+        "createdAt" : "2019-07-08T09:09:29Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c2a5a919-201b-49c8-8a36-f964acd2be9a",
+        "parentId" : "dc5c13d7-f21e-41ab-885f-ee839f45d511",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Addressed in 9bf50c0.",
+        "createdAt" : "2019-07-08T09:49:28Z",
+        "updatedAt" : "2019-07-08T10:16:11Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2d3ff888f4f9c9e53de8d799e9090ca48d516338",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,465 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.tests.integration.ledger.api\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.language.{\n+  LanguageVersion,\n+  LanguageMajorVersion => LMajV,\n+  LanguageMinorVersion => LMinV\n+}\n+import com.digitalasset.ledger.api.testing.utils.{\n+  AkkaBeforeAndAfterAll,\n+  SuiteResourceManagementAroundEach\n+}\n+import com.digitalasset.ledger.api.v1.value.{Optional, Record, RecordField, Value}\n+import com.digitalasset.platform.apitesting.LedgerContextExtensions._\n+import com.digitalasset.platform.apitesting.TestParties._\n+import com.digitalasset.platform.apitesting.{MultiLedgerFixture, TestIdsGenerator, TestTemplateIds}\n+import com.digitalasset.platform.participant.util.ValueConversions._\n+import com.digitalasset.daml.lf.transaction.VersionTimeline.Implicits._\n+import com.google.rpc.code.Code\n+import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n+import org.scalatest.{AsyncWordSpec, Matchers, OptionValues}\n+\n+class ContractKeysIT\n+    extends AsyncWordSpec\n+    with AkkaBeforeAndAfterAll\n+    with MultiLedgerFixture\n+    with SuiteResourceManagementAroundEach\n+    with ScalaFutures\n+    with AsyncTimeLimitedTests\n+    with Matchers\n+    with OptionValues {\n+\n+  protected val testTemplateIds = new TestTemplateIds(config)\n+  protected val templateIds = testTemplateIds.templateIds\n+  protected val testIdsGenerator = new TestIdsGenerator(config)\n+\n+  private lazy val dummyTemplates =\n+    List(templateIds.dummy, templateIds.dummyFactory, templateIds.dummyWithParam)\n+  private val operator = Grace\n+  private val receiver = Heidi\n+  private val giver = Alice\n+  private val owner = Bob\n+  private val delegate = Charlie\n+  private val observers = List(Eve, Frank)\n+\n+  private val emptyRecordValue = Value(Value.Sum.Record(Record()))\n+\n+  /** This should be the same version as the dar version. */\n+  protected val languageVersion: LanguageVersion = LanguageVersion(LMajV.V1, LMinV.Dev)\n+\n+  override protected def config: Config = Config.default\n+\n+  \"Working with contract keys\" should {\n+\n+    \"permit fetching a divulged contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) =\n+        RecordField(label, Some(Value(Value.Sum.Party(party))))\n+\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate\n+      // unique keys. This is not so great though, it'd be better to have a clean environment.\n+      val key = s\"${UUID.randomUUID.toString}-key\"\n+      val odArgs = Seq(\n+        pf(\"owner\", owner),\n+        pf(\"delegate\", delegate)\n+      )\n+      val delegatedCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl3\"),\n+        owner,\n+        templateIds.delegated,\n+        Record(\n+          Some(templateIds.delegated),\n+          Seq(pf(\"owner\", owner), RecordField(value = Some(Value(Value.Sum.Text(key))))))\n+      )\n+      val delegationCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl4\"),\n+        owner,\n+        templateIds.delegation,\n+        Record(Some(templateIds.delegation), odArgs))\n+      val showIdCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"SDVl5\"),\n+        owner,\n+        templateIds.showDelegated,\n+        Record(Some(templateIds.showDelegated), odArgs))\n+      for {\n+        delegatedEv <- delegatedCreate\n+        delegationEv <- delegationCreate\n+        showIdEv <- showIdCreate\n+        fetchArg = Record(\n+          None,\n+          Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+        lookupArg = (expected: Option[String]) =>\n+          Record(\n+            None,\n+            Seq(\n+              pf(\"\", owner),\n+              RecordField(value = Some(Value(Value.Sum.Text(key)))),\n+              RecordField(value = expected match {\n+                case None => Value(Value.Sum.Optional(Optional(None)))\n+                case Some(cid) => Value(Value.Sum.Optional(Optional(Some(cid.asContractId))))\n+              })\n+            )\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl6\"),\n+          submitter = owner,\n+          template = templateIds.showDelegated,\n+          contractId = showIdEv.contractId,\n+          choice = \"ShowIt\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"SDVl7\"),\n+          submitter = delegate,\n+          template = templateIds.delegation,\n+          contractId = delegationEv.contractId,\n+          choice = \"FetchDelegated\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+        )\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"SDVl8\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"SDVl8\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"SDVl9\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"SDVl9\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(Some(delegatedEv.contractId)))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+      } yield (succeed)\n+    }\n+\n+    \"reject fetching an undisclosed contract\" in allFixtures { ctx =>\n+      def pf(label: String, party: String) =\n+        RecordField(label, Some(Value(Value.Sum.Party(party))))\n+\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate\n+      // unique keys. This is not so great though, it'd be better to have a clean environment.\n+      val key = s\"${UUID.randomUUID.toString}-key\"\n+      val delegatedCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"TDVl3\"),\n+        owner,\n+        templateIds.delegated,\n+        Record(\n+          Some(templateIds.delegated),\n+          Seq(pf(\"owner\", owner), RecordField(value = Some(Value(Value.Sum.Text(key))))))\n+      )\n+      val delegationCreate = ctx.testingHelpers.simpleCreate(\n+        testIdsGenerator.testCommandId(\"TDVl4\"),\n+        owner,\n+        templateIds.delegation,\n+        Record(Some(templateIds.delegation), Seq(pf(\"owner\", owner), pf(\"delegate\", delegate)))\n+      )\n+      for {\n+        delegatedEv <- delegatedCreate\n+        delegationEv <- delegationCreate\n+        fetchArg = Record(\n+          None,\n+          Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+        lookupArg = (expected: Option[String]) =>\n+          Record(\n+            None,\n+            Seq(\n+              pf(\"\", owner),\n+              RecordField(value = Some(Value(Value.Sum.Text(key)))),\n+              RecordField(value = expected match {\n+                case None => Value(Value.Sum.Optional(Optional(None)))\n+                case Some(cid) => Value(Value.Sum.Optional(Optional(Some(cid.asContractId))))\n+              }),\n+            )\n+        )\n+        fetchResult <- ctx.testingHelpers.failingExercise(\n+          testIdsGenerator.testCommandId(\"TDVl5\"),\n+          submitter = delegate,\n+          template = templateIds.delegation,\n+          contractId = delegationEv.contractId,\n+          choice = \"FetchDelegated\",\n+          arg = Value(Value.Sum.Record(fetchArg)),\n+          Code.INVALID_ARGUMENT,\n+          pattern = \"dependency error: couldn't find contract\"\n+        )\n+        // this fetch still fails even if we do not check that the submitter\n+        // is in the lookup maintainer, since we have the visibility check\n+        // implement as part of #753.\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"TDVl6\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+            Code.INVALID_ARGUMENT,\n+            \"couldn't find key\",\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"TDVl6\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"FetchByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+        _ <- if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+          ctx.testingHelpers.simpleExercise(\n+            testIdsGenerator.testCommandId(\"TDVl7\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+          )\n+        } else {\n+          ctx.testingHelpers.failingExercise(\n+            testIdsGenerator.testCommandId(\"TDVl7\"),\n+            submitter = delegate,\n+            template = templateIds.delegation,\n+            contractId = delegationEv.contractId,\n+            choice = \"LookupByKeyDelegated\",\n+            arg = Value(Value.Sum.Record(lookupArg(None))),\n+            Code.INVALID_ARGUMENT,\n+            \"Expected the submitter 'Charlie' to be in maintainers 'Bob'\",\n+          )\n+        }\n+      } yield (succeed)\n+    }\n+\n+    //      // this is basically a port of\n+    //      // `daml-lf/tests/scenario/daml-1.3/contract-keys/Test.daml`.\n+    \"process contract keys\" in allFixtures { ctx =>\n+      // TODO currently we run multiple suites with the same sandbox, therefore we must generate\n+      // unique keys. This is not so great though, it'd be better to have a clean environment.\n+      val keyPrefix = UUID.randomUUID.toString\n+\n+      def textKeyRecord(p: String, k: String, disclosedTo: List[String]): Record =\n+        Record(\n+          fields = List(\n+            RecordField(value = p.asParty),\n+            RecordField(value = s\"$keyPrefix-$k\".asText),\n+            RecordField(value = disclosedTo.map(_.asParty).asList)))\n+\n+      val key = \"some-key\"\n+\n+      def textKeyKey(p: String, k: String): Value =\n+        Value(\n+          Value.Sum.Record(Record(fields =\n+            List(RecordField(value = p.asParty), RecordField(value = s\"$keyPrefix-$k\".asText)))))\n+\n+      for {\n+        cid1 <- ctx.testingHelpers.simpleCreate(\n+          testIdsGenerator.testCommandId(\"CK-test-cid1\"),\n+          Alice,\n+          templateIds.textKey,\n+          textKeyRecord(Alice, key, List(Bob))\n+        )\n+        // duplicate keys are not ok\n+        _ <- ctx.testingHelpers.failingCreate(\n+          testIdsGenerator.testCommandId(\"CK-test-duplicate-key\"),\n+          Alice,\n+          templateIds.textKey,\n+          textKeyRecord(Alice, key, List(Bob)),\n+          Code.INVALID_ARGUMENT,\n+          \"DuplicateKey\"\n+        )\n+        // create handles to perform lookups / fetches\n+        aliceTKO <- ctx.testingHelpers.simpleCreate(\n+          testIdsGenerator.testCommandId(\"CK-test-aliceTKO\"),\n+          Alice,\n+          templateIds.textKeyOperations,\n+          Record(fields = List(RecordField(value = Alice.asParty))))\n+        bobTKO <- ctx.testingHelpers.simpleCreate(\n+          testIdsGenerator.testCommandId(\"CK-test-bobTKO\"),\n+          Bob,\n+          templateIds.textKeyOperations,\n+          Record(fields = List(RecordField(value = Bob.asParty)))\n+        )\n+\n+        // unauthorized lookups are not OK\n+        // both existing lookups...\n+        lookupNone = Value(Value.Sum.Optional(Optional(None)))\n+        lookupSome = (cid: String) => Value(Value.Sum.Optional(Optional(Some(cid.asContractId))))\n+        _ <- ctx.testingHelpers.failingExercise(\n+          testIdsGenerator.testCommandId(\"CK-test-bob-unauthorized-1\"),\n+          Bob,\n+          templateIds.textKeyOperations,\n+          bobTKO.contractId,\n+          \"TKOLookup\",\n+          Value(\n+            Value.Sum.Record(\n+              Record(fields = List(\n+                RecordField(value = textKeyKey(Alice, key)),\n+                RecordField(value = lookupSome(cid1.contractId)))))),\n+          Code.INVALID_ARGUMENT,\n+          if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+            \"requires authorizers\"\n+          } else {\n+            \"Expected the submitter 'Bob' to be in maintainers 'Alice'\"\n+          }\n+        )\n+        // ..and non-existing ones\n+        _ <- ctx.testingHelpers.failingExercise(\n+          testIdsGenerator.testCommandId(\"CK-test-bob-unauthorized-2\"),\n+          Bob,\n+          templateIds.textKeyOperations,\n+          bobTKO.contractId,\n+          \"TKOLookup\",\n+          Value(\n+            Value.Sum.Record(\n+              Record(fields = List(\n+                RecordField(value = textKeyKey(Alice, \"bogus-key\")),\n+                RecordField(value = lookupNone))))),\n+          Code.INVALID_ARGUMENT,\n+          if (languageVersion precedes LanguageVersion.checkSubmitterInMaintainers) {\n+            \"requires authorizers\"\n+          } else {\n+            \"Expected the submitter 'Bob' to be in maintainers 'Alice'\"\n+          }\n+        )\n+        // successful, authorized lookup\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"CK-test-alice-lookup-found\"),\n+          Alice,\n+          templateIds.textKeyOperations,\n+          aliceTKO.contractId,\n+          \"TKOLookup\",\n+          Value(\n+            Value.Sum.Record(\n+              Record(fields = List(\n+                RecordField(value = textKeyKey(Alice, key)),\n+                RecordField(value = lookupSome(cid1.contractId))))))\n+        )\n+        // successful fetch\n+        _ <- ctx.testingHelpers.simpleExercise(\n+          testIdsGenerator.testCommandId(\"CK-test-alice-fetch-found\"),\n+          Alice,\n+          templateIds.textKeyOperations,\n+          aliceTKO.contractId,\n+          \"TKOFetch\",\n+          Value(\n+            Value.Sum.Record(\n+              Record(fields = List(\n+                RecordField(value = textKeyKey(Alice, key)),\n+                RecordField(value = cid1.contractId.asContractId)))))\n+        )\n+        // failing, authorized lookup"
+  }
+]

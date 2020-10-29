@@ -1,0 +1,105 @@
+[
+  {
+    "id" : "cfdb2e6e-d96c-4313-8e8f-2b64b00bce5a",
+    "prId" : 5327,
+    "comments" : [
+      {
+        "id" : "53c70691-29dc-4046-a479-bbfd98717ea3",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "@rautenrieth-da: the catch-all case seem problematic. It will hide errors in the future. For safety: could at leats log at INFO level the error that happened and that you are retrying? Also consider doing a case distinctions on the errors and going through them one-by-one to decide whether the chosen action is the appropriate one.",
+        "createdAt" : "2020-04-01T06:47:18Z",
+        "updatedAt" : "2020-04-01T10:00:18Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0b2b665e-c6d5-4acd-8ba1-5a1ffc96ace5",
+        "parentId" : "53c70691-29dc-4046-a479-bbfd98717ea3",
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "Another point to consider: could it be that a retry is \"in too quick succession\", i.e., that some outside update to the index-store needs to happen for the retry to work? In that case, we might want to consider an exponential back-off strategy to avoid busy-waiting.",
+        "createdAt" : "2020-04-01T06:48:40Z",
+        "updatedAt" : "2020-04-01T10:00:18Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "427884e6-6d22-4de9-8eb0-8fd9275be26b",
+        "parentId" : "53c70691-29dc-4046-a479-bbfd98717ea3",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "This error should only happen if the ACS changed between command interpretation and the lookup of maximum ledger time of used contracts, which happens _immediately_ after command interpretation.\r\n\r\nAn immediate retry would therefore already use a different ACS than the original interpretation. However, as @gerolf-da noted, if the transaction uses fixed contract IDs (as opposed those looked by by key), then a retry would not change the result.\r\n\r\nIf fixed contract IDs are used, and some of those contracts are archived between command interpretation and the subsequent ledger time lookup:\r\n1. The first submission would return `ABORTED`, signalling that no ledger time could be found, and suggesting the app to retry.\r\n2. The second submission would return the final error `INVALID_ARGUMENT`, because the archived contracts do not exist at command interpretation.\r\n\r\nIMO that is a reasonable behavior.",
+        "createdAt" : "2020-04-01T09:43:34Z",
+        "updatedAt" : "2020-04-01T10:00:18Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ebed8609d6fda7b7427ccc0ff42930ccf1290b25",
+    "line" : null,
+    "diffHunk" : "@@ -75,6 +75,12 @@ final case class LedgerTimeHelper(\n                 else\n                   Future.successful(Left(ErrorCause.LedgerTime(maxRetries)))\n               })\n+              .recoverWith {\n+                // An error while looking up the maximum ledger time for the used contracts\n+                // most likely means that one of the contracts is already not active anymore,\n+                // which can happen under contention. Retry without advancing time in this case.\n+                case _ => loop(commands, submissionSeed, retriesLeft - 1)"
+  },
+  {
+    "id" : "98a77225-3fcf-4ad1-9bdd-8593483989d4",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "ef6fa51c-5eb2-402d-ac5c-40ac2fef851f",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "What about naming this as `result`?",
+        "createdAt" : "2020-03-25T11:21:39Z",
+        "updatedAt" : "2020-03-25T11:28:29Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : 54,
+    "diffHunk" : "@@ -0,0 +1,90 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.apiserver\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.index.v2.ContractStore\n+import com.digitalasset.daml.lf.crypto\n+import com.digitalasset.daml.lf.data.Time\n+import com.digitalasset.daml.lf.transaction.Transaction\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+import com.digitalasset.ledger.api.domain.{Commands => ApiCommands}\n+import com.digitalasset.platform.store.ErrorCause\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+final case class LedgerTimeHelper(\n+    contractStore: ContractStore,\n+    commandExecutor: CommandExecutor,\n+    maxRetries: Int,\n+) {\n+\n+  /**\n+    * Executes a command, advancing the ledger time as necessary.\n+    *\n+    * The command execution result is guaranteed to satisfy causal monotonicity, i.e.,\n+    * the resulting transaction has a ledger time greater than or equal to the ledger time of any used contract.\n+    */\n+  def execute(\n+      commands: ApiCommands,\n+      submissionSeed: Option[crypto.Hash],\n+  )(implicit ec: ExecutionContext): Future[Either[ErrorCause, CommandExecutionResult]] =\n+    loop(commands, submissionSeed, maxRetries)\n+\n+  private[this] def loop(\n+      commands: ApiCommands,\n+      submissionSeed: Option[crypto.Hash],\n+      retriesLeft: Int,\n+  )(implicit ec: ExecutionContext): Future[Either[ErrorCause, CommandExecutionResult]] = {\n+    commandExecutor\n+      .execute(\n+        commands.submitter,\n+        submissionSeed,\n+        commands,\n+        contractStore.lookupActiveContract(commands.submitter, _),\n+        contractStore.lookupContractKey(commands.submitter, _),\n+        commands.commands\n+      )\n+      .flatMap {\n+        case e @ Left(ErrorCause.DamlLf(_)) =>\n+          // Permanently failed\n+          Future.successful(e)\n+        case Right(cer) =>"
+  }
+]

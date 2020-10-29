@@ -1,0 +1,333 @@
+[
+  {
+    "id" : "89658777-de4a-4b3b-ad97-d9c4476a09d9",
+    "prId" : 6386,
+    "comments" : [
+      {
+        "id" : "0ebd504c-5305-4d45-a3f1-77467624e693",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I think returning `Either String _` here isn't very useful, given that in every case that we use `loadExternalAnchors`, the `Left` case is followed by printing the error and exiting. Maybe it's best to just have `loadExternalAnchors :: Maybe FilePath ->IO (Map.Map Anchor String)` and bake in the error handling here, for now?",
+        "createdAt" : "2020-06-18T09:55:58Z",
+        "updatedAt" : "2020-06-21T20:23:35Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a0b67321-27ee-4293-993d-4c7eafda68dc",
+        "parentId" : "0ebd504c-5305-4d45-a3f1-77467624e693",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ ",
+        "createdAt" : "2020-06-20T17:48:25Z",
+        "updatedAt" : "2020-06-21T20:23:35Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5c40c3b851bd82e3c9a187108ca134ba32995a63",
+    "line" : null,
+    "diffHunk" : "@@ -91,6 +99,18 @@ inputDocData DamldocOptions{..} = do\n         InputDaml -> onErrorExit . runMaybeT $\n             extractDocs do_extractOptions do_diagsLogger do_compileOptions do_inputFiles\n \n+-- | Load a database of external anchors from a file.\n+loadExternalAnchors :: Maybe FilePath -> IO (Either String (Map.Map Anchor String))"
+  },
+  {
+    "id" : "b75056cd-1e4e-4265-bad7-a4a32d378072",
+    "prId" : 6386,
+    "comments" : [
+      {
+        "id" : "e87b176f-7c3d-4b0a-af9b-a1b2636ef1da",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "It would be nice to default to the external anchor table in the runfiles (if it exist).",
+        "createdAt" : "2020-06-18T09:57:20Z",
+        "updatedAt" : "2020-06-21T20:23:35Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5c40c3b851bd82e3c9a187108ca134ba32995a63",
+    "line" : 66,
+    "diffHunk" : "@@ -108,18 +128,25 @@ renderDocData DamldocOptions{..} docData = do\n             OutputJson ->\n                 write do_outputPath $ T.decodeUtf8 . LBS.toStrict $ AP.encodePretty' jsonConf docData\n             OutputDocs format -> do\n-                let renderOptions = RenderOptions\n-                        { ro_mode =\n-                            if do_combine\n+                externalAnchors <- loadExternalAnchors do_externalAnchorPath"
+  },
+  {
+    "id" : "b671804f-25b0-4b8c-9e1f-88cfe551014e",
+    "prId" : 2295,
+    "comments" : [
+      {
+        "id" : "0d71b087-4114-4331-b29b-5fa6af0984e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Having a type called `DamldocOptions` that has a list of `DocOption` seems confusing. We should probably refactor the whole handling of `DocOption` at some point. But that’s probably better left for a separate PR.",
+        "createdAt" : "2019-07-26T11:30:06Z",
+        "updatedAt" : "2019-07-26T11:52:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "80b6036f-7669-43ce-8042-6a2bdc5900aa",
+        "parentId" : "0d71b087-4114-4331-b29b-5fa6af0984e5",
+        "author" : null,
+        "body" : "I agree :-) ",
+        "createdAt" : "2019-07-26T11:41:09Z",
+        "updatedAt" : "2019-07-26T11:52:29Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3cbf21fa2c5f44224c0925817b9a9a555e46f583",
+    "line" : null,
+    "diffHunk" : "@@ -18,67 +21,99 @@ import Development.IDE.Types.Location\n import Development.IDE.Types.Diagnostics\n import Development.IDE.Types.Options\n \n-import           Control.Monad.Extra\n-import           Control.Monad.Except\n+import Control.Monad.Extra\n+import Control.Monad.Except\n+import Data.Maybe\n+import System.IO\n+import System.Exit\n+import System.Directory\n+import System.FilePath\n+\n import qualified Data.Aeson                        as AE\n import qualified Data.Aeson.Encode.Pretty          as AP\n-import qualified Data.ByteString.Lazy              as BS\n+import qualified Data.ByteString as BS\n+import qualified Data.ByteString.Lazy as LBS\n import qualified Data.Text                         as T\n import qualified Data.Text.Encoding                as T\n-import           System.Directory\n-import           System.FilePath\n \n+data DamldocOptions = DamldocOptions\n+    { do_inputFormat :: InputFormat\n+    , do_ideOptions :: IdeOptions\n+    , do_outputPath :: FilePath\n+    , do_outputFormat :: OutputFormat\n+    , do_docTemplate :: Maybe FilePath\n+    , do_docOptions :: [DocOption]"
+  },
+  {
+    "id" : "b5815688-7ce5-4c6b-afb3-5c9e1dd74470",
+    "prId" : 2295,
+    "comments" : [
+      {
+        "id" : "708a839f-318a-46f5-b052-204abcaab567",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe calle it `runDamlDoc`s then? Not a big fan of calling things `driver`.",
+        "createdAt" : "2019-07-26T11:30:59Z",
+        "updatedAt" : "2019-07-26T11:52:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cdf1f01a-9608-4d0d-875c-2e9b011720bf",
+        "parentId" : "708a839f-318a-46f5-b052-204abcaab567",
+        "author" : null,
+        "body" : "👍 ",
+        "createdAt" : "2019-07-26T11:52:43Z",
+        "updatedAt" : "2019-07-26T11:52:43Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3cbf21fa2c5f44224c0925817b9a9a555e46f583",
+    "line" : 77,
+    "diffHunk" : "@@ -18,67 +21,99 @@ import Development.IDE.Types.Location\n import Development.IDE.Types.Diagnostics\n import Development.IDE.Types.Options\n \n-import           Control.Monad.Extra\n-import           Control.Monad.Except\n+import Control.Monad.Extra\n+import Control.Monad.Except\n+import Data.Maybe\n+import System.IO\n+import System.Exit\n+import System.Directory\n+import System.FilePath\n+\n import qualified Data.Aeson                        as AE\n import qualified Data.Aeson.Encode.Pretty          as AP\n-import qualified Data.ByteString.Lazy              as BS\n+import qualified Data.ByteString as BS\n+import qualified Data.ByteString.Lazy as LBS\n import qualified Data.Text                         as T\n import qualified Data.Text.Encoding                as T\n-import           System.Directory\n-import           System.FilePath\n \n+data DamldocOptions = DamldocOptions\n+    { do_inputFormat :: InputFormat\n+    , do_ideOptions :: IdeOptions\n+    , do_outputPath :: FilePath\n+    , do_outputFormat :: OutputFormat\n+    , do_docTemplate :: Maybe FilePath\n+    , do_docOptions :: [DocOption]\n+    , do_inputFiles :: [NormalizedFilePath]\n+    , do_docTitle :: Maybe T.Text\n+    , do_combine :: Bool\n+    }\n \n data InputFormat = InputJson | InputDaml\n     deriving (Eq, Show, Read)\n \n-damlDocDriver :: InputFormat\n-              -> IdeOptions\n-              -> FilePath\n-              -> DocFormat\n-              -> Maybe FilePath\n-              -> [DocOption]\n-              -> [NormalizedFilePath]\n-              -> IO ()\n-damlDocDriver cInputFormat ideOpts output cFormat prefixFile options files = do\n+data OutputFormat = OutputJson | OutputHoogle | OutputDocs RenderFormat\n+    deriving (Eq, Show, Read)\n+\n+-- | Run damldocs!"
+  },
+  {
+    "id" : "6da2ebdc-25d0-4110-a0e0-bb89bb0c940b",
+    "prId" : 2295,
+    "comments" : [
+      {
+        "id" : "b207e3fa-5f8e-4626-9bd5-1c7e47fff3a2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Looks like that comment stops in the middle of a sentence. Given that this only seems to be used once and I don’t find either the name or the comment to add much helpful information, I would just inline the implementation.",
+        "createdAt" : "2019-07-26T11:33:40Z",
+        "updatedAt" : "2019-07-26T11:52:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c42b4eb3-d486-48f7-9132-b8d6e45badb6",
+        "parentId" : "b207e3fa-5f8e-4626-9bd5-1c7e47fff3a2",
+        "author" : null,
+        "body" : "Fair",
+        "createdAt" : "2019-07-26T11:42:49Z",
+        "updatedAt" : "2019-07-26T11:52:29Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3cbf21fa2c5f44224c0925817b9a9a555e46f583",
+    "line" : null,
+    "diffHunk" : "@@ -18,67 +21,99 @@ import Development.IDE.Types.Location\n import Development.IDE.Types.Diagnostics\n import Development.IDE.Types.Options\n \n-import           Control.Monad.Extra\n-import           Control.Monad.Except\n+import Control.Monad.Extra\n+import Control.Monad.Except\n+import Data.Maybe\n+import System.IO\n+import System.Exit\n+import System.Directory\n+import System.FilePath\n+\n import qualified Data.Aeson                        as AE\n import qualified Data.Aeson.Encode.Pretty          as AP\n-import qualified Data.ByteString.Lazy              as BS\n+import qualified Data.ByteString as BS\n+import qualified Data.ByteString.Lazy as LBS\n import qualified Data.Text                         as T\n import qualified Data.Text.Encoding                as T\n-import           System.Directory\n-import           System.FilePath\n \n+data DamldocOptions = DamldocOptions\n+    { do_inputFormat :: InputFormat\n+    , do_ideOptions :: IdeOptions\n+    , do_outputPath :: FilePath\n+    , do_outputFormat :: OutputFormat\n+    , do_docTemplate :: Maybe FilePath\n+    , do_docOptions :: [DocOption]\n+    , do_inputFiles :: [NormalizedFilePath]\n+    , do_docTitle :: Maybe T.Text\n+    , do_combine :: Bool\n+    }\n \n data InputFormat = InputJson | InputDaml\n     deriving (Eq, Show, Read)\n \n-damlDocDriver :: InputFormat\n-              -> IdeOptions\n-              -> FilePath\n-              -> DocFormat\n-              -> Maybe FilePath\n-              -> [DocOption]\n-              -> [NormalizedFilePath]\n-              -> IO ()\n-damlDocDriver cInputFormat ideOpts output cFormat prefixFile options files = do\n+data OutputFormat = OutputJson | OutputHoogle | OutputDocs RenderFormat\n+    deriving (Eq, Show, Read)\n+\n+-- | Run damldocs!\n+damlDocDriver :: DamldocOptions -> IO ()\n+damlDocDriver options = do\n+    docData <- inputDocData options\n+    renderDocData options (transformDocData options docData)\n+\n+-- | Load doc data, either via the DAML typechecker or via JSON files.\n+inputDocData :: DamldocOptions -> IO [ModuleDoc]\n+inputDocData DamldocOptions{..} = do\n \n     let printAndExit errMsg = do\n-            putStrLn $ \"Error processing input from \" <> unwords (map fromNormalizedFilePath files) <> \"\\n\"\n-                     <> errMsg\n-            fail \"Aborted.\"\n+            hPutStr stderr . unlines $\n+                [ unwords\n+                    $ \"Error processing input from\"\n+                    : map fromNormalizedFilePath do_inputFiles\n+                , errMsg\n+                ]\n+            exitFailure\n \n-    let onErrorExit act =\n-            act >>= either (printAndExit . renderDiags) pure\n         renderDiags = T.unpack . showDiagnosticsColored\n+        onErrorExit act = act >>= either (printAndExit . renderDiags) pure\n+\n+    case do_inputFormat of\n+        InputJson -> do\n+            input <- mapM (BS.readFile . fromNormalizedFilePath) do_inputFiles\n+            let mbData = map (AE.eitherDecode . LBS.fromStrict) input\n+            applyAnnotations <$> concatMapM (either printAndExit pure) mbData\n \n-    docData <- case cInputFormat of\n-            InputJson -> do\n-                input <- mapM (BS.readFile . fromNormalizedFilePath) files\n-                let mbData = map AE.eitherDecode input :: [Either String [ModuleDoc]]\n-                applyAnnotations <$> concatMapM (either printAndExit pure) mbData\n+        InputDaml -> onErrorExit . runExceptT $\n+            fmap (applyTransform do_docOptions)\n+                (mkDocs do_ideOptions do_inputFiles)\n \n-            InputDaml ->\n-                onErrorExit $ runExceptT\n-                            $ fmap (applyTransform options)\n-                            $ mkDocs ideOpts files\n+-- | Transform doc data, applying annotations and"
+  },
+  {
+    "id" : "35013ccf-db19-424c-90d9-ed5e107ef83d",
+    "prId" : 2295,
+    "comments" : [
+      {
+        "id" : "a4c29731-2c27-43b1-a45a-06553a01c6c9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    templateM <- mapM T.readFileUtf8 do_docTemplate\r\n```\r\nwith the helper from `Data.Text.Extended`.",
+        "createdAt" : "2019-07-26T11:34:17Z",
+        "updatedAt" : "2019-07-26T11:52:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cf7596ee-6434-4d42-ab15-ff32878368d7",
+        "parentId" : "a4c29731-2c27-43b1-a45a-06553a01c6c9",
+        "author" : null,
+        "body" : "thanks!",
+        "createdAt" : "2019-07-26T11:52:33Z",
+        "updatedAt" : "2019-07-26T11:52:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3cbf21fa2c5f44224c0925817b9a9a555e46f583",
+    "line" : null,
+    "diffHunk" : "@@ -18,67 +21,99 @@ import Development.IDE.Types.Location\n import Development.IDE.Types.Diagnostics\n import Development.IDE.Types.Options\n \n-import           Control.Monad.Extra\n-import           Control.Monad.Except\n+import Control.Monad.Extra\n+import Control.Monad.Except\n+import Data.Maybe\n+import System.IO\n+import System.Exit\n+import System.Directory\n+import System.FilePath\n+\n import qualified Data.Aeson                        as AE\n import qualified Data.Aeson.Encode.Pretty          as AP\n-import qualified Data.ByteString.Lazy              as BS\n+import qualified Data.ByteString as BS\n+import qualified Data.ByteString.Lazy as LBS\n import qualified Data.Text                         as T\n import qualified Data.Text.Encoding                as T\n-import           System.Directory\n-import           System.FilePath\n \n+data DamldocOptions = DamldocOptions\n+    { do_inputFormat :: InputFormat\n+    , do_ideOptions :: IdeOptions\n+    , do_outputPath :: FilePath\n+    , do_outputFormat :: OutputFormat\n+    , do_docTemplate :: Maybe FilePath\n+    , do_docOptions :: [DocOption]\n+    , do_inputFiles :: [NormalizedFilePath]\n+    , do_docTitle :: Maybe T.Text\n+    , do_combine :: Bool\n+    }\n \n data InputFormat = InputJson | InputDaml\n     deriving (Eq, Show, Read)\n \n-damlDocDriver :: InputFormat\n-              -> IdeOptions\n-              -> FilePath\n-              -> DocFormat\n-              -> Maybe FilePath\n-              -> [DocOption]\n-              -> [NormalizedFilePath]\n-              -> IO ()\n-damlDocDriver cInputFormat ideOpts output cFormat prefixFile options files = do\n+data OutputFormat = OutputJson | OutputHoogle | OutputDocs RenderFormat\n+    deriving (Eq, Show, Read)\n+\n+-- | Run damldocs!\n+damlDocDriver :: DamldocOptions -> IO ()\n+damlDocDriver options = do\n+    docData <- inputDocData options\n+    renderDocData options (transformDocData options docData)\n+\n+-- | Load doc data, either via the DAML typechecker or via JSON files.\n+inputDocData :: DamldocOptions -> IO [ModuleDoc]\n+inputDocData DamldocOptions{..} = do\n \n     let printAndExit errMsg = do\n-            putStrLn $ \"Error processing input from \" <> unwords (map fromNormalizedFilePath files) <> \"\\n\"\n-                     <> errMsg\n-            fail \"Aborted.\"\n+            hPutStr stderr . unlines $\n+                [ unwords\n+                    $ \"Error processing input from\"\n+                    : map fromNormalizedFilePath do_inputFiles\n+                , errMsg\n+                ]\n+            exitFailure\n \n-    let onErrorExit act =\n-            act >>= either (printAndExit . renderDiags) pure\n         renderDiags = T.unpack . showDiagnosticsColored\n+        onErrorExit act = act >>= either (printAndExit . renderDiags) pure\n+\n+    case do_inputFormat of\n+        InputJson -> do\n+            input <- mapM (BS.readFile . fromNormalizedFilePath) do_inputFiles\n+            let mbData = map (AE.eitherDecode . LBS.fromStrict) input\n+            applyAnnotations <$> concatMapM (either printAndExit pure) mbData\n \n-    docData <- case cInputFormat of\n-            InputJson -> do\n-                input <- mapM (BS.readFile . fromNormalizedFilePath) files\n-                let mbData = map AE.eitherDecode input :: [Either String [ModuleDoc]]\n-                applyAnnotations <$> concatMapM (either printAndExit pure) mbData\n+        InputDaml -> onErrorExit . runExceptT $\n+            fmap (applyTransform do_docOptions)\n+                (mkDocs do_ideOptions do_inputFiles)\n \n-            InputDaml ->\n-                onErrorExit $ runExceptT\n-                            $ fmap (applyTransform options)\n-                            $ mkDocs ideOpts files\n+-- | Transform doc data, applying annotations and\n+transformDocData :: DamldocOptions -> [ModuleDoc] -> [ModuleDoc]\n+transformDocData DamldocOptions {..} = applyTransform do_docOptions\n \n-    prefix <- maybe (pure \"\") BS.readFile prefixFile\n+-- | Output doc data.\n+renderDocData :: DamldocOptions -> [ModuleDoc] -> IO ()\n+renderDocData DamldocOptions{..} docData = do\n+    templateM <- mapM (fmap T.decodeUtf8 . BS.readFile) do_docTemplate"
+  },
+  {
+    "id" : "0cdaf73d-f5eb-4960-9153-685ea1d4b011",
+    "prId" : 2295,
+    "comments" : [
+      {
+        "id" : "195c3ff8-de64-475a-a785-4be9aa469994",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n            T.writeFileUtf8 $ prefix <> contents\r\n```",
+        "createdAt" : "2019-07-26T11:35:09Z",
+        "updatedAt" : "2019-07-26T11:52:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3cbf21fa2c5f44224c0925817b9a9a555e46f583",
+    "line" : null,
+    "diffHunk" : "@@ -18,67 +21,99 @@ import Development.IDE.Types.Location\n import Development.IDE.Types.Diagnostics\n import Development.IDE.Types.Options\n \n-import           Control.Monad.Extra\n-import           Control.Monad.Except\n+import Control.Monad.Extra\n+import Control.Monad.Except\n+import Data.Maybe\n+import System.IO\n+import System.Exit\n+import System.Directory\n+import System.FilePath\n+\n import qualified Data.Aeson                        as AE\n import qualified Data.Aeson.Encode.Pretty          as AP\n-import qualified Data.ByteString.Lazy              as BS\n+import qualified Data.ByteString as BS\n+import qualified Data.ByteString.Lazy as LBS\n import qualified Data.Text                         as T\n import qualified Data.Text.Encoding                as T\n-import           System.Directory\n-import           System.FilePath\n \n+data DamldocOptions = DamldocOptions\n+    { do_inputFormat :: InputFormat\n+    , do_ideOptions :: IdeOptions\n+    , do_outputPath :: FilePath\n+    , do_outputFormat :: OutputFormat\n+    , do_docTemplate :: Maybe FilePath\n+    , do_docOptions :: [DocOption]\n+    , do_inputFiles :: [NormalizedFilePath]\n+    , do_docTitle :: Maybe T.Text\n+    , do_combine :: Bool\n+    }\n \n data InputFormat = InputJson | InputDaml\n     deriving (Eq, Show, Read)\n \n-damlDocDriver :: InputFormat\n-              -> IdeOptions\n-              -> FilePath\n-              -> DocFormat\n-              -> Maybe FilePath\n-              -> [DocOption]\n-              -> [NormalizedFilePath]\n-              -> IO ()\n-damlDocDriver cInputFormat ideOpts output cFormat prefixFile options files = do\n+data OutputFormat = OutputJson | OutputHoogle | OutputDocs RenderFormat\n+    deriving (Eq, Show, Read)\n+\n+-- | Run damldocs!\n+damlDocDriver :: DamldocOptions -> IO ()\n+damlDocDriver options = do\n+    docData <- inputDocData options\n+    renderDocData options (transformDocData options docData)\n+\n+-- | Load doc data, either via the DAML typechecker or via JSON files.\n+inputDocData :: DamldocOptions -> IO [ModuleDoc]\n+inputDocData DamldocOptions{..} = do\n \n     let printAndExit errMsg = do\n-            putStrLn $ \"Error processing input from \" <> unwords (map fromNormalizedFilePath files) <> \"\\n\"\n-                     <> errMsg\n-            fail \"Aborted.\"\n+            hPutStr stderr . unlines $\n+                [ unwords\n+                    $ \"Error processing input from\"\n+                    : map fromNormalizedFilePath do_inputFiles\n+                , errMsg\n+                ]\n+            exitFailure\n \n-    let onErrorExit act =\n-            act >>= either (printAndExit . renderDiags) pure\n         renderDiags = T.unpack . showDiagnosticsColored\n+        onErrorExit act = act >>= either (printAndExit . renderDiags) pure\n+\n+    case do_inputFormat of\n+        InputJson -> do\n+            input <- mapM (BS.readFile . fromNormalizedFilePath) do_inputFiles\n+            let mbData = map (AE.eitherDecode . LBS.fromStrict) input\n+            applyAnnotations <$> concatMapM (either printAndExit pure) mbData\n \n-    docData <- case cInputFormat of\n-            InputJson -> do\n-                input <- mapM (BS.readFile . fromNormalizedFilePath) files\n-                let mbData = map AE.eitherDecode input :: [Either String [ModuleDoc]]\n-                applyAnnotations <$> concatMapM (either printAndExit pure) mbData\n+        InputDaml -> onErrorExit . runExceptT $\n+            fmap (applyTransform do_docOptions)\n+                (mkDocs do_ideOptions do_inputFiles)\n \n-            InputDaml ->\n-                onErrorExit $ runExceptT\n-                            $ fmap (applyTransform options)\n-                            $ mkDocs ideOpts files\n+-- | Transform doc data, applying annotations and\n+transformDocData :: DamldocOptions -> [ModuleDoc] -> [ModuleDoc]\n+transformDocData DamldocOptions {..} = applyTransform do_docOptions\n \n-    prefix <- maybe (pure \"\") BS.readFile prefixFile\n+-- | Output doc data.\n+renderDocData :: DamldocOptions -> [ModuleDoc] -> IO ()\n+renderDocData DamldocOptions{..} docData = do\n+    templateM <- mapM (fmap T.decodeUtf8 . BS.readFile) do_docTemplate\n \n-    let write file contents = do\n+    let prefix = fromMaybe \"\" templateM\n+        write file contents = do\n             createDirectoryIfMissing True $ takeDirectory file\n             putStrLn $ \"Writing \" ++ file ++ \"...\"\n-            BS.writeFile file $ prefix <> BS.fromStrict (T.encodeUtf8 contents)\n-\n-    case cFormat of\n-            Json -> write output $ T.decodeUtf8 . BS.toStrict $ AP.encodePretty' jsonConf docData\n-            Rst  -> write output . renderPage . mconcat $ map renderSimpleRst docData\n-            Hoogle   -> write output . T.concat $ map renderSimpleHoogle docData\n-            Markdown -> write output . renderPage . mconcat $ map renderSimpleMD docData\n-            Html -> do\n+            BS.writeFile file . T.encodeUtf8 $ prefix <> contents"
+  },
+  {
+    "id" : "4cdefbd3-e4ec-44c7-b47d-e803835652b3",
+    "prId" : 2259,
+    "comments" : [
+      {
+        "id" : "a1c0eb9a-fb52-4ab4-a205-ed8b300bdceb",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not the biggest fan of using record wild cards to construct value when the proper record syntax would be good enough. I prefer something more explicit like\r\n```haskell\r\nlet opts = RenderOptions\r\n      { ro_mode = RenderToFolder output\r\n      ; ...\r\n      }\r\n```",
+        "createdAt" : "2019-07-23T12:18:43Z",
+        "updatedAt" : "2019-07-23T16:24:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "66afc374-356f-4ede-8055-b4251feba48a",
+        "parentId" : "a1c0eb9a-fb52-4ab4-a205-ed8b300bdceb",
+        "author" : null,
+        "body" : ":+1: that looks good!",
+        "createdAt" : "2019-07-23T16:08:03Z",
+        "updatedAt" : "2019-07-23T16:24:56Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2ed4fda9eea075172b450f1f9bef15880ed2a82c",
+    "line" : null,
+    "diffHunk" : "@@ -72,11 +72,12 @@ damlDocDriver cInputFormat ideOpts output cFormat prefixFile options files = do\n \n     case cFormat of\n             Json -> write output $ T.decodeUtf8 . BS.toStrict $ AP.encodePretty' jsonConf docData\n-            Rst  -> write output . renderFinish . mconcat $ map renderSimpleRst docData\n+            Rst  -> write output . renderPage . mconcat $ map renderSimpleRst docData\n             Hoogle   -> write output . T.concat $ map renderSimpleHoogle docData\n-            Markdown -> write output . renderFinish . mconcat $ map renderSimpleMD docData\n-            Html -> sequence_\n-                [ write (output </> hyphenated (unModulename md_name) <> \".html\") $ renderSimpleHtml m\n-                | m@ModuleDoc{..} <- docData ]\n-                    where hyphenated = T.unpack . T.replace \".\" \"-\"\n-    putStrLn \"Done\"\n+            Markdown -> write output . renderPage . mconcat $ map renderSimpleMD docData\n+            Html -> do\n+                let ro_mode = RenderToFolder output\n+                    ro_format = Html\n+                    ro_title = Nothing\n+                    ro_template = Nothing\n+                renderDocs RenderOptions{..} docData"
+  }
+]

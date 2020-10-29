@@ -1,0 +1,955 @@
+[
+  {
+    "id" : "b96dfe8e-78bb-446a-81f8-6cd0ebd2920a",
+    "prId" : 6712,
+    "comments" : [
+      {
+        "id" : "11cc01ed-faaa-4c20-b36b-a223e24ac51e",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "The deleted comment above states that postgres might not be using the index for this query. How do we solve this problem now?",
+        "createdAt" : "2020-07-14T10:43:24Z",
+        "updatedAt" : "2020-07-14T16:42:39Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "df00280b-3d40-436a-9f81-3e204c10461f",
+        "parentId" : "11cc01ed-faaa-4c20-b36b-a223e24ac51e",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "yes, that is true... on postgres 12 we had to use `order by event_offset` to force it to use the index. I was planning on returning this but it would require a bit more testing, did not want to block the release.",
+        "createdAt" : "2020-07-14T13:11:10Z",
+        "updatedAt" : "2020-07-14T16:42:39Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "35b9613e1ae1d87525c00f8f474c72cbe262e1e4",
+    "line" : null,
+    "diffHunk" : "@@ -40,25 +49,47 @@ object EventsRange {\n     if (startExclusive == Offset.beforeBegin) {\n       EmptyEventSeqIdRange.startExclusive\n     } else {\n-      import com.daml.platform.store.Conversions.OffsetToStatement\n-      // This query could be: \"select min(event_sequential_id) - 1 from participant_events where event_offset > ${range.startExclusive}\"\n-      // however there are cases when postgres decides not to use the index. We are forcing the index usage specifying `order by event_offset`\n-      SQL\"select min(event_sequential_id) from participant_events where event_offset > ${startExclusive} group by event_offset order by event_offset asc limit 1\"\n-        .as(get[Long](1).singleOpt)(connection)\n-        .map(_ - 1L)\n-        .getOrElse(EmptyEventSeqIdRange.startExclusive)\n+      // TODO(Leo): fuse these two queries\n+      readMaxRowId(startExclusive)(connection).getOrElse(\n+        readNextRowId(startExclusive)(connection)\n+          .map(_ - 1L)\n+          .getOrElse(\n+            if (isLedgerEmpty(connection))\n+              EmptyEventSeqIdRange.startExclusive\n+            else\n+              throw new IllegalStateException(\n+                s\"readLowerBound($startExclusive) returned None on non-empty ledger\")\n+          )\n+      )\n     }\n \n+  private def readMaxRowId(offset: Offset)(connection: java.sql.Connection): Option[Long] = {\n+    SQL\"select max(event_sequential_id) from participant_events where event_offset = ${offset}\"\n+      .as(get[Option[Long]](1).single)(connection)\n+  }\n+\n+  private def readNextRowId(offset: Offset)(connection: java.sql.Connection): Option[Long] = {\n+    SQL\"select min(event_sequential_id) from participant_events where event_offset > ${offset}\""
+  },
+  {
+    "id" : "7c104717-7597-4844-85f3-f04eb88aa390",
+    "prId" : 6712,
+    "comments" : [
+      {
+        "id" : "83db8611-3b4d-4c40-89aa-3148dce25ba1",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This could also happen if the request has an offset that is \"from the future\".",
+        "createdAt" : "2020-07-14T11:52:02Z",
+        "updatedAt" : "2020-07-14T16:42:39Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9d604684-df56-4d67-854e-4bbc9b6f86ca",
+        "parentId" : "83db8611-3b4d-4c40-89aa-3148dce25ba1",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "if it is from the future, `readNextRowId` should take care of this. It does\r\n```\r\nselect min(event_sequential_id) from participant_events where event_offset > ${offset}\r\n```\r\nand we subtract `1` from this to get the `startExclusive` row_id. If this query also returns `null` we either got an empty ledger in which case we return `EmptyEventSeqIdRange.startExclusive` or something is very wrong with the above two queries and we throw a runtime exception.",
+        "createdAt" : "2020-07-14T13:08:46Z",
+        "updatedAt" : "2020-07-14T16:42:39Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "35b9613e1ae1d87525c00f8f474c72cbe262e1e4",
+    "line" : null,
+    "diffHunk" : "@@ -40,25 +49,47 @@ object EventsRange {\n     if (startExclusive == Offset.beforeBegin) {\n       EmptyEventSeqIdRange.startExclusive\n     } else {\n-      import com.daml.platform.store.Conversions.OffsetToStatement\n-      // This query could be: \"select min(event_sequential_id) - 1 from participant_events where event_offset > ${range.startExclusive}\"\n-      // however there are cases when postgres decides not to use the index. We are forcing the index usage specifying `order by event_offset`\n-      SQL\"select min(event_sequential_id) from participant_events where event_offset > ${startExclusive} group by event_offset order by event_offset asc limit 1\"\n-        .as(get[Long](1).singleOpt)(connection)\n-        .map(_ - 1L)\n-        .getOrElse(EmptyEventSeqIdRange.startExclusive)\n+      // TODO(Leo): fuse these two queries\n+      readMaxRowId(startExclusive)(connection).getOrElse(\n+        readNextRowId(startExclusive)(connection)\n+          .map(_ - 1L)\n+          .getOrElse(\n+            if (isLedgerEmpty(connection))\n+              EmptyEventSeqIdRange.startExclusive\n+            else\n+              throw new IllegalStateException(\n+                s\"readLowerBound($startExclusive) returned None on non-empty ledger\")"
+  },
+  {
+    "id" : "0f8a5f94-a737-4b9c-a505-9ff6cca62f57",
+    "prId" : 6658,
+    "comments" : [
+      {
+        "id" : "77b88dd3-bf19-41a4-9465-2c77023dd3cc",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "this method is gone in the master and I believe unused in this branch. `readEventSeqId` is used for reading both upper and lower bounds",
+        "createdAt" : "2020-07-14T20:59:58Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e6630f7e-c98c-4541-a61e-8889deffda44",
+        "parentId" : "77b88dd3-bf19-41a4-9465-2c77023dd3cc",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Oops, bad merge conflict resolution I guess. Thanks.",
+        "createdAt" : "2020-07-14T21:00:33Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "10a7b0f5-67ae-4110-81af-e70517935a2c",
+        "parentId" : "77b88dd3-bf19-41a4-9465-2c77023dd3cc",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "cea2837993",
+        "createdAt" : "2020-07-14T21:13:12Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69f55443bf44c1520d2dc1c24b1aa8bee88b4d46",
+    "line" : null,
+    "diffHunk" : "@@ -52,6 +57,36 @@ object EventsRange {\n     else EmptyEventSeqIdRange.copy(endInclusive = readEventSeqId(endInclusive)(connection))\n   }\n \n+  private def readUpperBound(endInclusive: Offset)(connection: java.sql.Connection): Long ="
+  },
+  {
+    "id" : "292961c6-9687-4852-83e6-d3732433535b",
+    "prId" : 6658,
+    "comments" : [
+      {
+        "id" : "bb2c8a59-e5f5-42e4-9489-0cda7515a032",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I don't understand what's the principle that you use to decide whether or not to use infix notation. What is it? In general, every other call in this Bazel package uses infix notation for symbolic operators, otherwise the usual dot notation is used.",
+        "createdAt" : "2020-07-15T09:21:17Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cb9b2241-4bed-4c67-bdcb-c01ccb23c4e8",
+        "parentId" : "bb2c8a59-e5f5-42e4-9489-0cda7515a032",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "The principle I tend to use is \"do the . and () actually disambiguate anything, permit sensible code formatting (e.g. newlines in chains of calls), or do they exist solely to make it look more like Java?\" If the latter, I use infix when it looks nicer.\r\n\r\nThis strategy can fairly be accused of \"radical novelty\", but I suggest this merely mirrors the \"reactionary-ism\" of the other strategy you imply. Consider `tx isReplayedBy replay(tx)`. Is this expression really made clearer by the form `tx.isReplayedBy(replay(tx))`? Or is that merely a hypothetical reader betrayed by their own expectation of seeing a language that is not Scala? This is what I regularly ask myself.\r\n\r\nSince I'm staring at this code carefully, I would probably put a `.` before `flatMap`, which passes (2) (permit a sensible reformatting), but the others fall into (3).",
+        "createdAt" : "2020-07-15T12:24:18Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d33e2071-fa6a-4431-bb0f-615dd68d22f8",
+        "parentId" : "bb2c8a59-e5f5-42e4-9489-0cda7515a032",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "That's fine, I don't care too much about consistency at this level or using a specific convention, I was just unable to recognize the pattern.",
+        "createdAt" : "2020-07-15T12:30:59Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69f55443bf44c1520d2dc1c24b1aa8bee88b4d46",
+    "line" : null,
+    "diffHunk" : "@@ -61,4 +66,21 @@ object EventsRange {\n       .as(get[Long](1).singleOpt)(connection)\n       .getOrElse(EmptyLedgerEventSeqId)\n   }\n+\n+  private[events] def readPage[A](\n+      fasterRead: Long => SimpleSql[Row], // takes guessedPageEnd\n+      saferRead: Int => SimpleSql[Row], // takes minPageSize\n+      row: RowParser[A],\n+      range: EventsRange[Long],\n+      pageSize: Int): SqlSequence[Vector[A]] = {\n+    val minPageSize = 10 min pageSize max (pageSize / 10)\n+    val guessedPageEnd = range.endInclusive min (range.startExclusive + pageSize)\n+    SqlSequence.vector(fasterRead(guessedPageEnd) withFetchSize Some(pageSize), row) flatMap {\n+      arithPage =>\n+        if (guessedPageEnd == range.endInclusive || arithPage.sizeIs >= minPageSize)\n+          SqlSequence point arithPage"
+  },
+  {
+    "id" : "90498a49-8727-43a0-95f6-66fea50420bb",
+    "prId" : 6658,
+    "comments" : [
+      {
+        "id" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "To restate the general strategy in prose, to make it easier to think about edge cases:\r\n\r\n1. We pick a min page size, which is pageSize/10 but at least 10 (unless the pageSize < 10, but let's set that aside).\r\n2. First, query row IDs [startExclusive, startExclusive + pageSize), unless the latter exceeds endInclusive.\r\n    1. If that yields \"min page size\" elements, then return that as a page. So, consider pageSize = 1000 with a SQL predicate of frequency about 10%. If we find >=100 elements in the initial query, we just return them, but if we find <=99 elements, we query a second time.\r\n    1. Otherwise, do a fallback query. This is exactly like the query that preceded this PR, except we use `limit (minPageSize - elementsSoFar)` instead of `limit pageSize`. So, in our example, we would look only for the first 100 elements that match, rather than the first 1000.",
+        "createdAt" : "2020-07-15T13:06:34Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f9991188-cea6-422b-9055-f7ee2983551c",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Probably worth adding this as a comment somewhere, so that it's always where the reader needs it the most. :wink: ",
+        "createdAt" : "2020-07-15T13:32:53Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2fc4a9c1-913e-420e-8416-f6fbfad5498b",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I'd rather not, because I'm basically asking for it to be outdated within a week. This description is meant more for you to disagree with it so it can become more quickly outdated :)",
+        "createdAt" : "2020-07-15T14:14:25Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "418dece1-e8ad-4497-9dcd-6d8d7aaaea85",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "why not just use `limit pageSize` instead of `limit minPageSize` in the fallback query? If we are doing the slow query, so just return the `pageSize` number of elements.",
+        "createdAt" : "2020-07-15T14:22:07Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c46d6e12-b076-4683-9676-0b715fe0a96d",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "@leo-da The reason is that the predicate is linear, and in the fallback, our search space is `limit / frequency`. In other words, we reduce the search space by 90%, which can be a very large reduction for low-frequency queries.\r\n\r\nThis is meant to be in harmony with how we determine whether we need to fallback in the first place: if it was unacceptable to only return 99 elements, but would have been acceptable to return 100 elements if the first query had found them, we should only spend time looking for 100 elements.\r\n\r\nThe Big Idea of doing the arithmetic query is to limit the search space. The goal of the fallback is to avoid problematic cases with the first query, such as returning only one element per page over the ledger API, which would be very bad performance-wise.",
+        "createdAt" : "2020-07-15T14:29:39Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ffc6b292-7e23-4c58-b7d9-2b45b1a84ed0",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "A party with sparing events will pretty much always trigger the slow query, right?",
+        "createdAt" : "2020-07-15T15:36:49Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6875fd9e-afb1-46be-86b3-bc6fb37363d9",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "so, limiting the  search space you are optimizing the query, decreasing the latency. However you will have to do more of those fast queries in the case of the sparse party events. I guess I would pick lower total throughput, but more predictable/faster queries. `limit minPageSize` in the fallback query is fine with me.",
+        "createdAt" : "2020-07-15T15:44:18Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a8983be1-a9fe-49ed-ad29-62c486c57688",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "@gerolf-da Yes, according to how evenly distributed its events are. (You can think of infrequent template IDs similarly.)\r\n\r\nOne possible extension might be to feedback that the `limit` query was used on the first page and use it for later queries. That might have other edge cases I'm not thinking of, though.\r\n\r\nSome of this can be dealt with by adjusting how minPageSize is chosen. Originally, it was always 1, so the limit query was used only in the unworkable case where the fast query returned no results at all; however, a stream of transaction response messages each containing only 1 event seemed...not great.",
+        "createdAt" : "2020-07-15T16:19:13Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "59fc5799-74ef-4934-90ec-2136a708cad8",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "@leo-da Yeah, trade-offs abound here. I would like to skip the fast query if I was sure that it wouldn't yield enough results, but I'm unsure what the best way to perform that heuristic would be.",
+        "createdAt" : "2020-07-15T16:21:16Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "51eddaa0-17a6-4001-8293-7e1009784433",
+        "parentId" : "92da3013-0c64-470e-98dc-5ce4711d3577",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Slight alteration in 78f8f70af8: if minPageSize is 100, and we found 80 in the first query, we only search for 20 in the second query. I've incidentally eliminated all the duplicate queries I had introduced.\r\n\r\n(As you surely agree, reasoning about whether direct SQL interpolation is safe is much better than being able to append fragments of literal SQL and positional arguments.)",
+        "createdAt" : "2020-07-15T18:49:37Z",
+        "updatedAt" : "2020-07-28T19:42:13Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69f55443bf44c1520d2dc1c24b1aa8bee88b4d46",
+    "line" : null,
+    "diffHunk" : "@@ -61,4 +66,22 @@ object EventsRange {\n       .as(get[Long](1).singleOpt)(connection)\n       .getOrElse(EmptyLedgerEventSeqId)\n   }\n+\n+  private[events] def readPage[A](\n+      fasterRead: Long => SimpleSql[Row], // takes guessedPageEnd\n+      saferRead: Int => SimpleSql[Row], // takes minPageSize\n+      row: RowParser[A],\n+      range: EventsRange[Long],\n+      pageSize: Int): SqlSequence[Vector[A]] = {\n+    val minPageSize = 10 min pageSize max (pageSize / 10)\n+    val guessedPageEnd = range.endInclusive min (range.startExclusive + pageSize)\n+    SqlSequence\n+      .vector(fasterRead(guessedPageEnd) withFetchSize Some(pageSize), row)\n+      .flatMap { arithPage =>\n+        if (guessedPageEnd == range.endInclusive || arithPage.sizeIs >= minPageSize)\n+          SqlSequence point arithPage\n+        else\n+          SqlSequence.vector(saferRead(minPageSize) withFetchSize Some(minPageSize), row)\n+      }\n+  }"
+  },
+  {
+    "id" : "c32804c2-2098-496a-9afa-c79cce054a0b",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "1a24f28b-3b58-4b2e-b1f7-ce664c1ba56e",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n  private val parser: RowParser[EventsRange[Long]] =\r\n```\r\nUnless there is a good reason not to.",
+        "createdAt" : "2020-06-26T13:56:46Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,52 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.long\n+import anorm.{RowParser, SqlStringInterpolation}\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  val parser: RowParser[EventsRange[Long]] ="
+  },
+  {
+    "id" : "ac514142-6391-4822-84f8-d70a02dd6f16",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "5e84158a-cdc4-4f0d-a7ca-c59a5d3a54d1",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "How does this affect the query if `min(row_id)` is the smallest in the table? I guess it's ok, just asking to make sure there's not gotcha.",
+        "createdAt" : "2020-06-26T13:59:15Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "139e2b29-4908-4d33-83a9-c3d8431c1ba7",
+        "parentId" : "5e84158a-cdc4-4f0d-a7ca-c59a5d3a54d1",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "start is always exclusive, so we need a `row_id` that is smaller than `min(row_id)` that satisfies the where condition. It should work fine, `auto_increment` and `bigserial` start from `1`, so we should never get negative overflow, if that is what you are worried about.",
+        "createdAt" : "2020-06-26T21:56:24Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,52 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.long\n+import anorm.{RowParser, SqlStringInterpolation}\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  val parser: RowParser[EventsRange[Long]] =\n+    (long(\"start\") ~ long(\"end\")).map(r => EventsRange(r._1, r._2))\n+\n+  /**\n+    * Converts Offset range to Row ID range.\n+    *\n+    * @param range offset range\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def eventsRange(range: EventsRange[Offset])(\n+      implicit connection: java.sql.Connection): EventsRange[Long] = {\n+    import com.daml.platform.store.Conversions.OffsetToStatement\n+\n+    // anorm throws UnexpectedNullableFound if beforeBegin passed\n+    if (range.startExclusive == Offset.beforeBegin) {\n+      eventsRange(range.endInclusive)\n+    } else {\n+      // start is exclusive, that is why -1"
+  },
+  {
+    "id" : "44492a37-b9f9-4f73-aeb8-25eedd701f1e",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "9ec6afed-a667-4e5a-b6bd-9528f846bf09",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This comments looks out of place here.",
+        "createdAt" : "2020-06-26T13:59:51Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f61b63ee-01fb-4243-9799-20e7f76082b6",
+        "parentId" : "9ec6afed-a667-4e5a-b6bd-9528f846bf09",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "agreed.",
+        "createdAt" : "2020-06-26T22:24:06Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,52 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.long\n+import anorm.{RowParser, SqlStringInterpolation}\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  val parser: RowParser[EventsRange[Long]] =\n+    (long(\"start\") ~ long(\"end\")).map(r => EventsRange(r._1, r._2))\n+\n+  /**\n+    * Converts Offset range to Row ID range.\n+    *\n+    * @param range offset range\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def eventsRange(range: EventsRange[Offset])(\n+      implicit connection: java.sql.Connection): EventsRange[Long] = {\n+    import com.daml.platform.store.Conversions.OffsetToStatement\n+\n+    // anorm throws UnexpectedNullableFound if beforeBegin passed\n+    if (range.startExclusive == Offset.beforeBegin) {\n+      eventsRange(range.endInclusive)\n+    } else {\n+      // start is exclusive, that is why -1\n+      val query =\n+        SQL\"select min(row_id) - 1 as start, max(row_id) as end from participant_events where event_offset > ${range.startExclusive} and event_offset <= ${range.endInclusive}\"\n+\n+      query.as(parser.single)\n+    }\n+  }\n+\n+  def eventsRange(endInclusive: Offset)(\n+      implicit connection: java.sql.Connection): EventsRange[Long] = {\n+    import com.daml.platform.store.Conversions.OffsetToStatement\n+\n+    // anorm throws UnexpectedNullableFound if beforeBegin passed\n+    if (endInclusive == Offset.beforeBegin) {\n+      EventsRange(0, 0)\n+    } else {\n+      // start is exclusive, that is why -1"
+  },
+  {
+    "id" : "a299e58e-2446-4292-a662-b116da47dcbc",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "97a0e057-a76f-4314-93dd-df66c4f341d0",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Why not simply importing `com.daml.platform.store.Conversions.OffsetToStatement`?",
+        "createdAt" : "2020-06-29T07:35:05Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "39f9e917-afa7-4783-a375-aa990a9423cf",
+        "parentId" : "97a0e057-a76f-4314-93dd-df66c4f341d0",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "yeah, can be done... it is just idea was auto-removing it every time I was optmizing imports, so I put it into a var.... but sure I will move it into an import",
+        "createdAt" : "2020-06-29T13:31:43Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,62 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.get\n+import anorm.{RowParser, SqlStringInterpolation}\n+import com.daml.ledger.participant.state.v1.Offset\n+import scalaz.syntax.std.option._\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  private val EmptyRowIdRange = EventsRange(0L, 0L)\n+\n+  private implicit val `offset to statement converter` =\n+    com.daml.platform.store.Conversions.OffsetToStatement"
+  },
+  {
+    "id" : "59df0203-78c4-40df-8e8f-5139ecd99b94",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "777b55ca-f980-4440-8e88-786326d88eb1",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n    get[Option[Long]](\"end\").map(\r\n      _.fold(EmptyRowIdRange)(end => EmptyRowIdRange.copy(endExclusive = end)\r\n    )\r\n```\r\nYou can very easily replace this with a native `fold` or `map`/`getOrElse` as you have done in `rangeParser`. I'd prefer not bringing Scalaz into the picture for a single use that can easily be covered by the standard library.",
+        "createdAt" : "2020-06-29T07:42:35Z",
+        "updatedAt" : "2020-07-07T20:49:50Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,62 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.get\n+import anorm.{RowParser, SqlStringInterpolation}\n+import com.daml.ledger.participant.state.v1.Offset\n+import scalaz.syntax.std.option._\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  private val EmptyRowIdRange = EventsRange(0L, 0L)\n+\n+  private implicit val `offset to statement converter` =\n+    com.daml.platform.store.Conversions.OffsetToStatement\n+\n+  private val rangeParser: RowParser[EventsRange[Long]] =\n+    (get[Option[Long]](\"start\") ~ get[Option[Long]](\"end\")).map { row =>\n+      EventsRange(\n+        startExclusive = row._1.getOrElse(EmptyRowIdRange.startExclusive),\n+        endInclusive = row._2.getOrElse(EmptyRowIdRange.endInclusive))\n+    }\n+\n+  private val endParser: RowParser[EventsRange[Long]] =\n+    get[Option[Long]](\"end\").map { end =>\n+      end.cata(\n+        x => EmptyRowIdRange.copy(endInclusive = x),\n+        EmptyRowIdRange\n+      )\n+    }"
+  },
+  {
+    "id" : "297884de-4bb2-494a-b856-9531a77fec41",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "5af8188e-ec92-4017-80d0-4d580c1aab2f",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Why explicitly setting the fetch size?",
+        "createdAt" : "2020-07-01T09:46:42Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bbc2fdf2-2c46-4808-844c-40b6c1ece59d",
+        "parentId" : "5af8188e-ec92-4017-80d0-4d580c1aab2f",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "We are setting `FetchSize` in `TransactionReader`, so I am just applying the same pattern. Technically `anorm` can do some optimization based on the specified fetch size, like pre-allocating buffers of specific size (don't know if it actually does).",
+        "createdAt" : "2020-07-01T12:43:50Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "09f8a0a3-2c9b-458e-87fa-18b16761b089",
+        "parentId" : "5af8188e-ec92-4017-80d0-4d580c1aab2f",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "To the best of my understanding, this only sets the fetch size as a JDBC option, is it useful when retrieving only one item?",
+        "createdAt" : "2020-07-01T13:10:03Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "63cca828-1d77-486b-8f43-385b37bc92e6",
+        "parentId" : "5af8188e-ec92-4017-80d0-4d580c1aab2f",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "probably not useful :) removing it",
+        "createdAt" : "2020-07-02T15:06:14Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,67 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.get\n+import anorm.SqlStringInterpolation\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  private val EmptyRowIdRange = EventsRange(0L, 0L)\n+\n+  private val oneRow = Some(1)\n+\n+  /**\n+    * Converts Offset range to Row ID range.\n+    *\n+    * @param range offset range\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(range: EventsRange[Offset])(\n+      connection: java.sql.Connection): EventsRange[Long] =\n+    EventsRange(\n+      startExclusive = readLowerBound(range.startExclusive)(connection),\n+      endInclusive = readUpperBound(range.endInclusive)(connection)\n+    )\n+\n+  /**\n+    * Converts ledger end offset into a Row ID range.\n+    *\n+    * @param endInclusive ledger end offset\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(endInclusive: Offset)(connection: java.sql.Connection): EventsRange[Long] =\n+    EmptyRowIdRange.copy(endInclusive = readUpperBound(endInclusive)(connection))\n+\n+  private def readLowerBound(startExclusive: Offset)(connection: java.sql.Connection): Long =\n+    if (startExclusive == Offset.beforeBegin) {\n+      EmptyRowIdRange.startExclusive\n+    } else {\n+      import com.daml.platform.store.Conversions.OffsetToStatement\n+      // This query could be: \"select min(row_id) - 1 from participant_events where event_offset > ${range.startExclusive}\"\n+      // however there are cases when postgres decides not to use the index. We are forcing the index usage specifying `order by event_offset`\n+      SQL\"select min(row_id) from participant_events where event_offset > ${startExclusive} group by event_offset order by event_offset asc limit 1\"\n+        .withFetchSize(oneRow)"
+  },
+  {
+    "id" : "3b52876f-cbfe-4ec8-b649-3a868e9ffa16",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "ac504d5a-f42c-4071-bc2a-9a588536e200",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n      // however tests using PostgreSQL 12 with tens of millions of events have shown that the index\r\n      // on `event_offset` is not used unless we _hint_ at it by specifying `order by event_offset`\r\n```",
+        "createdAt" : "2020-07-01T09:49:02Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,67 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.get\n+import anorm.SqlStringInterpolation\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  private val EmptyRowIdRange = EventsRange(0L, 0L)\n+\n+  private val oneRow = Some(1)\n+\n+  /**\n+    * Converts Offset range to Row ID range.\n+    *\n+    * @param range offset range\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(range: EventsRange[Offset])(\n+      connection: java.sql.Connection): EventsRange[Long] =\n+    EventsRange(\n+      startExclusive = readLowerBound(range.startExclusive)(connection),\n+      endInclusive = readUpperBound(range.endInclusive)(connection)\n+    )\n+\n+  /**\n+    * Converts ledger end offset into a Row ID range.\n+    *\n+    * @param endInclusive ledger end offset\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(endInclusive: Offset)(connection: java.sql.Connection): EventsRange[Long] =\n+    EmptyRowIdRange.copy(endInclusive = readUpperBound(endInclusive)(connection))\n+\n+  private def readLowerBound(startExclusive: Offset)(connection: java.sql.Connection): Long =\n+    if (startExclusive == Offset.beforeBegin) {\n+      EmptyRowIdRange.startExclusive\n+    } else {\n+      import com.daml.platform.store.Conversions.OffsetToStatement\n+      // This query could be: \"select min(row_id) - 1 from participant_events where event_offset > ${range.startExclusive}\"\n+      // however there are cases when postgres decides not to use the index. We are forcing the index usage specifying `order by event_offset`\n+      SQL\"select min(row_id) from participant_events where event_offset > ${startExclusive} group by event_offset order by event_offset asc limit 1\"\n+        .withFetchSize(oneRow)\n+        .as(get[Long](1).singleOpt)(connection)\n+        .map(_ - 1L)\n+        .getOrElse(EmptyRowIdRange.startExclusive)\n+    }\n+\n+  private def readUpperBound(endInclusive: Offset)(connection: java.sql.Connection): Long =\n+    if (endInclusive == Offset.beforeBegin) {\n+      EmptyRowIdRange.endInclusive\n+    } else {\n+      import com.daml.platform.store.Conversions.OffsetToStatement\n+      // This query could be: \"select max(row_id) from participant_events where event_offset <= ${range.endInclusive}\"\n+      // however there are cases (query takes 24 min on DB with 4 million rows in participant_events)\n+      // when postgres decides not to use the index. We are forcing the index usage specifying `order by event_offset`"
+  },
+  {
+    "id" : "8126c201-7414-4d81-a94b-f297a8b81768",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "2a255ddd-2053-4086-afe8-96bf741dae09",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I'm starting to wonder: was the query slow just because PostgreSQL was not picking the right index?",
+        "createdAt" : "2020-07-01T13:21:44Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f57b6516-6f7c-4890-93ca-cffac5dc180f",
+        "parentId" : "2a255ddd-2053-4086-afe8-96bf741dae09",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "don't know... however `order by event_sequential_id` is faster than `order by (event_offset, transaction_id, node_index)` that is for sure. Also `event_sequential_id` allows us to simplify the SQL where clause, we don't have to take into account `node_index`, because `event_sequential_id` is an unique identifier.",
+        "createdAt" : "2020-07-07T16:18:16Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,67 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.get\n+import anorm.SqlStringInterpolation\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  private val EmptyRowIdRange = EventsRange(0L, 0L)\n+\n+  private val oneRow = Some(1)\n+\n+  /**\n+    * Converts Offset range to Row ID range.\n+    *\n+    * @param range offset range\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(range: EventsRange[Offset])(\n+      connection: java.sql.Connection): EventsRange[Long] =\n+    EventsRange(\n+      startExclusive = readLowerBound(range.startExclusive)(connection),\n+      endInclusive = readUpperBound(range.endInclusive)(connection)\n+    )\n+\n+  /**\n+    * Converts ledger end offset into a Row ID range.\n+    *\n+    * @param endInclusive ledger end offset\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(endInclusive: Offset)(connection: java.sql.Connection): EventsRange[Long] =\n+    EmptyRowIdRange.copy(endInclusive = readUpperBound(endInclusive)(connection))\n+\n+  private def readLowerBound(startExclusive: Offset)(connection: java.sql.Connection): Long =\n+    if (startExclusive == Offset.beforeBegin) {\n+      EmptyRowIdRange.startExclusive\n+    } else {\n+      import com.daml.platform.store.Conversions.OffsetToStatement\n+      // This query could be: \"select min(row_id) - 1 from participant_events where event_offset > ${range.startExclusive}\"\n+      // however there are cases when postgres decides not to use the index. We are forcing the index usage specifying `order by event_offset`"
+  },
+  {
+    "id" : "4ed5350b-3e30-414d-819d-dbe950788abc",
+    "prId" : 6372,
+    "comments" : [
+      {
+        "id" : "ee12d1de-1e44-4903-88c2-d79c1eded8ea",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I'm wondering whether the queries for lower bound and upper bound could be combined into a single query to avoid a roundtrip?\r\nThis doesn't have a big influence when `startExclusive` and `endInclusive` are far apart, but once the client reaches the ledger head it can be quite an overhead.",
+        "createdAt" : "2020-07-07T08:04:00Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c1a045a9-4652-4e9b-b1c0-2a7031f7485d",
+        "parentId" : "ee12d1de-1e44-4903-88c2-d79c1eded8ea",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/6372#discussion_r446213480",
+        "createdAt" : "2020-07-07T09:17:54Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1d02b82f-a470-477d-bf15-c51c9d57733c",
+        "parentId" : "ee12d1de-1e44-4903-88c2-d79c1eded8ea",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I see. Thank you.",
+        "createdAt" : "2020-07-07T09:40:34Z",
+        "updatedAt" : "2020-07-07T20:49:51Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a4ac22ba1dbfc5a1f114a75812abec7b87d0eb34",
+    "line" : 39,
+    "diffHunk" : "@@ -0,0 +1,63 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+package com.daml.platform.store.dao.events\n+\n+import anorm.SqlParser.get\n+import anorm.SqlStringInterpolation\n+import com.daml.ledger.participant.state.v1.Offset\n+\n+final case class EventsRange[A](startExclusive: A, endInclusive: A)\n+\n+object EventsRange {\n+  private val EmptyRowIdRange = EventsRange(0L, 0L)\n+\n+  /**\n+    * Converts Offset range to Row ID range.\n+    *\n+    * @param range offset range\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(range: EventsRange[Offset])(\n+      connection: java.sql.Connection): EventsRange[Long] =\n+    EventsRange(\n+      startExclusive = readLowerBound(range.startExclusive)(connection),\n+      endInclusive = readUpperBound(range.endInclusive)(connection)\n+    )\n+\n+  /**\n+    * Converts ledger end offset into a Row ID range.\n+    *\n+    * @param endInclusive ledger end offset\n+    * @param connection SQL connection\n+    * @return Row ID range\n+    */\n+  def readRowIdRange(endInclusive: Offset)(connection: java.sql.Connection): EventsRange[Long] =\n+    EmptyRowIdRange.copy(endInclusive = readUpperBound(endInclusive)(connection))\n+\n+  private def readLowerBound(startExclusive: Offset)(connection: java.sql.Connection): Long ="
+  }
+]

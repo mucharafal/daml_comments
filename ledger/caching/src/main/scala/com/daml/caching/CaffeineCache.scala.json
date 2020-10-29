@@ -1,0 +1,33 @@
+[
+  {
+    "id" : "06ee05a2-dfe6-4c40-a53f-59cfcc86cbd5",
+    "prId" : 6432,
+    "comments" : [
+      {
+        "id" : "e755ad19-a1a6-4b39-a8fb-8f7cde71ac5b",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n      cache: caffeine.Cache[Key, Value],\r\n```",
+        "createdAt" : "2020-06-19T14:13:56Z",
+        "updatedAt" : "2020-06-19T14:19:22Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9e404d140fe8f22a807a16033b1a4e5cf3349485",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,56 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.caching\n+\n+import com.daml.metrics.CacheMetrics\n+import com.github.benmanes.caffeine.{cache => caffeine}\n+\n+import scala.compat.java8.OptionConverters._\n+\n+object CaffeineCache {\n+\n+  def apply[Key <: AnyRef, Value <: AnyRef](\n+      builder: caffeine.Caffeine[_ >: Key, _ >: Value],\n+      metrics: Option[CacheMetrics],\n+  ): Cache[Key, Value] = {\n+    val cache = builder.build[Key, Value]\n+    metrics match {\n+      case None => new SimpleCaffeineCache(cache)\n+      case Some(metrics) => new InstrumentedCaffeineCache(cache, metrics)\n+    }\n+  }\n+\n+  private final class SimpleCaffeineCache[Key <: AnyRef, Value <: AnyRef](\n+      cache: caffeine.Cache[Key, Value]"
+  }
+]

@@ -1,0 +1,1106 @@
+[
+  {
+    "id" : "9fb994c7-613e-4012-a100-d469d460b97f",
+    "prId" : 7252,
+    "comments" : [
+      {
+        "id" : "d75807a8-d1eb-4758-a43e-109bfc849fee",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Did you verify whether things need to be zero-based or 1-based?",
+        "createdAt" : "2020-08-27T15:45:15Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "195ac29d-eed6-4243-92eb-bbb9ba680be0",
+        "parentId" : "d75807a8-d1eb-4758-a43e-109bfc849fee",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, the [LSP spec](https://microsoft.github.io/language-server-protocol/specification#range) says zero-based and I've also verified manually in the IDE that the right code range lights up.",
+        "createdAt" : "2020-08-28T08:29:33Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5cd8cd54f886d4b5d729f46c48c70c22c49f3082",
+    "line" : null,
+    "diffHunk" : "@@ -472,6 +472,18 @@ scenarioTests run = testGroup \"scenarios\"\n           expectScenarioContent \"Return value: &quot;ok&quot\"\n           closeDoc scenario\n           closeDoc main'\n+    , testCase \"submit location\" $ run $ do\n+          main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+              [ \"module Main where\"\n+              , \"template T with party : Party where signatory party\"\n+              , \"main = scenario $ do\"\n+              , \"  alice <- getParty \\\"Alice\\\"\"\n+              , \"  submit alice do create (T alice)\"\n+              ]\n+          script <- openScript \"Main.daml\" \"main\"\n+          expectScenarioContent \"title=\\\"Main:5:3\\\">Main:5:3</a>\""
+  },
+  {
+    "id" : "ad85b003-c36b-4b78-9a1d-38e6e228e46b",
+    "prId" : 7252,
+    "comments" : [
+      {
+        "id" : "04c592cf-db63-47d6-9896-b22101f8a04d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "two submits in one script might be worth testing. What could also be useful to test  is having the `submit` in some function that we call from the main script. We could also think about displaying full call stacks for failed submits but that’s definitely something separate.",
+        "createdAt" : "2020-08-27T15:45:56Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "67ab8029-d7da-465e-a3f6-43c6f39af893",
+        "parentId" : "04c592cf-db63-47d6-9896-b22101f8a04d",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That's a good idea. I've added a line that calls a second submit through an intermediate definition and extended the test to match against a regex for two locations.\r\n\r\nI've noticed a difference between scenarios and scripts in this case in that in scenarios the location will extend to the left of the equal sign so long as no bind is in the way while it does not with scripts. However, I'd argue the scripts behavior is more consistent.\r\n\r\nTo illustrate, `[]` marks the referenced range:\r\n```\r\n-- scenarios\r\n[indirect party = \r\n    submit party do createCmd (T party)]\r\nindirect party =\r\n    [submit party do createCmd (T party)]\r\n    >> pure ()\r\nindirect party = do\r\n    [submit party do createCmd (T party)]\r\n    pure ()\r\n-- script\r\nindirect party =\r\n    [submit party do createCmd (T party)]\r\nindirect party =\r\n    [submit party do createCmd (T party)]\r\n    >> pure ()\r\nindirect party = do\r\n    [submit party do createCmd (T party)]\r\n    pure ()\r\n```",
+        "createdAt" : "2020-08-28T09:04:58Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "87751894-68ad-45c8-86fb-510bd8be9544",
+        "parentId" : "04c592cf-db63-47d6-9896-b22101f8a04d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Agreed, the script behavior is better :+1: ",
+        "createdAt" : "2020-08-28T11:39:36Z",
+        "updatedAt" : "2020-08-28T11:39:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5cd8cd54f886d4b5d729f46c48c70c22c49f3082",
+    "line" : 34,
+    "diffHunk" : "@@ -527,6 +539,21 @@ scriptTests damlcPath scriptDarPath = testGroup \"scripts\"\n           expectScriptContent \"Return value: &quot;ok&quot\"\n           closeDoc script\n           closeDoc main'\n+    , testCase \"submit location\" $ run $ do\n+          main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+              [ \"{-# LANGUAGE ApplicativeDo #-}\"\n+              , \"module Main where\"\n+              , \"import Daml.Script\"\n+              , \"template T with party : Party where signatory party\"\n+              , \"main : Script (ContractId T)\"\n+              , \"main = do\"\n+              , \"  alice <- allocateParty \\\"Alice\\\"\"\n+              , \"  submit alice do createCmd (T alice)\""
+  },
+  {
+    "id" : "ca78c903-6aab-4efa-9aaf-e8083b03fdd7",
+    "prId" : 4445,
+    "comments" : [
+      {
+        "id" : "ea0d4a7c-6675-4ce6-b4e5-9e5eb0f51d5e",
+        "parentId" : null,
+        "author" : null,
+        "body" : "🤔 \r\n\r\nWhy do we need a daml.yaml if it does not have a valid sdk-version field?",
+        "createdAt" : "2020-02-10T10:33:23Z",
+        "updatedAt" : "2020-02-10T11:32:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cdf561ec-1245-4ac1-9b74-73fb8d45b5e4",
+        "parentId" : "ea0d4a7c-6675-4ce6-b4e5-9e5eb0f51d5e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Because the config file is read by `damlc` not the assistant. More generally, this is what we’re telling users to use so it’s helpful to test. E.g., without the change to `initPackageDb` which only considers a project a project if it has also `name`, …  fields `daml init` would fail if you have a `daml.yaml` with only an `sdk-version`.",
+        "createdAt" : "2020-02-10T10:40:44Z",
+        "updatedAt" : "2020-02-10T11:32:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8179a724-6f02-4f12-9b14-cc0962907c94",
+        "parentId" : "ea0d4a7c-6675-4ce6-b4e5-9e5eb0f51d5e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ve changed it to use the current SDK version to make it a bit less confusing.",
+        "createdAt" : "2020-02-10T10:57:22Z",
+        "updatedAt" : "2020-02-10T11:32:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f2e1e48e-1672-44ab-adac-b7cf77223ad0",
+        "parentId" : "ea0d4a7c-6675-4ce6-b4e5-9e5eb0f51d5e",
+        "author" : null,
+        "body" : "I see, thanks for the explanation. I think using the current SDK version is good. :)",
+        "createdAt" : "2020-02-10T11:48:11Z",
+        "updatedAt" : "2020-02-10T11:48:11Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d6a41fd7d895508cb724dfabf4d2d88377d6e5ce",
+    "line" : null,
+    "diffHunk" : "@@ -646,3 +649,76 @@ regressionTests run _runScenarios = testGroup \"regression\"\n           , _command = Nothing\n           , _xdata = Nothing\n           }\n+\n+multiPackageTests :: FilePath -> TestTree\n+multiPackageTests damlc = testGroup \"multi-package\"\n+    [ testCaseSteps \"example 1\" $ \\step -> withTempDir $ \\dir -> do\n+          step \"build a\"\n+          createDirectoryIfMissing True (dir </> \"a\")\n+          writeFileUTF8 (dir </> \"a\" </> \"daml.yaml\") $ unlines\n+              [ \"sdk-version: ignored\"\n+              , \"name: a\"\n+              , \"version: 0.0.1\"\n+              , \"source: .\"\n+              , \"dependencies: [daml-prim, daml-stdlib]\"\n+              ]\n+          writeFileUTF8 (dir </> \"a\" </> \"A.daml\") $ unlines\n+              [ \"daml 1.2 module A where\"\n+              , \"data A = A\"\n+              , \"a = A\"\n+              ]\n+          withCurrentDirectory (dir </> \"a\") $ callProcess damlc [\"build\", \"-o\", dir </> \"a\" </> \"a.dar\"]\n+          step \"build b\"\n+          createDirectoryIfMissing True (dir </> \"b\")\n+          writeFileUTF8 (dir </> \"b\" </> \"daml.yaml\") $ unlines\n+              [ \"sdk-version: ignored\"\n+              , \"name: b\"\n+              , \"version: 0.0.1\"\n+              , \"source: .\"\n+              , \"dependencies: [daml-prim, daml-stdlib, \" <> show (\"..\" </> \"a\" </> \"a.dar\") <> \"]\"\n+              ]\n+          writeFileUTF8 (dir </> \"b\" </> \"B.daml\") $ unlines\n+              [ \"daml 1.2 module B where\"\n+              , \"import A\"\n+              , \"f : Scenario A\"\n+              , \"f = pure a\"\n+              ]\n+          withCurrentDirectory (dir </> \"b\") $ callProcess damlc [\"build\", \"-o\", dir </> \"b\" </> \"b.dar\"]\n+          step \"run language server\"\n+          writeFileUTF8 (dir </> \"daml.yaml\") $ unlines\n+              [ \"sdk-version: ignored\""
+  },
+  {
+    "id" : "cd691d9d-91b7-4506-98f3-ed4052b5e155",
+    "prId" : 4391,
+    "comments" : [
+      {
+        "id" : "3de4401c-3e65-4245-a7b8-62aec990898e",
+        "parentId" : null,
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I don't understand this!",
+        "createdAt" : "2020-02-11T22:10:42Z",
+        "updatedAt" : "2020-02-18T11:12:21Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "28abe919-7da2-4526-bd0c-6feb80297054",
+        "parentId" : "3de4401c-3e65-4245-a7b8-62aec990898e",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "What I mean is. By turning on `--hide-all-packages`, this test broke...\r\nSo I made a temp hack to suppress the failure, showing what the new behaviour is.\r\nBut I have no idea if this new behaviour is correct. Or more generally what this test is about!",
+        "createdAt" : "2020-02-11T22:19:52Z",
+        "updatedAt" : "2020-02-18T11:12:21Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2b6a340a-98c8-45bb-b206-3356b5c4342c",
+        "parentId" : "3de4401c-3e65-4245-a7b8-62aec990898e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This test checks that the IDE can load multiple packages at once. In this case the IDE will not be started in the project directory but in a parent directory, e.g., you open vscode in `foobar` and you have two projects at `foobar/a` and `foobar/b`. This means that `init` will do nothing since it is run in `foobar` and not in `foobar/a`. The proper fix for this is to change where we do `init` but I deliberately left this out of #4445 since it would have conflicted even more with this PR.\r\n\r\nFor now, I think the best fix is to add a `--package` flag to the `build-options` field of `b` and mention this in the docs at https://github.com/digital-asset/daml/blob/master/docs/source/daml/daml-studio.rst#working-with-multiple-packages. We can then shuffle around pkg db initialization afterwards to make this unnecessary.",
+        "createdAt" : "2020-02-12T08:38:46Z",
+        "updatedAt" : "2020-02-18T11:12:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3f2ebc1f-8142-4512-b542-8df4c3cdf530",
+        "parentId" : "3de4401c-3e65-4245-a7b8-62aec990898e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/4481 adds another test for starting the IDE in the respective project directory. In that case `init` should work correctly and you should not need to add a `--package` flag. Probably a good idea to merge #4481 first and rebase this on top of it to make sure this is the case.",
+        "createdAt" : "2020-02-12T08:46:31Z",
+        "updatedAt" : "2020-02-18T11:12:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "92a95d7c-2e8c-46f6-a12a-4bd802e3b7f1",
+        "parentId" : "3de4401c-3e65-4245-a7b8-62aec990898e",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "These tests all work now.",
+        "createdAt" : "2020-02-17T20:59:30Z",
+        "updatedAt" : "2020-02-18T11:12:21Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e29eddf5d338724158422a9fd62bf47e4131c5c1",
+    "line" : null,
+    "diffHunk" : "@@ -708,8 +708,10 @@ multiPackageTests damlc = testGroup \"multi-package\"\n               Just escapedFpB <- pure $ escapeURIString isUnescapedInURIComponent <$> uriToFilePath (docB ^. uri)\n               -- code lenses are a good test since they force LF compilation\n               r <- getCodeLenses docB\n+              -- TODO: test broken by --hide-all-packages being turned on. Why??"
+  },
+  {
+    "id" : "ad792d5b-f65b-461a-8da0-d89f8bc8ed30",
+    "prId" : 4074,
+    "comments" : [
+      {
+        "id" : "b2b90633-c6c9-4a33-aa37-d6a8adc6c784",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Is it necessary to compare against an exact list of expected completions in this test, or sufficient to check that, say `DA.List`, is present? With the full list this test will need to be changed if the default set of visible modules is changed.",
+        "createdAt" : "2020-01-16T16:43:19Z",
+        "updatedAt" : "2020-01-16T17:01:28Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0b87b67f-1c4b-4687-b9cc-21a443e643e3",
+        "parentId" : "b2b90633-c6c9-4a33-aa37-d6a8adc6c784",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "good point, simplified",
+        "createdAt" : "2020-01-16T16:58:07Z",
+        "updatedAt" : "2020-01-16T17:01:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "81d18b49ad3d28a44de1b5f2b14e752db90f0a65",
+    "line" : null,
+    "diffHunk" : "@@ -605,3 +606,83 @@ stressTests run _runScenarios = testGroup \"Stress tests\"\n     makeModule :: String -> [T.Text] -> Session TextDocumentIdentifier\n     makeModule name lines = openDoc' (name ++ \".daml\") damlId $\n         moduleContent name lines\n+\n+regressionTests\n+    :: (Session () -> IO ())\n+    -> (Session () -> IO ())\n+    -> TestTree\n+regressionTests run _runScenarios = testGroup \"regression\"\n+  [ testCase \"completion on stale file\" $ run $ do\n+        -- This used to produce \"cannot continue after interface file error\"\n+        -- since we used a function from GHCi in ghcide.\n+        foo <- openDoc' \"Foo.daml\" damlId $ T.unlines\n+            [ \"{-# OPTIONS_GHC -Wall #-}\"\n+            , \"daml 1.2\"\n+            , \"module Foo where\"\n+            , \"import DA.List\"\n+            , \"\"\n+            ]\n+        expectDiagnostics [(\"Foo.daml\", [(DsWarning, (3,0), \"redundant\")])]\n+        completions <- getCompletions foo (Position 3 1)\n+        liftIO $ completions @?= map mkCompletion\n+            [ \"Control.Exception.Base\""
+  },
+  {
+    "id" : "edbb8025-2861-4062-831d-106f3b472085",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "b6375b5f-0581-40a8-999f-385cb8adaede",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we get some proper tests in the shake tests that this works like it is supposed to?",
+        "createdAt" : "2019-08-28T07:18:26Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d362d47e-8b00-4094-9d83-1ceed0dea096",
+        "parentId" : "b6375b5f-0581-40a8-999f-385cb8adaede",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "I am not sure what do you mean by like it is supposed to, earlier we had no field information now we have that ",
+        "createdAt" : "2019-08-28T18:04:10Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1fef7e09-15c3-41d2-b417-99e52d04ed45",
+        "parentId" : "b6375b5f-0581-40a8-999f-385cb8adaede",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Just testing a bunch of different case and making sure (without golden tests) that they all behave as you expect, e.g., records, nested records, variants, …",
+        "createdAt" : "2019-08-28T18:11:09Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "13b496fc-9cdc-4c99-82ee-139cdba6c29a",
+        "parentId" : "b6375b5f-0581-40a8-999f-385cb8adaede",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "The nested record types, edge creation and such are covered with tests in `DA.Test.ShakeIdeClient` which do not use golden file tests. This is checking if the dot string is generated currently because that is not covered by the shakeIde tests. ",
+        "createdAt" : "2019-08-28T18:26:52Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fb8b69bb-c8ca-4401-b159-54ff0786d0bb",
+        "parentId" : "b6375b5f-0581-40a8-999f-385cb8adaede",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What I am trying to say is that we should have tests that check for this in the shake tests. Given that this change did not change any of the Shake tests, they evidently don’t test your change here so we should extend them to test that fields are correctly represented in the graph.",
+        "createdAt" : "2019-08-28T18:28:52Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "22c57d57-ec57-453b-9e07-573a64bfdee2",
+        "parentId" : "b6375b5f-0581-40a8-999f-385cb8adaede",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Ah ok that makes sense, thanks for explaining ",
+        "createdAt" : "2019-08-28T18:54:31Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "167de1e3-97ae-4402-9575-e71a6446e26d",
+        "parentId" : "b6375b5f-0581-40a8-999f-385cb8adaede",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "I have updated the tests to assert the fields that were added in this PR. The bit that is not tested in these ShakeIdeTest is the style (the table one which shows template data fields within the DOT file). ",
+        "createdAt" : "2019-09-04T18:45:32Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : 5,
+    "diffHunk" : "@@ -435,7 +435,7 @@ executeCommandTests run _ = testGroup \"execute command\"\n         Just escapedFp <- pure $ uriToFilePath (main' ^. uri)\n         actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n            \"daml/damlVisualize\"  (Just (List [Aeson.String $ T.pack escapedFp]))\n-        let expectedDotString = \"digraph G {\\ncompound=true;\\nrankdir=LR;\\nsubgraph cluster_Coin{\\nn0[label=Create][color=green]; \\nn1[label=Archive][color=red]; \\nn2[label=Delete][color=red]; \\nlabel=Coin;color=blue\\n}\\n}\\n\"\n+        let expectedDotString = \"digraph G {\\ncompound=true;\\nrankdir=LR;\\nsubgraph cluster_Coin{\\nn0[label=Create][color=green]; \\nn1[label=Archive][color=red]; \\nn2[label=Delete][color=red]; \\nlabel=<<table align = \\\"left\\\" border=\\\"0\\\" cellborder=\\\"0\\\" cellspacing=\\\"1\\\">\\n<tr><td align=\\\"center\\\"><b>Coin</b></td></tr><tr><td align=\\\"left\\\">owner</td></tr> \\n</table>>;color=blue\\n}\\n}\\n\""
+  },
+  {
+    "id" : "a40c629b-99e3-4c11-8fa5-c5d7daa795f4",
+    "prId" : 2597,
+    "comments" : [
+      {
+        "id" : "c21adf80-186a-432c-adb3-4d445cf74fbb",
+        "parentId" : null,
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "This looks more like golden test. Let me know if there is a better way to do this.",
+        "createdAt" : "2019-08-23T15:59:55Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a8dd326f-5c93-4acd-95e7-6511ade6a5cb",
+        "parentId" : "c21adf80-186a-432c-adb3-4d445cf74fbb",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Given that the example is very simple, I think this is fine for now. If it becomes an issue we could either do some simple string matching using a regex or `isInfixOf` or if we want to test something more complex, parse the dot file and check for certain connections. But given that we have separate tests for testing that visualization works correctly, keeping this test simple and focusing on whether the LSP integration works seems like a good choice.",
+        "createdAt" : "2019-08-26T06:58:23Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1b1fd2cb67bf8f3d8e5f6fa576f088fc36bd49fc",
+    "line" : 39,
+    "diffHunk" : "@@ -416,6 +417,44 @@ scenarioTests run = testGroup \"scenarios\"\n           closeDoc main'\n     ]\n \n+executeCommandTests :: (forall a. Session a -> IO a) -> (Session () -> IO ()) -> TestTree\n+executeCommandTests run _ = testGroup \"execute command\"\n+    [ testCase \"execute commands\" $ run $ do\n+        main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+            [ \"daml 1.2\"\n+            , \"module Coin where\"\n+            , \"template Coin\"\n+            , \"  with\"\n+            , \"    owner : Party\"\n+            , \"  where\"\n+            , \"    signatory owner\"\n+            , \"    controller owner can\"\n+            , \"      Delete : ()\"\n+            , \"        do return ()\"\n+            ]\n+        Just escapedFp <- pure $ uriToFilePath (main' ^. uri)\n+        actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n+           \"daml/damlVisualize\"  (Just (List [Aeson.String $ T.pack escapedFp]))\n+        let expectedDotString = \"digraph G {\\ncompound=true;\\nrankdir=LR;\\nsubgraph cluster_Coin{\\nn0[label=Create][color=green]; \\nn1[label=Archive][color=red]; \\nn2[label=Delete][color=red]; \\nlabel=Coin;color=blue\\n}\\n}\\n\""
+  },
+  {
+    "id" : "d1b1af20-bc9b-4f73-99e3-17524fe10c40",
+    "prId" : 2597,
+    "comments" : [
+      {
+        "id" : "0d6bacc2-5aa1-46da-a8bd-a682700f681f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        liftIO $ assertEqual \"Visulization command\" (Just expectedDotString) (_result actualDotString)\r\n```\r\nThat will give you a more useful error message if the test fails.",
+        "createdAt" : "2019-08-26T06:59:41Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1b1fd2cb67bf8f3d8e5f6fa576f088fc36bd49fc",
+    "line" : null,
+    "diffHunk" : "@@ -416,6 +417,44 @@ scenarioTests run = testGroup \"scenarios\"\n           closeDoc main'\n     ]\n \n+executeCommandTests :: (forall a. Session a -> IO a) -> (Session () -> IO ()) -> TestTree\n+executeCommandTests run _ = testGroup \"execute command\"\n+    [ testCase \"execute commands\" $ run $ do\n+        main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+            [ \"daml 1.2\"\n+            , \"module Coin where\"\n+            , \"template Coin\"\n+            , \"  with\"\n+            , \"    owner : Party\"\n+            , \"  where\"\n+            , \"    signatory owner\"\n+            , \"    controller owner can\"\n+            , \"      Delete : ()\"\n+            , \"        do return ()\"\n+            ]\n+        Just escapedFp <- pure $ uriToFilePath (main' ^. uri)\n+        actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n+           \"daml/damlVisualize\"  (Just (List [Aeson.String $ T.pack escapedFp]))\n+        let expectedDotString = \"digraph G {\\ncompound=true;\\nrankdir=LR;\\nsubgraph cluster_Coin{\\nn0[label=Create][color=green]; \\nn1[label=Archive][color=red]; \\nn2[label=Delete][color=red]; \\nlabel=Coin;color=blue\\n}\\n}\\n\"\n+        liftIO $ assertBool \"Visulization command\" (Just expectedDotString == _result actualDotString)"
+  },
+  {
+    "id" : "798637b2-3547-4040-9469-e1a4ad65038b",
+    "prId" : 2597,
+    "comments" : [
+      {
+        "id" : "bb516d21-79ba-4eee-8781-912149ac3460",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        liftIO $ assertEqual \"Invalid command\" (Just Aeson.Null) (_result actualDotString)\r\n```",
+        "createdAt" : "2019-08-26T07:00:22Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1b1fd2cb67bf8f3d8e5f6fa576f088fc36bd49fc",
+    "line" : null,
+    "diffHunk" : "@@ -416,6 +417,44 @@ scenarioTests run = testGroup \"scenarios\"\n           closeDoc main'\n     ]\n \n+executeCommandTests :: (forall a. Session a -> IO a) -> (Session () -> IO ()) -> TestTree\n+executeCommandTests run _ = testGroup \"execute command\"\n+    [ testCase \"execute commands\" $ run $ do\n+        main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+            [ \"daml 1.2\"\n+            , \"module Coin where\"\n+            , \"template Coin\"\n+            , \"  with\"\n+            , \"    owner : Party\"\n+            , \"  where\"\n+            , \"    signatory owner\"\n+            , \"    controller owner can\"\n+            , \"      Delete : ()\"\n+            , \"        do return ()\"\n+            ]\n+        Just escapedFp <- pure $ uriToFilePath (main' ^. uri)\n+        actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n+           \"daml/damlVisualize\"  (Just (List [Aeson.String $ T.pack escapedFp]))\n+        let expectedDotString = \"digraph G {\\ncompound=true;\\nrankdir=LR;\\nsubgraph cluster_Coin{\\nn0[label=Create][color=green]; \\nn1[label=Archive][color=red]; \\nn2[label=Delete][color=red]; \\nlabel=Coin;color=blue\\n}\\n}\\n\"\n+        liftIO $ assertBool \"Visulization command\" (Just expectedDotString == _result actualDotString)\n+        closeDoc main'\n+    , testCase \"Invalid commands result in empty response\"  $ run $ do\n+        main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+            [ \"daml 1.2\"\n+            , \"module Empty where\"\n+            ]\n+        Just escapedFp <- pure $ uriToFilePath (main' ^. uri)\n+        actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n+           \"daml/NoCommand\"  (Just (List [Aeson.String $ T.pack escapedFp]))\n+        let expectedNull = Just Aeson.Null\n+        liftIO $ assertBool \"Invlalid command\" (expectedNull == _result actualDotString)"
+  },
+  {
+    "id" : "95465cb9-c48b-40c3-a947-47a431318ae2",
+    "prId" : 2597,
+    "comments" : [
+      {
+        "id" : "a487f47f-7b04-41a9-80d7-b4878e2822d0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        liftIO $ assertEqual \"Invlalid command\" (Just Aeson.Null) (_result actualDotString)\r\n```",
+        "createdAt" : "2019-08-26T07:00:48Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1b1fd2cb67bf8f3d8e5f6fa576f088fc36bd49fc",
+    "line" : null,
+    "diffHunk" : "@@ -416,6 +417,44 @@ scenarioTests run = testGroup \"scenarios\"\n           closeDoc main'\n     ]\n \n+executeCommandTests :: (forall a. Session a -> IO a) -> (Session () -> IO ()) -> TestTree\n+executeCommandTests run _ = testGroup \"execute command\"\n+    [ testCase \"execute commands\" $ run $ do\n+        main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+            [ \"daml 1.2\"\n+            , \"module Coin where\"\n+            , \"template Coin\"\n+            , \"  with\"\n+            , \"    owner : Party\"\n+            , \"  where\"\n+            , \"    signatory owner\"\n+            , \"    controller owner can\"\n+            , \"      Delete : ()\"\n+            , \"        do return ()\"\n+            ]\n+        Just escapedFp <- pure $ uriToFilePath (main' ^. uri)\n+        actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n+           \"daml/damlVisualize\"  (Just (List [Aeson.String $ T.pack escapedFp]))\n+        let expectedDotString = \"digraph G {\\ncompound=true;\\nrankdir=LR;\\nsubgraph cluster_Coin{\\nn0[label=Create][color=green]; \\nn1[label=Archive][color=red]; \\nn2[label=Delete][color=red]; \\nlabel=Coin;color=blue\\n}\\n}\\n\"\n+        liftIO $ assertBool \"Visulization command\" (Just expectedDotString == _result actualDotString)\n+        closeDoc main'\n+    , testCase \"Invalid commands result in empty response\"  $ run $ do\n+        main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+            [ \"daml 1.2\"\n+            , \"module Empty where\"\n+            ]\n+        Just escapedFp <- pure $ uriToFilePath (main' ^. uri)\n+        actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n+           \"daml/NoCommand\"  (Just (List [Aeson.String $ T.pack escapedFp]))\n+        let expectedNull = Just Aeson.Null\n+        liftIO $ assertBool \"Invlalid command\" (expectedNull == _result actualDotString)\n+        closeDoc main'\n+    , testCase \"Visualization command with no arguments\" $ run $ do\n+        actualDotString :: ExecuteCommandResponse <- LSP.request WorkspaceExecuteCommand $ ExecuteCommandParams\n+           \"daml/damlVisualize\"  Nothing\n+        let expectedNull = Just Aeson.Null\n+        liftIO $ assertBool \"Invlalid command\" (expectedNull == _result actualDotString)"
+  },
+  {
+    "id" : "f2216cd5-6515-4e44-95b8-1832c6a7f48c",
+    "prId" : 2257,
+    "comments" : [
+      {
+        "id" : "5112f270-9e5d-4191-a2b0-042b51c9822f",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why not `assert True`? :)",
+        "createdAt" : "2019-07-23T09:37:38Z",
+        "updatedAt" : "2019-07-23T12:16:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b3f6d69c-c564-4972-be59-05798b23fb1f",
+        "parentId" : "5112f270-9e5d-4191-a2b0-042b51c9822f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Because I’m lazy and keep copying the same silly example from other tests :stuck_out_tongue: ",
+        "createdAt" : "2019-07-23T12:16:30Z",
+        "updatedAt" : "2019-07-23T12:16:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0a507defa99383adda7779ab3da3c31a1db28779",
+    "line" : 18,
+    "diffHunk" : "@@ -248,6 +249,38 @@ requestTests run _runScenarios = testGroup \"requests\"\n                     }\n               ]\n \n+          closeDoc main'\n+    , testCase \"stale code-lenses\" $ run $ do\n+          main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+              [ \"daml 1.2\"\n+              , \"module Main where\"\n+              , \"single = scenario do\"\n+              , \"  assert (True == True)\""
+  },
+  {
+    "id" : "9b0b9fcf-0ddd-478d-b2e5-1721555d84be",
+    "prId" : 2257,
+    "comments" : [
+      {
+        "id" : "a713dbda-268b-4083-8570-5a9bdfaacbc5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Very nice.",
+        "createdAt" : "2019-07-23T09:39:31Z",
+        "updatedAt" : "2019-07-23T12:16:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0a507defa99383adda7779ab3da3c31a1db28779",
+    "line" : 43,
+    "diffHunk" : "@@ -248,6 +249,38 @@ requestTests run _runScenarios = testGroup \"requests\"\n                     }\n               ]\n \n+          closeDoc main'\n+    , testCase \"stale code-lenses\" $ run $ do\n+          main' <- openDoc' \"Main.daml\" damlId $ T.unlines\n+              [ \"daml 1.2\"\n+              , \"module Main where\"\n+              , \"single = scenario do\"\n+              , \"  assert (True == True)\"\n+              ]\n+          lenses <- getCodeLenses main'\n+          Just escapedFp <- pure $ escapeURIString isUnescapedInURIComponent <$> uriToFilePath (main' ^. uri)\n+          let codeLens range =\n+                  CodeLens\n+                    { _range = range\n+                    , _command = Just $ Command\n+                          { _title = \"Scenario results\"\n+                          , _command = \"daml.showResource\"\n+                          , _arguments = Just $ List\n+                              [ \"Scenario: single\"\n+                              ,  toJSON $ \"daml://compiler?file=\" <> escapedFp <> \"&top-level-decl=single\"\n+                              ]\n+                          }\n+                    , _xdata = Nothing\n+                    }\n+          liftIO $ lenses @?= [codeLens (Range (Position 2 0) (Position 2 6))]\n+          changeDoc main' [TextDocumentContentChangeEvent (Just (Range (Position 3 23) (Position 3 23))) Nothing \"+\"]\n+          expectDiagnostics [(\"Main.daml\", [(DsError, (4, 0), \"Parse error\")])]\n+          lenses <- getCodeLenses main'\n+          liftIO $ lenses @?= [codeLens (Range (Position 2 0) (Position 2 6))]\n+          -- Shift code lenses down\n+          changeDoc main' [TextDocumentContentChangeEvent (Just (Range (Position 1 0) (Position 1 0))) Nothing \"\\n\\n\"]\n+          lenses <- getCodeLenses main'\n+          liftIO $ lenses @?= [codeLens (Range (Position 4 0) (Position 4 6))]"
+  },
+  {
+    "id" : "42c722ef-981c-4028-b3a4-be69b5e1d720",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "8e8b4894-40fb-4a47-9aa3-9a4dc25ac92c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`getHlintDataDir` depends on the executable you run it from so this test isn’t testing what you think it is. It tests if the test suite executable finds the files not if damlc finds the files.",
+        "createdAt" : "2019-07-12T08:33:17Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f09b12bb-5c67-468d-9792-d4814f0a0824",
+        "parentId" : "8e8b4894-40fb-4a47-9aa3-9a4dc25ac92c",
+        "author" : null,
+        "body" : "This is debugging code that I used to assure myself that the configuration file exists where it's expected to be. I put it there because reading the config file is failing in the stress test and wanted to assure myself that it wasn't for lack of its existence. I'm very confused why these tests are failing",
+        "createdAt" : "2019-07-12T09:46:57Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e7fa82fa-4041-4d5e-b7ab-24aeb5d09646",
+        "parentId" : "8e8b4894-40fb-4a47-9aa3-9a4dc25ac92c",
+        "author" : null,
+        "body" : "Any way, time to take this debugging code out.",
+        "createdAt" : "2019-07-12T09:55:54Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -401,6 +404,19 @@ stressTests run _runScenarios = testGroup \"Stress tests\"\n                 ]\n             expect :: Int -> Session ()\n             expect i = when (odd i) $ do\n+                -- Despite these checks succeeding, the rest of the\n+                -- block can fail for failing to read 'hlint.yaml'.\n+                -- It's read at the end of the day by\n+                -- Data.Yaml.decodeFileEither. Is there some sort of\n+                -- contention going on?\n+                hlintDataDir <- liftIO getHlintDataDir"
+  },
+  {
+    "id" : "bd9f0554-43ba-43a1-b0b6-8001b9965290",
+    "prId" : 2004,
+    "comments" : [
+      {
+        "id" : "9d4760f8-6d76-4db1-b085-34ad79dd79c5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why do we split this into two loops with the same body?",
+        "createdAt" : "2019-07-04T11:23:19Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9d9b9cb1-d864-4e08-a11a-373848a80608",
+        "parentId" : "9d4760f8-6d76-4db1-b085-34ad79dd79c5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oops, that made sense before now it doesn’t, changed",
+        "createdAt" : "2019-07-04T11:30:52Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "54d6d583f4fec01a2e40f80c1bec3d0962e66f68",
+    "line" : 69,
+    "diffHunk" : "@@ -387,25 +390,43 @@ stressTests\n stressTests run _runScenarios = testGroup \"Stress tests\"\n   [ testCase \"Modify a file 2000 times\" $ run $ do\n         let fooValue :: Int -> T.Text\n+            -- Even values should produce empty diagnostics\n+            -- while odd values will produce a type error.\n             fooValue i = T.pack (show (i `div` 2))\n-                      <> if i `mod` 2 == 0 then \"\" else \".5\"\n+                      <> if even i then \"\" else \".5\"\n             fooContent i = T.unlines\n                 [ \"daml 1.2\"\n                 , \"module Foo where\"\n                 , \"foo : Int\"\n                 , \"foo = \" <> fooValue i\n                 ]\n+            expect i = when (odd i) $ do\n+                -- We do not wait for empty diagnostics on even i since debouncing\n+                -- causes them to only be emitted after a delay which slows down\n+                -- the tests.\n+                -- Depending on debouncing we might first get a message with an empty\n+                -- set of diagnostics or we might get the error diagnostics directly\n+                -- if debouncing supresses the empty set of diagnostics.\n+                diags <-\n+                    skipManyTill\n+                        anyMessage\n+                        (do m <- LSP.message :: Session PublishDiagnosticsNotification;\n+                            let diags = toList $ m ^. params . diagnostics\n+                            guard (notNull diags)\n+                            pure diags)\n+                liftIO $ unless (length diags == 1) $\n+                    assertFailure $ \"Incorrect number of diagnostics, expected 1 but got \" <> show diags\n+                let msg = head diags ^. message\n+                liftIO $ assertBool (\"Expected type error but got \" <> T.unpack msg) $\n+                    \"Couldn't match expected type\" `T.isInfixOf` msg\n         foo <- openDoc' \"Foo.daml\" damlId $ fooContent 0\n-        forM_ [1 .. 999] $ \\i ->\n+        forM_ [1 .. 999] $ \\i -> do\n             replaceDoc foo $ fooContent i\n-        -- We delay to account for debouncing\n-        liftIO $ threadDelay (10 ^ (6 :: Int))\n-        expectDiagnostics [(\"Foo.daml\", [(DsError, (3, 6), \"Couldn't match expected type\")])]\n-        forM_ [1000 .. 2000] $ \\i ->\n+            expect i\n+        forM_ [1000 .. 2000] $ \\i -> do\n             replaceDoc foo $ fooContent i\n-        liftIO $ threadDelay (10 ^ (6 :: Int))\n+            expect i"
+  },
+  {
+    "id" : "3cd0f71e-677a-4f57-b7b7-069f30f9e2c0",
+    "prId" : 2004,
+    "comments" : [
+      {
+        "id" : "91fef0db-d6b1-4638-b060-b1f17fcf2869",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "You don't like `$` anymore? :)",
+        "createdAt" : "2019-07-04T11:23:43Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2221efcd-3986-41d1-a42e-2bf840841022",
+        "parentId" : "91fef0db-d6b1-4638-b060-b1f17fcf2869",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":dollar: ",
+        "createdAt" : "2019-07-04T11:49:17Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "54d6d583f4fec01a2e40f80c1bec3d0962e66f68",
+    "line" : null,
+    "diffHunk" : "@@ -387,25 +390,43 @@ stressTests\n stressTests run _runScenarios = testGroup \"Stress tests\"\n   [ testCase \"Modify a file 2000 times\" $ run $ do\n         let fooValue :: Int -> T.Text\n+            -- Even values should produce empty diagnostics\n+            -- while odd values will produce a type error.\n             fooValue i = T.pack (show (i `div` 2))\n-                      <> if i `mod` 2 == 0 then \"\" else \".5\"\n+                      <> if even i then \"\" else \".5\"\n             fooContent i = T.unlines\n                 [ \"daml 1.2\"\n                 , \"module Foo where\"\n                 , \"foo : Int\"\n                 , \"foo = \" <> fooValue i\n                 ]\n+            expect i = when (odd i) $ do\n+                -- We do not wait for empty diagnostics on even i since debouncing\n+                -- causes them to only be emitted after a delay which slows down\n+                -- the tests.\n+                -- Depending on debouncing we might first get a message with an empty\n+                -- set of diagnostics or we might get the error diagnostics directly\n+                -- if debouncing supresses the empty set of diagnostics.\n+                diags <-\n+                    skipManyTill\n+                        anyMessage\n+                        (do m <- LSP.message :: Session PublishDiagnosticsNotification;"
+  },
+  {
+    "id" : "c20dadd5-bfaf-418b-bc98-e3143e38e317",
+    "prId" : 2004,
+    "comments" : [
+      {
+        "id" : "3667d77c-992f-4874-b39f-caa5f10f0179",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Could we please give this a type signature as a reminder what monad we're in.",
+        "createdAt" : "2019-07-04T11:25:44Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cc69f0a0-14f8-4a59-986d-2d3450f2eb72",
+        "parentId" : "3667d77c-992f-4874-b39f-caa5f10f0179",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Done!",
+        "createdAt" : "2019-07-04T11:49:22Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "54d6d583f4fec01a2e40f80c1bec3d0962e66f68",
+    "line" : 41,
+    "diffHunk" : "@@ -387,25 +390,43 @@ stressTests\n stressTests run _runScenarios = testGroup \"Stress tests\"\n   [ testCase \"Modify a file 2000 times\" $ run $ do\n         let fooValue :: Int -> T.Text\n+            -- Even values should produce empty diagnostics\n+            -- while odd values will produce a type error.\n             fooValue i = T.pack (show (i `div` 2))\n-                      <> if i `mod` 2 == 0 then \"\" else \".5\"\n+                      <> if even i then \"\" else \".5\"\n             fooContent i = T.unlines\n                 [ \"daml 1.2\"\n                 , \"module Foo where\"\n                 , \"foo : Int\"\n                 , \"foo = \" <> fooValue i\n                 ]\n+            expect i = when (odd i) $ do"
+  },
+  {
+    "id" : "e92b4a88-7afe-4901-b5e0-8c0de6a18044",
+    "prId" : 1799,
+    "comments" : [
+      {
+        "id" : "a30c7349-535e-4dec-9aa5-f40424e0f47d",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "@cocreature This had a 180 s timeout before, now it takes less than three seconds. That makes me suspicious.",
+        "createdAt" : "2019-06-21T13:15:58Z",
+        "updatedAt" : "2019-06-21T13:42:33Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8dab9486-8914-494b-8833-c7fef2d4a678",
+        "parentId" : "a30c7349-535e-4dec-9aa5-f40424e0f47d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The code looks reasonable to me and I don’t see any reason why typechecking 100 trivial modules should take longer than 3 seconds so I suspect that we might just have fixed whatever was causing issues here.",
+        "createdAt" : "2019-06-21T13:30:16Z",
+        "updatedAt" : "2019-06-21T13:42:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "77a8455c0ec36c5f5ba815fbdbb20ae8784a4151",
+    "line" : 78,
+    "diffHunk" : "@@ -374,3 +376,80 @@ scenarioTests run = testGroup \"scenarios\"\n           closeDoc scenario\n           closeDoc main'\n     ]\n+\n+\n+-- | Do extreme things to the compiler service.\n+stressTests\n+  :: (forall a. Session a -> IO a)\n+  -> (Session () -> IO ())\n+  -> TestTree\n+stressTests run _runScenarios = testGroup \"Stress tests\"\n+  [ testCase \"Modify a file 2000 times\" $ run $ do\n+        let fooValue :: Int -> T.Text\n+            fooValue i = T.pack (show (i `div` 2))\n+                      <> if i `mod` 2 == 0 then \"\" else \".5\"\n+            fooContent i = T.unlines\n+                [ \"daml 1.2\"\n+                , \"module Foo where\"\n+                , \"foo : Int\"\n+                , \"foo = \" <> fooValue i\n+                ]\n+        foo <- openDoc' \"Foo.daml\" damlId $ fooContent 0\n+        forM_ [1 .. 999] $ \\i ->\n+            replaceDoc foo $ fooContent i\n+        expectDiagnostics [(\"Foo.daml\", [(DsError, (3, 6), \"Couldn't match expected type\")])]\n+        forM_ [1000 .. 2000] $ \\i ->\n+            replaceDoc foo $ fooContent i\n+        expectDiagnostics [(\"Foo.daml\", [])]\n+        closeDoc foo\n+  , testCase \"Set 10 files of interest\" $ run $ do\n+        foos <- forM [1 .. 10 :: Int] $ \\i ->\n+            makeModule (\"Foo\" ++ show i) [\"foo  10\"]\n+        expectDiagnostics\n+            [ (\"Foo\" ++ show i ++ \".daml\", [(DsError, (2, 0), \"Parse error\")])\n+            | i <- [1 .. 10 :: Int]\n+            ]\n+        forM_ (zip [1 .. 10 :: Int] foos) $ \\(i, foo) ->\n+            replaceDoc foo $ moduleContent (\"Foo\" ++ show i) [\"foo = 10\"]\n+        withTimeout 30 $\n+            expectDiagnostics [(\"Foo\" ++ show i ++ \".daml\", []) | i <- [1 .. 10 :: Int]]\n+        mapM_ closeDoc foos\n+  , testCase \"Type check 100-deep module chain\" $ run $ do\n+        -- The idea for this test is we have 101 modules named Foo0 through Foo100.\n+        -- Foo0 imports Foo1, which imports Foo2, which imports Foo3, and so on to Foo100.\n+        -- Each FooN has a definition fooN that depends on fooN+1, except Foo100.\n+        -- But the type of foo0 doesn't match the type of foo100. So we expect a type error.\n+        -- Then we modify the type of foo0 to clear the type error.\n+        foo0 <- makeModule \"Foo0\"\n+            [ \"import Foo1\"\n+            , \"foo0 : Int\"\n+            , \"foo0 = foo1\"\n+            ]\n+        foos <- forM [1 .. 99 :: Int] $ \\i ->\n+            makeModule (\"Foo\" ++ show i)\n+                [ \"import Foo\" <> T.show (i+1)\n+                , \"foo\" <> T.show i <> \" = foo\" <> T.show (i+1)\n+                ]\n+        foo100 <- makeModule \"Foo100\"\n+            [ \"foo100 : Bool\"\n+            , \"foo100 = False\"\n+            ]\n+        withTimeout 30 $ do"
+  },
+  {
+    "id" : "a85a2ec1-9c6e-46ce-b701-fcfa968c92f5",
+    "prId" : 1799,
+    "comments" : [
+      {
+        "id" : "4becaa44-0096-4c2e-988c-1ed5f467460c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’d prefer to reduce our dependency on `da-hs-base rather than extend it. Do you actually need this here? I couldn’t spot anything that isn’t already in `Data.Text`.",
+        "createdAt" : "2019-06-21T13:24:26Z",
+        "updatedAt" : "2019-06-21T13:42:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4ea349af-5412-4da6-9147-b957620ad8d9",
+        "parentId" : "4becaa44-0096-4c2e-988c-1ed5f467460c",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "It's for `T.show`. Sure, it's easy to replace.",
+        "createdAt" : "2019-06-21T13:31:14Z",
+        "updatedAt" : "2019-06-21T13:42:33Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "963ae85e-d6c7-4df8-ae0d-7f2f96ec25de",
+        "parentId" : "4becaa44-0096-4c2e-988c-1ed5f467460c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah missed that one, yes I would just go for `T.pack . show` here.",
+        "createdAt" : "2019-06-21T13:31:55Z",
+        "updatedAt" : "2019-06-21T13:42:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "77a8455c0ec36c5f5ba815fbdbb20ae8784a4151",
+    "line" : null,
+    "diffHunk" : "@@ -6,10 +6,11 @@\n module Main (main) where\n \n import Control.Lens hiding (List)\n+import Control.Monad (forM, forM_, void)\n import Control.Monad.IO.Class\n import DA.Bazel.Runfiles\n import Data.Aeson (toJSON)\n-import qualified Data.Text as T\n+import qualified Data.Text.Extended as T"
+  },
+  {
+    "id" : "5569478c-8274-4284-a73a-3ba22397d27c",
+    "prId" : 1516,
+    "comments" : [
+      {
+        "id" : "1d72d6b6-d52b-4603-82ab-d1b895562410",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Why not just `daml-foundations/daml-tools/da-hs-damlc-app/...` - using `</>` doesn't really help but is more verbose.",
+        "createdAt" : "2019-06-04T18:48:42Z",
+        "updatedAt" : "2019-06-04T18:51:17Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "520ee836-ea60-4312-ae8d-7a25bf98db57",
+        "parentId" : "1d72d6b6-d52b-4603-82ab-d1b895562410",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "At this point I’m slightly traumatized from issues caused by mixing `/` and `\\` on Windows so I try to avoid it where I can :slightly_smiling_face:",
+        "createdAt" : "2019-06-04T18:56:28Z",
+        "updatedAt" : "2019-06-04T18:56:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "01c6223d9eda18a3bb535e620ebea04d9988ba9b",
+    "line" : 22,
+    "diffHunk" : "@@ -0,0 +1,72 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE OverloadedStrings #-}\n+{-# LANGUAGE RankNTypes #-}\n+module Main (main) where\n+\n+import DA.Bazel.Runfiles\n+import qualified Data.Text as T\n+import Language.Haskell.LSP.Test\n+import Language.Haskell.LSP.Types\n+import System.FilePath\n+import System.IO.Extra\n+import Test.Tasty\n+import Test.Tasty.HUnit\n+\n+import Daml.Lsp.Test.Util\n+\n+main :: IO ()\n+main = do\n+    damlcPath <- locateRunfiles $\n+        mainWorkspace </> \"daml-foundations\" </> \"daml-tools\" </>"
+  }
+]

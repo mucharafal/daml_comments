@@ -1,0 +1,293 @@
+[
+  {
+    "id" : "590e7b0c-b840-492d-b6d0-e277eb4e96d1",
+    "prId" : 6111,
+    "comments" : [
+      {
+        "id" : "0eb9d55e-4fe8-49aa-b0e2-8ca32999c4d3",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Win!",
+        "createdAt" : "2020-05-27T09:29:24Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9b0d1405-4510-4a37-b1d9-514493603a34",
+        "parentId" : "0eb9d55e-4fe8-49aa-b0e2-8ca32999c4d3",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : ": )",
+        "createdAt" : "2020-05-27T10:12:36Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4eaa7219a57e7cae32f14958b2c32423ade3c9d3",
+    "line" : 62,
+    "diffHunk" : "@@ -12,50 +11,40 @@ import akka.stream.scaladsl.Source\n import com.daml.api.util.TimeProvider\n import com.daml.caching.Cache\n import com.daml.ledger.api.health.{HealthStatus, Healthy}\n-import com.daml.ledger.on.memory.InMemoryLedgerReaderWriter.{DefaultTimeProvider, Index, dispatcher}\n-import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlStateValue\n-import com.daml.ledger.participant.state.kvutils.api.{LedgerReader, LedgerRecord, LedgerWriter}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.api._\n import com.daml.ledger.participant.state.kvutils.{Bytes, KeyValueCommitting}\n import com.daml.ledger.participant.state.v1.{LedgerId, Offset, ParticipantId, SubmissionResult}\n import com.daml.ledger.validator._\n import com.daml.ledger.validator.batch.{\n   BatchedSubmissionValidator,\n   BatchedSubmissionValidatorFactory,\n-  BatchedSubmissionValidatorParameters,\n   ConflictDetection\n }\n import com.daml.lf.data.Ref\n import com.daml.lf.engine.Engine\n+import com.daml.logging.LoggingContext.newLoggingContext\n import com.daml.metrics.Metrics\n import com.daml.platform.akkastreams.dispatcher.Dispatcher\n import com.daml.resources.{Resource, ResourceOwner}\n \n import scala.concurrent.{ExecutionContext, Future}\n-import scala.util.{Failure, Success}\n+import scala.util.Success\n \n final class InMemoryBatchedLedgerReaderWriter(\n     override val participantId: ParticipantId,\n     override val ledgerId: LedgerId,\n-    now: () => Instant,\n     dispatcher: Dispatcher[Index],\n     state: InMemoryState,\n-    validator: BatchedSubmissionValidator[Index],\n+    committer: BatchedValidatingCommitter[Index],\n     metrics: Metrics)(implicit materializer: Materializer, executionContext: ExecutionContext)\n     extends LedgerReader\n     with LedgerWriter {\n   override def commit(correlationId: String, envelope: Bytes): Future[SubmissionResult] =\n     ledgerStateAccess\n       .inTransaction { ledgerStateOperations =>\n-        val (reader, commitStrategy) = BatchedSubmissionValidatorFactory\n-          .readerAndCommitStrategyFrom(ledgerStateOperations, keySerializationStrategy)\n-        validator\n-          .validateAndCommit(envelope, correlationId, now(), participantId, reader, commitStrategy)\n-          .transformWith {\n-            case Success(_) =>\n-              Future.successful(SubmissionResult.Acknowledged)\n-            case Failure(exception) =>\n-              Future.successful(SubmissionResult.InternalError(exception.getLocalizedMessage))\n-          }\n+        committer\n+          .commit(correlationId, envelope, participantId, ledgerStateOperations)"
+  },
+  {
+    "id" : "6e11e44c-4384-423e-9f03-48d9fc82b0d0",
+    "prId" : 6111,
+    "comments" : [
+      {
+        "id" : "e0be2764-7aee-4e7e-a5d2-708071466937",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'm confused. We already use the `BatchedValidatingCommitter` here. Does this not do batching unless we also use `BatchedSubmissionValidatorFactory`?",
+        "createdAt" : "2020-05-27T09:34:28Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d8e087c0-1ed7-48ec-965c-9614889a9e22",
+        "parentId" : "e0be2764-7aee-4e7e-a5d2-708071466937",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "You need both in order to have the performance benefits. I.e., batched submission validation requires two parts: 1) creating batched submissions at the ledger API server side and 2) validating individual submissions within a batched submission in parallel in the validator/committer. 1) is ensured by `BatchingLedgerWriter` and 2) is enabled by `BatchedValidatingCommitter`. `ledger-on-memory` is a ledger which has the submitter and the committer in-process, hence, the above separation may be confusing (but is required for supporting production ready ledgers).",
+        "createdAt" : "2020-05-27T10:21:03Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "54d328d7-5758-4344-be14-60c7ecda2322",
+        "parentId" : "e0be2764-7aee-4e7e-a5d2-708071466937",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Sounds good. Could you add a comment along these lines please?",
+        "createdAt" : "2020-05-27T10:27:35Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1131defe-26b9-46fe-9055-677a41f12753",
+        "parentId" : "e0be2764-7aee-4e7e-a5d2-708071466937",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added.",
+        "createdAt" : "2020-05-27T15:57:57Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4eaa7219a57e7cae32f14958b2c32423ade3c9d3",
+    "line" : null,
+    "diffHunk" : "@@ -126,24 +118,56 @@ object InMemoryBatchedLedgerReaderWriter {\n           metrics,\n           inStaticTimeMode = needStaticTimeModeFor(timeProvider))\n       val validator = BatchedSubmissionValidator[Index](\n-        BatchedSubmissionValidatorParameters.default,\n+        BatchedSubmissionValidatorFactory.defaultParametersFor(\n+          batchingLedgerWriterConfig.enableBatching),\n         keyValueCommitting,\n         new ConflictDetection(metrics),\n         metrics,\n-        engine)\n-      Resource.successful(\n+        engine\n+      )\n+      val committer =\n+        BatchedValidatingCommitter[Index](\n+          () => timeProvider.getCurrentTime,\n+          validator,\n+          stateValueCache)\n+      val readerWriter =\n         new InMemoryBatchedLedgerReaderWriter(\n           participantId,\n           ledgerId,\n-          () => timeProvider.getCurrentTime,\n           dispatcher,\n           state,\n-          validator,\n+          committer,\n           metrics\n-        ))\n+        )\n+      if (batchingLedgerWriterConfig.enableBatching) {"
+  },
+  {
+    "id" : "f78effed-37f5-4ce9-97bf-c712d75e173e",
+    "prId" : 6111,
+    "comments" : [
+      {
+        "id" : "d3c7534e-2324-4b51-877b-ac322609c3d0",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Am I right to assume that the InMemoryBatchedLedgerReaderWriter is in fact a generic Reader/Writer because it still needs to be wrapped in BatchedSubmissionValidator here:\r\n```\r\nBatchedSubmissionValidatorFactory.batchingLedgerWriterFrom(\r\n            batchingLedgerWriterConfig,\r\n            readerWriter)\r\n```\r\nIn that case, would it not be better to drop `Batched` from its name?",
+        "createdAt" : "2020-05-27T09:59:57Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f93113a1-53f9-477f-9f5a-41d2dd12c75a",
+        "parentId" : "d3c7534e-2324-4b51-877b-ac322609c3d0",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Yes, as I wrote in the description I'll do that in a separate PR (this one only deletes the old classes).",
+        "createdAt" : "2020-05-27T10:23:03Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4eaa7219a57e7cae32f14958b2c32423ade3c9d3",
+    "line" : 146,
+    "diffHunk" : "@@ -126,24 +118,56 @@ object InMemoryBatchedLedgerReaderWriter {\n           metrics,\n           inStaticTimeMode = needStaticTimeModeFor(timeProvider))\n       val validator = BatchedSubmissionValidator[Index](\n-        BatchedSubmissionValidatorParameters.default,\n+        BatchedSubmissionValidatorFactory.defaultParametersFor(\n+          batchingLedgerWriterConfig.enableBatching),\n         keyValueCommitting,\n         new ConflictDetection(metrics),\n         metrics,\n-        engine)\n-      Resource.successful(\n+        engine\n+      )\n+      val committer =\n+        BatchedValidatingCommitter[Index](\n+          () => timeProvider.getCurrentTime,\n+          validator,\n+          stateValueCache)\n+      val readerWriter ="
+  },
+  {
+    "id" : "12ec1ce3-edbc-4550-a6aa-208cad6e760b",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "2ea0fe8d-0a28-4cc0-a109-f68966278e54",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This doesn't pass on the correct `isStaticTimeMode` parameter for `KeyValueCommitting`.\r\n```suggestion\r\n      val keyValueCommitting = new KeyValueCommitting(engine, metrics, timeProvider != TimeProvider.UTC)\r\n```",
+        "createdAt" : "2020-05-20T15:21:22Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "806c4883-7bde-43dd-ac43-0210068c5837",
+        "parentId" : "2ea0fe8d-0a28-4cc0-a109-f68966278e54",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Good point -- yes, if we need batched submission validation for sandbox-next then this flag needs to be added.",
+        "createdAt" : "2020-05-25T09:15:05Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,142 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.on.memory\n+\n+import java.time.Instant\n+import java.util.UUID\n+\n+import akka.NotUsed\n+import akka.stream.Materializer\n+import akka.stream.scaladsl.Source\n+import com.daml.api.util.TimeProvider\n+import com.daml.caching.Cache\n+import com.daml.ledger.api.health.{HealthStatus, Healthy}\n+import com.daml.ledger.on.memory.InMemoryLedgerReaderWriter.{DefaultTimeProvider, Index, dispatcher}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlStateValue\n+import com.daml.ledger.participant.state.kvutils.api.{LedgerReader, LedgerRecord, LedgerWriter}\n+import com.daml.ledger.participant.state.kvutils.{Bytes, KeyValueCommitting}\n+import com.daml.ledger.participant.state.v1.{LedgerId, Offset, ParticipantId, SubmissionResult}\n+import com.daml.ledger.validator._\n+import com.daml.ledger.validator.batch.{\n+  BatchedSubmissionValidator,\n+  BatchedSubmissionValidatorFactory,\n+  BatchedSubmissionValidatorParameters,\n+  ConflictDetection\n+}\n+import com.daml.lf.data.Ref\n+import com.daml.lf.engine.Engine\n+import com.daml.metrics.Metrics\n+import com.daml.platform.akkastreams.dispatcher.Dispatcher\n+import com.daml.resources.{Resource, ResourceOwner}\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.{Failure, Success}\n+\n+final class InMemoryBatchedLedgerReaderWriter(\n+    override val participantId: ParticipantId,\n+    override val ledgerId: LedgerId,\n+    now: () => Instant,\n+    dispatcher: Dispatcher[Index],\n+    state: InMemoryState,\n+    validator: BatchedSubmissionValidator[Index],\n+    metrics: Metrics)(implicit materializer: Materializer, executionContext: ExecutionContext)\n+    extends LedgerReader\n+    with LedgerWriter {\n+  override def commit(correlationId: String, envelope: Bytes): Future[SubmissionResult] =\n+    ledgerStateAccess\n+      .inTransaction { ledgerStateOperations =>\n+        val (reader, commitStrategy) = BatchedSubmissionValidatorFactory\n+          .readerAndCommitStrategyFrom(ledgerStateOperations, keySerializationStrategy)\n+        validator\n+          .validateAndCommit(envelope, correlationId, now(), participantId, reader, commitStrategy)\n+          .transformWith {\n+            case Success(_) =>\n+              Future.successful(SubmissionResult.Acknowledged)\n+            case Failure(exception) =>\n+              Future.successful(SubmissionResult.InternalError(exception.getLocalizedMessage))\n+          }\n+      }\n+      .andThen {\n+        case Success(SubmissionResult.Acknowledged) =>\n+          dispatcher.signalNewHead(state.newHeadSinceLastWrite())\n+      }\n+\n+  override def events(startExclusive: Option[Offset]): Source[LedgerRecord, NotUsed] =\n+    reader.events(startExclusive)\n+\n+  override def currentHealth(): HealthStatus = Healthy\n+\n+  private val reader = new InMemoryLedgerReader(ledgerId, dispatcher, state, metrics)\n+\n+  private val keySerializationStrategy = DefaultStateKeySerializationStrategy\n+\n+  private val ledgerStateAccess = new InMemoryLedgerStateAccess(state, metrics)\n+}\n+\n+object InMemoryBatchedLedgerReaderWriter {\n+  final class SingleParticipantOwner(\n+      initialLedgerId: Option[LedgerId],\n+      participantId: ParticipantId,\n+      timeProvider: TimeProvider = DefaultTimeProvider,\n+      stateValueCache: Cache[Bytes, DamlStateValue] = Cache.none,\n+      metrics: Metrics,\n+      engine: Engine,\n+  )(implicit materializer: Materializer)\n+      extends ResourceOwner[InMemoryBatchedLedgerReaderWriter] {\n+    override def acquire()(\n+        implicit executionContext: ExecutionContext\n+    ): Resource[InMemoryBatchedLedgerReaderWriter] = {\n+      val state = InMemoryState.empty\n+      for {\n+        dispatcher <- dispatcher.acquire()\n+        readerWriter <- new Owner(\n+          initialLedgerId,\n+          participantId,\n+          metrics,\n+          timeProvider,\n+          stateValueCache,\n+          dispatcher,\n+          state,\n+          engine\n+        ).acquire()\n+      } yield readerWriter\n+    }\n+  }\n+\n+  final class Owner(\n+      initialLedgerId: Option[LedgerId],\n+      participantId: ParticipantId,\n+      metrics: Metrics,\n+      timeProvider: TimeProvider = DefaultTimeProvider,\n+      stateValueCache: Cache[Bytes, DamlStateValue] = Cache.none,\n+      dispatcher: Dispatcher[Index],\n+      state: InMemoryState,\n+      engine: Engine,\n+  )(implicit materializer: Materializer)\n+      extends ResourceOwner[InMemoryBatchedLedgerReaderWriter] {\n+    override def acquire()(\n+        implicit executionContext: ExecutionContext\n+    ): Resource[InMemoryBatchedLedgerReaderWriter] = {\n+      val ledgerId =\n+        initialLedgerId.getOrElse(Ref.LedgerString.assertFromString(UUID.randomUUID.toString))\n+      val keyValueCommitting = new KeyValueCommitting(engine, metrics)"
+  },
+  {
+    "id" : "89879c67-9df1-4901-a36b-b2854865db78",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "f3f3b86c-193f-41e2-8faf-05bfb7845cfc",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "`now()` will be called immediately but the actual validation will be scheduled at some later point in time. Shouldn't `validateAndCommit` call `now()` instead?",
+        "createdAt" : "2020-05-20T15:36:51Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c739c904-3bd9-49c4-9437-005a0f927244",
+        "parentId" : "f3f3b86c-193f-41e2-8faf-05bfb7845cfc",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "We have to use the pre-determined record time during validation (take a look at `SubmissionValidator`'s signatures). There may be a minimal difference vs. calling `now()` in the validator itself, however, the skews allowed on the ledger should be able to cushion that.",
+        "createdAt" : "2020-05-25T09:42:25Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : 52,
+    "diffHunk" : "@@ -0,0 +1,142 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.on.memory\n+\n+import java.time.Instant\n+import java.util.UUID\n+\n+import akka.NotUsed\n+import akka.stream.Materializer\n+import akka.stream.scaladsl.Source\n+import com.daml.api.util.TimeProvider\n+import com.daml.caching.Cache\n+import com.daml.ledger.api.health.{HealthStatus, Healthy}\n+import com.daml.ledger.on.memory.InMemoryLedgerReaderWriter.{DefaultTimeProvider, Index, dispatcher}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlStateValue\n+import com.daml.ledger.participant.state.kvutils.api.{LedgerReader, LedgerRecord, LedgerWriter}\n+import com.daml.ledger.participant.state.kvutils.{Bytes, KeyValueCommitting}\n+import com.daml.ledger.participant.state.v1.{LedgerId, Offset, ParticipantId, SubmissionResult}\n+import com.daml.ledger.validator._\n+import com.daml.ledger.validator.batch.{\n+  BatchedSubmissionValidator,\n+  BatchedSubmissionValidatorFactory,\n+  BatchedSubmissionValidatorParameters,\n+  ConflictDetection\n+}\n+import com.daml.lf.data.Ref\n+import com.daml.lf.engine.Engine\n+import com.daml.metrics.Metrics\n+import com.daml.platform.akkastreams.dispatcher.Dispatcher\n+import com.daml.resources.{Resource, ResourceOwner}\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.{Failure, Success}\n+\n+final class InMemoryBatchedLedgerReaderWriter(\n+    override val participantId: ParticipantId,\n+    override val ledgerId: LedgerId,\n+    now: () => Instant,\n+    dispatcher: Dispatcher[Index],\n+    state: InMemoryState,\n+    validator: BatchedSubmissionValidator[Index],\n+    metrics: Metrics)(implicit materializer: Materializer, executionContext: ExecutionContext)\n+    extends LedgerReader\n+    with LedgerWriter {\n+  override def commit(correlationId: String, envelope: Bytes): Future[SubmissionResult] =\n+    ledgerStateAccess\n+      .inTransaction { ledgerStateOperations =>\n+        val (reader, commitStrategy) = BatchedSubmissionValidatorFactory\n+          .readerAndCommitStrategyFrom(ledgerStateOperations, keySerializationStrategy)\n+        validator\n+          .validateAndCommit(envelope, correlationId, now(), participantId, reader, commitStrategy)"
+  }
+]

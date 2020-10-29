@@ -1,0 +1,86 @@
+[
+  {
+    "id" : "b99bb859-029e-484e-901f-1f78698e86af",
+    "prId" : 6821,
+    "comments" : [
+      {
+        "id" : "dfe85497-53c2-4aa8-b4de-50c8b29e07df",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ll bump this again once the PR to our GHC fork is merged but I wanted to see if CI passes.",
+        "createdAt" : "2020-07-22T08:45:46Z",
+        "updatedAt" : "2020-07-22T09:20:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d030ac0de3a0c584a862d6ca1955808616971c09",
+    "line" : null,
+    "diffHunk" : "@@ -12,7 +12,7 @@ jobs:\n   variables:\n     ghc-lib-sha: '77fcc42eef2256ba9bb61a7e442a65bedb19a35d'\n     base-sha: '9c787d4d24f2b515934c8503ee2bbd7cfac4da20'\n-    patches: 'f844cb345412f6a9fd5708d8b697fd0800dd0909 833ca63be2ab14871874ccb6974921e8952802e9'\n+    patches: '80f2ae67ec69d79c116b1e239228635dc460e783 833ca63be2ab14871874ccb6974921e8952802e9'"
+  },
+  {
+    "id" : "9d0eebf3-76fc-4b03-a68d-20e2df65da84",
+    "prId" : 6188,
+    "comments" : [
+      {
+        "id" : "99752d66-5339-4311-92f8-64f87c8bb97e",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Might be worth extracting the calls to `curl | head | awk`. If either of those fails due to a network connectivity issue (as opposed to printing \"404\"), I think we'd probably want to abort.",
+        "createdAt" : "2020-06-03T07:39:23Z",
+        "updatedAt" : "2020-06-03T19:03:27Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3121e21b-3a17-483e-9e00-a772069587d0",
+        "parentId" : "99752d66-5339-4311-92f8-64f87c8bb97e",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Done, I think. Is this what you had in mind? Cursory testing in a shell does seem to indicate this would fail as expected, whereas the previous version wouldn't, as you suggested.\r\n\r\nI've also added a `-n` to the `gsutil cp` commands so that even if we do end up running this when not needed, we would not overwrite the files.",
+        "createdAt" : "2020-06-03T18:05:07Z",
+        "updatedAt" : "2020-06-03T19:03:27Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f7fc8965205996dd62bc15e093c9e90ee4611d62",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,72 @@\n+# Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+parameters:\n+- name: final_job_name\n+\n+jobs:\n+\n+- job: ${{ parameters.final_job_name }}\n+  pool:\n+    vmImage: 'Ubuntu 16.04'\n+  variables:\n+    base-sha: '9c787d4d24f2b515934c8503ee2bbd7cfac4da20'\n+    patches: '4650347db9a7e8c65831ab83b80da43b28c3deba 833ca63be2ab14871874ccb697'\n+    ghc-lib-sha: '952911541233fa8a5bd94486bc46e03688b23bdd'\n+    flavor: 'ghc-8.8.1'\n+  steps:\n+  - checkout: self\n+  - bash: |\n+      set -euo pipefail\n+\n+      CACHE_KEY=\"$(find ci/da-ghc-lib -type f -print0 | sort -z | xargs -r0 md5sum | md5sum | awk '{print $1}')\"\n+      LIB=\"da-ghc-lib/ghc-lib-$CACHE_KEY.tar.gz\"\n+      PARSER=\"da-ghc-lib/ghc-lib-parser-$CACHE_KEY.tar.gz\"\n+      URL_BASE=\"https://daml-binaries.da-ext.net\"\n+      if [ \"200\" = \"$(curl -Is \"$URL_BASE/$LIB\" | head -1 | awk '{print $2}')\" ] \\\n+        && [ \"200\" = \"$(curl -Is \"$URL_BASE/$PARSER\" | head -1 | awk '{print $2}')\" ]; then"
+  }
+]

@@ -1,0 +1,199 @@
+[
+  {
+    "id" : "2b8f7ae5-8f70-4e98-b824-b711daa905d7",
+    "prId" : 1818,
+    "comments" : [
+      {
+        "id" : "55d86030-b990-4cca-b3b4-b6786e52d186",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "why do we need this?",
+        "createdAt" : "2019-06-28T08:12:58Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "27d05204-6cc7-4242-818a-7fc42fdd1272",
+        "parentId" : "55d86030-b990-4cca-b3b4-b6786e52d186",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/blob/master/ledger-api/grpc-definitions/com/digitalasset/ledger/api/v1/admin/package_management_service.proto#L70, but thinking about it, I can replace it by `octet_length(package)`.",
+        "createdAt" : "2019-06-28T08:30:00Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bae23a0a96200d0ece436a646cceb68a50511f37",
+    "line" : 22,
+    "diffHunk" : "@@ -0,0 +1,31 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+---------------------------------------------------------------------------------------------------\n+-- V5: List of packages\n+--\n+-- This schema version adds a table for tracking DAML-LF packages.\n+-- Previously, packages were only stored in memory and needed to be specified through the CLI.\n+---------------------------------------------------------------------------------------------------\n+\n+\n+\n+CREATE TABLE packages (\n+  -- The unique identifier of the package (the hash of its content)\n+  package_id         varchar primary key   not null,\n+  -- Packages are uploaded as DAR files (i.e., in groups)\n+  -- This field can be used to find out which packages were uploaded together\n+  submission_id      varchar               not null,\n+  -- A human readable description of the package source\n+  source_description varchar,\n+  -- The size of the original uploaded package, in bytes\n+  size               bigint                not null,"
+  },
+  {
+    "id" : "d58c8572-ed96-4ee9-8b4e-de61aad216a9",
+    "prId" : 1818,
+    "comments" : [
+      {
+        "id" : "ea037e24-2865-43b5-a12f-8a7d68bf1be9",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I think we ought to make `submission_id` nullable, as the API Server will not have a submission identifier available through the state updates.",
+        "createdAt" : "2019-06-28T08:23:44Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f1bfd376-98d1-481f-8f63-7f3a530d5784",
+        "parentId" : "ea037e24-2865-43b5-a12f-8a7d68bf1be9",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "This ID is to be able to tell what packages were uploaded together, in case of two concurrent `uploadPackages` calls (those would share the same `ledger_offset`, and, if extremely unlucky, the same `known_since` value). It is a concept of the DAO, and has nothing to do with participant state or ledger API interfaces. A random UUID is generated at each call site of `LedgerDao.uploadLfPackages`.",
+        "createdAt" : "2019-06-28T09:12:42Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d9d1aa05-7afc-4130-9d51-d19fb6f04008",
+        "parentId" : "ea037e24-2865-43b5-a12f-8a7d68bf1be9",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Okay, thank you for the explanation. I think the name is slightly misleading, as it's not really a submission identifier, but rather a receipt or bundle identifier. My initial thought was that this refers to a user-provided identifier upon package upload via the ledger api.\r\nOther than maybe `local_submission_id` I don't really have a better name.",
+        "createdAt" : "2019-06-28T09:21:37Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f493b8a3-4992-4e5a-a7d6-f634c16183fa",
+        "parentId" : "ea037e24-2865-43b5-a12f-8a7d68bf1be9",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "`upload_id`?",
+        "createdAt" : "2019-06-28T09:35:31Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "027d19b3-83c1-43f8-afca-ac9d4678bc85",
+        "parentId" : "ea037e24-2865-43b5-a12f-8a7d68bf1be9",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Thank you. I'm gonna go and facepalm about myself for a while ;)",
+        "createdAt" : "2019-06-28T09:39:26Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bae23a0a96200d0ece436a646cceb68a50511f37",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,31 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+---------------------------------------------------------------------------------------------------\n+-- V5: List of packages\n+--\n+-- This schema version adds a table for tracking DAML-LF packages.\n+-- Previously, packages were only stored in memory and needed to be specified through the CLI.\n+---------------------------------------------------------------------------------------------------\n+\n+\n+\n+CREATE TABLE packages (\n+  -- The unique identifier of the package (the hash of its content)\n+  package_id         varchar primary key   not null,\n+  -- Packages are uploaded as DAR files (i.e., in groups)\n+  -- This field can be used to find out which packages were uploaded together\n+  submission_id      varchar               not null,"
+  },
+  {
+    "id" : "7e4d7827-3fd2-4fa8-b516-8882e5d51c71",
+    "prId" : 1818,
+    "comments" : [
+      {
+        "id" : "09425f43-7215-4d00-94bf-372f5fd379b0",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Please reference exactly which protobuf message (ideally with fully-qualified protobuf package and message name) is being stored.",
+        "createdAt" : "2019-06-28T08:24:42Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bae23a0a96200d0ece436a646cceb68a50511f37",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,31 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+---------------------------------------------------------------------------------------------------\n+-- V5: List of packages\n+--\n+-- This schema version adds a table for tracking DAML-LF packages.\n+-- Previously, packages were only stored in memory and needed to be specified through the CLI.\n+---------------------------------------------------------------------------------------------------\n+\n+\n+\n+CREATE TABLE packages (\n+  -- The unique identifier of the package (the hash of its content)\n+  package_id         varchar primary key   not null,\n+  -- Packages are uploaded as DAR files (i.e., in groups)\n+  -- This field can be used to find out which packages were uploaded together\n+  submission_id      varchar               not null,\n+  -- A human readable description of the package source\n+  source_description varchar,\n+  -- The size of the original uploaded package, in bytes\n+  size               bigint                not null,\n+  -- The time when the package was added\n+  known_since        timestamptz           not null,\n+  -- The ledger end at the time when the package was added\n+  ledger_offset      bigint                not null,\n+  -- The package is stored using the .proto definition in"
+  }
+]

@@ -1,0 +1,136 @@
+[
+  {
+    "id" : "5f4eb80b-d21b-454e-99b6-629dfa11a932",
+    "prId" : 7565,
+    "comments" : [
+      {
+        "id" : "67745705-5f60-4d50-87a4-33c1f8a92a06",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "good catch!",
+        "createdAt" : "2020-10-05T12:00:25Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9310bb3f2b0980068c91493742150006dbe5c473",
+    "line" : 47,
+    "diffHunk" : "@@ -60,7 +85,7 @@ object Response {\n   case class Token(\n       accessToken: String,\n       tokenType: String,\n-      expiresIn: Option[String],\n+      expiresIn: Option[Int],"
+  },
+  {
+    "id" : "d00ccb01-6133-4a4e-bc78-8cc639c8f7af",
+    "prId" : 7250,
+    "comments" : [
+      {
+        "id" : "df240625-1bc8-474b-b54b-8936a4cc773d",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "https://tools.ietf.org/html/rfc6749#section-4.1.3 says it's required if present in the request, why is it optional here?",
+        "createdAt" : "2020-08-28T13:31:29Z",
+        "updatedAt" : "2020-08-28T15:18:02Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e7a1674a-c3f0-4d20-b529-9c3550218891",
+        "parentId" : "df240625-1bc8-474b-b54b-8936a4cc773d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point, that was when I still had it optional in the request as well which turned out to be annoying.",
+        "createdAt" : "2020-08-28T14:22:15Z",
+        "updatedAt" : "2020-08-28T15:18:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a7555f7a82e1b1135b21c7598154fb22afe2cfc4",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,84 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.oauth.server\n+\n+import akka.http.scaladsl.model.Uri\n+import akka.http.scaladsl.model.Uri.Query\n+import spray.json.{\n+  DefaultJsonProtocol,\n+  JsString,\n+  JsValue,\n+  JsonFormat,\n+  RootJsonFormat,\n+  deserializationError\n+}\n+\n+object Request {\n+\n+  // https://tools.ietf.org/html/rfc6749#section-4.1.1\n+  case class Authorize(\n+      responseType: String,\n+      clientId: String,\n+      redirectUri: Uri, // optional in oauth but we require it\n+      scope: Option[String],\n+      state: Option[String]) {\n+    def toQuery: Query = {\n+      var params: Seq[(String, String)] =\n+        Seq(\n+          (\"response_type\", responseType),\n+          (\"client_id\", clientId),\n+          (\"redirect_uri\", redirectUri.toString))\n+      scope.foreach { scope =>\n+        params ++= Seq((\"scope\", scope))\n+      }\n+      state.foreach { state =>\n+        params ++= Seq((\"state\", state))\n+      }\n+      Query(params: _*)\n+    }\n+  }\n+\n+  // https://tools.ietf.org/html/rfc6749#section-4.1.3\n+  case class Token(\n+      grantType: String,\n+      code: String,\n+      redirectUri: Option[Uri],"
+  },
+  {
+    "id" : "86fd27bc-aaaa-4af8-a03e-f164e66ba4ac",
+    "prId" : 7250,
+    "comments" : [
+      {
+        "id" : "1dbaa3eb-4e8b-4b3b-a739-b2fbba69973f",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Shouldn't this reference https://tools.ietf.org/html/rfc6749#section-5.1?",
+        "createdAt" : "2020-08-28T13:38:29Z",
+        "updatedAt" : "2020-08-28T15:18:02Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cc394d28-9324-4820-bea3-1195a5c8511c",
+        "parentId" : "1dbaa3eb-4e8b-4b3b-a739-b2fbba69973f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "good catch!",
+        "createdAt" : "2020-08-28T14:22:50Z",
+        "updatedAt" : "2020-08-28T15:18:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a7555f7a82e1b1135b21c7598154fb22afe2cfc4",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,84 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.oauth.server\n+\n+import akka.http.scaladsl.model.Uri\n+import akka.http.scaladsl.model.Uri.Query\n+import spray.json.{\n+  DefaultJsonProtocol,\n+  JsString,\n+  JsValue,\n+  JsonFormat,\n+  RootJsonFormat,\n+  deserializationError\n+}\n+\n+object Request {\n+\n+  // https://tools.ietf.org/html/rfc6749#section-4.1.1\n+  case class Authorize(\n+      responseType: String,\n+      clientId: String,\n+      redirectUri: Uri, // optional in oauth but we require it\n+      scope: Option[String],\n+      state: Option[String]) {\n+    def toQuery: Query = {\n+      var params: Seq[(String, String)] =\n+        Seq(\n+          (\"response_type\", responseType),\n+          (\"client_id\", clientId),\n+          (\"redirect_uri\", redirectUri.toString))\n+      scope.foreach { scope =>\n+        params ++= Seq((\"scope\", scope))\n+      }\n+      state.foreach { state =>\n+        params ++= Seq((\"state\", state))\n+      }\n+      Query(params: _*)\n+    }\n+  }\n+\n+  // https://tools.ietf.org/html/rfc6749#section-4.1.3\n+  case class Token(\n+      grantType: String,\n+      code: String,\n+      redirectUri: Option[Uri],\n+      clientId: String,\n+      clientSecret: String)\n+\n+}\n+\n+object Response {\n+\n+  // https://tools.ietf.org/html/rfc6749#section-4.1.2\n+  case class Authorize(code: String, state: Option[String]) {\n+    def toQuery: Query = state match {\n+      case None => Query((\"code\", code))\n+      case Some(state) => Query((\"code\", code), (\"state\", state))\n+    }\n+  }\n+\n+  // https://tools.ietf.org/html/rfc6749#section-4.1.1"
+  }
+]

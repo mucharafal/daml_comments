@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "92e1a53a-3ae6-437b-bfc1-fb559a67a626",
+    "prId" : 585,
+    "comments" : [
+      {
+        "id" : "f18abc8b-04c2-4a4d-8dcf-0d3d6f549272",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      logger.warn(s\"$codegenId does not allow overriding Event Decoder, requested: ${decoderMapping: String}\")\r\n```\r\n\r\nWhich will probably not type-check, suggesting a different formatting of the message...?",
+        "createdAt" : "2019-04-18T16:20:41Z",
+        "updatedAt" : "2019-04-18T18:31:28Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "483985bf5e049615c4bf19298afa2ac0e9cf3006",
+    "line" : null,
+    "diffHunk" : "@@ -4,47 +4,54 @@\n package com.digitalasset.codegen\n \n import java.io.File\n+import java.nio.file.Path\n+\n+import ch.qos.logback.classic.Level\n+import com.digitalasset.daml.lf.codegen.conf.Conf\n+import com.typesafe.scalalogging.StrictLogging\n+import org.slf4j.{Logger, LoggerFactory}\n+\n+object Main extends StrictLogging {\n+\n+  private val codegenId = \"Scala Codegen\"\n+\n+  def main(args: Array[String]): Unit =\n+    Conf.parse(args) match {\n+      case Some(Conf(darMap, outputDir, decoderPkgAndClass, verbosity)) =>\n+        setGlobalLogLevel(verbosity)\n+        logUnsupportedEventDecoderOverride(decoderPkgAndClass)\n+        val (dars, packageName) = darsAndOnePackageName(darMap)\n+        CodeGen.generateCode(dars, packageName, outputDir.toFile, CodeGen.Novel)\n+      case None =>\n+        throw new IllegalArgumentException(\n+          s\"Invalid $codegenId command line arguments: ${args.mkString(\" \")}\")\n+    }\n \n-import scopt.OptionParser\n-\n-object Main {\n-\n-  case class Config(\n-      inputFiles: Seq[File] = Seq(),\n-      packageName: String = \"\",\n-      outputDir: File = new File(\".\"),\n-      codeGenMode: CodeGen.Mode = CodeGen.Novel)\n-\n-  private val parser = new OptionParser[Config](\"codegen\") {\n-    help(\"help\").text(\"prints this usage text\")\n-\n-    opt[Seq[File]](\"input-files\").required\n-      .abbr(\"i\")\n-      .action((d, c) => c.copy(inputFiles = d))\n-      .text(\"input DAR or DALF files\")\n-\n-    opt[String](\"package-name\")\n-      .required()\n-      .abbr(\"p\")\n-      .action((d, c) => c.copy(packageName = d))\n-      .text(\"package name e.g. com.digitalasset.mypackage\")\n-\n-    opt[File](\"output-dir\")\n-      .required()\n-      .abbr(\"o\")\n-      .action((d, c) => c.copy(outputDir = d))\n-      .text(\"output directory for Scala files\")\n+  private def setGlobalLogLevel(verbosity: Level): Unit = {\n+    LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) match {\n+      case a: ch.qos.logback.classic.Logger =>\n+        a.setLevel(verbosity)\n+        logger.info(s\"$codegenId verbosity: $verbosity\")\n+      case _ =>\n+        logger.warn(s\"$codegenId cannot set requested verbosity: $verbosity\")\n+    }\n   }\n \n-  def main(args: Array[String]): Unit = {\n-    parser.parse(args, Config()) match {\n-      case Some(config) =>\n-        CodeGen.generateCode(\n-          config.inputFiles.toList,\n-          config.packageName,\n-          config.outputDir,\n-          config.codeGenMode)\n-      case None => // arguments are bad, error message will have been displayed\n+  private def logUnsupportedEventDecoderOverride(mapping: Option[(String, String)]): Unit =\n+    mapping.foreach { decoderMapping =>\n+      logger.warn(s\"$codegenId does not allow overriding Event Decoder, requested: $decoderMapping\")"
+  },
+  {
+    "id" : "e82fdd9a-d65f-40e7-b7b7-dc09882137b0",
+    "prId" : 585,
+    "comments" : [
+      {
+        "id" : "bfbe0f65-157c-4047-abb5-5253d1491755",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "You should calculate `dars` and `packageNames` separately from `darMap.keys` and `darMap.values` respectively; no explicit fold necessary.",
+        "createdAt" : "2019-04-18T16:24:00Z",
+        "updatedAt" : "2019-04-18T18:31:28Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "483985bf5e049615c4bf19298afa2ac0e9cf3006",
+    "line" : null,
+    "diffHunk" : "@@ -4,47 +4,54 @@\n package com.digitalasset.codegen\n \n import java.io.File\n+import java.nio.file.Path\n+\n+import ch.qos.logback.classic.Level\n+import com.digitalasset.daml.lf.codegen.conf.Conf\n+import com.typesafe.scalalogging.StrictLogging\n+import org.slf4j.{Logger, LoggerFactory}\n+\n+object Main extends StrictLogging {\n+\n+  private val codegenId = \"Scala Codegen\"\n+\n+  def main(args: Array[String]): Unit =\n+    Conf.parse(args) match {\n+      case Some(Conf(darMap, outputDir, decoderPkgAndClass, verbosity)) =>\n+        setGlobalLogLevel(verbosity)\n+        logUnsupportedEventDecoderOverride(decoderPkgAndClass)\n+        val (dars, packageName) = darsAndOnePackageName(darMap)\n+        CodeGen.generateCode(dars, packageName, outputDir.toFile, CodeGen.Novel)\n+      case None =>\n+        throw new IllegalArgumentException(\n+          s\"Invalid $codegenId command line arguments: ${args.mkString(\" \")}\")\n+    }\n \n-import scopt.OptionParser\n-\n-object Main {\n-\n-  case class Config(\n-      inputFiles: Seq[File] = Seq(),\n-      packageName: String = \"\",\n-      outputDir: File = new File(\".\"),\n-      codeGenMode: CodeGen.Mode = CodeGen.Novel)\n-\n-  private val parser = new OptionParser[Config](\"codegen\") {\n-    help(\"help\").text(\"prints this usage text\")\n-\n-    opt[Seq[File]](\"input-files\").required\n-      .abbr(\"i\")\n-      .action((d, c) => c.copy(inputFiles = d))\n-      .text(\"input DAR or DALF files\")\n-\n-    opt[String](\"package-name\")\n-      .required()\n-      .abbr(\"p\")\n-      .action((d, c) => c.copy(packageName = d))\n-      .text(\"package name e.g. com.digitalasset.mypackage\")\n-\n-    opt[File](\"output-dir\")\n-      .required()\n-      .abbr(\"o\")\n-      .action((d, c) => c.copy(outputDir = d))\n-      .text(\"output directory for Scala files\")\n+  private def setGlobalLogLevel(verbosity: Level): Unit = {\n+    LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) match {\n+      case a: ch.qos.logback.classic.Logger =>\n+        a.setLevel(verbosity)\n+        logger.info(s\"$codegenId verbosity: $verbosity\")\n+      case _ =>\n+        logger.warn(s\"$codegenId cannot set requested verbosity: $verbosity\")\n+    }\n   }\n \n-  def main(args: Array[String]): Unit = {\n-    parser.parse(args, Config()) match {\n-      case Some(config) =>\n-        CodeGen.generateCode(\n-          config.inputFiles.toList,\n-          config.packageName,\n-          config.outputDir,\n-          config.codeGenMode)\n-      case None => // arguments are bad, error message will have been displayed\n+  private def logUnsupportedEventDecoderOverride(mapping: Option[(String, String)]): Unit =\n+    mapping.foreach { decoderMapping =>\n+      logger.warn(s\"$codegenId does not allow overriding Event Decoder, requested: $decoderMapping\")\n+    }\n+\n+  private def darsAndOnePackageName(darMap: Map[Path, Option[String]]): (List[File], String) = {\n+    val empty: (List[File], Set[String]) = (List.empty, Set.empty)\n+    val (dars, packageNames) =\n+      darMap.foldRight(empty)((a, as) => (a._1.toFile :: as._1, as._2 + a._2.getOrElse(\"daml\")))"
+  }
+]

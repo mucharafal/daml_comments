@@ -1,0 +1,469 @@
+[
+  {
+    "id" : "e512b743-ef6f-41b9-9027-3446d1780ae7",
+    "prId" : 5541,
+    "comments" : [
+      {
+        "id" : "f3f02f67-88d3-4d35-8b8c-9f329c7b1d02",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Cool, I didn't know `||` also acts as array concatenation 👍 ",
+        "createdAt" : "2020-04-17T16:30:14Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dc532c03-0217-4c4f-a818-518093fdcfe0",
+        "parentId" : "f3f02f67-88d3-4d35-8b8c-9f329c7b1d02",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n    array_agg(contract_observers.observer) filter (where contract_observers.observer is not null) || array_agg(contract_signatories.signatory) filter (where contract_signatories.signatory is not null) as create_stakeholders,\r\n```\r\nThis filters out the `NULL` value in case there are no observers or signatories (in case of divulged contracts).",
+        "createdAt" : "2020-04-17T16:40:25Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "28bc7a5d-15d5-49e4-9752-463734f9ce26",
+        "parentId" : "f3f02f67-88d3-4d35-8b8c-9f329c7b1d02",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I'm not sure this is what we want. The stakeholders are supposed to null for divulged contracts.",
+        "createdAt" : "2020-04-17T16:51:18Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "945cba27-65eb-4f02-b7d0-e6eb1008aadc",
+        "parentId" : "f3f02f67-88d3-4d35-8b8c-9f329c7b1d02",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Sorry, I wasn't clear. the added filter makes it so that we don't get `{NULL, 'Alice'}` in case there are no observers.\r\n\r\n```\r\nselect\r\ncontract_data.id as contract_id,\r\narray_agg(contract_observers.observer) filter (where contract_observers.observer is not null) || array_agg(contract_signatories.signatory) as create_stakeholders\r\nfrom contract_data\r\nleft join contract_observers on contract_observers.contract_id = contract_data.id\r\nleft join contract_signatories on contract_signatories.contract_id = contract_data.id\r\ngroup by (contract_data.id);\r\n contract_id | create_stakeholders\r\n-------------+---------------------\r\n #0:0        | {Alice}\r\n #1:0        | {Alice}\r\n #2:0        | {Alice}\r\n #3:0        | {Alice}\r\n(4 rows)\r\n\r\nselect\r\ncontract_data.id as contract_id,\r\narray_agg(contract_observers.observer) || array_agg(contract_signatories.signatory) as create_stakeholders\r\nfrom contract_data\r\nleft join contract_observers on contract_observers.contract_id = contract_data.id\r\nleft join contract_signatories on contract_signatories.contract_id = contract_data.id\r\ngroup by (contract_data.id);\r\n contract_id | create_stakeholders\r\n-------------+---------------------\r\n #0:0        | {NULL,Alice}\r\n #1:0        | {NULL,Alice}\r\n #2:0        | {NULL,Alice}\r\n #3:0        | {NULL,Alice}\r\n(4 rows)\r\n```",
+        "createdAt" : "2020-04-17T16:57:45Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "83ee0ddc-bbb8-4d06-8596-036787041f4b",
+        "parentId" : "f3f02f67-88d3-4d35-8b8c-9f329c7b1d02",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "And in the case of divulged contracts, also the join for signatories will yield such a `NULL` array element.",
+        "createdAt" : "2020-04-17T16:58:35Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "75f15047-7492-49ec-af12-898c638d68ec",
+        "parentId" : "f3f02f67-88d3-4d35-8b8c-9f329c7b1d02",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Ok, thanks, let me re-run the tests one last time.",
+        "createdAt" : "2020-04-17T17:34:46Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d8cab255-3cca-43d8-a53e-68bff8322a28",
+        "parentId" : "f3f02f67-88d3-4d35-8b8c-9f329c7b1d02",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Tests pass! :tada: ",
+        "createdAt" : "2020-04-17T17:37:31Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2034352017063fbc2c958c5a086273e66ed0ad47",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,60 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+---------------------------------------------------------------------------------------------------\n+-- V26: Contracts new schema\n+--\n+-- Used for interpretation and validation by the DAML engine\n+---------------------------------------------------------------------------------------------------\n+\n+-- contains all active and divulged contracts\n+create table participant_contracts\n+(\n+    contract_id varchar primary key not null,\n+    template_id varchar not null,\n+    -- create_argument needs to be nullable to leave this field empty as part of this migration\n+    -- a second (java) migration will fill it up\n+    -- a third (sql) migration will make this non-nullable, as it's supposed to always be populated\n+    create_argument bytea,\n+\n+    -- the following fields are null for divulged contracts\n+    create_stakeholders varchar array,\n+    create_key_hash bytea,\n+    create_ledger_effective_time timestamp\n+);\n+\n+-- support looking up a contract by key\n+create unique index on participant_contracts(create_key_hash);\n+\n+insert into participant_contracts\n+select\n+    contracts.id as contract_id,\n+    contracts.package_id || ':' || contracts.name as template_id,\n+    null as create_argument, -- filled up in a subsequent migration\n+    array_agg(contract_observers.observer) || array_agg(contract_signatories.signatory) as create_stakeholders,"
+  },
+  {
+    "id" : "1a963d60-3ff5-47f4-a9ba-f2d9235d9325",
+    "prId" : 5541,
+    "comments" : [
+      {
+        "id" : "4587ae3c-d1c1-49a2-a834-f9acc18e5b74",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I think this should be `from contract_data left join contracts on contract_data.id = contracts.id` (with other necessary changes in the select statement), otherwise this query implicitly filters out the divulged contracts, where there is no entry in `contracts`. The consequence is that we also don't have a `template_id` for those contracts readily available in the database. But this can also be filled in by the java migration via the `ContractInst` that is available in `contract_data`.",
+        "createdAt" : "2020-04-17T16:37:48Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8c506db3-6e28-48ad-9d05-471551f82024",
+        "parentId" : "4587ae3c-d1c1-49a2-a834-f9acc18e5b74",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Actually, I don't think `contract_data` should be there at all. It's not needed in this migration. I'll simply remove it.",
+        "createdAt" : "2020-04-17T16:49:57Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "32848ab8-792f-4648-8e74-919db3514a44",
+        "parentId" : "4587ae3c-d1c1-49a2-a834-f9acc18e5b74",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It's a leftover from my initial query in which I thought I didn't need to go through a Java migration for the step involving `contract_data`.",
+        "createdAt" : "2020-04-17T16:54:24Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e27c139c-5f3e-4e6e-8006-e10f9d7809f7",
+        "parentId" : "4587ae3c-d1c1-49a2-a834-f9acc18e5b74",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "No, it is needed in case of privacy aware ledgers, because then we actually have divulged contracts where there is only an entry in `contract_data` but not in `contracts`.",
+        "createdAt" : "2020-04-17T16:59:50Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "907dc12e-b82f-47f9-90c4-2bfbb1a04999",
+        "parentId" : "4587ae3c-d1c1-49a2-a834-f9acc18e5b74",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/5541/commits/4435578f1d993812b3d7c61adb5b590c5481879e",
+        "createdAt" : "2020-04-17T17:22:46Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2034352017063fbc2c958c5a086273e66ed0ad47",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,60 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+---------------------------------------------------------------------------------------------------\n+-- V26: Contracts new schema\n+--\n+-- Used for interpretation and validation by the DAML engine\n+---------------------------------------------------------------------------------------------------\n+\n+-- contains all active and divulged contracts\n+create table participant_contracts\n+(\n+    contract_id varchar primary key not null,\n+    template_id varchar not null,\n+    -- create_argument needs to be nullable to leave this field empty as part of this migration\n+    -- a second (java) migration will fill it up\n+    -- a third (sql) migration will make this non-nullable, as it's supposed to always be populated\n+    create_argument bytea,\n+\n+    -- the following fields are null for divulged contracts\n+    create_stakeholders varchar array,\n+    create_key_hash bytea,\n+    create_ledger_effective_time timestamp\n+);\n+\n+-- support looking up a contract by key\n+create unique index on participant_contracts(create_key_hash);\n+\n+insert into participant_contracts\n+select\n+    contracts.id as contract_id,\n+    contracts.package_id || ':' || contracts.name as template_id,\n+    null as create_argument, -- filled up in a subsequent migration\n+    array_agg(contract_observers.observer) || array_agg(contract_signatories.signatory) as create_stakeholders,\n+    decode(contract_keys.value_hash, 'hex') as create_key_hash,\n+    ledger_entries.effective_at as create_ledger_effective_time\n+from contracts"
+  },
+  {
+    "id" : "be524e20-2c78-4aec-b33e-f2eb27b211d7",
+    "prId" : 5541,
+    "comments" : [
+      {
+        "id" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This should be a union of `contract_divulgences` and `contract_witnesses`.",
+        "createdAt" : "2020-04-17T16:46:09Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "33b43deb-e3e9-4829-bb7a-b831d5522bc7",
+        "parentId" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Is it supposed to also be filtered to make sure I don't end up trying to insert witnesses to archived contracts?",
+        "createdAt" : "2020-04-17T16:55:20Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9f3e6973-0916-4aca-b81c-8f204d4f07fe",
+        "parentId" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "After a quick look at the table, it appears it does indeed need to be filtered to make sure only witnesses of active contracts are retained in the migration.",
+        "createdAt" : "2020-04-17T16:58:12Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c2aac22d-f0b4-45a7-9a58-bb2fd27dd4c0",
+        "parentId" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Very good catch, thanks. I'm a bit surprised the test didn't catch it. I'll look more into it.",
+        "createdAt" : "2020-04-17T16:58:40Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "742d191d-dd69-4f03-aa03-79fe28f1ccb1",
+        "parentId" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "The problem is that in the test I only try to fetch the contract via DAML Script's `query`, which is backed by the ACS, instead of going through the engine. I'll make sure to fix it.",
+        "createdAt" : "2020-04-17T17:04:18Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "097dc5a3-0489-4663-a73f-b19b1074d3c8",
+        "parentId" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "yeah right, you'll have to send a command that triggers evaluation and loading via the engine.",
+        "createdAt" : "2020-04-17T17:05:45Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "df495c03-c06e-491e-a4ba-40cce6a1dcde",
+        "parentId" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "[This](https://github.com/stefanobaghino-da/test-5541-data-migration/commit/194c963859e9d348678174d686facca56e1d48ad) makes correctly fail the test, fixing.",
+        "createdAt" : "2020-04-17T17:13:05Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4e87ceec-781c-4b81-b329-717178fe00fd",
+        "parentId" : "e11511f1-4f0d-4222-b085-1cdc1c424496",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/5541/commits/4435578f1d993812b3d7c61adb5b590c5481879e",
+        "createdAt" : "2020-04-17T17:23:00Z",
+        "updatedAt" : "2020-04-17T19:02:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2034352017063fbc2c958c5a086273e66ed0ad47",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,60 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+---------------------------------------------------------------------------------------------------\n+-- V26: Contracts new schema\n+--\n+-- Used for interpretation and validation by the DAML engine\n+---------------------------------------------------------------------------------------------------\n+\n+-- contains all active and divulged contracts\n+create table participant_contracts\n+(\n+    contract_id varchar primary key not null,\n+    template_id varchar not null,\n+    -- create_argument needs to be nullable to leave this field empty as part of this migration\n+    -- a second (java) migration will fill it up\n+    -- a third (sql) migration will make this non-nullable, as it's supposed to always be populated\n+    create_argument bytea,\n+\n+    -- the following fields are null for divulged contracts\n+    create_stakeholders varchar array,\n+    create_key_hash bytea,\n+    create_ledger_effective_time timestamp\n+);\n+\n+-- support looking up a contract by key\n+create unique index on participant_contracts(create_key_hash);\n+\n+insert into participant_contracts\n+select\n+    contracts.id as contract_id,\n+    contracts.package_id || ':' || contracts.name as template_id,\n+    null as create_argument, -- filled up in a subsequent migration\n+    array_agg(contract_observers.observer) || array_agg(contract_signatories.signatory) as create_stakeholders,\n+    decode(contract_keys.value_hash, 'hex') as create_key_hash,\n+    ledger_entries.effective_at as create_ledger_effective_time\n+from contracts\n+join contract_data on contract_data.id = contracts.id\n+left join contract_keys on contract_keys.contract_id = contracts.id\n+left join ledger_entries on ledger_entries.transaction_id = contracts.transaction_id\n+left join contract_observers on contract_observers.contract_id = contracts.id\n+left join contract_signatories on contract_signatories.contract_id = contracts.id\n+group by (\n+    contracts.id,\n+    template_id,\n+    create_key_hash,\n+    create_ledger_effective_time\n+);\n+\n+-- visibility of contracts to parties\n+create table participant_contract_witnesses\n+(\n+    contract_id varchar not null,\n+    contract_witness varchar not null,\n+\n+    primary key (contract_id, contract_witness),\n+    foreign key (contract_id) references participant_contracts(contract_id)\n+);\n+\n+insert into participant_contract_witnesses select contract_id, party as contract_witness from contract_divulgences;"
+  }
+]

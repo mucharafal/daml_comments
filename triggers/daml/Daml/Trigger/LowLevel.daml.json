@@ -1,0 +1,615 @@
+[
+  {
+    "id" : "c2c82ccf-132e-430d-bc49-ee8f0b407d69",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "cb0ac61c-fb07-41b3-a293-1ae23d5d20df",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Note that newtypes are not free in DAML so you are sometimes better off inlining this stuff (sadly). Not too worried about this for triggers for now but worth keeping in mind.",
+        "createdAt" : "2020-10-01T08:07:03Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a108b6e2-43aa-42bd-9034-7bb8cf32a5f5",
+        "parentId" : "cb0ac61c-fb07-41b3-a293-1ae23d5d20df",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Also I just realized that we used a newtype before as well … Maybe at least worth merging it to one layer of newtypes at some point instead of having `TriggerA` on top of `TriggerRule` on top of `StateT` …. Doesn’t have to be in this PR though.",
+        "createdAt" : "2020-10-01T08:16:31Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "01a5ec9f-48a0-41ac-87d3-2e099b895d5f",
+        "parentId" : "cb0ac61c-fb07-41b3-a293-1ae23d5d20df",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I use them for three things in this PR:\r\n\r\n1. matching constraint signatures nicely,\r\n2. letting the functor layer go up and down when I haven't settled on which layer will operate where. e.g. TriggerSetup very nearly got elided for the final design, but it was needed for the low-level initialState as you wanted, so it survived causing very little trouble at the DAML layer (at the Scala layer is another story), and\r\n3. _not_ letting operations pollute upwards. For example it would be very undesirable for `ActionState TriggerAState TriggerA` to exist; it might even be desirable to remove `ActionTrigger TriggerA` so as to hide `submitCommands` from the high-level API.\r\n\r\n(2) is naturally just scaffolding, but we should take care about (3). And of course damlc will just yell at you for not thinking about (1).",
+        "createdAt" : "2020-10-01T20:25:52Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e3e56c7d-da94-49ba-a3c7-f60b5f53fd05",
+        "parentId" : "cb0ac61c-fb07-41b3-a293-1ae23d5d20df",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense :+1: ",
+        "createdAt" : "2020-10-02T07:21:25Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : 40,
+    "diffHunk" : "@@ -244,3 +255,111 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+-- Same as in Script; TODO factor\n+data Free f a\n+  = Pure a\n+  | Free (f (Free f a))\n+\n+instance Functor f => Functor (Free f) where\n+  fmap f (Pure a) = Pure (f a)\n+  fmap f (Free x) = Free (fmap f <$> x)\n+\n+instance Functor f => Applicative (Free f) where\n+  pure = Pure\n+  Pure f <*> Pure a = Pure (f a)\n+  Pure f <*> Free x = Free (fmap f <$> x)\n+  Free x <*> my     = Free ((<*> my) <$> x)\n+\n+instance Functor f => Action (Free f) where\n+  Pure a >>= f = f a\n+  Free x >>= f = Free ((>>= f) <$> x)\n+\n+liftFC : Functor f => f a -> Free f a\n+liftFC fa = Free (Pure <$> fa)\n+\n+lowerFC : Action f => Free f a -> f a\n+lowerFC (Pure a) = pure a\n+lowerFC (Free x) = x >>= lowerFC\n+\n+newtype StateT s m a = StateT { runStateT : s -> m (a, s) }"
+  },
+  {
+    "id" : "a07b83c7-3afc-456d-a611-9f751712ec57",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "2c650389-9d8f-4ec7-9c1f-04ea51fe5b7f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "As mentioned on the issue, one thing that we can do with this monadified version is to return a `CommandId` here so we don’t have to do this annoying back and forth translation between the random UUIDs in the trigger runner and what users specify here. Let’s leave that for a separate PR though.",
+        "createdAt" : "2020-10-01T08:08:37Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : 76,
+    "diffHunk" : "@@ -244,3 +255,111 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+-- Same as in Script; TODO factor\n+data Free f a\n+  = Pure a\n+  | Free (f (Free f a))\n+\n+instance Functor f => Functor (Free f) where\n+  fmap f (Pure a) = Pure (f a)\n+  fmap f (Free x) = Free (fmap f <$> x)\n+\n+instance Functor f => Applicative (Free f) where\n+  pure = Pure\n+  Pure f <*> Pure a = Pure (f a)\n+  Pure f <*> Free x = Free (fmap f <$> x)\n+  Free x <*> my     = Free ((<*> my) <$> x)\n+\n+instance Functor f => Action (Free f) where\n+  Pure a >>= f = f a\n+  Free x >>= f = Free ((>>= f) <$> x)\n+\n+liftFC : Functor f => f a -> Free f a\n+liftFC fa = Free (Pure <$> fa)\n+\n+lowerFC : Action f => Free f a -> f a\n+lowerFC (Pure a) = pure a\n+lowerFC (Free x) = x >>= lowerFC\n+\n+newtype StateT s m a = StateT { runStateT : s -> m (a, s) }\n+  deriving Functor\n+\n+liftStateT : Functor m => m a -> StateT s m a\n+liftStateT ma = StateT $ \\s -> (,s) <$> ma\n+\n+instance Action m => Applicative (StateT s m) where\n+  pure a = StateT (\\s -> pure (a, s))\n+  f <*> x = f >>= (<$> x)\n+  \n+instance Action m => Action (StateT s m) where\n+  StateT x >>= f = StateT $ \\s -> do\n+    (x', s') <- x s\n+    runStateT (f x') s'\n+\n+class ActionState s m | m -> s where\n+  get : m s\n+  put : s -> m ()\n+\n+modify : (Action m, ActionState s m) => (s -> s) -> m ()\n+modify f = put . f =<< get\n+\n+instance Applicative m => ActionState s (StateT s m) where\n+  get = StateT $ \\s -> pure (s, s)\n+  put s = StateT $ const $ pure ((), s)\n+\n+execStateT : Functor m => StateT s m a -> s -> m s\n+execStateT (StateT fa) = fmap snd . fa\n+\n+zoom : Functor m => (t -> s) -> (t -> s -> t) -> StateT s m a -> StateT t m a\n+zoom r w (StateT smas) = StateT $ \\t ->\n+  smas (r t) <&> \\(a, s) -> (a, w t s)\n+\n+-- Must be kept in sync with Runner#handleStepFreeResult\n+data TriggerF a =\n+  GetTime (Time -> a)\n+  | Submit (Commands, () -> a)"
+  },
+  {
+    "id" : "aa09a8fb-efd1-4a02-93e7-07222b8bfd5f",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "a1ead2df-1373-47d3-8e90-e561c088bf0a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not that worried about trying to make it easy to migrate the low-level trigger API. Triggers are still alpha in general and the low-level API is even more likely to change.",
+        "createdAt" : "2020-10-01T08:18:45Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e54421b8-5440-4f95-a6cb-daaf36aca9de",
+        "parentId" : "a1ead2df-1373-47d3-8e90-e561c088bf0a",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "This was more for my own sanity-checking (that all ports must be possible) and my own ease of porting the integration tests. If it seems nicer to directly port the tests I'll get rid of them.",
+        "createdAt" : "2020-10-01T17:33:23Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -244,3 +255,111 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+-- Same as in Script; TODO factor\n+data Free f a\n+  = Pure a\n+  | Free (f (Free f a))\n+\n+instance Functor f => Functor (Free f) where\n+  fmap f (Pure a) = Pure (f a)\n+  fmap f (Free x) = Free (fmap f <$> x)\n+\n+instance Functor f => Applicative (Free f) where\n+  pure = Pure\n+  Pure f <*> Pure a = Pure (f a)\n+  Pure f <*> Free x = Free (fmap f <$> x)\n+  Free x <*> my     = Free ((<*> my) <$> x)\n+\n+instance Functor f => Action (Free f) where\n+  Pure a >>= f = f a\n+  Free x >>= f = Free ((>>= f) <$> x)\n+\n+liftFC : Functor f => f a -> Free f a\n+liftFC fa = Free (Pure <$> fa)\n+\n+lowerFC : Action f => Free f a -> f a\n+lowerFC (Pure a) = pure a\n+lowerFC (Free x) = x >>= lowerFC\n+\n+newtype StateT s m a = StateT { runStateT : s -> m (a, s) }\n+  deriving Functor\n+\n+liftStateT : Functor m => m a -> StateT s m a\n+liftStateT ma = StateT $ \\s -> (,s) <$> ma\n+\n+instance Action m => Applicative (StateT s m) where\n+  pure a = StateT (\\s -> pure (a, s))\n+  f <*> x = f >>= (<$> x)\n+  \n+instance Action m => Action (StateT s m) where\n+  StateT x >>= f = StateT $ \\s -> do\n+    (x', s') <- x s\n+    runStateT (f x') s'\n+\n+class ActionState s m | m -> s where\n+  get : m s\n+  put : s -> m ()\n+\n+modify : (Action m, ActionState s m) => (s -> s) -> m ()\n+modify f = put . f =<< get\n+\n+instance Applicative m => ActionState s (StateT s m) where\n+  get = StateT $ \\s -> pure (s, s)\n+  put s = StateT $ const $ pure ((), s)\n+\n+execStateT : Functor m => StateT s m a -> s -> m s\n+execStateT (StateT fa) = fmap snd . fa\n+\n+zoom : Functor m => (t -> s) -> (t -> s -> t) -> StateT s m a -> StateT t m a\n+zoom r w (StateT smas) = StateT $ \\t ->\n+  smas (r t) <&> \\(a, s) -> (a, w t s)\n+\n+-- Must be kept in sync with Runner#handleStepFreeResult\n+data TriggerF a =\n+  GetTime (Time -> a)\n+  | Submit (Commands, () -> a)\n+  deriving Functor\n+\n+newtype TriggerSetup s a = TriggerSetup { runTriggerSetup : Free TriggerF a }\n+  deriving (Functor, Applicative, Action)\n+\n+newtype TriggerRule s a = TriggerRule { runTriggerRule : StateT s (Free TriggerF) a }\n+  deriving (Functor, Applicative, Action)\n+\n+deriving instance ActionState s (TriggerRule s)\n+\n+class HasTime m => ActionTrigger m where\n+  liftTF : TriggerF a -> m a\n+\n+instance ActionTrigger (TriggerSetup s) where\n+  liftTF = TriggerSetup . liftFC\n+\n+instance ActionTrigger (TriggerRule s) where\n+  liftTF = TriggerRule . liftStateT . liftFC\n+\n+instance HasTime (TriggerSetup s) where\n+  getTime = liftTF (GetTime identity)\n+\n+instance HasTime (TriggerRule s) where\n+  getTime = liftTF (GetTime identity)\n+\n+submitCommands : ActionTrigger m => Commands -> m ()\n+submitCommands cmds = liftTF (Submit (cmds, identity))\n+\n+type TriggerInitialState s = Party -> Time -> ActiveContracts -> (s, [Commands])\n+type TriggerUpdate s = Time -> Message -> s -> (s, [Commands])\n+\n+forwardPortInitialState : TriggerInitialState s -> Party -> ActiveContracts -> Free TriggerF s"
+  },
+  {
+    "id" : "fbd4418d-56b5-4883-98fe-ed0c3095923c",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "92d47910-a819-4b1a-9307-f50c69cbd33f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Seems to be unused.",
+        "createdAt" : "2020-10-01T08:31:20Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e6bff332-4cac-4de7-a07c-13994e8362a6",
+        "parentId" : "92d47910-a819-4b1a-9307-f50c69cbd33f",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "3669c03e40041958b76d57c96ef794edcdcb4cc8",
+        "createdAt" : "2020-10-01T17:18:42Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -244,3 +255,111 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+-- Same as in Script; TODO factor\n+data Free f a\n+  = Pure a\n+  | Free (f (Free f a))\n+\n+instance Functor f => Functor (Free f) where\n+  fmap f (Pure a) = Pure (f a)\n+  fmap f (Free x) = Free (fmap f <$> x)\n+\n+instance Functor f => Applicative (Free f) where\n+  pure = Pure\n+  Pure f <*> Pure a = Pure (f a)\n+  Pure f <*> Free x = Free (fmap f <$> x)\n+  Free x <*> my     = Free ((<*> my) <$> x)\n+\n+instance Functor f => Action (Free f) where\n+  Pure a >>= f = f a\n+  Free x >>= f = Free ((>>= f) <$> x)\n+\n+liftFC : Functor f => f a -> Free f a\n+liftFC fa = Free (Pure <$> fa)\n+\n+lowerFC : Action f => Free f a -> f a"
+  },
+  {
+    "id" : "c1abbd52-e12b-44f3-be54-8650304fbfe3",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "0306f2d7-5f59-49e1-9eb2-051571c82678",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "While this is only the LowLevel interface, some newtype around `Free TriggerF s` would probably still be nice so that `submitCommands` can also be used here if you really want this interface with all the caveats that come with it.",
+        "createdAt" : "2020-10-01T08:34:16Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d38c920a-a661-4d4f-85e6-e10d65be7a49",
+        "parentId" : "0306f2d7-5f59-49e1-9eb2-051571c82678",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It's already possible to do this by writing `runTriggerSetup do`.",
+        "createdAt" : "2020-10-01T15:37:00Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "398cc27b-a85b-49b4-a242-595717496550",
+        "parentId" : "0306f2d7-5f59-49e1-9eb2-051571c82678",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "good point, you still end up leaking `Free` into the public API though which I’d prefer to avoid.",
+        "createdAt" : "2020-10-01T16:05:09Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d9f6d2a8-5f68-456c-b94c-0f664422a8fb",
+        "parentId" : "0306f2d7-5f59-49e1-9eb2-051571c82678",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I was avoiding this because (as you mentioned in another comment) newtypes add layers, which is annoying to deal with at the Scala layer as seen in 841ee75320120e2300d34bf2ec563e17299029af .  Anyway that is there now.",
+        "createdAt" : "2020-10-01T20:17:57Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -155,8 +166,8 @@ data ActiveContracts = ActiveContracts { activeContracts : [Created] }\n -- | Trigger is (approximately) a left-fold over `Message` with\n -- an accumulator of type `s`.\n data Trigger s = Trigger\n-  { initialState : Party -> Time -> ActiveContracts -> (s, [Commands])\n-  , update : Time -> Message -> s -> (s, [Commands])\n+  { initialState : Party -> ActiveContracts -> Free TriggerF s"
+  },
+  {
+    "id" : "a374362a-9d00-4dd8-a3e0-b67d277483ed",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "8551e307-bb97-418d-9324-367b0a2c572b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What exactly do you mean by “May lose information”?",
+        "createdAt" : "2020-10-02T07:23:50Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "65adb3d3-85d4-40bd-ab40-c31fa3397a0b",
+        "parentId" : "8551e307-bb97-418d-9324-367b0a2c572b",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "You can't take the result of `simulateRule` and get back the original rule; for example, you might have a TriggerF case that's supposed to organize a parade and pass the number of attendees to the continuation, but `simulateRule` slacks off on the logistics and just passes 42.",
+        "createdAt" : "2020-10-02T15:02:10Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7a9f4dcf-e417-423f-83ab-790445ee7c6c",
+        "parentId" : "8551e307-bb97-418d-9324-367b0a2c572b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense :+1: ",
+        "createdAt" : "2020-10-02T15:03:12Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : 85,
+    "diffHunk" : "@@ -244,3 +259,94 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+newtype StateT s m a = StateT { runStateT : s -> m (a, s) }\n+  deriving Functor\n+\n+liftStateT : Functor m => m a -> StateT s m a\n+liftStateT ma = StateT $ \\s -> (,s) <$> ma\n+\n+instance Action m => Applicative (StateT s m) where\n+  pure a = StateT (\\s -> pure (a, s))\n+  f <*> x = f >>= (<$> x)\n+  \n+instance Action m => Action (StateT s m) where\n+  StateT x >>= f = StateT $ \\s -> do\n+    (x', s') <- x s\n+    runStateT (f x') s'\n+\n+class ActionState s m | m -> s where\n+  get : m s\n+  put : s -> m ()\n+\n+modify : (Action m, ActionState s m) => (s -> s) -> m ()\n+modify f = put . f =<< get\n+\n+instance Applicative m => ActionState s (StateT s m) where\n+  get = StateT $ \\s -> pure (s, s)\n+  put s = StateT $ const $ pure ((), s)\n+\n+execStateT : Functor m => StateT s m a -> s -> m s\n+execStateT (StateT fa) = fmap snd . fa\n+\n+zoom : Functor m => (t -> s) -> (t -> s -> t) -> StateT s m a -> StateT t m a\n+zoom r w (StateT smas) = StateT $ \\t ->\n+  smas (r t) <&> \\(a, s) -> (a, w t s)\n+\n+-- Must be kept in sync with Runner#handleStepFreeResult\n+data TriggerF a =\n+  GetTime (Time -> a)\n+  | Submit (Commands, () -> a)\n+  deriving Functor\n+\n+newtype TriggerSetup a = TriggerSetup { runTriggerSetup : Free TriggerF a }\n+  deriving (Functor, Applicative, Action)\n+\n+newtype TriggerRule s a = TriggerRule { runTriggerRule : StateT s (Free TriggerF) a }\n+  deriving (Functor, Applicative, Action)\n+\n+-- | Run a rule without running it.  May lose information from the rule;"
+  },
+  {
+    "id" : "5a7da770-9090-4201-8541-82824cd6e657",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "9d67f088-ddf7-48db-8170-dbaba2cc6094",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "clever I like it!",
+        "createdAt" : "2020-10-02T07:24:06Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : 89,
+    "diffHunk" : "@@ -244,3 +259,94 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+newtype StateT s m a = StateT { runStateT : s -> m (a, s) }\n+  deriving Functor\n+\n+liftStateT : Functor m => m a -> StateT s m a\n+liftStateT ma = StateT $ \\s -> (,s) <$> ma\n+\n+instance Action m => Applicative (StateT s m) where\n+  pure a = StateT (\\s -> pure (a, s))\n+  f <*> x = f >>= (<$> x)\n+  \n+instance Action m => Action (StateT s m) where\n+  StateT x >>= f = StateT $ \\s -> do\n+    (x', s') <- x s\n+    runStateT (f x') s'\n+\n+class ActionState s m | m -> s where\n+  get : m s\n+  put : s -> m ()\n+\n+modify : (Action m, ActionState s m) => (s -> s) -> m ()\n+modify f = put . f =<< get\n+\n+instance Applicative m => ActionState s (StateT s m) where\n+  get = StateT $ \\s -> pure (s, s)\n+  put s = StateT $ const $ pure ((), s)\n+\n+execStateT : Functor m => StateT s m a -> s -> m s\n+execStateT (StateT fa) = fmap snd . fa\n+\n+zoom : Functor m => (t -> s) -> (t -> s -> t) -> StateT s m a -> StateT t m a\n+zoom r w (StateT smas) = StateT $ \\t ->\n+  smas (r t) <&> \\(a, s) -> (a, w t s)\n+\n+-- Must be kept in sync with Runner#handleStepFreeResult\n+data TriggerF a =\n+  GetTime (Time -> a)\n+  | Submit (Commands, () -> a)\n+  deriving Functor\n+\n+newtype TriggerSetup a = TriggerSetup { runTriggerSetup : Free TriggerF a }\n+  deriving (Functor, Applicative, Action)\n+\n+newtype TriggerRule s a = TriggerRule { runTriggerRule : StateT s (Free TriggerF) a }\n+  deriving (Functor, Applicative, Action)\n+\n+-- | Run a rule without running it.  May lose information from the rule;\n+-- meant for testing purposes only.\n+simulateRule : TriggerRule s a -> Time -> s -> (s, [Commands], a)\n+simulateRule rule time s = (s', reverse cmds, a)\n+  where ((a, s'), cmds) = State.runState (foldFree sim (runStateT (runTriggerRule rule) s)) []"
+  },
+  {
+    "id" : "30fbb3be-1d33-4fef-be89-05b8db32d7ef",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "e7bad1d4-a248-45ca-8cf9-81966860b69d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is unused",
+        "createdAt" : "2020-10-02T07:31:06Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9e5c5292-1c22-427c-9af8-174b1212e9ee",
+        "parentId" : "e7bad1d4-a248-45ca-8cf9-81966860b69d",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "096604136ffda132c7feb923ae1002f0e875b1ea",
+        "createdAt" : "2020-10-02T16:27:54Z",
+        "updatedAt" : "2020-10-02T16:27:54Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -244,3 +259,94 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+newtype StateT s m a = StateT { runStateT : s -> m (a, s) }\n+  deriving Functor\n+\n+liftStateT : Functor m => m a -> StateT s m a\n+liftStateT ma = StateT $ \\s -> (,s) <$> ma\n+\n+instance Action m => Applicative (StateT s m) where\n+  pure a = StateT (\\s -> pure (a, s))\n+  f <*> x = f >>= (<$> x)\n+  \n+instance Action m => Action (StateT s m) where\n+  StateT x >>= f = StateT $ \\s -> do\n+    (x', s') <- x s\n+    runStateT (f x') s'\n+\n+class ActionState s m | m -> s where\n+  get : m s\n+  put : s -> m ()\n+\n+modify : (Action m, ActionState s m) => (s -> s) -> m ()\n+modify f = put . f =<< get\n+\n+instance Applicative m => ActionState s (StateT s m) where\n+  get = StateT $ \\s -> pure (s, s)\n+  put s = StateT $ const $ pure ((), s)\n+\n+execStateT : Functor m => StateT s m a -> s -> m s\n+execStateT (StateT fa) = fmap snd . fa\n+\n+zoom : Functor m => (t -> s) -> (t -> s -> t) -> StateT s m a -> StateT t m a\n+zoom r w (StateT smas) = StateT $ \\t ->\n+  smas (r t) <&> \\(a, s) -> (a, w t s)\n+\n+-- Must be kept in sync with Runner#handleStepFreeResult\n+data TriggerF a =\n+  GetTime (Time -> a)\n+  | Submit (Commands, () -> a)\n+  deriving Functor\n+\n+newtype TriggerSetup a = TriggerSetup { runTriggerSetup : Free TriggerF a }\n+  deriving (Functor, Applicative, Action)\n+\n+newtype TriggerRule s a = TriggerRule { runTriggerRule : StateT s (Free TriggerF) a }\n+  deriving (Functor, Applicative, Action)\n+\n+-- | Run a rule without running it.  May lose information from the rule;\n+-- meant for testing purposes only.\n+simulateRule : TriggerRule s a -> Time -> s -> (s, [Commands], a)\n+simulateRule rule time s = (s', reverse cmds, a)\n+  where ((a, s'), cmds) = State.runState (foldFree sim (runStateT (runTriggerRule rule) s)) []\n+        sim : TriggerF x -> State.State [Commands] x\n+        sim (GetTime f) = pure (f time)\n+        sim (Submit (cmds, f)) = State.modify (cmds ::) $> f ()\n+\n+deriving instance ActionState s (TriggerRule s)\n+\n+class HasTime m => ActionTrigger m where\n+  liftTF : TriggerF a -> m a\n+\n+instance ActionTrigger TriggerSetup where\n+  liftTF = TriggerSetup . lift\n+\n+instance ActionTrigger (TriggerRule s) where\n+  liftTF = TriggerRule . liftStateT . lift\n+\n+instance HasTime TriggerSetup where\n+  getTime = liftTF (GetTime identity)\n+\n+instance HasTime (TriggerRule s) where\n+  getTime = liftTF (GetTime identity)\n+\n+submitCommands : ActionTrigger m => Commands -> m ()\n+submitCommands cmds = liftTF (Submit (cmds, identity))\n+\n+type TriggerInitialState s = Party -> Time -> ActiveContracts -> (s, [Commands])\n+type TriggerUpdate s = Time -> Message -> s -> (s, [Commands])\n+\n+forwardPortInitialState : TriggerInitialState s -> Party -> ActiveContracts -> TriggerSetup s"
+  },
+  {
+    "id" : "fade8634-6e72-464e-8fb8-788b4620503d",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "510a6928-9113-417e-a3f5-e282c0d07f62",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like we only use this in 5 tests. 4 of those don’t use `getTime` so the time aspect becomes redundant. Given that, I would prefer to just port those tests instead of keeping this around forever. But doesn’t have to be in this PR.",
+        "createdAt" : "2020-10-02T07:33:27Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d1d61b4f-9101-41e1-a3d7-a6408d9971e8",
+        "parentId" : "510a6928-9113-417e-a3f5-e282c0d07f62",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "1187207430d0c361188d55c39cb19c354fe4e084",
+        "createdAt" : "2020-10-02T16:28:01Z",
+        "updatedAt" : "2020-10-02T16:28:02Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -244,3 +259,94 @@ data Commands = Commands\n   { commandId : CommandId\n   , commands : [Command]\n   }\n+\n+newtype StateT s m a = StateT { runStateT : s -> m (a, s) }\n+  deriving Functor\n+\n+liftStateT : Functor m => m a -> StateT s m a\n+liftStateT ma = StateT $ \\s -> (,s) <$> ma\n+\n+instance Action m => Applicative (StateT s m) where\n+  pure a = StateT (\\s -> pure (a, s))\n+  f <*> x = f >>= (<$> x)\n+  \n+instance Action m => Action (StateT s m) where\n+  StateT x >>= f = StateT $ \\s -> do\n+    (x', s') <- x s\n+    runStateT (f x') s'\n+\n+class ActionState s m | m -> s where\n+  get : m s\n+  put : s -> m ()\n+\n+modify : (Action m, ActionState s m) => (s -> s) -> m ()\n+modify f = put . f =<< get\n+\n+instance Applicative m => ActionState s (StateT s m) where\n+  get = StateT $ \\s -> pure (s, s)\n+  put s = StateT $ const $ pure ((), s)\n+\n+execStateT : Functor m => StateT s m a -> s -> m s\n+execStateT (StateT fa) = fmap snd . fa\n+\n+zoom : Functor m => (t -> s) -> (t -> s -> t) -> StateT s m a -> StateT t m a\n+zoom r w (StateT smas) = StateT $ \\t ->\n+  smas (r t) <&> \\(a, s) -> (a, w t s)\n+\n+-- Must be kept in sync with Runner#handleStepFreeResult\n+data TriggerF a =\n+  GetTime (Time -> a)\n+  | Submit (Commands, () -> a)\n+  deriving Functor\n+\n+newtype TriggerSetup a = TriggerSetup { runTriggerSetup : Free TriggerF a }\n+  deriving (Functor, Applicative, Action)\n+\n+newtype TriggerRule s a = TriggerRule { runTriggerRule : StateT s (Free TriggerF) a }\n+  deriving (Functor, Applicative, Action)\n+\n+-- | Run a rule without running it.  May lose information from the rule;\n+-- meant for testing purposes only.\n+simulateRule : TriggerRule s a -> Time -> s -> (s, [Commands], a)\n+simulateRule rule time s = (s', reverse cmds, a)\n+  where ((a, s'), cmds) = State.runState (foldFree sim (runStateT (runTriggerRule rule) s)) []\n+        sim : TriggerF x -> State.State [Commands] x\n+        sim (GetTime f) = pure (f time)\n+        sim (Submit (cmds, f)) = State.modify (cmds ::) $> f ()\n+\n+deriving instance ActionState s (TriggerRule s)\n+\n+class HasTime m => ActionTrigger m where\n+  liftTF : TriggerF a -> m a\n+\n+instance ActionTrigger TriggerSetup where\n+  liftTF = TriggerSetup . lift\n+\n+instance ActionTrigger (TriggerRule s) where\n+  liftTF = TriggerRule . liftStateT . lift\n+\n+instance HasTime TriggerSetup where\n+  getTime = liftTF (GetTime identity)\n+\n+instance HasTime (TriggerRule s) where\n+  getTime = liftTF (GetTime identity)\n+\n+submitCommands : ActionTrigger m => Commands -> m ()\n+submitCommands cmds = liftTF (Submit (cmds, identity))\n+\n+type TriggerInitialState s = Party -> Time -> ActiveContracts -> (s, [Commands])\n+type TriggerUpdate s = Time -> Message -> s -> (s, [Commands])\n+\n+forwardPortInitialState : TriggerInitialState s -> Party -> ActiveContracts -> TriggerSetup s\n+forwardPortInitialState f p ac = do\n+  time <- getTime\n+  let (s, cmds) = f p time ac\n+  mapA_ submitCommands cmds\n+  pure s\n+\n+forwardPort : TriggerUpdate s -> Message -> TriggerRule s ()"
+  },
+  {
+    "id" : "b6254240-b4e4-4dae-ba49-ecb619ddd1e4",
+    "prId" : 3245,
+    "comments" : [
+      {
+        "id" : "2669978f-2844-4799-aea2-6c44d9f3605f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Hm, not quite sure if having to hide Prelude is better or worse. Slightly leaning towards just requiring hiding Prelude and/or qualified imports but neither is great.\r\n\r\nMaybe we can come up with some terrible hack to get to and from text functions for absolute contract ids and then just use the actual ContractId type but I’m not quite sure how to pull that off.",
+        "createdAt" : "2019-10-23T12:42:33Z",
+        "updatedAt" : "2019-10-23T13:23:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ec63ad07-0174-4548-ac2f-3ec69bdb9ef7",
+        "parentId" : "2669978f-2844-4799-aea2-6c44d9f3605f",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "It's tricky, requiring to hide `Prelude.ContractId` increases the boilerplate for creating triggers. Also, trigger modules might still require `Prelude.ContractId`, e.g. [here](https://github.com/digital-asset/daml/blob/6c36777a8ee65e0942233d3bea02bc29b4e583d9/triggers/tests/daml/ACS.daml#L91), so using the same name can be confusing.",
+        "createdAt" : "2019-10-23T12:52:13Z",
+        "updatedAt" : "2019-10-23T13:23:30Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ff840fe0-9328-4fa9-aefc-1d7ad9e684ef",
+        "parentId" : "2669978f-2844-4799-aea2-6c44d9f3605f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe `AbsoluteContractId` isn’t so bad? The normal `ContractId` can be both relative (while building up a transaction) and absolute which is the part that stops us from implementing conversions to `Text` so this at least conveys the right distinction for why we can do things here that we can’t do with the normal `ContractId` type.",
+        "createdAt" : "2019-10-23T13:03:59Z",
+        "updatedAt" : "2019-10-23T13:23:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "08075df4-0c95-47be-babe-266629bbc088",
+        "parentId" : "2669978f-2844-4799-aea2-6c44d9f3605f",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, that sounds better. I've changed it to that for now.",
+        "createdAt" : "2019-10-23T13:23:58Z",
+        "updatedAt" : "2019-10-23T13:23:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cbe825f8ae53e3c37d57924a87796f563d662143",
+    "line" : null,
+    "diffHunk" : "@@ -26,17 +30,27 @@ module Daml.Trigger.LowLevel\n \n import DA.Next.Map (MapKey(..))\n \n-data Identifier = Identifier\n-  { packageId : Text\n-  , moduleName : Text\n-  , entityName : Text\n-  } deriving (Show, Eq, Ord)\n-\n data AnyContractId = AnyContractId\n-  { templateId : Identifier\n+  { templateId : TemplateTypeRep\n   , contractId : Text\n   } deriving (Show, Eq, Ord)\n \n+-- XXX: The name ContractId clashes with Prelude.ContractId.\n+--   Find a better name than TheContractId.\n+newtype TheContractId t = TheContractId { contractId : Text }"
+  }
+]

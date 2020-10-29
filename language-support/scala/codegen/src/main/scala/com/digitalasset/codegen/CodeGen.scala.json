@@ -1,0 +1,167 @@
+[
+  {
+    "id" : "9e4ec0cf-0d49-4c32-bdaf-16bde61aa8a4",
+    "prId" : 1833,
+    "comments" : [
+      {
+        "id" : "bff840b0-bd40-4635-ae2b-06bd38f21cf3",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I'd rather use `partitionEithers` twice to preserve the exhaustiveness checking, and continue returning the specific types from `splitNTDs`.",
+        "createdAt" : "2019-06-24T13:00:10Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "18571653-519b-4d3b-a9ac-947fc87d287e",
+        "parentId" : "bff840b0-bd40-4635-ae2b-06bd38f21cf3",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-06-25T09:26:27Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0024f1caa606682717407339870b82441a5a448c",
+    "line" : null,
+    "diffHunk" : "@@ -244,20 +242,26 @@ object CodeGen {\n     filePlans ++ specialPlans\n   }\n \n-  type LHSIndexedRecords[+RT] = Map[(Identifier, List[Ref.Name]), Record[RT]]\n-\n-  private[this] def splitNTDs[RT, VT](recordsAndVariants: Iterable[ScopedDataType.DT[RT, VT]])\n-    : (LHSIndexedRecords[RT], List[ScopedDataType[Variant[VT]]]) =\n-    partitionEithers(recordsAndVariants map {\n-      case sdt @ ScopedDataType(qualName, typeVars, ddt) =>\n-        ddt match {\n-          case r: Record[RT] => Left(((qualName, typeVars.toList), r))\n-          case v: Variant[VT] => Right(sdt copy (dataType = v))\n-          case e: Enum =>\n-            // FixMe (RH) https://github.com/digital-asset/daml/issues/105\n-            throw new NotImplementedError(\"Enum types not supported\")\n-        }\n-    })(breakOut, breakOut)\n+  private[this] def splitNTDs[RT, VT](definitions: Iterable[ScopedDataType.DT[RT, VT]]): (\n+      Iterable[ScopedDataType[Record[RT]]],\n+      Iterable[ScopedDataType[Variant[VT]]],\n+      Iterable[ScopedDataType[Enum]]\n+  ) = {\n+\n+    val records = definitions.collect {\n+      case sdt @ ScopedDataType(qualName, typeVars, r: Record[RT]) => sdt copy (dataType = r)\n+    }\n+\n+    val variants = definitions.collect {\n+      case sdt @ ScopedDataType(qualName, typeVars, v: Variant[VT]) => sdt copy (dataType = v)\n+    }\n+\n+    val enums = definitions.collect {"
+  },
+  {
+    "id" : "a55f29aa-6a41-448b-9e23-7d20d26ae4e3",
+    "prId" : 1833,
+    "comments" : [
+      {
+        "id" : "457ad7a5-6cfa-45f2-ad05-456819b97c14",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      variants.traverseU {\r\n```",
+        "createdAt" : "2019-06-24T13:01:10Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0024f1caa606682717407339870b82441a5a448c",
+    "line" : 120,
+    "diffHunk" : "@@ -268,16 +272,24 @@ object CodeGen {\n     * unchanged.\n     */\n   private[this] def splatVariants[RT <: iface.Type, VT <: iface.Type](\n-      recordsAndVariants: Iterable[ScopedDataType.DT[RT, VT]])\n-    : (LHSIndexedRecords[RT], List[ScopedDataType[Variant[List[(Ref.Name, RT)] \\/ VT]]]) = {\n+      recordsAndVariants: Iterable[ScopedDataType.DT[RT, VT]]): (\n+      List[ScopedDataType[Record[RT]]],\n+      List[ScopedDataType[Variant[List[(Ref.Name, RT)] \\/ VT]]],\n+      List[ScopedDataType[Enum]]\n+  ) = {\n+\n+    val (records, variants, enums) = splitNTDs(recordsAndVariants)\n \n-    val (recordMap, variants) = splitNTDs(recordsAndVariants)\n+    val recordMap: Map[(ScopedDataType.Name, List[Ref.Name]), ScopedDataType[Record[RT]]] =\n+      records.map {\n+        case ddt @ ScopedDataType(name, vars, _) => (name -> vars.toList) -> ddt\n+      }(breakOut)\n \n     val noDeletion = Set.empty[(Identifier, List[Ref.Name])]\n     // both traverseU can change to traverse with -Ypartial-unification\n     // or Scala 2.13\n     val (deletedRecords, newVariants) =\n-      variants.traverseU {\n+      variants.toList.traverseU {"
+  },
+  {
+    "id" : "7b2643d9-6231-4c2a-9358-d821ec775c6a",
+    "prId" : 1210,
+    "comments" : [
+      {
+        "id" : "73b4021a-5aee-4118-9681-290dd63d1815",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "To explain further about doing the filtering outside of the dependency graph code, while dealing with the case @jberthold-da mentioned about a template referring to another template's associated record type as a normal data structure:\r\n\r\n```suggestion\r\n       val combinedIface: EnvironmentInterface = combineEnvInterfaces(ifaces map (filterTemplatesByRegexes(roots, _)))\r\n```\r\nAnd elsewhere, something like\r\n\r\n```scala\r\nprivate[this] def filterTemplatesByRegexes(regexes: Seq[String], ei: EnvironmentInterface): EnvironmentInterface =\r\n  if (regexes.isEmpty) ei else {\r\n    val EnvironmentInterface(tds) = ei\r\n    EnvironmentInterface(tds transform {\r\n      case (id, tpl@InterfaceType.Template(_, _)) if !matchesRoots(id) => // matchesRoots from your existing code\r\n        InterfaceType.Normal(tpl.`type`)\r\n      case (_, other) => other\r\n    })\r\n  }\r\n```\r\n\r\nThis has the nice effect of generating those indirectly included templates using only their \"normal datatype\" form.",
+        "createdAt" : "2019-05-22T21:02:04Z",
+        "updatedAt" : "2019-06-11T19:43:17Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "24800eb387ce26d19e7b19fb11ea60df1862330e",
+    "line" : null,
+    "diffHunk" : "@@ -75,18 +80,20 @@ object CodeGen {\n       files: NonEmptyList[File],\n       packageName: String,\n       outputDir: File,\n-      mode: Mode): ValidationNel[String, Unit] =\n+      mode: Mode,\n+      roots: Seq[String]): ValidationNel[String, Unit] =\n     decodeInterfaces(files).map { ifaces: NonEmptyList[EnvironmentInterface] =>\n       val combinedIface: EnvironmentInterface = combineEnvInterfaces(ifaces)"
+  },
+  {
+    "id" : "79650e9c-35dd-47ce-8144-b857fe9d51c3",
+    "prId" : 366,
+    "comments" : [
+      {
+        "id" : "374a99e6-9e4b-4976-82b9-ebef2cc745c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "stephencompall-DA",
+          "name" : "Actually @S11001001 (Stephen Compall)",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/32464278?u=2f0eaeb2500ecacccd6c1af95b27424d5193ad65&v=4"
+        },
+        "body" : "I believe this traversal will create separate runs for each sub-`EnvironmentInterface`, producing multiple EventDecoder and package ID files for multi-argument situations, probably overwriting as it goes. If so, we need to handle the whole argument set with a single `decodeInterface` to produce a single `EnvironmentInterface` to do the whole codegen run on.",
+        "createdAt" : "2019-04-15T13:52:59Z",
+        "updatedAt" : "2019-04-15T19:25:09Z",
+        "lastEditedBy" : {
+          "login" : "stephencompall-DA",
+          "name" : "Actually @S11001001 (Stephen Compall)",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/32464278?u=2f0eaeb2500ecacccd6c1af95b27424d5193ad65&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "92a7fd21-6f79-4eb1-80f8-a725df7202ed",
+        "parentId" : "374a99e6-9e4b-4976-82b9-ebef2cc745c0",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "this is something worth of a test case... I will create a second daml file for the Integration Test.",
+        "createdAt" : "2019-04-15T14:09:07Z",
+        "updatedAt" : "2019-04-15T19:25:09Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f33e6acf24d0adf2018e2aa0c52a01834a47a100",
+    "line" : null,
+    "diffHunk" : "@@ -109,78 +55,81 @@ object CodeGen {\n   @throws[PackageInterfaceException](\n     cause = \"either decoding a package from a file or extracting\" +\n       \" the package interface failed\")\n-  def generateCode(\n-      sdamlFile: File,\n-      otherDalfInputs: Seq[URL],\n+  def generateCode(files: List[File], packageName: String, outputDir: File, mode: Mode): Unit = {\n+    generateCodeSafe(files, packageName, outputDir, mode)\n+      .fold(es => throw PackageInterfaceException(formatErrors(es)), identity)\n+  }\n+\n+  private def formatErrors(es: NonEmptyList[String]): String =\n+    es.toList.mkString(\"\\n\")\n+\n+  def generateCodeSafe(\n+      files: List[File],\n       packageName: String,\n       outputDir: File,\n-      mode: Mode): Unit = {\n-    val errorOrRun = for {\n-      interface <- decodePackageFromFile(sdamlFile, mode)\n-      dependencies <- decodePackagesFromURLs(otherDalfInputs, mode)\n-      combined = mode.combineInterfaces(interface, dependencies)\n-    } yield packageInterfaceToScalaCode(mode.Dialect(packageName, combined, outputDir))\n-\n-    errorOrRun fold (e => throw PackageInterfaceException(e), identity)\n-  }\n+      mode: Mode): ValidationNel[String, Unit] = {\n \n-  private def decodePackageFromFile(\n-      sdamlFile: File,\n-      mode: Mode): String \\/ mode.InterfaceElement = {\n-    val is = Files.newInputStream(sdamlFile.toPath)\n-    println(s\"Decoding ${sdamlFile.toPath}\")\n-    try decodePackageFrom(is, mode)\n-    finally is.close() // close is in case of fatal throwables\n-  }\n+    val reader = UniversalArchiveReader()\n \n-  private def decodePackagesFromURLs(\n-      urls: Seq[URL],\n-      mode: Mode): String \\/ Seq[mode.InterfaceElement] =\n-    urls\n-      .map { url =>\n-        val is = url.openStream()\n-        try decodePackageFrom(is, mode)\n-        finally is.close()\n-      }\n-      .toList\n-      .sequenceU\n+    val errorsOrUnits: ValidationNel[String, List[Unit]] = files.traverseU { f =>"
+  }
+]

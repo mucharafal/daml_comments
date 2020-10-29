@@ -1,0 +1,775 @@
+[
+  {
+    "id" : "c5f7c306-d27a-4d56-932a-5fc519216fd3",
+    "prId" : 6515,
+    "comments" : [
+      {
+        "id" : "050e6b81-a301-4beb-8336-2a203a4f3ede",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Why adding `()`? If you consider it as producing a side-effect, then the definition site should be changed too as well as all occurrences.",
+        "createdAt" : "2020-06-29T14:56:26Z",
+        "updatedAt" : "2020-06-30T08:52:03Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fe3ca372-dc98-4f1e-b724-8210dc73d775",
+        "parentId" : "050e6b81-a301-4beb-8336-2a203a4f3ede",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "This is a mock specification, hence I'm mirroring the exact signature of the method.",
+        "createdAt" : "2020-06-29T15:11:28Z",
+        "updatedAt" : "2020-06-30T08:52:03Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "099da51d-4094-4dff-a17d-08e8db08c9cb",
+        "parentId" : "050e6b81-a301-4beb-8336-2a203a4f3ede",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Right, for some reason I was convinced that the trait signature was without `()`.",
+        "createdAt" : "2020-06-29T15:50:52Z",
+        "updatedAt" : "2020-06-30T08:52:03Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5b5d17d48af638f059d785c2d530c2f7d89eec0e",
+    "line" : 70,
+    "diffHunk" : "@@ -111,25 +163,33 @@ object BatchingLedgerWriterSpec {\n       captor: Option[ArgumentCaptor[kvutils.Bytes]] = None,\n       submissionResult: SubmissionResult = SubmissionResult.Acknowledged): LedgerWriter = {\n     val writer = mock[LedgerWriter]\n-    when(writer.commit(anyString(), captor.map(_.capture()).getOrElse(any[kvutils.Bytes]())))\n+    when(\n+      writer.commit(\n+        anyString(),\n+        captor.map(_.capture()).getOrElse(any[kvutils.Bytes]()),\n+        any[CommitMetadata]))\n       .thenReturn(Future.successful(SubmissionResult.Acknowledged))\n     when(writer.participantId).thenReturn(v1.ParticipantId.assertFromString(\"test-participant\"))\n-    when(writer.currentHealth).thenReturn(HealthStatus.healthy)\n+    when(writer.currentHealth()).thenReturn(HealthStatus.healthy)"
+  },
+  {
+    "id" : "461c5d16-e2f7-4db3-b46e-cb1d1b974290",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "5faf5205-b0e8-427d-a454-79e309a064d9",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "We'll soon know :) I don't think there's a perfect way to run time-sensitive tests but perhaps we should start considering something like https://github.com/puniverse/timewarp",
+        "createdAt" : "2020-03-12T17:42:56Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.mockito.Mockito.{timeout, times, _}\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Matchers {\n+\n+  private def createWriter(\n+      captor: Option[ArgumentCaptor[Array[Byte]]] = None,\n+      result: SubmissionResult = SubmissionResult.Acknowledged): LedgerWriter = {\n+    val writer = mock[LedgerWriter]\n+    when(\n+      writer.commit(\n+        ArgumentMatchers.anyString(),\n+        captor.map(_.capture()).getOrElse(ArgumentMatchers.any[Array[Byte]]())))\n+      .thenReturn(Future.successful(SubmissionResult.Acknowledged))\n+    when(writer.participantId).thenReturn(v1.ParticipantId.assertFromString(\"test-participant\"))\n+    writer\n+  }\n+\n+  private def createBatchingWriter(\n+      writer: LedgerWriter,\n+      maxBatchSizeBytes: Long,\n+      maxWaitDuration: FiniteDuration) =\n+    LoggingContext.newLoggingContext { implicit logCtx =>\n+      new BatchingLedgerWriter(\n+        writer = writer,\n+        maxQueueSize = 128,\n+        maxBatchSizeBytes = maxBatchSizeBytes,\n+        maxWaitDuration = maxWaitDuration,\n+        maxParallelism = 1\n+      )\n+    }\n+\n+  private def createExpectedBatch(corId: String, subm: Array[Byte]) =\n+    Envelope\n+      .enclose(\n+        DamlSubmissionBatch.newBuilder\n+          .addSubmissions(\n+            DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+              .setCorrelationId(corId)\n+              .setSubmission(ByteString.copyFrom(subm)))\n+          .build)\n+      .toByteArray\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    // Test that even when maxWaitDuration is reached we don't commit an empty batch.\n+    \"not commit empty batches\" in {\n+      val mockWriter = mock[LedgerWriter]\n+      val batchingWriter = createBatchingWriter(mockWriter, 1024, 10.millis)\n+      Thread.sleep(2 * batchingWriter.maxWaitDuration.toMillis);\n+      verifyZeroInteractions(mockWriter)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val batchCaptor: ArgumentCaptor[Array[Byte]] = ArgumentCaptor.forClass(classOf[Array[Byte]])\n+      val mockWriter = createWriter(Some(batchCaptor))\n+      val batchingWriter = createBatchingWriter(\n+        mockWriter,\n+        1024,\n+        /* Fingers crossed that this is long enough to not make this test flaky */"
+  },
+  {
+    "id" : "4d20d928-c01f-4484-8fe2-8d87dcd1b6a1",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "6957061a-8c15-4714-a9ff-642087879969",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "For improved readability I'd suggest importing `ArgumentMatchers._`.",
+        "createdAt" : "2020-03-16T09:41:58Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "47dbd7ee-c1f8-4ea4-aae3-afd7c8ea5786",
+        "parentId" : "6957061a-8c15-4714-a9ff-642087879969",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Added back the import. `eq` conflicts so I need both.",
+        "createdAt" : "2020-03-23T13:01:17Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2dcfcff6-e904-47a9-b51b-1068e3aea688",
+        "parentId" : "6957061a-8c15-4714-a9ff-642087879969",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Makes sense.",
+        "createdAt" : "2020-03-25T18:17:26Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.mockito.Mockito.{timeout, times, _}\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Matchers {\n+\n+  private def createWriter(\n+      captor: Option[ArgumentCaptor[Array[Byte]]] = None,\n+      result: SubmissionResult = SubmissionResult.Acknowledged): LedgerWriter = {\n+    val writer = mock[LedgerWriter]\n+    when(\n+      writer.commit(\n+        ArgumentMatchers.anyString(),\n+        captor.map(_.capture()).getOrElse(ArgumentMatchers.any[Array[Byte]]())))\n+      .thenReturn(Future.successful(SubmissionResult.Acknowledged))\n+    when(writer.participantId).thenReturn(v1.ParticipantId.assertFromString(\"test-participant\"))\n+    writer\n+  }\n+\n+  private def createBatchingWriter(\n+      writer: LedgerWriter,\n+      maxBatchSizeBytes: Long,\n+      maxWaitDuration: FiniteDuration) =\n+    LoggingContext.newLoggingContext { implicit logCtx =>\n+      new BatchingLedgerWriter(\n+        writer = writer,\n+        maxQueueSize = 128,\n+        maxBatchSizeBytes = maxBatchSizeBytes,\n+        maxWaitDuration = maxWaitDuration,\n+        maxParallelism = 1\n+      )\n+    }\n+\n+  private def createExpectedBatch(corId: String, subm: Array[Byte]) =\n+    Envelope\n+      .enclose(\n+        DamlSubmissionBatch.newBuilder\n+          .addSubmissions(\n+            DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+              .setCorrelationId(corId)\n+              .setSubmission(ByteString.copyFrom(subm)))\n+          .build)\n+      .toByteArray\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    // Test that even when maxWaitDuration is reached we don't commit an empty batch.\n+    \"not commit empty batches\" in {\n+      val mockWriter = mock[LedgerWriter]\n+      val batchingWriter = createBatchingWriter(mockWriter, 1024, 10.millis)\n+      Thread.sleep(2 * batchingWriter.maxWaitDuration.toMillis);\n+      verifyZeroInteractions(mockWriter)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val batchCaptor: ArgumentCaptor[Array[Byte]] = ArgumentCaptor.forClass(classOf[Array[Byte]])\n+      val mockWriter = createWriter(Some(batchCaptor))\n+      val batchingWriter = createBatchingWriter(\n+        mockWriter,\n+        1024,\n+        /* Fingers crossed that this is long enough to not make this test flaky */\n+        50.millis)\n+\n+      val (corId1, subm1) = \"test1\" -> Array[Byte](1, 2, 3)\n+      val (corId2, subm2) = \"test2\" -> Array[Byte](4, 5, 6)\n+\n+      for {\n+        res1 <- batchingWriter.commit(corId1, subm1)\n+\n+        // Wait until the first batch's duration expires\n+        _ <- Future { Thread.sleep(batchingWriter.maxWaitDuration.toMillis * 2); }\n+\n+        // Commit another submission, which we expect to land in a separate batch.\n+        res2 <- batchingWriter.commit(corId2, subm2)\n+\n+      } yield {\n+        def verifyCommit(expected: Array[Byte]) = {\n+          val commitTimeout = batchingWriter.maxWaitDuration.toMillis * 5\n+          verify(mockWriter, timeout(commitTimeout))\n+            .commit(ArgumentMatchers.anyString(), ArgumentMatchers.eq(expected))"
+  },
+  {
+    "id" : "6b79146f-8cfd-4695-a528-0bc02379bb6a",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "5e9015a4-904e-4a95-9bfb-4dd7fabc303e",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "We have `MockitoHelpers.captor` that should simplify creation captors for a specific class.",
+        "createdAt" : "2020-03-16T09:42:50Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.mockito.Mockito.{timeout, times, _}\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Matchers {\n+\n+  private def createWriter(\n+      captor: Option[ArgumentCaptor[Array[Byte]]] = None,\n+      result: SubmissionResult = SubmissionResult.Acknowledged): LedgerWriter = {\n+    val writer = mock[LedgerWriter]\n+    when(\n+      writer.commit(\n+        ArgumentMatchers.anyString(),\n+        captor.map(_.capture()).getOrElse(ArgumentMatchers.any[Array[Byte]]())))\n+      .thenReturn(Future.successful(SubmissionResult.Acknowledged))\n+    when(writer.participantId).thenReturn(v1.ParticipantId.assertFromString(\"test-participant\"))\n+    writer\n+  }\n+\n+  private def createBatchingWriter(\n+      writer: LedgerWriter,\n+      maxBatchSizeBytes: Long,\n+      maxWaitDuration: FiniteDuration) =\n+    LoggingContext.newLoggingContext { implicit logCtx =>\n+      new BatchingLedgerWriter(\n+        writer = writer,\n+        maxQueueSize = 128,\n+        maxBatchSizeBytes = maxBatchSizeBytes,\n+        maxWaitDuration = maxWaitDuration,\n+        maxParallelism = 1\n+      )\n+    }\n+\n+  private def createExpectedBatch(corId: String, subm: Array[Byte]) =\n+    Envelope\n+      .enclose(\n+        DamlSubmissionBatch.newBuilder\n+          .addSubmissions(\n+            DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+              .setCorrelationId(corId)\n+              .setSubmission(ByteString.copyFrom(subm)))\n+          .build)\n+      .toByteArray\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    // Test that even when maxWaitDuration is reached we don't commit an empty batch.\n+    \"not commit empty batches\" in {\n+      val mockWriter = mock[LedgerWriter]\n+      val batchingWriter = createBatchingWriter(mockWriter, 1024, 10.millis)\n+      Thread.sleep(2 * batchingWriter.maxWaitDuration.toMillis);\n+      verifyZeroInteractions(mockWriter)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val batchCaptor: ArgumentCaptor[Array[Byte]] = ArgumentCaptor.forClass(classOf[Array[Byte]])"
+  },
+  {
+    "id" : "0c314033-9356-43c8-be1f-85c006457381",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "90cad5d8-7092-409a-899e-9bb8a2bad080",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please move `private def`s to the end of the test suite so that you don't have to keep scrolling down to find the first test case definition.",
+        "createdAt" : "2020-03-16T09:44:29Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4276176b-bcb9-41b0-9c87-f2dad4327c0f",
+        "parentId" : "90cad5d8-7092-409a-899e-9bb8a2bad080",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-03-23T13:01:50Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.mockito.Mockito.{timeout, times, _}\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Matchers {\n+\n+  private def createWriter("
+  },
+  {
+    "id" : "dd73bffa-6d81-4eef-bde5-03c03e4b96fc",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "0f4f6e56-66af-4927-8747-3e62639b115c",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Instead of using `Thread.sleep` (which may make these tests flaky) I'd suggest using the akka streams testkit:\r\nhttps://doc.akka.io/docs/akka/current/stream/stream-testkit.html#streams-testkit\r\n\r\nIf you injected the queue into `BatchingLedgerWriter` this would be trivial to rewrite using the testkit.",
+        "createdAt" : "2020-03-16T09:46:11Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "280f77ff-9606-4c1a-b980-a9cf392584dd",
+        "parentId" : "0f4f6e56-66af-4927-8747-3e62639b115c",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Removed all use of `sleep` and used `eventually` instead.",
+        "createdAt" : "2020-03-23T13:01:42Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.mockito.Mockito.{timeout, times, _}\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Matchers {\n+\n+  private def createWriter(\n+      captor: Option[ArgumentCaptor[Array[Byte]]] = None,\n+      result: SubmissionResult = SubmissionResult.Acknowledged): LedgerWriter = {\n+    val writer = mock[LedgerWriter]\n+    when(\n+      writer.commit(\n+        ArgumentMatchers.anyString(),\n+        captor.map(_.capture()).getOrElse(ArgumentMatchers.any[Array[Byte]]())))\n+      .thenReturn(Future.successful(SubmissionResult.Acknowledged))\n+    when(writer.participantId).thenReturn(v1.ParticipantId.assertFromString(\"test-participant\"))\n+    writer\n+  }\n+\n+  private def createBatchingWriter(\n+      writer: LedgerWriter,\n+      maxBatchSizeBytes: Long,\n+      maxWaitDuration: FiniteDuration) =\n+    LoggingContext.newLoggingContext { implicit logCtx =>\n+      new BatchingLedgerWriter(\n+        writer = writer,\n+        maxQueueSize = 128,\n+        maxBatchSizeBytes = maxBatchSizeBytes,\n+        maxWaitDuration = maxWaitDuration,\n+        maxParallelism = 1\n+      )\n+    }\n+\n+  private def createExpectedBatch(corId: String, subm: Array[Byte]) =\n+    Envelope\n+      .enclose(\n+        DamlSubmissionBatch.newBuilder\n+          .addSubmissions(\n+            DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+              .setCorrelationId(corId)\n+              .setSubmission(ByteString.copyFrom(subm)))\n+          .build)\n+      .toByteArray\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    // Test that even when maxWaitDuration is reached we don't commit an empty batch.\n+    \"not commit empty batches\" in {\n+      val mockWriter = mock[LedgerWriter]\n+      val batchingWriter = createBatchingWriter(mockWriter, 1024, 10.millis)\n+      Thread.sleep(2 * batchingWriter.maxWaitDuration.toMillis);"
+  },
+  {
+    "id" : "b8e72de9-5693-4932-9254-695d7a78f2e0",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "0722738c-e22f-4898-aa9c-1a52f5231801",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Can you test reporting of health status as well, please?",
+        "createdAt" : "2020-03-16T09:48:10Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "15bc749b-b5b8-485c-a643-bc9bf6bccb78",
+        "parentId" : "0722738c-e22f-4898-aa9c-1a52f5231801",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Added.",
+        "createdAt" : "2020-03-23T13:01:56Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "670e8022-9982-4b22-be28-dec9b913f8ce",
+        "parentId" : "0722738c-e22f-4898-aa9c-1a52f5231801",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Great! You may want to test the health status reporting separately from the other aspects, i.e., that way you don't test multiple aspects in the same test case (now you assert health status at the end of the test cases).",
+        "createdAt" : "2020-03-25T17:46:21Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : 1,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved."
+  },
+  {
+    "id" : "ba884cd8-ff9e-4675-b9fe-c13e7caf25ec",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "69fcc455-7092-46ae-9d93-4f8ae32951aa",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "You could simplify this by directly testing `commitBatch`.",
+        "createdAt" : "2020-03-16T10:23:07Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.mockito.Mockito.{timeout, times, _}\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Matchers {\n+\n+  private def createWriter(\n+      captor: Option[ArgumentCaptor[Array[Byte]]] = None,\n+      result: SubmissionResult = SubmissionResult.Acknowledged): LedgerWriter = {\n+    val writer = mock[LedgerWriter]\n+    when(\n+      writer.commit(\n+        ArgumentMatchers.anyString(),\n+        captor.map(_.capture()).getOrElse(ArgumentMatchers.any[Array[Byte]]())))\n+      .thenReturn(Future.successful(SubmissionResult.Acknowledged))\n+    when(writer.participantId).thenReturn(v1.ParticipantId.assertFromString(\"test-participant\"))\n+    writer\n+  }\n+\n+  private def createBatchingWriter(\n+      writer: LedgerWriter,\n+      maxBatchSizeBytes: Long,\n+      maxWaitDuration: FiniteDuration) =\n+    LoggingContext.newLoggingContext { implicit logCtx =>\n+      new BatchingLedgerWriter(\n+        writer = writer,\n+        maxQueueSize = 128,\n+        maxBatchSizeBytes = maxBatchSizeBytes,\n+        maxWaitDuration = maxWaitDuration,\n+        maxParallelism = 1\n+      )\n+    }\n+\n+  private def createExpectedBatch(corId: String, subm: Array[Byte]) =\n+    Envelope\n+      .enclose(\n+        DamlSubmissionBatch.newBuilder\n+          .addSubmissions(\n+            DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+              .setCorrelationId(corId)\n+              .setSubmission(ByteString.copyFrom(subm)))\n+          .build)\n+      .toByteArray\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    // Test that even when maxWaitDuration is reached we don't commit an empty batch.\n+    \"not commit empty batches\" in {\n+      val mockWriter = mock[LedgerWriter]\n+      val batchingWriter = createBatchingWriter(mockWriter, 1024, 10.millis)\n+      Thread.sleep(2 * batchingWriter.maxWaitDuration.toMillis);\n+      verifyZeroInteractions(mockWriter)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val batchCaptor: ArgumentCaptor[Array[Byte]] = ArgumentCaptor.forClass(classOf[Array[Byte]])\n+      val mockWriter = createWriter(Some(batchCaptor))\n+      val batchingWriter = createBatchingWriter(\n+        mockWriter,\n+        1024,\n+        /* Fingers crossed that this is long enough to not make this test flaky */\n+        50.millis)\n+\n+      val (corId1, subm1) = \"test1\" -> Array[Byte](1, 2, 3)\n+      val (corId2, subm2) = \"test2\" -> Array[Byte](4, 5, 6)\n+\n+      for {\n+        res1 <- batchingWriter.commit(corId1, subm1)\n+\n+        // Wait until the first batch's duration expires\n+        _ <- Future { Thread.sleep(batchingWriter.maxWaitDuration.toMillis * 2); }\n+\n+        // Commit another submission, which we expect to land in a separate batch.\n+        res2 <- batchingWriter.commit(corId2, subm2)\n+\n+      } yield {\n+        def verifyCommit(expected: Array[Byte]) = {\n+          val commitTimeout = batchingWriter.maxWaitDuration.toMillis * 5\n+          verify(mockWriter, timeout(commitTimeout))\n+            .commit(ArgumentMatchers.anyString(), ArgumentMatchers.eq(expected))\n+        }\n+        verifyCommit(createExpectedBatch(corId1, subm1))\n+        verifyCommit(createExpectedBatch(corId2, subm2))\n+\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+      }\n+    }\n+\n+    \"commit batch when maxBatchSizeBytes reached\" in {\n+      val batchCaptor: ArgumentCaptor[Array[Byte]] = ArgumentCaptor.forClass(classOf[Array[Byte]])\n+      val mockWriter = createWriter(Some(batchCaptor))\n+      val batchingWriter = createBatchingWriter(mockWriter, 10, 1.seconds)\n+      val expectedBatch =\n+        Envelope\n+          .enclose(\n+            DamlSubmissionBatch.newBuilder\n+              .addSubmissions(DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+                .setCorrelationId(\"test1\")\n+                .setSubmission(ByteString.copyFrom(Array[Byte](1, 2, 3, 4, 5))))\n+              .addSubmissions(DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+                .setCorrelationId(\"test2\")\n+                .setSubmission(ByteString.copyFrom(Array[Byte](6, 7, 8, 9, 10))))\n+              .build)\n+          .toByteArray\n+\n+      for {\n+        res1 <- batchingWriter.commit(\"test1\", Array[Byte](1, 2, 3, 4, 5))\n+        res2 <- batchingWriter.commit(\"test2\", Array[Byte](6, 7, 8, 9, 10))\n+        res3 <- batchingWriter.commit(\"test3\", Array[Byte](11, 12, 13, 14, 15))\n+      } yield {\n+        // We're only expecting the first batch to have been emitted.\n+        verify(mockWriter, times(1))\n+          .commit(ArgumentMatchers.anyString(), ArgumentMatchers.eq(expectedBatch))\n+\n+        all(Seq(res1, res2, res3)) should be(SubmissionResult.Acknowledged)\n+      }\n+    }\n+  }\n+\n+  // Test that the batching writer stays up and keeps going even when underlying writer fails.\n+  \"drop batch when commit fails\" in {\n+    val mockWriter = createWriter(None, SubmissionResult.Overloaded)"
+  },
+  {
+    "id" : "ed8cdab8-9a42-46d5-bac8-bd72f69b7323",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "f44e6e27-877c-4591-b562-dfaf9df0f52f",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "`correlatedSubmission`",
+        "createdAt" : "2020-03-25T16:50:29Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder"
+  },
+  {
+    "id" : "c5a34a0b-0362-4c4a-a29f-4ab08ed67357",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "2c2ba71c-1226-4f98-acbe-59f0f5eba018",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "To improve readability, please create a val or def named `aSubmission` that contains your favourite string.",
+        "createdAt" : "2020-03-25T16:51:02Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))"
+  },
+  {
+    "id" : "21029e06-2d00-4062-a8a0-5c11a9afb5d0",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "a606af15-837f-4d80-becc-47dbe2939ca0",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "To improve readability of these test cases please name parameters (otherwise it's difficult to get why you're testing what the test states).",
+        "createdAt" : "2020-03-25T16:51:48Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "637c204e-8da8-4ebe-83ea-523e2750a267",
+        "parentId" : "a606af15-837f-4d80-becc-47dbe2939ca0",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Ah yes. The fact that I've got the IntelliJ setting on that shows these automatically makes me forget this.",
+        "createdAt" : "2020-03-26T12:42:12Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)"
+  },
+  {
+    "id" : "04977095-3800-4dfc-a9a4-9baa95fae8c8",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "d86477b7-8cd1-4bf4-afba-ddd219c5744d",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "A mutable collection such as a `ListBuffer` would be more appropriate here (it's easier to reason about the code if you don't have `var`s).",
+        "createdAt" : "2020-03-25T16:53:59Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e3bd1f35-fa31-4c48-b778-1fb73edc20b5",
+        "parentId" : "d86477b7-8cd1-4bf4-afba-ddd219c5744d",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : ":+1: ",
+        "createdAt" : "2020-03-26T12:48:42Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      queue.alive should be(true)\n+      for {\n+        res <- queue.offer(subm1)\n+      } yield {\n+        res should be(SubmissionResult.Acknowledged)\n+        queue.alive should be(false)\n+      }\n+    }\n+\n+    \"not commit empty batches\" in {\n+      val mockCommit =\n+        mock[Function[Seq[DamlSubmissionBatch.CorrelatedSubmission], Future[Unit]]]\n+      val queue = DefaultBatchingQueue(1, 1024, 1.millis, 1)\n+      queue.run(mockCommit)\n+      Thread.sleep(5.millis.toMillis);\n+      verifyZeroInteractions(mockCommit)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val maxWait = 5.millis\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]"
+  },
+  {
+    "id" : "e5e06de2-c49d-4916-bbc2-f731c707999e",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "3cca55d2-f851-44e6-9726-9ba9375e9529",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "For improved test readability you may want to create a helper function for creating and 'running' a batching queue. I.e., this way you wouldn't have to repeat your submission collector function definition.",
+        "createdAt" : "2020-03-25T16:55:44Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      queue.alive should be(true)\n+      for {\n+        res <- queue.offer(subm1)\n+      } yield {\n+        res should be(SubmissionResult.Acknowledged)\n+        queue.alive should be(false)\n+      }\n+    }\n+\n+    \"not commit empty batches\" in {\n+      val mockCommit =\n+        mock[Function[Seq[DamlSubmissionBatch.CorrelatedSubmission], Future[Unit]]]\n+      val queue = DefaultBatchingQueue(1, 1024, 1.millis, 1)\n+      queue.run(mockCommit)\n+      Thread.sleep(5.millis.toMillis);\n+      verifyZeroInteractions(mockCommit)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val maxWait = 5.millis\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue ="
+  },
+  {
+    "id" : "44260a40-2c91-49f6-afcb-67ef577816db",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "d65df187-5dba-4343-92fb-c2753df8d845",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Here naming parameters would help, i.e., you could say `maxBatchSize = aSubmission.size` which would speak for itself.",
+        "createdAt" : "2020-03-25T16:56:31Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      queue.alive should be(true)\n+      for {\n+        res <- queue.offer(subm1)\n+      } yield {\n+        res should be(SubmissionResult.Acknowledged)\n+        queue.alive should be(false)\n+      }\n+    }\n+\n+    \"not commit empty batches\" in {\n+      val mockCommit =\n+        mock[Function[Seq[DamlSubmissionBatch.CorrelatedSubmission], Future[Unit]]]\n+      val queue = DefaultBatchingQueue(1, 1024, 1.millis, 1)\n+      queue.run(mockCommit)\n+      Thread.sleep(5.millis.toMillis);\n+      verifyZeroInteractions(mockCommit)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val maxWait = 5.millis\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 1024, maxWait, 1)\n+          .run { batch =>\n+            {\n+              batches = batch +: batches\n+              Future.successful(())\n+            }\n+          }\n+\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"1\").build\n+      val subm2 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"2\").build\n+\n+      for {\n+        res1 <- queue.offer(subm1)\n+        _ = eventually {\n+          batches.size should be(1)\n+        }\n+        res2 <- queue.offer(subm2)\n+        _ <- eventually {\n+          batches.size should be(2)\n+        }\n+      } yield {\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+        batches should be(Seq(Seq(subm2), Seq(subm1)))\n+        queue.alive should be(true)\n+      }\n+    }\n+\n+    \"commit batch after max batch size exceeded\" in {\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 15, 50.millis, 1)"
+  },
+  {
+    "id" : "69933ff1-5706-4f74-85ad-3afa2bd72f77",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "45b1a2c8-8a66-435c-94dc-7f2375c19593",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "There is only one correlationId/submission pair no numbering is needed. Can you separately declare these variables, please?",
+        "createdAt" : "2020-03-25T16:59:12Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      queue.alive should be(true)\n+      for {\n+        res <- queue.offer(subm1)\n+      } yield {\n+        res should be(SubmissionResult.Acknowledged)\n+        queue.alive should be(false)\n+      }\n+    }\n+\n+    \"not commit empty batches\" in {\n+      val mockCommit =\n+        mock[Function[Seq[DamlSubmissionBatch.CorrelatedSubmission], Future[Unit]]]\n+      val queue = DefaultBatchingQueue(1, 1024, 1.millis, 1)\n+      queue.run(mockCommit)\n+      Thread.sleep(5.millis.toMillis);\n+      verifyZeroInteractions(mockCommit)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val maxWait = 5.millis\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 1024, maxWait, 1)\n+          .run { batch =>\n+            {\n+              batches = batch +: batches\n+              Future.successful(())\n+            }\n+          }\n+\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"1\").build\n+      val subm2 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"2\").build\n+\n+      for {\n+        res1 <- queue.offer(subm1)\n+        _ = eventually {\n+          batches.size should be(1)\n+        }\n+        res2 <- queue.offer(subm2)\n+        _ <- eventually {\n+          batches.size should be(2)\n+        }\n+      } yield {\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+        batches should be(Seq(Seq(subm2), Seq(subm1)))\n+        queue.alive should be(true)\n+      }\n+    }\n+\n+    \"commit batch after max batch size exceeded\" in {\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 15, 50.millis, 1)\n+          .run { batch =>\n+            {\n+              batches = batch +: batches\n+              Future.successful(())\n+            }\n+          }\n+\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+      val subm2 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"2\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      for {\n+        res1 <- queue.offer(subm1)\n+        _ = {\n+          batches.size should be(0)\n+        }\n+        res2 <- queue.offer(subm2)\n+      } yield {\n+        // First batch emitted.\n+        batches.size should be(1)\n+\n+        // Wait for second batch.\n+        eventually {\n+          batches.size should be(2)\n+        }\n+\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+        batches should be(Seq(Seq(subm2), Seq(subm1)))\n+        queue.alive should be(true)\n+      }\n+    }\n+  }\n+\n+  def immediateBatchingQueue: BatchingQueue =\n+    new BatchingQueue {\n+      override def run(commitBatch: Seq[DamlSubmissionBatch.CorrelatedSubmission] => Future[Unit])(\n+          implicit materializer: Materializer): BatchingQueueHandle =\n+        new BatchingQueueHandle {\n+          override def alive: Boolean = true\n+          override def offer(\n+              submission: DamlSubmissionBatch.CorrelatedSubmission): Future[SubmissionResult] =\n+            commitBatch(Seq(submission))\n+              .map { _ =>\n+                SubmissionResult.Acknowledged\n+              }\n+        }\n+    }\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    \"construct batch correctly\" in {\n+      val batchCaptor = MockitoHelpers.captor[kvutils.Bytes]\n+      val mockWriter = createWriter(Some(batchCaptor))\n+      val batchingWriter =\n+        LoggingContext.newLoggingContext { implicit logCtx =>\n+          new BatchingLedgerWriter(immediateBatchingQueue, mockWriter)\n+        }\n+      val (corId1, subm1) = \"test1\" -> ByteString.copyFrom(Array[Byte](1, 2, 3))"
+  },
+  {
+    "id" : "82c297df-e49c-44fa-b6fe-099acf51b85f",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "70dcf43e-ed0f-4488-baff-9108f910b6ba",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please name the parameters here otherwise it's non-trivial to get why this commit will fail.",
+        "createdAt" : "2020-03-25T17:00:49Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cc0e1eef-6a48-4591-a475-c1fce456202f",
+        "parentId" : "70dcf43e-ed0f-4488-baff-9108f910b6ba",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-03-26T13:15:05Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      queue.alive should be(true)\n+      for {\n+        res <- queue.offer(subm1)\n+      } yield {\n+        res should be(SubmissionResult.Acknowledged)\n+        queue.alive should be(false)\n+      }\n+    }\n+\n+    \"not commit empty batches\" in {\n+      val mockCommit =\n+        mock[Function[Seq[DamlSubmissionBatch.CorrelatedSubmission], Future[Unit]]]\n+      val queue = DefaultBatchingQueue(1, 1024, 1.millis, 1)\n+      queue.run(mockCommit)\n+      Thread.sleep(5.millis.toMillis);\n+      verifyZeroInteractions(mockCommit)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val maxWait = 5.millis\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 1024, maxWait, 1)\n+          .run { batch =>\n+            {\n+              batches = batch +: batches\n+              Future.successful(())\n+            }\n+          }\n+\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"1\").build\n+      val subm2 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"2\").build\n+\n+      for {\n+        res1 <- queue.offer(subm1)\n+        _ = eventually {\n+          batches.size should be(1)\n+        }\n+        res2 <- queue.offer(subm2)\n+        _ <- eventually {\n+          batches.size should be(2)\n+        }\n+      } yield {\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+        batches should be(Seq(Seq(subm2), Seq(subm1)))\n+        queue.alive should be(true)\n+      }\n+    }\n+\n+    \"commit batch after max batch size exceeded\" in {\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 15, 50.millis, 1)\n+          .run { batch =>\n+            {\n+              batches = batch +: batches\n+              Future.successful(())\n+            }\n+          }\n+\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+      val subm2 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"2\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      for {\n+        res1 <- queue.offer(subm1)\n+        _ = {\n+          batches.size should be(0)\n+        }\n+        res2 <- queue.offer(subm2)\n+      } yield {\n+        // First batch emitted.\n+        batches.size should be(1)\n+\n+        // Wait for second batch.\n+        eventually {\n+          batches.size should be(2)\n+        }\n+\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+        batches should be(Seq(Seq(subm2), Seq(subm1)))\n+        queue.alive should be(true)\n+      }\n+    }\n+  }\n+\n+  def immediateBatchingQueue: BatchingQueue =\n+    new BatchingQueue {\n+      override def run(commitBatch: Seq[DamlSubmissionBatch.CorrelatedSubmission] => Future[Unit])(\n+          implicit materializer: Materializer): BatchingQueueHandle =\n+        new BatchingQueueHandle {\n+          override def alive: Boolean = true\n+          override def offer(\n+              submission: DamlSubmissionBatch.CorrelatedSubmission): Future[SubmissionResult] =\n+            commitBatch(Seq(submission))\n+              .map { _ =>\n+                SubmissionResult.Acknowledged\n+              }\n+        }\n+    }\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    \"construct batch correctly\" in {\n+      val batchCaptor = MockitoHelpers.captor[kvutils.Bytes]\n+      val mockWriter = createWriter(Some(batchCaptor))\n+      val batchingWriter =\n+        LoggingContext.newLoggingContext { implicit logCtx =>\n+          new BatchingLedgerWriter(immediateBatchingQueue, mockWriter)\n+        }\n+      val (corId1, subm1) = \"test1\" -> ByteString.copyFrom(Array[Byte](1, 2, 3))\n+      val expected = createExpectedBatch(corId1, subm1)\n+      for {\n+        res1 <- batchingWriter.commit(corId1, subm1)\n+      } yield {\n+        verify(mockWriter).commit(anyString(), ArgumentMatchers.eq(expected))\n+        res1 should be(SubmissionResult.Acknowledged)\n+      }\n+    }\n+\n+    \"drop batch when commit fails\" in {\n+      val mockWriter = createWriter(None, SubmissionResult.Overloaded)"
+  },
+  {
+    "id" : "afe31672-fff6-41b1-bc5e-497e5cca59f4",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "f7deebae-dc4c-45fd-a7af-65f9c30154ce",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Here readability could be improved by introducing `aSubmission` (as recommended above) and setting `maxBatchSizeBytes = aSubmission.size` explicitly.",
+        "createdAt" : "2020-03-25T17:02:38Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8a546e20-794d-487b-8a67-6c7b20ccf908",
+        "parentId" : "f7deebae-dc4c-45fd-a7af-65f9c30154ce",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "agreed!",
+        "createdAt" : "2020-03-26T13:15:12Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,226 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.{Envelope, MockitoHelpers}\n+import com.daml.ledger.participant.state.{kvutils, v1}\n+import com.daml.ledger.participant.state.v1.SubmissionResult\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n+import com.digitalasset.logging.LoggingContext\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.mockito.{ArgumentCaptor, ArgumentMatchers}\n+import org.scalatest.concurrent.Eventually\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration._\n+\n+class BatchingLedgerWriterSpec\n+    extends AsyncWordSpec\n+    with MockitoSugar\n+    with AkkaBeforeAndAfterAll\n+    with Eventually\n+    with Matchers {\n+\n+  \"DefaultBatchingQueue\" should {\n+\n+    \"report dead when queue is closed\" in {\n+      val queue = DefaultBatchingQueue(10, 5, 1.millis, 1)\n+        .run { batch =>\n+          throw new RuntimeException(\"kill the queue\")\n+        }\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      queue.alive should be(true)\n+      for {\n+        res <- queue.offer(subm1)\n+      } yield {\n+        res should be(SubmissionResult.Acknowledged)\n+        queue.alive should be(false)\n+      }\n+    }\n+\n+    \"not commit empty batches\" in {\n+      val mockCommit =\n+        mock[Function[Seq[DamlSubmissionBatch.CorrelatedSubmission], Future[Unit]]]\n+      val queue = DefaultBatchingQueue(1, 1024, 1.millis, 1)\n+      queue.run(mockCommit)\n+      Thread.sleep(5.millis.toMillis);\n+      verifyZeroInteractions(mockCommit)\n+      succeed\n+    }\n+\n+    // Test that we commit a batch when we have a submission and the maxWaitDuration has been reached.\n+    \"commit batch after maxWaitDuration\" in {\n+      val maxWait = 5.millis\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 1024, maxWait, 1)\n+          .run { batch =>\n+            {\n+              batches = batch +: batches\n+              Future.successful(())\n+            }\n+          }\n+\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"1\").build\n+      val subm2 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder.setCorrelationId(\"2\").build\n+\n+      for {\n+        res1 <- queue.offer(subm1)\n+        _ = eventually {\n+          batches.size should be(1)\n+        }\n+        res2 <- queue.offer(subm2)\n+        _ <- eventually {\n+          batches.size should be(2)\n+        }\n+      } yield {\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+        batches should be(Seq(Seq(subm2), Seq(subm1)))\n+        queue.alive should be(true)\n+      }\n+    }\n+\n+    \"commit batch after max batch size exceeded\" in {\n+      var batches = Seq.empty[Seq[DamlSubmissionBatch.CorrelatedSubmission]]\n+      val queue =\n+        DefaultBatchingQueue(10, 15, 50.millis, 1)\n+          .run { batch =>\n+            {\n+              batches = batch +: batches\n+              Future.successful(())\n+            }\n+          }\n+\n+      val subm1 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"1\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+      val subm2 = DamlSubmissionBatch.CorrelatedSubmission.newBuilder\n+        .setCorrelationId(\"2\")\n+        .setSubmission(ByteString.copyFromUtf8(\"helloworld\"))\n+        .build\n+\n+      for {\n+        res1 <- queue.offer(subm1)\n+        _ = {\n+          batches.size should be(0)\n+        }\n+        res2 <- queue.offer(subm2)\n+      } yield {\n+        // First batch emitted.\n+        batches.size should be(1)\n+\n+        // Wait for second batch.\n+        eventually {\n+          batches.size should be(2)\n+        }\n+\n+        res1 should be(SubmissionResult.Acknowledged)\n+        res2 should be(SubmissionResult.Acknowledged)\n+        batches should be(Seq(Seq(subm2), Seq(subm1)))\n+        queue.alive should be(true)\n+      }\n+    }\n+  }\n+\n+  def immediateBatchingQueue: BatchingQueue =\n+    new BatchingQueue {\n+      override def run(commitBatch: Seq[DamlSubmissionBatch.CorrelatedSubmission] => Future[Unit])(\n+          implicit materializer: Materializer): BatchingQueueHandle =\n+        new BatchingQueueHandle {\n+          override def alive: Boolean = true\n+          override def offer(\n+              submission: DamlSubmissionBatch.CorrelatedSubmission): Future[SubmissionResult] =\n+            commitBatch(Seq(submission))\n+              .map { _ =>\n+                SubmissionResult.Acknowledged\n+              }\n+        }\n+    }\n+\n+  \"BatchingLedgerWriter\" should {\n+\n+    \"construct batch correctly\" in {\n+      val batchCaptor = MockitoHelpers.captor[kvutils.Bytes]\n+      val mockWriter = createWriter(Some(batchCaptor))\n+      val batchingWriter =\n+        LoggingContext.newLoggingContext { implicit logCtx =>\n+          new BatchingLedgerWriter(immediateBatchingQueue, mockWriter)\n+        }\n+      val (corId1, subm1) = \"test1\" -> ByteString.copyFrom(Array[Byte](1, 2, 3))\n+      val expected = createExpectedBatch(corId1, subm1)\n+      for {\n+        res1 <- batchingWriter.commit(corId1, subm1)\n+      } yield {\n+        verify(mockWriter).commit(anyString(), ArgumentMatchers.eq(expected))\n+        res1 should be(SubmissionResult.Acknowledged)\n+      }\n+    }\n+\n+    \"drop batch when commit fails\" in {\n+      val mockWriter = createWriter(None, SubmissionResult.Overloaded)\n+      val batchingWriter = createBatchingWriter(mockWriter, 5, 1.millis)"
+  }
+]

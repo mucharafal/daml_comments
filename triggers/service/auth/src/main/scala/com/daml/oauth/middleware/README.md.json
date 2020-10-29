@@ -1,0 +1,230 @@
+[
+  {
+    "id" : "180e6098-d240-4c4e-948d-15b07e6c076b",
+    "prId" : 7654,
+    "comments" : [
+      {
+        "id" : "156eee2c-5ac2-429c-9650-0a440307c5e1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not quite sure the behavior in the trigger service that we have atm is sensible. For the standalone trigger runner we made the application id configurable via a CLI parameter. Not quite sure what the best approach here is.\r\n\r\n1. We could mandate it as a parameter when starting the trigger but that seems a bit annoying\r\n2. We could make it optional and default to the UUID of the trigger which could be reasonable\r\n3. We could also try to infer it from the token but that gets a bit annoying since I’d prefer not to parse the token so the middleware would need to pass this on.\r\n\r\nLet’s leave this out of this PR but I think we need something more sensible than what we do now.",
+        "createdAt" : "2020-10-13T08:46:29Z",
+        "updatedAt" : "2020-10-16T15:18:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a223bc6c-5423-4443-9273-a9634a07ddc8",
+        "parentId" : "156eee2c-5ac2-429c-9650-0a440307c5e1",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : ":+1: I've opened https://github.com/digital-asset/daml/issues/7671 to track this.",
+        "createdAt" : "2020-10-13T15:18:36Z",
+        "updatedAt" : "2020-10-16T15:18:15Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b1adc8e2e9d1b4d7828d6b222879ebaabd6947a",
+    "line" : 4,
+    "diffHunk" : "@@ -51,7 +51,6 @@ repository](https://github.com/digital-asset/ex-secure-daml-infra).\n       context.accessToken[namespace] = {\n         // NOTE change the ledger ID to match your deployment.\n         \"ledgerId\": \"2D105384-CE61-4CCC-8E0E-37248BA935A3\",\n-        \"applicationId\": context.clientName,"
+  },
+  {
+    "id" : "ba08b21b-2170-448a-9335-70a569ef7bbb",
+    "prId" : 7629,
+    "comments" : [
+      {
+        "id" : "55a08b04-6404-48d9-b834-0d1fec0f7e49",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "At some point, we should also provide an example for how you can actually do this securely and configure in some way which users can get which claims.",
+        "createdAt" : "2020-10-09T15:21:01Z",
+        "updatedAt" : "2020-10-09T15:43:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "58bb1ff30fa2ecc252322bac614323c81e9f5eb1",
+    "line" : 30,
+    "diffHunk" : "@@ -21,33 +21,21 @@ repository](https://github.com/digital-asset/ex-secure-daml-infra).\n * Create a new native application.\n   - Provide a name (`ex-daml-auth-middleware`).\n   - Select the authorized API (`ex-daml-api`).\n-  - Configure the allowed callback URLs in the settings (`http://localhost:3000`).\n+  - Configure the allowed callback URLs in the settings (`http://localhost:3000/cb`).\n   - Note the \"Client ID\" and \"Client Secret\" displayed in the \"Basic\n     Information\" pane of the application settings.\n   - Note the \"OAuth Authorization URL\" and the \"OAuth Token URL\" in the\n     \"Endpoints\" tab of the advanced settings.\n-* Create a \"Hook\" for \"Client Credential Exchange\".\n+* Create a new empty rule.\n   - Provide a name (`ex-daml-claims`).\n   - Provide a script\n     ``` javascript\n-    /**\n-    @param {object} client - information about the client\n-    @param {string} client.name - name of client\n-    @param {string} client.id - client id\n-    @param {string} client.tenant - Auth0 tenant name\n-    @param {object} client.metadata - client metadata\n-    @param {array|undefined} scope - array of strings representing the scope claim or undefined\n-    @param {string} audience - token's audience claim\n-    @param {object} context - additional authorization context\n-    @param {object} context.webtask - webtask context\n-    @param {function} cb - function (error, accessTokenClaims)\n-    */\n-    module.exports = function(client, scope, audience, context, cb) {\n-      var access_token = {};\n+    function (user, context, callback) {\n+      // Grant all requested claims"
+  },
+  {
+    "id" : "557d1467-2693-4166-b111-37ea58b1e71a",
+    "prId" : 7565,
+    "comments" : [
+      {
+        "id" : "eea74139-957b-47df-9e5a-e04480a835b1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m a bit confused by the terminology here. Why is a machine to machine application using the authorization grant? I thought “machine to machine” was usually referring to the client credentials grant where the inital consent step goes away and the oauth client can directly request tokens.\r\n\r\nIs this just confusing terminology on auth0’s side?",
+        "createdAt" : "2020-10-05T11:54:50Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4e9bd2ff-c158-4174-8709-16ceb947d953",
+        "parentId" : "eea74139-957b-47df-9e5a-e04480a835b1",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "\"Machine to Machine\" is one of the available application types that Auth0 provides. It looks like \"Native\" is closer to what we want here. At least it enables application code grant by default.",
+        "createdAt" : "2020-10-05T13:27:12Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9310bb3f2b0980068c91493742150006dbe5c473",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,100 @@\n+# Trigger Service Authentication/Authorization Middleware\n+\n+Implements an OAuth2 middleware according to the trigger service\n+authentication/authorization specification in\n+`triggers/service/authentication.md`.\n+\n+## Manual Testing against Auth0\n+\n+Apart from the automated tests defined in this repository, the middleware can\n+be tested manually against an auth0 OAuth2 setup. The necessary steps are\n+extracted and adapted from the [Secure DAML Infrastructure\n+repository](https://github.com/digital-asset/ex-secure-daml-infra).\n+\n+### Setup\n+\n+* Sign up for an account on [Auth0](https://auth0.com).\n+* Create a new API.\n+  - Provide a name (`ex-daml-api`).\n+  - Provide an Identifier (`https://daml.com/ledger-api`).\n+  - Select Signing Algorithm of `RS256`.\n+* Create a new machine to machine application."
+  },
+  {
+    "id" : "56ebd76d-0173-40ed-8744-091847584776",
+    "prId" : 7565,
+    "comments" : [
+      {
+        "id" : "e82f7137-bef3-4e30-afec-c964206d984b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What exactly is this referring to? This code already seems to implement the mapping?",
+        "createdAt" : "2020-10-05T11:57:40Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "700a5b7b-d690-4cf4-b3cb-79fdd8dce14c",
+        "parentId" : "e82f7137-bef3-4e30-afec-c964206d984b",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Right, the implementation is just the first naive mapping that came to mind. The todo note is about putting some thought into what this mapping should look like. I'm planning to do that when integrating with the trigger service.",
+        "createdAt" : "2020-10-05T13:32:39Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9310bb3f2b0980068c91493742150006dbe5c473",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,100 @@\n+# Trigger Service Authentication/Authorization Middleware\n+\n+Implements an OAuth2 middleware according to the trigger service\n+authentication/authorization specification in\n+`triggers/service/authentication.md`.\n+\n+## Manual Testing against Auth0\n+\n+Apart from the automated tests defined in this repository, the middleware can\n+be tested manually against an auth0 OAuth2 setup. The necessary steps are\n+extracted and adapted from the [Secure DAML Infrastructure\n+repository](https://github.com/digital-asset/ex-secure-daml-infra).\n+\n+### Setup\n+\n+* Sign up for an account on [Auth0](https://auth0.com).\n+* Create a new API.\n+  - Provide a name (`ex-daml-api`).\n+  - Provide an Identifier (`https://daml.com/ledger-api`).\n+  - Select Signing Algorithm of `RS256`.\n+* Create a new machine to machine application.\n+  - Provide a name (`ex-daml-auth-middleware`).\n+  - Select the authorized API (`ex-daml-api`).\n+  - Configure the allowed callback URLs in the settings (`http://localhost:3000`).\n+  - Enable the \"Authorization Code\" \"Grant Type\" in the advanced settings.\n+  - Note the \"Client ID\" and \"Client Secret\" displayed in the \"Basic\n+    Information\" pane of the application settings.\n+  - Note the \"OAuth Authorization URL\" and the \"OAuth Token URL\" in the\n+    \"Endpoints\" tab of the advanced settings.\n+* Create a \"Hook\" for \"Client Credential Exchange\".\n+  - Provide a name (`ex-daml-claims`).\n+  - Provide a script\n+    ``` javascript\n+    /**\n+    @param {object} client - information about the client\n+    @param {string} client.name - name of client\n+    @param {string} client.id - client id\n+    @param {string} client.tenant - Auth0 tenant name\n+    @param {object} client.metadata - client metadata\n+    @param {array|undefined} scope - array of strings representing the scope claim or undefined\n+    @param {string} audience - token's audience claim\n+    @param {object} context - additional authorization context\n+    @param {object} context.webtask - webtask context\n+    @param {function} cb - function (error, accessTokenClaims)\n+    */\n+    module.exports = function(client, scope, audience, context, cb) {\n+      var access_token = {};\n+      var actAs = [];\n+      var readAs = [];\n+      var admin = false;\n+      // TODO define mapping from scope to ledger claims."
+  },
+  {
+    "id" : "fb6599e0-e97b-487b-8382-ac273489ddb2",
+    "prId" : 7565,
+    "comments" : [
+      {
+        "id" : "4169ec01-4296-420c-ba5e-b6a09c9a2268",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "huh, I always understood the standard as specifying this as `/token`. I guess I was wrong :shrug: No harm in making it configurable.",
+        "createdAt" : "2020-10-05T11:59:15Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "142b28c2-af8d-4353-b33d-7a674d7f338f",
+        "parentId" : "4169ec01-4296-420c-ba5e-b6a09c9a2268",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Indeed, according to [this SO question](https://stackoverflow.com/questions/40797181/google-oauth-2-0-new-authorization-and-token-endpoint/40800830) you can even find instances where the authority differs between them.",
+        "createdAt" : "2020-10-05T13:33:45Z",
+        "updatedAt" : "2020-10-05T13:34:20Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9310bb3f2b0980068c91493742150006dbe5c473",
+    "line" : 93,
+    "diffHunk" : "@@ -0,0 +1,100 @@\n+# Trigger Service Authentication/Authorization Middleware\n+\n+Implements an OAuth2 middleware according to the trigger service\n+authentication/authorization specification in\n+`triggers/service/authentication.md`.\n+\n+## Manual Testing against Auth0\n+\n+Apart from the automated tests defined in this repository, the middleware can\n+be tested manually against an auth0 OAuth2 setup. The necessary steps are\n+extracted and adapted from the [Secure DAML Infrastructure\n+repository](https://github.com/digital-asset/ex-secure-daml-infra).\n+\n+### Setup\n+\n+* Sign up for an account on [Auth0](https://auth0.com).\n+* Create a new API.\n+  - Provide a name (`ex-daml-api`).\n+  - Provide an Identifier (`https://daml.com/ledger-api`).\n+  - Select Signing Algorithm of `RS256`.\n+* Create a new machine to machine application.\n+  - Provide a name (`ex-daml-auth-middleware`).\n+  - Select the authorized API (`ex-daml-api`).\n+  - Configure the allowed callback URLs in the settings (`http://localhost:3000`).\n+  - Enable the \"Authorization Code\" \"Grant Type\" in the advanced settings.\n+  - Note the \"Client ID\" and \"Client Secret\" displayed in the \"Basic\n+    Information\" pane of the application settings.\n+  - Note the \"OAuth Authorization URL\" and the \"OAuth Token URL\" in the\n+    \"Endpoints\" tab of the advanced settings.\n+* Create a \"Hook\" for \"Client Credential Exchange\".\n+  - Provide a name (`ex-daml-claims`).\n+  - Provide a script\n+    ``` javascript\n+    /**\n+    @param {object} client - information about the client\n+    @param {string} client.name - name of client\n+    @param {string} client.id - client id\n+    @param {string} client.tenant - Auth0 tenant name\n+    @param {object} client.metadata - client metadata\n+    @param {array|undefined} scope - array of strings representing the scope claim or undefined\n+    @param {string} audience - token's audience claim\n+    @param {object} context - additional authorization context\n+    @param {object} context.webtask - webtask context\n+    @param {function} cb - function (error, accessTokenClaims)\n+    */\n+    module.exports = function(client, scope, audience, context, cb) {\n+      var access_token = {};\n+      var actAs = [];\n+      var readAs = [];\n+      var admin = false;\n+      // TODO define mapping from scope to ledger claims.\n+      scope.forEach(s => {\n+        if (s.startsWith(\"actAs:\")) {\n+          actAs.push(s.slice(6));\n+        } else if (s.startsWith(\"readAs:\")) {\n+          readAs.push(s.slice(7));\n+        } else if (s.startsWith(\"admin\")) {\n+          admin = true;\n+        }\n+      })\n+      access_token['https://daml.com/ledger-api'] = {\n+        // NOTE change the ledger ID to match your deployment.\n+        \"ledgerId\": \"2D105384-CE61-4CCC-8E0E-37248BA935A3\",\n+        \"applicationId\": client.name,\n+        \"actAs\": actAs,\n+        \"readAs\": readAs,\n+        \"admin\": admin\n+      };\n+      cb(null, access_token);\n+    };\n+    ```\n+* Create a new user.\n+  - Provide an email address (`alice@localhost`)\n+  - Provide a secure password\n+  - Mark the email address as verified on the user's \"Details\" page.\n+\n+### Testing\n+\n+* Start the middleware by executing the following command.\n+  ```\n+  $ DAML_CLIENT_ID=CLIENTID \\\n+    DAML_CLIENT_SECRET=CLIENTSECRET \\\n+    bazel run //triggers/service/auth:oauth-middleware-binary -- \\\n+      --port 3000 \\\n+      --oauth-auth AUTHURL \\\n+      --oauth-token TOKENURL\n+  ```\n+  - Replace `CLIENTID` and `CLIENTSECRET` by the \"Client ID\" and \"Client\n+    Secret\" from above.\n+  - Replace `AUTHURL` and `TOKENURL` by the \"OAuth Authorization URL\"\n+    and \"OAuth Token URL\" from above. They should look as follows:\n+    ```\n+    https://XYZ.auth0.com/authorize\n+    https://XYZ.auth0.com/oauth/token"
+  }
+]

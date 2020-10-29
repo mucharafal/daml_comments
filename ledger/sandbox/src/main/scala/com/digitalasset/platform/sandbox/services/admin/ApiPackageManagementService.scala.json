@@ -1,0 +1,265 @@
+[
+  {
+    "id" : "b6cbbad6-a7b7-4685-b934-ac70fcc8a4a4",
+    "prId" : 3806,
+    "comments" : [
+      {
+        "id" : "4366aa68-1430-4b1d-a695-7d8833c82427",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "It seems possible, that a race condition can be won by an upload packages request traveling through the ledger and back through the transaction service. In that case \"ledgerEndBeforeRequest\" is in fact \"ledgerEndAfterRequest\"",
+        "createdAt" : "2019-12-11T07:24:56Z",
+        "updatedAt" : "2019-12-12T15:08:00Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "63d302a5-6960-4c87-b6fe-c294f9dcb357",
+        "parentId" : "4366aa68-1430-4b1d-a695-7d8833c82427",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Oops, my mistake. Definitely need to query it first.",
+        "createdAt" : "2019-12-11T10:14:18Z",
+        "updatedAt" : "2019-12-12T15:08:00Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "251fd5fc053893266c997d1d7451a1f25479df7b",
+    "line" : null,
+    "diffHunk" : "@@ -60,74 +70,84 @@ class ApiPackageManagementService(\n   }\n \n   override def uploadDarFile(request: UploadDarFileRequest): Future[UploadDarFileResponse] = {\n+    val submissionId =\n+      if (request.submissionId.isEmpty)\n+        SubmissionId.assertFromString(UUID.randomUUID().toString)\n+      else\n+        SubmissionId.assertFromString(request.submissionId)\n+\n+    // TODO(JM): Implement computation of maximum record time from\n+    // the current configuration. I am leaving this to another PR as\n+    // we need this change in other services as well and this PR is\n+    // large enough. For now, we'll default to 1 minute.\n+    val timeToLive = 60.seconds\n+    val maxRecordTime =\n+      Time.Timestamp.assertFromInstant(\n+        request\n+          .maximumRecordTime\n+          .map(TimestampConversion.toInstant)\n+          .getOrElse(timeProvider.getCurrentTime.plusNanos(timeToLive.toNanos))\n+      )\n+\n     val resultT = for {\n       dar <- DarReader { case (_, x) => Try(Archive.parseFrom(x)) }\n         .readArchive(\n           \"package-upload\",\n           new ZipInputStream(new ByteArrayInputStream(request.darFile.toByteArray)))\n     } yield {\n-      (packagesWrite.uploadPackages(dar.all, None), dar.all.map(_.getHash))\n+      packagesWrite.uploadPackages(submissionId, maxRecordTime, dar.all, None)\n     }\n+\n     resultT.fold(\n       err => Future.failed(ErrorFactories.invalidArgument(err.getMessage)),\n       res =>\n-        FutureConverters\n-          .toScala(res._1)\n-          .flatMap {\n-            case UploadPackagesResult.Ok =>\n-              Future.successful(UploadDarFileResponse())\n-            case r @ UploadPackagesResult.Overloaded =>\n-              Future.failed(ErrorFactories.resourceExhausted(r.description))\n-            case r @ UploadPackagesResult.InternalError(_) =>\n-              Future.failed(ErrorFactories.internal(r.reason))\n-            case r @ UploadPackagesResult.InvalidPackage(_) =>\n-              Future.failed(ErrorFactories.invalidArgument(r.description))\n-            case r @ UploadPackagesResult.ParticipantNotAuthorized =>\n-              Future.failed(ErrorFactories.permissionDenied(r.description))\n-            case r @ UploadPackagesResult.NotSupported =>\n-              Future.failed(ErrorFactories.unimplemented(r.description))\n-          }(DE)\n-          .flatMap(pollUntilPersisted(res._2, _))(DE)\n+      transactionsService\n+        .currentLedgerEnd()"
+  },
+  {
+    "id" : "06564099-74ba-42c8-a176-cd8c89bc90d3",
+    "prId" : 3524,
+    "comments" : [
+      {
+        "id" : "112b2680-bf24-4322-8b72-0eae3330cdb4",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n            case UploadPackagesResult.Overloaded =>\r\n```\r\n`r` seems to be unused.",
+        "createdAt" : "2019-11-20T09:54:55Z",
+        "updatedAt" : "2019-11-20T12:51:07Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "02760b2d9223fbfc9c776e4b3edac71864bcd5f9",
+    "line" : 4,
+    "diffHunk" : "@@ -76,6 +76,10 @@ class ApiPackageManagementService(\n           .flatMap {\n             case UploadPackagesResult.Ok =>\n               Future.successful(UploadDarFileResponse())\n+            case r @ UploadPackagesResult.Overloaded =>"
+  },
+  {
+    "id" : "34036a16-7145-4ce1-a084-68e91a459afb",
+    "prId" : 2194,
+    "comments" : [
+      {
+        "id" : "d9880e49-44c9-45aa-8c71-1fe5b4e87436",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Do you think it would make sense to move this in `PollingUtils`?",
+        "createdAt" : "2019-07-17T13:17:32Z",
+        "updatedAt" : "2019-07-18T04:20:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5608d4ec-f8f4-4e78-b4d7-6eeeefed040b",
+        "parentId" : "d9880e49-44c9-45aa-8c71-1fe5b4e87436",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "If you prefer to leave it here, it may be worth to cut on the parameters and call `PollingUtils.pollUntilPersisted` with the actual values here.",
+        "createdAt" : "2019-07-17T13:33:05Z",
+        "updatedAt" : "2019-07-18T04:20:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3f2c7e06-84df-4c90-a894-109756163598",
+        "parentId" : "d9880e49-44c9-45aa-8c71-1fe5b4e87436",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Since we use the same values for `minWait`, `maxWait`, and `backoffProgression`, we could also hard-code them inside `PollingUtils.pollUntilPersisted`. If we realize that we need different values for party and package checking, we can put them as parameters, but I doubt that will be the case.",
+        "createdAt" : "2019-07-18T07:30:00Z",
+        "updatedAt" : "2019-07-18T07:30:01Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ca8ba586-a712-4f92-96bf-880799c514bb",
+        "parentId" : "d9880e49-44c9-45aa-8c71-1fe5b4e87436",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "The test uses explicit values for `minWait`, `maxWait`, and `backoffProgression` to check whether they behave correctly, so I will leave the parameters for now.",
+        "createdAt" : "2019-07-18T07:57:30Z",
+        "updatedAt" : "2019-07-18T07:57:31Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "848717af9c07474e7fae355da54c904ec52b1295",
+    "line" : 56,
+    "diffHunk" : "@@ -76,13 +80,51 @@ class ApiPackageManagementService(\n             case r @ UploadPackagesResult.NotSupported =>\n               Future.failed(ErrorFactories.unimplemented(r.description))\n           }(DE)\n+          .flatMap(\n+            pollUntilPersisted(\n+              res._2,\n+              _,\n+              50.milliseconds,\n+              500.milliseconds,\n+              (d: FiniteDuration) => d * 2))(DE)\n     )\n   }\n+\n+  /**\n+    * Wraps a call [[PollingUtils.pollUntilPersisted]] so that it can be chained on the package upload with a `flatMap`.\n+    *\n+    * Checks invariants and forwards the original result after all packages are found to be persisted.\n+    *\n+    * @param ids The IDs of the uploaded packages\n+    * @return The result of the party allocation received originally, wrapped in a [[Future]]\n+    */\n+  private def pollUntilPersisted("
+  },
+  {
+    "id" : "69f08ebe-176e-49cf-9550-6abb0b5dba62",
+    "prId" : 2194,
+    "comments" : [
+      {
+        "id" : "17e1ba4c-98e9-41aa-98f4-97d287c2ac38",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n      .pollUntilPersisted(packagesIndex.listLfPackages _)(\r\n```\r\nI guess it's a matter of taste, use your discretion.",
+        "createdAt" : "2019-07-17T13:22:21Z",
+        "updatedAt" : "2019-07-18T04:20:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "848717af9c07474e7fae355da54c904ec52b1295",
+    "line" : null,
+    "diffHunk" : "@@ -76,13 +80,51 @@ class ApiPackageManagementService(\n             case r @ UploadPackagesResult.NotSupported =>\n               Future.failed(ErrorFactories.unimplemented(r.description))\n           }(DE)\n+          .flatMap(\n+            pollUntilPersisted(\n+              res._2,\n+              _,\n+              50.milliseconds,\n+              500.milliseconds,\n+              (d: FiniteDuration) => d * 2))(DE)\n     )\n   }\n+\n+  /**\n+    * Wraps a call [[PollingUtils.pollUntilPersisted]] so that it can be chained on the package upload with a `flatMap`.\n+    *\n+    * Checks invariants and forwards the original result after all packages are found to be persisted.\n+    *\n+    * @param ids The IDs of the uploaded packages\n+    * @return The result of the party allocation received originally, wrapped in a [[Future]]\n+    */\n+  private def pollUntilPersisted(\n+      ids: List[String],\n+      result: UploadDarFileResponse,\n+      minWait: FiniteDuration,\n+      maxWait: FiniteDuration,\n+      iteration: FiniteDuration => FiniteDuration): Future[UploadDarFileResponse] = {\n+    val newPackages = ids.toSet\n+    val description = s\"packages ${ids.mkString(\", \")}\"\n+    PollingUtils\n+      .pollUntilPersisted(() => packagesIndex.listLfPackages())("
+  },
+  {
+    "id" : "8f6c503d-edff-425d-98c0-55bdc550e2a2",
+    "prId" : 1800,
+    "comments" : [
+      {
+        "id" : "3d1b2c9e-bf41-49f0-99b7-b7bbfe5e95b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I think it would be nice to have `DarReader` support `ZipInputStream` as well if possible. This way we don't have to create a temporary zipfile, but can feed the `ZipInputStream` directly from the byte array.",
+        "createdAt" : "2019-06-26T13:28:59Z",
+        "updatedAt" : "2019-06-27T08:00:27Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e21388c3-9949-4ff9-a9b5-af6eda023946",
+        "parentId" : "3d1b2c9e-bf41-49f0-99b7-b7bbfe5e95b8",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I agree this would be better. The `DarReader` does random-access reading of zip file entries, which does not work with `ZipInputStream`, so this would require some refactoring of the reader.",
+        "createdAt" : "2019-06-26T13:56:23Z",
+        "updatedAt" : "2019-06-27T08:00:27Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d0733672-344f-47ad-93d9-198b617363db",
+        "parentId" : "3d1b2c9e-bf41-49f0-99b7-b7bbfe5e95b8",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Right. I didn't mean for this to be changed in this PR. Thanks for checking.",
+        "createdAt" : "2019-06-26T15:15:03Z",
+        "updatedAt" : "2019-06-27T08:00:27Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "720e4237da08f6f60dc2001e8f439cb9614a907e",
+    "line" : 48,
+    "diffHunk" : "@@ -38,19 +45,35 @@ class ApiPackageManagementService(\n               pkgId.toString,\n               details.size,\n               Some(Timestamp(details.knownSince.getEpochSecond, details.knownSince.getNano)),\n-              details.sourceDescription)\n+              details.sourceDescription.getOrElse(\"\"))\n         })\n       }(DE)\n   }\n \n   override def uploadDarFile(request: UploadDarFileRequest): Future[UploadDarFileResponse] = {\n-    FutureConverters\n-      .toScala(packagesWrite.uploadDar(\"\", request.darFile.toByteArray))\n-      .flatMap {\n-        case UploadDarResult.Ok => Future.successful(UploadDarFileResponse())\n-        case UploadDarResult.InvalidPackage(err) =>\n-          Future.failed(ErrorFactories.invalidArgument(s\"Invalid package: $err\"))\n-      }(DE)\n+    val resultT = for {\n+      file <- Try(File.createTempFile(\"uploadDarFile\", \".dar\"))\n+      _ <- bracket(Try(new FileOutputStream(file)))(fos => Try(fos.close())).flatMap { fos =>\n+        Try(fos.write(request.darFile.toByteArray))\n+      }\n+      dar <- DarReader { case (_, x) => Try(Archive.parseFrom(x)) }.readArchive(new ZipFile(file))"
+  }
+]

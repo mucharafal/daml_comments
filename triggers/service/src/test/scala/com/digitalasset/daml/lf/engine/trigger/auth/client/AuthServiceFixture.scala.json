@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "eb91247f-3870-4c17-bccf-a0ad99cab93e",
+    "prId" : 6768,
+    "comments" : [
+      {
+        "id" : "b290db58-0975-47a2-bb37-d31fd228265e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Any particular reason why you’re using static time instead of wallclock (which is the default on sandbox)?",
+        "createdAt" : "2020-07-20T07:40:10Z",
+        "updatedAt" : "2020-07-20T13:14:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "969517b0-49c8-44c1-abe1-29ab627471db",
+        "parentId" : "b290db58-0975-47a2-bb37-d31fd228265e",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "No particular reason, other than copying from the TriggerServiceFixture which does the same. I can remove this here (and probably there as well in another PR).",
+        "createdAt" : "2020-07-20T13:07:40Z",
+        "updatedAt" : "2020-07-20T13:14:32Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "310d5a1bb1a6b68dbb3229efc95a2362d60d7257",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,101 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.engine.trigger.auth.client\n+\n+import java.net.{InetAddress, ServerSocket, Socket}\n+\n+import akka.actor.ActorSystem\n+import akka.http.scaladsl.model.Uri\n+import akka.stream.Materializer\n+import com.daml.bazeltools.BazelRunfiles\n+import com.daml.ledger.api.domain.LedgerId\n+import com.daml.lf.engine.trigger.AuthServiceClient\n+import com.daml.platform.common.LedgerIdMode\n+import com.daml.platform.sandbox.SandboxServer\n+import com.daml.platform.sandbox.config.SandboxConfig\n+import com.daml.platform.services.time.TimeProviderType\n+import com.daml.ports.Port\n+import com.daml.timer.RetryStrategy\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.sys.process.Process\n+import scala.concurrent.duration._\n+\n+object AuthServiceFixture {\n+\n+  private def findFreePort(): Port = {\n+    val socket = new ServerSocket(Port(0).value)\n+    try {\n+      Port(socket.getLocalPort)\n+    } finally {\n+      socket.close()\n+    }\n+  }\n+\n+  def withAuthServiceClient[A](testName: String)(testFn: AuthServiceClient => Future[A])(\n+      implicit system: ActorSystem,\n+      mat: Materializer,\n+      ec: ExecutionContext): Future[A] = {\n+    val adminLedgerId = LedgerId(\"admin-ledger\")\n+    val adminLedgerF = for {\n+      ledger <- Future(\n+        new SandboxServer(\n+          SandboxConfig.default.copy(\n+            port = Port.Dynamic,\n+            timeProviderType = Some(TimeProviderType.Static),"
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id" : "9c729252-04e9-4e32-b7bd-7fbadb00cd9c",
+    "prId" : 6368,
+    "comments" : [
+      {
+        "id" : "02e8c77d-d761-4807-a238-27e88e8ee19b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Named arguments for the last three args as well?",
+        "createdAt" : "2020-06-16T17:05:31Z",
+        "updatedAt" : "2020-06-17T08:59:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2af1223e-5f06-429f-bbcc-3562f48fb29f",
+        "parentId" : "02e8c77d-d761-4807-a238-27e88e8ee19b",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Should we have a convenience function akin to `Machine.buildForScenario` for the pattern with `Timestamp.now()`,`NoSeed` and two times `Set.empty` as well? This appears a few times.",
+        "createdAt" : "2020-06-16T17:14:10Z",
+        "updatedAt" : "2020-06-17T08:59:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6422994acada0eb74280713a408f020498a5de13",
+    "line" : null,
+    "diffHunk" : "@@ -22,13 +24,16 @@ class InterpreterTest extends WordSpec with Matchers with TableDrivenPropertyChe\n \n   private implicit def id(s: String): Ref.Name = Name.assertFromString(s)\n \n+  private val noPackages: PureCompiledPackages = PureCompiledPackages(Map.empty).right.get\n+\n   private def runExpr(e: Expr): SValue = {\n-    val machine = Speedy.Machine.fromExpr(\n-      expr = e,\n-      compiledPackages = PureCompiledPackages(Map.empty).right.get,\n-      scenario = false,\n+    val machine = Speedy.Machine(\n+      compiledPackages = noPackages,\n       submissionTime = Time.Timestamp.now(),\n       initialSeeding = InitialSeeding.NoSeed,\n+      noPackages.compiler.unsafeCompile(e),\n+      Set.empty,\n+      Set.empty"
+  },
+  {
+    "id" : "70b2d5c3-8ef6-40ac-8d48-089b566c5633",
+    "prId" : 6368,
+    "comments" : [
+      {
+        "id" : "f0d73a6a-290b-49a9-8394-f045de1ef26a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Named arguments?",
+        "createdAt" : "2020-06-16T17:05:44Z",
+        "updatedAt" : "2020-06-17T08:59:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6422994acada0eb74280713a408f020498a5de13",
+    "line" : null,
+    "diffHunk" : "@@ -127,21 +132,21 @@ class InterpreterTest extends WordSpec with Matchers with TableDrivenPropertyChe\n   }\n \n   \"large lists\" should {\n-    val t_int64 = TBuiltin(BTInt64)\n-    val t_int64List = TApp(TBuiltin(BTList), t_int64)\n-    val list = ECons(\n-      t_int64List,\n-      ImmArray((1 to 100000).map(i => EPrimLit(PLInt64(i.toLong)))),\n-      ENil(t_int64List),\n-    )\n+    val list =\n+      SEValue(\n+        SList(\n+          FrontStack(ImmArray((1 to 100000).map(i => SInt64(i.toLong)))),\n+        )\n+      )\n     var machine: Speedy.Machine = null\n     \"compile\" in {\n-      machine = Speedy.Machine.fromExpr(\n-        expr = list,\n-        compiledPackages = PureCompiledPackages(Map.empty).right.get,\n-        scenario = false,\n-        submissionTime = Time.Timestamp.now(),\n-        initialSeeding = InitialSeeding.NoSeed,\n+      machine = Speedy.Machine(\n+        noPackages,\n+        Time.Timestamp.now(),\n+        InitialSeeding.NoSeed,\n+        list,\n+        Set.empty,\n+        Set.empty"
+  }
+]

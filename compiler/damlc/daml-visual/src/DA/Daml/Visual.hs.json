@@ -1,0 +1,1028 @@
+[
+  {
+    "id" : "b6affe9f-f136-49ee-bc99-ffd6df8dfcc7",
+    "prId" : 5789,
+    "comments" : [
+      {
+        "id" : "82bf96eb-5516-4d0b-b9ef-35737b376a91",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I find this function name misleading. I understand that it returns a \"choice id\" when it actually returns a \"template id\". Maybe something like `templateIdFromChoices` would be better.",
+        "createdAt" : "2020-05-04T08:26:31Z",
+        "updatedAt" : "2020-05-04T08:35:46Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "afb3885b-a7e7-46c1-8a2a-5f5bc2844737",
+        "parentId" : "82bf96eb-5516-4d0b-b9ef-35737b376a91",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point, I’ve renamed it to just `templateId`.",
+        "createdAt" : "2020-05-04T08:35:53Z",
+        "updatedAt" : "2020-05-04T08:35:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "09335f965551c53f88a64f32b89c7ff2fd04fb46",
+    "line" : null,
+    "diffHunk" : "@@ -41,32 +41,33 @@ import DA.Bazel.Runfiles\n import System.FilePath\n import Safe\n import Control.Monad\n+import Control.Monad.State\n \n type IsConsuming = Bool\n-type InternalChcName = LF.ChoiceName\n \n data Action = ACreate (LF.Qualified LF.TypeConName)\n             | AExercise (LF.Qualified LF.TypeConName) LF.ChoiceName deriving (Eq, Ord, Show )\n \n data ChoiceAndAction = ChoiceAndAction\n     { choiceName :: LF.ChoiceName\n-    , internalChcName :: InternalChcName -- as we have choices with same name across modules\n     , choiceConsuming :: IsConsuming\n     , actions :: Set.Set Action\n     } deriving (Show)\n \n \n data TemplateChoices = TemplateChoices\n-    { template :: LF.Template\n-    , modName :: LF.ModuleName\n+    { template :: LF.Qualified LF.Template\n     , choiceAndActions :: [ChoiceAndAction]\n     } deriving (Show)\n \n+templateChoiceId :: TemplateChoices -> LF.Qualified LF.TypeConName"
+  },
+  {
+    "id" : "e42f2556-928c-4d7f-94bd-432eaffa49ae",
+    "prId" : 5739,
+    "comments" : [
+      {
+        "id" : "9740e0d7-7035-4305-8768-9bd2abd013d5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t find this comment super helpful. If you don’t understand pattern synonyms it’s not clear what this is supposed to be and if you do, then inlining the definition here in a comment somewhat defeats the point of using a pattern synonym. Maybe just add a comment that this is a pattern synonym with a link to docs? Or probably better at the definition of `EInternalTemplateVal` since finding that just entails grep.",
+        "createdAt" : "2020-04-27T15:34:11Z",
+        "updatedAt" : "2020-04-27T16:21:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1f73576e-6023-48d0-a3b2-1358f5e0a12e",
+        "parentId" : "9740e0d7-7035-4305-8768-9bd2abd013d5",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Ah sorry I left that in. This is not about pattern synonyms (as you can see the synonym is still used in there). This is because I printed the syntax tree then reconstructed the expected shape (which is the comment), then inverted it to match the existing style of infix operators.",
+        "createdAt" : "2020-04-27T15:38:18Z",
+        "updatedAt" : "2020-04-27T16:21:24Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1ad19af69918100ae5812a06cce8f52fb17f1dc7",
+    "line" : null,
+    "diffHunk" : "@@ -173,8 +173,12 @@ startFromExpr seen world e = case e of\n         Set.singleton (AExercise tpl (LF.ChoiceName \"Archive\"))\n     -- NOTE(RJR): Look for calls to the `exercise` method from a `Choice`\n     -- instance and produce the corresponding edge in the graph.\n+    --(LF.ETmApp (LF.ETyApp (LF.ETyApp (LF.ETyApp (EInternalTemplateVal \"exercise\") (LF.TCon tpl)) (LF.TCon (LF.Qualified _ _ (LF.TypeConName [chc])))) _ret), _dict)"
+  },
+  {
+    "id" : "f51a7907-3e6d-4e3d-a2a3-ecf9363d72f3",
+    "prId" : 5739,
+    "comments" : [
+      {
+        "id" : "96f96fc7-c2b8-414c-a5fc-7e8bee08321f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we get a test for this?",
+        "createdAt" : "2020-04-27T15:34:18Z",
+        "updatedAt" : "2020-04-27T16:21:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9422be58-de06-4f58-9306-49e9cbc8d147",
+        "parentId" : "96f96fc7-c2b8-414c-a5fc-7e8bee08321f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "For reference: The existing tests are at https://github.com/digital-asset/daml/blob/master/compiler/damlc/tests/src/DA/Test/ShakeIdeClient.hs#L1177",
+        "createdAt" : "2020-04-27T15:39:51Z",
+        "updatedAt" : "2020-04-27T16:21:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1ad19af69918100ae5812a06cce8f52fb17f1dc7",
+    "line" : null,
+    "diffHunk" : "@@ -173,8 +173,12 @@ startFromExpr seen world e = case e of\n         Set.singleton (AExercise tpl (LF.ChoiceName \"Archive\"))\n     -- NOTE(RJR): Look for calls to the `exercise` method from a `Choice`\n     -- instance and produce the corresponding edge in the graph.\n+    --(LF.ETmApp (LF.ETyApp (LF.ETyApp (LF.ETyApp (EInternalTemplateVal \"exercise\") (LF.TCon tpl)) (LF.TCon (LF.Qualified _ _ (LF.TypeConName [chc])))) _ret), _dict)\n     EInternalTemplateVal \"exercise\" `LF.ETyApp` LF.TCon tpl `LF.ETyApp` LF.TCon (LF.Qualified _ _ (LF.TypeConName [chc])) `LF.ETyApp` _ret `LF.ETmApp` _dict ->\n         Set.singleton (AExercise tpl (LF.ChoiceName chc))\n+    --(LF.ETmApp (LF.ETyApp (LF.ETyApp (LF.ETyApp (LF.ETyApp (EInternalTemplateVal \"exerciseByKey\") (LF.TCon tpl)) _) (LF.TCon (LF.Qualified _ _ (LF.TypeConName [chc])))) _ret) _dict)\n+    EInternalTemplateVal \"exerciseByKey\" `LF.TyApp` LF.TCon tpl `LF.ETyApp` _ `LF.ETyApp` LF.TCon (LF.Qualified _ _ (LF.TypeConName [chc])) `LF.ETyApp` _ret `LF.ETmApp` _dict ->"
+  },
+  {
+    "id" : "2ccc40a6-8bc9-4db0-8ec6-cbb13fc3ab10",
+    "prId" : 3670,
+    "comments" : [
+      {
+        "id" : "aad40319-c71b-41ed-b720-1476ed7536e7",
+        "parentId" : null,
+        "author" : null,
+        "body" : "\"it they\" --> \"they contain\"",
+        "createdAt" : "2019-11-29T07:58:59Z",
+        "updatedAt" : "2019-11-29T13:04:50Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ab017fbc-50dc-404e-bd48-cf8a96c8ef70",
+        "parentId" : "aad40319-c71b-41ed-b720-1476ed7536e7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good catch, fixed!",
+        "createdAt" : "2019-11-29T09:32:53Z",
+        "updatedAt" : "2019-11-29T13:04:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "abb363aad65b2173e41b6b0e0e9a16e83c6474a2",
+    "line" : null,
+    "diffHunk" : "@@ -145,12 +145,12 @@ startFromUpdate seen world update = case update of\n startFromExpr :: Set.Set (LF.Qualified LF.ExprValName) -> LF.World -> LF.Expr -> Set.Set Action\n startFromExpr seen world e = case e of\n     LF.EVar _ -> Set.empty\n-    -- NOTE(MH/RJR): Do not explore the `$fXInstance` dictionary because it\n-    -- contains all the ledger actions and therefore creates too many edges\n+    -- NOTE(MH/RJR): Do not explore the `$fChoice`/`$fTemplate` dictionaries because it\n+    -- they all the ledger actions and therefore creates too many edges"
+  },
+  {
+    "id" : "7a29f833-96c5-45f2-80df-33877616c6af",
+    "prId" : 3009,
+    "comments" : [
+      {
+        "id" : "e7a9621a-8606-4ed8-92bf-66b22ca7eb54",
+        "parentId" : null,
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Is there a better way to get toJson methods?",
+        "createdAt" : "2019-09-24T18:08:42Z",
+        "updatedAt" : "2019-09-27T13:33:14Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "886d1e6f-6a8b-49e6-ba1f-77f769229ee6",
+        "parentId" : "e7a9621a-8606-4ed8-92bf-66b22ca7eb54",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You can just have empty instances, so `instance ToJSON D3Node`.",
+        "createdAt" : "2019-09-24T19:04:21Z",
+        "updatedAt" : "2019-09-27T13:33:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4b0640d679a39b59928bde9f985c4fdc99ab02c1",
+    "line" : null,
+    "diffHunk" : "@@ -67,6 +75,61 @@ data Graph = Graph\n     , edges :: [(ChoiceDetails, ChoiceDetails)]\n     } deriving (Show, Eq)\n \n+data D3Link = D3Link\n+    { source :: Int\n+    , target :: Int\n+    , weight :: Int\n+    } deriving (Generic, Show)\n+\n+-- can add more information like signatories, observers\n+data D3Node = D3Node\n+    { fields :: T.Text\n+    , tplName :: T.Text\n+    , id :: Int\n+    , chcName :: T.Text\n+    } deriving (Generic, Show)\n+\n+data D3Graph = D3Graph\n+    { d3links :: [D3Link]\n+    , d3nodes :: [D3Node]\n+    } deriving (Generic, Show)\n+\n+data WebPage = WebPage\n+    { links :: T.Text\n+    , dnodes :: T.Text\n+    , d3Js :: String\n+    , d3PlusJs :: String\n+    } deriving (Generic, Show)\n+\n+d3LinksFromGraphEdges :: Graph -> [D3Link]\n+d3LinksFromGraphEdges g = map edgeToD3Link (edges g)\n+    where edgeToD3Link edge = D3Link (nodeId (fst edge)) (nodeId (snd edge)) 10\n+\n+d3NodesFromGraph :: Graph -> [D3Node]\n+d3NodesFromGraph g = concatMap subGraphToD3Nodes (subgraphs g)\n+        where subGraphToD3Nodes sg = map (\\chcD ->\n+                                            D3Node (T.unlines $ templateFields sg)\n+                                            (tplNameUnqual $ clusterTemplate sg)\n+                                            (nodeId chcD)\n+                                            (DAP.renderPretty $ displayChoiceName chcD)\n+                                            )\n+                                    (nodes sg)\n+\n+graphToD3Graph :: Graph -> D3Graph\n+graphToD3Graph g = D3Graph (d3LinksFromGraphEdges g) (d3NodesFromGraph g)\n+\n+instance ToJSON D3Link where\n+    toEncoding = genericToEncoding defaultOptions\n+\n+instance ToJSON D3Node where"
+  },
+  {
+    "id" : "86af43ef-cdda-4f6e-9b8b-68d5b8166a62",
+    "prId" : 3009,
+    "comments" : [
+      {
+        "id" : "0e791965-b5e6-4c76-99fa-3ad92f4bdaf1",
+        "parentId" : null,
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "The weight is not strictly necessary, but giving a default here saves me writing some JS. In reality, weight is used to determine the thickness of the arrow in the network svg ",
+        "createdAt" : "2019-09-24T18:11:38Z",
+        "updatedAt" : "2019-09-27T13:33:14Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4b0640d679a39b59928bde9f985c4fdc99ab02c1",
+    "line" : 73,
+    "diffHunk" : "@@ -67,6 +75,61 @@ data Graph = Graph\n     , edges :: [(ChoiceDetails, ChoiceDetails)]\n     } deriving (Show, Eq)\n \n+data D3Link = D3Link\n+    { source :: Int\n+    , target :: Int\n+    , weight :: Int\n+    } deriving (Generic, Show)\n+\n+-- can add more information like signatories, observers\n+data D3Node = D3Node\n+    { fields :: T.Text\n+    , tplName :: T.Text\n+    , id :: Int\n+    , chcName :: T.Text\n+    } deriving (Generic, Show)\n+\n+data D3Graph = D3Graph\n+    { d3links :: [D3Link]\n+    , d3nodes :: [D3Node]\n+    } deriving (Generic, Show)\n+\n+data WebPage = WebPage\n+    { links :: T.Text\n+    , dnodes :: T.Text\n+    , d3Js :: String\n+    , d3PlusJs :: String\n+    } deriving (Generic, Show)\n+\n+d3LinksFromGraphEdges :: Graph -> [D3Link]\n+d3LinksFromGraphEdges g = map edgeToD3Link (edges g)\n+    where edgeToD3Link edge = D3Link (nodeId (fst edge)) (nodeId (snd edge)) 10"
+  },
+  {
+    "id" : "07c43bdd-5102-4d1b-9bd3-cffb94a1da94",
+    "prId" : 3009,
+    "comments" : [
+      {
+        "id" : "b3c6041e-d198-475a-a177-7e8aaa0e0562",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is not going to work on Windows. You need to use `locateRunfiles`.",
+        "createdAt" : "2019-09-24T18:59:44Z",
+        "updatedAt" : "2019-09-27T13:33:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "afa8e35a-273c-4397-bd32-7aa559f20315",
+        "parentId" : "b3c6041e-d198-475a-a177-7e8aaa0e0562",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Cool, I did not know about `locateRunfiles` will update now",
+        "createdAt" : "2019-09-24T19:29:07Z",
+        "updatedAt" : "2019-09-27T13:33:14Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4b0640d679a39b59928bde9f985c4fdc99ab02c1",
+    "line" : null,
+    "diffHunk" : "@@ -241,10 +304,58 @@ graphFromModule modules world = Graph subGraphs edges\n           subGraphs = map (constructSubgraphsWithLables world nodes) templatesAndModules\n           edges = graphEdges nodes templatesAndModules\n \n-\n dotFileGen :: [LF.Module] -> LF.World -> String\n dotFileGen modules world = constructDotGraph $ graphFromModule modules world\n \n+webPageTemplate :: T.Text\n+webPageTemplate =\n+    T.unlines [ \"<html>\"\n+    , \"<head><title>DAML Visualization</title><meta charset=\\\"utf-8\\\"></head>\"\n+    , \"<body>\"\n+    , \"<div id='viz'></div>\"\n+    , \"<script>\"\n+    , \"{{{d3Js}}}\"\n+    , \"</script>\"\n+    , \"<script>\"\n+    , \"{{{d3PlusJs}}}\"\n+    , \"</script>\"\n+    , \"<script>\"\n+    , \"var nodes = {{{dnodes}}}\"\n+    , \"var links = {{{links}}}\"\n+    , \"d3plus.viz()\"\n+    , \"          .container('#viz')\"\n+    , \"          .type('network')\"\n+    , \"          .data(nodes)\"\n+    , \"          .text('chcName')\"\n+    , \"          .edges({ value: links, arrows: true })\"\n+    , \"          .tooltip({\"\n+    , \"             Template: function (d) { return d['tplName'] },\"\n+    , \"             Fields: function (d) { return d['fields']; }\"\n+    , \"          })\"\n+    , \"          .draw();\"\n+    , \"</script>\"\n+    , \"</body>\"\n+    , \"</html>\"\n+    ]\n+\n+execVisualHtml :: FilePath -> FilePath -> IO ()\n+execVisualHtml darFilePath webFilePath = do\n+    darBytes <- B.readFile darFilePath\n+    dalfs <- either fail pure $\n+                readDalfs $ ZIPArchive.toArchive (BSL.fromStrict darBytes)\n+    d3js <-   readFile \"compiler/damlc/daml-visual/d3.js\""
+  },
+  {
+    "id" : "103fb11f-de08-4b4b-ab32-ccc06845bf1a",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "13003ec4-d113-47ea-a68a-c43f01400997",
+        "parentId" : null,
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "I am not sure if we want to expose this from SService or move to a more accessible place ",
+        "createdAt" : "2019-08-27T20:38:19Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fc78316e-d736-4f84-ba30-8586de89a62b",
+        "parentId" : "13003ec4-d113-47ea-a68a-c43f01400997",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I would prefer to reuse the code, either by just depending on it for now or by moving it to some shared location (not quite sure what would be a good place for it, maybe `DA.Daml.LF.Ast.Util`?",
+        "createdAt" : "2019-08-28T06:51:46Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "723ec35b-1d5b-4260-8e3a-8aec1a17c4d9",
+        "parentId" : "13003ec4-d113-47ea-a68a-c43f01400997",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "That sounds like a good place to put it. Let me move them",
+        "createdAt" : "2019-08-28T19:24:08Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd"
+  },
+  {
+    "id" : "fa802901-9394-4ef4-a957-98b33de5f8d3",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "f8781fac-bbf8-44c6-9225-ed708e411186",
+        "parentId" : null,
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Using PRSelf seems somewhat wrong. We have the whole package here feels like I would not have to do that. What would be an easy way to get `LF.Qualified LF.TypeConName`",
+        "createdAt" : "2019-08-27T20:41:04Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "44da57fa-1fdd-47e1-96e3-ea979fa70500",
+        "parentId" : "f8781fac-bbf8-44c6-9225-ed708e411186",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do you think `PRSelf` is wrong? Seems to make sense to me.",
+        "createdAt" : "2019-08-28T07:13:23Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8f9929e7-9314-4675-8e13-f50574530de6",
+        "parentId" : "f8781fac-bbf8-44c6-9225-ed708e411186",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "I do not completely understand how this works. The world in context is constructed using `rewriteSelfReferences` which is explained by a comment there ` Rewrite all `PRSelf` references to `PRImport` references.` So by that, I thought it would rewrite `PRSelf`",
+        "createdAt" : "2019-08-28T15:53:43Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0fac5ddf-211d-42dd-8018-b3ce32a3c14a",
+        "parentId" : "f8781fac-bbf8-44c6-9225-ed708e411186",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "As far as I can tell, you only rewrite PRSelf in external packages see https://github.com/digital-asset/daml/blob/master/compiler/damlc/daml-visual/src/DA/Daml/Visual.hs#L127. `pkg` itself can still contain `PRSelf`. As far as I can tell, your only search for templates in the current package not the external package so `PRSelf` should be accurate.",
+        "createdAt" : "2019-08-29T06:13:11Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "50581da5-40dd-4556-86ab-121804c114eb",
+        "parentId" : "f8781fac-bbf8-44c6-9225-ed708e411186",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Cool. thanks",
+        "createdAt" : "2019-08-29T14:54:06Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd\n+labledField :: T.Text -> T.Text -> T.Text\n+labledField fname \"\" = fname\n+labledField fname label = fname <> \".\" <> label\n+\n+typeConFieldsNames :: LF.World -> (LF.FieldName, LF.Type) -> [T.Text]\n+typeConFieldsNames world (LF.FieldName fName, LF.TConApp tcn _) = map (labledField fName) (typeConFields tcn world)\n+typeConFieldsNames _ (LF.FieldName fName, _) = [fName]\n+\n+typeConFields :: LF.Qualified LF.TypeConName -> LF.World -> [T.Text]\n+typeConFields qName world = case LF.lookupDataType qName world of\n+  Right dataType -> case LF.dataCons dataType of\n+    LF.DataRecord re -> concatMap (typeConFieldsNames world) re\n+    LF.DataVariant _ -> [\"\"]\n+    LF.DataEnum _ -> [\"\"]\n+  Left _ -> error \"malformed template constructor\"\n+\n+-- Other way is to go from Expr to Qalified a and then use that qualified\n+tplQulified :: LF.World -> TemplateChoices -> [T.Text]\n+tplQulified wrld tplc = typeConFields qualTpl wrld\n+    where qualTpl = LF.Qualified LF.PRSelf (modName tplc) (LF.tplTypeCon $ template tplc)"
+  },
+  {
+    "id" : "cb7895de-420b-4e66-b07a-fbf3daf5517a",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "13b6fb1e-7396-42c6-ac1e-3960854702a7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t understand what you mean by “Other way”. Does this code implement the other way? If so, then what’s the first way? Or is this an alternative way of implementing the same thing?",
+        "createdAt" : "2019-08-28T06:53:34Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c60af78c-2d30-48fd-9798-67b6c2aeb60d",
+        "parentId" : "13b6fb1e-7396-42c6-ac1e-3960854702a7",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "The other way to go about this is by creating a Partial function `LF.Expr -> LF.Qualified LF.TypeConName` and an error if that is not the case. Which sounds bad ",
+        "createdAt" : "2019-08-28T15:56:08Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd\n+labledField :: T.Text -> T.Text -> T.Text\n+labledField fname \"\" = fname\n+labledField fname label = fname <> \".\" <> label\n+\n+typeConFieldsNames :: LF.World -> (LF.FieldName, LF.Type) -> [T.Text]\n+typeConFieldsNames world (LF.FieldName fName, LF.TConApp tcn _) = map (labledField fName) (typeConFields tcn world)\n+typeConFieldsNames _ (LF.FieldName fName, _) = [fName]\n+\n+typeConFields :: LF.Qualified LF.TypeConName -> LF.World -> [T.Text]\n+typeConFields qName world = case LF.lookupDataType qName world of\n+  Right dataType -> case LF.dataCons dataType of\n+    LF.DataRecord re -> concatMap (typeConFieldsNames world) re\n+    LF.DataVariant _ -> [\"\"]\n+    LF.DataEnum _ -> [\"\"]\n+  Left _ -> error \"malformed template constructor\"\n+\n+-- Other way is to go from Expr to Qalified a and then use that qualified"
+  },
+  {
+    "id" : "0706b27b-2655-44b4-9cad-73ceac5a9843",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "34f74798-c4bf-4c47-abdf-e9b3625beeab",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\ntplQualified :: LF.World -> TemplateChoices -> [T.Text]\r\n```",
+        "createdAt" : "2019-08-28T06:53:52Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd\n+labledField :: T.Text -> T.Text -> T.Text\n+labledField fname \"\" = fname\n+labledField fname label = fname <> \".\" <> label\n+\n+typeConFieldsNames :: LF.World -> (LF.FieldName, LF.Type) -> [T.Text]\n+typeConFieldsNames world (LF.FieldName fName, LF.TConApp tcn _) = map (labledField fName) (typeConFields tcn world)\n+typeConFieldsNames _ (LF.FieldName fName, _) = [fName]\n+\n+typeConFields :: LF.Qualified LF.TypeConName -> LF.World -> [T.Text]\n+typeConFields qName world = case LF.lookupDataType qName world of\n+  Right dataType -> case LF.dataCons dataType of\n+    LF.DataRecord re -> concatMap (typeConFieldsNames world) re\n+    LF.DataVariant _ -> [\"\"]\n+    LF.DataEnum _ -> [\"\"]\n+  Left _ -> error \"malformed template constructor\"\n+\n+-- Other way is to go from Expr to Qalified a and then use that qualified\n+tplQulified :: LF.World -> TemplateChoices -> [T.Text]"
+  },
+  {
+    "id" : "d6771a8f-a832-435f-84d1-593b7e39a85c",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "7bddb604-35e7-4c16-b1d9-07a69273b256",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\ntplQualified wrld tplc = typeConFields qualTpl wrld\r\n```",
+        "createdAt" : "2019-08-28T06:54:02Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd\n+labledField :: T.Text -> T.Text -> T.Text\n+labledField fname \"\" = fname\n+labledField fname label = fname <> \".\" <> label\n+\n+typeConFieldsNames :: LF.World -> (LF.FieldName, LF.Type) -> [T.Text]\n+typeConFieldsNames world (LF.FieldName fName, LF.TConApp tcn _) = map (labledField fName) (typeConFields tcn world)\n+typeConFieldsNames _ (LF.FieldName fName, _) = [fName]\n+\n+typeConFields :: LF.Qualified LF.TypeConName -> LF.World -> [T.Text]\n+typeConFields qName world = case LF.lookupDataType qName world of\n+  Right dataType -> case LF.dataCons dataType of\n+    LF.DataRecord re -> concatMap (typeConFieldsNames world) re\n+    LF.DataVariant _ -> [\"\"]\n+    LF.DataEnum _ -> [\"\"]\n+  Left _ -> error \"malformed template constructor\"\n+\n+-- Other way is to go from Expr to Qalified a and then use that qualified\n+tplQulified :: LF.World -> TemplateChoices -> [T.Text]\n+tplQulified wrld tplc = typeConFields qualTpl wrld"
+  },
+  {
+    "id" : "428c5cee-49de-4d8f-a2f2-924c775f4e5c",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "6bff8ff8-3126-4127-9840-acee0b486edb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This function has a very confusing name. It sounds like it somehow returns the qualified name of a template but that’s not what it does. It returns a list of field names. It might be easier to understand this code if you work with `LF.FieldName` everywhere and only convert to `Text` at the very end.",
+        "createdAt" : "2019-08-28T06:58:10Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "06393dba-7630-465a-8478-d18df95b2fb1",
+        "parentId" : "6bff8ff8-3126-4127-9840-acee0b486edb",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Yes, This was something I forgot to delete. Deleted it now",
+        "createdAt" : "2019-08-28T18:45:49Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd\n+labledField :: T.Text -> T.Text -> T.Text\n+labledField fname \"\" = fname\n+labledField fname label = fname <> \".\" <> label\n+\n+typeConFieldsNames :: LF.World -> (LF.FieldName, LF.Type) -> [T.Text]\n+typeConFieldsNames world (LF.FieldName fName, LF.TConApp tcn _) = map (labledField fName) (typeConFields tcn world)\n+typeConFieldsNames _ (LF.FieldName fName, _) = [fName]\n+\n+typeConFields :: LF.Qualified LF.TypeConName -> LF.World -> [T.Text]\n+typeConFields qName world = case LF.lookupDataType qName world of\n+  Right dataType -> case LF.dataCons dataType of\n+    LF.DataRecord re -> concatMap (typeConFieldsNames world) re\n+    LF.DataVariant _ -> [\"\"]\n+    LF.DataEnum _ -> [\"\"]\n+  Left _ -> error \"malformed template constructor\"\n+\n+-- Other way is to go from Expr to Qalified a and then use that qualified\n+tplQulified :: LF.World -> TemplateChoices -> [T.Text]"
+  },
+  {
+    "id" : "d8617973-9756-45e0-8b91-1f07eccab878",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "0dd36197-0104-4207-86e4-e7c627304005",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can this function run into an infinite loop? What happens if I have something like:\r\n\r\n```haskell\r\ndata X = X { y : Y }\r\ndata Y = Y { x : X }\r\n```\r\nAdmittedly that is not a useful type in DAML (since it is strict) but if you change it to something like `data X = X { y : Maybe Y }` it becomes a useful type and afaict the only reason why that won’t cause an infinite loop at the moment is that you don’t recurse into variants at all.",
+        "createdAt" : "2019-08-28T06:59:06Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f9c3101a-ab03-4e85-a7f3-dcdd23411ede",
+        "parentId" : "0dd36197-0104-4207-86e4-e7c627304005",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That comment still applies afaict. At least it deserves a comment and maybe a TODO that we might also want to recurse on variants at some point which will require changes.",
+        "createdAt" : "2019-09-05T12:21:02Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "813d31a7-b96b-468e-8764-3cd62d6956af",
+        "parentId" : "0dd36197-0104-4207-86e4-e7c627304005",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Yes, I will add a TODO. Will revisit this again soon ",
+        "createdAt" : "2019-09-05T14:04:24Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : 70,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd\n+labledField :: T.Text -> T.Text -> T.Text\n+labledField fname \"\" = fname\n+labledField fname label = fname <> \".\" <> label\n+\n+typeConFieldsNames :: LF.World -> (LF.FieldName, LF.Type) -> [T.Text]\n+typeConFieldsNames world (LF.FieldName fName, LF.TConApp tcn _) = map (labledField fName) (typeConFields tcn world)\n+typeConFieldsNames _ (LF.FieldName fName, _) = [fName]\n+\n+typeConFields :: LF.Qualified LF.TypeConName -> LF.World -> [T.Text]"
+  },
+  {
+    "id" : "33bf5e08-9cc7-41da-86cd-9e1a2de26da4",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "17d7527a-14ab-4575-9b4b-ffaffef5eb71",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like currently you simply flatten all nested records into a single list of fields. Can we display them in a more hierarchical way? Throwing away the structure that the user created doesn’t seem like a nice way to present this.\r\nI could also see this blowing up on large records if you recurse without a limit. Maybe we should make this configurable, e.g., initially have a single parameter for recursing on fields where `0` does not display any fields in the graph (i.e. the behavior without this PR), 1 goes down a single level, 2 recurses once, …",
+        "createdAt" : "2019-08-28T07:08:17Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "afaf8f59-add4-4b65-822b-dc3320819d98",
+        "parentId" : "17d7527a-14ab-4575-9b4b-ffaffef5eb71",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "The nested nature of it preserved it is separated by a dot similar to what we do in scenario service table output. I am not sure if I understood the comment correctly correct me if my understanding is wrong ",
+        "createdAt" : "2019-08-28T15:59:43Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "64f21b2d-9a31-41f8-8ed3-a01a0bc9ca72",
+        "parentId" : "17d7527a-14ab-4575-9b4b-ffaffef5eb71",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see, I missed the dots. Thanks for the explanation. I’m still a bit worried that this doesn’t scale to large nested records so I think the limit is probably still a good idea but I’m fine with that being added separately.",
+        "createdAt" : "2019-08-28T16:25:54Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : 71,
+    "diffHunk" : "@@ -151,9 +153,32 @@ addCreateChoice :: TemplateChoices -> Map.Map LF.ChoiceName ChoiceDetails -> Cho\n addCreateChoice TemplateChoices {..} lookupData = nodeIdForChoice lookupData tplNameCreateChoice\n     where tplNameCreateChoice = LF.ChoiceName $ T.pack $ DAP.renderPretty (headNote \"addCreateChoice\" (LF.unTypeConName (LF.tplTypeCon template))) ++ \"_Create\"\n \n-constructSubgraphsWithLables :: Map.Map LF.ChoiceName ChoiceDetails -> TemplateChoices -> SubGraph\n-constructSubgraphsWithLables lookupData tpla@TemplateChoices {..} = SubGraph nodesWithCreate template\n+-- This is copied from PrettyScenarios but depending on SS for visual seems odd\n+labledField :: T.Text -> T.Text -> T.Text\n+labledField fname \"\" = fname\n+labledField fname label = fname <> \".\" <> label\n+\n+typeConFieldsNames :: LF.World -> (LF.FieldName, LF.Type) -> [T.Text]\n+typeConFieldsNames world (LF.FieldName fName, LF.TConApp tcn _) = map (labledField fName) (typeConFields tcn world)\n+typeConFieldsNames _ (LF.FieldName fName, _) = [fName]\n+\n+typeConFields :: LF.Qualified LF.TypeConName -> LF.World -> [T.Text]\n+typeConFields qName world = case LF.lookupDataType qName world of"
+  },
+  {
+    "id" : "5498a02b-3274-4de4-8781-e9ec433148fa",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "feb80602-6a86-40be-9b6f-c18fc4d6fcbc",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we remove this?",
+        "createdAt" : "2019-08-28T07:14:19Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -183,11 +208,17 @@ choiceDetailsColorCode False = \"green\"\n subGraphBodyLine :: ChoiceDetails -> String\n subGraphBodyLine chc = \"n\" ++ show (nodeId chc)++ \"[label=\" ++ DAP.renderPretty (displayChoiceName chc) ++\"][color=\" ++ choiceDetailsColorCode (consuming chc) ++\"]; \"\n \n-subGraphEnd :: LF.Template -> String\n-subGraphEnd tpl = \"label=\" ++ DAP.renderPretty (LF.tplTypeCon tpl) ++ \";color=\" ++ \"blue\" ++ \"\\n}\"\n+subGraphEnd :: SubGraph -> String\n+subGraphEnd sg = \"label=<\" ++ tHeader ++ tTitle ++ tBody  ++ tclose ++ \">\" ++ \";color=\" ++ \"blue\" ++ \"\\n}\"\n+    where tHeader = \"<table align = \\\"left\\\" border=\\\"0\\\" cellborder=\\\"0\\\" cellspacing=\\\"1\\\">\\n\"\n+          tTitle =  \"<tr><td align=\\\"center\\\"><b>\" ++  DAP.renderPretty (LF.tplTypeCon $ clusterTemplate sg) ++ \"</b></td></tr>\"\n+          tBody = concatMap fieldTableLine (templateFileds sg)\n+          fieldTableLine field = \"<tr><td align=\\\"left\\\">\" ++ T.unpack field  ++ \"</td></tr> \\n\"\n+          tclose = \"</table>\"\n \n+-- DAP.renderPretty (LF.tplTypeCon (clusterTemplate sg))"
+  },
+  {
+    "id" : "e0a3c3a3-ded5-4353-aa32-dc65283b4689",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "2591b62d-8d32-4184-a917-0622f7d71915",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why did you change the type here? It looks like you still only use the template. Changing the type seems fine in principle (although I’m not sure it helps with anything here either) but I would suggest that you also change `subGraphHeader` in that case. It seems odd to have different types for `subGraphHeader` and `subGraphEnd`.",
+        "createdAt" : "2019-08-28T07:18:05Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "939c343c-ba83-49cb-a43b-2d70711d96c3",
+        "parentId" : "2591b62d-8d32-4184-a917-0622f7d71915",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Ah I see that could look odd. I had to change this as I need to access all the fields to add to the label in towards the end of the subgraph. Let me change the type of Header so that it is same as subgraph end. ",
+        "createdAt" : "2019-08-28T18:03:04Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9b2531c0-ef16-437a-993c-bdcee5ea5b66",
+        "parentId" : "2591b62d-8d32-4184-a917-0622f7d71915",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see, I missed the call to `templateFields` below. Somehow my browser search failed me :(",
+        "createdAt" : "2019-08-28T18:10:29Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : 105,
+    "diffHunk" : "@@ -183,11 +208,17 @@ choiceDetailsColorCode False = \"green\"\n subGraphBodyLine :: ChoiceDetails -> String\n subGraphBodyLine chc = \"n\" ++ show (nodeId chc)++ \"[label=\" ++ DAP.renderPretty (displayChoiceName chc) ++\"][color=\" ++ choiceDetailsColorCode (consuming chc) ++\"]; \"\n \n-subGraphEnd :: LF.Template -> String\n-subGraphEnd tpl = \"label=\" ++ DAP.renderPretty (LF.tplTypeCon tpl) ++ \";color=\" ++ \"blue\" ++ \"\\n}\"\n+subGraphEnd :: SubGraph -> String\n+subGraphEnd sg = \"label=<\" ++ tHeader ++ tTitle ++ tBody  ++ tclose ++ \">\" ++ \";color=\" ++ \"blue\" ++ \"\\n}\""
+  },
+  {
+    "id" : "b6c895a3-8bf4-462e-bc54-96bc0154f42f",
+    "prId" : 2673,
+    "comments" : [
+      {
+        "id" : "ce0ac655-f74f-4d00-b592-3e8c97c2fe5e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n          tBody = concatMap fieldTableLine (templateFields sg)\r\n```",
+        "createdAt" : "2019-08-28T18:08:13Z",
+        "updatedAt" : "2019-09-05T14:29:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f132fa8499359d43acb8be985d25f7293c76ce03",
+    "line" : null,
+    "diffHunk" : "@@ -183,11 +208,17 @@ choiceDetailsColorCode False = \"green\"\n subGraphBodyLine :: ChoiceDetails -> String\n subGraphBodyLine chc = \"n\" ++ show (nodeId chc)++ \"[label=\" ++ DAP.renderPretty (displayChoiceName chc) ++\"][color=\" ++ choiceDetailsColorCode (consuming chc) ++\"]; \"\n \n-subGraphEnd :: LF.Template -> String\n-subGraphEnd tpl = \"label=\" ++ DAP.renderPretty (LF.tplTypeCon tpl) ++ \";color=\" ++ \"blue\" ++ \"\\n}\"\n+subGraphEnd :: SubGraph -> String\n+subGraphEnd sg = \"label=<\" ++ tHeader ++ tTitle ++ tBody  ++ tclose ++ \">\" ++ \";color=\" ++ \"blue\" ++ \"\\n}\"\n+    where tHeader = \"<table align = \\\"left\\\" border=\\\"0\\\" cellborder=\\\"0\\\" cellspacing=\\\"1\\\">\\n\"\n+          tTitle =  \"<tr><td align=\\\"center\\\"><b>\" ++  DAP.renderPretty (LF.tplTypeCon $ clusterTemplate sg) ++ \"</b></td></tr>\"\n+          tBody = concatMap fieldTableLine (templateFileds sg)"
+  },
+  {
+    "id" : "4e4acf52-00e5-4422-af84-3f10efed1cdc",
+    "prId" : 2597,
+    "comments" : [
+      {
+        "id" : "0e28bd85-4e72-4d36-9538-ac7f1c9280e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Instead of accepting a list of modules and a world, why not just use the world and the `_worldSelf` field for the package and the modules that you visualize?",
+        "createdAt" : "2019-08-20T06:58:42Z",
+        "updatedAt" : "2019-08-26T14:36:04Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0bc2799c-0d93-4336-ac12-235c283f8b72",
+        "parentId" : "0e28bd85-4e72-4d36-9538-ac7f1c9280e9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That comment still applies afaict.",
+        "createdAt" : "2019-08-26T06:56:48Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "859b5b2e-fad1-434e-8683-1ee8a9e8aa18",
+        "parentId" : "0e28bd85-4e72-4d36-9538-ac7f1c9280e9",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "I will do that in a different PR. ",
+        "createdAt" : "2019-08-26T14:35:32Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "1b1fd2cb67bf8f3d8e5f6fa576f088fc36bd49fc",
+    "line" : 21,
+    "diffHunk" : "@@ -197,21 +198,25 @@ constructDotGraph subgraphs edges = \"digraph G {\\ncompound=true;\\n\" ++ \"rankdir=\n         edgesLines = unlines $ map (uncurry drawEdge) edges\n         graphLines = subgraphsLines ++ edgesLines\n \n+\n+dotFileGen :: [LF.Module] -> LF.World -> String"
+  }
+]

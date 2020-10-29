@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "5c1acb72-fa32-43db-ae2f-989cfa90ac15",
+    "prId" : 2264,
+    "comments" : [
+      {
+        "id" : "534fec23-7518-48d4-90ca-fabf1221f5b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I don't think this applies to each individual integration test. I think we can offload this to the test tool, in the sense that the test tool performs the following actions:\r\n1) upload packages required to run the test to the ledger endpoint\r\n2) allocate parties \r\n3) run the tests\r\nWDYT?",
+        "createdAt" : "2019-07-23T14:09:41Z",
+        "updatedAt" : "2019-07-23T15:24:21Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8b705657-d33f-4101-8244-dc16f001f72c",
+        "parentId" : "534fec23-7518-48d4-90ca-fabf1221f5b8",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Right, ideally, the tool should be responsible for uploading packages and allocating parties, and the tests themselves should only specify what parties/packages it needs. I'm going to formulate it more generally, it may need some touch up (like adding more pointers to methods) after @stefanobaghino-da's refactoring. ",
+        "createdAt" : "2019-07-23T15:18:48Z",
+        "updatedAt" : "2019-07-23T15:24:21Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f034faeb489e40bd06e1c74d9ef9a729b50e7eb2",
+    "line" : null,
+    "diffHunk" : "@@ -61,3 +61,41 @@ participants, and executes the configured scenarios (to be precise,\n the SemanticTester creates a list of commands and expected responses\n based on the content of the scenarios, and executes these commands on\n the backend).\n+\n+## Writing integration tests\n+\n+The integration tests should work with any conformant DAML ledger.\n+This includes not only our sandbox, but also other ledger implementations.\n+\n+The following are important considerations for writing integration tests. \n+\n+\n+### Exclusive access\n+\n+Don't assume you have exclusive access to the ledger.\n+Other tests or applications may be running concurrently.\n+\n+* Don't make assumptions on how ledger offsets evolve.\n+  Other applications may modify the ledger in between your commands.\n+* Make sure command and workflow IDs are globally unique,\n+  and not shared between test runs.\n+  * See `TestIdsGenerator.testCommandId` and `TestIdsGenerator.testWorkflowId`\n+* Make sure party names are globally unique,\n+  and not shared between test runs.\n+  * If possible, allocate parties at the beginning of the test using the admin API.\n+  * See `TestIdsGenerator.testPartyName`\n+* Thanks to our privacy model, using unique party names and workflow IDs\n+  will essentially create a private sub-ledger and make sure none of your actions interfere with the rest of the ledger.\n+\n+### Previous ledger content\n+\n+Don't make assumptions on the previous content of the ledger.\n+The ledger may be completely empty, or it may be a long running ledger with millions of ledger entries.\n+\n+* Don't start streaming from genesis.\n+  Instead, at the start of the test, read the ledger begin,\n+  and start all streaming from there.\n+* Upload all required DAML packages at the beginning of the test."
+  }
+]

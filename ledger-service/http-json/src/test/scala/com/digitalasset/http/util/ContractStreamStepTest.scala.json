@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "49d92b10-7c5c-492c-a759-06de0971b188",
+    "prId" : 4809,
+    "comments" : [
+      {
+        "id" : "889383d4-8a2b-4e3e-9958-98e9afdf54d8",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Should it be part of `ContractStreamStep` companion object?",
+        "createdAt" : "2020-03-04T17:56:20Z",
+        "updatedAt" : "2020-03-04T17:58:18Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4805b21fc74b54a33855f5cb6907fc0efbf433da",
+    "line" : 64,
+    "diffHunk" : "@@ -0,0 +1,85 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.http\n+package util\n+\n+import com.digitalasset.daml.lf.data.FlatSpecCheckLaws\n+\n+import org.scalatest.prop.GeneratorDrivenPropertyChecks\n+import org.scalatest.prop.TableDrivenPropertyChecks\n+import org.scalatest.{FlatSpec, Matchers}\n+import scalaz.scalacheck.ScalaCheckBinding._\n+import scalaz.scalacheck.ScalazProperties\n+import scalaz.syntax.apply._\n+import scalaz.syntax.semigroup._\n+import scalaz.{@@, Equal, Semigroup, Tag}\n+\n+class ContractStreamStepTest\n+    extends FlatSpec\n+    with FlatSpecCheckLaws\n+    with Matchers\n+    with GeneratorDrivenPropertyChecks\n+    with TableDrivenPropertyChecks {\n+  import ContractStreamStepTest._, ContractStreamStep._\n+  import InsertDeleteStepTest._\n+\n+  behavior of \"append\"\n+\n+  it should \"be associative for valid streams\" in forAll(validStreamGen) { csses =>\n+    whenever(csses.size >= 3) {\n+      forEvery(\n+        Table((\"a\", \"b\", \"c\"), csses.sliding(3).map { case Seq(a, b, c) => (a, b, c) }.toSeq: _*)) {\n+        case (a, b, c) =>\n+          (a |+| (b |+| c)) should ===((a |+| b) |+| c)\n+      }\n+    }\n+  }\n+\n+  it should \"report the last offset\" in forAll { (a: CSS, b: CSS) =>\n+    def off(css: ContractStreamStep[_, _]) = css match {\n+      case Acs(_) => None\n+      case LiveBegin(off) => off.toOption\n+      case Txn(_, off) => Some(off)\n+    }\n+    off(a |+| b) should ===(off(b) orElse off(a))\n+  }\n+\n+  it should \"preserve append across toInsertDelete\" in forAll { (a: CSS, b: CSS) =>\n+    (a |+| b).toInsertDelete should ===(a.toInsertDelete |+| b.toInsertDelete)\n+  }\n+\n+  behavior of \"append semigroup\"\n+\n+  checkLaws(ScalazProperties.semigroup.laws[CSS])\n+}\n+\n+object ContractStreamStepTest {\n+  import InsertDeleteStepTest._, InsertDeleteStep.Inserts, ContractStreamStep._\n+  import org.scalacheck.{Arbitrary, Gen}\n+  import Arbitrary.arbitrary\n+\n+  type CSS = ContractStreamStep[Unit, Cid]\n+\n+  implicit val `CSS semigroup`: Semigroup[CSS] ="
+  }
+]

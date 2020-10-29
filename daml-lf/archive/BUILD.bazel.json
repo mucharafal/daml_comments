@@ -1,0 +1,719 @@
+[
+  {
+    "id" : "fdf8c87b-df30-425a-bd61-f25bf566b37a",
+    "prId" : 3175,
+    "comments" : [
+      {
+        "id" : "574a0f8a-813a-4525-bc54-e3fab71e3bc2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What is the purpose of the `%s` here? Regardless of the details changing the maven coordinates will mean that we upload it to a different location so this should at the very least be documented in the release notes as users need to update this as well.",
+        "createdAt" : "2019-10-15T06:55:09Z",
+        "updatedAt" : "2019-10-15T07:38:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2727b33a-113a-44f9-afd0-9a269f221f78",
+        "parentId" : "574a0f8a-813a-4525-bc54-e3fab71e3bc2",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "My mistake. fixed",
+        "createdAt" : "2019-10-15T07:34:19Z",
+        "updatedAt" : "2019-10-15T07:38:08Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe0c4f3be6a10f0d7370cac74047e92baec5dee9",
+    "line" : null,
+    "diffHunk" : "@@ -17,49 +17,79 @@ load(\n load(\"//bazel_tools:pom_file.bzl\", \"pom_file\")\n load(\"@os_info//:os_info.bzl\", \"is_windows\")\n load(\"//bazel_tools:javadoc_library.bzl\", \"javadoc_library\")\n+load(\"//bazel_tools:java.bzl\", \"da_java_proto_library\")\n+load(\"@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl\", \"jar_jar\")\n \n LF_MAJOR_VERSIONS = [\n     \"0\",\n     \"1\",\n ]\n \n filegroup(\n-    name = \"daml-lf-archive-srcs\",\n-    srcs = [\"src/main/protobuf/com/digitalasset/daml_lf/daml_lf.proto\"] +\n-           [\"src/main/protobuf/com/digitalasset/daml_lf/daml_lf_%s.proto\" % v for v in LF_MAJOR_VERSIONS],\n-    visibility = [\"//visibility:public\"],\n-)\n-\n-exports_files(\n-    [\"com/digitalasset/daml_lf/daml_lf_%s.proto\" % v for v in LF_MAJOR_VERSIONS],\n+    name = \"daml_lf_archive_proto_srcs\",\n+    srcs = glob([\"src/main/protobuf/com/digitalasset/daml_lf/*.proto\"]),\n )\n \n proto_library(\n-    name = \"daml_lf_proto\",\n-    srcs = [\":daml-lf-archive-srcs\"],\n+    name = \"daml_lf_archive_proto\",\n+    srcs = [\"daml_lf_archive_proto_srcs\"],\n     strip_import_prefix = \"src/main/protobuf/\",\n-    visibility = [\"//:__subpackages__\"],\n+    visibility = [\"//visibility:public\"],\n )\n \n proto_gen(\n-    name = \"daml_lf_java_proto_srcs\",\n-    srcs = [\":daml_lf_proto\"],\n+    name = \"daml_lf_archive_java_proto_srcs\",\n+    srcs = [\"daml_lf_archive_proto\"],\n     plugin_name = \"java\",\n+    visibility = [\"//visibility:public\"],\n )\n \n java_library(\n-    name = \"daml_lf_java_proto\",\n-    srcs = [\":daml_lf_java_proto_srcs\"],\n-    tags = [\"maven_coordinates=com.digitalasset:daml-lf-archive:__VERSION__\"],\n+    name = \"daml_lf_archive_java_proto\",\n+    srcs = [\"daml_lf_archive_java_proto_srcs\"],\n+    tags = [\"maven_coordinates=com.digitalasset:daml-lf-%s-archive-java-proto:__VERSION__\"],"
+  },
+  {
+    "id" : "f92c81e5-3d14-4500-8d96-206594518729",
+    "prId" : 3175,
+    "comments" : [
+      {
+        "id" : "def9efaf-d772-42ac-826c-98a57b337432",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "As for the other change, this is potentially breaking since users will have to update their references.",
+        "createdAt" : "2019-10-15T06:56:05Z",
+        "updatedAt" : "2019-10-15T07:38:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cd7689da-7650-4798-92dd-ac7540e2f0d2",
+        "parentId" : "def9efaf-d772-42ac-826c-98a57b337432",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-10-15T07:34:26Z",
+        "updatedAt" : "2019-10-15T07:38:08Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fe0c4f3be6a10f0d7370cac74047e92baec5dee9",
+    "line" : 115,
+    "diffHunk" : "@@ -100,10 +130,10 @@ da_scala_library(\n     name = \"daml_lf_archive_reader\",\n     srcs = glob([\"src/main/scala/**/*.scala\"]),\n     scalacopts = lf_scalacopts,\n-    tags = [\"maven_coordinates=com.digitalasset:daml-lf-archive-reader:__VERSION__\"],\n+    tags = [\"maven_coordinates=com.digitalasset:daml-lf-archive-scala:__VERSION__\"],"
+  },
+  {
+    "id" : "18e5ee17-b0e6-431c-b1fd-40c645fa0617",
+    "prId" : 3175,
+    "comments" : [
+      {
+        "id" : "a93f7b13-6268-4ade-a8bd-8d7a1b303e10",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This still has different maven coordinates than before.",
+        "createdAt" : "2019-10-15T07:40:20Z",
+        "updatedAt" : "2019-10-15T07:40:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fe83ac47-c627-48ef-97f5-4a38e9cd92b1",
+        "parentId" : "a93f7b13-6268-4ade-a8bd-8d7a1b303e10",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I added to the release notes. ",
+        "createdAt" : "2019-10-15T08:00:53Z",
+        "updatedAt" : "2019-10-15T08:00:53Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fe0c4f3be6a10f0d7370cac74047e92baec5dee9",
+    "line" : 50,
+    "diffHunk" : "@@ -17,49 +17,79 @@ load(\n load(\"//bazel_tools:pom_file.bzl\", \"pom_file\")\n load(\"@os_info//:os_info.bzl\", \"is_windows\")\n load(\"//bazel_tools:javadoc_library.bzl\", \"javadoc_library\")\n+load(\"//bazel_tools:java.bzl\", \"da_java_proto_library\")\n+load(\"@com_github_johnynek_bazel_jar_jar//:jar_jar.bzl\", \"jar_jar\")\n \n LF_MAJOR_VERSIONS = [\n     \"0\",\n     \"1\",\n ]\n \n filegroup(\n-    name = \"daml-lf-archive-srcs\",\n-    srcs = [\"src/main/protobuf/com/digitalasset/daml_lf/daml_lf.proto\"] +\n-           [\"src/main/protobuf/com/digitalasset/daml_lf/daml_lf_%s.proto\" % v for v in LF_MAJOR_VERSIONS],\n-    visibility = [\"//visibility:public\"],\n-)\n-\n-exports_files(\n-    [\"com/digitalasset/daml_lf/daml_lf_%s.proto\" % v for v in LF_MAJOR_VERSIONS],\n+    name = \"daml_lf_archive_proto_srcs\",\n+    srcs = glob([\"src/main/protobuf/com/digitalasset/daml_lf/*.proto\"]),\n )\n \n proto_library(\n-    name = \"daml_lf_proto\",\n-    srcs = [\":daml-lf-archive-srcs\"],\n+    name = \"daml_lf_archive_proto\",\n+    srcs = [\"daml_lf_archive_proto_srcs\"],\n     strip_import_prefix = \"src/main/protobuf/\",\n-    visibility = [\"//:__subpackages__\"],\n+    visibility = [\"//visibility:public\"],\n )\n \n proto_gen(\n-    name = \"daml_lf_java_proto_srcs\",\n-    srcs = [\":daml_lf_proto\"],\n+    name = \"daml_lf_archive_java_proto_srcs\",\n+    srcs = [\"daml_lf_archive_proto\"],\n     plugin_name = \"java\",\n+    visibility = [\"//visibility:public\"],\n )\n \n java_library(\n-    name = \"daml_lf_java_proto\",\n-    srcs = [\":daml_lf_java_proto_srcs\"],\n-    tags = [\"maven_coordinates=com.digitalasset:daml-lf-archive:__VERSION__\"],\n+    name = \"daml_lf_archive_java_proto\",\n+    srcs = [\"daml_lf_archive_java_proto_srcs\"],\n+    tags = [\"maven_coordinates=com.digitalasset:daml-lf-archive-java-proto:__VERSION__\"],"
+  },
+  {
+    "id" : "04aa1bc4-d61e-4d3c-956c-f1e1b34a92b7",
+    "prId" : 3142,
+    "comments" : [
+      {
+        "id" : "48a2aec9-560f-449d-b6d8-ab39618ada36",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "rename to `daml_lf_archive_reader`",
+        "createdAt" : "2019-10-11T07:21:21Z",
+        "updatedAt" : "2019-10-15T18:02:37Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "27c3fe00-58b1-4bdb-8096-a4f8bcef8f32",
+        "parentId" : "48a2aec9-560f-449d-b6d8-ab39618ada36",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-10-11T09:21:26Z",
+        "updatedAt" : "2019-10-15T18:02:37Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6a094129d2e19bb8060f21f6601947eaab12d12e",
+    "line" : null,
+    "diffHunk" : "@@ -92,12 +126,12 @@ da_haskell_library(\n \n da_scala_library(\n     name = \"daml_lf_archive_scala\","
+  },
+  {
+    "id" : "a03eebd0-d3dd-4ef8-a542-f334444e0351",
+    "prId" : 3142,
+    "comments" : [
+      {
+        "id" : "bcf9cd58-09c0-4852-9315-f6b87a361abe",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Rename to `daml_lf_archive_reader_tests`.",
+        "createdAt" : "2019-10-11T07:21:52Z",
+        "updatedAt" : "2019-10-15T18:02:37Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6e875335-3e03-4db1-a236-06405ebbd6aa",
+        "parentId" : "bcf9cd58-09c0-4852-9315-f6b87a361abe",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-10-11T09:21:38Z",
+        "updatedAt" : "2019-10-15T18:02:37Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6a094129d2e19bb8060f21f6601947eaab12d12e",
+    "line" : null,
+    "diffHunk" : "@@ -109,15 +143,15 @@ da_scala_library(\n da_scala_test_suite(\n     name = \"daml_lf_archive_scala_tests\","
+  },
+  {
+    "id" : "39cac2fa-e29f-4fe0-b74f-d21ba4f159f7",
+    "prId" : 3142,
+    "comments" : [
+      {
+        "id" : "b16d11e4-a78a-4eb3-8513-56c60be9873f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Also add a bazel target for the javadoc and sources.",
+        "createdAt" : "2019-10-11T07:23:07Z",
+        "updatedAt" : "2019-10-15T18:02:37Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e4b08594-b5b9-4bcd-b54d-b5cc39de15fc",
+        "parentId" : "b16d11e4-a78a-4eb3-8513-56c60be9873f",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-10-11T09:21:47Z",
+        "updatedAt" : "2019-10-15T18:02:37Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6a094129d2e19bb8060f21f6601947eaab12d12e",
+    "line" : null,
+    "diffHunk" : "@@ -17,54 +17,88 @@ load(\n load(\"//bazel_tools:pom_file.bzl\", \"pom_file\")\n load(\"@os_info//:os_info.bzl\", \"is_windows\")\n load(\"//bazel_tools:javadoc_library.bzl\", \"javadoc_library\")\n+load(\":archive.bzl\", \"mangle\", \"mangle_for_java\")\n+load(\"//bazel_tools:java.bzl\", \"da_java_proto_library\")\n \n LF_MAJOR_VERSIONS = [\n     \"0\",\n     \"1\",\n ]\n \n-filegroup(\n-    name = \"daml-lf-archive-srcs\",\n-    srcs = [\"da/daml_lf.proto\"] + [\"da/daml_lf_%s.proto\" % v for v in LF_MAJOR_VERSIONS],\n-    visibility = [\"//visibility:public\"],\n-)\n-\n-exports_files(\n-    [\"da/daml_lf_%s.proto\" % v for v in LF_MAJOR_VERSIONS],\n-)\n+LF_VERSIONS = [\n+    \"daml-lf\",\n+    \"daml-lf-1.6\",\n+]\n \n-proto_library(\n-    name = \"daml_lf_proto\",\n-    srcs = [\":daml-lf-archive-srcs\"],\n-    proto_source_root = \"daml-lf/archive\",\n-    visibility = [\"//:__subpackages__\"],\n-)\n+[\n+    [\n+        filegroup(\n+            name = \"%s_archive_proto_srcs\" % mangled_version,\n+            srcs = glob([\"src/main/protobuf/com/digitalasset/%s/*.proto\" % mangle_for_java(mangled_version)]),\n+        ),\n+        proto_library(\n+            name = \"%s_archive_proto\" % mangled_version,\n+            srcs = [\"%s_archive_proto_srcs\" % mangled_version],\n+            strip_import_prefix = \"src/main/protobuf/\",\n+            visibility = [\"//visibility:public\"],\n+            deps = [\"@com_google_protobuf//:empty_proto\"],\n+        ),\n+        da_java_proto_library("
+  },
+  {
+    "id" : "75b7ab40-2ebc-43d7-9d97-a2ff66937e9a",
+    "prId" : 3067,
+    "comments" : [
+      {
+        "id" : "9bdaa819-f371-4777-ad2d-0251d2ee99bf",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "if this is a test, should this be a `da_scala_test`?",
+        "createdAt" : "2019-10-02T14:42:23Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1116e61e-bf92-4864-8603-5756c2805ef3",
+        "parentId" : "9bdaa819-f371-4777-ad2d-0251d2ee99bf",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "@dajmaki That's one or you.",
+        "createdAt" : "2019-10-02T14:57:41Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8fba06dc-d27f-4fac-ac22-232b72311328",
+        "parentId" : "9bdaa819-f371-4777-ad2d-0251d2ee99bf",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "It should perhaps be called ”decode-tester” or just decoder. It’s an ad-hoc cli tool for benchmarking and profiling the decoding. We could also consider just commenting it out as it’s only used when needed?",
+        "createdAt" : "2019-10-02T15:03:23Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "90ce1575-2373-4569-b228-eae2b9431d9f",
+        "parentId" : "9bdaa819-f371-4777-ad2d-0251d2ee99bf",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Renamed it and added a comment.",
+        "createdAt" : "2019-10-02T15:21:50Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "999892a7-c0c7-44da-9033-90126895bc05",
+        "parentId" : "9bdaa819-f371-4777-ad2d-0251d2ee99bf",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks!",
+        "createdAt" : "2019-10-02T15:22:13Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eb8a3c63a39ce4715734e5fd8e994ef0f0490499",
+    "line" : 14,
+    "diffHunk" : "@@ -226,3 +227,15 @@ pkg_tar(\n     package_dir = \"daml-lf-archive-protos/protobuf/da\",\n     visibility = [\"//visibility:public\"],\n )\n+\n+da_scala_binary("
+  },
+  {
+    "id" : "88bcf2c2-bc11-4e7a-973d-332f626010b0",
+    "prId" : 2059,
+    "comments" : [
+      {
+        "id" : "d0f3632f-9e6a-4941-8331-86520c064c33",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Nice ! ",
+        "createdAt" : "2019-07-09T11:25:42Z",
+        "updatedAt" : "2019-07-09T11:25:50Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "43b333df-0b01-4f37-90ba-17d1ae00ca59",
+        "parentId" : "d0f3632f-9e6a-4941-8331-86520c064c33",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Please don't endorse me for bash on linkedin 🙏 ",
+        "createdAt" : "2019-07-09T11:43:14Z",
+        "updatedAt" : "2019-07-09T11:43:15Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5b4a967650f62f9042025d1f1f24fb4cfef3a6e0",
+    "line" : 5,
+    "diffHunk" : "@@ -195,7 +195,7 @@ genrule(\n     ],\n     outs = [\"daml_lf_archive_java.jar\"],\n     cmd = \"\"\"\n-    INPUT=$$(echo \"$(locations :daml_lf_proto_lib_java)\" | cut -d ' ' -f 1)\n+    INPUT=$$(echo \"$(locations :daml_lf_proto_lib_java)\" | tr ' ' '\\n' | grep -v '\\-src.jar')"
+  },
+  {
+    "id" : "91841410-6b29-4fc5-a5de-4cebb0ffa418",
+    "prId" : 1937,
+    "comments" : [
+      {
+        "id" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Please do this instead:\r\n\r\nhttps://github.com/digital-asset/daml/blob/5daf3f55f31ab327be04031c2d39c48b80cc7c0f/daml-lf/archive/src/test/scala/com/digitalasset/daml/lf/archive/DecodeV1Spec.scala#L62-L65",
+        "createdAt" : "2019-07-03T21:29:28Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "27a0e215-e3c5-46dc-9f33-aa1b914111e9",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Done",
+        "createdAt" : "2019-07-04T08:45:27Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e2e10f2f-382c-4160-9052-af2ec125e5c9",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "If you don't specify a `target` at all, you get the newest stable version of DAML-LF. I think that is the right to do in almost all cases, except for when you want to test something specific to an older version.",
+        "createdAt" : "2019-07-04T08:53:01Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9062b4b4-c402-4acd-b0b7-b4d773115cb6",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Here we want to test something in a latest version (`1.6`) which is still not stable.  ",
+        "createdAt" : "2019-07-04T09:04:40Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "682e20a2-d03b-4576-96ae-cf9836ce478a",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "@remyhaemmerle-da I'm not sure I can follow you here. Once 1.6 is frozen, it is the latest stable version. If you don't specify a target, the compiler will produce 1.6 once this PR is merge and until 1.7 is frozen.",
+        "createdAt" : "2019-07-04T09:07:18Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "94eab0b2-3f46-41ba-a930-05048957c367",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Is it not the  `versionDefault` that defines the default output of the compiler ?\r\nhttps://github.com/digital-asset/daml/blob/7bad280b280bb4240dca7b6b1d670076d13dc07f/compiler/daml-lf-ast/src/DA/Daml/LF/Ast/Version.hs#L32\r\n\r\nI did not change it, so it is sill `1.5`. Should I ? ",
+        "createdAt" : "2019-07-04T09:13:39Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "37f756f9-ca32-453c-93d2-5493ae200155",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Yes, please change it. I completely missed that. Apologies for the confusion.",
+        "createdAt" : "2019-07-04T09:16:01Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d65cf599-f7db-437f-bad9-b519d3bdd587",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-07-04T11:00:14Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9b438875-03fd-46cb-bc49-83120ea4224b",
+        "parentId" : "5c5babb3-1922-4b41-a640-9ca336a66f63",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Thanks a lot.",
+        "createdAt" : "2019-07-04T11:28:11Z",
+        "updatedAt" : "2019-07-12T17:22:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7a9443ebd3345db86ae245d80d9ee2d9a5d9ab47",
+    "line" : null,
+    "diffHunk" : "@@ -139,7 +139,7 @@ daml_compile(\n daml_compile(\n     name = \"DarReaderTest-dev\",\n     main_src = \"src/test/daml/DarReaderTest.daml\",\n-    target = \"1.dev\",\n+    target = \"1.6\","
+  },
+  {
+    "id" : "889d52d0-2fe2-4e93-aaf6-2b508b291625",
+    "prId" : 1867,
+    "comments" : [
+      {
+        "id" : "f746e92f-952a-44b9-b552-83da4a580655",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Considering that the bazel target in artifacts.yaml is called `daml_lf_archive_java`, should this be called `daml_lf_archive_java_javadoc`?",
+        "createdAt" : "2019-06-25T15:30:56Z",
+        "updatedAt" : "2019-06-25T15:50:48Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9f45bf08-5665-4a41-a608-b657adb6f15d",
+        "parentId" : "f746e92f-952a-44b9-b552-83da4a580655",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good catch, fixed! (I’ll add the check before attempting to make another release).",
+        "createdAt" : "2019-06-25T15:51:03Z",
+        "updatedAt" : "2019-06-25T15:51:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2cf802837823a6b0ea3f7e9e1b9a26d8a246306b",
+    "line" : null,
+    "diffHunk" : "@@ -151,6 +152,14 @@ java_proto_library(\n     deps = [\":daml_lf_proto_lib\"],\n )\n \n+javadoc_library(\n+    name = \"daml_lf_archive_javadoc\","
+  }
+]

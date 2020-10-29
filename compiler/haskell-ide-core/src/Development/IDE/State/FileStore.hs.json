@@ -1,0 +1,274 @@
+[
+  {
+    "id" : "19e548ba-4f76-498b-a40b-e484b2b1cd66",
+    "prId" : 1489,
+    "comments" : [
+      {
+        "id" : "f4539206-08d2-43c7-8ddc-095fadc5537f",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "I'm not averse to spinning up an LSP server to test, then our tests are more like real. We'd then just mock VS Code. Although happy to go this way for now.",
+        "createdAt" : "2019-06-03T13:08:32Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fb2862f5-37c2-4821-93e4-f59599f3cc16",
+        "parentId" : "f4539206-08d2-43c7-8ddc-095fadc5537f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah, I am certainly planning to do LSP based tests (probably using `lsp-test`). That would also allow us to finally kill those dreaded language server tests. I just didn’t want to also cram this in this PR as well and keeping `daml-ghc-shake-test-ci` intact for now seems useful.",
+        "createdAt" : "2019-06-03T13:26:25Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8a46b2d8b9b426b7e201afee1fde0bfd4ba9efef",
+    "line" : 50,
+    "diffHunk" : "@@ -6,44 +6,74 @@\n module Development.IDE.State.FileStore(\n     getFileExists, getFileContents,\n     setBufferModified,\n-    fileStoreRules\n+    fileStoreRules,\n+    VFSHandle(..),\n+    makeVFSHandle,\n+    makeLSPVFSHandle,\n     ) where\n \n \n \n import           StringBuffer\n import Development.IDE.Orphans()\n \n+import Control.Concurrent.STM\n import qualified Data.Map.Strict as Map\n+import Data.Maybe\n import qualified Data.Text as T\n import           Data.Time.Clock\n import           Control.Monad.Extra\n import qualified System.Directory as Dir\n import           Development.Shake\n import           Development.Shake.Classes\n import           Development.IDE.State.Shake\n-import           Control.Concurrent.Extra\n import           Control.Exception\n import           GHC.Generics\n import System.IO.Error\n import qualified Data.ByteString.Char8 as BS\n import qualified StringBuffer as SB\n import Development.IDE.Types.Diagnostics\n+import qualified Data.Rope.UTF16 as Rope\n import           Data.Time\n \n-\n--- This module stores the changed files in memory, and answers file system questions\n--- from either the memory changes OR the file system itself\n-\n-type DirtyFiles = Map.Map FilePath (UTCTime, StringBuffer) -- when it was modified, it's current value\n-\n--- Store the DirtyFiles globally, so we can get at it through setBufferModified\n-newtype GlobalDirtyFiles = GlobalDirtyFiles (Var DirtyFiles)\n-instance IsIdeGlobal GlobalDirtyFiles\n+import Language.Haskell.LSP.Core\n+import Language.Haskell.LSP.VFS\n+\n+-- | haskell-lsp manages the VFS internally and automatically so we cannot use\n+-- the builtin VFS without spawning up an LSP server. To be able to test things\n+-- like `setBufferModified` we abstract over the VFS implementation."
+  },
+  {
+    "id" : "49b2c2de-817d-4507-bf9e-bccc64c13ef7",
+    "prId" : 1489,
+    "comments" : [
+      {
+        "id" : "0e73ac80-5efb-4417-9738-6f268adc302d",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Is the `Int` required? I guess that's the version? Should it not just always increment?",
+        "createdAt" : "2019-06-03T13:09:37Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c704faad-5f2a-4ef3-8c80-f85737b4188c",
+        "parentId" : "0e73ac80-5efb-4417-9738-6f268adc302d",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "In fact I'd just suggest making the `Var` be of type `(Int, Map Uri VirtualFile)` and have a global version.",
+        "createdAt" : "2019-06-03T13:11:33Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "534a9c30-9a8f-4325-91ca-941adff675f2",
+        "parentId" : "0e73ac80-5efb-4417-9738-6f268adc302d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The reason why I kept it this way is that it makes it look a bit more like a reasonable implementation that we could theoretically also use in `damlc ide` if we ever switch to something that does not manage the VFS automagically like `haskell-lsp`. But I guess `haskell-lsp` is unlikely to change in that regard unless so changing it to `Int` seems reasonable.",
+        "createdAt" : "2019-06-03T13:31:24Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8a46b2d8b9b426b7e201afee1fde0bfd4ba9efef",
+    "line" : null,
+    "diffHunk" : "@@ -6,44 +6,74 @@\n module Development.IDE.State.FileStore(\n     getFileExists, getFileContents,\n     setBufferModified,\n-    fileStoreRules\n+    fileStoreRules,\n+    VFSHandle(..),\n+    makeVFSHandle,\n+    makeLSPVFSHandle,\n     ) where\n \n \n \n import           StringBuffer\n import Development.IDE.Orphans()\n \n+import Control.Concurrent.STM\n import qualified Data.Map.Strict as Map\n+import Data.Maybe\n import qualified Data.Text as T\n import           Data.Time.Clock\n import           Control.Monad.Extra\n import qualified System.Directory as Dir\n import           Development.Shake\n import           Development.Shake.Classes\n import           Development.IDE.State.Shake\n-import           Control.Concurrent.Extra\n import           Control.Exception\n import           GHC.Generics\n import System.IO.Error\n import qualified Data.ByteString.Char8 as BS\n import qualified StringBuffer as SB\n import Development.IDE.Types.Diagnostics\n+import qualified Data.Rope.UTF16 as Rope\n import           Data.Time\n \n-\n--- This module stores the changed files in memory, and answers file system questions\n--- from either the memory changes OR the file system itself\n-\n-type DirtyFiles = Map.Map FilePath (UTCTime, StringBuffer) -- when it was modified, it's current value\n-\n--- Store the DirtyFiles globally, so we can get at it through setBufferModified\n-newtype GlobalDirtyFiles = GlobalDirtyFiles (Var DirtyFiles)\n-instance IsIdeGlobal GlobalDirtyFiles\n+import Language.Haskell.LSP.Core\n+import Language.Haskell.LSP.VFS\n+\n+-- | haskell-lsp manages the VFS internally and automatically so we cannot use\n+-- the builtin VFS without spawning up an LSP server. To be able to test things\n+-- like `setBufferModified` we abstract over the VFS implementation.\n+data VFSHandle = VFSHandle\n+    { getVirtualFile :: Uri -> IO (Maybe VirtualFile)\n+    , setVirtualFileContents :: Uri -> T.Text -> Int -> IO ()"
+  },
+  {
+    "id" : "bb709f95-5888-448b-8326-6bd8a4e7574f",
+    "prId" : 1489,
+    "comments" : [
+      {
+        "id" : "419d5062-ce5a-477b-874b-1fb6c1baafc6",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "You're using STM like they are MVars. I'd prefer direct use of something like a `Var`.",
+        "createdAt" : "2019-06-03T13:10:42Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f756f12d-dc28-40db-aa19-87be5d292f30",
+        "parentId" : "419d5062-ce5a-477b-874b-1fb6c1baafc6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Fair enough, I generally default to STM but I don’t feel strongly about this so happy to change it.",
+        "createdAt" : "2019-06-03T13:32:03Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8a46b2d8b9b426b7e201afee1fde0bfd4ba9efef",
+    "line" : null,
+    "diffHunk" : "@@ -6,44 +6,74 @@\n module Development.IDE.State.FileStore(\n     getFileExists, getFileContents,\n     setBufferModified,\n-    fileStoreRules\n+    fileStoreRules,\n+    VFSHandle(..),\n+    makeVFSHandle,\n+    makeLSPVFSHandle,\n     ) where\n \n \n \n import           StringBuffer\n import Development.IDE.Orphans()\n \n+import Control.Concurrent.STM"
+  },
+  {
+    "id" : "ce984244-4b60-428c-a842-a6c1fd6f3371",
+    "prId" : 1489,
+    "comments" : [
+      {
+        "id" : "fc291bb0-b54e-48ef-a567-4199fc7bb847",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "We should drop the `Int` argument.",
+        "createdAt" : "2019-06-03T13:13:53Z",
+        "updatedAt" : "2019-06-03T13:44:22Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8a46b2d8b9b426b7e201afee1fde0bfd4ba9efef",
+    "line" : null,
+    "diffHunk" : "@@ -113,29 +143,21 @@ getFileExists =\n     use_ GetFileExists\n \n \n-fileStoreRules :: Rules ()\n-fileStoreRules = do\n-    dirty <- liftIO $ newVar Map.empty\n-    addIdeGlobal $ GlobalDirtyFiles dirty\n-    getModificationTimeRule dirty\n-    getFileContentsRule dirty\n-    getFileExistsRule dirty\n-\n-\n-strictPair :: a -> b -> (a, b)\n-strictPair !a !b = (a,b)\n+fileStoreRules :: VFSHandle -> Rules ()\n+fileStoreRules vfs = do\n+    addIdeGlobal vfs\n+    getModificationTimeRule vfs\n+    getFileContentsRule vfs\n+    getFileExistsRule vfs\n \n \n -- | Notify the compiler service of a modified buffer\n-setBufferModified :: IdeState -> FilePath -> (Maybe T.Text, UTCTime) -> IO ()\n-setBufferModified state absFile (mcontents, !time) = do\n-    GlobalDirtyFiles envDirtyFiles <- getIdeGlobalState state\n-    -- update vars synchronously\n-    modifyVar_ envDirtyFiles $ evaluate . case mcontents of\n-        Nothing -> Map.delete absFile\n-        Just contents -> Map.insert absFile $ strictPair time $ textToStringBuffer contents\n-\n-    -- run shake to update results regarding the files of interest\n+setBufferModified :: IdeState -> FilePath -> Maybe (T.Text, Int) -> IO ()"
+  },
+  {
+    "id" : "cd122638-dc4e-48de-8797-6364d6d17f66",
+    "prId" : 961,
+    "comments" : [
+      {
+        "id" : "8b528ef7-f5c9-44eb-a264-dae4488a51a8",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "You must be very worried about efficiency here. ;)",
+        "createdAt" : "2019-05-07T09:08:13Z",
+        "updatedAt" : "2019-05-07T09:09:36Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e19cff13-fad1-416f-9f18-3f6ff2a26231",
+        "parentId" : "8b528ef7-f5c9-44eb-a264-dae4488a51a8",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "🤦‍♂ ",
+        "createdAt" : "2019-05-07T09:12:48Z",
+        "updatedAt" : "2019-05-07T09:12:48Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6de847f3-2327-419d-9b9d-30b37f293739",
+        "parentId" : "8b528ef7-f5c9-44eb-a264-dae4488a51a8",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Removed in https://github.com/digital-asset/daml/pull/963/files#diff-b8ba0a4cf59ff60c866c80c7ccb8f198",
+        "createdAt" : "2019-05-07T10:10:25Z",
+        "updatedAt" : "2019-05-07T10:10:25Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c2fb835c1fb3781af2a846f7a29e34b649d3ada1",
+    "line" : 35,
+    "diffHunk" : "@@ -141,7 +142,13 @@ setBufferModified state absFile (mcontents, !time) = do\n     -- update vars synchronously\n     modifyVar_ envDirtyFiles $ evaluate . case mcontents of\n         Nothing -> Map.delete absFile\n-        Just contents -> Map.insert absFile $ strictPair time (textToStringBuffer contents)\n+        Just contents -> Map.insert absFile $ strictPair time $ textToStringBuffer contents\n \n     -- run shake to update results regarding the files of interest\n     void $ shakeRun state []\n+\n+\n+-- would be nice to do this more efficiently...\n+textToStringBuffer :: T.Text -> SB.StringBuffer\n+-- would be nice to do this more efficiently..."
+  }
+]

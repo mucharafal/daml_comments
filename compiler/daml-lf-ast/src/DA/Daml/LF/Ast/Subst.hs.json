@@ -1,0 +1,152 @@
+[
+  {
+    "id" : "3f61e48f-e0e7-4c1a-b8c7-1516646db22f",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "8c31b0a0-93fe-45ce-9c57-873b6b21556f",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This overlaps with\r\nhttps://github.com/digital-asset/daml/blob/7e070d6d16f1fddfb96a8b861795d20e007635df/compiler/daml-lf-tools/src/DA/Daml/LF/Simplifier.hs#L37",
+        "createdAt" : "2020-04-28T15:17:38Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3dd4813d-920c-42e5-bd7b-a35d7bf64958",
+        "parentId" : "8c31b0a0-93fe-45ce-9c57-873b6b21556f",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "They do sufficiently different things (`freeVarsStep` calculates only free `ExprVarNames`, and does it at the same time as calculating safeties).",
+        "createdAt" : "2020-04-28T16:29:25Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8f3af2d7-504a-4d73-ac78-b93ef386f680",
+        "parentId" : "8c31b0a0-93fe-45ce-9c57-873b6b21556f",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Could we only have something like `freeVarsStep` for type variables here and combine it with `freeVarsStep` like in\r\nhttps://github.com/digital-asset/daml/blob/f71ab92ea52bdc71aba6446264cbe8af61a7805f/compiler/daml-lf-tools/src/DA/Daml/LF/Simplifier.hs#L244",
+        "createdAt" : "2020-04-28T17:20:29Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4b55a877-c5cd-440c-b0e2-a787e6db32fb",
+        "parentId" : "8c31b0a0-93fe-45ce-9c57-873b6b21556f",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Happy to do some coalescing / refactoring after I figure out a good way to reduce the janky \"run simplifier twice\" & fix other issues.",
+        "createdAt" : "2020-04-30T09:47:29Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,371 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- | Substitution in LF expressions.\n+module DA.Daml.LF.Ast.Subst\n+    ( Subst (..)\n+    , typeSubst\n+    , exprSubst\n+    , substExpr\n+    , substType\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.Ast.Recursive\n+import qualified DA.Daml.LF.Ast.Type as Type\n+\n+import Control.Arrow (second)\n+import Data.Functor.Foldable (cata)\n+import Data.Maybe (fromMaybe)\n+import qualified Data.Map.Strict as Map\n+import qualified Data.Set as Set\n+import qualified Data.Text as T\n+import Safe (findJust)\n+\n+data Subst = Subst\n+    { substTypes :: !(Map.Map TypeVarName Type)\n+        -- ^ types to substitute\n+    , substExprs :: !(Map.Map ExprVarName Expr)\n+        -- ^ expressions to substitute\n+    , substExhaustedTypeVars :: !(Set.Set TypeVarName)\n+        -- ^ set of exhausted type variables\n+        -- (these are all the free type vars that appear in substTypes\n+        -- or substExprs, plus the type vars that were bound above us,\n+        -- plus the type vars that were substituted away)\n+    , substExhaustedExprVars :: !(Set.Set ExprVarName)\n+        -- ^ set of exhausted expr variables\n+        -- (these are all the free expr vars that appear in substExprs,\n+        -- plus the expr vars that were bound above us, plus the expr\n+        -- vars that were substituted away)\n+    }\n+\n+instance Monoid Subst where\n+    mempty = Subst\n+        { substTypes = Map.empty\n+        , substExprs = Map.empty\n+        , substExhaustedTypeVars = Set.empty\n+        , substExhaustedExprVars = Set.empty\n+        }\n+\n+instance Semigroup Subst where\n+    s1 <> s2 = Subst\n+        { substTypes = substTypes s1 <> substTypes s2\n+        , substExprs = substExprs s1 <> substExprs s2\n+        , substExhaustedExprVars = substExhaustedExprVars s1 <> substExhaustedExprVars s2\n+        , substExhaustedTypeVars = substExhaustedTypeVars s1 <> substExhaustedTypeVars s2\n+        }\n+\n+typeSubst :: TypeVarName -> Type -> Subst\n+typeSubst x t = Subst\n+    { substTypes = Map.fromList [(x,t)]\n+    , substExprs = Map.empty\n+    , substExhaustedTypeVars = Set.insert x (freeVarsInType t)\n+    , substExhaustedExprVars = Set.empty\n+    }\n+\n+exprSubst :: ExprVarName -> Expr -> Subst\n+exprSubst x e = Subst\n+    { substTypes = Map.empty\n+    , substExprs = Map.fromList [(x,e)]\n+    , substExhaustedTypeVars = typeVars0\n+    , substExhaustedExprVars = Set.insert x exprVars0\n+    }\n+  where\n+    (typeVars0, exprVars0) = freeVarsInExpr e\n+\n+\n+freeVarsInType :: Type -> Set.Set TypeVarName\n+freeVarsInType = Type.freeVars\n+\n+freeVarsInTypeConApp :: TypeConApp -> Set.Set TypeVarName\n+freeVarsInTypeConApp (TypeConApp _ tys) = foldMap freeVarsInType tys\n+\n+freeVarsInExpr :: Expr -> (Set.Set TypeVarName, Set.Set ExprVarName)"
+  },
+  {
+    "id" : "00c3354d-8972-4e32-9d45-1e249180d231",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "1ca67bbe-c46a-4388-a61e-e4a4da528bb4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What do you think about naming this function more distinct from `typeSubst`? Maybe `applySubstInType`. (That's a mouthful but will definitely avoid any confusion.) Same for `substExpr` and other friends.",
+        "createdAt" : "2020-05-08T18:35:19Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b99d2596-14de-4ea9-8727-f8d53781aade",
+        "parentId" : "1ca67bbe-c46a-4388-a61e-e4a4da528bb4",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "good idea 👍 ",
+        "createdAt" : "2020-05-11T10:36:25Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,273 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+-- | Substitution in LF expressions.\n+module DA.Daml.LF.Ast.Subst\n+    ( Subst (..)\n+    , typeSubst\n+    , typeSubst'\n+    , exprSubst\n+    , exprSubst'\n+    , substExpr\n+    , substType\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.Ast.FreeVars\n+import qualified DA.Daml.LF.Ast.Type as Type\n+\n+import Control.Arrow (second)\n+import qualified Data.Map.Strict as Map\n+\n+data Subst = Subst\n+    { substTypes :: !(Map.Map TypeVarName Type)\n+        -- ^ types to substitute\n+    , substExprs :: !(Map.Map ExprVarName Expr)\n+        -- ^ expressions to substitute\n+    , substExhausted :: !FreeVars\n+        -- ^ exhausted variables. These are all the free variables that\n+        -- appear in substTypes or substExprs, plus the variables that\n+        -- were bound above us, plus the variables that were substituted\n+        -- away. This is mainly used to generate fresh variables that\n+        -- don't conflict with existing variables, so over-approximation\n+        -- is fine.\n+    }\n+\n+instance Monoid Subst where\n+    mempty = Subst\n+        { substTypes = Map.empty\n+        , substExprs = Map.empty\n+        , substExhausted = mempty\n+        }\n+\n+instance Semigroup Subst where\n+    s1 <> s2 = Subst\n+        { substTypes = substTypes s1 <> substTypes s2\n+        , substExprs = substExprs s1 <> substExprs s2\n+        , substExhausted = substExhausted s1 <> substExhausted s2\n+        }\n+\n+typeSubst' :: TypeVarName -> Type -> FreeVars -> Subst\n+typeSubst' x t fvs = Subst\n+    { substTypes = Map.fromList [(x,t)]\n+    , substExprs = Map.empty\n+    , substExhausted = freeTypeVar x <> fvs\n+    }\n+\n+exprSubst' :: ExprVarName -> Expr -> FreeVars -> Subst\n+exprSubst' x e fvs = Subst\n+    { substTypes = Map.empty\n+    , substExprs = Map.fromList [(x,e)]\n+    , substExhausted = freeExprVar x <> fvs\n+    }\n+\n+typeSubst :: TypeVarName -> Type -> Subst\n+typeSubst x t = typeSubst' x t (freeVarsInType t)\n+\n+exprSubst :: ExprVarName -> Expr -> Subst\n+exprSubst x e = exprSubst' x e (freeVarsInExpr e)\n+\n+substType :: Subst -> Type -> Type"
+  }
+]

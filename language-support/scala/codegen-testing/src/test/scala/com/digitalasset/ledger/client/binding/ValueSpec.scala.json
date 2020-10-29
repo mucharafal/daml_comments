@@ -1,0 +1,86 @@
+[
+  {
+    "id" : "087a4cd6-b927-4ed3-aadd-61299219d609",
+    "prId" : 7483,
+    "comments" : [
+      {
+        "id" : "ce278e33-89c7-4e63-9f4c-6ee79832c661",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      Value.encode(BigDecimal.exact(\"0.0000000000001\"): P.Numeric) shouldBe VSum\r\n```",
+        "createdAt" : "2020-09-25T14:43:31Z",
+        "updatedAt" : "2020-09-28T06:43:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8acb142ecf47700230d2a8ea8989744ef13e5e83",
+    "line" : null,
+    "diffHunk" : "@@ -29,119 +25,18 @@ class ValueSpec extends WordSpec with Matchers with GeneratorDrivenPropertyCheck\n       Value.Decoder[P.List[P.Int64]]\n       Value.Encoder[P.List[P.Int64]]\n     }\n-  }\n-}\n-\n-object ValueSpec {\n-\n-  private sealed abstract class Exists[F[_]] {\n-    type T\n-    val run: F[T]\n-  }\n-\n-  private def Exists[T0, F[_]](_run: F[T0]): Exists[F] = {\n-    final case class ExistsImpl(run: F[T0]) extends Exists[F] {\n-      type T = T0\n-      override def productPrefix = \"Exists\"\n-    }\n-    ExistsImpl(_run)\n-  }\n-\n-  private final case class ValueCheck[T](tName: String)(\n-      implicit val TA: Arbitrary[T],\n-      val TS: Shrink[T],\n-      val TV: Value[T])\n-\n-  import com.daml.ledger.client.binding.{Primitive => P}\n-\n-  private[binding] implicit val dateArb: Arbitrary[P.Date] =\n-    Arbitrary(GenEncoding.primitive.valueDate)\n-\n-  private[binding] implicit val timestampArb: Arbitrary[P.Timestamp] =\n-    Arbitrary(GenEncoding.primitive.valueTimestamp)\n-\n-  private[this] object TautologicalValueChecks extends ValuePrimitiveEncoding[ValueCheck] {\n-    override val valueInt64 = ValueCheck[P.Int64](\"Int64\")\n-    override val valueNumeric = ValueCheck[P.Numeric](\"Numeric\")\n-    override val valueParty = {\n-      implicit val PA: Arbitrary[P.Party] = Arbitrary(GenEncoding.primitive.valueParty)\n-      ValueCheck[P.Party](\"Party\")\n-    }\n-    override val valueText = ValueCheck[P.Text](\"Text\")\n-    override val valueDate = ValueCheck[P.Date](\"Date\")\n-    override val valueTimestamp = ValueCheck[P.Timestamp](\"Timestamp\")\n-    override val valueUnit = ValueCheck[P.Unit](\"Unit\")\n-    override val valueBool = ValueCheck[P.Bool](\"Bool\")\n-    override def valueContractId[A] = {\n-      implicit val CA: Arbitrary[P.ContractId[A]] =\n-        Arbitrary(GenEncoding.primitive.valueContractId)\n-      ValueCheck[P.ContractId[A]](\"ContractId\")\n-    }\n-\n-    override def valueList[A](implicit vc: ValueCheck[A]) = {\n-      import vc._\n-      ValueCheck[P.List[A]](s\"List[$tName]\")\n-    }\n-\n-    override def valueOptional[A](implicit vc: ValueCheck[A]) = {\n-      import vc._\n-      ValueCheck[P.Optional[A]](s\"Option[$tName]\")\n-    }\n-\n-    override def valueTextMap[A](implicit vc: ValueCheck[A]) = {\n-      import vc._\n-      implicit val arbTM: Arbitrary[P.TextMap[A]] = Arbitrary(\n-        GenEncoding.primitive.valueTextMap(TA.arbitrary))\n-      ValueCheck[P.TextMap[A]](s\"Map[$tName]\")\n+    \"encode Numeric without exponents\" in {\n+      import com.daml.ledger.client.binding.{Primitive => P}\n+      import com.daml.ledger.api.v1.value.Value.{Sum => VSum}\n+      Value.Encoder[P.Numeric].write(BigDecimal.exact(\"0.0000000000001\"): P.Numeric) shouldBe VSum"
+  },
+  {
+    "id" : "8310aa47-bd7a-4b6d-963e-fc96d25b5295",
+    "prId" : 3522,
+    "comments" : [
+      {
+        "id" : "ebf4359a-49b4-40e9-8b42-82ef01f2a0e2",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "All of these are cyclic definitions. You've defined the `GenEncoding` and `ShrinkEncoding` GenMap overrides, so you can import `vc._` and derive the answers from those, such as is done for `valueParty` and `valueContractId`.",
+        "createdAt" : "2019-11-22T17:32:07Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4f84bb5b-b401-4917-8b9d-3b4fac1a0430",
+        "parentId" : "ebf4359a-49b4-40e9-8b42-82ef01f2a0e2",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-11-25T09:49:14Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "16fc9a85aea14851e9ec58117022ef66e1aee8ab",
+    "line" : null,
+    "diffHunk" : "@@ -88,9 +88,16 @@ object ValueSpec {\n       ValueCheck[P.Optional[A]](s\"Option[$tName]\")\n     }\n \n-    override def valueMap[A](implicit vc: ValueCheck[A]) = {\n+    override def valueTextMap[A](implicit vc: ValueCheck[A]) = {\n       import vc._\n-      ValueCheck[P.Map[A]](s\"Map[$tName]\")\n+      ValueCheck[P.TextMap[A]](s\"Map[$tName]\")\n+    }\n+\n+    override def valueGenMap[K, V](implicit vcK: ValueCheck[K], vcV: ValueCheck[V]) = {\n+      implicit def TA: Arbitrary[P.GenMap[K, V]] = implicitly[Arbitrary[P.GenMap[K, V]]]\n+      implicit def TS: Shrink[P.GenMap[K, V]] = implicitly[Shrink[P.GenMap[K, V]]]\n+      implicit def TV: Value[P.GenMap[K, V]] = implicitly[Value[P.GenMap[K, V]]]"
+  }
+]

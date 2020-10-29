@@ -1,0 +1,1288 @@
+[
+  {
+    "id" : "d8c27308-3a9d-4f59-aa13-ec5ee7caff5d",
+    "prId" : 6268,
+    "comments" : [
+      {
+        "id" : "ca03da7a-4f79-47d7-af3b-8e5f6b3d6ef8",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "```suggestion\r\n  it should \"give an Unauthorized error for a stop request without an authorization header\" in withHttpService(\r\n```\r\nsince we are avoiding hardcoding status codes in the tests.",
+        "createdAt" : "2020-06-08T18:47:38Z",
+        "updatedAt" : "2020-06-08T18:53:21Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "aeb3cae7bd045ad7332a268f786b30610e352ab8",
+    "line" : 19,
+    "diffHunk" : "@@ -468,21 +468,22 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       } yield succeed\n   }\n \n-  it should \"not act on a stop request without a token\" in withHttpService(None) {\n-    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n-      val uuid: String = \"ffffffff-ffff-ffff-ffff-ffffffffffff\"\n-      val req = HttpRequest(\n-        method = HttpMethods.DELETE,\n-        uri = uri.withPath(Uri.Path(s\"/v1/stop/$uuid\")),\n-      )\n-      for {\n-        resp <- Http().singleRequest(req)\n-        body <- responseBodyToString(resp)\n-        JsObject(fields) = body.parseJson\n-        _ <- fields.get(\"status\") should equal(Some(JsNumber(422)))\n-        _ <- fields.get(\"errors\") should equal(\n-          Some(JsArray(JsString(\"missing Authorization header with OAuth 2.0 Bearer Token\"))))\n-      } yield succeed\n+  it should \"give a 401 response for a stop request without an authorization header\" in withHttpService("
+  },
+  {
+    "id" : "a4fe73b4-a88e-4323-b71c-714cac2a57ce",
+    "prId" : 6268,
+    "comments" : [
+      {
+        "id" : "5f2cde6e-0162-4052-a2e0-27e98561407d",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "```suggestion\r\n  it should \"give a Not Found response for a stop request with unparseable UUID\" in withHttpService(None) {\r\n```",
+        "createdAt" : "2020-06-08T18:50:35Z",
+        "updatedAt" : "2020-06-08T18:53:21Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "aeb3cae7bd045ad7332a268f786b30610e352ab8",
+    "line" : 37,
+    "diffHunk" : "@@ -468,21 +468,22 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       } yield succeed\n   }\n \n-  it should \"not act on a stop request without a token\" in withHttpService(None) {\n-    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n-      val uuid: String = \"ffffffff-ffff-ffff-ffff-ffffffffffff\"\n-      val req = HttpRequest(\n-        method = HttpMethods.DELETE,\n-        uri = uri.withPath(Uri.Path(s\"/v1/stop/$uuid\")),\n-      )\n-      for {\n-        resp <- Http().singleRequest(req)\n-        body <- responseBodyToString(resp)\n-        JsObject(fields) = body.parseJson\n-        _ <- fields.get(\"status\") should equal(Some(JsNumber(422)))\n-        _ <- fields.get(\"errors\") should equal(\n-          Some(JsArray(JsString(\"missing Authorization header with OAuth 2.0 Bearer Token\"))))\n-      } yield succeed\n+  it should \"give a 401 response for a stop request without an authorization header\" in withHttpService(\n+    None) { (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+    val uuid: String = \"ffffffff-ffff-ffff-ffff-ffffffffffff\"\n+    val req = HttpRequest(\n+      method = HttpMethods.DELETE,\n+      uri = uri.withPath(Uri.Path(s\"/v1/stop/$uuid\")),\n+    )\n+    for {\n+      resp <- Http().singleRequest(req)\n+      _ <- resp.status should equal(StatusCodes.Unauthorized)\n+      body <- responseBodyToString(resp)\n+      JsObject(fields) = body.parseJson\n+      _ <- fields.get(\"status\") should equal(Some(JsNumber(StatusCodes.Unauthorized.intValue)))\n+      _ <- fields.get(\"errors\") should equal(\n+        Some(JsArray(JsString(\"missing Authorization header with OAuth 2.0 Bearer Token\"))))\n+    } yield succeed\n   }\n \n   it should \"give a 404 response for a stop request with unparseable UUID\" in withHttpService(None) {"
+  },
+  {
+    "id" : "da47bdb8-41f3-44a6-88c5-b945236e4b51",
+    "prId" : 6268,
+    "comments" : [
+      {
+        "id" : "e208c599-afd1-472f-b94e-5767c7151d99",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "and below too",
+        "createdAt" : "2020-06-08T18:51:38Z",
+        "updatedAt" : "2020-06-08T18:53:21Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "aeb3cae7bd045ad7332a268f786b30610e352ab8",
+    "line" : 46,
+    "diffHunk" : "@@ -494,7 +495,7 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       )\n       for {\n         resp <- Http().singleRequest(req)\n-        _ <- assert(resp.status.isFailure() && resp.status.intValue() == 404)\n+        _ <- resp.status should equal(StatusCodes.NotFound)\n       } yield succeed\n   }\n "
+  },
+  {
+    "id" : "849a2c86-6b49-457e-b2df-68c1bb7adf1b",
+    "prId" : 6249,
+    "comments" : [
+      {
+        "id" : "452ee659-e442-4926-a243-90671185dc8c",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "This was added initially as a test for the database code only, which is now covered by the other tests.",
+        "createdAt" : "2020-06-08T19:57:12Z",
+        "updatedAt" : "2020-06-08T19:57:13Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "895685a48e10c82802a4acca4a1e3194fef7066e",
+    "line" : 19,
+    "diffHunk" : "@@ -232,22 +232,6 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       Future(succeed)\n     }\n \n-  it should \"add running triggers\" in\n-    withTriggerServiceAndDb(Some(dar)) { (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n-      for {\n-        // Initially no triggers started for Alice\n-        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector())\n-        // Start a trigger for Alice and check it appears in list.\n-        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n-        trigger1 <- parseTriggerId(resp)\n-        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(trigger1))\n-        // Do the same for a second trigger.\n-        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n-        trigger2 <- parseTriggerId(resp)\n-        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(trigger1, trigger2).sorted)\n-      } yield succeed\n-    }\n-"
+  },
+  {
+    "id" : "ce1eb399-8b2b-4c83-8a60-8f6e33492a13",
+    "prId" : 6230,
+    "comments" : [
+      {
+        "id" : "7a1b8f3f-e437-4c28-a745-434d7007a8ab",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Is it possible it never sees the network loss and doesn't fail / get restarted?",
+        "createdAt" : "2020-06-04T18:57:58Z",
+        "updatedAt" : "2020-06-04T19:03:27Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5db6d9f2-4227-4960-aaa7-9b37afe3de53",
+        "parentId" : "7a1b8f3f-e437-4c28-a745-434d7007a8ab",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I've not seen a run to date where that has been the case. If that happens, the test will fail and we'll be forced to re-examine it.",
+        "createdAt" : "2020-06-04T19:07:11Z",
+        "updatedAt" : "2020-06-04T19:07:11Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b1c6cc8d30c338b7092c14bc7b6997d6ab088e5",
+    "line" : 44,
+    "diffHunk" : "@@ -428,118 +415,101 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n         aliceTrigger <- parseTriggerId(resp)\n         // Proceed when it is confirmed to be running.\n         _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n-        // Simulate brief network connectivity loss. This will cause the\n-        // running trigger's flow graph to complete with failure. Don't\n-        // wait around to restore the network or the restart strategy\n-        // will in turn lead to the stop strategy killing the trigger\n-        // due to the lack of ability to initialize the restarted\n-        // trigger.\n+        // Simulate brief network connectivity loss.\n         _ <- Future { ledgerProxy.disable() }\n         _ <- Future { ledgerProxy.enable() }\n-        // To conclude, check that the trigger survived the network\n-        // outage and that its history indicates it went through a\n-        // restart to do so.\n+        // Check that the trigger survived the outage and that its\n+        // history shows it went through a restart."
+  },
+  {
+    "id" : "0325ca2a-c835-4559-8265-c0984e043fcc",
+    "prId" : 6228,
+    "comments" : [
+      {
+        "id" : "b1b144c3-37a5-4319-9e6f-3034106b731c",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "I think you can use `ignore` instead of commenting out, e.g. described here: https://www.scalatest.org/user_guide/tagging_your_tests",
+        "createdAt" : "2020-06-04T15:48:57Z",
+        "updatedAt" : "2020-06-04T15:52:42Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5a9b9f15-80a3-4508-b2f0-99fafedabe07",
+        "parentId" : "b1b144c3-37a5-4319-9e6f-3034106b731c",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Good to know.",
+        "createdAt" : "2020-06-04T15:50:35Z",
+        "updatedAt" : "2020-06-04T15:52:42Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cb40dea569c951d23d12ef08e9835fa29131c77d",
+    "line" : null,
+    "diffHunk" : "@@ -413,6 +413,11 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       } yield succeed\n   }\n \n+  // TODO(SF, 2020-06-05): This test is temporarily disabled as too\n+  // fragile. There is a race condition on the trigger restart and the\n+  // network being unavailable (see\n+  // https://dev.azure.com/digitalasset/adadc18a-d7df-446a-aacb-86042c1619c6/_apis/build/builds/45230/logs/124).\n+  /*"
+  },
+  {
+    "id" : "1768fc4a-68fc-4730-b0ad-95c31af1a417",
+    "prId" : 6217,
+    "comments" : [
+      {
+        "id" : "588f124d-b89e-411d-b1ef-4843d16f7c96",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This doesn’t make sense to me. Why does an invalid UUID produce a 404 but a UUID that is not found produces a 422? that seems the wrong way around.",
+        "createdAt" : "2020-06-03T18:06:37Z",
+        "updatedAt" : "2020-06-03T18:46:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9be9eec2-231d-4d5e-b64b-a3c6da6734ef",
+        "parentId" : "588f124d-b89e-411d-b1ef-4843d16f7c96",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "It's an akka thing. If the path (`pathPrefix(\"v1\" / \"stop\" / JavaUUID)`) is invalid (the `JavaUUID` fails to parse), it never makes \"our\" code and a 404 is returned. In the event it is a valid path but the UUID doesn't match any trigger we know we return 422 (unprocessable entity). Make better sense now?",
+        "createdAt" : "2020-06-03T18:13:45Z",
+        "updatedAt" : "2020-06-03T18:46:39Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8c932266-a802-4807-8eb1-372c25edfc14",
+        "parentId" : "588f124d-b89e-411d-b1ef-4843d16f7c96",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I could arrange for a 404 in the second case too if you think that's better?",
+        "createdAt" : "2020-06-03T18:15:18Z",
+        "updatedAt" : "2020-06-03T18:46:39Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7b8dc0cf-23da-45a8-a808-707c298f37f8",
+        "parentId" : "588f124d-b89e-411d-b1ef-4843d16f7c96",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not really, makes sense that we get a 404 for the invalid UUID but I don’t understand why 422 is a good response here. It is literally a failing lookup. That seems very much like “not found” to me.",
+        "createdAt" : "2020-06-03T18:16:04Z",
+        "updatedAt" : "2020-06-03T18:46:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2696c343-6675-412f-abe6-26360494ec0e",
+        "parentId" : "588f124d-b89e-411d-b1ef-4843d16f7c96",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok. Let's go with 404 in both cases.",
+        "createdAt" : "2020-06-03T18:19:17Z",
+        "updatedAt" : "2020-06-03T18:46:39Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a0702118a15f8743b69a12a2f5c02b1b5976a97c",
+    "line" : 21,
+    "diffHunk" : "@@ -500,4 +500,42 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       } yield succeed\n   }\n \n+  it should \"stopping a trigger without providing a token should be unauthroized\" in withHttpService(\n+    None) { (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+    val uuid: String = \"ffffffff-ffff-ffff-ffff-ffffffffffff\"\n+    val req = HttpRequest(\n+      method = HttpMethods.DELETE,\n+      uri = uri.withPath(Uri.Path(s\"/v1/stop/$uuid\")),\n+    )\n+    for {\n+      resp <- Http().singleRequest(req)\n+      body <- responseBodyToString(resp)\n+      JsObject(fields) = body.parseJson\n+      _ <- fields.get(\"status\") should equal(Some(JsNumber(422)))\n+      _ <- fields.get(\"errors\") should equal(\n+        Some(JsArray(JsString(\"missing Authorization header with OAuth 2.0 Bearer Token\"))))\n+    } yield succeed\n+  }\n+\n+  it should \"stopping a trigger that can't parse as a UUID gives a 404 response\" in withHttpService("
+  },
+  {
+    "id" : "d9f4e025-5161-4de4-ad70-c73818ea8cf3",
+    "prId" : 6202,
+    "comments" : [
+      {
+        "id" : "10e3e162-020e-4a91-bac5-f9ee6f1e1277",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Why does this result in an initialization failure instead of a runtime failure? Does the trigger `initialize` step fail if the `triggerRule` throws an `error`?",
+        "createdAt" : "2020-06-02T23:16:59Z",
+        "updatedAt" : "2020-06-02T23:17:33Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0e55012d-830a-4af9-a77a-5073256a59d8",
+        "parentId" : "10e3e162-020e-4a91-bac5-f9ee6f1e1277",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "It's possible for `getTriggerSink` to throw an exception in the evaluation of `runWithACS`. When that happens, it does not manifest as a completing future which is what we deem to be runtime failure but is immediate hence the `try`/`catch` and categorization as initialization failure.",
+        "createdAt" : "2020-06-02T23:27:14Z",
+        "updatedAt" : "2020-06-02T23:29:38Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ad88ad27f7f43a713c38e12b3c7dfadd241282ae",
+    "line" : 15,
+    "diffHunk" : "@@ -456,4 +456,48 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       } yield succeed\n   }\n \n+  it should \"stop a trigger when the user script fails init\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      for {\n+        resp <- startTrigger(uri, s\"$testPkgId:ErrorTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        _ <- assertTriggerStatus(\n+          uri,\n+          aliceTrigger,\n+          _ ==\n+            Vector(\n+              \"starting\",\n+              \"stopped: initialization failure\","
+  },
+  {
+    "id" : "1dfbc45f-e46b-4e71-8bf6-4b5a8d60b692",
+    "prId" : 6180,
+    "comments" : [
+      {
+        "id" : "f3a3aec2-531e-494d-acc9-23f98e666b1c",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Nice!",
+        "createdAt" : "2020-06-01T19:10:28Z",
+        "updatedAt" : "2020-06-01T20:06:10Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0895cd29-3d33-4979-b71b-6b1c9ff7acfe",
+        "parentId" : "f3a3aec2-531e-494d-acc9-23f98e666b1c",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "🎉 ",
+        "createdAt" : "2020-06-01T19:44:30Z",
+        "updatedAt" : "2020-06-01T20:06:10Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "83521744518854aaa6eb08638a03c747bd6bb707",
+    "line" : 89,
+    "diffHunk" : "@@ -363,11 +406,21 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n         // trigger.\n         _ <- Future { ledgerProxy.disable() }\n         _ <- Future { ledgerProxy.enable() }\n-        // In the future I hope to be able to prove right here that the\n-        // running trigger was failed and restarted. For now, the logs\n-        // confirm that to be the case. In any case, the postcondition\n-        // is this : the running trigger survives.\n+        // To conclude, check that the trigger survived the network\n+        // outage and that its history indicates it went through a\n+        // restart to do so.\n         _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n+        _ <- assertTriggerStatus(\n+          uri,\n+          aliceTrigger,\n+          _ ==\n+            Vector(\n+              \"starting\",\n+              \"running\",\n+              \"stopped : runtime failure\",\n+              \"starting\",\n+              \"running\"\n+            ))"
+  },
+  {
+    "id" : "1f7f6069-bab7-40d2-8b97-d14cba686d3c",
+    "prId" : 6180,
+    "comments" : [
+      {
+        "id" : "c41e34b6-0a2e-41fd-a521-f96462a9d398",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "It seems to make more sense to append to the logs in the first place and avoid reversing here.",
+        "createdAt" : "2020-06-01T19:11:55Z",
+        "updatedAt" : "2020-06-01T20:06:10Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "83521744518854aaa6eb08638a03c747bd6bb707",
+    "line" : null,
+    "diffHunk" : "@@ -181,6 +189,30 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n     }\n   }\n \n+  def parseTriggerStatus(resp: HttpResponse): Future[Vector[String]] = {\n+    for {\n+      JsObject(fields) <- parseResult(resp)\n+      Some(JsArray(list)) = fields.get(\"logs\")\n+      statusMsgs = list map {\n+        case JsArray(Vector(JsString(_), JsString(msg))) => msg\n+        case _ => fail(\"\"\"Unexpected format in the \"logs\" field\"\"\")\n+      }\n+    } yield statusMsgs.reverse // Order with least recent at front."
+  },
+  {
+    "id" : "b9777567-2da9-4dfd-bae7-32bd9290862a",
+    "prId" : 6180,
+    "comments" : [
+      {
+        "id" : "f9139097-a6f3-4def-8884-6e15cae90bb3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It would be nice to also have a test for a trigger that calls `error`.",
+        "createdAt" : "2020-06-02T07:02:23Z",
+        "updatedAt" : "2020-06-02T07:02:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3b88202f-632f-4354-8090-19a2c71f041f",
+        "parentId" : "f9139097-a6f3-4def-8884-6e15cae90bb3",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "In order that you see similar results to that you mean? The idea is you'd like to see an execution failure that has manifested from the user script itself?",
+        "createdAt" : "2020-06-02T11:17:19Z",
+        "updatedAt" : "2020-06-02T11:17:20Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a2c2609a-90f8-480d-acaf-02a799fa954e",
+        "parentId" : "f9139097-a6f3-4def-8884-6e15cae90bb3",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Exactly it should behave basically the same.",
+        "createdAt" : "2020-06-02T11:19:34Z",
+        "updatedAt" : "2020-06-02T11:19:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f5c9c90c-6d61-4e2e-814c-ff741fedc42d",
+        "parentId" : "f9139097-a6f3-4def-8884-6e15cae90bb3",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Writing such a test for highl-level triggers exposed a problem. See PR https://github.com/digital-asset/daml/pull/6202 for the current best running resolution to that. Low-level tests next and we'll see how it goes.",
+        "createdAt" : "2020-06-02T20:53:23Z",
+        "updatedAt" : "2020-06-02T20:53:23Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b5805a34-a036-4f12-9313-2dac162f88df",
+        "parentId" : "f9139097-a6f3-4def-8884-6e15cae90bb3",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Low-level test seems to work. Included with PR https://github.com/digital-asset/daml/pull/6202 as well.",
+        "createdAt" : "2020-06-02T21:32:44Z",
+        "updatedAt" : "2020-06-02T21:32:44Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "83521744518854aaa6eb08638a03c747bd6bb707",
+    "line" : 86,
+    "diffHunk" : "@@ -363,11 +406,21 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n         // trigger.\n         _ <- Future { ledgerProxy.disable() }\n         _ <- Future { ledgerProxy.enable() }\n-        // In the future I hope to be able to prove right here that the\n-        // running trigger was failed and restarted. For now, the logs\n-        // confirm that to be the case. In any case, the postcondition\n-        // is this : the running trigger survives.\n+        // To conclude, check that the trigger survived the network\n+        // outage and that its history indicates it went through a\n+        // restart to do so.\n         _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n+        _ <- assertTriggerStatus(\n+          uri,\n+          aliceTrigger,\n+          _ ==\n+            Vector(\n+              \"starting\",\n+              \"running\",\n+              \"stopped: runtime failure\","
+  },
+  {
+    "id" : "b771a7ac-c868-4708-a718-2ab7eda25c8d",
+    "prId" : 6178,
+    "comments" : [
+      {
+        "id" : "02f2d26e-101b-4e5c-b0b7-8da7fa357998",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "This second parse is unnecessary?",
+        "createdAt" : "2020-06-01T15:45:22Z",
+        "updatedAt" : "2020-06-01T16:12:52Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "04ecf179dadd4a9f7a2d54539a58ebe37bd37dd5",
+    "line" : null,
+    "diffHunk" : "@@ -331,4 +325,52 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       ledgerProxy.enable()\n     }\n   }\n+\n+  it should \"stop a failing trigger that can't be restarted\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      // Simulate the ledger becoming unrecoverably unavailable due to\n+      // network connectivity loss. The stop strategy means the running\n+      // trigger will be terminated.\n+      for {\n+        // Request a trigger be started for Alice.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        triggerId <- parseTriggerId(resp)"
+  },
+  {
+    "id" : "09986554-92d8-4e90-a543-9ece5bef126c",
+    "prId" : 6178,
+    "comments" : [
+      {
+        "id" : "aef09089-464b-4f83-bfa9-dbc9e2031394",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Same here",
+        "createdAt" : "2020-06-01T15:46:01Z",
+        "updatedAt" : "2020-06-01T16:12:52Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "04ecf179dadd4a9f7a2d54539a58ebe37bd37dd5",
+    "line" : null,
+    "diffHunk" : "@@ -331,4 +325,52 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       ledgerProxy.enable()\n     }\n   }\n+\n+  it should \"stop a failing trigger that can't be restarted\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      // Simulate the ledger becoming unrecoverably unavailable due to\n+      // network connectivity loss. The stop strategy means the running\n+      // trigger will be terminated.\n+      for {\n+        // Request a trigger be started for Alice.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        triggerId <- parseTriggerId(resp)\n+        // Proceed when it's confirmed to be running.\n+        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n+        // Simulate unrecoverable network connectivity loss.\n+        _ <- Future { ledgerProxy.disable() }\n+        // Confirm that the running trigger is stopped.\n+        _ <- assertTriggerIds(uri, \"Alice\", _.isEmpty)\n+      } yield succeed\n+  }\n+\n+  it should \"restart a failing trigger if possible\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      // Simulate the ledger briefly being unavailable due to network\n+      // connectivity loss. Our restart strategy means that the running\n+      // trigger gets restarted.\n+      for {\n+        // Request a trigger be started for Alice.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        triggerId <- parseTriggerId(resp)"
+  },
+  {
+    "id" : "00f93ecc-8655-421e-a6d1-b2af824e9555",
+    "prId" : 6178,
+    "comments" : [
+      {
+        "id" : "d0228837-fdab-4267-b862-c3b9b754c903",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Agreed, maybe your trigger history map will help with this?",
+        "createdAt" : "2020-06-01T15:48:43Z",
+        "updatedAt" : "2020-06-01T16:12:52Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1e23507d-1ee0-44c7-9f6f-9cc3c4f4d8da",
+        "parentId" : "d0228837-fdab-4267-b862-c3b9b754c903",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I hope so!",
+        "createdAt" : "2020-06-01T16:05:40Z",
+        "updatedAt" : "2020-06-01T16:12:52Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "04ecf179dadd4a9f7a2d54539a58ebe37bd37dd5",
+    "line" : 100,
+    "diffHunk" : "@@ -331,4 +325,52 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       ledgerProxy.enable()\n     }\n   }\n+\n+  it should \"stop a failing trigger that can't be restarted\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      // Simulate the ledger becoming unrecoverably unavailable due to\n+      // network connectivity loss. The stop strategy means the running\n+      // trigger will be terminated.\n+      for {\n+        // Request a trigger be started for Alice.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        triggerId <- parseTriggerId(resp)\n+        // Proceed when it's confirmed to be running.\n+        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n+        // Simulate unrecoverable network connectivity loss.\n+        _ <- Future { ledgerProxy.disable() }\n+        // Confirm that the running trigger is stopped.\n+        _ <- assertTriggerIds(uri, \"Alice\", _.isEmpty)\n+      } yield succeed\n+  }\n+\n+  it should \"restart a failing trigger if possible\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      // Simulate the ledger briefly being unavailable due to network\n+      // connectivity loss. Our restart strategy means that the running\n+      // trigger gets restarted.\n+      for {\n+        // Request a trigger be started for Alice.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        triggerId <- parseTriggerId(resp)\n+        // Proceed when it is confirmed to be running.\n+        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n+        // Simulate brief network connectivity loss. This will cause the\n+        // running trigger's flow graph to complete with failure. Don't\n+        // wait around to restore the network or the restart strategy\n+        // will in turn lead to the stop strategy killing the trigger\n+        // due to the lack of ability to initialize the restarted\n+        // trigger.\n+        _ <- Future { ledgerProxy.disable() }\n+        _ <- Future { ledgerProxy.enable() }\n+        // In the future I hope to be able to prove right here that the\n+        // running trigger was failed and restarted. For now, the logs"
+  },
+  {
+    "id" : "98e1730d-3464-4e88-b4ac-88365887d686",
+    "prId" : 6178,
+    "comments" : [
+      {
+        "id" : "ab07e2a7-ecd0-40ad-b7b9-a0460342d781",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is this timing sensitive because we only retry a limited number of times? I guess if we add the `assertTriggerIds(uri, \"Alice\", _.isEmpty)` part from the other test it would fail since we’ve reached the maximum number of retries?",
+        "createdAt" : "2020-06-02T06:37:58Z",
+        "updatedAt" : "2020-06-02T06:38:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d05a709a-035c-44ce-9ee0-8cd1d9692ef3",
+        "parentId" : "ab07e2a7-ecd0-40ad-b7b9-a0460342d781",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Recall there are two supervisor strategies. Failures to initialize result in stopped triggers, execution failures result in restarts. Suppose an execution failure occurs due to network outage - an attempt will be made to restart it. If the outage is still present as the restart cycles through initialization then the trigger will get stopped (permanently) as an initialization failure. That's where this timing sensitivity comes from. I think this answer indicates that there's room for improvement but I'm not clear yet on how we might do so. To the second question, yes, the wait involved in the `assertTriggerIds` means we'll not recover the network in time for the restart to succeed but as indicated above, not because the max retries of the trigger have been reached but rather because it will be stopped due to initialization failure.",
+        "createdAt" : "2020-06-02T11:12:06Z",
+        "updatedAt" : "2020-06-02T11:12:07Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "04ecf179dadd4a9f7a2d54539a58ebe37bd37dd5",
+    "line" : 97,
+    "diffHunk" : "@@ -331,4 +325,50 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n       ledgerProxy.enable()\n     }\n   }\n+\n+  it should \"stop a failing trigger that can't be restarted\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      // Simulate the ledger becoming unrecoverably unavailable due to\n+      // network connectivity loss. The stop strategy means the running\n+      // trigger will be terminated.\n+      for {\n+        // Request a trigger be started for Alice.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        // Proceed when it's confirmed to be running.\n+        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n+        // Simulate unrecoverable network connectivity loss.\n+        _ <- Future { ledgerProxy.disable() }\n+        // Confirm that the running trigger is stopped.\n+        _ <- assertTriggerIds(uri, \"Alice\", _.isEmpty)\n+      } yield succeed\n+  }\n+\n+  it should \"restart a failing trigger if possible\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+      // Simulate the ledger briefly being unavailable due to network\n+      // connectivity loss. Our restart strategy means that the running\n+      // trigger gets restarted.\n+      for {\n+        // Request a trigger be started for Alice.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        // Proceed when it is confirmed to be running.\n+        _ <- assertTriggerIds(uri, \"Alice\", _ == Vector(aliceTrigger))\n+        // Simulate brief network connectivity loss. This will cause the\n+        // running trigger's flow graph to complete with failure. Don't\n+        // wait around to restore the network or the restart strategy\n+        // will in turn lead to the stop strategy killing the trigger\n+        // due to the lack of ability to initialize the restarted\n+        // trigger.\n+        _ <- Future { ledgerProxy.disable() }"
+  },
+  {
+    "id" : "7a89ff6b-b1dc-4aeb-8040-364a70da6bfa",
+    "prId" : 6153,
+    "comments" : [
+      {
+        "id" : "486d2eab-f263-4e42-a394-fbe714d01054",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Instead of adding a bunch of separate tests for DB, you might want to consider abstracting over the backend in the tests and then instantiating all tests once with an in-memory backend and once with a SQL backend. You can still have additional tests for each backend if required but at least you test that the basic functionality works correctly with both.",
+        "createdAt" : "2020-06-02T07:27:32Z",
+        "updatedAt" : "2020-06-02T16:34:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "509858bf-c423-43c8-84be-f6883b188692",
+        "parentId" : "486d2eab-f263-4e42-a394-fbe714d01054",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Yes good point, I thought of this too. It has the potential downside of making the tests too slow, but would be much easier to make the tests comprehensive. I'll explore this in a later PR.",
+        "createdAt" : "2020-06-02T16:01:01Z",
+        "updatedAt" : "2020-06-02T16:34:36Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2e27d8a43e27c8fcdaccc26c506fee4f3359edba",
+    "line" : 23,
+    "diffHunk" : "@@ -219,6 +221,35 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n     val testJdbcConfig = JdbcConfig(postgresDatabase.url, \"operator\", \"password\")\n     assert(ServiceMain.initDatabase(testJdbcConfig).isRight)\n     dropDatabase()\n+    disconnectFromPostgresqlServer()\n+    succeed\n+  }\n+\n+  it should \"add running triggers to the database\" in {"
+  },
+  {
+    "id" : "077925ab-1b56-40ec-9425-2fc5fdf35829",
+    "prId" : 6150,
+    "comments" : [
+      {
+        "id" : "94a0fb28-9322-4a63-b39e-2555c3c51cad",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Jolly good of you!",
+        "createdAt" : "2020-05-28T22:51:29Z",
+        "updatedAt" : "2020-05-28T22:56:45Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "573aceb7e60c06358f08695b2f3b0de6bdf6e81e",
+    "line" : 118,
+    "diffHunk" : "@@ -290,4 +298,37 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n         _ <- assert(resp.status.isSuccess)\n       } yield succeed\n   }\n+\n+  it should \"fail to start a trigger if a ledger client can't be obtained\" in withHttpService(\n+    Some(dar)) { (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+    // Disable the proxy. This means that the service won't be able to\n+    // get a ledger connection.\n+    ledgerProxy.disable()\n+    try {\n+      // Request a trigger be started and setup an assertion that\n+      // completes with success when the running trigger table becomes\n+      // non-empty.\n+      val runningTriggersNotEmpty = for {\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        triggerId <- parseTriggerId(resp)\n+      } yield (assertTriggerIds(uri, \"Alice\", triggerIds => triggerIds.nonEmpty))\n+      // Wait a good while (10s) on the assertion to become true. If it\n+      // does, indicate the test has failed (because, since the trigger\n+      // can't be initialized for the lack of a viable ledger client\n+      // connection, it should not make its way to the running triggers\n+      // table).\n+      Await.ready(awaitable = runningTriggersNotEmpty, atMost = 10.seconds)\n+      fail(\"Timeout expected\")\n+    } catch {\n+      // If the assertion times-out the test has succeeded (look to\n+      // the log; you'll see messages indicating that the trigger\n+      // failed to initialize and was stopped).\n+      case _: TimeoutException => succeed\n+    } finally {\n+      // This isn't strictly neccessary here (since each test gets its\n+      // own fixture) but it's jolly decent of us to do it anyway."
+  },
+  {
+    "id" : "6b803f82-e8df-4de4-8342-7e93525fe629",
+    "prId" : 6150,
+    "comments" : [
+      {
+        "id" : "f5abbacb-9b54-49c2-92a8-df457a704bd5",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "A more descriptive error might be helpful here, like \"Trigger added despite disabled ledger client\".",
+        "createdAt" : "2020-05-28T22:55:19Z",
+        "updatedAt" : "2020-05-28T22:56:45Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "573aceb7e60c06358f08695b2f3b0de6bdf6e81e",
+    "line" : 110,
+    "diffHunk" : "@@ -290,4 +298,37 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n         _ <- assert(resp.status.isSuccess)\n       } yield succeed\n   }\n+\n+  it should \"fail to start a trigger if a ledger client can't be obtained\" in withHttpService(\n+    Some(dar)) { (uri: Uri, client: LedgerClient, ledgerProxy: Proxy) =>\n+    // Disable the proxy. This means that the service won't be able to\n+    // get a ledger connection.\n+    ledgerProxy.disable()\n+    try {\n+      // Request a trigger be started and setup an assertion that\n+      // completes with success when the running trigger table becomes\n+      // non-empty.\n+      val runningTriggersNotEmpty = for {\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        aliceTrigger <- parseTriggerId(resp)\n+        triggerId <- parseTriggerId(resp)\n+      } yield (assertTriggerIds(uri, \"Alice\", triggerIds => triggerIds.nonEmpty))\n+      // Wait a good while (10s) on the assertion to become true. If it\n+      // does, indicate the test has failed (because, since the trigger\n+      // can't be initialized for the lack of a viable ledger client\n+      // connection, it should not make its way to the running triggers\n+      // table).\n+      Await.ready(awaitable = runningTriggersNotEmpty, atMost = 10.seconds)\n+      fail(\"Timeout expected\")"
+  },
+  {
+    "id" : "fc9dcce9-8d07-45f5-9499-b7c657afcb3d",
+    "prId" : 6150,
+    "comments" : [
+      {
+        "id" : "af6767b2-f1f4-4341-85e5-7e4d40cdf562",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "It may be useful to add the more specific helper which is commonly used, i.e. `assertTriggerIdsEqual`.",
+        "createdAt" : "2020-05-28T22:56:20Z",
+        "updatedAt" : "2020-05-28T22:56:45Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "573aceb7e60c06358f08695b2f3b0de6bdf6e81e",
+    "line" : 22,
+    "diffHunk" : "@@ -167,15 +168,16 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n     } yield triggerIds\n   }\n \n-  def assertTriggerIds(uri: Uri, party: String, expectedTriggerIds: Vector[String]) = {\n-    Future {\n-      eventually {\n-        val actualTriggerIds = Await.result(for {\n-          resp <- listTriggers(uri, party)\n-          result <- parseTriggerIds(resp)\n-        } yield result, Duration.Inf)\n-        assert(actualTriggerIds == expectedTriggerIds)\n-      }"
+  },
+  {
+    "id" : "668e3c54-2c78-4c11-ba3a-e1502afe8315",
+    "prId" : 6079,
+    "comments" : [
+      {
+        "id" : "408fd224-f8f1-4a20-9110-795e90ad50d8",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That is a great way to write a flaky test. Please use `eventually` instead.",
+        "createdAt" : "2020-05-22T16:15:30Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2cb3d063-d68e-4ec7-8441-64d532eed578",
+        "parentId" : "408fd224-f8f1-4a20-9110-795e90ad50d8",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I'll look into `eventually`.",
+        "createdAt" : "2020-05-22T16:46:29Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4839c9eb-24bc-42e8-b81f-475d2aa53bbd",
+        "parentId" : "408fd224-f8f1-4a20-9110-795e90ad50d8",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "This is fixed now.",
+        "createdAt" : "2020-05-22T18:10:11Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cbdb87590a19aa1bb81b8b704105db5a774d8efd",
+    "line" : null,
+    "diffHunk" : "@@ -189,6 +189,7 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers {\n       resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n       triggerId <- parseTriggerId(resp)\n \n+      _ <- Future { Thread.sleep(1000); true }"
+  },
+  {
+    "id" : "9b373e32-577b-4e04-a601-b7b31592df6f",
+    "prId" : 6079,
+    "comments" : [
+      {
+        "id" : "8e3d8f76-2444-4dc2-9d29-db077ff144a3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This seems like a helper function `assertTriggerIds(uri, party, expectedTriggerIds)` would be very useful.",
+        "createdAt" : "2020-05-25T14:33:06Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "69094423-2079-45be-988f-1e88fc563ad5",
+        "parentId" : "8e3d8f76-2444-4dc2-9d29-db077ff144a3",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Indeed!",
+        "createdAt" : "2020-05-25T14:43:59Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "026d91ac-3086-4eb4-852f-428bbd497c20",
+        "parentId" : "8e3d8f76-2444-4dc2-9d29-db077ff144a3",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "PR https://github.com/digital-asset/daml/pull/6147",
+        "createdAt" : "2020-05-28T16:00:33Z",
+        "updatedAt" : "2020-05-28T16:00:33Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cbdb87590a19aa1bb81b8b704105db5a774d8efd",
+    "line" : 56,
+    "diffHunk" : "@@ -213,45 +223,77 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n   it should \"start multiple triggers and list them by party\" in withHttpService(Some(dar)) {\n     (uri: Uri, client) =>\n       for {\n-        // no triggers running initially\n         resp <- listTriggers(uri, \"Alice\")\n         result <- parseTriggerIds(resp)\n         _ <- result should equal(Vector())\n         // start trigger for Alice\n         resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n         aliceTrigger <- parseTriggerId(resp)\n-        resp <- listTriggers(uri, \"Alice\")\n-        result <- parseTriggerIds(resp)\n-        _ <- result should equal(Vector(aliceTrigger))\n-        // start trigger for Bob\n+        _ <- Future {\n+          eventually {\n+            val r = Await.result(for {\n+              resp <- listTriggers(uri, \"Alice\")\n+              result <- parseTriggerIds(resp)\n+            } yield result, Duration.Inf)\n+            assert(r == Vector(aliceTrigger))\n+          }\n+        }\n         resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Bob\")\n         bobTrigger1 <- parseTriggerId(resp)\n-        resp <- listTriggers(uri, \"Bob\")\n-        result <- parseTriggerIds(resp)\n-        _ <- result should equal(Vector(bobTrigger1))\n-        // start another trigger for Bob\n+        _ <- Future {\n+          eventually {\n+            val r = Await.result(for {"
+  },
+  {
+    "id" : "25fc94c2-574d-492f-acc1-12e3db3f6980",
+    "prId" : 6079,
+    "comments" : [
+      {
+        "id" : "5344c533-ee1c-4bb3-95b1-bccbff5c9028",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "This doesn't seem to be used",
+        "createdAt" : "2020-05-26T15:21:33Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cbdb87590a19aa1bb81b8b704105db5a774d8efd",
+    "line" : null,
+    "diffHunk" : "@@ -191,19 +191,29 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n   }\n \n   it should \"start a trigger after uploading it\" in withHttpService(None) { (uri: Uri, client) =>\n+    def chk() = {"
+  },
+  {
+    "id" : "7ddac3bf-7dcf-4607-b885-8cee3c654896",
+    "prId" : 6079,
+    "comments" : [
+      {
+        "id" : "eae3b16d-c4d9-4069-ae24-d01a15533acc",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "I understand we want to wait until the new trigger has actually started so that the running trigger map and hence `listTriggers` returns the new trigger id. Does `eventually` add a delay so this is the case?",
+        "createdAt" : "2020-05-26T16:37:24Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "198e0049-aa5e-40e7-8afe-a98cca860dbd",
+        "parentId" : "eae3b16d-c4d9-4069-ae24-d01a15533acc",
+        "author" : null,
+        "body" : "yep",
+        "createdAt" : "2020-05-26T16:44:59Z",
+        "updatedAt" : "2020-05-26T19:55:32Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cbdb87590a19aa1bb81b8b704105db5a774d8efd",
+    "line" : 13,
+    "diffHunk" : "@@ -191,19 +191,29 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers with Postg\n   }\n \n   it should \"start a trigger after uploading it\" in withHttpService(None) { (uri: Uri, client) =>\n+    def chk() = {\n+      for {\n+        resp <- listTriggers(uri, \"Alice\")\n+        result <- parseTriggerIds(resp)\n+      } yield result\n+    }\n+\n     for {\n       resp <- uploadDar(uri, darPath)\n       JsObject(fields) <- parseResult(resp)\n       Some(JsString(mainPackageId)) = fields.get(\"mainPackageId\")\n       _ <- mainPackageId should not be empty\n-\n       resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n       triggerId <- parseTriggerId(resp)\n-\n-      resp <- listTriggers(uri, \"Alice\")\n-      result <- parseTriggerIds(resp)\n-      _ <- result should equal(Vector(triggerId))\n-\n+      _ <- Future {\n+        eventually {"
+  },
+  {
+    "id" : "c388b293-f6f1-4e13-9a8f-251775a2d2c5",
+    "prId" : 6055,
+    "comments" : [
+      {
+        "id" : "bad4bb5b-daff-401a-959c-5b3900dce254",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "leftover debugging output?",
+        "createdAt" : "2020-05-20T18:01:32Z",
+        "updatedAt" : "2020-05-20T19:05:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e33dc91f-97b2-4148-ab45-47235b2ed954",
+        "parentId" : "bad4bb5b-daff-401a-959c-5b3900dce254",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Thanks 😊 ",
+        "createdAt" : "2020-05-20T18:09:56Z",
+        "updatedAt" : "2020-05-20T19:05:20Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "34d1295521392ecc8352dedf4c334bbf942ec958",
+    "line" : null,
+    "diffHunk" : "@@ -62,6 +66,22 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers {\n   implicit val esf: ExecutionSequencerFactory = new AkkaExecutionSequencerPool(testId)(system)\n   implicit val ec: ExecutionContext = system.dispatcher\n \n+  protected def jwt(party: String): Jwt = {\n+    println(\"test id\" + testId)"
+  },
+  {
+    "id" : "e4513c5c-873d-4522-ab78-956e462879dc",
+    "prId" : 6055,
+    "comments" : [
+      {
+        "id" : "205bd832-2ff8-4dc7-8f90-bb9d9e2d75e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why embed this as a string instead of using `AuthServiceJWTPayload`? See https://github.com/digital-asset/daml/blob/master/ledger/sandbox/src/test/lib/scala/com/digitalasset/platform/sandbox/services/SandboxFixtureWithAuth.scala#L60 for an example of the latter.",
+        "createdAt" : "2020-05-20T18:03:25Z",
+        "updatedAt" : "2020-05-20T19:05:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b175aa75-6f51-4aa9-843b-55f6b0fd4d25",
+        "parentId" : "205bd832-2ff8-4dc7-8f90-bb9d9e2d75e9",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I just copied the json-api code. I'll have a look!",
+        "createdAt" : "2020-05-20T18:09:48Z",
+        "updatedAt" : "2020-05-20T19:05:20Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "34d1295521392ecc8352dedf4c334bbf942ec958",
+    "line" : 30,
+    "diffHunk" : "@@ -62,6 +66,22 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers {\n   implicit val esf: ExecutionSequencerFactory = new AkkaExecutionSequencerPool(testId)(system)\n   implicit val ec: ExecutionContext = system.dispatcher\n \n+  protected def jwt(party: String): Jwt = {\n+    println(\"test id\" + testId)\n+    val decodedJwt = DecodedJwt("
+  },
+  {
+    "id" : "19324660-2115-4d90-87d2-27ff079d8383",
+    "prId" : 5770,
+    "comments" : [
+      {
+        "id" : "4faa7583-12f8-4be6-96de-65ddbc6f94ce",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like some helper that throws on failed requests might come in handy but doesn’t need to be in this PR.",
+        "createdAt" : "2020-04-28T20:11:11Z",
+        "updatedAt" : "2020-04-28T23:47:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b141236e74168079b83c0ed40b234a5f7119dcb",
+    "line" : 76,
+    "diffHunk" : "@@ -100,47 +109,97 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers {\n     Http().singleRequest(req)\n   }\n \n+  def responseBodyToString(resp: HttpResponse) = {\n+    resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+  }\n+\n   it should \"should fail for non-existent trigger\" in withHttpService(Some(dar)) {\n     (uri: Uri, client) =>\n       for {\n-        resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:foobar\", \"Alice\")\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:foobar\", \"Alice\")\n         body <- {\n           assert(resp.status == StatusCodes.UnprocessableEntity)\n-          resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+          responseBodyToString(resp)\n         }\n       } yield assert(body == \"Could not find name foobar in module TestTrigger\")\n   }\n \n-  it should \"find a trigger after uploading it\" in withHttpService(None) { (uri: Uri, client) =>\n-    for {\n-      // attempt to start trigger before uploading which fails.\n-      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n-      _ <- assert(resp.status == StatusCodes.UnprocessableEntity)\n-      resp <- uploadDar(uri, darPath)\n-      body <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      _ <- body should startWith(\"DAR uploaded\")\n-      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n-      _ <- assert(resp.status.isSuccess)\n-      triggerId <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      resp <- stopTrigger(uri, triggerId)\n-      _ <- assert(resp.status.isSuccess)\n-    } yield succeed\n+  it should \"find a trigger after uploading it\" in withHttpService(None) {\n+    (uri: Uri, client) =>\n+      for {\n+        // attempt to start trigger before uploading which fails.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        _ <- assert(resp.status == StatusCodes.UnprocessableEntity)\n+        resp <- uploadDar(uri, darPath)\n+        body <- responseBodyToString(resp)\n+        _ <- body should startWith(\"DAR uploaded\")\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        _ <- assert(resp.status.isSuccess)\n+        triggerId <- responseBodyToString(resp)\n+        resp <- listTriggers(uri, \"Alice\")\n+        body <- responseBodyToString(resp)\n+        _ <- body should include(triggerId)\n+        resp <- stopTrigger(uri, triggerId)\n+        _ <- assert(resp.status.isSuccess)\n+      } yield succeed\n+  }\n+\n+  it should \"start multiple triggers and list them by party\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client) =>\n+      for {\n+        // no triggers running initially\n+        resp <- listTriggers(uri, \"Alice\")\n+        _ <- assert(resp.status.isSuccess)"
+  },
+  {
+    "id" : "818afe52-0f12-4c84-bbea-ec6535679243",
+    "prId" : 5770,
+    "comments" : [
+      {
+        "id" : "9d2dbb59-d9c7-4788-a1b0-8d496648efba",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like you really want exact assertions everywhere here and not just testing for some kind of infix.",
+        "createdAt" : "2020-04-28T20:15:11Z",
+        "updatedAt" : "2020-04-28T23:47:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f6c4ce02-cbd7-486c-9660-07bc71898071",
+        "parentId" : "9d2dbb59-d9c7-4788-a1b0-8d496648efba",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Fixed that now with the JSON format",
+        "createdAt" : "2020-04-28T20:57:50Z",
+        "updatedAt" : "2020-04-28T23:47:43Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b141236e74168079b83c0ed40b234a5f7119dcb",
+    "line" : null,
+    "diffHunk" : "@@ -100,47 +109,97 @@ class ServiceTest extends AsyncFlatSpec with Eventually with Matchers {\n     Http().singleRequest(req)\n   }\n \n+  def responseBodyToString(resp: HttpResponse) = {\n+    resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+  }\n+\n   it should \"should fail for non-existent trigger\" in withHttpService(Some(dar)) {\n     (uri: Uri, client) =>\n       for {\n-        resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:foobar\", \"Alice\")\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:foobar\", \"Alice\")\n         body <- {\n           assert(resp.status == StatusCodes.UnprocessableEntity)\n-          resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+          responseBodyToString(resp)\n         }\n       } yield assert(body == \"Could not find name foobar in module TestTrigger\")\n   }\n \n-  it should \"find a trigger after uploading it\" in withHttpService(None) { (uri: Uri, client) =>\n-    for {\n-      // attempt to start trigger before uploading which fails.\n-      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n-      _ <- assert(resp.status == StatusCodes.UnprocessableEntity)\n-      resp <- uploadDar(uri, darPath)\n-      body <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      _ <- body should startWith(\"DAR uploaded\")\n-      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n-      _ <- assert(resp.status.isSuccess)\n-      triggerId <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      resp <- stopTrigger(uri, triggerId)\n-      _ <- assert(resp.status.isSuccess)\n-    } yield succeed\n+  it should \"find a trigger after uploading it\" in withHttpService(None) {\n+    (uri: Uri, client) =>\n+      for {\n+        // attempt to start trigger before uploading which fails.\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        _ <- assert(resp.status == StatusCodes.UnprocessableEntity)\n+        resp <- uploadDar(uri, darPath)\n+        body <- responseBodyToString(resp)\n+        _ <- body should startWith(\"DAR uploaded\")\n+        resp <- startTrigger(uri, s\"$testPkgId:TestTrigger:trigger\", \"Alice\")\n+        _ <- assert(resp.status.isSuccess)\n+        triggerId <- responseBodyToString(resp)\n+        resp <- listTriggers(uri, \"Alice\")\n+        body <- responseBodyToString(resp)\n+        _ <- body should include(triggerId)\n+        resp <- stopTrigger(uri, triggerId)\n+        _ <- assert(resp.status.isSuccess)\n+      } yield succeed\n+  }\n+\n+  it should \"start multiple triggers and list them by party\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client) =>\n+      for {\n+        // no triggers running initially\n+        resp <- listTriggers(uri, \"Alice\")\n+        _ <- assert(resp.status.isSuccess)\n+        body <- responseBodyToString(resp)\n+        _ <- body should endWith(\": \")"
+  },
+  {
+    "id" : "6f8fb4d7-25ac-4a4d-b619-459131a030ff",
+    "prId" : 5084,
+    "comments" : [
+      {
+        "id" : "4eed4d18-718e-4b94-a3e1-c97d5864a966",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That comment seems misplaced",
+        "createdAt" : "2020-03-19T11:08:22Z",
+        "updatedAt" : "2020-03-19T11:17:23Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4bafe3e5d9cd1f221404137b5446f25b9212cdee",
+    "line" : null,
+    "diffHunk" : "@@ -95,40 +99,74 @@ class ServiceTest extends AsyncFlatSpec with Eventually {\n     Http().singleRequest(req)\n   }\n \n-  it should \"should fail for non-existent trigger\" in withHttpService { (uri: Uri, client) =>\n-    for {\n-      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:foobar\", \"Alice\")\n-      body <- {\n-        assert(resp.status == StatusCodes.UnprocessableEntity)\n-        resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      }\n-    } yield assert(body == \"Could not find name foobar in module TestTrigger\")\n+  def uploadDar(uri: Uri, file: File) = {\n+    val fileContentsSource: Source[ByteString, Any] = FileIO.fromPath(file.toPath)\n+    val multipartForm = Multipart.FormData(\n+      Multipart.FormData.BodyPart(\n+        \"dar\",\n+        HttpEntity.IndefiniteLength(ContentTypes.`application/octet-stream`, fileContentsSource),\n+        Map(\"filename\" -> file.toString)))\n+    val req = HttpRequest(\n+      method = HttpMethods.POST,\n+      uri = uri.withPath(Uri.Path(s\"/upload_dar\")),\n+      entity = multipartForm.toEntity\n+    )\n+    Http().singleRequest(req)\n+  }\n+\n+  it should \"should fail for non-existent trigger\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client) =>\n+      for {\n+        resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:foobar\", \"Alice\")\n+        body <- {\n+          assert(resp.status == StatusCodes.UnprocessableEntity)\n+          resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+        }\n+      } yield assert(body == \"Could not find name foobar in module TestTrigger\")\n   }\n \n-  it should \"should enable a trigger on http request\" in withHttpService { (uri: Uri, client) =>\n-    // start the trigger\n+  it should \"find a trigger after uploading it\" in withHttpService(None) { (uri: Uri, client) =>\n     for {\n+      // attempt to start trigger before uploading which fails.\n       resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n-      triggerId <- {\n-        assert(resp.status.isSuccess)\n-        resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      }\n-      // Trigger is running, create an A contract\n-      _ <- {\n-        val cmd = Command().withCreate(\n-          CreateCommand(\n-            templateId = Some(Identifier(dar.main._1, \"TestTrigger\", \"A\")), // template id\n-            createArguments = Some(\n-              Record(\n-                None,\n-                Seq(\n-                  RecordField(value = Some(Value().withParty(\"Alice\"))),\n-                  RecordField(value = Some(Value().withInt64(42)))))),\n-          ))\n-        submitCmd(client, \"Alice\", cmd)\n-      }\n-      // Query ACS until we see a B contract\n-      // format: off\n+      _ <- assert(resp.status == StatusCodes.UnprocessableEntity)\n+      resp <- uploadDar(uri, darPath)\n+      body <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+      _ <- body should startWith(\"DAR uploaded\")\n+      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n+      _ <- assert(resp.status.isSuccess)\n+      triggerId <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+      resp <- stopTrigger(uri, triggerId)\n+      _ <- assert(resp.status.isSuccess)\n+      // upload dar"
+  },
+  {
+    "id" : "9dd44be6-e7e3-4810-a8cb-90a7a1a2aa33",
+    "prId" : 5084,
+    "comments" : [
+      {
+        "id" : "cbf3b2dc-5e26-4ab6-9e8f-c51fdfbc084a",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n              templateId = Some(Identifier(dar.main._1, \"TestTrigger\", \"A\")),\r\n```\r\nseems redundant.",
+        "createdAt" : "2020-03-19T11:09:58Z",
+        "updatedAt" : "2020-03-19T11:17:23Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4bafe3e5d9cd1f221404137b5446f25b9212cdee",
+    "line" : null,
+    "diffHunk" : "@@ -95,40 +99,74 @@ class ServiceTest extends AsyncFlatSpec with Eventually {\n     Http().singleRequest(req)\n   }\n \n-  it should \"should fail for non-existent trigger\" in withHttpService { (uri: Uri, client) =>\n-    for {\n-      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:foobar\", \"Alice\")\n-      body <- {\n-        assert(resp.status == StatusCodes.UnprocessableEntity)\n-        resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      }\n-    } yield assert(body == \"Could not find name foobar in module TestTrigger\")\n+  def uploadDar(uri: Uri, file: File) = {\n+    val fileContentsSource: Source[ByteString, Any] = FileIO.fromPath(file.toPath)\n+    val multipartForm = Multipart.FormData(\n+      Multipart.FormData.BodyPart(\n+        \"dar\",\n+        HttpEntity.IndefiniteLength(ContentTypes.`application/octet-stream`, fileContentsSource),\n+        Map(\"filename\" -> file.toString)))\n+    val req = HttpRequest(\n+      method = HttpMethods.POST,\n+      uri = uri.withPath(Uri.Path(s\"/upload_dar\")),\n+      entity = multipartForm.toEntity\n+    )\n+    Http().singleRequest(req)\n+  }\n+\n+  it should \"should fail for non-existent trigger\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client) =>\n+      for {\n+        resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:foobar\", \"Alice\")\n+        body <- {\n+          assert(resp.status == StatusCodes.UnprocessableEntity)\n+          resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+        }\n+      } yield assert(body == \"Could not find name foobar in module TestTrigger\")\n   }\n \n-  it should \"should enable a trigger on http request\" in withHttpService { (uri: Uri, client) =>\n-    // start the trigger\n+  it should \"find a trigger after uploading it\" in withHttpService(None) { (uri: Uri, client) =>\n     for {\n+      // attempt to start trigger before uploading which fails.\n       resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n-      triggerId <- {\n-        assert(resp.status.isSuccess)\n-        resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n-      }\n-      // Trigger is running, create an A contract\n-      _ <- {\n-        val cmd = Command().withCreate(\n-          CreateCommand(\n-            templateId = Some(Identifier(dar.main._1, \"TestTrigger\", \"A\")), // template id\n-            createArguments = Some(\n-              Record(\n-                None,\n-                Seq(\n-                  RecordField(value = Some(Value().withParty(\"Alice\"))),\n-                  RecordField(value = Some(Value().withInt64(42)))))),\n-          ))\n-        submitCmd(client, \"Alice\", cmd)\n-      }\n-      // Query ACS until we see a B contract\n-      // format: off\n+      _ <- assert(resp.status == StatusCodes.UnprocessableEntity)\n+      resp <- uploadDar(uri, darPath)\n+      body <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+      _ <- body should startWith(\"DAR uploaded\")\n+      resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n+      _ <- assert(resp.status.isSuccess)\n+      triggerId <- resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+      resp <- stopTrigger(uri, triggerId)\n+      _ <- assert(resp.status.isSuccess)\n+      // upload dar\n+    } yield succeed\n+  }\n+\n+  it should \"should enable a trigger on http request\" in withHttpService(Some(dar)) {\n+    (uri: Uri, client) =>\n+      // start the trigger\n+      for {\n+        resp <- startTrigger(uri, s\"${dar.main._1}:TestTrigger:trigger\", \"Alice\")\n+        triggerId <- {\n+          assert(resp.status.isSuccess)\n+          resp.entity.dataBytes.runFold(ByteString(\"\"))(_ ++ _).map(_.utf8String)\n+        }\n+        // Trigger is running, create an A contract\n+        _ <- {\n+          val cmd = Command().withCreate(\n+            CreateCommand(\n+              templateId = Some(Identifier(dar.main._1, \"TestTrigger\", \"A\")), // template id"
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "1ca092be-125c-41d7-b9c6-bbb947c8f500",
+    "prId" : 1833,
+    "comments" : [
+      {
+        "id" : "15f355a9-3f62-44a9-91b5-661ae90627ed",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n        a => a.index,\r\n```",
+        "createdAt" : "2019-06-26T07:02:11Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b0244867-116f-4487-9c18-37e35043d263",
+        "parentId" : "15f355a9-3f62-44a9-91b5-661ae90627ed",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Indeed. fixed. ",
+        "createdAt" : "2019-06-26T09:37:02Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0024f1caa606682717407339870b82441a5a448c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,41 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.ledger.client.binding\n+\n+import com.digitalasset.ledger.api.v1.{value => rpcvalue}\n+import com.digitalasset.ledger.client.binding.encoding.{LfEncodable, LfTypeEncoding}\n+import scalaz.Liskov.<~<\n+import scalaz.OneAnd\n+import scalaz.syntax.functor._\n+import scalaz.std.vector._\n+\n+abstract class EnumCompanion[T](implicit isEnum: T <~< EnumRef) extends ValueRefCompanion {\n+\n+  val firstValue: T\n+  val otherValues: Vector[T]\n+\n+  final def values: Vector[T] = firstValue +: otherValues\n+\n+  implicit final lazy val `the enum Value`: Value[T] = new `Value ValueRef`[T] {\n+    private[this] val readers = values.map(e => (isEnum(e).constructor: String) -> e).toMap\n+\n+    override def read(argValue: rpcvalue.Value.Sum): Option[T] =\n+      argValue.enum flatMap (e => readers.get(e.constructor))\n+\n+    private[this] val rpcValues = values.map(e => ` enum`(isEnum(e).constructor))\n+\n+    override def write(enum: T): rpcvalue.Value.Sum =\n+      rpcValues(isEnum(enum).index)\n+  }\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\"))\n+  implicit final val `the enum LfEncodable`: LfEncodable[T] = new LfEncodable[T] {\n+    override def encoding(lte: LfTypeEncoding): lte.Out[T] =\n+      lte.enumAll(\n+        ` dataTypeId`,\n+        (firstValue +: otherValues).map(isEnum(_).constructor).zipWithIndex.toMap,"
+  },
+  {
+    "id" : "935b9540-b249-45a7-864b-71c8c1256ee7",
+    "prId" : 1833,
+    "comments" : [
+      {
+        "id" : "3e41b31d-2ab8-4f41-8cf8-5e62baed0dd7",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Doesn't refer to `lte`, so can be pulled out like `readers` and `rpcValues` (with the same `lazy val` for the containing `val`).",
+        "createdAt" : "2019-06-26T07:04:23Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0a12e84f-dd28-4d5c-aa3b-38afa249d960",
+        "parentId" : "3e41b31d-2ab8-4f41-8cf8-5e62baed0dd7",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Done. ",
+        "createdAt" : "2019-06-26T11:11:30Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0024f1caa606682717407339870b82441a5a448c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,41 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.ledger.client.binding\n+\n+import com.digitalasset.ledger.api.v1.{value => rpcvalue}\n+import com.digitalasset.ledger.client.binding.encoding.{LfEncodable, LfTypeEncoding}\n+import scalaz.Liskov.<~<\n+import scalaz.OneAnd\n+import scalaz.syntax.functor._\n+import scalaz.std.vector._\n+\n+abstract class EnumCompanion[T](implicit isEnum: T <~< EnumRef) extends ValueRefCompanion {\n+\n+  val firstValue: T\n+  val otherValues: Vector[T]\n+\n+  final def values: Vector[T] = firstValue +: otherValues\n+\n+  implicit final lazy val `the enum Value`: Value[T] = new `Value ValueRef`[T] {\n+    private[this] val readers = values.map(e => (isEnum(e).constructor: String) -> e).toMap\n+\n+    override def read(argValue: rpcvalue.Value.Sum): Option[T] =\n+      argValue.enum flatMap (e => readers.get(e.constructor))\n+\n+    private[this] val rpcValues = values.map(e => ` enum`(isEnum(e).constructor))\n+\n+    override def write(enum: T): rpcvalue.Value.Sum =\n+      rpcValues(isEnum(enum).index)\n+  }\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\"))\n+  implicit final val `the enum LfEncodable`: LfEncodable[T] = new LfEncodable[T] {\n+    override def encoding(lte: LfTypeEncoding): lte.Out[T] =\n+      lte.enumAll(\n+        ` dataTypeId`,\n+        (firstValue +: otherValues).map(isEnum(_).constructor).zipWithIndex.toMap,\n+        OneAnd(firstValue, otherValues).map(x => isEnum(x).constructor -> x))"
+  }
+]

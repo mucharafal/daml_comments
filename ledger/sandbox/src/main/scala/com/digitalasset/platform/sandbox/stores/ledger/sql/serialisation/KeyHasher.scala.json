@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "37e204a8-4884-41a1-a68b-0f70fd5b1af9",
+    "prId" : 544,
+    "comments" : [
+      {
+        "id" : "88738700-f44b-4d8c-91bc-c859a9ada68d",
+        "parentId" : null,
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "crash if you encounter this -- we never serialize these.",
+        "createdAt" : "2019-04-25T15:33:30Z",
+        "updatedAt" : "2019-04-25T20:02:12Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "91d91a91-4897-4091-be3b-0c471e110e0f",
+        "parentId" : "88738700-f44b-4d8c-91bc-c859a9ada68d",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I have replaced the above implementation by a `sys.error`",
+        "createdAt" : "2019-04-25T20:11:44Z",
+        "updatedAt" : "2019-04-25T20:11:44Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e7269aafff2faa4deed3b744d1ee458a5ec75e33",
+    "line" : 100,
+    "diffHunk" : "@@ -0,0 +1,160 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.stores.ledger.sql.serialisation\n+\n+import java.nio.ByteBuffer\n+import java.security.MessageDigest\n+\n+import com.digitalasset.daml.lf.transaction.Node.GlobalKey\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+\n+trait KeyHasher {\n+\n+  /** Returns the hash of the given DAML-LF value */\n+  def hashKey(key: GlobalKey): Array[Byte]\n+\n+  /** Returns a string representation of the hash of the given DAML-LF value */\n+  def hashKeyString(key: GlobalKey): String = hashKey(key).map(\"%02x\" format _).mkString\n+}\n+\n+/**\n+  * ADT for data elements that appear in the input stream of the hash function\n+  * used to hash DAML-LF values.\n+  */\n+sealed abstract class HashToken extends Product with Serializable\n+final case class HashTokenText(value: String) extends HashToken\n+final case class HashTokenByte(value: Byte) extends HashToken\n+final case class HashTokenInt(value: Int) extends HashToken\n+final case class HashTokenLong(value: Long) extends HashToken\n+final case class HashTokenBigDecimal(value: BigDecimal) extends HashToken\n+final case class HashTokenCollectionBegin(length: Int) extends HashToken\n+final case class HashTokenCollectionEnd() extends HashToken\n+\n+object KeyHasher extends KeyHasher {\n+\n+  /**\n+    * Traverses the given value in a stable way, producing \"hash tokens\" for any encountered primitive values.\n+    * These tokens can be used as the input to a hash function.\n+    *\n+    * @param value the DAML-LF value to hash\n+    * @param z initial hash value\n+    * @param op operation to append a hash token\n+    * @return the final hash value\n+    */\n+  def foldLeft[T](value: Value[AbsoluteContractId], z: T, op: (T, HashToken) => T): T = {\n+    import com.digitalasset.daml.lf.value.Value._\n+\n+    value match {\n+      case ValueContractId(v) => op(z, HashTokenText(v.coid))\n+      case ValueInt64(v) => op(z, HashTokenLong(v))\n+      case ValueDecimal(v) => op(z, HashTokenBigDecimal(v))\n+      case ValueText(v) => op(z, HashTokenText(v))\n+      case ValueTimestamp(v) => op(z, HashTokenLong(v.micros))\n+      case ValueParty(v) => op(z, HashTokenText(v.underlyingString))\n+      case ValueBool(v) => op(z, HashTokenByte(if (v) 1.toByte else 0.toByte))\n+      case ValueDate(v) => op(z, HashTokenInt(v.days))\n+      case ValueUnit => op(z, HashTokenByte(0))\n+\n+      // Record: [CollectionBegin(), Token(value)*, CollectionEnd()]\n+      case ValueRecord(_, fs) =>\n+        val z1 = op(z, HashTokenCollectionBegin(fs.length))\n+        val z2 = fs.foldLeft[T](z1)((t, v) => foldLeft(v._2, t, op))\n+        op(z2, HashTokenCollectionEnd())\n+\n+      // Optional: [CollectionBegin(), Token(value), CollectionEnd()]\n+      case ValueOptional(Some(v)) =>\n+        val z1 = op(z, HashTokenCollectionBegin(1))\n+        val z2 = foldLeft(v, z1, op)\n+        op(z2, HashTokenCollectionEnd())\n+      case ValueOptional(None) =>\n+        val z1 = op(z, HashTokenCollectionBegin(0))\n+        op(z1, HashTokenCollectionEnd())\n+\n+      // Variant: [CollectionBegin(), Text(variant), Token(value), CollectionEnd()]\n+      case ValueVariant(_, variant, v) =>\n+        val z1 = op(z, HashTokenCollectionBegin(1))\n+        val z2 = op(z1, HashTokenText(variant))\n+        val z3 = foldLeft(v, z2, op)\n+        op(z3, HashTokenCollectionEnd())\n+\n+      // List: [CollectionBegin(), Token(value)*, CollectionEnd()]\n+      case ValueList(xs) =>\n+        val arr = xs.toImmArray\n+        val z1 = op(z, HashTokenCollectionBegin(xs.length))\n+        val z2 = arr.foldLeft[T](z1)((t, v) => foldLeft(v, t, op))\n+        op(z2, HashTokenCollectionEnd())\n+\n+      // Map: [CollectionBegin(), (Text(key), Token(value))*, CollectionEnd()]\n+      case ValueMap(xs) =>\n+        val arr = xs.toImmArray\n+        val z1 = op(z, HashTokenCollectionBegin(arr.length))\n+        val z2 = arr.foldLeft[T](z1)((t, v) => {\n+          val zz1 = op(t, HashTokenText(v._1))\n+          foldLeft(v._2, zz1, op)\n+        })\n+        op(z2, HashTokenCollectionEnd())\n+\n+      // Tuple: same as Map\n+      case ValueTuple(xs) =>"
+  }
+]

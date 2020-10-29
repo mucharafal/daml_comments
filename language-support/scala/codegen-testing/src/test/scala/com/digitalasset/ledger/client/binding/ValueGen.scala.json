@@ -1,0 +1,61 @@
+[
+  {
+    "id" : "365c6aba-6456-4dcc-ac78-350e0a344b2f",
+    "prId" : 7483,
+    "comments" : [
+      {
+        "id" : "175c17f9-d303-49b1-9d95-9401da648e75",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "👍 ",
+        "createdAt" : "2020-09-25T14:45:10Z",
+        "updatedAt" : "2020-09-28T06:43:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8acb142ecf47700230d2a8ea8989744ef13e5e83",
+    "line" : 42,
+    "diffHunk" : "@@ -0,0 +1,126 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.client.binding\n+\n+import encoding.{ValuePrimitiveEncoding, GenEncoding}\n+import org.scalacheck.{Arbitrary, Gen, Shrink}\n+\n+import scala.language.higherKinds\n+\n+object ValueGen {\n+\n+  private[binding] sealed abstract class Exists[F[_]] {\n+    type T\n+    val run: F[T]\n+  }\n+\n+  private def Exists[T0, F[_]](_run: F[T0]): Exists[F] = {\n+    final case class ExistsImpl(run: F[T0]) extends Exists[F] {\n+      type T = T0\n+      override def productPrefix = \"Exists\"\n+    }\n+    ExistsImpl(_run)\n+  }\n+\n+  private[binding] final case class ValueCheck[T](tName: String)(\n+      implicit val TA: Arbitrary[T],\n+      val TS: Shrink[T],\n+      val TV: Value[T])\n+\n+  import com.daml.ledger.client.binding.{Primitive => P}\n+\n+  private[binding] implicit val dateArb: Arbitrary[P.Date] =\n+    Arbitrary(GenEncoding.primitive.valueDate)\n+\n+  private[binding] implicit val timestampArb: Arbitrary[P.Timestamp] =\n+    Arbitrary(GenEncoding.primitive.valueTimestamp)\n+\n+  private[this] object TautologicalValueChecks extends ValuePrimitiveEncoding[ValueCheck] {\n+    override val valueInt64 = ValueCheck[P.Int64](\"Int64\")\n+    override val valueNumeric = {\n+      implicit val PA: Arbitrary[P.Numeric] = Arbitrary(GenEncoding.primitive.valueNumeric)"
+  },
+  {
+    "id" : "ea99b5de-c293-4e4a-a518-7b9143f52e07",
+    "prId" : 7483,
+    "comments" : [
+      {
+        "id" : "e7ee5731-72bf-48b1-a9e5-11d977c4c83e",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\nprivate[binding] object ValueGen {\r\n```\r\n\r\n`object ValueSpec` was public because `class ValueSpec` must be. This was just superstition on my part, I think.",
+        "createdAt" : "2020-09-25T14:47:21Z",
+        "updatedAt" : "2020-09-28T06:43:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8acb142ecf47700230d2a8ea8989744ef13e5e83",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,126 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.client.binding\n+\n+import encoding.{ValuePrimitiveEncoding, GenEncoding}\n+import org.scalacheck.{Arbitrary, Gen, Shrink}\n+\n+import scala.language.higherKinds\n+\n+object ValueGen {"
+  }
+]

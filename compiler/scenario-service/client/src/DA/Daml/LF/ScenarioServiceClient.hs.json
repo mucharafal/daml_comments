@@ -1,0 +1,193 @@
+[
+  {
+    "id" : "ebf9d852-e79a-4cf6-9d4f-0196ff8fa92b",
+    "prId" : 4537,
+    "comments" : [
+      {
+        "id" : "fdcc3989-2afc-40b8-a849-3c1a581fab9b",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "How are these cloned contexts cleaned up? Sure, on the Haskell side they are GC'ed. But, don't we need to explicitly delete them to avoid leaking resources in the scenario service?",
+        "createdAt" : "2020-02-17T09:56:15Z",
+        "updatedAt" : "2020-02-17T09:56:15Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b8f51618-75bd-4977-a3c9-c7ae957321d2",
+        "parentId" : "fdcc3989-2afc-40b8-a849-3c1a581fab9b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "There is a `gcCtxs` gRPC request that we send to the server https://github.com/digital-asset/daml/blob/master/compiler/damlc/daml-ide-core/src/Development/IDE/Core/Rules/Daml.hs#L908",
+        "createdAt" : "2020-02-17T09:58:44Z",
+        "updatedAt" : "2020-02-17T09:58:44Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "164177c7-da59-448f-921f-5fd46b16c710",
+        "parentId" : "fdcc3989-2afc-40b8-a849-3c1a581fab9b",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Thanks for clarifying!",
+        "createdAt" : "2020-02-17T10:00:19Z",
+        "updatedAt" : "2020-02-17T10:00:37Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "58797393fe690a55389e5a23b069622f2203cde1",
+    "line" : 46,
+    "diffHunk" : "@@ -142,23 +145,30 @@ getNewCtx Handle{..} Context{..} = withLock hContextLock $ withSem hConcurrencyS\n       (S.toList unloadPackages)\n       ctxDamlLfVersion\n       ctxSkipValidation\n-  writeIORef hLoadedPackages newLoadedPackages\n-  writeIORef hLoadedModules ctxModules\n-  res <- LowLevel.updateCtx hLowLevelHandle hContextId ctxUpdate\n-  case res of\n-    Left err -> pure (Left err)\n-    Right () -> LowLevel.cloneCtx hLowLevelHandle hContextId\n+  rootCtxId <- readIORef hContextId\n+  runExceptT $ do\n+      clonedRootCtxId <- ExceptT $ LowLevel.cloneCtx hLowLevelHandle rootCtxId"
+  },
+  {
+    "id" : "a35c6304-7788-46bf-a29f-4e38bab994da",
+    "prId" : 3003,
+    "comments" : [
+      {
+        "id" : "745a1325-b45d-4c07-9a43-2a5debd8b47e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "same here, this should also be a newtype (you can use the same newtype for both if you want).",
+        "createdAt" : "2019-09-24T16:18:23Z",
+        "updatedAt" : "2019-09-25T08:01:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3fb68825c3c5aa62891a92ec08a49980aca9758f",
+    "line" : null,
+    "diffHunk" : "@@ -118,7 +117,7 @@ data Context = Context\n   { ctxModules :: MS.Map Hash (LF.ModuleName, BS.ByteString)\n   , ctxPackages :: [(LF.PackageId, BS.ByteString)]\n   , ctxDamlLfVersion :: LF.Version\n-  , ctxLightValidation :: LowLevel.LightValidation\n+  , ctxValidation :: Bool"
+  },
+  {
+    "id" : "4a8208e0-92e3-4ad9-92f9-7befede8d65f",
+    "prId" : 2551,
+    "comments" : [
+      {
+        "id" : "2664c409-96b5-495f-b601-4f4f2c2629e7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should probably rename this to include the letters `grpc` in a future PR.",
+        "createdAt" : "2019-08-15T09:37:37Z",
+        "updatedAt" : "2019-08-15T09:40:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "203414bdcc3113647e0b416a698de00e484876d0",
+    "line" : 14,
+    "diffHunk" : "@@ -61,15 +62,18 @@ toLowLevelOpts Options{..} =\n data Handle = Handle\n   { hLowLevelHandle :: LowLevel.Handle\n   , hOptions :: Options\n-  , hConcurrencySem :: QSem\n-  -- ^ Limits the number of concurrent scenario executions.\n+  , hConcurrencySem :: QSemN"
+  },
+  {
+    "id" : "6abe9598-d178-42b8-9063-500c945f57b5",
+    "prId" : 1970,
+    "comments" : [
+      {
+        "id" : "367e5fd3-0ed2-4f60-9e50-ae18717b5921",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can we put the `Maybe Int` into the `Options`?",
+        "createdAt" : "2019-07-02T11:37:53Z",
+        "updatedAt" : "2019-07-02T11:49:42Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dc27d340-f5e6-4fc8-a71e-70aab980d180",
+        "parentId" : "367e5fd3-0ed2-4f60-9e50-ae18717b5921",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That doesn’t really make sense since we read it from the config file here. We could move the logic for reading the config file somewhere else but I’m not sure propagating this from the top-level really helps makes things clearer.",
+        "createdAt" : "2019-07-02T11:45:17Z",
+        "updatedAt" : "2019-07-02T11:49:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "96dd828f-315d-4fcd-8d60-713db908b7e9",
+        "parentId" : "367e5fd3-0ed2-4f60-9e50-ae18717b5921",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Alright. I don't have all the context on this anyway. I was just wondering but I'm happy to go your way.",
+        "createdAt" : "2019-07-02T12:00:52Z",
+        "updatedAt" : "2019-07-02T12:00:52Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c48864812b9ae7d83844fe88fe52b1305db02418",
+    "line" : 26,
+    "diffHunk" : "@@ -42,8 +48,8 @@ data Options = Options\n   , optLogError :: String -> IO ()\n   }\n \n-toLowLevelOpts :: Options -> LowLevel.Options\n-toLowLevelOpts Options{..} = LowLevel.Options{..}\n+toLowLevelOpts :: Maybe Int -> Options -> LowLevel.Options"
+  }
+]

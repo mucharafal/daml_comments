@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "6218ecf5-073f-46ba-991a-375fe888a7fc",
+    "prId" : 2282,
+    "comments" : [
+      {
+        "id" : "34b50a93-dc99-4732-a59d-f75f7451c131",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n    ledgerId.flatMap(LedgerClock(_, services.time))\r\n```\r\nFor simple `map`s or `flatMap`s I find the for-comprehension very noise. E.g. line 64 is also nicely readable without a for-comprehension.",
+        "createdAt" : "2019-08-06T12:55:25Z",
+        "updatedAt" : "2019-08-09T14:28:54Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "78f1bfbc-c3a7-4ee2-a621-816321d9e8c5",
+        "parentId" : "34b50a93-dc99-4732-a59d-f75f7451c131",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/2282/commits/034eb510e6cf739a9fd7ca37570863068e0eca5b",
+        "createdAt" : "2019-08-06T16:15:42Z",
+        "updatedAt" : "2019-08-09T14:28:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c0ec2e9d435c3c835828ec8bb046a8d6fe9c4a32",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,210 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.api.rewrite.testtool.infrastructure\n+\n+import java.time.Instant\n+import java.util.UUID\n+\n+import com.digitalasset.ledger.api.v1.admin.party_management_service.AllocatePartyRequest\n+import com.digitalasset.ledger.api.v1.command_service.SubmitAndWaitRequest\n+import com.digitalasset.ledger.api.v1.commands.Command.Command.{Create, Exercise}\n+import com.digitalasset.ledger.api.v1.commands.{Command, Commands, CreateCommand, ExerciseCommand}\n+import com.digitalasset.ledger.api.v1.event.Event\n+import com.digitalasset.ledger.api.v1.event.Event.Event.Created\n+import com.digitalasset.ledger.api.v1.ledger_identity_service.GetLedgerIdentityRequest\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.digitalasset.ledger.api.v1.transaction.{Transaction, TransactionTree}\n+import com.digitalasset.ledger.api.v1.transaction_filter.{\n+  Filters,\n+  InclusiveFilters,\n+  TransactionFilter\n+}\n+import com.digitalasset.ledger.api.v1.transaction_service.{\n+  GetLedgerEndRequest,\n+  GetTransactionByIdRequest,\n+  GetTransactionsRequest,\n+  GetTransactionsResponse\n+}\n+import com.digitalasset.ledger.api.v1.value.{Identifier, Record, RecordField, Value}\n+import com.google.protobuf.timestamp.Timestamp\n+import io.grpc.Channel\n+\n+import scala.concurrent.duration.Duration\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+object LedgerBindings {\n+\n+  private def filter(templateIds: Seq[Identifier]): Filters =\n+    new Filters(if (templateIds.isEmpty) None else Some(new InclusiveFilters(templateIds)))\n+\n+  private def transactionFilter(party: String, templateIds: Seq[Identifier]) =\n+    new TransactionFilter(Map(party -> filter(templateIds)))\n+\n+  private val end = LedgerOffset(\n+    LedgerOffset.Value.Boundary(LedgerOffset.LedgerBoundary.LEDGER_END))\n+\n+}\n+\n+final class LedgerBindings(channel: Channel, commandTtlFactor: Double)(\n+    implicit ec: ExecutionContext) {\n+\n+  private[this] val services = new LedgerServices(channel)\n+\n+  val ledgerId: Future[String] =\n+    for {\n+      response <- services.id.getLedgerIdentity(new GetLedgerIdentityRequest)\n+    } yield response.ledgerId\n+\n+  private[this] val clock: Future[LedgerClock] =\n+    for (id <- ledgerId; clock <- LedgerClock(id, services.time)) yield clock"
+  }
+]

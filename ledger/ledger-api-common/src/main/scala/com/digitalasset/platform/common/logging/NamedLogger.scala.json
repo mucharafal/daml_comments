@@ -1,0 +1,130 @@
+[
+  {
+    "id" : "f91e7efa-b601-4d98-9336-b7daa166c4c2",
+    "prId" : 3080,
+    "comments" : [
+      {
+        "id" : "a30f6a52-1941-44c9-be63-f560bd45dbf0",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Does this really need to be a `case class`?\r\n```suggestion\r\nprivate[logging] final class SimpleNamedLogger(name: String) extends NamedLogger {\r\n```",
+        "createdAt" : "2019-10-03T14:14:03Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b9fadead-1f68-4e24-af50-10daa1ad09c4",
+        "parentId" : "a30f6a52-1941-44c9-be63-f560bd45dbf0",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Also worth considering calling this a `SimpleNamedLoggerFactory`.",
+        "createdAt" : "2019-10-03T14:15:07Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d223484f-de15-4fd1-a121-94d4b3342763",
+        "parentId" : "a30f6a52-1941-44c9-be63-f560bd45dbf0",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "Changing to regular final class instead and renaming.",
+        "createdAt" : "2019-10-03T15:05:15Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d95f1ee782ebcf961b9c14dc7408e26e2e9e470e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,55 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.common.logging\n+\n+import org.slf4j.{Logger, LoggerFactory}\n+\n+/**\n+  * NamedLogger augments a regular class-based slf4j logger with one annotated with a \"name\" where the name provides\n+  * human readable context identifying a class instance, e.g. which participant in a set of participants has logged\n+  * a particular message.\n+  *\n+  * The name can be constructed in a nested, left-to-right append manner.\n+  */\n+trait NamedLogger {\n+\n+  /** Name for the logger. Can be empty. */\n+  val name: String\n+\n+  /** Augment the name with another sub-name. Useful when transitioning from one caller to one specific named callee */\n+  def append(subName: String): NamedLogger\n+\n+  def forParticipant(id: String): NamedLogger = append(s\"participant/$id\")\n+\n+  private[logging] def getLogger(fullName: String): Logger\n+\n+  /** get a loggers in factory methods\n+    *\n+    * Sometimes, the NamedLogging trait can not be used, e.g. in a factory method. In these\n+    * cases, a logger can be created using this function.\n+    */\n+  def getLogger(klass: Class[_]): Logger = {\n+    val fullName = Array(klass.getName, name)\n+      .filterNot(_.isEmpty)\n+      .mkString(\":\")\n+    getLogger(fullName)\n+  }\n+\n+}\n+\n+// Named Logger implementation\n+private[logging] case class SimpleNamedLogger(name: String) extends NamedLogger {"
+  },
+  {
+    "id" : "6c55ea73-1c58-4f85-bc7a-343021809467",
+    "prId" : 3080,
+    "comments" : [
+      {
+        "id" : "48ea8819-a812-4e01-b980-085c34571449",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Not really a logger though, but rather a factory of loggers.\r\n```suggestion\r\ntrait NamedLoggerFactory {\r\n```\r\nI would also suggest being explicit about this when naming the instances around the codebase (i.e. `loggerFactory` rather than `namedLogger`).",
+        "createdAt" : "2019-10-03T14:15:31Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bcc92bcf-5bf7-4925-9ab4-814195253952",
+        "parentId" : "48ea8819-a812-4e01-b980-085c34571449",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "👍 ",
+        "createdAt" : "2019-10-03T15:05:25Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d95f1ee782ebcf961b9c14dc7408e26e2e9e470e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,55 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.common.logging\n+\n+import org.slf4j.{Logger, LoggerFactory}\n+\n+/**\n+  * NamedLogger augments a regular class-based slf4j logger with one annotated with a \"name\" where the name provides\n+  * human readable context identifying a class instance, e.g. which participant in a set of participants has logged\n+  * a particular message.\n+  *\n+  * The name can be constructed in a nested, left-to-right append manner.\n+  */\n+trait NamedLogger {"
+  }
+]

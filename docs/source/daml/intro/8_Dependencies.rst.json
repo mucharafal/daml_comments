@@ -1,0 +1,212 @@
+[
+  {
+    "id" : "a6ff82ab-2806-417e-99a9-2f96ea0aabc9",
+    "prId" : 7506,
+    "comments" : [
+      {
+        "id" : "13ebdeff-a27d-479f-81be-b1e24373d032",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "They really only rely on `.hi` files. `.daml` files are completely ignored. `.hie` files are only used for cross-SDK goto definition which only works for daml-stdlib/daml-prim so they might as well be ignored as well.",
+        "createdAt" : "2020-09-29T12:52:20Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3651b25c-a662-478b-864f-e1c7de353edc",
+        "parentId" : "13ebdeff-a27d-479f-81be-b1e24373d032",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "Did not realise that only worked for daml-stdlib/daml-prim . I thought it worked for ``dependencies`` in general, but fair enough. removed it.",
+        "createdAt" : "2020-09-29T13:11:26Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bbae240e40255c19a1415b4c9bd363fdf8d29bf9",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,86 @@\n+.. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+8 Working with Dependencies\n+===========================\n+\n+The application from Chapter 7 is a complete and secure model for atomic swaps of assets, but there is plenty of room for improvement. However, one can't implement all feature before going live with an application so it's important to understand way to change already running code. There are fundamentally two types of change one may want to make:\n+\n+1. Upgrades, which change existing logic. For example, one might want the ``Asset`` template to have multiple signatories.\n+2. Extensions, which merely add new functionality though additional templates.\n+\n+Upgrades are covered in their own own section outside this introduction to DAML: :doc:`upgrade/index` so in this section we will extend the chapter 7 model with a simple second workflow: A multi-leg trade. In doing so, you'll learn about:\n+\n+- The software architecture of the DAML Stack\n+- Dependencies and Data Dependencies\n+- Identifiers\n+\n+Since we are extending chapter 7, the setup for this chapter is slightly more complex:\n+\n+#. In a base directory, load the chapter 7 project using ``daml new 7Composing --template daml-intro-7``. The directory ``7Composing`` here is important as it'll be referenced by the other project we are creating.\n+#. In the same directory, load the chapter 8 project using ``daml new 8Dependencies --template daml-intro-8``.\n+\n+``8Dependencies`` contains a new module ``Intro.Asset.MultiTrade`` and a corresponding test module ``Test.Intro.Asset.MultiTrade``.\n+\n+DAR, DALF, DAML-LF, and the Engine\n+----------------------------------\n+\n+In :doc:`7_Composing` you already learnt a little about projects, DAML-LF, DAR files, and dependencies. In this chapter we will actually need to have dependencies from the chapter 8 project to the chapter 7 project so it's time to learn a little more about all this.\n+\n+Let's have a look inside the DAR file of chapter 7. DAR files, like Java JAR files are just ZIP archives, but the DAML SDK also has a utility to inspect DARs out of the box:\n+\n+#. Navigate into the ``7Composing`` directory.\n+#. Build using ``daml build -o assets.dar``\n+#. Run ``daml damlc inspect-dar assets.dar``\n+\n+You'll get a whole lot of output. Under the header \"DAR archive contains the following files:\" you'll see that the DAR contains\n+\n+#. ``*.dalf`` files for the project and all its dependencies\n+#. The original DAML source code\n+#. ``*.hi`` and ``*.hie`` files for each ``*.daml`` file\n+#. Some meta-inf and config files\n+\n+The first file is something like ``7Composing-1.0.0-887056cbb313b94ab9a6caf34f7fe4fbfe19cb0c861e50d1594c665567ab7625.dalf`` which is the actual compiled package for the project. ``*.dalf`` files contain DAML-LF, which is DAML's intermediate language. The file contents are a binary encoded protobuf message from the `daml-lf schema <https://github.com/digital-asset/daml/tree/master/daml-lf/archive>`_.  DAML-LF is evaluated on the Ledger by the DAML Engine, which is a JVM component that is part of tools like the IDE's Script runner, the Sandbox, or proper production ledgers. If DAML-LF is to DAML what Java Bytecode is to Java, the DAML Engine is to DAML what the JVM is to Java.\n+\n+Hashes and Identifiers\n+----------------------\n+\n+Under the heading \"DAR archive contains the following packages:\" you get a similar looking list of package names, paired with only the long random string repeated. That hexadecimal string, ``887056cbb313b94ab9a6caf34f7fe4fbfe19cb0c861e50d1594c665567ab7625`` in this case, is the package hash and the primary and only identifier for a package that's guaranteed to be available and preserved. Meta information like name (\"7Composing\") and version (\"1.0.0\") help make it human readable but should not be relied upon. You may not always get DAR files from your compiler, but be loading them from a running Ledger, or get them from an artifact repository.\n+\n+We can see this in action. When a DAR file gets deployed to a ledger, not all meta information is preserved. \n+\n+#. Note down your main package hash from running ``inspect-dar`` above\n+#. Start the project using ``daml start``\n+#. Open a second terminal and run ``daml ledger fetch-dar --host localhost --port 6865 --main-package-id \"887056cbb313b94ab9a6caf34f7fe4fbfe19cb0c861e50d1594c665567ab7625\" -o assets_ledger.dar``, making sure to replace the hash with the appropriate one.\n+#. Run ``daml damlc inspect-dar assets_ledger.dar``\n+\n+You'll notice two things. Firstly, a lot of the dependencies have lost their names, they are now only identifiable by hash. We could of course also create a second project ``7Composing-1.0.0`` with completely different contents so even when name and version are available, package hash is the only safe identifier.\n+\n+That's why over the Ledger API, all types, like templates and records are identified by the triple ``(entity name, module name, package hash)``. Your client application should know the package hashes it wants to interact with. To aid that, ``inspect-dar`` also provides a machine-readable format for the information it emits: ``daml damlc inspect-dar --json assets_ledger.dar``. The ``main_package_id`` field in the resulting JSON payload is the package hash of our project.\n+\n+Secondly, you'll notice that all the ``*.daml``, ``*.hi`` and ``*.hie`` files are gone. This leads us to data dependencies.\n+\n+Dependencies and Data Dependencies\n+----------------------------------\n+\n+Dependencies under the ``daml.yaml`` ``dependencies`` group rely on the ``*.hi``, ``*.hie``, and ``*.daml`` files. The information in these files is crucial for dependencies like the Standard Library, which provide functions, types and typeclasses."
+  },
+  {
+    "id" : "cf7a31cb-df71-40cc-a181-b7b7fa53fdf0",
+    "prId" : 7506,
+    "comments" : [
+      {
+        "id" : "bc83e50b-02e1-44cb-9bd2-001d93b1e910",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The part about `Eq` is confusing. You are explaining that it can have changed and now you have two different functions. But first, that doesn’t actually work in `dependencies`, they don’t work across SDK versions at all and second if they actually changed than you also get two different versions in `data-dependencies`.",
+        "createdAt" : "2020-09-29T12:56:42Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "27d4252e-131b-4f18-b2a3-8997a40f7997",
+        "parentId" : "bc83e50b-02e1-44cb-9bd2-001d93b1e910",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "Made it a bit vaguer. ",
+        "createdAt" : "2020-09-29T13:11:40Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bbae240e40255c19a1415b4c9bd363fdf8d29bf9",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,86 @@\n+.. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+8 Working with Dependencies\n+===========================\n+\n+The application from Chapter 7 is a complete and secure model for atomic swaps of assets, but there is plenty of room for improvement. However, one can't implement all feature before going live with an application so it's important to understand way to change already running code. There are fundamentally two types of change one may want to make:\n+\n+1. Upgrades, which change existing logic. For example, one might want the ``Asset`` template to have multiple signatories.\n+2. Extensions, which merely add new functionality though additional templates.\n+\n+Upgrades are covered in their own own section outside this introduction to DAML: :doc:`upgrade/index` so in this section we will extend the chapter 7 model with a simple second workflow: A multi-leg trade. In doing so, you'll learn about:\n+\n+- The software architecture of the DAML Stack\n+- Dependencies and Data Dependencies\n+- Identifiers\n+\n+Since we are extending chapter 7, the setup for this chapter is slightly more complex:\n+\n+#. In a base directory, load the chapter 7 project using ``daml new 7Composing --template daml-intro-7``. The directory ``7Composing`` here is important as it'll be referenced by the other project we are creating.\n+#. In the same directory, load the chapter 8 project using ``daml new 8Dependencies --template daml-intro-8``.\n+\n+``8Dependencies`` contains a new module ``Intro.Asset.MultiTrade`` and a corresponding test module ``Test.Intro.Asset.MultiTrade``.\n+\n+DAR, DALF, DAML-LF, and the Engine\n+----------------------------------\n+\n+In :doc:`7_Composing` you already learnt a little about projects, DAML-LF, DAR files, and dependencies. In this chapter we will actually need to have dependencies from the chapter 8 project to the chapter 7 project so it's time to learn a little more about all this.\n+\n+Let's have a look inside the DAR file of chapter 7. DAR files, like Java JAR files are just ZIP archives, but the DAML SDK also has a utility to inspect DARs out of the box:\n+\n+#. Navigate into the ``7Composing`` directory.\n+#. Build using ``daml build -o assets.dar``\n+#. Run ``daml damlc inspect-dar assets.dar``\n+\n+You'll get a whole lot of output. Under the header \"DAR archive contains the following files:\" you'll see that the DAR contains\n+\n+#. ``*.dalf`` files for the project and all its dependencies\n+#. The original DAML source code\n+#. ``*.hi`` and ``*.hie`` files for each ``*.daml`` file\n+#. Some meta-inf and config files\n+\n+The first file is something like ``7Composing-1.0.0-887056cbb313b94ab9a6caf34f7fe4fbfe19cb0c861e50d1594c665567ab7625.dalf`` which is the actual compiled package for the project. ``*.dalf`` files contain DAML-LF, which is DAML's intermediate language. The file contents are a binary encoded protobuf message from the `daml-lf schema <https://github.com/digital-asset/daml/tree/master/daml-lf/archive>`_.  DAML-LF is evaluated on the Ledger by the DAML Engine, which is a JVM component that is part of tools like the IDE's Script runner, the Sandbox, or proper production ledgers. If DAML-LF is to DAML what Java Bytecode is to Java, the DAML Engine is to DAML what the JVM is to Java.\n+\n+Hashes and Identifiers\n+----------------------\n+\n+Under the heading \"DAR archive contains the following packages:\" you get a similar looking list of package names, paired with only the long random string repeated. That hexadecimal string, ``887056cbb313b94ab9a6caf34f7fe4fbfe19cb0c861e50d1594c665567ab7625`` in this case, is the package hash and the primary and only identifier for a package that's guaranteed to be available and preserved. Meta information like name (\"7Composing\") and version (\"1.0.0\") help make it human readable but should not be relied upon. You may not always get DAR files from your compiler, but be loading them from a running Ledger, or get them from an artifact repository.\n+\n+We can see this in action. When a DAR file gets deployed to a ledger, not all meta information is preserved. \n+\n+#. Note down your main package hash from running ``inspect-dar`` above\n+#. Start the project using ``daml start``\n+#. Open a second terminal and run ``daml ledger fetch-dar --host localhost --port 6865 --main-package-id \"887056cbb313b94ab9a6caf34f7fe4fbfe19cb0c861e50d1594c665567ab7625\" -o assets_ledger.dar``, making sure to replace the hash with the appropriate one.\n+#. Run ``daml damlc inspect-dar assets_ledger.dar``\n+\n+You'll notice two things. Firstly, a lot of the dependencies have lost their names, they are now only identifiable by hash. We could of course also create a second project ``7Composing-1.0.0`` with completely different contents so even when name and version are available, package hash is the only safe identifier.\n+\n+That's why over the Ledger API, all types, like templates and records are identified by the triple ``(entity name, module name, package hash)``. Your client application should know the package hashes it wants to interact with. To aid that, ``inspect-dar`` also provides a machine-readable format for the information it emits: ``daml damlc inspect-dar --json assets_ledger.dar``. The ``main_package_id`` field in the resulting JSON payload is the package hash of our project.\n+\n+Secondly, you'll notice that all the ``*.daml``, ``*.hi`` and ``*.hie`` files are gone. This leads us to data dependencies.\n+\n+Dependencies and Data Dependencies\n+----------------------------------\n+\n+Dependencies under the ``daml.yaml`` ``dependencies`` group rely on the ``*.hi``, ``*.hie``, and ``*.daml`` files. The information in these files is crucial for dependencies like the Standard Library, which provide functions, types and typeclasses.\n+\n+However, as you can see above, this information isn't preserved. Furthermore, preserving this information may not even be desireable. Imagine we had built ``7Composing`` with SDK 1.100.0, and are building ``8Dependencies`` with SDK 1.101.0. An inbuilt typeclass like ``Eq`` may have changed in between so we now have two different ``==`` functions. The one from the 1.100.0 Standard Library and the one from 1.101.0. This gets messy fast, which is why the SDK does not support ``dependencies`` across SDK versions. For dependencies on contract models that were fetched from a ledger, or come from an older SDK version, there is a simpler kind of dependency called ``data-dependencies``. The syntax for ``data-dependencies`` is the same, but they only rely on the \"binary\" ``*.dalf`` files. The name tries to confer that the main purpose of such dependencies is to handle data: Records, Choices, Templates. The stuff one needs to use contract composability across projects."
+  },
+  {
+    "id" : "740b24d7-65be-44e4-b9b5-a1a5ab69f1d7",
+    "prId" : 7506,
+    "comments" : [
+      {
+        "id" : "bbdd8ac5-95f4-4fbb-9dd6-4ecfcef174af",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "There is no template called `daml-intro-8`.",
+        "createdAt" : "2020-09-29T14:21:44Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ebd44981-7161-4d5b-8f04-b8d5a7a0e8b9",
+        "parentId" : "bbdd8ac5-95f4-4fbb-9dd6-4ecfcef174af",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "There should be in ``daml-head`` from this branch.",
+        "createdAt" : "2020-09-29T14:25:19Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7ec9fcdc-c38f-4cd1-90cb-1aedc654065c",
+        "parentId" : "bbdd8ac5-95f4-4fbb-9dd6-4ecfcef174af",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "No, you have `daml-intro-8-assets` and `daml-intro-8-upgrade` but no `daml-intro-8`.",
+        "createdAt" : "2020-09-29T14:27:02Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "208b3dad-696d-4487-bd0c-19f64ada36b6",
+        "parentId" : "bbdd8ac5-95f4-4fbb-9dd6-4ecfcef174af",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "I did in the previous version which was about upgrading, but I changed that. I'm puzzled why you still see the old templates.",
+        "createdAt" : "2020-09-29T14:28:55Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "aa3120ab-c2d7-462f-b22a-98f14a358f5a",
+        "parentId" : "bbdd8ac5-95f4-4fbb-9dd6-4ecfcef174af",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "duh, I forgot to pull :facepalm: ",
+        "createdAt" : "2020-09-29T14:29:57Z",
+        "updatedAt" : "2020-09-29T15:50:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bbae240e40255c19a1415b4c9bd363fdf8d29bf9",
+    "line" : 21,
+    "diffHunk" : "@@ -0,0 +1,86 @@\n+.. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+8 Working with Dependencies\n+===========================\n+\n+The application from Chapter 7 is a complete and secure model for atomic swaps of assets, but there is plenty of room for improvement. However, one can't implement all feature before going live with an application so it's important to understand way to change already running code. There are fundamentally two types of change one may want to make:\n+\n+1. Upgrades, which change existing logic. For example, one might want the ``Asset`` template to have multiple signatories.\n+2. Extensions, which merely add new functionality though additional templates.\n+\n+Upgrades are covered in their own own section outside this introduction to DAML: :doc:`/upgrade/index` so in this section we will extend the chapter 7 model with a simple second workflow: A multi-leg trade. In doing so, you'll learn about:\n+\n+- The software architecture of the DAML Stack\n+- Dependencies and Data Dependencies\n+- Identifiers\n+\n+Since we are extending chapter 7, the setup for this chapter is slightly more complex:\n+\n+#. In a base directory, load the chapter 7 project using ``daml new 7Composing --template daml-intro-7``. The directory ``7Composing`` here is important as it'll be referenced by the other project we are creating.\n+#. In the same directory, load the chapter 8 project using ``daml new 8Dependencies --template daml-intro-8``."
+  }
+]

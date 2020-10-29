@@ -1,0 +1,503 @@
+[
+  {
+    "id" : "c86540aa-d9a9-4de6-945c-b0556f6ddfaa",
+    "prId" : 1967,
+    "comments" : [
+      {
+        "id" : "66b2d69f-9ec3-420e-b339-950432acefeb",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "`LanguageVersion.Major` is a synonym for `LanguageMajorVersion`, and similar for Minor, which you may or may not wish to use as an alternative shortcut. (I'm not particularly attached to any style besides \"don't be shy about renaming imports just because they're not in Java\")",
+        "createdAt" : "2019-07-02T13:16:28Z",
+        "updatedAt" : "2019-07-05T08:39:36Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5ab26f081f43a184ed21982c7e26995630d1f49e",
+    "line" : 7,
+    "diffHunk" : "@@ -44,6 +44,12 @@ import org.scalatest.Inside._\n import org.scalatest._\n import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n import scalaz.syntax.tag._\n+import com.digitalasset.daml.lf.language.{\n+  LanguageVersion,\n+  LanguageMajorVersion => LMajV,\n+  LanguageMinorVersion => LMinV"
+  },
+  {
+    "id" : "84bf0123-6539-4a75-a031-1e89f6b654de",
+    "prId" : 563,
+    "comments" : [
+      {
+        "id" : "96d821cd-118d-45e8-b94b-dcc08b9a48d4",
+        "parentId" : null,
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "why the random command id here?",
+        "createdAt" : "2019-04-18T07:44:16Z",
+        "updatedAt" : "2019-04-18T15:22:23Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "755e08ac-9c21-4450-adbf-c475b8e544c1",
+        "parentId" : "96d821cd-118d-45e8-b94b-dcc08b9a48d4",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I removed the UUIDs.",
+        "createdAt" : "2019-04-18T12:31:53Z",
+        "updatedAt" : "2019-04-18T15:22:23Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "772213d170fb4591ce3ca5794a3bc094e5ca2bff",
+    "line" : null,
+    "diffHunk" : "@@ -736,6 +744,93 @@ abstract class CommandTransactionChecks\n         }\n       }\n     }\n+    \"client sends a CreateAndExerciseCommand\" should {\n+      val validCreateAndExercise = CreateAndExerciseCommand(\n+        Some(templateIds.dummy),\n+        Some(Record(fields = List(RecordField(value = Some(Value(Value.Sum.Party(party))))))),\n+        \"DummyChoice1\",\n+        Some(Value(Value.Sum.Record(Record())))\n+      )\n+      val ledgerEnd =\n+        LedgerOffset(LedgerOffset.Value.Boundary(LedgerOffset.LedgerBoundary.LEDGER_END))\n+      val partyFilter = TransactionFilter(Map(party -> Filters(None)))\n+\n+      def newRequest(cmdId: String) = submitRequest\n+        .update(_.commands.commands := Seq[Command](\n+          Command(Command.Command.CreateAndExercise(validCreateAndExercise))))\n+        .update(_.commands.ledgerId := config.getLedgerId)\n+        .update(_.commands.commandId := cmdId)\n+\n+      \"process valid commands successfully\" in allFixtures{ c =>\n+        val cmdId = UUID.randomUUID().toString"
+  },
+  {
+    "id" : "94e3ace2-c449-4de3-b07f-ed732ecade13",
+    "prId" : 405,
+    "comments" : [
+      {
+        "id" : "1bb80347-d69d-4121-8287-56db3959ecae",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "`cid` is a bad name... Can be Contract ID or Command ID, but I guess it is Command ID in this case:\r\n```\r\nprivate def cid(commandId: String) = s\"$commandId\"\r\n```\r\n",
+        "createdAt" : "2019-04-19T14:49:55Z",
+        "updatedAt" : "2019-04-19T14:49:55Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ba845c61-c011-4876-b24d-1e279469caf4",
+        "parentId" : "1bb80347-d69d-4121-8287-56db3959ecae",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "This function precedes this PR; do you want me to rename it?",
+        "createdAt" : "2019-04-19T15:37:03Z",
+        "updatedAt" : "2019-04-19T15:37:03Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "38ab46d8b26e1e46a78717ee7131e4cc857bc971",
+    "line" : 28,
+    "diffHunk" : "@@ -423,6 +426,98 @@ abstract class CommandTransactionChecks\n         }\n       }\n \n+      \"permit fetching a divulged contract\" in forAllMatchingFixtures {\n+        case TestFixture(SandboxInMemory, ctx) =>\n+        def pf(label: String, party: String) =\n+          RecordField(label, Some(Value(Value.Sum.Party(party))))\n+        val odArgs = Seq(pf(\"owner\", owner), pf(\"delegate\", delegate))\n+        val delegatedCreate = simpleCreate(\n+          ctx,\n+          cid(\"SDVl3\"),"
+  },
+  {
+    "id" : "99dcfbe6-e5e7-4fc3-adb4-2e6db57cf875",
+    "prId" : 405,
+    "comments" : [
+      {
+        "id" : "ab14bee7-61b7-4777-84c3-2e8130594c1a",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "The test case is `permit fetching a divulged contract` why are we testing for failures here (`// Exercise a choice that is supposed to fail.`)? Is that because the `owner` delegated it to the `delegate`? Should not we test that the `delegate` can anctually exercise `ShowIt`?\r\n",
+        "createdAt" : "2019-04-19T15:02:32Z",
+        "updatedAt" : "2019-04-19T15:06:06Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4121475c-e9b2-421f-a746-cbedfb0154b5",
+        "parentId" : "ab14bee7-61b7-4777-84c3-2e8130594c1a",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "We're testing that the result is `Code.OK`; see a few lines below.",
+        "createdAt" : "2019-04-19T15:10:20Z",
+        "updatedAt" : "2019-04-19T15:10:20Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ea4ce8a1-c6fd-4f5f-8657-f64b5dd1eaa7",
+        "parentId" : "ab14bee7-61b7-4777-84c3-2e8130594c1a",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I mean it is hard to understand what is being tested here. `failingExercise` with `Code.OK`... does it meant that the exercise actually was successful?\r\n\r\nI mean this is the original owner says `ShowIt` and it is successfull, right? Because it is `Code.OK`\r\n```\r\n          showResult <- failingExercise(\r\n            ctx,\r\n            cid(\"SDVl6\"),\r\n            submitter = owner,\r\n            template = templateIds.showDelegated,\r\n            contractId = showIdEv.contractId,\r\n            choice = \"ShowIt\",\r\n            arg = Value(Value.Sum.Record(fetchArg)),\r\n            Code.OK,\r\n            pattern = \"\"\r\n          )\r\n```\r\nand this is delegate fetches it:\r\n```\r\n          fetchResult <- failingExercise(\r\n            ctx,\r\n            cid(\"SDVl7\"),\r\n            submitter = delegate,\r\n            template = templateIds.delegation,\r\n            contractId = delegationEv.contractId,\r\n            choice = \"FetchDelegated\",\r\n            arg = Value(Value.Sum.Record(fetchArg)),\r\n            Code.OK,\r\n            pattern = \"\"\r\n          )\r\n```\r\nand it is again successful because of the `Code.OK`. And it does not matter that the function actually called `failingExercise` that is what confused me... It should be called `exerciseAssertReturnCode`... but I guess those functions were here before this change. `assertCommandFailsWithCode` is also poorly named, it should have been named `assertCommandCompletesWithCode`, we are using it to assert successful completions.",
+        "createdAt" : "2019-04-19T16:49:41Z",
+        "updatedAt" : "2019-04-19T16:57:59Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a16f910b-d03f-4282-a958-a5f45d792a92",
+        "parentId" : "ab14bee7-61b7-4777-84c3-2e8130594c1a",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Your understanding of what's going on is perfectly cromulent.",
+        "createdAt" : "2019-04-19T16:56:41Z",
+        "updatedAt" : "2019-04-19T16:56:41Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "38ab46d8b26e1e46a78717ee7131e4cc857bc971",
+    "line" : 51,
+    "diffHunk" : "@@ -423,6 +426,98 @@ abstract class CommandTransactionChecks\n         }\n       }\n \n+      \"permit fetching a divulged contract\" in forAllMatchingFixtures {\n+        case TestFixture(SandboxInMemory, ctx) =>\n+        def pf(label: String, party: String) =\n+          RecordField(label, Some(Value(Value.Sum.Party(party))))\n+        val odArgs = Seq(pf(\"owner\", owner), pf(\"delegate\", delegate))\n+        val delegatedCreate = simpleCreate(\n+          ctx,\n+          cid(\"SDVl3\"),\n+          owner,\n+          templateIds.delegated,\n+          Record(Some(templateIds.delegated), Seq(pf(\"owner\", owner))))\n+        val delegationCreate = simpleCreate(\n+          ctx,\n+          cid(\"SDVl4\"),\n+          owner,\n+          templateIds.delegation,\n+          Record(Some(templateIds.delegation), odArgs))\n+        val showIdCreate = simpleCreate(\n+          ctx,\n+          cid(\"SDVl5\"),\n+          owner,\n+          templateIds.showDelegated,\n+          Record(Some(templateIds.showDelegated), odArgs))\n+        val exerciseOfFetch = for {\n+          delegatedEv <- delegatedCreate\n+          delegationEv <- delegationCreate\n+          showIdEv <- showIdCreate\n+          fetchArg = Record(\n+            None,\n+            Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+          showResult <- failingExercise("
+  },
+  {
+    "id" : "c70940ca-34db-406c-9eb9-af55d3c29634",
+    "prId" : 405,
+    "comments" : [
+      {
+        "id" : "9f16509b-0c87-4d4a-b25a-c589db92dbc8",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Maybe a comment here saying the `delegate` cannot fetch Delegation contracts, because it is not an owner.\r\nBut yeah, I don't see that we are testing anything that `delegate` can do in this test.",
+        "createdAt" : "2019-04-19T15:08:38Z",
+        "updatedAt" : "2019-04-19T15:08:38Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b1ed1e44-edc6-4a04-9d42-7ad3f12e45fa",
+        "parentId" : "9f16509b-0c87-4d4a-b25a-c589db92dbc8",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "`delegate` _can_ fetch because it has been divulged to it in the `ShowIt` exercise that owner did in the previous transaction.",
+        "createdAt" : "2019-04-19T15:10:57Z",
+        "updatedAt" : "2019-04-19T15:10:57Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "38ab46d8b26e1e46a78717ee7131e4cc857bc971",
+    "line" : 62,
+    "diffHunk" : "@@ -423,6 +426,98 @@ abstract class CommandTransactionChecks\n         }\n       }\n \n+      \"permit fetching a divulged contract\" in forAllMatchingFixtures {\n+        case TestFixture(SandboxInMemory, ctx) =>\n+        def pf(label: String, party: String) =\n+          RecordField(label, Some(Value(Value.Sum.Party(party))))\n+        val odArgs = Seq(pf(\"owner\", owner), pf(\"delegate\", delegate))\n+        val delegatedCreate = simpleCreate(\n+          ctx,\n+          cid(\"SDVl3\"),\n+          owner,\n+          templateIds.delegated,\n+          Record(Some(templateIds.delegated), Seq(pf(\"owner\", owner))))\n+        val delegationCreate = simpleCreate(\n+          ctx,\n+          cid(\"SDVl4\"),\n+          owner,\n+          templateIds.delegation,\n+          Record(Some(templateIds.delegation), odArgs))\n+        val showIdCreate = simpleCreate(\n+          ctx,\n+          cid(\"SDVl5\"),\n+          owner,\n+          templateIds.showDelegated,\n+          Record(Some(templateIds.showDelegated), odArgs))\n+        val exerciseOfFetch = for {\n+          delegatedEv <- delegatedCreate\n+          delegationEv <- delegationCreate\n+          showIdEv <- showIdCreate\n+          fetchArg = Record(\n+            None,\n+            Seq(RecordField(\"\", Some(Value(Value.Sum.ContractId(delegatedEv.contractId))))))\n+          showResult <- failingExercise(\n+            ctx,\n+            cid(\"SDVl6\"),\n+            submitter = owner,\n+            template = templateIds.showDelegated,\n+            contractId = showIdEv.contractId,\n+            choice = \"ShowIt\",\n+            arg = Value(Value.Sum.Record(fetchArg)),\n+            Code.OK,\n+            pattern = \"\"\n+          )\n+          fetchResult <- failingExercise("
+  },
+  {
+    "id" : "f4eb4c9a-6309-46bc-9297-4d0a5da72039",
+    "prId" : 339,
+    "comments" : [
+      {
+        "id" : "820cdde2-bc20-41b9-8763-30a9a0e342f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "body" : "@gaboraranyossy-da do you have an idea on why this might happen?",
+        "createdAt" : "2019-04-09T17:01:08Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0631e5e0-30ca-4a00-8610-2092d21c530c",
+        "parentId" : "820cdde2-bc20-41b9-8763-30a9a0e342f5",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "debugging it locally it seems that this call doesn't return: https://github.com/digital-asset/daml/blob/05e691f55852fbb207f0e43cf23bb95b95866ba3/ledger/sandbox/src/main/scala/com/digitalasset/platform/sandbox/stores/ledger/CommandExecutorImpl.scala#L31 It probably dies on the ExecutionContext. ",
+        "createdAt" : "2019-04-10T07:59:23Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4d6842fac53183965c2a96a4cf26d31218482340",
+    "line" : 352,
+    "diffHunk" : "@@ -220,22 +209,24 @@ class CommandTransactionChecks(\n         ) // expected args\n       }\n \n-      // TODO An equivalent of this in TransactionIT tests this with a lower number of commands.\n-      // This can be removed once we can raise the command limit there.\n-      \"accept huge submissions with a large number of commands\" in {\n+      /*\n+       * TODO(FM) for absolutely mysterious reasons this times out, but the equivalent one in TransactionServiceIT"
+  },
+  {
+    "id" : "b41e8a55-6537-4f45-9d14-1c491200acd2",
+    "prId" : 339,
+    "comments" : [
+      {
+        "id" : "ac2f2cd0-0212-4b2e-9d10-dde4fd927180",
+        "parentId" : null,
+        "author" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "body" : "@gaboraranyossy-da do you have an idea on why this might happe?",
+        "createdAt" : "2019-04-09T17:01:23Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e29efa2b-4048-4573-9eae-c55313328ef8",
+        "parentId" : "ac2f2cd0-0212-4b2e-9d10-dde4fd927180",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "I need more context on this, let's chat when you have time.",
+        "createdAt" : "2019-04-10T08:01:58Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4d6842fac53183965c2a96a4cf26d31218482340",
+    "line" : 1732,
+    "diffHunk" : "@@ -1161,9 +944,254 @@ class CommandTransactionChecks(\n       exercise.actingParties should contain(\"party\")\n       exercise.getChoiceArgument.getRecord.fields shouldEqual expectedExerciseFields\n       // check that we have the create\n-      val create = getHead(createdEventsInTreeNodes(exercise.childEventIds.map(tx.eventsById)))\n+      val create = ctx.testingHelpers.getHead(ctx.testingHelpers.createdEventsInTreeNodes(exercise.childEventIds.map(tx.eventsById)))\n       create.getCreateArguments.fields shouldEqual expectedCreateFields\n-//      expectedCreateFields\n-    })(_ => succeed)\n+      //    expectedCreateFields\n+      succeed\n+    }\n+  }\n+\n+  private def removeLabels(fields: Seq[RecordField]): Seq[RecordField] = {\n+    fields.map { f =>\n+      f.value match {\n+        case Some(Value(Value.Sum.Record(r))) =>\n+          RecordField(\"\", Some(Value(Value.Sum.Record(removeLabelsFromRecord(r)))))\n+        case other =>\n+          RecordField(\"\", other)\n+      }\n+    }\n+  }\n+\n+  private def removeLabelsFromRecord(r: Record): Record = {\n+    r.update(_.fields.modify(removeLabels))\n+  }\n+\n+  private def createAgreementFactory(ctx: LedgerContext, receiver: String, giver: String, commandId: String) = {\n+    submitRequestWithId(ctx, commandId)\n+        .update(\n+          _.commands.commands := List(\n+            Command(\n+              create(\n+                templateIds.agreementFactory,\n+                List(receiver -> receiver.asParty, giver -> giver.asParty)))),\n+          _.commands.party := giver\n+        )\n+  }\n+\n+  // Create a template instance and return the resulting create event.\n+  private def simpleCreateWithListener(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] = {\n+    for {\n+      tx <- ctx.testingHelpers.submitAndListenForSingleResultOfCommand(\n+        submitRequestWithId(ctx, cid(commandId))\n+            .update(\n+              _.commands.commands :=\n+                  List(CreateCommand(Some(template), Some(arg)).wrap),\n+              _.commands.party := submitter\n+            ),\n+        TransactionFilter(Map(listener -> Filters.defaultInstance))\n+      )\n+    } yield {\n+      ctx.testingHelpers.getHead(ctx.testingHelpers.createdEventsIn(tx))\n+    }\n+  }\n+\n+  // Create a template instance and return the resulting create event.\n+  private def simpleCreate(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] =\n+    simpleCreateWithListener(ctx, commandId, submitter, submitter, template, arg)\n+\n+  private def failingCreate(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      arg: Record,\n+      code: Code,\n+      pattern: String\n+  ): Future[Assertion] =\n+    assertCommandFailsWithCode(\n+      ctx,\n+      submitRequestWithId(ctx, cid(commandId))\n+          .update(\n+            _.commands.commands :=\n+                List(CreateCommand(Some(template), Some(arg)).wrap),\n+            _.commands.party := submitter\n+          ),\n+      code,\n+      pattern\n+    )\n+\n+  // Exercise a choice and return all resulting create events.\n+  private def simpleExerciseWithListener(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      contractId: String,\n+      choice: String,\n+      arg: Value\n+  ): Future[TransactionTree] = {\n+    ctx.testingHelpers.submitAndListenForSingleTreeResultOfCommand(\n+      submitRequestWithId(ctx, cid(commandId))\n+          .update(\n+            _.commands.commands :=\n+                List(ExerciseCommand(Some(template), contractId, choice, Some(arg)).wrap),\n+            _.commands.party := submitter\n+          ),\n+      TransactionFilter(Map(listener -> Filters.defaultInstance)),\n+      false\n+    )\n+  }\n+\n+  private def simpleCreateWithListenerForTransactions(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] = {\n+    for {\n+      tx <- ctx.testingHelpers.submitAndListenForSingleResultOfCommand(\n+        submitRequestWithId(ctx, cid(commandId))\n+            .update(\n+              _.commands.commands :=\n+                  List(CreateCommand(Some(template), Some(arg)).wrap),\n+              _.commands.party := submitter\n+            ),\n+        TransactionFilter(Map(listener -> Filters.defaultInstance))\n+      )\n+    } yield {\n+      ctx.testingHelpers.getHead(ctx.testingHelpers.createdEventsIn(tx))\n+    }\n+  }\n+\n+  private def transactionsFromsimpleCreate(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] =\n+    simpleCreateWithListenerForTransactions(ctx, commandId, submitter, submitter, template, arg)\n+\n+  private def submitAndListenForTransactionResultOfCommand(\n+      ctx: LedgerContext,\n+      command: SubmitRequest,\n+      transactionFilter: TransactionFilter,\n+      filterCid: Boolean = true): Future[Seq[Transaction]] = {\n+    submitAndListenForTransactionResultsOfCommand(ctx, command, transactionFilter, filterCid)\n+  }\n+\n+  private def submitAndListenForTransactionResultsOfCommand(\n+      ctx: LedgerContext,\n+      submitRequest: SubmitRequest,\n+      transactionFilter: TransactionFilter,\n+      filterCid: Boolean = true): Future[immutable.Seq[Transaction]] = {\n+    val commandId = submitRequest.getCommands.commandId\n+    for {\n+      txEndOffset <- ctx.testingHelpers.submitSuccessfullyAndReturnOffset(submitRequest)\n+      transactions <- listenForTransactionResultOfCommand(\n+        ctx,\n+        transactionFilter,\n+        if (filterCid) Some(commandId) else None,\n+        txEndOffset)\n+    } yield {\n+      transactions\n+    }\n+  }\n+\n+  private def listenForTransactionResultOfCommand(\n+      ctx: LedgerContext,\n+      transactionFilter: TransactionFilter,\n+      commandId: Option[String],\n+      txEndOffset: LedgerOffset): Future[immutable.Seq[Transaction]] = {\n+    ctx.transactionClient\n+        .getTransactions(\n+          txEndOffset,\n+          None,\n+          transactionFilter\n+        )\n+        .filter(x => commandId.fold(true)(cid => x.commandId == cid))\n+        .take(1)\n+        .takeWithin(3.seconds)\n+        .runWith(Sink.seq)\n+  }\n+\n+  private def simpleExerciseWithListenerForTransactions(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      contractId: String,\n+      choice: String,\n+      arg: Value\n+  ): Future[Seq[Transaction]] = {\n+    submitAndListenForTransactionResultOfCommand(\n+      ctx,\n+      submitRequestWithId(ctx, cid(commandId))\n+          .update(\n+            _.commands.commands :=\n+                List(ExerciseCommand(Some(template), contractId, choice, Some(arg)).wrap),\n+            _.commands.party := submitter\n+          ),\n+      TransactionFilter(Map(listener -> Filters.defaultInstance)),\n+      false\n+    )\n+  }\n+\n+  private def transactionsFromSimpleExercise(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      contractId: String,\n+      choice: String,\n+      arg: Value): Future[Seq[Transaction]] =\n+    simpleExerciseWithListenerForTransactions(\n+      ctx,\n+      commandId,\n+      submitter,\n+      submitter,\n+      template,\n+      contractId,\n+      choice,\n+      arg)\n+\n+  private def assertCommandFailsWithCode(\n+      ctx: LedgerContext,\n+      submitRequest: SubmitRequest,\n+      expectedErrorCode: Code,\n+      expectedMessageSubString: String): Future[Assertion] = {\n+    for {\n+      ledgerEnd <- ctx.transactionClient.getLedgerEnd\n+      completion <- submitCommand(ctx, submitRequest)\n+      // TODO(FM) in the contract keys test this hangs forever after expecting a failedExercise."
+  },
+  {
+    "id" : "27ea9e2c-c8a5-453d-8bc0-36eca6970711",
+    "prId" : 339,
+    "comments" : [
+      {
+        "id" : "3b8c244a-308a-491d-89a1-87ac5a0e894a",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "that's really sad ",
+        "createdAt" : "2019-04-11T06:50:59Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3198a882-208c-473e-974a-73a4f5fc8eb3",
+        "parentId" : "3b8c244a-308a-491d-89a1-87ac5a0e894a",
+        "author" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "body" : ":man_shrugging: ",
+        "createdAt" : "2019-04-11T07:47:32Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4d6842fac53183965c2a96a4cf26d31218482340",
+    "line" : 94,
+    "diffHunk" : "@@ -35,166 +30,173 @@ import com.digitalasset.ledger.api.v1.value.{\n   Value,\n   Variant\n }\n-import com.digitalasset.ledger.client.configuration.CommandClientConfiguration\n-import com.digitalasset.ledger.client.services.commands.{CommandClient, CompletionStreamElement}\n-import com.digitalasset.ledger.client.services.transactions.TransactionClient\n+import com.digitalasset.ledger.client.services.commands.CompletionStreamElement\n+import com.digitalasset.platform.apitesting.LedgerContextExtensions._\n import com.digitalasset.platform.participant.util.ValueConversions._\n-import com.digitalasset.platform.sandbox.TestTemplateIdentifiers\n-import com.digitalasset.platform.sandbox.utils.LedgerTestingHelpers\n-import com.google.protobuf.empty.Empty\n import com.google.rpc.code.Code\n-import io.grpc.Channel\n+import org.scalatest.Inside._\n import org.scalatest._\n-import org.scalatest.concurrent.ScalaFutures\n-import org.scalatest.time.{Seconds, Span}\n+import org.scalatest.concurrent.{AsyncTimeLimitedTests, ScalaFutures}\n \n import scala.collection.immutable\n+import scala.concurrent.Future\n import scala.concurrent.duration._\n-import scala.concurrent.{ExecutionContextExecutor, Future}\n-\n-@SuppressWarnings(\n-  Array(\n-    \"org.wartremover.warts.Any\",\n-    \"org.wartremover.warts.Option2Iterable\"\n-  ))\n-class CommandTransactionChecks(\n-    submitCommand: SubmitRequest => Future[Completion],\n-    instanceId: String,\n-    testPackageId: => String,\n-    ledgerIdOnServer: => String,\n-    channel: => Channel,\n-    timeProviderForClient: => TimeProvider,\n-    getMaterializer: => ActorMaterializer,\n-    getEsf: => ExecutionSequencerFactory)\n-    extends WordSpec\n-    with Matchers\n-    with OptionValues\n-    with ScalaFutures {\n-\n-  private implicit lazy val mat: ActorMaterializer = getMaterializer\n-  private implicit lazy val esf: ExecutionSequencerFactory = getEsf\n-\n-  private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global\n-  override implicit lazy val patienceConfig: PatienceConfig = PatienceConfig(Span(60L, Seconds))\n-\n-  private lazy val commandClient = newCommandClient()\n-\n-  private lazy val templateIds = new TestTemplateIdentifiers(testPackageId)\n+\n+// scalafmt cannot deal with this file"
+  },
+  {
+    "id" : "de3229d0-1e95-4464-bbe0-45588c7151b9",
+    "prId" : 339,
+    "comments" : [
+      {
+        "id" : "a759ffc4-1ea3-4ce5-a955-cca85c4ab619",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "can you please remove if not needed?",
+        "createdAt" : "2019-04-11T06:53:11Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "775951e3-9b43-4c9e-ae85-25538425fede",
+        "parentId" : "a759ffc4-1ea3-4ce5-a955-cca85c4ab619",
+        "author" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-04-11T07:49:30Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4d6842fac53183965c2a96a4cf26d31218482340",
+    "line" : null,
+    "diffHunk" : "@@ -692,215 +697,117 @@ class CommandTransactionChecks(\n                   RecordField(value = cid2.contractId.asContractId),\n                   RecordField(value = textKeyValue(alice, \"test-key-2\"))))))\n           )\n-        } yield ())(identity)\n+        } yield {\n+          succeed\n+        }\n       }\n-    }\n-  }\n \n-  private def createAgreementFactory(receiver: String, giver: String, commandId: String) = {\n-    submitRequestWithId(commandId)\n-      .update(\n-        _.commands.commands := List(\n-          Command(\n-            create(\n-              templateIds.agreementFactory,\n-              List(receiver -> receiver.asParty, giver -> giver.asParty)))),\n-        _.commands.party := giver\n-      )\n-  }\n-\n-  // Create a template instance and return the resulting create event.\n-  private def simpleCreateWithListener(\n-      commandId: String,\n-      submitter: String,\n-      listener: String,\n-      template: Identifier,\n-      arg: Record\n-  ): Future[CreatedEvent] = {\n-    for {\n-      tx <- submitAndListenForSingleResultOfCommand(\n-        submitRequestWithId(cid(commandId))\n-          .update(\n-            _.commands.commands :=\n-              List(CreateCommand(Some(template), Some(arg)).wrap),\n-            _.commands.party := submitter\n-          ),\n-        TransactionFilter(Map(listener -> Filters.defaultInstance))\n-      )\n-    } yield {\n-      getHead(createdEventsIn(tx))\n     }\n   }\n \n-  // Create a template instance and return the resulting create event.\n-  private def simpleCreate(\n-      commandId: String,\n-      submitter: String,\n-      template: Identifier,\n-      arg: Record\n-  ): Future[CreatedEvent] =\n-    simpleCreateWithListener(commandId, submitter, submitter, template, arg)\n+  private def cid(commandId: String) = s\"$commandId\"\n \n-  private def failingCreate(\n-      commandId: String,\n-      submitter: String,\n-      template: Identifier,\n-      arg: Record,\n-      code: Code,\n-      pattern: String\n-  ): Future[Assertion] =\n-    assertCommandFailsWithCode(\n-      submitRequestWithId(cid(commandId))\n-        .update(\n-          _.commands.commands :=\n-            List(CreateCommand(Some(template), Some(arg)).wrap),\n-          _.commands.party := submitter\n-        ),\n-      code,\n-      pattern\n-    )\n+  def submitRequestWithId(ctx: LedgerContext, commandId: String): SubmitRequest =\n+    M.submitRequest.update(\n+      _.commands.modify(_.copy(commandId = commandId, ledgerId = ctx.ledgerId)))\n \n-  // Exercise a choice and return all resulting create events.\n-  private def simpleExerciseWithListener(\n-      commandId: String,\n-      submitter: String,\n-      listener: String,\n-      template: Identifier,\n-      contractId: String,\n-      choice: String,\n-      arg: Value\n-  ): Future[TransactionTree] = {\n-    submitAndListenForSingleTreeResultOfCommand(\n-      submitRequestWithId(cid(commandId))\n-        .update(\n-          _.commands.commands :=\n-            List(ExerciseCommand(Some(template), contractId, choice, Some(arg)).wrap),\n-          _.commands.party := submitter\n-        ),\n-      TransactionFilter(Map(listener -> Filters.defaultInstance)),\n-      false\n-    )\n-  }\n+  private def createCommandWithId(ctx: LedgerContext, commandId: String) = {\n+    val reqWithId = submitRequestWithId(ctx, commandId)\n+    val arguments = List(\"operator\" -> \"party\".asParty)\n \n-  private def simpleCreateWithListenerForTransactions(\n-      commandId: String,\n-      submitter: String,\n-      listener: String,\n-      template: Identifier,\n-      arg: Record\n-  ): Future[CreatedEvent] = {\n-    for {\n-      tx <- submitAndListenForSingleResultOfCommand(\n-        submitRequestWithId(cid(commandId))\n-          .update(\n-            _.commands.commands :=\n-              List(CreateCommand(Some(template), Some(arg)).wrap),\n-            _.commands.party := submitter\n-          ),\n-        TransactionFilter(Map(listener -> Filters.defaultInstance))\n-      )\n-    } yield {\n-      getHead(createdEventsIn(tx))\n-    }\n+    reqWithId.update(\n+      _.commands.update(_.commands := dummyTemplates.map(i => Command(create(i, arguments)))))\n   }\n \n-  private def transactionsFromsimpleCreate(\n-      commandId: String,\n-      submitter: String,\n-      template: Identifier,\n-      arg: Record\n-  ): Future[CreatedEvent] =\n-    simpleCreateWithListenerForTransactions(commandId, submitter, submitter, template, arg)\n+  private def create(templateId: Identifier, arguments: immutable.Seq[(String, Value)]): Create = {\n+    Create(CreateCommand(Some(templateId), Some(arguments.asRecordOf(templateId))))\n+  }\n \n-  private def simpleExerciseWithListenerForTransactions(\n-      commandId: String,\n-      submitter: String,\n-      listener: String,\n-      template: Identifier,\n-      contractId: String,\n-      choice: String,\n-      arg: Value\n-  ): Future[Seq[Transaction]] = {\n-    submitAndListenForTransactionResultOfCommand(\n-      submitRequestWithId(cid(commandId))\n-        .update(\n-          _.commands.commands :=\n-            List(ExerciseCommand(Some(template), contractId, choice, Some(arg)).wrap),\n-          _.commands.party := submitter\n-        ),\n-      TransactionFilter(Map(listener -> Filters.defaultInstance)),\n-      false\n-    )\n+  private def listenForCompletionAsApplication(\n+      ctx: LedgerContext,\n+      applicationId: String,\n+      requestingParty: String,\n+      offset: LedgerOffset,\n+      commandIdToListenFor: String) = {\n+    ctx.commandClient(applicationId = applicationId).flatMap { commandClient =>\n+      commandClient\n+          .completionSource(List(requestingParty), offset)\n+          .collect {\n+            case CompletionStreamElement.CompletionElement(completion)\n+              if completion.commandId == commandIdToListenFor =>\n+              completion\n+          }\n+          .take(1)\n+          .takeWithin(3.seconds)\n+          .runWith(Sink.seq)\n+          .map(_.headOption)\n+    }\n   }\n \n-  private def transactionsFromSimpleExercise(\n-      commandId: String,\n-      submitter: String,\n-      template: Identifier,\n-      contractId: String,\n-      choice: String,\n-      arg: Value): Future[Seq[Transaction]] =\n-    simpleExerciseWithListenerForTransactions(\n-      commandId,\n-      submitter,\n-      submitter,\n-      template,\n-      contractId,\n-      choice,\n-      arg)\n+  private lazy val getAllContracts = M.transactionFilter\n \n-  def submitAndListenForTransactionResultOfCommand(\n-      command: SubmitRequest,\n-      transactionFilter: TransactionFilter,\n-      filterCid: Boolean = true): Future[Seq[Transaction]] = {\n-    submitAndListenForTransactionResultsOfCommand(command, transactionFilter, filterCid)\n+  private def createContracts(ctx: LedgerContext, commandId: String) = {\n+    val command = createCommandWithId(ctx, commandId)\n+    ctx.testingHelpers.submitAndListenForSingleResultOfCommand(command, getAllContracts)\n   }\n \n-  def submitAndListenForTransactionResultsOfCommand(\n-      submitRequest: SubmitRequest,\n-      transactionFilter: TransactionFilter,\n-      filterCid: Boolean = true): Future[immutable.Seq[Transaction]] = {\n-    val commandId = submitRequest.getCommands.commandId\n+  private def findCreatedEventInResultOf(\n+      ctx: LedgerContext,\n+      cid: String,\n+      templateToLookFor: Identifier): Future[CreatedEvent] = {\n     for {\n-      txEndOffset <- submitSuccessfullyAndReturnOffset(submitRequest)\n-      transactions <- listenForTransactionResultOfCommand(\n-        transactionFilter,\n-        if (filterCid) Some(commandId) else None,\n-        txEndOffset)\n+      tx <- createContracts(ctx, cid)\n     } yield {\n-      transactions\n+      ctx.testingHelpers.findCreatedEventIn(tx, templateToLookFor)\n     }\n   }\n \n-  def listenForTransactionResultOfCommand(\n-      transactionFilter: TransactionFilter,\n-      commandId: Option[String],\n-      txEndOffset: LedgerOffset): Future[immutable.Seq[Transaction]] = {\n-    transactionClient\n-      .getTransactions(\n-        txEndOffset,\n-        None,\n-        transactionFilter\n-      )\n-      .filter(x => commandId.fold(true)(cid => x.commandId == cid))\n-      .take(1)\n-      .takeWithin(3.seconds)\n-      .runWith(Sink.seq)\n+  private def requestToCallExerciseWithId(\n+      ctx: LedgerContext,\n+      factoryContractId: String,\n+      commandId: String) = {\n+    submitRequestWithId(ctx, commandId).update(\n+      _.commands.commands := List(\n+        ExerciseCommand(\n+          Some(templateIds.dummyFactory),\n+          factoryContractId,\n+          \"DummyFactoryCall\",\n+          Some(Value(Sum.Record(Record())))).wrap))\n+  }\n+\n+  /*"
+  },
+  {
+    "id" : "39f40d85-b66f-4587-91dc-cf3265228341",
+    "prId" : 339,
+    "comments" : [
+      {
+        "id" : "de521622-9370-4afd-8897-e96ae8fb95ed",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "is this still an issue?",
+        "createdAt" : "2019-04-11T06:54:16Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "454c108d-a851-4e99-95a8-6ac95fcb60bf",
+        "parentId" : "de521622-9370-4afd-8897-e96ae8fb95ed",
+        "author" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "body" : "yes, i'd merge for now though.",
+        "createdAt" : "2019-04-11T07:47:26Z",
+        "updatedAt" : "2019-04-11T07:49:30Z",
+        "lastEditedBy" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4d6842fac53183965c2a96a4cf26d31218482340",
+    "line" : 1734,
+    "diffHunk" : "@@ -1161,9 +958,254 @@ class CommandTransactionChecks(\n       exercise.actingParties should contain(\"party\")\n       exercise.getChoiceArgument.getRecord.fields shouldEqual expectedExerciseFields\n       // check that we have the create\n-      val create = getHead(createdEventsInTreeNodes(exercise.childEventIds.map(tx.eventsById)))\n+      val create = ctx.testingHelpers.getHead(ctx.testingHelpers.createdEventsInTreeNodes(exercise.childEventIds.map(tx.eventsById)))\n       create.getCreateArguments.fields shouldEqual expectedCreateFields\n-//      expectedCreateFields\n-    })(_ => succeed)\n+      //    expectedCreateFields\n+      succeed\n+    }\n+  }\n+\n+  private def removeLabels(fields: Seq[RecordField]): Seq[RecordField] = {\n+    fields.map { f =>\n+      f.value match {\n+        case Some(Value(Value.Sum.Record(r))) =>\n+          RecordField(\"\", Some(Value(Value.Sum.Record(removeLabelsFromRecord(r)))))\n+        case other =>\n+          RecordField(\"\", other)\n+      }\n+    }\n+  }\n+\n+  private def removeLabelsFromRecord(r: Record): Record = {\n+    r.update(_.fields.modify(removeLabels))\n+  }\n+\n+  private def createAgreementFactory(ctx: LedgerContext, receiver: String, giver: String, commandId: String) = {\n+    submitRequestWithId(ctx, commandId)\n+        .update(\n+          _.commands.commands := List(\n+            Command(\n+              create(\n+                templateIds.agreementFactory,\n+                List(receiver -> receiver.asParty, giver -> giver.asParty)))),\n+          _.commands.party := giver\n+        )\n+  }\n+\n+  // Create a template instance and return the resulting create event.\n+  private def simpleCreateWithListener(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] = {\n+    for {\n+      tx <- ctx.testingHelpers.submitAndListenForSingleResultOfCommand(\n+        submitRequestWithId(ctx, cid(commandId))\n+            .update(\n+              _.commands.commands :=\n+                  List(CreateCommand(Some(template), Some(arg)).wrap),\n+              _.commands.party := submitter\n+            ),\n+        TransactionFilter(Map(listener -> Filters.defaultInstance))\n+      )\n+    } yield {\n+      ctx.testingHelpers.getHead(ctx.testingHelpers.createdEventsIn(tx))\n+    }\n+  }\n+\n+  // Create a template instance and return the resulting create event.\n+  private def simpleCreate(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] =\n+    simpleCreateWithListener(ctx, commandId, submitter, submitter, template, arg)\n+\n+  private def failingCreate(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      arg: Record,\n+      code: Code,\n+      pattern: String\n+  ): Future[Assertion] =\n+    assertCommandFailsWithCode(\n+      ctx,\n+      submitRequestWithId(ctx, cid(commandId))\n+          .update(\n+            _.commands.commands :=\n+                List(CreateCommand(Some(template), Some(arg)).wrap),\n+            _.commands.party := submitter\n+          ),\n+      code,\n+      pattern\n+    )\n+\n+  // Exercise a choice and return all resulting create events.\n+  private def simpleExerciseWithListener(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      contractId: String,\n+      choice: String,\n+      arg: Value\n+  ): Future[TransactionTree] = {\n+    ctx.testingHelpers.submitAndListenForSingleTreeResultOfCommand(\n+      submitRequestWithId(ctx, cid(commandId))\n+          .update(\n+            _.commands.commands :=\n+                List(ExerciseCommand(Some(template), contractId, choice, Some(arg)).wrap),\n+            _.commands.party := submitter\n+          ),\n+      TransactionFilter(Map(listener -> Filters.defaultInstance)),\n+      false\n+    )\n+  }\n+\n+  private def simpleCreateWithListenerForTransactions(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] = {\n+    for {\n+      tx <- ctx.testingHelpers.submitAndListenForSingleResultOfCommand(\n+        submitRequestWithId(ctx, cid(commandId))\n+            .update(\n+              _.commands.commands :=\n+                  List(CreateCommand(Some(template), Some(arg)).wrap),\n+              _.commands.party := submitter\n+            ),\n+        TransactionFilter(Map(listener -> Filters.defaultInstance))\n+      )\n+    } yield {\n+      ctx.testingHelpers.getHead(ctx.testingHelpers.createdEventsIn(tx))\n+    }\n+  }\n+\n+  private def transactionsFromsimpleCreate(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      arg: Record\n+  ): Future[CreatedEvent] =\n+    simpleCreateWithListenerForTransactions(ctx, commandId, submitter, submitter, template, arg)\n+\n+  private def submitAndListenForTransactionResultOfCommand(\n+      ctx: LedgerContext,\n+      command: SubmitRequest,\n+      transactionFilter: TransactionFilter,\n+      filterCid: Boolean = true): Future[Seq[Transaction]] = {\n+    submitAndListenForTransactionResultsOfCommand(ctx, command, transactionFilter, filterCid)\n+  }\n+\n+  private def submitAndListenForTransactionResultsOfCommand(\n+      ctx: LedgerContext,\n+      submitRequest: SubmitRequest,\n+      transactionFilter: TransactionFilter,\n+      filterCid: Boolean = true): Future[immutable.Seq[Transaction]] = {\n+    val commandId = submitRequest.getCommands.commandId\n+    for {\n+      txEndOffset <- ctx.testingHelpers.submitSuccessfullyAndReturnOffset(submitRequest)\n+      transactions <- listenForTransactionResultOfCommand(\n+        ctx,\n+        transactionFilter,\n+        if (filterCid) Some(commandId) else None,\n+        txEndOffset)\n+    } yield {\n+      transactions\n+    }\n+  }\n+\n+  private def listenForTransactionResultOfCommand(\n+      ctx: LedgerContext,\n+      transactionFilter: TransactionFilter,\n+      commandId: Option[String],\n+      txEndOffset: LedgerOffset): Future[immutable.Seq[Transaction]] = {\n+    ctx.transactionClient\n+        .getTransactions(\n+          txEndOffset,\n+          None,\n+          transactionFilter\n+        )\n+        .filter(x => commandId.fold(true)(cid => x.commandId == cid))\n+        .take(1)\n+        .takeWithin(3.seconds)\n+        .runWith(Sink.seq)\n+  }\n+\n+  private def simpleExerciseWithListenerForTransactions(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      listener: String,\n+      template: Identifier,\n+      contractId: String,\n+      choice: String,\n+      arg: Value\n+  ): Future[Seq[Transaction]] = {\n+    submitAndListenForTransactionResultOfCommand(\n+      ctx,\n+      submitRequestWithId(ctx, cid(commandId))\n+          .update(\n+            _.commands.commands :=\n+                List(ExerciseCommand(Some(template), contractId, choice, Some(arg)).wrap),\n+            _.commands.party := submitter\n+          ),\n+      TransactionFilter(Map(listener -> Filters.defaultInstance)),\n+      false\n+    )\n+  }\n+\n+  private def transactionsFromSimpleExercise(\n+      ctx: LedgerContext,\n+      commandId: String,\n+      submitter: String,\n+      template: Identifier,\n+      contractId: String,\n+      choice: String,\n+      arg: Value): Future[Seq[Transaction]] =\n+    simpleExerciseWithListenerForTransactions(\n+      ctx,\n+      commandId,\n+      submitter,\n+      submitter,\n+      template,\n+      contractId,\n+      choice,\n+      arg)\n+\n+  private def assertCommandFailsWithCode(\n+      ctx: LedgerContext,\n+      submitRequest: SubmitRequest,\n+      expectedErrorCode: Code,\n+      expectedMessageSubString: String): Future[Assertion] = {\n+    for {\n+      ledgerEnd <- ctx.transactionClient.getLedgerEnd\n+      completion <- submitCommand(ctx, submitRequest)\n+      // TODO(FM) in the contract keys test this hangs forever after expecting a failedExercise.\n+      // Could it be that the ACS behaves like that sometimes? In that case that'd be a bug. We must investigate\n+      /*"
+  }
+]

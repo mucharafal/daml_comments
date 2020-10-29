@@ -1,0 +1,139 @@
+[
+  {
+    "id" : "d69e81bc-aa5f-4eb2-8eeb-1ec49d2a0739",
+    "prId" : 5342,
+    "comments" : [
+      {
+        "id" : "028bedaf-563a-4fe6-b5fe-89fea4b8dd46",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The whole `runProcessQuiet` stuff already got moved here. You need to rebase.",
+        "createdAt" : "2020-04-01T14:48:34Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9ea50466-3b0a-4887-9c88-0f0f3e6161b7",
+        "parentId" : "028bedaf-563a-4fe6-b5fe-89fea4b8dd46",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Actually, the `callProcessSilent` in DA.Test.Util was not being used by the code I was refactoring (`IntegrationTests.hs`), which contained an almost duplication of the silent/quiet thing. I merged these together now.\r\n",
+        "createdAt" : "2020-04-02T08:36:41Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c4585811a1d5dd8c2de2c7598d8e15a88ac1b345",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,69 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Test.Calling\n+  ( runCreateProcessForStdout\n+  , callCommandForStdout\n+  , runCreateProcessQuiet\n+  , callProcessQuiet\n+  , callCommandQuiet\n+  , waitForProcess'\n+  , withDevNull\n+  , P.callCommand\n+  ) where\n+\n+import Control.Exception (Exception,throwIO)\n+import Control.Monad (unless)\n+import Data.Typeable (Typeable)\n+import System.Exit (ExitCode(ExitSuccess))\n+import System.IO.Extra (Handle,hPutStr,stderr,withTempFile,withFile,IOMode(WriteMode))\n+import System.Process (CreateProcess(..),ProcessHandle,shell,proc)\n+import qualified System.Process as P\n+\n+-- | Like call process but returning stdout.\n+runCreateProcessForStdout :: CreateProcess -> IO String\n+runCreateProcessForStdout createProcess = do\n+    -- We use `repeat ' '` to keep stdin open. Really we would just\n+    -- like to inherit stdin but readCreateProcessWithExitCode does\n+    -- not allow us to overwrite just that and I don’t want to\n+    -- reimplement everything.\n+    (exit, out, err) <- P.readCreateProcessWithExitCode createProcess (repeat ' ')\n+    hPutStr stderr err\n+    unless (exit == ExitSuccess) $ throwIO $ ProcessExitFailure exit createProcess\n+    return out\n+\n+callCommandForStdout :: String -> IO String"
+  },
+  {
+    "id" : "9cdafc20-6724-4849-bef9-b92bcf704516",
+    "prId" : 5342,
+    "comments" : [
+      {
+        "id" : "33fc2b0e-437a-4077-bac3-87279d93d7df",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is no longer necessary, so just remove it.",
+        "createdAt" : "2020-04-01T14:48:50Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c4585811a1d5dd8c2de2c7598d8e15a88ac1b345",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,69 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Test.Calling\n+  ( runCreateProcessForStdout\n+  , callCommandForStdout\n+  , runCreateProcessQuiet\n+  , callProcessQuiet\n+  , callCommandQuiet\n+  , waitForProcess'\n+  , withDevNull\n+  , P.callCommand\n+  ) where\n+\n+import Control.Exception (Exception,throwIO)\n+import Control.Monad (unless)\n+import Data.Typeable (Typeable)\n+import System.Exit (ExitCode(ExitSuccess))\n+import System.IO.Extra (Handle,hPutStr,stderr,withTempFile,withFile,IOMode(WriteMode))\n+import System.Process (CreateProcess(..),ProcessHandle,shell,proc)\n+import qualified System.Process as P\n+\n+-- | Like call process but returning stdout.\n+runCreateProcessForStdout :: CreateProcess -> IO String\n+runCreateProcessForStdout createProcess = do\n+    -- We use `repeat ' '` to keep stdin open. Really we would just"
+  },
+  {
+    "id" : "28a496fc-fc77-403f-99f7-b957adc3d498",
+    "prId" : 5342,
+    "comments" : [
+      {
+        "id" : "4bafddc9-e892-49cd-8c3b-4cd0cab5f267",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`DA.Test.Calling` sounds very confusing. Given that the stuff already moved to `DA.Test.Util` I would leave it in there. If you really want to use a separate module use `DA.Test.Process`.",
+        "createdAt" : "2020-04-01T14:49:25Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b06bf64f-3069-407f-8c43-a00fb0fef501",
+        "parentId" : "4bafddc9-e892-49cd-8c3b-4cd0cab5f267",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Renamed to DA.Test.Process\r\n",
+        "createdAt" : "2020-04-02T08:37:12Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c4585811a1d5dd8c2de2c7598d8e15a88ac1b345",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,69 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Test.Calling"
+  }
+]

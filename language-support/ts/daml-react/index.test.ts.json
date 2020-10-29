@@ -1,0 +1,184 @@
+[
+  {
+    "id" : "90d3943f-ba36-43ad-92b7-05fca13e0cc7",
+    "prId" : 7789,
+    "comments" : [
+      {
+        "id" : "6fbd6447-8ff8-4c19-83ff-61dc724b8acd",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "A comment that explains why we have to lie to the compiler would be nice.",
+        "createdAt" : "2020-10-23T11:36:55Z",
+        "updatedAt" : "2020-10-23T12:19:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "312c2392-8174-452e-ad62-dbc6e57d29a0",
+        "parentId" : "6fbd6447-8ff8-4c19-83ff-61dc724b8acd",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I don't think we _have to_, but the current test code does and changing that seemed outside the scope of this PR.\r\n\r\nThe issue is that we're mocking the entire stream implementation in such a way that the return value of the (mocked) streams is never type checked. The logical type signature for the `streamq` and `streamk` functions would ensure that the values we get out of our streams are the ones expected by the `useStream*` functions, but all of the existing tests essentially return & check for `{loading: boolean; contract: payload}` instead of the proper `{loading: boolean, contract: {templateId: ..., payload: ..., ...}}`, i.e. we're completely skipping over the `CreateEvent` type.\r\n\r\nWhile I do think this should be cleaned up at some point, I don't think it should be done as part of this PR. I'm also not sure there's that much to gain, so priority is unclear.",
+        "createdAt" : "2020-10-23T12:08:02Z",
+        "updatedAt" : "2020-10-23T12:19:54Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "127702ea-ea0b-4d76-a89c-2ee0e8e8b3ac",
+        "parentId" : "6fbd6447-8ff8-4c19-83ff-61dc724b8acd",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Perfectly fine to not change this in this PR and maybe never. Can we copy your implementation into a code comment? I’m sure I’ll forget about this again otherwise.",
+        "createdAt" : "2020-10-23T12:10:19Z",
+        "updatedAt" : "2020-10-23T12:19:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cf654db0-70dd-4970-aabd-ae2f0731ddfd",
+        "parentId" : "6fbd6447-8ff8-4c19-83ff-61dc724b8acd",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Added similar explanation as comments.",
+        "createdAt" : "2020-10-23T12:17:34Z",
+        "updatedAt" : "2020-10-23T12:19:54Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c2711d75ba7ad4effdb829987dba951c25a92e82",
+    "line" : 133,
+    "diffHunk" : "@@ -307,236 +307,257 @@ describe('useFetchByKey', () => {\n   });\n });\n \n-describe('useStreamQuery', () => {\n-  test('live event changes loading status', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-    expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n-  });\n-\n-  test('live event changes loading status', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-    expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n-  });\n-\n-  test('closeHandler gets called', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const closeHandler = jest.fn();\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query], closeHandler));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n-\n-    expect(closeHandler).toHaveBeenCalledTimes(0);\n-    act(() => void emitter.emit('close', {code: 4000, reason: ''}));\n-    expect(closeHandler).toHaveBeenCalledTimes(1);\n-    expect(closeHandler).toHaveBeenLastCalledWith({code: 4000, reason: ''});\n-  });\n-\n-  test('empty stream', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:false});\n-\n-    // empty events\n-    act(() =>\n-      void emitter.emit('change', [])\n-    );\n-    expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n-  });\n-\n-\n-  test('new events', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query}]);\n-    expect(hookResult.result.current.contracts).toEqual([]);\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-\n-    expect(hookResult.result.current.loading).toBe(false);\n-\n-    // one new event\n-    act(() => void emitter.emit('change', ['event1']));\n-    expect(hookResult.result.current.contracts).toEqual(['event1']);\n-    expect(hookResult.result.current.loading).toBe(false);\n-\n-    // two new events replacing old one.\n-    act(() => void emitter.emit('change', ['event2', 'event3']));\n-    expect(hookResult.result.current).toEqual({contracts: ['event2', 'event3'], loading: false});\n-  });\n-\n-  test('changed query triggers reload', () => {\n-    // setup\n-    const query1 = 'foo-query';\n-    const query2 = 'bar-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const {result} = renderDamlHook(() => {\n-      const [query, setQuery] = useState(query1);\n-      const queryResult = useStreamQuery(Foo, () => ({query}), [query]);\n-      return {queryResult, query, setQuery};\n-    })\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query1}]);\n+function streamq<Q, LyingToTheCompiler extends {loading: boolean; contracts: readonly object[]}>(useFn: (template: Template<object>, factory: () => Q, deps: unknown[], closeHandler?: (e: StreamCloseEvent) => void) => LyingToTheCompiler, mkQuery: (s: string) => () => Q): () => void {"
+  },
+  {
+    "id" : "71792d16-3e88-4c08-9c21-c6b40091c94c",
+    "prId" : 7789,
+    "comments" : [
+      {
+        "id" : "ca3a1cd7-c975-48c5-8c1d-f1a0b3c1868c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Would a test be useful that actually tests multiple queries or keys or is this somewhat redundant in this mocked setup?",
+        "createdAt" : "2020-10-23T11:41:13Z",
+        "updatedAt" : "2020-10-23T12:19:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "01a65717-83ee-49a3-aa9f-2e07c79db9a9",
+        "parentId" : "ca3a1cd7-c975-48c5-8c1d-f1a0b3c1868c",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Given that we're completely mocking the entire stream stack here, I don't think it would add any value at all to test at this level. I'm otherwise happy with the current test coverage of the underlying `@daml/ledger` functions, but would be open to try and add more of that in a separate PR if you're not.",
+        "createdAt" : "2020-10-23T12:09:28Z",
+        "updatedAt" : "2020-10-23T12:19:54Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a37d4de6-bccb-4aee-9e10-eb5e79fe5a04",
+        "parentId" : "ca3a1cd7-c975-48c5-8c1d-f1a0b3c1868c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I agree with you, just wanted to check if I had all the context.",
+        "createdAt" : "2020-10-23T12:10:52Z",
+        "updatedAt" : "2020-10-23T12:19:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c2711d75ba7ad4effdb829987dba951c25a92e82",
+    "line" : 491,
+    "diffHunk" : "@@ -307,236 +307,257 @@ describe('useFetchByKey', () => {\n   });\n });\n \n-describe('useStreamQuery', () => {\n-  test('live event changes loading status', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-    expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n-  });\n-\n-  test('live event changes loading status', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-    expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n-  });\n-\n-  test('closeHandler gets called', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const closeHandler = jest.fn();\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query], closeHandler));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n-\n-    expect(closeHandler).toHaveBeenCalledTimes(0);\n-    act(() => void emitter.emit('close', {code: 4000, reason: ''}));\n-    expect(closeHandler).toHaveBeenCalledTimes(1);\n-    expect(closeHandler).toHaveBeenLastCalledWith({code: 4000, reason: ''});\n-  });\n-\n-  test('empty stream', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-\n-    // no events have been emitted.\n-    expect(hookResult.result.current).toEqual({contracts: [], loading:false});\n-\n-    // empty events\n-    act(() =>\n-      void emitter.emit('change', [])\n-    );\n-    expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n-  });\n-\n-\n-  test('new events', () => {\n-    // setup\n-    const query = 'foo-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query}]);\n-    expect(hookResult.result.current.contracts).toEqual([]);\n-\n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n-\n-    expect(hookResult.result.current.loading).toBe(false);\n-\n-    // one new event\n-    act(() => void emitter.emit('change', ['event1']));\n-    expect(hookResult.result.current.contracts).toEqual(['event1']);\n-    expect(hookResult.result.current.loading).toBe(false);\n-\n-    // two new events replacing old one.\n-    act(() => void emitter.emit('change', ['event2', 'event3']));\n-    expect(hookResult.result.current).toEqual({contracts: ['event2', 'event3'], loading: false});\n-  });\n-\n-  test('changed query triggers reload', () => {\n-    // setup\n-    const query1 = 'foo-query';\n-    const query2 = 'bar-query';\n-    const [stream, emitter] = mockStream();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    const {result} = renderDamlHook(() => {\n-      const [query, setQuery] = useState(query1);\n-      const queryResult = useStreamQuery(Foo, () => ({query}), [query]);\n-      return {queryResult, query, setQuery};\n-    })\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query1}]);\n+function streamq<Q, LyingToTheCompiler extends {loading: boolean; contracts: readonly object[]}>(useFn: (template: Template<object>, factory: () => Q, deps: unknown[], closeHandler?: (e: StreamCloseEvent) => void) => LyingToTheCompiler, mkQuery: (s: string) => () => Q): () => void {\n+  return (): void => {\n+    test('live event changes loading status', () => {\n+      // setup\n+      const query = 'foo-query';\n+      const [stream, emitter] = mockStream();\n+      mockStreamQueries.mockReturnValueOnce(stream);\n+      const hookResult = renderDamlHook(() => useFn(Foo, mkQuery(query), [query]));\n+      expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n+      expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n+\n+      // no events have been emitted.\n+      expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n+\n+      // live event\n+      act(() =>\n+        void emitter.emit('live', [])\n+      );\n+      expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n+    });\n \n-    // live event\n-    act(() =>\n-      void emitter.emit('live', [])\n-    );\n+    test('live event changes loading status', () => {\n+      // setup\n+      const query = 'foo-query';\n+      const [stream, emitter] = mockStream();\n+      mockStreamQueries.mockReturnValueOnce(stream);\n+      const hookResult = renderDamlHook(() => useFn(Foo, mkQuery(query), [query]));\n+      expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n+      expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n+\n+      // no events have been emitted.\n+      expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n+\n+      // live event\n+      act(() =>\n+        void emitter.emit('live', [])\n+      );\n+      expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n+    });\n \n-    expect(result.current.queryResult).toEqual({contracts: [], loading: false});\n+    test('closeHandler gets called', () => {\n+      // setup\n+      const query = 'foo-query';\n+      const [stream, emitter] = mockStream();\n+      mockStreamQueries.mockReturnValueOnce(stream);\n+      const closeHandler = jest.fn();\n+      const hookResult = renderDamlHook(() => useFn(Foo, mkQuery(query), [query], closeHandler));\n+      expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n+      expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n+\n+      // no events have been emitted.\n+      expect(hookResult.result.current).toEqual({contracts: [], loading:true});\n+\n+      expect(closeHandler).toHaveBeenCalledTimes(0);\n+      act(() => void emitter.emit('close', {code: 4000, reason: ''}));\n+      expect(closeHandler).toHaveBeenCalledTimes(1);\n+      expect(closeHandler).toHaveBeenLastCalledWith({code: 4000, reason: ''});\n+    });\n \n-    // new events\n-    act(() => void emitter.emit('change', ['foo']));\n-    expect(result.current.queryResult).toEqual({contracts: ['foo'], loading: false});\n+    test('empty stream', () => {\n+      // setup\n+      const query = 'foo-query';\n+      const [stream, emitter] = mockStream();\n+      mockStreamQueries.mockReturnValueOnce(stream);\n+      const hookResult = renderDamlHook(() => useFn(Foo, mkQuery(query), [query]));\n+      expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n+      expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query}]);\n+\n+      // live event\n+      act(() =>\n+        void emitter.emit('live', [])\n+      );\n+\n+      // no events have been emitted.\n+      expect(hookResult.result.current).toEqual({contracts: [], loading:false});\n+\n+      // empty events\n+      act(() =>\n+        void emitter.emit('change', [])\n+      );\n+      expect(hookResult.result.current).toEqual({contracts: [], loading: false});\n+    });\n \n-    // change query, expect stream to have been called with new query.\n-    mockStreamQueries.mockClear();\n-    mockStreamQueries.mockReturnValueOnce(stream);\n-    act(() => result.current.setQuery(query2));\n-    // live event\n-    act(() => void emitter.emit('live', null));\n-    // change event\n-    act(() => void emitter.emit('change', ['bar']));\n-    expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n-    expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query2}]);\n-    expect(result.current.queryResult).toEqual({contracts: ['bar'], loading: false});\n-  });\n-});\n \n-describe('useStreamFetchByKey', () => {\n-  test('empty stream', () => {\n-    const contract = {owner: 'Alice'};\n-    const key = contract.owner;\n-    const [stream, emitter] = mockStream();\n-    mockStreamFetchByKeys.mockReturnValueOnce(stream);\n-    const {result} = renderDamlHook(() => useStreamFetchByKey(Foo, () => key, [key]));\n-    expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n-    expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key]);\n-    expect(result.current).toEqual({contract: null, loading: true});\n+    test('new events', () => {\n+      // setup\n+      const query = 'foo-query';\n+      const [stream, emitter] = mockStream();\n+      mockStreamQueries.mockReturnValueOnce(stream);\n+      const hookResult = renderDamlHook(() => useFn(Foo, mkQuery(query), [query]));\n+      expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n+      expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query}]);\n+      expect(hookResult.result.current.contracts).toEqual([]);\n \n-    act(() => void emitter.emit('live'));\n-    expect(result.current).toEqual({contract: null, loading: false});\n+      // live event\n+      act(() =>\n+        void emitter.emit('live', [])\n+      );\n \n-    act(() => void emitter.emit('change', [null]));\n-    expect(result.current).toEqual({contract: null, loading: false});\n-  }),\n+      expect(hookResult.result.current.loading).toBe(false);\n \n-  test('new event', () => {\n-    const contract = {owner: 'Alice'};\n-    const key = contract.owner;\n-    const [stream, emitter] = mockStream();\n-    mockStreamFetchByKeys.mockReturnValueOnce(stream);\n-    const {result} = renderDamlHook(() => useStreamFetchByKey(Foo, () => key, [key]));\n-    expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n-    expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key]);\n-    expect(result.current).toEqual({contract: null, loading: true});\n+      // one new event\n+      act(() => void emitter.emit('change', ['event1']));\n+      expect(hookResult.result.current.contracts).toEqual(['event1']);\n+      expect(hookResult.result.current.loading).toBe(false);\n \n-    act(() => void emitter.emit('live'));\n-    expect(result.current).toEqual({contract: null, loading: false});\n+      // two new events replacing old one.\n+      act(() => void emitter.emit('change', ['event2', 'event3']));\n+      expect(hookResult.result.current).toEqual({contracts: ['event2', 'event3'], loading: false});\n+    });\n \n-    act(() => void emitter.emit('change', [contract]));\n-    expect(result.current).toEqual({contract: contract, loading: false});\n-  }),\n+    test('changed query triggers reload', () => {\n+      // setup\n+      const query1 = 'foo-query';\n+      const query2 = 'bar-query';\n+      const [stream, emitter] = mockStream();\n+      mockStreamQueries.mockReturnValueOnce(stream);\n+      const {result} = renderDamlHook(() => {\n+        const [query, setQuery] = useState(query1);\n+        const queryResult = useFn(Foo, mkQuery(query), [query]);\n+        return {queryResult, query, setQuery};\n+      })\n+      expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n+      expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query1}]);\n+\n+      // live event\n+      act(() =>\n+        void emitter.emit('live', [])\n+      );\n+\n+      expect(result.current.queryResult).toEqual({contracts: [], loading: false});\n+\n+      // new events\n+      act(() => void emitter.emit('change', ['foo']));\n+      expect(result.current.queryResult).toEqual({contracts: ['foo'], loading: false});\n+\n+      // change query, expect stream to have been called with new query.\n+      mockStreamQueries.mockClear();\n+      mockStreamQueries.mockReturnValueOnce(stream);\n+      act(() => result.current.setQuery(query2));\n+      // live event\n+      act(() => void emitter.emit('live', null));\n+      // change event\n+      act(() => void emitter.emit('change', ['bar']));\n+      expect(mockStreamQueries).toHaveBeenCalledTimes(1);\n+      expect(mockStreamQueries).toHaveBeenLastCalledWith(Foo, [{query: query2}]);\n+      expect(result.current.queryResult).toEqual({contracts: ['bar'], loading: false});\n+    });\n+  };\n+}\n \n-  test('changed key triggers reload', () => {\n-    const contract = {k1 : 'Alice', k2: 'Bob'};\n-    const key1 = contract.k1;\n-    const key2 = contract.k2;\n-    const [stream, emitter] = mockStream();\n-    mockStreamFetchByKeys.mockReturnValueOnce(stream);\n-    const {result} = renderDamlHook(() => {\n-      const [key, setKey] = useState(key1);\n-      const fetchResult = useStreamFetchByKey(Foo, () => key, [key]);\n-      return {fetchResult, key, setKey};\n-    })\n-    act(() => void emitter.emit('live'));\n-    act(() => void emitter.emit('change', [contract]));\n-    expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n-    expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key1]);\n-    expect(result.current.fetchResult).toEqual({contract: contract, loading: false});\n-\n-    mockStreamFetchByKeys.mockClear();\n-    mockStreamFetchByKeys.mockReturnValueOnce(stream);\n-    act(() => result.current.setKey(key2));\n-    expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n-    expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key2]);\n-  });\n+describe('useStreamQuery', streamq(useStreamQuery, (query: string): (() => Query<object>) => (): Query<object> => ({query})));\n+describe('useStreamQueries', streamq(useStreamQueries, (query: string): (() => Query<object>[]) => (): Query<object>[] => [{query}]));\n+\n+function streamk<Q, Ignored, R extends {loading: boolean}>(useFn: (template: Template<object>, factory: () => Q, deps: unknown[], closeHandler?: (e: StreamCloseEvent) => void) => Ignored, mkQ: (owner: string) => () => Q, init: R, found: (c: object | null) => R): () => void {\n+  return (): void => {\n+    test('empty stream', () => {\n+      const contract = {owner: 'Alice'};\n+      const key = contract.owner;\n+      const [stream, emitter] = mockStream();\n+      mockStreamFetchByKeys.mockReturnValueOnce(stream);\n+      const {result} = renderDamlHook(() => useFn(Foo, mkQ(key), [key]));\n+      expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n+      expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key]);\n+      expect(result.current).toEqual(init);\n+\n+      act(() => void emitter.emit('live'));\n+      expect(result.current).toEqual({...init, loading: false});\n+\n+      act(() => void emitter.emit('change', [null]));\n+      expect(result.current).toEqual(found(null));\n+    }),\n+\n+    test('new event', () => {\n+      const contract = {owner: 'Alice'};\n+      const key = contract.owner;\n+      const [stream, emitter] = mockStream();\n+      mockStreamFetchByKeys.mockReturnValueOnce(stream);\n+      const {result} = renderDamlHook(() => useFn(Foo, mkQ(key), [key]));\n+      expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n+      expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key]);\n+      expect(result.current).toEqual(init);\n+\n+      act(() => void emitter.emit('live'));\n+      expect(result.current).toEqual({...init, loading: false});\n+\n+      act(() => void emitter.emit('change', [contract]));\n+      expect(result.current).toEqual(found(contract));\n+    }),\n+\n+    test('changed key triggers reload', () => {\n+      const contract = {k1 : 'Alice', k2: 'Bob'};\n+      const key1 = contract.k1;\n+      const key2 = contract.k2;\n+      const [stream, emitter] = mockStream();\n+      mockStreamFetchByKeys.mockReturnValueOnce(stream);\n+      const {result} = renderDamlHook(() => {\n+        const [key, setKey] = useState(key1);\n+        const fetchResult = useFn(Foo, mkQ(key), [key]);\n+        return {fetchResult, key, setKey};\n+      })\n+      act(() => void emitter.emit('live'));\n+      act(() => void emitter.emit('change', [contract]));\n+      expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n+      expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key1]);\n+      expect(result.current.fetchResult).toEqual(found(contract));\n+\n+      mockStreamFetchByKeys.mockClear();\n+      mockStreamFetchByKeys.mockReturnValueOnce(stream);\n+      act(() => result.current.setKey(key2));\n+      expect(mockStreamFetchByKeys).toHaveBeenCalledTimes(1);\n+      expect(mockStreamFetchByKeys).toHaveBeenLastCalledWith(Foo, [key2]);\n+    });\n \n-  describe('createLedgerContext', () => {\n-    test('contexts can nest', () => {\n-      const innerLedger = createLedgerContext();\n-      const innerTOKEN = \"inner_TOKEN\";\n-      const innerPARTY = \"inner_PARTY\";\n-      const outerLedger = createLedgerContext('Outer');\n-      const outerTOKEN = \"outer_TOKEN\";\n-      const outerPARTY = \"outer_PARTY\";\n+    describe('createLedgerContext', () => {\n+      test('contexts can nest', () => {\n+        const innerLedger = createLedgerContext();\n+        const innerTOKEN = \"inner_TOKEN\";\n+        const innerPARTY = \"inner_PARTY\";\n+        const outerLedger = createLedgerContext('Outer');\n+        const outerTOKEN = \"outer_TOKEN\";\n+        const outerPARTY = \"outer_PARTY\";\n \n-      const innerWrapper: ComponentType = ({children}) => React.createElement(innerLedger.DamlLedger, {token:innerTOKEN, party:innerPARTY}, children);\n-      const r1 = renderHook(() => innerLedger.useParty(), {wrapper:innerWrapper});\n+        const innerWrapper: ComponentType = ({children}) => React.createElement(innerLedger.DamlLedger, {token:innerTOKEN, party:innerPARTY}, children);\n+        const r1 = renderHook(() => innerLedger.useParty(), {wrapper:innerWrapper});\n \n-      expect( r1.result.current).toBe(innerPARTY);\n+        expect( r1.result.current).toBe(innerPARTY);\n \n-      const outerWrapper: ComponentType = ({children}) => React.createElement(outerLedger.DamlLedger, {token:outerTOKEN, party:outerPARTY}, innerWrapper({children}) );\n-      const r2 = renderHook(() => outerLedger.useParty(), {wrapper:outerWrapper});\n-      expect( r2.result.current).toBe(outerPARTY);\n+        const outerWrapper: ComponentType = ({children}) => React.createElement(outerLedger.DamlLedger, {token:outerTOKEN, party:outerPARTY}, innerWrapper({children}) );\n+        const r2 = renderHook(() => outerLedger.useParty(), {wrapper:outerWrapper});\n+        expect( r2.result.current).toBe(outerPARTY);\n \n-      const r3 = renderHook(() => innerLedger.useParty(), {wrapper:outerWrapper});\n-      expect( r3.result.current).toBe(innerPARTY);\n+        const r3 = renderHook(() => innerLedger.useParty(), {wrapper:outerWrapper});\n+        expect( r3.result.current).toBe(innerPARTY);\n \n-    })\n+      });\n+    });\n+  };\n+}\n \n-  })\n-});\n+describe(\n+  'useStreamFetchByKey',\n+  streamk(\n+    useStreamFetchByKey,\n+    (k: string): (() => string) => (): string => k,\n+    {loading: true, contract: null},\n+    (c: object | null): {loading: boolean; contract: object | null} => ({loading: false, contract: c})));\n+describe("
+  },
+  {
+    "id" : "324a140d-2c2f-4540-a511-699969ab74c0",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "60a1dffa-0a2d-426b-81ad-c9c4b56120c2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "`[]` is not a valid state for a streaming fetch-by-key.\r\n```suggestion\r\n    act(() => void emitter.emit('live', null));\r\n```",
+        "createdAt" : "2020-04-01T11:00:38Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : null,
+    "diffHunk" : "@@ -351,6 +387,9 @@ describe('useStreamQuery', () => {\n     mockStreamQuery.mockClear();\n     mockStreamQuery.mockReturnValueOnce(stream);\n     act(() => result.current.setQuery(query2));\n+    // live event\n+    act(() => void emitter.emit('live', []));"
+  }
+]

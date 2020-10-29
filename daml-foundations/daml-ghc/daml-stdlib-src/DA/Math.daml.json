@@ -1,0 +1,529 @@
+[
+  {
+    "id" : "c6de8266-0b01-4b18-9d8a-dd71a4298c7f",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "1a239671-39ac-4c64-b1a8-a96441ca6cfc",
+        "parentId" : null,
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "```suggestion\r\npi () = 3.1415926536\r\n```\r\nDAML-LF's decimals only allow 10 digits after the dot. @robin-da is working on a fix to enforce this in the compiler instead of doing automatic rounding.",
+        "createdAt" : "2019-04-12T14:55:45Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Int` and `Decimal`\n+module DA.Math\n+( Powerable(..)\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 ^^\n+infixr 8 **\n+\n+class (Multiplicative a, Fractional a) => Powerable a where\n+  -- | Take an integer power of a number. Example: `2.0 ^^ 2 == 4.0`.\n+  (^^) : a -> Int -> a\n+  -- | Take a power of a number Example: `2.0 ** 2.0 == 4.0`.\n+  (**) : a -> a -> a\n+  -- | The exponential function. Example: `exp 0.0 == 1.0`\n+  exp : a -> a\n+  -- | The natural logarithm. Example: `log 10.0 == 2.30258509299`\n+  log :a -> a\n+  -- | The logarithm of a number to a given base. Example: `log 10.0 100.0 == 2.0`\n+  logBase : a -> a -> a\n+\n+instance Powerable Decimal where\n+  x ^^ n\n+    | n == 0 = 1.0\n+    | n < 0 = 1.0 / x ^^ (negate $ n)\n+    | otherwise = x * x ^^ (n - 1)\n+\n+  x ** y = exp (y * log x)\n+\n+  exp x\n+    | x == 0.0 = 1.0\n+    | x < 0.0 = 1.0 / exp (negate x)\n+    | otherwise =\n+      let (y, e) = expInner 1.0 1.0 x\n+      in y `e10` e\n+\n+  log x = logt10k x / 10000.0\n+\n+  logBase b x = log x / log b\n+\n+-- | `logt10k x` calculates 10000.0 * ln(x). The reason for\n+-- doing this is to preserve four additional decimal points\n+-- for precision.\n+-- The additive nature of `ln` is used to decompose\n+-- ln(x) == ln(10^m * 2^n * y) == m * ln(10) + n * ln(2) + ln(y)\n+-- where 0.5 < y < 1.5.\n+logt10k: Decimal -> Decimal\n+logt10k x\n+  | x == 1.0 = 0.0\n+  | x > 10.0 = ln10t10k + logt10k (x / 10.0)\n+  | x < 0.1 = logt10k (x * 10.0) - ln10t10k\n+  | x > 1.5 = ln2t10k + logt10k (x / 2.0)\n+  | x < 0.5 = logt10k (x * 2.0) - ln2t10k\n+  | otherwise = logt10kInner 10 x\n+  where\n+    ln10t10k = 23025.8509299405\n+    ln2t10k = 6931.4718055994\n+\n+-- | `log10kInner n x` approximates 10000 * ln(x) using n terms of the\n+-- power series expansion of ln(x) = 2 * artanh((x - 1) / (x + 1)) \n+logt10kInner: Int -> Decimal -> Decimal\n+logt10kInner n x \n+  | n < 0 = 0.0\n+  | otherwise = let\n+      f = (x - 1.0) / (x + 1.0)\n+      p = (2 * n + 1)\n+      term = (20000.0 / intToDecimal p) * f ^^ p\n+    in\n+    term + logt10kInner (n - 1) x\n+\n+-- | `e10` is used to shift the decimal point in decimal notation.\n+-- `e10 x n == x * intToDecimal (10 ^ n)`.\n+e10: Decimal -> Int -> Decimal\n+e10 x n\n+  | n == 0 = x\n+  | n > 0 = e10 (x * 10.0) (n - 1)\n+  | otherwise = e10 (x / 10.0) (n + 1)\n+\n+-- | `Sci` represents a number in scientific notation. `(x, n)` is\n+-- to be read as `x * 10^n`.\n+type Sci = (Decimal, Int)\n+\n+-- | `to36dig` tries to put a number in scientific notation in a form\n+-- where the `x` has order of magnitude 10^26. Given the fixed point\n+-- NUMBER(38,10) format of `Decimal` in DAML, this gives good\n+-- precision with a little bit of room to multiply with numbers less\n+-- than 100.\n+to36dig: Sci -> Sci\n+to36dig (x, n)\n+  | x < 1.0 `e10` 25 = to36dig (x * 10.0, n - 1)\n+  | x > 1.0 `e10` 26 = to36dig (x / 10.0, n + 1)\n+  | otherwise = (x, n)\n+\n+-- | `expInner` calculates the expansion\n+-- 1 + x/n * (1 + x/(n+1) * (1 + x/(n+2) * ...))\n+-- to a depth where t * x^k * n! / k! < 10^-10.\n+-- The sole purpose is to calculate `exp = expInner 1.0 1.0`\n+-- In the most precision-preserving way.\n+expInner: Decimal -> Decimal -> Decimal -> Sci\n+expInner n t x\n+  | t == 0.0 = (1.0, 0)\n+  | otherwise =\n+    let \n+      (y, e) = expInner (n + 1.0) (t * x / n) x\n+      z = 1.0 `e10` (negate e)\n+    in to36dig (z + x * y / n, e)\n+\n+-- | `sin` is the sine function\n+sin: Decimal -> Decimal\n+sin x = snd $ cordic 34 x\n+\n+-- | `cos` is the cosine function\n+cos: Decimal -> Decimal\n+cos x = fst $ cordic 34 x\n+\n+-- | `tan` is the tangent function\n+tan: Decimal -> Decimal\n+tan x = s / c\n+  where\n+    (c, s) = cordic 34 x\n+\n+-- | The number Pi\n+pi: () -> Decimal\n+pi () = 3.14159265359"
+  },
+  {
+    "id" : "6568d8c3-a788-4c3f-90ff-64a0f153f286",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "6129610c-008b-430a-b8cc-f3aeb329f003",
+        "parentId" : null,
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "Why the `()` argument?",
+        "createdAt" : "2019-04-12T14:56:00Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a12ee125-a2a8-488c-a36d-c8aeef05b164",
+        "parentId" : "6129610c-008b-430a-b8cc-f3aeb329f003",
+        "author" : null,
+        "body" : "Do trigonometric functions really belong in this library? You'll never see them in a term-sheet.",
+        "createdAt" : "2019-04-12T15:15:52Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "55c1133b-7a83-4ad4-ba6b-cb2a280e94de",
+        "parentId" : "6129610c-008b-430a-b8cc-f3aeb329f003",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "Avinash asked for them specifically.",
+        "createdAt" : "2019-04-12T15:27:30Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8ede87f2-ac30-4f0d-9761-f5be3671107c",
+        "parentId" : "6129610c-008b-430a-b8cc-f3aeb329f003",
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "I hope Aninash did not ask for the `()` argument. That would be odd.",
+        "createdAt" : "2019-04-12T15:32:41Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7faa8478-5afa-4028-871d-e849ebc897ca",
+        "parentId" : "6129610c-008b-430a-b8cc-f3aeb329f003",
+        "author" : null,
+        "body" : "I'm trying to get Avinash to clarify. It's my belief he was joking about about writing Fourier transfoms in DAML. I'm all for putting functions in if they have a good use case  - it's not obvious to me that trig functions have a place in a contract language. ",
+        "createdAt" : "2019-04-12T15:36:41Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Int` and `Decimal`\n+module DA.Math\n+( Powerable(..)\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 ^^\n+infixr 8 **\n+\n+class (Multiplicative a, Fractional a) => Powerable a where\n+  -- | Take an integer power of a number. Example: `2.0 ^^ 2 == 4.0`.\n+  (^^) : a -> Int -> a\n+  -- | Take a power of a number Example: `2.0 ** 2.0 == 4.0`.\n+  (**) : a -> a -> a\n+  -- | The exponential function. Example: `exp 0.0 == 1.0`\n+  exp : a -> a\n+  -- | The natural logarithm. Example: `log 10.0 == 2.30258509299`\n+  log :a -> a\n+  -- | The logarithm of a number to a given base. Example: `log 10.0 100.0 == 2.0`\n+  logBase : a -> a -> a\n+\n+instance Powerable Decimal where\n+  x ^^ n\n+    | n == 0 = 1.0\n+    | n < 0 = 1.0 / x ^^ (negate $ n)\n+    | otherwise = x * x ^^ (n - 1)\n+\n+  x ** y = exp (y * log x)\n+\n+  exp x\n+    | x == 0.0 = 1.0\n+    | x < 0.0 = 1.0 / exp (negate x)\n+    | otherwise =\n+      let (y, e) = expInner 1.0 1.0 x\n+      in y `e10` e\n+\n+  log x = logt10k x / 10000.0\n+\n+  logBase b x = log x / log b\n+\n+-- | `logt10k x` calculates 10000.0 * ln(x). The reason for\n+-- doing this is to preserve four additional decimal points\n+-- for precision.\n+-- The additive nature of `ln` is used to decompose\n+-- ln(x) == ln(10^m * 2^n * y) == m * ln(10) + n * ln(2) + ln(y)\n+-- where 0.5 < y < 1.5.\n+logt10k: Decimal -> Decimal\n+logt10k x\n+  | x == 1.0 = 0.0\n+  | x > 10.0 = ln10t10k + logt10k (x / 10.0)\n+  | x < 0.1 = logt10k (x * 10.0) - ln10t10k\n+  | x > 1.5 = ln2t10k + logt10k (x / 2.0)\n+  | x < 0.5 = logt10k (x * 2.0) - ln2t10k\n+  | otherwise = logt10kInner 10 x\n+  where\n+    ln10t10k = 23025.8509299405\n+    ln2t10k = 6931.4718055994\n+\n+-- | `log10kInner n x` approximates 10000 * ln(x) using n terms of the\n+-- power series expansion of ln(x) = 2 * artanh((x - 1) / (x + 1)) \n+logt10kInner: Int -> Decimal -> Decimal\n+logt10kInner n x \n+  | n < 0 = 0.0\n+  | otherwise = let\n+      f = (x - 1.0) / (x + 1.0)\n+      p = (2 * n + 1)\n+      term = (20000.0 / intToDecimal p) * f ^^ p\n+    in\n+    term + logt10kInner (n - 1) x\n+\n+-- | `e10` is used to shift the decimal point in decimal notation.\n+-- `e10 x n == x * intToDecimal (10 ^ n)`.\n+e10: Decimal -> Int -> Decimal\n+e10 x n\n+  | n == 0 = x\n+  | n > 0 = e10 (x * 10.0) (n - 1)\n+  | otherwise = e10 (x / 10.0) (n + 1)\n+\n+-- | `Sci` represents a number in scientific notation. `(x, n)` is\n+-- to be read as `x * 10^n`.\n+type Sci = (Decimal, Int)\n+\n+-- | `to36dig` tries to put a number in scientific notation in a form\n+-- where the `x` has order of magnitude 10^26. Given the fixed point\n+-- NUMBER(38,10) format of `Decimal` in DAML, this gives good\n+-- precision with a little bit of room to multiply with numbers less\n+-- than 100.\n+to36dig: Sci -> Sci\n+to36dig (x, n)\n+  | x < 1.0 `e10` 25 = to36dig (x * 10.0, n - 1)\n+  | x > 1.0 `e10` 26 = to36dig (x / 10.0, n + 1)\n+  | otherwise = (x, n)\n+\n+-- | `expInner` calculates the expansion\n+-- 1 + x/n * (1 + x/(n+1) * (1 + x/(n+2) * ...))\n+-- to a depth where t * x^k * n! / k! < 10^-10.\n+-- The sole purpose is to calculate `exp = expInner 1.0 1.0`\n+-- In the most precision-preserving way.\n+expInner: Decimal -> Decimal -> Decimal -> Sci\n+expInner n t x\n+  | t == 0.0 = (1.0, 0)\n+  | otherwise =\n+    let \n+      (y, e) = expInner (n + 1.0) (t * x / n) x\n+      z = 1.0 `e10` (negate e)\n+    in to36dig (z + x * y / n, e)\n+\n+-- | `sin` is the sine function\n+sin: Decimal -> Decimal\n+sin x = snd $ cordic 34 x\n+\n+-- | `cos` is the cosine function\n+cos: Decimal -> Decimal\n+cos x = fst $ cordic 34 x\n+\n+-- | `tan` is the tangent function\n+tan: Decimal -> Decimal\n+tan x = s / c\n+  where\n+    (c, s) = cordic 34 x\n+\n+-- | The number Pi\n+pi: () -> Decimal"
+  },
+  {
+    "id" : "27a3a75d-9638-4a5c-9960-d113dadc8023",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "aa47585e-f5bf-4c17-8230-71621af087af",
+        "parentId" : null,
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "```suggestion\r\n  log : a -> a\r\n```",
+        "createdAt" : "2019-04-12T14:57:07Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Int` and `Decimal`\n+module DA.Math\n+( Powerable(..)\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 ^^\n+infixr 8 **\n+\n+class (Multiplicative a, Fractional a) => Powerable a where\n+  -- | Take an integer power of a number. Example: `2.0 ^^ 2 == 4.0`.\n+  (^^) : a -> Int -> a\n+  -- | Take a power of a number Example: `2.0 ** 2.0 == 4.0`.\n+  (**) : a -> a -> a\n+  -- | The exponential function. Example: `exp 0.0 == 1.0`\n+  exp : a -> a\n+  -- | The natural logarithm. Example: `log 10.0 == 2.30258509299`\n+  log :a -> a"
+  },
+  {
+    "id" : "c12d7a17-707b-4797-bd13-ee66b23a5804",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "b5bc4d22-db3b-432e-9927-607b12da0866",
+        "parentId" : null,
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "This is going to be awfully slow. Can we please do the `O(log n)` algorithm instead.",
+        "createdAt" : "2019-04-12T14:59:42Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1c2852bc-35bd-424c-a31d-83dbbc8a32e0",
+        "parentId" : "b5bc4d22-db3b-432e-9927-607b12da0866",
+        "author" : null,
+        "body" : "Exponentiation by squaring?",
+        "createdAt" : "2019-04-12T15:13:24Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Int` and `Decimal`\n+module DA.Math\n+( Powerable(..)\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 ^^\n+infixr 8 **\n+\n+class (Multiplicative a, Fractional a) => Powerable a where\n+  -- | Take an integer power of a number. Example: `2.0 ^^ 2 == 4.0`.\n+  (^^) : a -> Int -> a\n+  -- | Take a power of a number Example: `2.0 ** 2.0 == 4.0`.\n+  (**) : a -> a -> a\n+  -- | The exponential function. Example: `exp 0.0 == 1.0`\n+  exp : a -> a\n+  -- | The natural logarithm. Example: `log 10.0 == 2.30258509299`\n+  log :a -> a\n+  -- | The logarithm of a number to a given base. Example: `log 10.0 100.0 == 2.0`\n+  logBase : a -> a -> a\n+\n+instance Powerable Decimal where\n+  x ^^ n\n+    | n == 0 = 1.0\n+    | n < 0 = 1.0 / x ^^ (negate $ n)\n+    | otherwise = x * x ^^ (n - 1)"
+  },
+  {
+    "id" : "b670829e-0a71-4140-a37b-7e38400df4ef",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "b45d194a-db73-4e43-b010-e58e9209a7db",
+        "parentId" : null,
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "I don't see any math utils for `Int`.",
+        "createdAt" : "2019-04-12T15:01:08Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Int` and `Decimal`"
+  },
+  {
+    "id" : "1697e33a-96c6-41f0-b87c-db7a79982a08",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "e6fa18bf-5358-40d7-811c-e0f723ad8cfe",
+        "parentId" : null,
+        "author" : null,
+        "body" : "So for reference, OCaml uses `(**)` for integer exponentiation and `(**.)` for floating point. Why though are there two operators in this class and not just `(**) : a -> a -> a`?",
+        "createdAt" : "2019-04-12T15:12:06Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f17aa3df-0787-4898-8e7e-976ec5baf9bb",
+        "parentId" : "e6fa18bf-5358-40d7-811c-e0f723ad8cfe",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "Don't understand the question. You mean why have a class at all?",
+        "createdAt" : "2019-04-12T15:29:07Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ee59b8d1-92e8-4f6f-862e-a50921a3fafe",
+        "parentId" : "e6fa18bf-5358-40d7-811c-e0f723ad8cfe",
+        "author" : null,
+        "body" : "No, I mean why does the class require two operators : `(^^)` and `(**)` - both compute powers right and the latter subsumes the former yes? I expect the answer is related to efficiency in the `Int` case but I'd like to hear anyway.",
+        "createdAt" : "2019-04-12T15:40:09Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "88c69807-0516-43d3-a08d-29b668df7332",
+        "parentId" : "e6fa18bf-5358-40d7-811c-e0f723ad8cfe",
+        "author" : null,
+        "body" : "On reflection, `(^^)` is traditionally spelled `pow`. I think that's the better name here. `(**)` I like (prior art as mentioned above). ",
+        "createdAt" : "2019-04-12T15:44:22Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d04a77f4-5736-462e-8549-4d4ce0300204",
+        "parentId" : "e6fa18bf-5358-40d7-811c-e0f723ad8cfe",
+        "author" : null,
+        "body" : "Ah, I see now that `(^)`, `(^^)` and `(**)` are \"normal\" in Haskell. Ok, question resolved for me.\r\n",
+        "createdAt" : "2019-04-12T16:04:37Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "00c48bdc-69a4-4254-8786-1a920aa9b5ef",
+        "parentId" : "e6fa18bf-5358-40d7-811c-e0f723ad8cfe",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "They are normal, but confuse me as an \"expert\" Haskeller. If you want to do better that's OK.",
+        "createdAt" : "2019-04-13T10:51:46Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Int` and `Decimal`\n+module DA.Math\n+( Powerable(..)\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 ^^\n+infixr 8 **\n+\n+class (Multiplicative a, Fractional a) => Powerable a where\n+  -- | Take an integer power of a number. Example: `2.0 ^^ 2 == 4.0`.\n+  (^^) : a -> Int -> a"
+  },
+  {
+    "id" : "be5cd5ef-f243-491b-8812-86f617b05551",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "94b6238d-6be4-42dc-bb2d-c5f62e956e13",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Space after : would be our typical syntax\r\n```suggestion\r\nsin : Decimal -> Decimal\r\n```",
+        "createdAt" : "2019-04-16T09:27:11Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,178 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Decimal`\n+module DA.Math\n+( (**)\n+, exp\n+, log\n+, logBase\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 **\n+\n+-- | Take a power of a number Example: `2.0 ** 2.0 == 4.0`.\n+(**) : Decimal -> Decimal -> Decimal\n+x ** y = exp (y * log x)\n+\n+-- | The exponential function. Example: `exp 0.0 == 1.0`\n+exp : Decimal -> Decimal\n+exp x\n+  | x == 0.0 = 1.0\n+  | x < 0.0 = 1.0 / exp (negate x)\n+  | otherwise =\n+    let (y, e) = expInner 1.0 1.0 x\n+    in y `e10` e\n+\n+-- | The natural logarithm. Example: `log 10.0 == 2.30258509299`\n+log : Decimal -> Decimal\n+log x = logt10k x / 10000.0\n+\n+-- | The logarithm of a number to a given base. Example: `log 10.0 100.0 == 2.0`\n+logBase : Decimal -> Decimal -> Decimal\n+logBase b x = log x / log b\n+\n+-- | `logt10k x` calculates 10000.0 * ln(x). The reason for\n+-- doing this is to preserve four additional decimal points\n+-- for precision.\n+-- The additive nature of `ln` is used to decompose\n+-- ln(x) == ln(10^m * 2^n * y) == m * ln(10) + n * ln(2) + ln(y)\n+-- where 0.5 < y < 1.5.\n+logt10k: Decimal -> Decimal\n+logt10k x\n+  | x == 1.0 = 0.0\n+  | x > 10.0 = ln10t10k + logt10k (x / 10.0)\n+  | x < 0.1 = logt10k (x * 10.0) - ln10t10k\n+  | x > 1.5 = ln2t10k + logt10k (x / 2.0)\n+  | x < 0.5 = logt10k (x * 2.0) - ln2t10k\n+  | otherwise = logt10kInner 10 x\n+  where\n+    ln10t10k = 23025.8509299405\n+    ln2t10k = 6931.4718055994\n+\n+-- | `log10kInner n x` approximates 10000 * ln(x) using n terms of the\n+-- power series expansion of ln(x) = 2 * artanh((x - 1) / (x + 1)) \n+logt10kInner: Int -> Decimal -> Decimal\n+logt10kInner n x \n+  | n < 0 = 0.0\n+  | otherwise = let\n+      f = (x - 1.0) / (x + 1.0)\n+      p = (2 * n + 1)\n+      term = (20000.0 / intToDecimal p) * f ^ p\n+    in\n+    term + logt10kInner (n - 1) x\n+\n+-- | `e10` is used to shift the decimal point in decimal notation.\n+-- `e10 x n == x * intToDecimal (10 ^ n)`.\n+e10: Decimal -> Int -> Decimal\n+e10 x n\n+  | n == 0 = x\n+  | n > 0 = e10 (x * 10.0) (n - 1)\n+  | otherwise = e10 (x / 10.0) (n + 1)\n+\n+-- | `Sci` represents a number in scientific notation. `(x, n)` is\n+-- to be read as `x * 10^n`.\n+type Sci = (Decimal, Int)\n+\n+-- | `to36dig` tries to put a number in scientific notation in a form\n+-- where the `x` has order of magnitude 10^26. Given the fixed point\n+-- NUMBER(38,10) format of `Decimal` in DAML, this gives good\n+-- precision with a little bit of room to multiply with numbers less\n+-- than 100.\n+to36dig: Sci -> Sci\n+to36dig (x, n)\n+  | x < 1.0 `e10` 25 = to36dig (x * 10.0, n - 1)\n+  | x > 1.0 `e10` 26 = to36dig (x / 10.0, n + 1)\n+  | otherwise = (x, n)\n+\n+-- | `expInner` calculates the expansion\n+-- 1 + x/n * (1 + x/(n+1) * (1 + x/(n+2) * ...))\n+-- to a depth where t * x^k * n! / k! < 10^-10.\n+-- The sole purpose is to calculate `exp = expInner 1.0 1.0`\n+-- In the most precision-preserving way.\n+expInner: Decimal -> Decimal -> Decimal -> Sci\n+expInner n t x\n+  | t == 0.0 = (1.0, 0)\n+  | otherwise =\n+    let \n+      (y, e) = expInner (n + 1.0) (t * x / n) x\n+      z = 1.0 `e10` (negate e)\n+    in to36dig (z + x * y / n, e)\n+\n+-- | `sin` is the sine function\n+sin: Decimal -> Decimal"
+  },
+  {
+    "id" : "34c47ce9-9c6c-42b9-a0a3-b0d319514e6e",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "d777fa9c-7235-4cf4-8d2a-67df5ee2b10f",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Can we get a note with respect to performance and precision. These are pretty precise but very slow?",
+        "createdAt" : "2019-04-16T09:27:49Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : 5,
+    "diffHunk" : "@@ -0,0 +1,178 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Decimal`"
+  },
+  {
+    "id" : "65252057-adc7-430c-89f9-37d51261c272",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "c0cd17e0-e433-46c7-9dca-f58d24434c0e",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Please add a link to wherever you were getting the cordic algo from - e.g. wikipedia",
+        "createdAt" : "2019-04-16T09:28:40Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : 130,
+    "diffHunk" : "@@ -0,0 +1,178 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Decimal`\n+module DA.Math\n+( (**)\n+, exp\n+, log\n+, logBase\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 **\n+\n+-- | Take a power of a number Example: `2.0 ** 2.0 == 4.0`.\n+(**) : Decimal -> Decimal -> Decimal\n+x ** y = exp (y * log x)\n+\n+-- | The exponential function. Example: `exp 0.0 == 1.0`\n+exp : Decimal -> Decimal\n+exp x\n+  | x == 0.0 = 1.0\n+  | x < 0.0 = 1.0 / exp (negate x)\n+  | otherwise =\n+    let (y, e) = expInner 1.0 1.0 x\n+    in y `e10` e\n+\n+-- | The natural logarithm. Example: `log 10.0 == 2.30258509299`\n+log : Decimal -> Decimal\n+log x = logt10k x / 10000.0\n+\n+-- | The logarithm of a number to a given base. Example: `log 10.0 100.0 == 2.0`\n+logBase : Decimal -> Decimal -> Decimal\n+logBase b x = log x / log b\n+\n+-- | `logt10k x` calculates 10000.0 * ln(x). The reason for\n+-- doing this is to preserve four additional decimal points\n+-- for precision.\n+-- The additive nature of `ln` is used to decompose\n+-- ln(x) == ln(10^m * 2^n * y) == m * ln(10) + n * ln(2) + ln(y)\n+-- where 0.5 < y < 1.5.\n+logt10k: Decimal -> Decimal\n+logt10k x\n+  | x == 1.0 = 0.0\n+  | x > 10.0 = ln10t10k + logt10k (x / 10.0)\n+  | x < 0.1 = logt10k (x * 10.0) - ln10t10k\n+  | x > 1.5 = ln2t10k + logt10k (x / 2.0)\n+  | x < 0.5 = logt10k (x * 2.0) - ln2t10k\n+  | otherwise = logt10kInner 10 x\n+  where\n+    ln10t10k = 23025.8509299405\n+    ln2t10k = 6931.4718055994\n+\n+-- | `log10kInner n x` approximates 10000 * ln(x) using n terms of the\n+-- power series expansion of ln(x) = 2 * artanh((x - 1) / (x + 1)) \n+logt10kInner: Int -> Decimal -> Decimal\n+logt10kInner n x \n+  | n < 0 = 0.0\n+  | otherwise = let\n+      f = (x - 1.0) / (x + 1.0)\n+      p = (2 * n + 1)\n+      term = (20000.0 / intToDecimal p) * f ^ p\n+    in\n+    term + logt10kInner (n - 1) x\n+\n+-- | `e10` is used to shift the decimal point in decimal notation.\n+-- `e10 x n == x * intToDecimal (10 ^ n)`.\n+e10: Decimal -> Int -> Decimal\n+e10 x n\n+  | n == 0 = x\n+  | n > 0 = e10 (x * 10.0) (n - 1)\n+  | otherwise = e10 (x / 10.0) (n + 1)\n+\n+-- | `Sci` represents a number in scientific notation. `(x, n)` is\n+-- to be read as `x * 10^n`.\n+type Sci = (Decimal, Int)\n+\n+-- | `to36dig` tries to put a number in scientific notation in a form\n+-- where the `x` has order of magnitude 10^26. Given the fixed point\n+-- NUMBER(38,10) format of `Decimal` in DAML, this gives good\n+-- precision with a little bit of room to multiply with numbers less\n+-- than 100.\n+to36dig: Sci -> Sci\n+to36dig (x, n)\n+  | x < 1.0 `e10` 25 = to36dig (x * 10.0, n - 1)\n+  | x > 1.0 `e10` 26 = to36dig (x / 10.0, n + 1)\n+  | otherwise = (x, n)\n+\n+-- | `expInner` calculates the expansion\n+-- 1 + x/n * (1 + x/(n+1) * (1 + x/(n+2) * ...))\n+-- to a depth where t * x^k * n! / k! < 10^-10.\n+-- The sole purpose is to calculate `exp = expInner 1.0 1.0`\n+-- In the most precision-preserving way.\n+expInner: Decimal -> Decimal -> Decimal -> Sci\n+expInner n t x\n+  | t == 0.0 = (1.0, 0)\n+  | otherwise =\n+    let \n+      (y, e) = expInner (n + 1.0) (t * x / n) x\n+      z = 1.0 `e10` (negate e)\n+    in to36dig (z + x * y / n, e)\n+\n+-- | `sin` is the sine function\n+sin: Decimal -> Decimal\n+sin x = snd $ cordic 34 x\n+\n+-- | `cos` is the cosine function\n+cos: Decimal -> Decimal\n+cos x = fst $ cordic 34 x\n+\n+-- | `tan` is the tangent function\n+tan: Decimal -> Decimal\n+tan x = s / c\n+  where\n+    (c, s) = cordic 34 x\n+\n+-- | The number Pi\n+pi = 3.1415926536\n+\n+-- | `cordic` is an implementation of the CORDIC algorithm."
+  },
+  {
+    "id" : "2b06bc67-9cef-4213-ab3c-5d19e801912a",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "cd3738ab-58c3-45a1-8beb-5f6ee86a331b",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Only put `|` on the first line, the others don't need it (and having it is harmful).",
+        "createdAt" : "2019-04-16T10:31:56Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,183 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Decimal`\n+-- | The this library is designed to give good precision, typically giving 9 correct decimal places.\n+-- | The numerical algorithms used are efficient, but still run with many iterations to achieve"
+  },
+  {
+    "id" : "329db7c7-977d-4f6c-84f7-7f5f29862b05",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "8474cc40-267e-48db-869a-4ca2242e301e",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Efficient to me means runs on the FPU. I don't think these are efficient.",
+        "createdAt" : "2019-04-16T10:32:15Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,183 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Decimal`\n+-- | The this library is designed to give good precision, typically giving 9 correct decimal places.\n+-- | The numerical algorithms used are efficient, but still run with many iterations to achieve"
+  },
+  {
+    "id" : "2f3823de-48f6-4e53-982d-0ee3477c3606",
+    "prId" : 419,
+    "comments" : [
+      {
+        "id" : "3f3b3ae6-ddd2-4227-a464-eee2d3ef58e7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "To me `e10` suggests `e10 x = x * 10^10`.",
+        "createdAt" : "2019-04-17T13:52:35Z",
+        "updatedAt" : "2019-04-17T20:37:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a9f282e69c10af63c77c3809c010f499a8be3f90",
+    "line" : 78,
+    "diffHunk" : "@@ -0,0 +1,183 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+-- | Math - Utility Math functions for `Decimal`\n+-- The this library is designed to give good precision, typically giving 9 correct decimal places.\n+-- The numerical algorithms run with many iterations to achieve that precision and are interpreted\n+-- by the DAML runtime so they are not performant. Their use is not advised in performance critical\n+-- contexts.\n+module DA.Math\n+( (**)\n+, exp\n+, log\n+, logBase\n+, sin\n+, cos\n+, tan\n+, pi\n+) where\n+\n+import DA.List\n+\n+infixr 8 **\n+\n+-- | Take a power of a number Example: `2.0 ** 2.0 == 4.0`.\n+(**) : Decimal -> Decimal -> Decimal\n+x ** y = exp (y * log x)\n+\n+-- | The exponential function. Example: `exp 0.0 == 1.0`\n+exp : Decimal -> Decimal\n+exp x\n+  | x == 0.0 = 1.0\n+  | x < 0.0 = 1.0 / exp (negate x)\n+  | otherwise =\n+    let (y, e) = expInner 1.0 1.0 x\n+    in y `e10` e\n+\n+-- | The natural logarithm. Example: `log 10.0 == 2.30258509299`\n+log : Decimal -> Decimal\n+log x = logt10k x / 10000.0\n+\n+-- | The logarithm of a number to a given base. Example: `log 10.0 100.0 == 2.0`\n+logBase : Decimal -> Decimal -> Decimal\n+logBase b x = log x / log b\n+\n+-- | `logt10k x` calculates 10000.0 * ln(x). The reason for\n+-- doing this is to preserve four additional decimal points\n+-- for precision.\n+-- The additive nature of `ln` is used to decompose\n+-- ln(x) == ln(10^m * 2^n * y) == m * ln(10) + n * ln(2) + ln(y)\n+-- where 0.5 < y < 1.5.\n+logt10k: Decimal -> Decimal\n+logt10k x\n+  | x == 1.0 = 0.0\n+  | x > 10.0 = ln10t10k + logt10k (x / 10.0)\n+  | x < 0.1 = logt10k (x * 10.0) - ln10t10k\n+  | x > 1.5 = ln2t10k + logt10k (x / 2.0)\n+  | x < 0.5 = logt10k (x * 2.0) - ln2t10k\n+  | otherwise = logt10kInner 10 x\n+  where\n+    ln10t10k = 23025.8509299405\n+    ln2t10k = 6931.4718055994\n+\n+-- | `log10kInner n x` approximates 10000 * ln(x) using n terms of the\n+-- power series expansion of ln(x) = 2 * artanh((x - 1) / (x + 1))\n+logt10kInner: Int -> Decimal -> Decimal\n+logt10kInner n x\n+  | n < 0 = 0.0\n+  | otherwise = let\n+      f = (x - 1.0) / (x + 1.0)\n+      p = (2 * n + 1)\n+      term = (20000.0 / intToDecimal p) * f ^ p\n+    in\n+    term + logt10kInner (n - 1) x\n+\n+-- | `e10` is used to shift the decimal point in decimal notation.\n+-- `e10 x n == x * intToDecimal (10 ^ n)`.\n+e10: Decimal -> Int -> Decimal"
+  }
+]

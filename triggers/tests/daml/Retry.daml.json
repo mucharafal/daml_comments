@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "00376d49-7b62-4032-8a0e-2fc8749544a4",
+    "prId" : 7632,
+    "comments" : [
+      {
+        "id" : "fe952403-1305-44f9-8db8-da047b44f344",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  _ -> query @Done >>= \\case\r\n```",
+        "createdAt" : "2020-10-13T07:32:01Z",
+        "updatedAt" : "2020-10-13T16:38:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ff9c6cdb061569d69928ce65252f33699b9f793b",
+    "line" : null,
+    "diffHunk" : "@@ -20,17 +20,16 @@ retryTrigger = Trigger\n \n -- We first create a T template, then we try to exercise C 3 times until allowedRetries is 0\n -- finally we create Done\n-retryRule : Party -> ACS -> Int -> TriggerA ()\n-retryRule party acs allowedRetries\n-  | [] <- getContracts @T acs = do\n+retryRule : Party -> Int -> TriggerA ()\n+retryRule party allowedRetries = query @T >>= \\case\n+  [] -> do\n     dedupCreate T { p = party }\n-  | ((cid, _) :: _) <- getContracts @T acs\n-  , allowedRetries > 0 = do\n+  ((cid, _) :: _) | allowedRetries > 0 -> do\n     dedupExercise cid C\n-  | allowedRetries == 0\n-  , [] <- getContracts @Done acs = do\n-    dedupCreate Done { p = party }\n-  | otherwise = pure ()\n+  otherwise -> query @Done >>= \\case"
+  },
+  {
+    "id" : "6309a0fd-6126-4705-bb89-63fca22d1a86",
+    "prId" : 3239,
+    "comments" : [
+      {
+        "id" : "ee6b9a6f-ab20-4cae-bf69-de7338037049",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It would be nice to also change the `CopyTrigger` and update the docs to no longer mention `runTrigger`. Probably also deserves an entry i nthe release notes.",
+        "createdAt" : "2019-10-21T10:35:50Z",
+        "updatedAt" : "2019-10-21T11:44:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "217af6d5160430df38838b3d5270fcc66dbf0364",
+    "line" : 5,
+    "diffHunk" : "@@ -11,7 +11,8 @@ import DA.Optional\n \n import Daml.Trigger\n \n-retryTrigger = runTrigger Trigger\n+retryTrigger : Trigger Int"
+  },
+  {
+    "id" : "745f9feb-c66a-4889-ae45-aaa67fd3c28e",
+    "prId" : 3226,
+    "comments" : [
+      {
+        "id" : "1d2bc487-6cd6-4863-8a68-a281f94632a4",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Can this bit be factored out? It might even be useful as part of the triggers library. Checking if a command is already in flight seems like a common operation.",
+        "createdAt" : "2019-10-18T12:34:28Z",
+        "updatedAt" : "2019-10-18T12:35:37Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "40800d07-31bf-42a5-872e-d7c4080767fe",
+        "parentId" : "1d2bc487-6cd6-4863-8a68-a281f94632a4",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah, while writing this I also thought that this should be part of the high-level API. So something like `deduplicateCreate` and `deduplicateExercise`. I’ll leave that for a separate PR.",
+        "createdAt" : "2019-10-18T12:45:31Z",
+        "updatedAt" : "2019-10-18T12:45:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0e33638f90f82c78482dad3b2b604ab156b9016",
+    "line" : 30,
+    "diffHunk" : "@@ -0,0 +1,65 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+module Retry where\n+\n+import DA.Action\n+import DA.Next.Map (Map)\n+import qualified DA.Next.Map as Map\n+import DA.Optional\n+\n+import Daml.Trigger\n+\n+retryTrigger = runTrigger Trigger\n+  { initialize = \\_acs -> 3\n+  , updateState = \\_acs msg allowedFail -> case msg of\n+      MCompletion c\n+        | Failed {} <- c.status -> allowedFail - 1\n+      _ -> allowedFail\n+  , rule = retryRule\n+  }\n+\n+-- We first create a T template, then we try to exercise C 3 times until allowedRetries is 0\n+-- finally we create Done\n+retryRule : Party -> ACS -> Map CommandId [Command] -> Int -> TriggerA ()\n+retryRule party acs commandsInFlight allowedRetries\n+  | [] <- getTemplates @T acs = do\n+    let create = T { p = party }\n+    let pending = concatMap (mapOptional toCreate . snd) $ Map.toList commandsInFlight\n+    when (create `notElem` pending) $ void $ emitCommands [createCmd create]"
+  }
+]

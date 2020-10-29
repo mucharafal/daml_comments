@@ -1,0 +1,96 @@
+[
+  {
+    "id" : "982ebe4f-7034-47c9-9e2f-2a17fa8203a5",
+    "prId" : 6516,
+    "comments" : [
+      {
+        "id" : "3ab784e2-1c24-4b2a-8e05-f81c9ef81605",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "8 function parameters might be a bit excessive. Can we wrap this up into (a few) record(s) or maybe a typeclass?",
+        "createdAt" : "2020-06-29T08:13:08Z",
+        "updatedAt" : "2020-06-30T18:06:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "27de0a13-ded7-44e7-990a-7f2a02eda03d",
+        "parentId" : "3ab784e2-1c24-4b2a-8e05-f81c9ef81605",
+        "author" : {
+          "login" : "Gertjan423",
+          "name" : "Gert-Jan Bottu",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/5838382?u=b47bd98f384562b45de5cd99b73da4c1aac7aceb&v=4"
+        },
+        "body" : "You're right. This function started off small, and kinda got out of control.\r\nA dedicated typeclass might be slight overkill, but a (few) record(s) would be much more readable indeed...",
+        "createdAt" : "2020-06-30T12:30:38Z",
+        "updatedAt" : "2020-06-30T18:06:09Z",
+        "lastEditedBy" : {
+          "login" : "Gertjan423",
+          "name" : "Gert-Jan Bottu",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/5838382?u=b47bd98f384562b45de5cd99b73da4c1aac7aceb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8c9efc7a1908f7441b41b0d2ca49c22490f8c777",
+    "line" : 191,
+    "diffHunk" : "@@ -0,0 +1,302 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE ConstraintKinds #-}\n+{-# LANGUAGE DataKinds #-}\n+{-# LANGUAGE GADTs #-}\n+{-# LANGUAGE RankNTypes #-}\n+{-# LANGUAGE TypeFamilies #-}\n+\n+-- | Solving references (adding support for recursion) for DAML LF static verification\n+module DA.Daml.LF.Verify.ReferenceSolve\n+  ( solveValueReferences\n+  , solveChoiceReferences\n+  ) where\n+\n+import Data.Hashable\n+import Data.Maybe (fromMaybe)\n+import Data.List (intercalate)\n+import qualified Data.HashMap.Strict as HM\n+\n+import DA.Daml.LF.Ast hiding (lookupChoice)\n+import DA.Daml.LF.Verify.Subst\n+import DA.Daml.LF.Verify.Context\n+\n+-- | Solves the value references by computing the closure of all referenced\n+-- values, for each value in the environment.\n+-- It thus empties `_usValue` by collecting all updates made by this closure.\n+solveValueReferences :: Env 'ValueGathering -> Env 'ChoiceGathering\n+solveValueReferences env =\n+  let val_exp_hmap = HM.map fst $ envVals env\n+      val_ref_hmap = HM.map snd $ envVals env\n+      (_, val_sol_hmap) = foldl (\\hmaps ref -> snd $ solveReference lookup_ref_in lookup_ref_out pop_upds ext_upds make_rec make_mutrec intro_cond empty_upds [] hmaps ref) (val_ref_hmap, HM.empty) (HM.keys $ envVals env)\n+      valhmap = HM.intersectionWith (\\e u -> (e,u)) val_exp_hmap val_sol_hmap\n+  in EnvCG (envSkols env) valhmap (envDats env) (envCids env) HM.empty (envCtrs env) HM.empty\n+  where\n+    lookup_ref_in :: Qualified ExprValName\n+      -> HM.HashMap (Qualified ExprValName) (UpdateSet 'ValueGathering)\n+      -> Maybe ( UpdateSet 'ValueGathering\n+               , HM.HashMap (Qualified ExprValName) (UpdateSet 'ValueGathering) )\n+    lookup_ref_in ref hmap = (, HM.delete ref hmap) <$> HM.lookup ref hmap\n+\n+    lookup_ref_out :: Qualified ExprValName\n+      -> HM.HashMap (Qualified ExprValName) (UpdateSet 'ChoiceGathering)\n+      -> Maybe (UpdateSet 'ChoiceGathering)\n+    lookup_ref_out ref hmap = HM.lookup ref hmap\n+\n+    pop_upds :: UpdateSet 'ValueGathering\n+      -> Maybe ( Either (Cond (Qualified ExprValName))\n+                        (UpdateSet 'ChoiceGathering)\n+               , UpdateSet 'ValueGathering )\n+    pop_upds = \\case\n+      [] -> Nothing\n+      (upd:updset1) ->\n+        let upd' = case upd of\n+              UpdVGBase base -> Right [UpdCGBase $ Simple base]\n+              UpdVGChoice cho -> Right [UpdCGChoice cho]\n+              UpdVGVal val -> Left val\n+        in Just (upd', updset1)\n+\n+    ext_upds :: UpdateSet 'ChoiceGathering -> UpdateSet 'ChoiceGathering\n+      -> UpdateSet 'ChoiceGathering\n+    ext_upds = concatUpdateSet\n+\n+    make_rec :: UpdateSet 'ChoiceGathering -> UpdateSet 'ChoiceGathering\n+    make_rec upds = (map baseUpd $ makeRec [upd | UpdCGBase upd <- upds])\n+      ++ [UpdCGChoice cho | UpdCGChoice cho <- upds]\n+\n+    make_mutrec :: [(Qualified ExprValName, UpdateSet 'ChoiceGathering)]\n+      -> UpdateSet 'ChoiceGathering\n+    make_mutrec inp =\n+      let (strs, upds) = unzip inp\n+          debug = intercalate \" - \" $ map (show . unExprValName . qualObject) strs\n+          updConcat = foldl concatUpdateSet emptyUpdateSet upds\n+      in (map baseUpd $ makeMutRec [upd | UpdCGBase upd <- updConcat] debug)\n+           ++ [UpdCGChoice cho | UpdCGChoice cho <- updConcat]\n+\n+    intro_cond :: Cond (UpdateSet 'ChoiceGathering)\n+      -> UpdateSet 'ChoiceGathering\n+    intro_cond (Determined x) = x\n+    intro_cond (Conditional cond cx cy) =\n+      let xs = map intro_cond cx\n+          ys = map intro_cond cy\n+          updx = foldl concatUpdateSet emptyUpdateSet xs\n+          updy = foldl concatUpdateSet emptyUpdateSet ys\n+      in (introCond $ createCond cond updx updy)\n+\n+    empty_upds :: UpdateSet 'ValueGathering\n+      -> UpdateSet 'ChoiceGathering\n+    empty_upds _ = emptyUpdateSet\n+\n+-- | Solves the choice references by computing the closure of all referenced\n+-- choices, for each choice in the environment.\n+-- It thus empties `_usChoice` by collecting all updates made by this closure.\n+solveChoiceReferences :: Env 'ChoiceGathering -> Env 'Solving\n+solveChoiceReferences env =\n+  let (_, chhmap) = foldl (\\hmaps ref -> snd $ solveReference lookup_ref_in lookup_ref_out pop_upds ext_upds make_rec make_mutrec intro_cond empty_upds [] hmaps ref) (envChoices env, HM.empty) (HM.keys $ envChoices env)\n+      valhmap = HM.map (inlineChoices chhmap) (envVals env)\n+  in EnvS (envSkols env) valhmap (envDats env) (envCids env) (envPreconds env) (envCtrs env) chhmap\n+  where\n+    lookup_ref_in :: UpdChoice\n+      -> HM.HashMap UpdChoice (ChoiceData 'ChoiceGathering)\n+      -> Maybe ( ChoiceData 'ChoiceGathering\n+               , HM.HashMap UpdChoice (ChoiceData 'ChoiceGathering) )\n+    lookup_ref_in ref hmap = (, HM.delete ref hmap) <$> HM.lookup ref hmap\n+\n+    lookup_ref_out :: UpdChoice\n+      -> HM.HashMap UpdChoice (ChoiceData 'Solving)\n+      -> Maybe (ChoiceData 'Solving)\n+    lookup_ref_out ref hmap = HM.lookup ref hmap\n+\n+    pop_upds :: ChoiceData 'ChoiceGathering\n+      -> Maybe ( Either (Cond UpdChoice) (ChoiceData 'Solving)\n+               , ChoiceData 'ChoiceGathering )\n+    pop_upds chdat@ChoiceData{..} = case _cdUpds of\n+      [] -> Nothing\n+      (upd:upds) ->\n+        let upd' = case upd of\n+              UpdCGBase base -> Right chdat{_cdUpds = [UpdSBase base]}\n+              UpdCGChoice cho -> Left cho\n+        in Just (upd', chdat{_cdUpds = upds})\n+\n+    ext_upds :: ChoiceData 'Solving\n+      -> ChoiceData 'Solving\n+      -> ChoiceData 'Solving\n+    ext_upds chdat1 chdat2 =\n+      let varSubst = createExprSubst [(_cdSelf chdat2, EVar (_cdSelf chdat1)), (_cdThis chdat2, EVar (_cdThis chdat1)), (_cdArgs chdat2, EVar (_cdArgs chdat1))]\n+          newUpds = _cdUpds chdat1 `concatUpdateSet`\n+            (substituteTm varSubst $ _cdUpds chdat2)\n+      in chdat1{_cdUpds = newUpds}\n+\n+    make_rec :: ChoiceData 'Solving -> ChoiceData 'Solving\n+    make_rec chdat@ChoiceData{..} =\n+      let upds = map baseUpd $ makeRec [upd | UpdSBase upd <- _cdUpds]\n+      in chdat{_cdUpds = upds}\n+\n+    make_mutrec :: [(UpdChoice, ChoiceData 'Solving)] -> ChoiceData 'Solving\n+    make_mutrec inp =\n+      let (strs, chdats) = unzip inp\n+          debug = intercalate \" - \" $ map (show . unChoiceName . _choName) strs\n+          chdat = concat_chdats chdats\n+          upds = map baseUpd $ makeMutRec [upd | UpdSBase upd <- _cdUpds chdat] debug\n+      in chdat{_cdUpds = upds}\n+\n+    -- | Internal function for combining choice data's. Note that the return\n+    -- type is considered to be irrelevant here, and the first one is returned\n+    -- arbitrarily.\n+    -- Also note that the input list is expected to be non-empty.\n+    concat_chdats :: IsPhase ph => [ChoiceData ph] -> ChoiceData ph\n+    concat_chdats inp =\n+      let chdat = head inp\n+          upds = foldl concatUpdateSet emptyUpdateSet $ map _cdUpds inp\n+      in chdat{_cdUpds = upds}\n+\n+    intro_cond :: IsPhase ph\n+      => Cond (ChoiceData ph)\n+      -> ChoiceData ph\n+    intro_cond (Determined x) = x\n+    intro_cond (Conditional cond cdatxs cdatys) =\n+      let datxs = map intro_cond cdatxs\n+          datys = map intro_cond cdatys\n+          newUpds = introCond (createCond cond\n+              (foldl\n+                (\\upd dat -> upd `concatUpdateSet` _cdUpds dat)\n+                emptyUpdateSet datxs)\n+              (foldl\n+                (\\upd dat -> upd `concatUpdateSet` _cdUpds dat)\n+                emptyUpdateSet datys))\n+      in (head datxs){_cdUpds = newUpds}\n+\n+    empty_upds :: ChoiceData 'ChoiceGathering\n+      -> ChoiceData 'Solving\n+    empty_upds dat = dat{_cdUpds = emptyUpdateSet}\n+\n+    inlineChoices :: HM.HashMap UpdChoice (ChoiceData 'Solving)\n+      -> (Expr, UpdateSet 'ChoiceGathering)\n+      -> (Expr, UpdateSet 'Solving)\n+    inlineChoices chshmap (exp, upds) =\n+      (exp, concatMap inline_choice upds)\n+      where\n+        inline_choice :: Upd 'ChoiceGathering -> UpdateSet 'Solving\n+        inline_choice (UpdCGBase upd) = [UpdSBase upd]\n+        inline_choice (UpdCGChoice (Determined cho)) =\n+          let chdat = fromMaybe (error \"Impossible: missing choice while solving\") (HM.lookup cho chshmap)\n+          in _cdUpds chdat\n+        inline_choice (UpdCGChoice (Conditional cond chos_a chos_b)) =\n+          let upds_a = map (Determined . inline_choice . UpdCGChoice) chos_a\n+              upds_b = map (Determined . inline_choice . UpdCGChoice) chos_b\n+          in introCond $ Conditional cond upds_a upds_b\n+\n+-- | Solves a single reference by recursively inlining the references into updates.\n+solveReference :: forall ref updset0 updset1. (Eq ref, Hashable ref, Show ref)"
+  },
+  {
+    "id" : "07e4e52c-b2c9-455a-b417-0b99ea20d456",
+    "prId" : 6516,
+    "comments" : [
+      {
+        "id" : "4e486af9-c9f7-4246-8f68-ea2beaf146a7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This whole module seems super complex and I admittedly don’t really understand the internals. Given the limited time, I would suggest to leave it as is for now but I very much would like to see this refactored in the future.",
+        "createdAt" : "2020-06-29T08:37:11Z",
+        "updatedAt" : "2020-06-30T18:06:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "284a1046-c210-49c6-a1c5-4ef61bf6d26b",
+        "parentId" : "4e486af9-c9f7-4246-8f68-ea2beaf146a7",
+        "author" : {
+          "login" : "Gertjan423",
+          "name" : "Gert-Jan Bottu",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/5838382?u=b47bd98f384562b45de5cd99b73da4c1aac7aceb&v=4"
+        },
+        "body" : "I agree... This module basically contains the entire logic behind references and recursion.\r\nIt was designed with the goal of being polymorphic (it works exactly the same way for value references and choice references, and is only defined once). But this polymorphism ended up adding more complexity than I anticipated...",
+        "createdAt" : "2020-06-30T12:33:13Z",
+        "updatedAt" : "2020-06-30T18:06:09Z",
+        "lastEditedBy" : {
+          "login" : "Gertjan423",
+          "name" : "Gert-Jan Bottu",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/5838382?u=b47bd98f384562b45de5cd99b73da4c1aac7aceb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8c9efc7a1908f7441b41b0d2ca49c22490f8c777",
+    "line" : 25,
+    "diffHunk" : "@@ -0,0 +1,302 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE ConstraintKinds #-}\n+{-# LANGUAGE DataKinds #-}\n+{-# LANGUAGE GADTs #-}\n+{-# LANGUAGE RankNTypes #-}\n+{-# LANGUAGE TypeFamilies #-}\n+\n+-- | Solving references (adding support for recursion) for DAML LF static verification\n+module DA.Daml.LF.Verify.ReferenceSolve\n+  ( solveValueReferences\n+  , solveChoiceReferences\n+  ) where\n+\n+import Data.Hashable\n+import Data.Maybe (fromMaybe)\n+import Data.List (intercalate)\n+import qualified Data.HashMap.Strict as HM\n+\n+import DA.Daml.LF.Ast hiding (lookupChoice)\n+import DA.Daml.LF.Verify.Subst\n+import DA.Daml.LF.Verify.Context\n+\n+-- | Solves the value references by computing the closure of all referenced"
+  }
+]

@@ -1,0 +1,217 @@
+[
+  {
+    "id" : "d5bbd690-fde1-4322-9a52-6811382b27c1",
+    "prId" : 7345,
+    "comments" : [
+      {
+        "id" : "37bf181f-07ad-4f8f-869b-0b92b501fbf0",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I assume this is unrelated to the other stuff?",
+        "createdAt" : "2020-09-08T18:03:36Z",
+        "updatedAt" : "2020-09-09T11:42:41Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "52b658af-55b1-409c-880c-9e29eff78d69",
+        "parentId" : "37bf181f-07ad-4f8f-869b-0b92b501fbf0",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Yes. fixed.",
+        "createdAt" : "2020-09-08T18:07:45Z",
+        "updatedAt" : "2020-09-09T11:42:41Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a82153ed56fe4391c031f6ea4ab2172d2af765d3",
+    "line" : null,
+    "diffHunk" : "@@ -1,101 +0,0 @@\n-// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n-// SPDX-License-Identifier: Apache-2.0\n-\n-package com.daml.lf.speedy.svalue\n-\n-import com.daml.lf.speedy.SValue\n-import com.daml.lf.speedy.SValue._\n-\n-import scala.annotation.tailrec\n-import scala.collection.JavaConverters._\n-import scala.util.hashing.MurmurHash3\n-\n-private[speedy] object Hasher {"
+  },
+  {
+    "id" : "7c0e605c-7b37-416b-aa70-bd8db2d9bfc9",
+    "prId" : 3715,
+    "comments" : [
+      {
+        "id" : "33b82871-ad47-48d3-b4b8-f290c13cfa77",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "You can just use `opt.size` here.",
+        "createdAt" : "2019-12-05T15:35:17Z",
+        "updatedAt" : "2019-12-06T15:11:20Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "59ffc5ca-45a0-40de-b481-b3b32dad8009",
+        "parentId" : "33b82871-ad47-48d3-b4b8-f290c13cfa77",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "implicit conversion from Option to Traversable are considered warts.",
+        "createdAt" : "2019-12-06T10:00:01Z",
+        "updatedAt" : "2019-12-06T15:11:21Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0703e5eb35d9a96c6ea7a07d0899920f5b3df5d7",
+    "line" : 33,
+    "diffHunk" : "@@ -69,15 +67,15 @@ private[speedy] object Hasher {\n               case SEnum(_, constructor) =>\n                 loop(cmdsRest, constructor.hashCode :: stack)\n               case SRecord(_, _, values) =>\n-                loop(pushOrderedValues(values.iterator().asScala, cmdsRest), stack)\n+                loop(pushOrderedValues(values.size, values.iterator().asScala, cmdsRest), stack)\n               case SVariant(_, variant, value) =>\n                 loop(Value(value) :: Mix(variant.hashCode) :: cmdsRest, stack)\n               case SStruct(_, values) =>\n-                loop(pushOrderedValues(values.iterator().asScala, cmdsRest), stack)\n+                loop(pushOrderedValues(values.size, values.iterator().asScala, cmdsRest), stack)\n               case SOptional(opt) =>\n-                loop(pushOrderedValues(opt.iterator, cmdsRest), stack)\n+                loop(pushOrderedValues(opt.fold(0)(_ => 1), opt.iterator, cmdsRest), stack)"
+  },
+  {
+    "id" : "b0184dc8-ce9d-4676-ae9e-7e64acf246dd",
+    "prId" : 3715,
+    "comments" : [
+      {
+        "id" : "7731f984-3adb-496e-9131-db3d9da70dcf",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Nice catch.",
+        "createdAt" : "2019-12-05T15:35:20Z",
+        "updatedAt" : "2019-12-06T15:11:20Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0703e5eb35d9a96c6ea7a07d0899920f5b3df5d7",
+    "line" : 16,
+    "diffHunk" : "@@ -30,8 +28,8 @@ private[speedy] object Hasher {\n   def hash(v: SValue): Int =\n     loop(List(Value(v)))\n \n-  private def pushOrderedValues(values: Iterator[SValue], cmds: List[Command]) =\n-    ((Ordered(values.size) :: cmds) /: values) { case (acc, v) => Value(v) :: acc }\n+  private def pushOrderedValues(size: Int, values: Iterator[SValue], cmds: List[Command]) =\n+    ((Ordered(size) :: cmds) /: values) { case (acc, v) => Value(v) :: acc }"
+  },
+  {
+    "id" : "6e8e64ca-c2b9-4642-ba10-6f77fcc6409e",
+    "prId" : 3715,
+    "comments" : [
+      {
+        "id" : "561a88e7-7242-4ccf-b82e-a65426919ede",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "I am glad you're writing tests.",
+        "createdAt" : "2019-12-05T15:35:59Z",
+        "updatedAt" : "2019-12-06T15:11:20Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0703e5eb35d9a96c6ea7a07d0899920f5b3df5d7",
+    "line" : 45,
+    "diffHunk" : "@@ -89,11 +87,11 @@ private[speedy] object Hasher {\n                 }\n                 loop(newCmds, stack)\n               case SAny(t, v) =>\n-                loop(Value(v) :: Mix(t.hashCode()) :: cmds, stack)\n+                loop(Value(v) :: Mix(t.hashCode()) :: cmdsRest, stack)"
+  },
+  {
+    "id" : "9a0ee469-619e-48d2-8206-e85543142a1f",
+    "prId" : 3453,
+    "comments" : [
+      {
+        "id" : "1a6daed7-6886-4d0e-ba1f-0efbb6ea00ac",
+        "parentId" : null,
+        "author" : null,
+        "body" : "In this case `k.hashCode` will result in a recursive call to Hasher.hash.\r\nIs this the expected behavior?\r\n\r\nThe recursive call can be removed by adding a second `Mix` command that takes both arguments from the stack.\r\n",
+        "createdAt" : "2019-11-14T12:31:27Z",
+        "updatedAt" : "2019-11-15T09:53:45Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1dde1099-3f66-41dd-b696-9bad8f554b23",
+        "parentId" : "1a6daed7-6886-4d0e-ba1f-0efbb6ea00ac",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "The `hashCode` field of a `SGenMap.Key` is a `val`. It is computed only once when the object is being constructed. There is no recursive call here. ",
+        "createdAt" : "2019-11-14T13:09:16Z",
+        "updatedAt" : "2019-11-15T09:53:45Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d704b3ae-21ee-4e1d-a0cd-1b221b13893a",
+        "parentId" : "1a6daed7-6886-4d0e-ba1f-0efbb6ea00ac",
+        "author" : null,
+        "body" : "^ that makes sense, thanks",
+        "createdAt" : "2019-11-14T13:20:25Z",
+        "updatedAt" : "2019-11-15T09:53:45Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "79777f3e5242b968e6ddaeabbd367f715b2cb5fa",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,101 @@\n+package com.digitalasset.daml.lf.speedy.svalue\n+\n+import com.digitalasset.daml.lf.speedy.SValue\n+import com.digitalasset.daml.lf.speedy.SValue._\n+\n+import scala.annotation.tailrec\n+import scala.collection.JavaConverters._\n+import scala.util.hashing.MurmurHash3\n+\n+// FIXME https://github.com/digital-asset/daml/issues/2256\n+// add extensive tests\n+private[speedy] object Hasher {\n+\n+  case class NonHashableSValue(v: SValue) extends IllegalArgumentException\n+\n+  private sealed trait Command\n+\n+  // mix a block of data with the head of the stack\n+  private final case class Mix(data: Int) extends Command\n+  // mix way the n first elements of the stack in a single block\n+  private final case class Ordered(n: Int) extends Command\n+  // mix in a symmetric way the n first elements of the stack in a single block\n+  private final case class Unordered(n: Int) extends Command\n+  // compute the hash of a value\n+  private final case class Value(v: SValue) extends Command\n+\n+  def hash(v: SValue): Int =\n+    loop(List(Value(v)))\n+\n+  private def pushOrderedValues(values: Iterator[SValue], cmds: List[Command]) =\n+    ((Ordered(values.size) :: cmds) /: values) { case (acc, v) => Value(v) :: acc }\n+\n+  @tailrec\n+  private def loop(cmds: List[Command], stack: List[Int] = List.empty): Int =\n+    cmds match {\n+      case cmd :: cmdsRest =>\n+        cmd match {\n+          case Value(v) =>\n+            v match {\n+              case _: SPAP | SToken | _: STNat =>\n+                throw NonHashableSValue(v)\n+              case SUnit =>\n+                loop(cmdsRest, 0 :: stack)\n+              case SBool(b) =>\n+                loop(cmdsRest, b.hashCode() :: stack)\n+              case SInt64(i) =>\n+                loop(cmdsRest, i.toInt :: stack)\n+              case SNumeric(n) =>\n+                loop(cmdsRest, n.hashCode() :: stack)\n+              case SText(s) =>\n+                loop(cmdsRest, s.hashCode :: stack)\n+              case SDate(d) =>\n+                loop(cmdsRest, d.hashCode() :: stack)\n+              case STimestamp(t) =>\n+                loop(cmdsRest, t.hashCode() :: stack)\n+              case SParty(p) =>\n+                loop(cmdsRest, p.hashCode :: stack)\n+              case SContractId(cid) =>\n+                loop(cmdsRest, cid.hashCode :: stack)\n+              case STypeRep(t) =>\n+                loop(cmdsRest, t.hashCode() :: stack)\n+              case SEnum(_, constructor) =>\n+                loop(cmdsRest, constructor.hashCode :: stack)\n+              case SRecord(_, _, values) =>\n+                loop(pushOrderedValues(values.iterator().asScala, cmdsRest), stack)\n+              case SVariant(_, variant, value) =>\n+                loop(Value(value) :: Mix(variant.hashCode) :: cmdsRest, stack)\n+              case STuple(_, values) =>\n+                loop(pushOrderedValues(values.iterator().asScala, cmdsRest), stack)\n+              case SOptional(opt) =>\n+                loop(pushOrderedValues(opt.iterator, cmdsRest), stack)\n+              case SList(values) =>\n+                loop(pushOrderedValues(values.iterator, cmdsRest), stack)\n+              case SMap(value) =>\n+                val newCmds = ((Unordered(value.size) :: cmdsRest) /: value) {\n+                  case (acc, (k, v)) => Value(v) :: Mix(k.hashCode) :: acc\n+                }\n+                loop(newCmds, stack)\n+              case SGenMap(_, values) =>\n+                val newCmds = ((Unordered(values.size) :: cmdsRest) /: values) {\n+                  case (acc, (k, (_, v))) => Value(v) :: Mix(k.hashCode) :: acc"
+  }
+]

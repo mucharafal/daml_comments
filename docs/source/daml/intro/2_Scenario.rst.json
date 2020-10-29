@@ -1,0 +1,431 @@
+[
+  {
+    "id" : "eabb3493-934b-4cab-8d6e-fe3d0bed5a37",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "a73c495e-44ee-4788-bf73-88f55646a096",
+        "parentId" : null,
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "Is this true? I thought `daml test` only runs scenarios, and one has to use `daml test-script` to test scripts?",
+        "createdAt" : "2020-08-31T14:27:39Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "df9352ed-a416-4632-8e18-bff158c1f8d9",
+        "parentId" : "a73c495e-44ee-4788-bf73-88f55646a096",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yes it is, `daml test` works against scripts and runs them in the scenario runner. `daml test-script` runs against an actual ledger (unfortunate naming).",
+        "createdAt" : "2020-08-31T14:28:20Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : null,
+    "diffHunk" : "@@ -1,82 +1,84 @@\n .. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n .. SPDX-License-Identifier: Apache-2.0\n \n-2 Testing templates using scenarios\n-===================================\n+2 Testing templates using DAML Script\n+=====================================\n \n-In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+In this section you will test the ``Token`` model from :doc:`1_Token` using the :doc:`DAML Script </daml-script/index>` integration in :ref:`DAML Studio <scenario-script-results>`. You'll learn about the basic features of :\n \n-- Getting parties\n+- Allocating parties\n - Submitting transactions\n - Creating contracts\n - Testing for failure\n - Archiving contracts\n - Viewing ledger and final ledger state\n \n-.. scenario_basics:\n+.. script_basics:\n \n-Scenario basics\n+Script basics\n ---------------\n \n-A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+A ``Script`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n \n-Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+Below is a basic script that creates a ``Token`` for a party called \"Alice\".\n \n .. literalinclude:: daml/daml-intro-2/Token_Test.daml\n   :language: daml\n   :start-after: -- TOKEN_TEST_1_BEGIN\n   :end-before: -- TOKEN_TEST_1_END\n \n-You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+You declare a ``Script`` as a top-level variable and introduce it using ``script do``. ``do`` always starts a block, so the rest of the script is indented.\n \n-Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above script uses the function ``allocateParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n \n - Use of ``<-`` instead of ``=``.\n \n-  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+  The reason for that is ``allocateParty`` is an ``Action`` that can only be performed once the ``Script`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger state the script is running on, ``allocateParty`` will either give you back a party with the name you specified or append a suffix to that name if such a party has already been allocated.\n \n   More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n \n \n   If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n-- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+- The argument ``\"Alice\"`` to ``allocateParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n \n With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``.\n \n-Just like ``Scenario`` is a recipe for a test, ``Update`` is a recipe for a transaction. ``create Token with owner = alice`` is an ``Update``, which translates to the transaction creating a ``Token`` with owner Alice.\n+Just like ``Script`` is a recipe for a test, ``Commands`` is a recipe for a transaction. ``createCmd Token with owner = alice`` is a ``Commands``, which translates to a list of commands that will be submitted to the ledger creating a transaction which creates a ``Token`` with owner Alice.\n \n You'll learn all about the syntax ``Token with owner = alice`` in :doc:`3_Data`.\n \n-You could write this as ``submit alice (create Token with owner = alice)``, but just like scenarios, you can assemble updates using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the scenario above gives the same result, whilst being easier to read.\n+You could write this as ``submit alice (createCmd Token with owner = alice)``, but just like scripts, you can assemble commands using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the commands above gives the same result, whilst being easier to read. Note however, that the commands submitted as part of a transaction are not allowed to depend n each other.\n \n-Running scenarios\n------------------\n+Running scripts\n+---------------\n \n-There are two ways to run scenarios:\n+There are a few ways to run DAML Scripts:\n \n-- In DAML Studio, providing visualizations of the resulting ledger\n-- Using the command line, useful for continuous integration\n+- In DAML Studio against a test ledger, providing visualizations of the resulting ledger\n+- Using the command line ``daml test`` also against a test ledger, useful for continuous integration"
+  },
+  {
+    "id" : "a813b9aa-a5dd-4d1a-b8da-635f81015efd",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "f469de6d-86c6-4160-b699-5337d5a5f155",
+        "parentId" : null,
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "Since when is `archiveCmd` a thing? ",
+        "createdAt" : "2020-08-31T14:28:59Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2729aaf2-11d6-4b87-9c4a-015e187c9525",
+        "parentId" : "f469de6d-86c6-4160-b699-5337d5a5f155",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Since this morning :slightly_smiling_face: Documentation-driven development. I got annoyed by 3 things during the migration that I added since:\r\n1. `archiveCmd`, very reasonable to have imho.\r\n2. The absence of an equivalent of `scenario`, we now have `script`.\r\n3. No equivalent of `pass`, we now have `passTime`.\r\n",
+        "createdAt" : "2020-08-31T14:30:17Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : null,
+    "diffHunk" : "@@ -110,13 +114,13 @@ To test for failing submits and keep the scenario running thereafter, or fail if\n Archiving contracts\n -------------------\n \n-Archiving contracts works just like creating them, but using ``archive`` instead of ``create``. Where ``create`` takes an instance of a template, ``archive`` takes a reference to a contract.\n+Archiving contracts works just like creating them, but using ``archiveCmd`` instead of ``createCmd``. Where ``createCmd`` takes an instance of a template, ``archiveCmd`` takes a reference to a contract."
+  },
+  {
+    "id" : "20c15c55-66d0-4960-951f-8238759339ca",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "7635ab03-b02f-4b33-805b-d64136079628",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Should the filename change accordingly? It's currently still `2_Scenario.rst`.",
+        "createdAt" : "2020-09-01T08:01:00Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "95dd900c-5b47-4f63-9b8a-80f040dce894",
+        "parentId" : "7635ab03-b02f-4b33-805b-d64136079628",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I was wondering about that. We don’t want to break links but we could change it and add a redirect.",
+        "createdAt" : "2020-09-01T10:34:18Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "60410b23-22ee-4073-9ae2-37127c600aaf",
+        "parentId" : "7635ab03-b02f-4b33-805b-d64136079628",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Renamed and added a redirect.",
+        "createdAt" : "2020-09-01T11:45:36Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : null,
+    "diffHunk" : "@@ -1,82 +1,84 @@\n .. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n .. SPDX-License-Identifier: Apache-2.0\n \n-2 Testing templates using scenarios\n-===================================\n+2 Testing templates using DAML Script"
+  },
+  {
+    "id" : "4195a358-a005-4593-9490-0a61a96413f5",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "5a29e9a0-2407-47e2-bc49-0feb8a06c16b",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\nWith a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Commands``.\r\n```",
+        "createdAt" : "2020-09-01T08:06:07Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : null,
+    "diffHunk" : "@@ -1,82 +1,84 @@\n .. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n .. SPDX-License-Identifier: Apache-2.0\n \n-2 Testing templates using scenarios\n-===================================\n+2 Testing templates using DAML Script\n+=====================================\n \n-In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+In this section you will test the ``Token`` model from :doc:`1_Token` using the :doc:`DAML Script </daml-script/index>` integration in :ref:`DAML Studio <scenario-script-results>`. You'll learn about the basic features of :\n \n-- Getting parties\n+- Allocating parties\n - Submitting transactions\n - Creating contracts\n - Testing for failure\n - Archiving contracts\n - Viewing ledger and final ledger state\n \n-.. scenario_basics:\n+.. script_basics:\n \n-Scenario basics\n+Script basics\n ---------------\n \n-A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+A ``Script`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n \n-Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+Below is a basic script that creates a ``Token`` for a party called \"Alice\".\n \n .. literalinclude:: daml/daml-intro-2/Token_Test.daml\n   :language: daml\n   :start-after: -- TOKEN_TEST_1_BEGIN\n   :end-before: -- TOKEN_TEST_1_END\n \n-You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+You declare a ``Script`` as a top-level variable and introduce it using ``script do``. ``do`` always starts a block, so the rest of the script is indented.\n \n-Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above script uses the function ``allocateParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n \n - Use of ``<-`` instead of ``=``.\n \n-  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+  The reason for that is ``allocateParty`` is an ``Action`` that can only be performed once the ``Script`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger state the script is running on, ``allocateParty`` will either give you back a party with the name you specified or append a suffix to that name if such a party has already been allocated.\n \n   More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n \n \n   If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n-- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+- The argument ``\"Alice\"`` to ``allocateParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n \n With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``."
+  },
+  {
+    "id" : "d038ab94-6bde-4b98-b97a-d16f54c496f1",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "b4ab3311-528a-411f-9ca4-97ed7a0321f1",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n- Against a real ledger, take a look at the documentation for :doc:`DAML Script </daml-script/index>` for more information.\r\n```",
+        "createdAt" : "2020-09-01T08:08:25Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : null,
+    "diffHunk" : "@@ -1,82 +1,84 @@\n .. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n .. SPDX-License-Identifier: Apache-2.0\n \n-2 Testing templates using scenarios\n-===================================\n+2 Testing templates using DAML Script\n+=====================================\n \n-In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+In this section you will test the ``Token`` model from :doc:`1_Token` using the :doc:`DAML Script </daml-script/index>` integration in :ref:`DAML Studio <scenario-script-results>`. You'll learn about the basic features of :\n \n-- Getting parties\n+- Allocating parties\n - Submitting transactions\n - Creating contracts\n - Testing for failure\n - Archiving contracts\n - Viewing ledger and final ledger state\n \n-.. scenario_basics:\n+.. script_basics:\n \n-Scenario basics\n+Script basics\n ---------------\n \n-A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+A ``Script`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n \n-Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+Below is a basic script that creates a ``Token`` for a party called \"Alice\".\n \n .. literalinclude:: daml/daml-intro-2/Token_Test.daml\n   :language: daml\n   :start-after: -- TOKEN_TEST_1_BEGIN\n   :end-before: -- TOKEN_TEST_1_END\n \n-You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+You declare a ``Script`` as a top-level variable and introduce it using ``script do``. ``do`` always starts a block, so the rest of the script is indented.\n \n-Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above script uses the function ``allocateParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n \n - Use of ``<-`` instead of ``=``.\n \n-  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+  The reason for that is ``allocateParty`` is an ``Action`` that can only be performed once the ``Script`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger state the script is running on, ``allocateParty`` will either give you back a party with the name you specified or append a suffix to that name if such a party has already been allocated.\n \n   More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n \n \n   If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n-- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+- The argument ``\"Alice\"`` to ``allocateParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n \n With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``.\n \n-Just like ``Scenario`` is a recipe for a test, ``Update`` is a recipe for a transaction. ``create Token with owner = alice`` is an ``Update``, which translates to the transaction creating a ``Token`` with owner Alice.\n+Just like ``Script`` is a recipe for a test, ``Commands`` is a recipe for a transaction. ``createCmd Token with owner = alice`` is a ``Commands``, which translates to a list of commands that will be submitted to the ledger creating a transaction which creates a ``Token`` with owner Alice.\n \n You'll learn all about the syntax ``Token with owner = alice`` in :doc:`3_Data`.\n \n-You could write this as ``submit alice (create Token with owner = alice)``, but just like scenarios, you can assemble updates using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the scenario above gives the same result, whilst being easier to read.\n+You could write this as ``submit alice (createCmd Token with owner = alice)``, but just like scripts, you can assemble commands using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the commands above gives the same result, whilst being easier to read. Note however, that the commands submitted as part of a transaction are not allowed to depend n each other.\n \n-Running scenarios\n------------------\n+Running scripts\n+---------------\n \n-There are two ways to run scenarios:\n+There are a few ways to run DAML Scripts:\n \n-- In DAML Studio, providing visualizations of the resulting ledger\n-- Using the command line, useful for continuous integration\n+- In DAML Studio against a test ledger, providing visualizations of the resulting ledger\n+- Using the command line ``daml test`` also against a test ledger, useful for continuous integration\n+- Against a real ledger, take a look at the documentation for :doc:`DAML Script </daml-script/index>` fr more information."
+  },
+  {
+    "id" : "2a7a7868-f1fb-49ce-befd-b9ddf58aa2c3",
+    "prId" : 1717,
+    "comments" : [
+      {
+        "id" : "f5987fff-eccb-4627-82a0-00b9dd18e71a",
+        "parentId" : null,
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "sentence case\r\n```suggestion\r\nScenario basics\r\n```",
+        "createdAt" : "2019-06-17T13:27:14Z",
+        "updatedAt" : "2019-06-18T09:05:02Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "64d0389f2c6ccd0a16f369739cc879b850f52d78",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,166 @@\n+.. Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+2 Testing templates using scenarios\n+===================================\n+\n+In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+\n+- Getting parties\n+- Submitting transactions\n+- Creating contracts\n+- Testing for failure\n+- Archiving contracts\n+- Viewing ledger and final ledger state\n+\n+.. scenario_basics:\n+\n+Scenario Basics"
+  },
+  {
+    "id" : "8d06bf14-e968-4f33-bdea-f13397aa18ad",
+    "prId" : 1717,
+    "comments" : [
+      {
+        "id" : "9814ec9d-152f-4465-bdab-2c2b5a44056c",
+        "parentId" : null,
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "sentence case\r\n```suggestion\r\nRunning scenarios\r\n```",
+        "createdAt" : "2019-06-17T13:27:22Z",
+        "updatedAt" : "2019-06-18T09:05:02Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "64d0389f2c6ccd0a16f369739cc879b850f52d78",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,166 @@\n+.. Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+2 Testing templates using scenarios\n+===================================\n+\n+In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+\n+- Getting parties\n+- Submitting transactions\n+- Creating contracts\n+- Testing for failure\n+- Archiving contracts\n+- Viewing ledger and final ledger state\n+\n+.. scenario_basics:\n+\n+Scenario Basics\n+---------------\n+\n+A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+\n+Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_1_BEGIN\n+  :end-before: -- TOKEN_TEST_1_END\n+\n+You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+\n+- Use of ``<-`` instead of ``=``.\n+\n+  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+\n+  More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n+\n+\n+  If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n+- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+\n+With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``.\n+\n+Just like ``Scenario`` is a recipe for a test, ``Update`` is a recipe for a transaction. ``create Token with owner = alice`` is an ``Update``, which translates to the transaction creating a ``Token`` with owner Alice.\n+\n+You'll learn all about the syntax ``Token with owner = alice`` in :doc:`3_Data`.\n+\n+You could write this as ``submit alice (create Token with owner = alice)``, but just like scenarios, you can assemble updates using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the scenario above gives the same result, whilst being easier to read.\n+\n+Running Scenarios"
+  },
+  {
+    "id" : "55c1c08d-8593-45b2-91a7-9bff96bafbca",
+    "prId" : 1717,
+    "comments" : [
+      {
+        "id" : "a98b9d21-78e3-4f76-970f-fb4e4651c3e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "sentence case\r\n```suggestion\r\nTesting for failure\r\n```",
+        "createdAt" : "2019-06-17T13:27:31Z",
+        "updatedAt" : "2019-06-18T09:05:02Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "64d0389f2c6ccd0a16f369739cc879b850f52d78",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,166 @@\n+.. Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+2 Testing templates using scenarios\n+===================================\n+\n+In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+\n+- Getting parties\n+- Submitting transactions\n+- Creating contracts\n+- Testing for failure\n+- Archiving contracts\n+- Viewing ledger and final ledger state\n+\n+.. scenario_basics:\n+\n+Scenario Basics\n+---------------\n+\n+A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+\n+Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_1_BEGIN\n+  :end-before: -- TOKEN_TEST_1_END\n+\n+You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+\n+- Use of ``<-`` instead of ``=``.\n+\n+  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+\n+  More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n+\n+\n+  If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n+- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+\n+With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``.\n+\n+Just like ``Scenario`` is a recipe for a test, ``Update`` is a recipe for a transaction. ``create Token with owner = alice`` is an ``Update``, which translates to the transaction creating a ``Token`` with owner Alice.\n+\n+You'll learn all about the syntax ``Token with owner = alice`` in :doc:`3_Data`.\n+\n+You could write this as ``submit alice (create Token with owner = alice)``, but just like scenarios, you can assemble updates using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the scenario above gives the same result, whilst being easier to read.\n+\n+Running Scenarios\n+-----------------\n+\n+There are two ways to run scenarios:\n+\n+- In DAML Studio, providing visualizations of the resulting ledger\n+- Using the command line, useful for continuous integration\n+\n+In DAML Studio, you should see the text \"Scenario results\" just above the line ``token_test_1 = do``. Click on it to display the outcome of the scenario.\n+\n+.. figure:: images/2_Scenario/scenario_results1.png\n+\n+This opens the scenario view in a separate column in VS Code. The default view is a tabular representation of the final state of the ledger:\n+\n+.. figure:: images/2_Scenario/tabular_view1.png\n+\n+What this display means:\n+\n+- The big title reading ``Token_Test:Token`` is the identifier of the type of contract that's listed below. ``Token_Test`` is the module name, ``Token`` the template name.\n+\n+- The first columns, labelled vertically, show which parties know about which contracts. In this simple scenario, the sole party \"Alice\" knows about the contract she created.\n+\n+- The second column shows the ID of the contract. This will be explained later.\n+\n+- The third column shows the status of the contract, either ``active`` or ``archived``.\n+- The remaining columns show the contract arguments, with one column per field. As expected, field ``owner`` is ``'Alice'``. The single quotation marks indicate that ``Alice`` is a party.\n+\n+To run the same test from the command line, save your module in a file ``Token_Test.daml`` and run ``daml damlc -- test Token_Test.daml``. If your file contains more than one scenario, all of them will be run.\n+\n+.. _intro_2_failure:\n+\n+Testing for Failure"
+  },
+  {
+    "id" : "4aee8510-95b9-44d2-b191-5c3a2aeaa264",
+    "prId" : 1717,
+    "comments" : [
+      {
+        "id" : "193d7709-1e6a-4a42-9c87-94572ced5c48",
+        "parentId" : null,
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "sentence case\r\n```suggestion\r\nArchiving contracts\r\n```",
+        "createdAt" : "2019-06-17T13:27:39Z",
+        "updatedAt" : "2019-06-18T09:05:02Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "64d0389f2c6ccd0a16f369739cc879b850f52d78",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,166 @@\n+.. Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+2 Testing templates using scenarios\n+===================================\n+\n+In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+\n+- Getting parties\n+- Submitting transactions\n+- Creating contracts\n+- Testing for failure\n+- Archiving contracts\n+- Viewing ledger and final ledger state\n+\n+.. scenario_basics:\n+\n+Scenario Basics\n+---------------\n+\n+A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+\n+Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_1_BEGIN\n+  :end-before: -- TOKEN_TEST_1_END\n+\n+You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+\n+- Use of ``<-`` instead of ``=``.\n+\n+  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+\n+  More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n+\n+\n+  If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n+- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+\n+With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``.\n+\n+Just like ``Scenario`` is a recipe for a test, ``Update`` is a recipe for a transaction. ``create Token with owner = alice`` is an ``Update``, which translates to the transaction creating a ``Token`` with owner Alice.\n+\n+You'll learn all about the syntax ``Token with owner = alice`` in :doc:`3_Data`.\n+\n+You could write this as ``submit alice (create Token with owner = alice)``, but just like scenarios, you can assemble updates using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the scenario above gives the same result, whilst being easier to read.\n+\n+Running Scenarios\n+-----------------\n+\n+There are two ways to run scenarios:\n+\n+- In DAML Studio, providing visualizations of the resulting ledger\n+- Using the command line, useful for continuous integration\n+\n+In DAML Studio, you should see the text \"Scenario results\" just above the line ``token_test_1 = do``. Click on it to display the outcome of the scenario.\n+\n+.. figure:: images/2_Scenario/scenario_results1.png\n+\n+This opens the scenario view in a separate column in VS Code. The default view is a tabular representation of the final state of the ledger:\n+\n+.. figure:: images/2_Scenario/tabular_view1.png\n+\n+What this display means:\n+\n+- The big title reading ``Token_Test:Token`` is the identifier of the type of contract that's listed below. ``Token_Test`` is the module name, ``Token`` the template name.\n+\n+- The first columns, labelled vertically, show which parties know about which contracts. In this simple scenario, the sole party \"Alice\" knows about the contract she created.\n+\n+- The second column shows the ID of the contract. This will be explained later.\n+\n+- The third column shows the status of the contract, either ``active`` or ``archived``.\n+- The remaining columns show the contract arguments, with one column per field. As expected, field ``owner`` is ``'Alice'``. The single quotation marks indicate that ``Alice`` is a party.\n+\n+To run the same test from the command line, save your module in a file ``Token_Test.daml`` and run ``daml damlc -- test Token_Test.daml``. If your file contains more than one scenario, all of them will be run.\n+\n+.. _intro_2_failure:\n+\n+Testing for Failure\n+-------------------\n+\n+In :doc:`1_Token` you learned that creating a ``Token`` requires the authority of its owner. In other words, it should not be possible for Alice to create a Token for another party and vice versa. A reasonable attempt to test that would be:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- FAILURE_TEST_1_BEGIN\n+  :end-before: -- FAILURE_TEST_1_END\n+\n+However, if you open the scenario view for that scenario, you see the following message:\n+\n+.. figure:: images/2_Scenario/failure.png\n+\n+The scenario failed, as expected, but scenarios abort at the first failure. This means that it only tested that Alice can't create a token for Bob, and the second ``submit`` statement was never reached.\n+\n+To test for failing submits and keep the scenario running thereafter, or fail if the submission succeeds, you can use the ``submitMustFail`` function:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_2_BEGIN\n+  :end-before: -- TOKEN_TEST_2_END\n+\n+``submitMustFail`` never has an impact on the ledger so the resulting tabular scenario view just shows the two Tokens resulting from the successful ``submit`` statements. Note the new column for Bob as well as the visibilities. Alice and Bob cannot see each others' Tokens.\n+\n+.. _archiving:\n+\n+Archiving Contracts"
+  },
+  {
+    "id" : "45b3ff28-6240-487b-8e92-17aebf1b1abe",
+    "prId" : 1717,
+    "comments" : [
+      {
+        "id" : "4ff6d980-71f0-4a8e-9c83-2350b55ba8cc",
+        "parentId" : null,
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "sentence case\r\n```suggestion\r\nExploring the ledger\r\n```",
+        "createdAt" : "2019-06-17T13:27:48Z",
+        "updatedAt" : "2019-06-18T09:05:02Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "64d0389f2c6ccd0a16f369739cc879b850f52d78",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,166 @@\n+.. Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+2 Testing templates using scenarios\n+===================================\n+\n+In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+\n+- Getting parties\n+- Submitting transactions\n+- Creating contracts\n+- Testing for failure\n+- Archiving contracts\n+- Viewing ledger and final ledger state\n+\n+.. scenario_basics:\n+\n+Scenario Basics\n+---------------\n+\n+A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+\n+Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_1_BEGIN\n+  :end-before: -- TOKEN_TEST_1_END\n+\n+You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+\n+- Use of ``<-`` instead of ``=``.\n+\n+  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+\n+  More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n+\n+\n+  If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n+- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+\n+With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``.\n+\n+Just like ``Scenario`` is a recipe for a test, ``Update`` is a recipe for a transaction. ``create Token with owner = alice`` is an ``Update``, which translates to the transaction creating a ``Token`` with owner Alice.\n+\n+You'll learn all about the syntax ``Token with owner = alice`` in :doc:`3_Data`.\n+\n+You could write this as ``submit alice (create Token with owner = alice)``, but just like scenarios, you can assemble updates using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the scenario above gives the same result, whilst being easier to read.\n+\n+Running Scenarios\n+-----------------\n+\n+There are two ways to run scenarios:\n+\n+- In DAML Studio, providing visualizations of the resulting ledger\n+- Using the command line, useful for continuous integration\n+\n+In DAML Studio, you should see the text \"Scenario results\" just above the line ``token_test_1 = do``. Click on it to display the outcome of the scenario.\n+\n+.. figure:: images/2_Scenario/scenario_results1.png\n+\n+This opens the scenario view in a separate column in VS Code. The default view is a tabular representation of the final state of the ledger:\n+\n+.. figure:: images/2_Scenario/tabular_view1.png\n+\n+What this display means:\n+\n+- The big title reading ``Token_Test:Token`` is the identifier of the type of contract that's listed below. ``Token_Test`` is the module name, ``Token`` the template name.\n+\n+- The first columns, labelled vertically, show which parties know about which contracts. In this simple scenario, the sole party \"Alice\" knows about the contract she created.\n+\n+- The second column shows the ID of the contract. This will be explained later.\n+\n+- The third column shows the status of the contract, either ``active`` or ``archived``.\n+- The remaining columns show the contract arguments, with one column per field. As expected, field ``owner`` is ``'Alice'``. The single quotation marks indicate that ``Alice`` is a party.\n+\n+To run the same test from the command line, save your module in a file ``Token_Test.daml`` and run ``daml damlc -- test Token_Test.daml``. If your file contains more than one scenario, all of them will be run.\n+\n+.. _intro_2_failure:\n+\n+Testing for Failure\n+-------------------\n+\n+In :doc:`1_Token` you learned that creating a ``Token`` requires the authority of its owner. In other words, it should not be possible for Alice to create a Token for another party and vice versa. A reasonable attempt to test that would be:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- FAILURE_TEST_1_BEGIN\n+  :end-before: -- FAILURE_TEST_1_END\n+\n+However, if you open the scenario view for that scenario, you see the following message:\n+\n+.. figure:: images/2_Scenario/failure.png\n+\n+The scenario failed, as expected, but scenarios abort at the first failure. This means that it only tested that Alice can't create a token for Bob, and the second ``submit`` statement was never reached.\n+\n+To test for failing submits and keep the scenario running thereafter, or fail if the submission succeeds, you can use the ``submitMustFail`` function:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_2_BEGIN\n+  :end-before: -- TOKEN_TEST_2_END\n+\n+``submitMustFail`` never has an impact on the ledger so the resulting tabular scenario view just shows the two Tokens resulting from the successful ``submit`` statements. Note the new column for Bob as well as the visibilities. Alice and Bob cannot see each others' Tokens.\n+\n+.. _archiving:\n+\n+Archiving Contracts\n+-------------------\n+\n+Archiving contracts works just like creating them, but using ``archive`` instead of ``create``. Where ``create`` takes an instance of a template, ``archive`` takes a reference to a contract.\n+\n+References to contracts have the type ``ContractId a``, where ``a`` is a *type parameter* representing the type of contract that the ID refers to. For example, a reference to a ``Token`` would be a ``ContractId Token``.\n+\n+To ``archive`` the Token Alice has created, you need to get a handle on its contract ID. In scenarios, you do this using ``<-`` notation. That's because the contract ID needs to be retrieved from the ledger. How this works is discussed in :doc:`5_Restrictions`.\n+\n+This scenario first checks that Bob cannot archive Alice's Token and then Alice successfully archives it:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_3_BEGIN\n+  :end-before: -- TOKEN_TEST_3_END\n+\n+Exploring the Ledger"
+  },
+  {
+    "id" : "c7b2f5cf-acdb-4884-bca2-5dd278f0ae0e",
+    "prId" : 1717,
+    "comments" : [
+      {
+        "id" : "63f47850-01f9-4f56-81e2-84981c904d06",
+        "parentId" : null,
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "to match other pages\r\n```suggestion\r\nNext up\r\n```",
+        "createdAt" : "2019-06-17T13:27:57Z",
+        "updatedAt" : "2019-06-18T09:05:02Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "64d0389f2c6ccd0a16f369739cc879b850f52d78",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,166 @@\n+.. Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+2 Testing templates using scenarios\n+===================================\n+\n+In this section you will test the ``Token`` model from :doc:`1_Token` using DAML's inbuilt ``scenario`` language. You'll learn about the basic features of scenarios:\n+\n+- Getting parties\n+- Submitting transactions\n+- Creating contracts\n+- Testing for failure\n+- Archiving contracts\n+- Viewing ledger and final ledger state\n+\n+.. scenario_basics:\n+\n+Scenario Basics\n+---------------\n+\n+A ``Scenario`` is like a recipe for a test, where you can script different parties submitting a series of transactions, to check that your templates behave as you'd expect. You can also script some some external information like party identities, and ledger time.\n+\n+Below is a basic scenario that creates a ``Token`` for a party called \"Alice\".\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_1_BEGIN\n+  :end-before: -- TOKEN_TEST_1_END\n+\n+You declare a ``Scenario`` a top-level variable and introduce it using ``scenario do``. ``do`` always starts a block, so the rest of the scenario is indented.\n+\n+Before you can create any ``Token`` contracts, you need some parties on the test ledger. The above scenario uses the function ``getParty`` to put a party called \"Alice\" in a variable ``alice``. There are two things of note there:\n+\n+- Use of ``<-`` instead of ``=``.\n+\n+  The reason for that is ``getParty`` is an ``Action`` that can only be performed once the ``Scenario`` is run in the context of a ledger. ``<-`` means \"run the action and bind the result\". It can only be run in that context because, depending on the ledger the scenario is running on, ``getParty`` may have to look up a party identity or create a new party.\n+\n+  More on ``Actions`` and ``do`` blocks in :doc:`5_Restrictions`.\n+\n+\n+  If that doesn't quite make sense yet, for the time being you can think of this arrow as extracting the right-hand-side value from the ledger and storing it into the variable on the left.\n+- The argument ``\"Alice\"`` to ``getParty`` does not have to be enclosed in brackets. Functions in DAML are called using the syntax ``fn arg1 arg2 arg3``.\n+\n+With a variable ``alice`` of type ``Party`` in hand, you can submit your first transaction. Unsurprisingly, you do this using the ``submit`` function. ``submit`` takes two arguments: a ``Party`` and an ``Update``.\n+\n+Just like ``Scenario`` is a recipe for a test, ``Update`` is a recipe for a transaction. ``create Token with owner = alice`` is an ``Update``, which translates to the transaction creating a ``Token`` with owner Alice.\n+\n+You'll learn all about the syntax ``Token with owner = alice`` in :doc:`3_Data`.\n+\n+You could write this as ``submit alice (create Token with owner = alice)``, but just like scenarios, you can assemble updates using ``do`` blocks. A ``do`` block always takes the value of the last statement within it so the syntax shown in the scenario above gives the same result, whilst being easier to read.\n+\n+Running Scenarios\n+-----------------\n+\n+There are two ways to run scenarios:\n+\n+- In DAML Studio, providing visualizations of the resulting ledger\n+- Using the command line, useful for continuous integration\n+\n+In DAML Studio, you should see the text \"Scenario results\" just above the line ``token_test_1 = do``. Click on it to display the outcome of the scenario.\n+\n+.. figure:: images/2_Scenario/scenario_results1.png\n+\n+This opens the scenario view in a separate column in VS Code. The default view is a tabular representation of the final state of the ledger:\n+\n+.. figure:: images/2_Scenario/tabular_view1.png\n+\n+What this display means:\n+\n+- The big title reading ``Token_Test:Token`` is the identifier of the type of contract that's listed below. ``Token_Test`` is the module name, ``Token`` the template name.\n+\n+- The first columns, labelled vertically, show which parties know about which contracts. In this simple scenario, the sole party \"Alice\" knows about the contract she created.\n+\n+- The second column shows the ID of the contract. This will be explained later.\n+\n+- The third column shows the status of the contract, either ``active`` or ``archived``.\n+- The remaining columns show the contract arguments, with one column per field. As expected, field ``owner`` is ``'Alice'``. The single quotation marks indicate that ``Alice`` is a party.\n+\n+To run the same test from the command line, save your module in a file ``Token_Test.daml`` and run ``daml damlc -- test Token_Test.daml``. If your file contains more than one scenario, all of them will be run.\n+\n+.. _intro_2_failure:\n+\n+Testing for Failure\n+-------------------\n+\n+In :doc:`1_Token` you learned that creating a ``Token`` requires the authority of its owner. In other words, it should not be possible for Alice to create a Token for another party and vice versa. A reasonable attempt to test that would be:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- FAILURE_TEST_1_BEGIN\n+  :end-before: -- FAILURE_TEST_1_END\n+\n+However, if you open the scenario view for that scenario, you see the following message:\n+\n+.. figure:: images/2_Scenario/failure.png\n+\n+The scenario failed, as expected, but scenarios abort at the first failure. This means that it only tested that Alice can't create a token for Bob, and the second ``submit`` statement was never reached.\n+\n+To test for failing submits and keep the scenario running thereafter, or fail if the submission succeeds, you can use the ``submitMustFail`` function:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_2_BEGIN\n+  :end-before: -- TOKEN_TEST_2_END\n+\n+``submitMustFail`` never has an impact on the ledger so the resulting tabular scenario view just shows the two Tokens resulting from the successful ``submit`` statements. Note the new column for Bob as well as the visibilities. Alice and Bob cannot see each others' Tokens.\n+\n+.. _archiving:\n+\n+Archiving Contracts\n+-------------------\n+\n+Archiving contracts works just like creating them, but using ``archive`` instead of ``create``. Where ``create`` takes an instance of a template, ``archive`` takes a reference to a contract.\n+\n+References to contracts have the type ``ContractId a``, where ``a`` is a *type parameter* representing the type of contract that the ID refers to. For example, a reference to a ``Token`` would be a ``ContractId Token``.\n+\n+To ``archive`` the Token Alice has created, you need to get a handle on its contract ID. In scenarios, you do this using ``<-`` notation. That's because the contract ID needs to be retrieved from the ledger. How this works is discussed in :doc:`5_Restrictions`.\n+\n+This scenario first checks that Bob cannot archive Alice's Token and then Alice successfully archives it:\n+\n+.. literalinclude:: daml/daml-intro-2/Token_Test.daml\n+  :language: daml\n+  :start-after: -- TOKEN_TEST_3_BEGIN\n+  :end-before: -- TOKEN_TEST_3_END\n+\n+Exploring the Ledger\n+--------------------\n+\n+The resulting scenario view is empty, because there are no contracts left on the ledger. However, if you want to see the history of the ledger, e.g. to see how you got to that state, tick the \"Show archived\" box at the top of the ledger view:\n+\n+.. figure:: images/2_Scenario/archived.png\n+\n+You can see that there was a ``Token`` contract, which is now archived, indicated both by the \"archived\" value in the ``status`` column as well as by a strikethrough.\n+\n+Click on the adjacent \"Show transaction view\" button to see the entire transaction graph:\n+\n+.. figure:: images/2_Scenario/tx_graph.png\n+\n+In the DAML Studio scenario runner, committed transactions are numbered sequentially. The lines starting with ``TX`` indicate that there are three committed transactions, with ids ``#0``, ``#1``, and ``#2``. These correspond to the three ``submit`` and ``submitMustFail`` statements in the scenario.\n+\n+Transaction ``#0`` has one *sub-transaction* ``#0:0``, which the arrow indicates is a ``create`` of a ``Token``. Identifiers ``#X:Y`` mean ``commit X, sub-transaction Y``. All transactions have this format in the scenario runner. However, this format is a testing feature. In general, you should consider Transaction and Contract IDs to be opaque.\n+\n+The lines above and below ``create Token_Test:Token`` give additional information:\n+\n+- ``consumed by: #2:1`` tells you that the contract is archived in sub-transaction ``1`` of commit ``2``.\n+- ``referenced by #2:0, #2:1`` tells you that the contract was used in other transactions, and lists their IDs.\n+- ``known to (since): 'Alice' (#0)`` tells you who knows about the contract. The fact that ``'Alice'`` appears in the list is equivalent to a ``x`` in the tabular view. The ``(#0)`` gives you the additional information that ``Alice`` learned about the contract in commit ``#0``.\n+- Everything following ``with`` shows the create arguments.\n+\n+Exercises\n+---------\n+\n+To get a better understanding of scenarios, try the following exercises:\n+\n+1. Write a template for a second type of Token.\n+2. Write a scenario with two parties and two types of tokens, creating one token of each type for each party and archiving one token for each party, leaving one token of each type in the final ledger view.\n+3. In :ref:`archiving` you tested that Bob cannot archive Alice's token. Can you guess why the submit fails? How can you find out why the submit fails?\n+\n+  .. hint::\n+\n+    Remember that in :ref:`intro_2_failure` we saw a proper error message for a failing submit.\n+\n+Next Steps"
+  }
+]

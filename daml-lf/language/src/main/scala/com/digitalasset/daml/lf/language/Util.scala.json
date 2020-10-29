@@ -1,0 +1,289 @@
+[
+  {
+    "id" : "9c9c2901-8a22-4a50-b62b-f15bec43c35f",
+    "prId" : 7577,
+    "comments" : [
+      {
+        "id" : "58a3778d-c03b-40b4-bbec-f8811035c5d5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "So this only gives us the LF interface that we also need for codegens. This seems enough for typechecking of ledger API values but as you pointed out it’s not enough for validation. So I assume for ledgers this means that we still end up retaining the whole package in memory? (hopefully we can at least get rid of it in triggers now)",
+        "createdAt" : "2020-10-06T18:08:16Z",
+        "updatedAt" : "2020-10-12T12:30:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "690d8afd-2178-466c-994a-fcb02e323442",
+        "parentId" : "58a3778d-c03b-40b4-bbec-f8811035c5d5",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "It is replaced by `toSignatures` that include all type information.",
+        "createdAt" : "2020-10-07T09:27:53Z",
+        "updatedAt" : "2020-10-12T12:30:48Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d6d8aeac74d12178596915f46b0e6afbe8a23966",
+    "line" : null,
+    "diffHunk" : "@@ -120,4 +120,48 @@ object Util {\n       )\n   }\n \n+  private[this] def toInterface(choice: AbstractTemplateChoice[_]): AbstractTemplateChoice[Unit] =\n+    choice match {\n+      case AbstractTemplateChoice(name, consuming, _, selfBinder, argBinder, returnType, _) =>\n+        AbstractTemplateChoice(name, consuming, (), selfBinder, argBinder, returnType, ())\n+    }\n+\n+  private[this] def toInterface(key: AbstractTemplateKey[_]): AbstractTemplateKey[Unit] =\n+    key match {\n+      case AbstractTemplateKey(typ, _, _) =>\n+        AbstractTemplateKey(typ, (), ())\n+    }\n+\n+  private[this] def toInterface(template: AbstractTemplate[_]): AbstractTemplate[Unit] =\n+    template match {\n+      case AbstractTemplate(param, _, _, _, choices, _, key) =>\n+        AbstractTemplate(\n+          param,\n+          (),\n+          (),\n+          (),\n+          choices.transform((_, v) => toInterface(v)),\n+          (),\n+          key.map(toInterface),\n+        )\n+    }\n+\n+  def toInterface(p: Package): PackageInterface = {\n+    val moduleInterface = p.modules.transform((_, mod) =>\n+      mod.collectDefinitions {\n+        case DDataType(true, params, cons) =>"
+  },
+  {
+    "id" : "82b3bb94-5062-4178-88f9-f07eee968585",
+    "prId" : 7548,
+    "comments" : [
+      {
+        "id" : "20f41a1a-fbc7-4b58-96d2-4f668cdf01f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Why we do not preserve the optionality of the observer ? \r\nIf we don't I will prefer to use `None`. In any case you want to allocate this `Some(())` in the the companion object. \r\nAll the purpose of the Signature is to save memory, so we do not want to allocate a Some from each choice. \r\n\r\n```suggestion\r\n      case TemplateChoice(name, consuming, _, observer, selfBinder, argBinder, returnType, _) =>\r\n        TemplateChoiceSignature(\r\n          name,\r\n          consuming,\r\n          (),\r\n          observer.flatMap(_ => SomeUnit),\r\n```\r\nwith the addition of the following value in the companion object\r\n```scala\r\nprivate val SomeUnit: Some[Unit] = SomeUnit\r\n```",
+        "createdAt" : "2020-10-15T07:50:14Z",
+        "updatedAt" : "2020-10-21T08:55:23Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4e0cef8f-2b3f-4e2a-bba3-9a1547407f5d",
+        "parentId" : "20f41a1a-fbc7-4b58-96d2-4f668cdf01f4",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm in favor of preserving the optionality.",
+        "createdAt" : "2020-10-15T11:37:09Z",
+        "updatedAt" : "2020-10-21T08:55:23Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1968095863437d26708412e9478b8d076d85897c",
+    "line" : null,
+    "diffHunk" : "@@ -122,8 +122,16 @@ object Util {\n \n   private[this] def toSignature(choice: TemplateChoice): TemplateChoiceSignature =\n     choice match {\n-      case TemplateChoice(name, consuming, _, selfBinder, argBinder, returnType, _) =>\n-        TemplateChoiceSignature(name, consuming, (), selfBinder, argBinder, returnType, ())\n+      case TemplateChoice(name, consuming, _, _, selfBinder, argBinder, returnType, _) =>\n+        TemplateChoiceSignature(\n+          name,\n+          consuming,\n+          (),\n+          Some(()),"
+  },
+  {
+    "id" : "c0b710bd-71cb-4683-8a0a-b4767568a1d9",
+    "prId" : 5629,
+    "comments" : [
+      {
+        "id" : "360f61c0-4bc5-4aab-b0d1-34333846912d",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Petition to move these to their own utility class that isn't called \"Util\" or something. How about `Graphs`?\r\n\r\nYou could even wrap it in a `case class Graph[X](graph: Map[X, Set[X]]) extends AnyVal` and make them methods. I would find that much more readable.",
+        "createdAt" : "2020-04-20T13:11:38Z",
+        "updatedAt" : "2020-04-20T14:48:19Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "473ceb89-c7b0-4979-9224-89e24ce40da1",
+        "parentId" : "360f61c0-4bc5-4aab-b0d1-34333846912d",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Fair enough. \r\nThe `extends AnyVal` is basically useless here though. Because the `Cycle` object will end up wrapped in an `Either`  it will be actually allocated.\r\n",
+        "createdAt" : "2020-04-20T13:54:45Z",
+        "updatedAt" : "2020-04-20T14:48:19Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c3667f23-e99c-4770-9946-6596afc6fc78",
+        "parentId" : "360f61c0-4bc5-4aab-b0d1-34333846912d",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Fair enough, good point.",
+        "createdAt" : "2020-04-20T14:11:03Z",
+        "updatedAt" : "2020-04-20T14:48:19Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3f58847316bfebf75c98029bd4ce800560e794f7",
+    "line" : null,
+    "diffHunk" : "@@ -84,4 +84,69 @@ object Util {\n   val CPTrue = CPPrimCon(PCTrue)\n   val CPFalse = CPPrimCon(PCFalse)\n \n+  type Graph[X] = Map[X, Set[X]]"
+  },
+  {
+    "id" : "2086f7ac-ab00-4264-b914-177a801f1d9d",
+    "prId" : 5629,
+    "comments" : [
+      {
+        "id" : "87cf46e5-2c08-47b3-b121-2795f75934db",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "If you wrapped that list of vertices that form a cycle in something like `case class Cycle`, it'd be harder to do the wrong thing with it.",
+        "createdAt" : "2020-04-20T13:13:01Z",
+        "updatedAt" : "2020-04-20T14:48:19Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "555d6a53-fc04-4712-9bf7-712052258270",
+        "parentId" : "87cf46e5-2c08-47b3-b121-2795f75934db",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed.",
+        "createdAt" : "2020-04-20T13:54:58Z",
+        "updatedAt" : "2020-04-20T14:48:19Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3f58847316bfebf75c98029bd4ce800560e794f7",
+    "line" : null,
+    "diffHunk" : "@@ -84,4 +84,69 @@ object Util {\n   val CPTrue = CPPrimCon(PCTrue)\n   val CPFalse = CPPrimCon(PCFalse)\n \n+  type Graph[X] = Map[X, Set[X]]\n+\n+  // Topologically order the vertices of an abstract Graph.\n+  // If the `graph` is a directed acyclic graph returns a list of its vertices in topological order as `Right`\n+  // otherwise returns a list of vertices that form a cycle as `Left`"
+  },
+  {
+    "id" : "e3096e79-52f2-41a5-a19a-7c35e0ac5f8b",
+    "prId" : 5629,
+    "comments" : [
+      {
+        "id" : "51d5e491-4706-413a-b0dc-3aa632e80552",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'd prefer passing these in in the call below rather than setting default arguments.",
+        "createdAt" : "2020-04-20T13:16:23Z",
+        "updatedAt" : "2020-04-20T14:48:19Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "de703473-681d-4c2a-8813-fb13c91cef59",
+        "parentId" : "51d5e491-4706-413a-b0dc-3aa632e80552",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "As you wish.\r\n",
+        "createdAt" : "2020-04-20T13:57:11Z",
+        "updatedAt" : "2020-04-20T14:48:19Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3f58847316bfebf75c98029bd4ce800560e794f7",
+    "line" : null,
+    "diffHunk" : "@@ -84,4 +84,69 @@ object Util {\n   val CPTrue = CPPrimCon(PCTrue)\n   val CPFalse = CPPrimCon(PCFalse)\n \n+  type Graph[X] = Map[X, Set[X]]\n+\n+  // Topologically order the vertices of an abstract Graph.\n+  // If the `graph` is a directed acyclic graph returns a list of its vertices in topological order as `Right`\n+  // otherwise returns a list of vertices that form a cycle as `Left`\n+  def topoSort[X](graph: Graph[X]): Either[List[X], List[X]] = {\n+\n+    var white = graph.keySet\n+    var black = graph.values.foldLeft(InsertOrdSet.empty[X])(_ | _.filterNot(white))\n+    def gray(x: X): Boolean = !white(x) && !black(x)\n+\n+    def visitSet(xs: Set[X]): Option[X] = xs.foldLeft(Option.empty[X])(_ orElse visit(_))\n+\n+    def visit(x: X): Option[X] =\n+      if (black(x))\n+        None\n+      else if (!white(x))\n+        Some(x)\n+      else { white -= x; visitSet(graph(x)) } orElse { black += x; None }\n+\n+    def buildCycle(curr: X, start: X, list: List[X] = List.empty): List[X] = {\n+      val next = graph(curr).find(gray).getOrElse(throw new UnknownError)\n+      if (next == start)\n+        curr :: list\n+      else\n+        buildCycle(next, start, curr :: list)\n+    }\n+\n+    visitSet(graph.keySet).fold[Either[List[X], List[X]]](Right(black.toList))(x =>\n+      Left(buildCycle(x, x)))\n+  }\n+\n+  // Return the `pkgIds` and all its dependencies in topological order.\n+  // A package undefined w.r.t. the function `packages` is treated as a sink.\n+  def dependenciesInTopologicalOrder(\n+      pkgIds: List[Ref.PackageId],\n+      packages: Ref.PackageId PartialFunction Package,\n+  ): List[Ref.PackageId] = {\n+\n+    @tailrec\n+    def buildGraph(\n+        toProcess0: List[Ref.PackageId] = pkgIds,\n+        seen0: Set[Ref.PackageId] = pkgIds.toSet,\n+        graph0: Graph[Ref.PackageId] = HashMap.empty,"
+  }
+]

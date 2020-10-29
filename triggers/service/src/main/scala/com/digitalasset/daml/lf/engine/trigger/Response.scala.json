@@ -1,0 +1,68 @@
+[
+  {
+    "id" : "3996f539-bb45-4616-84a4-60fa078a067e",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "cbd139db-3c86-4431-bd7b-c7676e946b8e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is there an advantage to making this an `implicit val` with an anonymous class as opposed to an implicit object? Happy either way, just trying to understand if there is a difference.",
+        "createdAt" : "2020-09-03T09:58:57Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0b0bccda-3469-47e9-8ba0-75d9d03430fa",
+        "parentId" : "cbd139db-3c86-4431-bd7b-c7676e946b8e",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "For a library, there are interesting good reasons related to API stability and proper separation of interface and implementation.  I won't go into those (as this isn't a library), but focus on a semantics difference affecting all use cases:\r\n\r\n```scala\r\nWelcome to Scala 2.12.10 (OpenJDK 64-Bit Server VM, Java 1.8.0_202).\r\nType in expressions for evaluation. Or try :help.\r\n\r\nscala> class Foo[T]\r\ndefined class Foo\r\n\r\nscala> object Qqq {\r\n     |   implicit val a: Foo[Int] = new Foo\r\n     |   implicit def b: Foo[Int] = new Foo\r\n     | }\r\ndefined object Qqq\r\n\r\nscala> import Qqq._\r\nimport Qqq._\r\n\r\nscala> implicitly[Foo[Int]]\r\n<console>:17: error: ambiguous implicit values:\r\n both value a in object Qqq of type => Foo[Int]\r\n and method b in object Qqq of type => Foo[Int]\r\n match expected type Foo[Int]\r\n       implicitly[Foo[Int]]\r\n                 ^\r\n```\r\n\r\nThis error is desirable; you have multiple instances in scope and Scala refuses to pick one.\r\n\r\nConsider the opposite implementation, though:\r\n\r\n```scala\r\nscala> object Qqq {\r\n     |   implicit object a extends Foo[Int]\r\n     |   implicit def b: Foo[Int] = new Foo\r\n     | }\r\ndefined object Qqq\r\n\r\nscala> import Qqq._\r\nimport Qqq._\r\n\r\nscala> implicitly[Foo[Int]]\r\nres1: Foo[Int] = Qqq$a$@25031fd4\r\n```\r\n\r\nEven though we have conflicting instances, scalac will pick one.  Why?  There's a hint here:\r\n\r\n```scala\r\nscala> implicitly[a.type]\r\nres3: Qqq.a.type = Qqq$a$@25031fd4\r\n```\r\n\r\nbut if we go back to the original code:\r\n\r\n```scala\r\nscala> implicitly[a.type]\r\n<console>:24: error: could not find implicit value for parameter e: Qqq.a.type\r\n       implicitly[a.type]\r\n                 ^\r\n\r\nscala> a: a.type\r\nres5: Qqq.a.type = Foo@5bee88e3\r\n```\r\n\r\nAn `implicit object bar extends Baz` is not *just* an implicit `Baz`, it is also an implicit `bar.type`, a strict subtype of `Baz`.  In the above, `a.type` exists regardless, but it is only implicit *itself* if you use `implicit object`.  And that causes SLS [§7.2](https://scala-lang.org/files/archive/spec/2.12/07-implicits.html#implicit-parameters), [§6.26.3](https://scala-lang.org/files/archive/spec/2.12/06-expressions.html#overloading-resolution) to kick in.\r\n\r\nThis can be harmless.  *Or*, you've imported `JsonFormat`s from multiple places and suddenly one of them silently works instead of giving you a conflict error.",
+        "createdAt" : "2020-09-03T15:03:21Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f78ca372-38d3-4a91-a33f-a88561624404",
+        "parentId" : "cbd139db-3c86-4431-bd7b-c7676e946b8e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense, thanks for writing this up!",
+        "createdAt" : "2020-09-03T15:52:22Z",
+        "updatedAt" : "2020-09-03T15:52:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 44,
+    "diffHunk" : "@@ -22,32 +23,38 @@ object Response {\n \n   // These functions are borrowed from the HTTP JSON ledger API but I haven't\n   // factored them out for now as they are fairly small.\n-  def errorsJsObject(status: StatusCode, es: Seq[String]): JsObject = {\n+  private[this] def errorsJsObject(status: StatusCode, es: Seq[String]): JsObject = {\n     val errors = es.toJson\n     JsObject(statusField(status), (\"errors\", errors))\n   }\n \n-  def resultJsObject[A: JsonWriter](a: A): JsObject = {\n+  private[this] def resultJsObject[A: JsonWriter](a: A): JsObject = {\n     resultJsObject(a.toJson)\n   }\n \n-  def resultJsObject(a: JsValue): JsObject = {\n+  private[this] def resultJsObject(a: JsValue): JsObject = {\n     JsObject(statusField(StatusCodes.OK), (\"result\", a))\n   }\n \n-  def statusField(status: StatusCode): (String, JsNumber) =\n+  private[this] def statusField(status: StatusCode): (String, JsNumber) =\n     (\"status\", JsNumber(status.intValue()))\n \n   // Trigger status messages have timestamps for which this is the\n   // formatter.\n-  object LocalDateTimeJsonFormat extends RootJsonFormat[LocalDateTime] {\n-    override def write(dt: LocalDateTime) =\n-      JsString(dt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))\n-\n-    override def read(json: JsValue): LocalDateTime = json match {\n-      case JsString(s) => LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME)\n-      case _ => throw new DeserializationException(\"Decode local datetime failed\")\n+  implicit val LocalDateTimeJsonFormat: RootJsonFormat[LocalDateTime] ="
+  }
+]

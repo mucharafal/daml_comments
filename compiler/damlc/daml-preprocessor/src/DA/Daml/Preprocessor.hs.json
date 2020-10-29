@@ -1,0 +1,527 @@
+[
+  {
+    "id" : "129afb9e-3c75-4c5b-8353-faf913c6e4b8",
+    "prId" : 7705,
+    "comments" : [
+      {
+        "id" : "a2c3b8d6-4028-4b05-80ad-f50db53db63e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        , \"using other versions of the SDK. Use DA.Generics at your own risk.\"\r\n```",
+        "createdAt" : "2020-10-16T06:57:27Z",
+        "updatedAt" : "2020-10-16T08:49:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f0f8f873091c7df04dac890341abb3abaa2b5a27",
+    "line" : null,
+    "diffHunk" : "@@ -266,6 +271,19 @@ checkLanguageExtensions dataDependableExtensions dflags x =\n     -- of the module name.\n     modNameLoc = maybe GHC.noSrcSpan GHC.getLoc (GHC.hsmodName (GHC.unLoc x))\n \n+checkImportsWrtDataDependencies :: GHC.ParsedSource -> [(GHC.SrcSpan, String)]\n+checkImportsWrtDataDependencies x =\n+    [ (loc, warning)\n+    | GHC.L loc GHC.ImportDecl{ideclName = GHC.L _ m} <- GHC.hsmodImports $ GHC.unLoc x\n+    , GHC.moduleNameString m == \"DA.Generics\"\n+    ]\n+  where\n+    warning = unlines\n+        [ \"Modules importing DA.Generics do not work with data-dependencies.\"\n+        , \"This will prevent the whole package from being extensible or upgradable\"\n+        , \"using other versionsof the SDK. Use DA.Generics at your own risk.\""
+  },
+  {
+    "id" : "4e4f1b03-53a7-40ec-8580-776da4b8167f",
+    "prId" : 7662,
+    "comments" : [
+      {
+        "id" : "5c745c0d-5671-48f5-a902-0bbcecfb50c1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        , \"of the SDK. Use this language extension at your own risk.\"\r\n```\r\nI’m all for being polite but this sounds weird in this sentence.",
+        "createdAt" : "2020-10-15T16:42:09Z",
+        "updatedAt" : "2020-10-15T17:00:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e3f23b1d5318f31cad2e008d6d135042c951a898",
+    "line" : null,
+    "diffHunk" : "@@ -244,6 +246,26 @@ checkModuleDefinition x\n         ]\n     | otherwise = []\n \n+checkLanguageExtensions :: ES.EnumSet GHC.Extension -> GHC.DynFlags -> GHC.ParsedSource -> [(GHC.SrcSpan, String)]\n+checkLanguageExtensions dataDependableExtensions dflags x =\n+    let exts = ES.toList (GHC.extensionFlags dflags)\n+        badExts = filter (\\ext -> not (ext `ES.member` dataDependableExtensions)) exts\n+    in\n+    [ (modNameLoc, warning ext) | ext <- badExts ]\n+  where\n+    warning ext = unlines\n+        [ \"Modules compiled with the \" ++ show ext ++ \" language extension\"\n+        , \"might not work properly with data-dependencies. This might stop the\"\n+        , \"whole package from being extensible or upgradable using other versions\"\n+        , \"of the SDK. Please use this language extension at your own risk.\""
+  },
+  {
+    "id" : "b4b84ce6-c713-4dd3-9999-5b56e9b156a1",
+    "prId" : 7467,
+    "comments" : [
+      {
+        "id" : "f5267599-0148-4f00-8721-819b2ec87f23",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "How about using `newtype` in the error message (only where it applies of course)? It might not be obvious to everyone that a newtype is a record.",
+        "createdAt" : "2020-09-23T12:43:01Z",
+        "updatedAt" : "2020-09-23T13:55:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "63e85089-31a3-47fa-87c4-60dfa8e5ad3e",
+        "parentId" : "f5267599-0148-4f00-8721-819b2ec87f23",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Good idea. :) ",
+        "createdAt" : "2020-09-23T12:51:34Z",
+        "updatedAt" : "2020-09-23T13:55:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "df6f9855d292399c8882aae7185f55fe1d0d0610",
+    "line" : null,
+    "diffHunk" : "@@ -161,6 +161,14 @@ checkRecordConstructor (GHC.L _ m) = mapMaybe getRecordError (GHC.hsmodDecls m)\n         | otherwise\n         = Nothing\n \n+    isNewType :: GHC.NewOrData -> Bool\n+    isNewType = (GHC.NewType ==)\n+\n+    isRecCon :: GHC.HsConDeclDetails GHC.GhcPs -> Bool\n+    isRecCon = \\case\n+        GHC.RecCon{} -> True\n+        _ -> False\n+\n     message tyNameStr conNameStr = unwords\n         [ \"Record type\", tyNameStr, \"has constructor\", conNameStr"
+  },
+  {
+    "id" : "f786dda2-0231-4b1e-bb90-72767fd4c4ed",
+    "prId" : 5266,
+    "comments" : [
+      {
+        "id" : "d6fbf576-7ab8-4c43-8474-6158fef0bc0e",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Isn't that pretty much the only solution now?",
+        "createdAt" : "2020-03-30T10:15:00Z",
+        "updatedAt" : "2020-03-30T10:17:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "73db654d-3063-4939-b408-243c39b93f85",
+        "parentId" : "d6fbf576-7ab8-4c43-8474-6158fef0bc0e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "No you can also change the type name, turn it into an enum in some cases, …",
+        "createdAt" : "2020-03-30T10:20:53Z",
+        "updatedAt" : "2020-03-30T10:20:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b38f0ac6aeb03673f81f602bc8a140d812da589b",
+    "line" : 26,
+    "diffHunk" : "@@ -141,7 +141,7 @@ checkRecordConstructor (GHC.L _ m) = mapMaybe getRecordError (GHC.hsmodDecls m)\n \n     message tyNameStr conNameStr = unwords\n         [ \"Record type\", tyNameStr, \"has constructor\", conNameStr\n-        , \"with different name. This may cause problems with cross-SDK upgrades.\"\n+        , \"with different name.\"\n         , \"Possible solution: Change the constructor name to\", tyNameStr ]"
+  },
+  {
+    "id" : "85a80754-87b4-43a4-9de6-fd67e86d9f06",
+    "prId" : 4892,
+    "comments" : [
+      {
+        "id" : "0999276c-0b1e-4542-aa7c-facf60002fa3",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Since there's no pattern matching going on here, I'd suggest to use `let` bindings.\r\n```suggestion\r\n        , let tyNameStr = GHC.occNameString (GHC.rdrNameOcc tyName)\r\n        , let conNameStr = GHC.occNameString (GHC.rdrNameOcc conName)\r\n```",
+        "createdAt" : "2020-03-09T11:13:19Z",
+        "updatedAt" : "2020-03-09T11:13:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "caf32ae7-7a0e-4b73-abd5-17b526d44c31",
+        "parentId" : "0999276c-0b1e-4542-aa7c-facf60002fa3",
+        "author" : null,
+        "body" : "Changed it in the other PR.",
+        "createdAt" : "2020-03-09T13:50:36Z",
+        "updatedAt" : "2020-03-09T13:50:36Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "16db994d057f16c87fa9e0043ec09253ca740aeb",
+    "line" : 35,
+    "diffHunk" : "@@ -117,6 +119,30 @@ checkImports x =\n     [ (ss, \"Import of internal module \" ++ GHC.moduleNameString m ++ \" is not allowed.\")\n     | GHC.L ss GHC.ImportDecl{ideclName=GHC.L _ m} <- GHC.hsmodImports $ GHC.unLoc x, isInternal m]\n \n+-- | Emit a warning if a record constructor name does not match the record type name.\n+-- See issue #4718. This ought to be moved into 'checkDataTypes' before too long.\n+checkRecordConstructor :: GHC.ParsedSource -> [(GHC.SrcSpan, String)]\n+checkRecordConstructor (GHC.L _ m) = mapMaybe getRecordError (GHC.hsmodDecls m)\n+  where\n+    getRecordError :: GHC.LHsDecl GHC.GhcPs -> Maybe (GHC.SrcSpan, String)\n+    getRecordError (GHC.L ss decl)\n+        | GHC.TyClD _ GHC.DataDecl{tcdLName=ltyName, tcdDataDefn=dataDefn} <- decl\n+        , GHC.HsDataDefn{dd_cons=[con]} <- dataDefn\n+        , GHC.RecCon{} <- GHC.con_args (GHC.unLoc con)\n+        , GHC.L _ tyName <- ltyName\n+        , [GHC.L _ conName] <- GHC.getConNames (GHC.unLoc con)\n+        , tyNameStr <- GHC.occNameString (GHC.rdrNameOcc tyName)\n+        , conNameStr <- GHC.occNameString (GHC.rdrNameOcc conName)"
+  },
+  {
+    "id" : "c628df30-3abb-4a0e-bcef-66c22d81e332",
+    "prId" : 4030,
+    "comments" : [
+      {
+        "id" : "f2f90b12-9693-48a7-9f28-c4349a09e47a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "To add some context this is because the template desugaring from https://github.com/digital-asset/ghc/pull/47 uses `primitive`.",
+        "createdAt" : "2020-01-14T09:13:00Z",
+        "updatedAt" : "2020-01-15T14:32:49Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3a6d332937a2569a52ae38499c6fe1022c9fe04c",
+    "line" : 4,
+    "diffHunk" : "@@ -91,6 +91,7 @@ importDamlPreprocessor = fmap onModule\n     where\n         onModule y = y {\n           GHC.hsmodImports =\n+            newImport True \"GHC.Types\" :"
+  },
+  {
+    "id" : "00e7b082-8522-4ef4-b002-8593779f0551",
+    "prId" : 3345,
+    "comments" : [
+      {
+        "id" : "d1dd04bd-0749-433f-b45b-2abce332f67d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I think it would be useful to spell this out to `generatedPreprocessor`. Otherwise it is very easy to confuse this with the `genericsPreprocessor`.",
+        "createdAt" : "2019-11-06T08:16:18Z",
+        "updatedAt" : "2019-11-06T15:18:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3a47efa4-2ab7-4af1-b4ea-4b393ca30d0a",
+        "parentId" : "d1dd04bd-0749-433f-b45b-2abce332f67d",
+        "author" : null,
+        "body" : "done, thanks!",
+        "createdAt" : "2019-11-06T11:38:33Z",
+        "updatedAt" : "2019-11-06T15:18:42Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c83bd73dbde87ea2f73acebd8ebceddb3a7dddd5",
+    "line" : null,
+    "diffHunk" : "@@ -48,12 +50,21 @@ damlPreprocessor mbPkgName x\n     | otherwise = IdePreprocessedSource\n         { preprocWarnings = checkModuleName x\n         , preprocErrors = checkImports x ++ checkDataTypes x ++ checkModuleDefinition x\n-        , preprocSource = recordDotPreprocessor $ importDamlPreprocessor $ genericsPreprocessor mbPkgName $ templateConstraintPreprocessor x\n+        , preprocSource = recordDotPreprocessor $ importDamlPreprocessor $ genericsPreprocessor mbPkgName $ templateConstraintPreprocessor $ enumTypePreprocessor x\n         }\n     where\n       name = fmap GHC.unLoc $ GHC.hsmodName $ GHC.unLoc x\n \n--- | No preprocessing. Used for generated code.\n+-- | Preprocessor for generated code.\n+genPreprocessor :: GHC.ParsedSource -> IdePreprocessedSource"
+  },
+  {
+    "id" : "7a5c9392-2681-47ad-8b27-ff572d6ca461",
+    "prId" : 3345,
+    "comments" : [
+      {
+        "id" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We happily accept `data Foo a = Bar | Baz` and turn it into a variant type. However, we don't accept `data Foo a = Bar`. We should fix this inconsistency. I consider the former counterintuitive and would be ok to ban it. To be more precise, I would ban all `data T a_1 ... a_m = C_1 | ... | C_n` for `m >=1` and `n >= 1`. Thoughts, @associahedron @bame-da @cocreature?",
+        "createdAt" : "2019-11-06T19:09:15Z",
+        "updatedAt" : "2019-11-06T19:09:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5ef7d929-abe9-4df3-81fb-7727541607ae",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Once we've decided on this and implemented it, we also need to adjust https://github.com/digital-asset/daml/blob/master/docs/source/app-dev/daml-lf-translation.rst#banned-declarations. (I'm happy to do that myself.)",
+        "createdAt" : "2019-11-06T19:10:51Z",
+        "updatedAt" : "2019-11-06T19:10:57Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a2cb145e-9e17-4409-8433-ed264911e988",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’d rather lift the restriction in LF so we can have `data Foo a = Bar` desugar to an enum. I don’t see why enums can’t have type parameters.",
+        "createdAt" : "2019-11-06T19:12:23Z",
+        "updatedAt" : "2019-11-06T19:14:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c8bedf9d-bb37-4f32-92c6-d5499e604472",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The problem is--as always--codegen for **Java**: you cannot have `enum Foo<T> { Bar, Baz }`.",
+        "createdAt" : "2019-11-06T19:20:06Z",
+        "updatedAt" : "2019-11-06T19:20:06Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "baa2a16a-fac2-4780-b472-7076f6e9e26e",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":cry: Is there anything stopping us from desugaring `data Foo a = Bar` as a variant? I find phantom type parameters to be quite useful in general so I’d rather not restrict their usage.",
+        "createdAt" : "2019-11-06T19:21:49Z",
+        "updatedAt" : "2019-11-06T19:21:49Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9c47f4e1-46a8-448a-aaef-1a2f35c407ac",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I find translating `data Foo = Bar` into an enum but `data Foo a = Bar` into a variant quite confusing. If you really want the variant with the phantom type parameter, you can always do `data Foo a = Bar ()`. We should probably stick that into the error message.",
+        "createdAt" : "2019-11-06T19:36:48Z",
+        "updatedAt" : "2019-11-06T19:36:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "de5c37a5-eaf7-4a7e-8347-44d483c680cb",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Fair point, I guess in that case I’m fine with forbidding it but we should probably first turn it into a warning for a couple of releases.",
+        "createdAt" : "2019-11-06T19:38:56Z",
+        "updatedAt" : "2019-11-06T19:38:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "002cdc99-0ded-404f-9b74-22e7cbe5b2e0",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I agree with going through the deprecation warning cycle. Ideally, we could capture data on how many users actually hit this warning via our telemetry mechanism. @rohanjr do you have an idea how to do this?",
+        "createdAt" : "2019-11-06T20:04:57Z",
+        "updatedAt" : "2019-11-06T20:04:57Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fee50bae-7454-4e24-800e-69bc5621a03b",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : null,
+        "body" : "The error message already says `Ambiguous data type declaration. Enums cannot have type arguments. Write data Foo a = Bar {} for a record or data Foo a = Bar () for a variant.`",
+        "createdAt" : "2019-11-07T09:52:14Z",
+        "updatedAt" : "2019-11-07T09:52:14Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8b2de90f-00a4-4d3b-b805-e507d4de3236",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "I suppose we could re-enable logging for compiler errors/warnings in our telemetry. We used to do that unintentionally and then disabled it, so it shouldn't be too hard to reenable. It may be overkill for this though?",
+        "createdAt" : "2019-11-07T15:50:36Z",
+        "updatedAt" : "2019-11-07T15:50:37Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "65f0d49c-9ee1-4a8f-9dc6-228e430cedd2",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We never deliberately logged all compiler errors. We logged some of them by accident (mainly as a result of failures to get scenario results which is not a bug in our code). I think it makes more sense to specifically log certain cases when we introduce the warning rather than logging all errors.",
+        "createdAt" : "2019-11-07T15:52:35Z",
+        "updatedAt" : "2019-11-07T15:52:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c9fbe0d8-b448-4a4e-983b-0612bd75d4c0",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : null,
+        "body" : "It's not a new error though?\r\n\r\n`data Foo a = Bar` was not supported before, and continues to be unsupported. The only thing this PR allows that was previously not allowed is `data Foo = Bar`, with no type variables.\r\n\r\nI could see us supporting `data Foo a = Bar` in the future, possibly by making the Java codegen smarter about enums.",
+        "createdAt" : "2019-11-07T15:59:36Z",
+        "updatedAt" : "2019-11-07T15:59:36Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4b373f77-e409-42ba-9ab8-3613e78aee2d",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "My understanding was that we are talking about introducing an error for `data Foo a = Bar | Baz` which is not an error right now.",
+        "createdAt" : "2019-11-07T16:00:42Z",
+        "updatedAt" : "2019-11-07T16:00:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4ba35546-8959-4a66-9d7a-d6bccce2a613",
+        "parentId" : "d75dd156-f539-492e-85bb-0f1322a91f32",
+        "author" : null,
+        "body" : "Ah, I see. Sorry.",
+        "createdAt" : "2019-11-07T16:04:58Z",
+        "updatedAt" : "2019-11-07T16:04:58Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c83bd73dbde87ea2f73acebd8ebceddb3a7dddd5",
+    "line" : 60,
+    "diffHunk" : "@@ -98,22 +108,22 @@ checkImports x =\n checkDataTypes :: GHC.ParsedSource -> [(GHC.SrcSpan, String)]\n checkDataTypes m = checkAmbiguousDataTypes m ++ checkUnlabelledConArgs m ++ checkThetas m\n \n-\n checkAmbiguousDataTypes :: GHC.ParsedSource -> [(GHC.SrcSpan, String)]\n checkAmbiguousDataTypes (GHC.L _ m) =\n     mapMaybe getAmbiguousError (GHC.hsmodDecls m)\n   where\n     getAmbiguousError :: GHC.LHsDecl GHC.GhcPs -> Maybe (GHC.SrcSpan, String)\n     -- Generate an error if the declaration is a data type with one constructor and zero arguments\n     getAmbiguousError (GHC.L ss decl)\n-      | GHC.TyClD _ GHC.DataDecl{tcdDataDefn=GHC.HsDataDefn{dd_cons=[con]}} <- decl -- single con data type\n-      , GHC.PrefixCon [] <- GHC.con_args (GHC.unLoc con) -- zero arguments\n+      | GHC.TyClD _ GHC.DataDecl{tcdTyVars = dtyvars, tcdDataDefn=GHC.HsDataDefn{dd_cons=[con]}} <- decl -- single con data type"
+  }
+]

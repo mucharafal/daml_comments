@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "ce783c17-dc90-4d75-bae3-35d07704d4d7",
+    "prId" : 928,
+    "comments" : [
+      {
+        "id" : "714ae895-e10d-4c9c-a96b-35067e1b82e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "body" : "Something's missing",
+        "createdAt" : "2019-05-06T08:29:09Z",
+        "updatedAt" : "2019-05-06T08:34:43Z",
+        "lastEditedBy" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2dc8fd59-8b15-4340-94a7-9a3f4a2de2e7",
+        "parentId" : "714ae895-e10d-4c9c-a96b-35067e1b82e5",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "argh, thanks, well spotted.",
+        "createdAt" : "2019-05-06T08:32:39Z",
+        "updatedAt" : "2019-05-06T08:34:43Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "78b6a8d456473c1384d9ebb6b949bde06994f295",
+    "line" : null,
+    "diffHunk" : "@@ -290,37 +290,31 @@ class DamlOnXTransactionService private (val indexService: IndexService, paralle\n       filter: TransactionFilter): Source[(Offset, (TransactionAccepted, BlindingInfo)), NotUsed] = {\n \n     val ledgerBounds =\n-      consumeAsyncResult(indexService.getLedgerBeginning(ledgerId))\n+      indexService.getLedgerBeginning\n         .flatMap { b =>\n-          consumeAsyncResult(indexService.getLedgerEnd(ledgerId))\n+          indexService.getLedgerEnd\n             .map(e => (b, e))\n         }\n \n     Source\n-      .fromFuture(\n-        ledgerBounds.flatMap {\n-          case (ledgerBegin, ledgerEnd) =>\n-            OffsetSection(begin, end)(getOffsetHelper(ledgerBegin, ledgerEnd)) match {\n-              case Failure(exception) =>\n-                Future.failed(exception)\n-              case Success(value) =>\n-                value match {\n-                  case OffsetSection.Empty =>\n-                    Future { Source.empty }\n-                  case OffsetSection.NonEmpty(subscribeFrom, subscribeUntil) =>\n-                    consumeAsyncResult(\n-                      indexService\n-                        .getAcceptedTransactions(\n-                          ledgerId,\n-                          Some(subscribeFrom),\n-                          subscribeUntil,\n-                          filter)\n-                    )\n-                }\n-            }\n-        }\n-      )\n-      .flatMapConcat(identity)\n+      .fromFuture(ledgerBounds)\n+      .flatMapConcat {\n+        case (ledgerBegin, ledgerEnd) =>\n+          OffsetSection(begin, end)(getOffsetHelper(ledgerBegin, ledgerEnd)) match {\n+            case Failure(exception) =>\n+              ???"
+  }
+]

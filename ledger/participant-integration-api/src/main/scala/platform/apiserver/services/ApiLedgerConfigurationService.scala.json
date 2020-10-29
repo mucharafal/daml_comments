@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "e4fe3376-8dee-44df-90c4-609d29a441a3",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "5bf0f51b-b1b5-4057-a986-854eeaee15fc",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I would have assumed calling `withEnrichedLoggingContext` with an empty map would be a no-op, but you seem to be doing it a lot. Why?",
+        "createdAt" : "2020-07-31T09:27:43Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5dade4b3-6200-4dac-9fd5-3709cd142437",
+        "parentId" : "5bf0f51b-b1b5-4057-a986-854eeaee15fc",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "WIP left-over, I'll address this as part of the [comments I left](https://github.com/digital-asset/daml/pull/6924#discussion_r463516895) in this regard.",
+        "createdAt" : "2020-07-31T11:06:48Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -13,33 +13,38 @@ import com.daml.grpc.adapter.ExecutionSequencerFactory\n import com.daml.ledger.api.domain.LedgerId\n import com.daml.ledger.api.v1.ledger_configuration_service._\n import com.daml.logging.{ContextualizedLogger, LoggingContext}\n+import com.daml.logging.LoggingContext.withEnrichedLoggingContext\n import com.daml.platform.api.grpc.GrpcApiService\n import com.daml.platform.server.api.validation.LedgerConfigurationServiceValidation\n import io.grpc.{BindableService, ServerServiceDefinition}\n \n import scala.concurrent.ExecutionContext\n \n private[apiserver] final class ApiLedgerConfigurationService private (\n-    configurationService: IndexConfigurationService)(\n+    configurationService: IndexConfigurationService,\n+)(\n     implicit protected val esf: ExecutionSequencerFactory,\n     protected val mat: Materializer,\n-    logCtx: LoggingContext)\n-    extends LedgerConfigurationServiceAkkaGrpc\n+    loggingContext: LoggingContext,\n+) extends LedgerConfigurationServiceAkkaGrpc\n     with GrpcApiService {\n \n   private val logger = ContextualizedLogger.get(this.getClass)\n \n   override protected def getLedgerConfigurationSource(\n-      request: GetLedgerConfigurationRequest): Source[GetLedgerConfigurationResponse, NotUsed] =\n-    configurationService\n-      .getLedgerConfiguration()\n-      .map(\n-        configuration =>\n-          GetLedgerConfigurationResponse(\n-            Some(LedgerConfiguration(\n-              Some(toProto(configuration.maxDeduplicationTime)),\n-            ))))\n-      .via(logger.logErrorsOnStream)\n+      request: GetLedgerConfigurationRequest,\n+  ): Source[GetLedgerConfigurationResponse, NotUsed] =\n+    withEnrichedLoggingContext(Map.empty[String, String]) { implicit loggingContext =>"
+  },
+  {
+    "id" : "52d6860a-adb2-410d-8caa-2ad7027e82f4",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "2f0428a1-32d0-46a9-bdb0-aa77999f9349",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Use `newLoggingContext` and add a ticket to evaluate using correlation identifiers for this kind of calls.",
+        "createdAt" : "2020-07-31T09:49:23Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "22054321-90ef-4925-8f1b-bb51c594c31d",
+        "parentId" : "2f0428a1-32d0-46a9-bdb0-aa77999f9349",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/6924/commits/af32d09482ee640237f1206ca2c64a304a1f9f83.",
+        "createdAt" : "2020-07-31T12:03:13Z",
+        "updatedAt" : "2020-07-31T12:03:22Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -13,33 +13,38 @@ import com.daml.grpc.adapter.ExecutionSequencerFactory\n import com.daml.ledger.api.domain.LedgerId\n import com.daml.ledger.api.v1.ledger_configuration_service._\n import com.daml.logging.{ContextualizedLogger, LoggingContext}\n+import com.daml.logging.LoggingContext.withEnrichedLoggingContext\n import com.daml.platform.api.grpc.GrpcApiService\n import com.daml.platform.server.api.validation.LedgerConfigurationServiceValidation\n import io.grpc.{BindableService, ServerServiceDefinition}\n \n import scala.concurrent.ExecutionContext\n \n private[apiserver] final class ApiLedgerConfigurationService private (\n-    configurationService: IndexConfigurationService)(\n+    configurationService: IndexConfigurationService,\n+)(\n     implicit protected val esf: ExecutionSequencerFactory,\n     protected val mat: Materializer,\n-    logCtx: LoggingContext)\n-    extends LedgerConfigurationServiceAkkaGrpc\n+    loggingContext: LoggingContext,\n+) extends LedgerConfigurationServiceAkkaGrpc\n     with GrpcApiService {\n \n   private val logger = ContextualizedLogger.get(this.getClass)\n \n   override protected def getLedgerConfigurationSource(\n-      request: GetLedgerConfigurationRequest): Source[GetLedgerConfigurationResponse, NotUsed] =\n-    configurationService\n-      .getLedgerConfiguration()\n-      .map(\n-        configuration =>\n-          GetLedgerConfigurationResponse(\n-            Some(LedgerConfiguration(\n-              Some(toProto(configuration.maxDeduplicationTime)),\n-            ))))\n-      .via(logger.logErrorsOnStream)\n+      request: GetLedgerConfigurationRequest,\n+  ): Source[GetLedgerConfigurationResponse, NotUsed] =\n+    withEnrichedLoggingContext(Map.empty[String, String]) { implicit loggingContext =>"
+  }
+]

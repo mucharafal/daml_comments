@@ -1,0 +1,348 @@
+[
+  {
+    "id" : "0a5a7029-8751-4b97-8fce-f41fd890fa3d",
+    "prId" : 4467,
+    "comments" : [
+      {
+        "id" : "dd5fdfb0-2079-43c9-93b3-a7a9066012c7",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n  case object CommandDeduplicationNew extends CommandDeduplicationResult\r\n```\r\n`final` before `object` is redundant.",
+        "createdAt" : "2020-02-11T09:50:18Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "81c3bb07cc3057b6358f8d09902331b1a80501bf",
+    "line" : null,
+    "diffHunk" : "@@ -105,4 +105,25 @@ package object v2 {\n       size: Long,\n       knownSince: Instant,\n       sourceDescription: Option[String])\n+\n+  /** The result of a command submission:\n+    * - `Left(error)` if the submission failed (either at command interpretation or at submission to the ledger)\n+    *   with the given error message.\n+    * - `Right(())` if the submission was successful, in which case the completion of the command\n+    *   can be tracked as usual through the completion service.\n+    */\n+  type CommandSubmissionResult = Either[String, Unit]\n+\n+  sealed abstract class CommandDeduplicationResult extends Product with Serializable\n+\n+  /** This is the first time the command was submitted. */\n+  final case object CommandDeduplicationNew extends CommandDeduplicationResult"
+  },
+  {
+    "id" : "0e7293d6-30a9-4c68-bc4f-0d4192792f4d",
+    "prId" : 4467,
+    "comments" : [
+      {
+        "id" : "7552de27-0e6e-456a-b7be-722ae7a1bdd9",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This type is always associated with the result of a submission. I'd prefer using `Either[String, Unit]` explicitly, so that:\r\n1. you don't have to import the type alias to use it\r\n2. whenever you use it, its capabilities are clear without having to navigate here to understand what it is and what it does",
+        "createdAt" : "2020-02-11T09:53:59Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "81c3bb07cc3057b6358f8d09902331b1a80501bf",
+    "line" : null,
+    "diffHunk" : "@@ -105,4 +105,25 @@ package object v2 {\n       size: Long,\n       knownSince: Instant,\n       sourceDescription: Option[String])\n+\n+  /** The result of a command submission:\n+    * - `Left(error)` if the submission failed (either at command interpretation or at submission to the ledger)\n+    *   with the given error message.\n+    * - `Right(())` if the submission was successful, in which case the completion of the command\n+    *   can be tracked as usual through the completion service.\n+    */\n+  type CommandSubmissionResult = Either[String, Unit]"
+  },
+  {
+    "id" : "8194b938-9551-4eb9-82c1-3a1dcbf85961",
+    "prId" : 1426,
+    "comments" : [
+      {
+        "id" : "fa5498eb-f532-4cb7-8b91-380e8e68535d",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Why is the `commandId` optional? Seems like we shouldn't produce/store completions without a command ID, which is useless anyway because you wouldn't be able to connect the completion to a command you sent earlier.",
+        "createdAt" : "2019-05-28T12:33:23Z",
+        "updatedAt" : "2019-05-28T13:07:19Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4f8a45f2-122e-4aa2-9983-508757fbae62",
+        "parentId" : "fa5498eb-f532-4cb7-8b91-380e8e68535d",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "right, that was my conclusion as well. I will change it.",
+        "createdAt" : "2019-05-28T12:47:38Z",
+        "updatedAt" : "2019-05-28T13:07:19Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b2087ef6864ee9b2a582a8119a092cbf231851c2",
+    "line" : null,
+    "diffHunk" : "@@ -37,12 +38,14 @@ package object v2 {\n \n     final case class CommandAccepted(\n         offset: LedgerOffset.Absolute,\n-        commandId: CommandId,\n+        recordTime: Instant,\n+        commandId: Option[CommandId],"
+  },
+  {
+    "id" : "9ce644ce-9225-4a14-a530-daf280c65467",
+    "prId" : 1362,
+    "comments" : [
+      {
+        "id" : "363b968f-3f02-4893-8934-d216024f38f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I guess we should remove `AbsoluteNodeId` completely?",
+        "createdAt" : "2019-05-24T07:52:55Z",
+        "updatedAt" : "2019-05-24T15:15:46Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "941fe4a3-cea9-4f0a-bfb8-241f4d69736b",
+        "parentId" : "363b968f-3f02-4893-8934-d216024f38f9",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "what do you mean? It's not used anymore in this file, is it?",
+        "createdAt" : "2019-05-24T09:37:11Z",
+        "updatedAt" : "2019-05-24T15:15:46Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "504f3206-e117-4c9c-aee4-d7076045544b",
+        "parentId" : "363b968f-3f02-4893-8934-d216024f38f9",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I meant to replace it with `EventId` and removing it completely from the codebase. I introduced it in the v2 index-api PR.",
+        "createdAt" : "2019-05-24T11:18:57Z",
+        "updatedAt" : "2019-05-24T15:15:46Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1bf9f7f7-6151-4d99-a3c3-c0e6f919c234",
+        "parentId" : "363b968f-3f02-4893-8934-d216024f38f9",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "it is replaced with `domain.EventId`",
+        "createdAt" : "2019-05-24T14:24:29Z",
+        "updatedAt" : "2019-05-24T15:15:46Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "07158cacfc99b310dd03da6c571924f9c965e077",
+    "line" : 27,
+    "diffHunk" : "@@ -22,27 +22,31 @@ package object v2 {\n       events: List[AcsUpdateEvent]\n   )\n \n-  sealed trait AcsUpdateEvent extends Product with Serializable\n+  sealed trait AcsUpdateEvent extends Product with Serializable {\n+    def stakeholders: Set[Ref.Party]\n+\n+    def templateId: Ref.Identifier\n+  }\n \n   object AcsUpdateEvent {\n \n     final case class Create(\n         transactionId: TransactionId,\n-        nodeId: AbsoluteNodeId,\n+        eventId: EventId,\n         contractId: Value.AbsoluteContractId,\n         templateId: Ref.Identifier,\n         argument: Value.VersionedValue[Value.AbsoluteContractId],\n         // TODO(JM,SM): understand witnessing parties\n-        stakeholders: List[Ref.Party],\n+        stakeholders: Set[Ref.Party],\n     ) extends AcsUpdateEvent\n \n     final case class Archive(\n         transactionId: TransactionId,\n-        nodeId: AbsoluteNodeId,"
+  },
+  {
+    "id" : "cc6274ea-8354-4952-b882-6c720be39baf",
+    "prId" : 1313,
+    "comments" : [
+      {
+        "id" : "b41e8727-1c00-4061-9ef3-c72c2677bfaf",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "do we actually need this? it looks like we don't need the eventId at all here: https://github.com/digital-asset/daml/pull/1314/files#diff-187da506c796f10dc0d43c95b946dd3fR37",
+        "createdAt" : "2019-05-22T13:12:06Z",
+        "updatedAt" : "2019-05-22T15:10:48Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b03b895e-7805-44ce-8200-1f88b4685a03",
+        "parentId" : "b41e8727-1c00-4061-9ef3-c72c2677bfaf",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Discussed with @dajmaki: Needs to be an opaque `String` that actually comes from the `ReadService`.",
+        "createdAt" : "2019-05-22T13:28:55Z",
+        "updatedAt" : "2019-05-22T15:10:48Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8d00559d939670c7057b52f349d0869629bf7457",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.index\n+\n+import java.time.Instant\n+\n+import akka.NotUsed\n+import akka.stream.scaladsl.Source\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.daml.lf.data.Time.Timestamp\n+import com.digitalasset.daml.lf.transaction.{BlindingInfo, GenTransaction}\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, NodeId}\n+import com.digitalasset.ledger.api.domain._\n+\n+package object v2 {\n+\n+  final case class AcsUpdate(\n+      optSubmitterInfo: Option[SubmitterInfo],\n+      offset: LedgerOffset,\n+      transactionMeta: TransactionMeta,\n+      transactionId: TransactionId,\n+      events: List[AcsUpdateEvent]\n+  )\n+\n+  sealed trait AcsUpdateEvent extends Product with Serializable\n+\n+  object AcsUpdateEvent {\n+\n+    final case class Create(\n+        transactionId: TransactionId,\n+        nodeId: NodeId,"
+  },
+  {
+    "id" : "95c20129-a072-4226-9b99-610b43daf06b",
+    "prId" : 1313,
+    "comments" : [
+      {
+        "id" : "6427281f-2729-4b28-9d49-0196773b4b82",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "see https://github.com/digital-asset/daml/pull/1313/files#r286489644",
+        "createdAt" : "2019-05-22T13:30:25Z",
+        "updatedAt" : "2019-05-22T15:10:48Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8d00559d939670c7057b52f349d0869629bf7457",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.index\n+\n+import java.time.Instant\n+\n+import akka.NotUsed\n+import akka.stream.scaladsl.Source\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.daml.lf.data.Time.Timestamp\n+import com.digitalasset.daml.lf.transaction.{BlindingInfo, GenTransaction}\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, NodeId}\n+import com.digitalasset.ledger.api.domain._\n+\n+package object v2 {\n+\n+  final case class AcsUpdate(\n+      optSubmitterInfo: Option[SubmitterInfo],\n+      offset: LedgerOffset,\n+      transactionMeta: TransactionMeta,\n+      transactionId: TransactionId,\n+      events: List[AcsUpdateEvent]\n+  )\n+\n+  sealed trait AcsUpdateEvent extends Product with Serializable\n+\n+  object AcsUpdateEvent {\n+\n+    final case class Create(\n+        transactionId: TransactionId,\n+        nodeId: NodeId,\n+        contractId: Value.AbsoluteContractId,\n+        templateId: Ref.Identifier,\n+        argument: Value.VersionedValue[Value.AbsoluteContractId],\n+        // TODO(JM,SM): understand witnessing parties\n+        stakeholders: List[Ref.Party],\n+    ) extends AcsUpdateEvent\n+\n+    final case class Archive(\n+        transactionId: TransactionId,\n+        nodeId: NodeId,"
+  },
+  {
+    "id" : "22998f76-337c-4e41-bee7-da66f8bf2372",
+    "prId" : 1313,
+    "comments" : [
+      {
+        "id" : "0ca30e3a-793e-481f-995e-7b5dcd7bc789",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Should not be needed. The filtering that needs this should happen within the index service.",
+        "createdAt" : "2019-05-22T13:34:39Z",
+        "updatedAt" : "2019-05-22T15:10:48Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8d00559d939670c7057b52f349d0869629bf7457",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.index\n+\n+import java.time.Instant\n+\n+import akka.NotUsed\n+import akka.stream.scaladsl.Source\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.daml.lf.data.Time.Timestamp\n+import com.digitalasset.daml.lf.transaction.{BlindingInfo, GenTransaction}\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, NodeId}\n+import com.digitalasset.ledger.api.domain._\n+\n+package object v2 {\n+\n+  final case class AcsUpdate(\n+      optSubmitterInfo: Option[SubmitterInfo],\n+      offset: LedgerOffset,\n+      transactionMeta: TransactionMeta,\n+      transactionId: TransactionId,\n+      events: List[AcsUpdateEvent]\n+  )\n+\n+  sealed trait AcsUpdateEvent extends Product with Serializable\n+\n+  object AcsUpdateEvent {\n+\n+    final case class Create(\n+        transactionId: TransactionId,\n+        nodeId: NodeId,\n+        contractId: Value.AbsoluteContractId,\n+        templateId: Ref.Identifier,\n+        argument: Value.VersionedValue[Value.AbsoluteContractId],\n+        // TODO(JM,SM): understand witnessing parties\n+        stakeholders: List[Ref.Party],\n+    ) extends AcsUpdateEvent\n+\n+    final case class Archive(\n+        transactionId: TransactionId,\n+        nodeId: NodeId,\n+        contractId: Value.AbsoluteContractId,\n+        templateId: Ref.Identifier,\n+        // TODO(JM,SM): understand witnessing parties\n+        stakeholders: List[Ref.Party],\n+    ) extends AcsUpdateEvent\n+\n+  }\n+\n+  sealed trait CompletionEvent extends Product with Serializable {\n+    def offset: LedgerOffset.Absolute\n+  }\n+\n+  object CompletionEvent {\n+\n+    final case class Checkpoint(offset: LedgerOffset.Absolute, recordTime: Timestamp)\n+        extends CompletionEvent\n+\n+    final case class CommandAccepted(\n+        offset: LedgerOffset.Absolute,\n+        commandId: CommandId,\n+        transactionId: TransactionId)\n+        extends CompletionEvent\n+\n+    final case class CommandRejected(\n+        offset: LedgerOffset.Absolute,\n+        commandId: CommandId,\n+        reason: RejectionReason)\n+        extends CompletionEvent\n+\n+  }\n+\n+  final case class ActiveContractSetSnapshot(\n+      takenAt: LedgerOffset.Absolute,\n+      activeContracts: Source[(WorkflowId, AcsUpdateEvent.Create), NotUsed])\n+\n+  /** A transaction that has been accepted as committed by the Participant\n+    * node.\n+    *\n+    * @param transactionData: the transaction that was accepted as committed.\n+    *\n+    * @param transactionMeta: Meta-data of a transaction visible to all parties\n+    *                       that can see a part of the transaction.\n+    *\n+    * @param submitterInfo: information about the original submission of the transaction. Is [[None]]\n+    *   if the participant node does not host the submitter.\n+    *\n+    * @param blindingInfo: Information for divulgence and disclosure.\n+    *\n+    */\n+  final case class Transaction(\n+      transactionData: GenTransaction.WithTxValue[NodeId, AbsoluteContractId],\n+      blindingInfo: BlindingInfo,"
+  },
+  {
+    "id" : "214dfc1e-8c4a-4e55-b53c-b2bcfe115b02",
+    "prId" : 1313,
+    "comments" : [
+      {
+        "id" : "c7b6b7a9-fce9-4041-a5ea-23b57741eb87",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "`NodeId` needs to be `String`.",
+        "createdAt" : "2019-05-22T13:36:13Z",
+        "updatedAt" : "2019-05-22T15:10:48Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8d00559d939670c7057b52f349d0869629bf7457",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,159 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.index\n+\n+import java.time.Instant\n+\n+import akka.NotUsed\n+import akka.stream.scaladsl.Source\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.daml.lf.data.Time.Timestamp\n+import com.digitalasset.daml.lf.transaction.{BlindingInfo, GenTransaction}\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, NodeId}\n+import com.digitalasset.ledger.api.domain._\n+\n+package object v2 {\n+\n+  final case class AcsUpdate(\n+      optSubmitterInfo: Option[SubmitterInfo],\n+      offset: LedgerOffset,\n+      transactionMeta: TransactionMeta,\n+      transactionId: TransactionId,\n+      events: List[AcsUpdateEvent]\n+  )\n+\n+  sealed trait AcsUpdateEvent extends Product with Serializable\n+\n+  object AcsUpdateEvent {\n+\n+    final case class Create(\n+        transactionId: TransactionId,\n+        nodeId: NodeId,\n+        contractId: Value.AbsoluteContractId,\n+        templateId: Ref.Identifier,\n+        argument: Value.VersionedValue[Value.AbsoluteContractId],\n+        // TODO(JM,SM): understand witnessing parties\n+        stakeholders: List[Ref.Party],\n+    ) extends AcsUpdateEvent\n+\n+    final case class Archive(\n+        transactionId: TransactionId,\n+        nodeId: NodeId,\n+        contractId: Value.AbsoluteContractId,\n+        templateId: Ref.Identifier,\n+        // TODO(JM,SM): understand witnessing parties\n+        stakeholders: List[Ref.Party],\n+    ) extends AcsUpdateEvent\n+\n+  }\n+\n+  sealed trait CompletionEvent extends Product with Serializable {\n+    def offset: LedgerOffset.Absolute\n+  }\n+\n+  object CompletionEvent {\n+\n+    final case class Checkpoint(offset: LedgerOffset.Absolute, recordTime: Timestamp)\n+        extends CompletionEvent\n+\n+    final case class CommandAccepted(\n+        offset: LedgerOffset.Absolute,\n+        commandId: CommandId,\n+        transactionId: TransactionId)\n+        extends CompletionEvent\n+\n+    final case class CommandRejected(\n+        offset: LedgerOffset.Absolute,\n+        commandId: CommandId,\n+        reason: RejectionReason)\n+        extends CompletionEvent\n+\n+  }\n+\n+  final case class ActiveContractSetSnapshot(\n+      takenAt: LedgerOffset.Absolute,\n+      activeContracts: Source[(WorkflowId, AcsUpdateEvent.Create), NotUsed])\n+\n+  /** A transaction that has been accepted as committed by the Participant\n+    * node.\n+    *\n+    * @param transactionData: the transaction that was accepted as committed.\n+    *\n+    * @param transactionMeta: Meta-data of a transaction visible to all parties\n+    *                       that can see a part of the transaction.\n+    *\n+    * @param submitterInfo: information about the original submission of the transaction. Is [[None]]\n+    *   if the participant node does not host the submitter.\n+    *\n+    * @param blindingInfo: Information for divulgence and disclosure.\n+    *\n+    */\n+  final case class Transaction(\n+      transactionData: GenTransaction.WithTxValue[NodeId, AbsoluteContractId],"
+  }
+]

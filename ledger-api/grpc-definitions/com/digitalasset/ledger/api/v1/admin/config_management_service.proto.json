@@ -1,0 +1,171 @@
+[
+  {
+    "id" : "c106c14a-2a8d-43b3-86eb-5984a9377ce8",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "b4124e83-fe2c-4155-b1c0-99e33d87c80b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Please add `reserved 1` etc. for the removed fields, for example like we did for `Identifier`: https://github.com/digital-asset/daml/blob/6f9b5162515d05af303cfc0147991f9614b20cf6/ledger-api/grpc-definitions/com/digitalasset/ledger/api/v1/value.proto#L125-L126",
+        "createdAt" : "2020-03-20T10:25:08Z",
+        "updatedAt" : "2020-03-25T08:01:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : null,
+    "diffHunk" : "@@ -73,17 +73,22 @@ message SetTimeModelResponse {\n }\n \n message TimeModel {\n-  // The expected minimum latency of a transaction.\n+  // google.protobuf.Duration min_transaction_latency = 1;"
+  },
+  {
+    "id" : "49c92490-8f0f-49ac-8705-abfc0bcef5ab",
+    "prId" : 3656,
+    "comments" : [
+      {
+        "id" : "ce18c418-470e-4f9d-8e0c-aa91fb96a6cc",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "We routinely also mark all fields in comments as being either // Required or // Optional ",
+        "createdAt" : "2019-11-29T15:04:20Z",
+        "updatedAt" : "2019-12-04T14:08:03Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "151db247-43f2-44d4-9f8d-43e3bd701785",
+        "parentId" : "ce18c418-470e-4f9d-8e0c-aa91fb96a6cc",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Added.",
+        "createdAt" : "2019-12-04T14:08:23Z",
+        "updatedAt" : "2019-12-04T14:08:23Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ae062ea39c90dbc8ce597fe173fbb634406549f3",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,77 @@\n+\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+syntax = \"proto3\";\n+\n+package com.digitalasset.ledger.api.v1.admin;\n+\n+option java_outer_classname = \"ConfigManagementServiceOuterClass\";\n+option java_package = \"com.digitalasset.ledger.api.v1.admin\";\n+option csharp_namespace = \"Com.DigitalAsset.Ledger.Api.V1.Admin\";\n+\n+import \"google/protobuf/duration.proto\";\n+\n+// Status: experimental interface, will change before it is deemed production\n+// ready\n+\n+// Ledger configuration management service provides methods for the ledger administrator\n+// to change the current ledger configuration. The services provides methods to modify\n+// different aspects of the configuration.\n+service ConfigManagementService {\n+  // Return the currently active time model and the current configuration generation.\n+  rpc GetTimeModel (GetTimeModelRequest) returns (GetTimeModelResponse);\n+\n+  // Set the ledger time model.\n+  // In case of failure this method responds with:\n+  // - INVALID_ARGUMENT if arguments are invalid, or the provided configuration generation\n+  //   does not match the current active configuration generation. The caller is expected\n+  //   to retry by again fetching current time model using 'GetTimeModel', applying changes\n+  //   and resubmitting.\n+  // - UNIMPLEMENTED if this method is not supported by the backing ledger.\n+  rpc SetTimeModel (SetTimeModelRequest) returns (SetTimeModelResponse);\n+\n+  // FIXME(JM): Support retrieving the complete configuration encoded using ledger_configuration.proto?\n+  // FIXME(JM): Support streaming configuration?\n+}\n+\n+// FIXME(JM): ../ledger_configuration_service.proto contains \"LedgerConfiguration\" that\n+// has some time model parameters. It isn't a 1-1 match though. We might want to reconcile these.\n+\n+// FIXME(JM): Complete copy from ledger_configuration.proto. We likely still want to evolve these\n+// separately as the ledger_configuration.proto has to maintain full backwards compatibility.\n+message TimeModel {\n+  // The expected minimum latency of a transaction."
+  },
+  {
+    "id" : "7444d451-9390-43d5-816d-dfa54689e00f",
+    "prId" : 3656,
+    "comments" : [
+      {
+        "id" : "c154a75e-03f4-473f-8795-eecba420f4ca",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Please add also command_id, to allow for duplicate request filtering in case of a retry after a crash",
+        "createdAt" : "2019-11-29T15:09:50Z",
+        "updatedAt" : "2019-12-04T14:08:03Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bf8fdadd-7743-4df8-8c4d-dbc251fa0648",
+        "parentId" : "c154a75e-03f4-473f-8795-eecba420f4ca",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "are we switching everything to \"command_id\" now?",
+        "createdAt" : "2019-11-29T17:58:11Z",
+        "updatedAt" : "2019-12-04T14:08:03Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "01315695-f2d5-4b78-950d-4048bbff06ac",
+        "parentId" : "c154a75e-03f4-473f-8795-eecba420f4ca",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Added it as submission id.",
+        "createdAt" : "2019-12-04T14:08:11Z",
+        "updatedAt" : "2019-12-04T14:08:11Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "34c815b6-ab8e-4e68-a749-be5fe6fcff50",
+        "parentId" : "c154a75e-03f4-473f-8795-eecba420f4ca",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "subbmission_id makes more sense, thank you",
+        "createdAt" : "2019-12-05T07:23:34Z",
+        "updatedAt" : "2019-12-05T07:23:34Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ae062ea39c90dbc8ce597fe173fbb634406549f3",
+    "line" : 52,
+    "diffHunk" : "@@ -0,0 +1,77 @@\n+\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+syntax = \"proto3\";\n+\n+package com.digitalasset.ledger.api.v1.admin;\n+\n+option java_outer_classname = \"ConfigManagementServiceOuterClass\";\n+option java_package = \"com.digitalasset.ledger.api.v1.admin\";\n+option csharp_namespace = \"Com.DigitalAsset.Ledger.Api.V1.Admin\";\n+\n+import \"google/protobuf/duration.proto\";\n+\n+// Status: experimental interface, will change before it is deemed production\n+// ready\n+\n+// Ledger configuration management service provides methods for the ledger administrator\n+// to change the current ledger configuration. The services provides methods to modify\n+// different aspects of the configuration.\n+service ConfigManagementService {\n+  // Return the currently active time model and the current configuration generation.\n+  rpc GetTimeModel (GetTimeModelRequest) returns (GetTimeModelResponse);\n+\n+  // Set the ledger time model.\n+  // In case of failure this method responds with:\n+  // - INVALID_ARGUMENT if arguments are invalid, or the provided configuration generation\n+  //   does not match the current active configuration generation. The caller is expected\n+  //   to retry by again fetching current time model using 'GetTimeModel', applying changes\n+  //   and resubmitting.\n+  // - UNIMPLEMENTED if this method is not supported by the backing ledger.\n+  rpc SetTimeModel (SetTimeModelRequest) returns (SetTimeModelResponse);\n+\n+  // FIXME(JM): Support retrieving the complete configuration encoded using ledger_configuration.proto?\n+  // FIXME(JM): Support streaming configuration?\n+}\n+\n+// FIXME(JM): ../ledger_configuration_service.proto contains \"LedgerConfiguration\" that\n+// has some time model parameters. It isn't a 1-1 match though. We might want to reconcile these.\n+\n+// FIXME(JM): Complete copy from ledger_configuration.proto. We likely still want to evolve these\n+// separately as the ledger_configuration.proto has to maintain full backwards compatibility.\n+message TimeModel {\n+  // The expected minimum latency of a transaction.\n+  google.protobuf.Duration min_transaction_latency = 1;\n+\n+  // The maximum allowed clock skew between the ledger and clients.\n+  google.protobuf.Duration max_clock_skew = 2;\n+\n+  // The maximum allowed time to live for a transaction.\n+  // Must be greater than the derived minimum time to live.\n+  google.protobuf.Duration max_ttl = 3;\n+}\n+\n+message GetTimeModelRequest {\n+}\n+\n+message GetTimeModelResponse {\n+  // The current configuration generation. The generation is a monotonically increasing\n+  // integer that is incremented on each change. Used when setting the time model.\n+  int64 configuration_generation = 1;\n+\n+  // The current ledger time model.\n+  TimeModel time_model = 2;\n+}\n+\n+message SetTimeModelRequest {\n+  // The current configuration generation which we're submitting the change against."
+  }
+]

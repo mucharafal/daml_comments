@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "fd8896e3-caf2-420f-8777-a0956a44e9ab",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "08d11126-5cdf-48dd-be73-76a1708c5d09",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Unused type -- please remove.",
+        "createdAt" : "2020-08-04T09:01:50Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8a06cac0-2f32-45ef-a9c5-b83b22cb6eac",
+        "parentId" : "08d11126-5cdf-48dd-be73-76a1708c5d09",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:30:53Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -26,43 +27,50 @@ class BatchedValidatingCommitterSpec\n   \"commit\" should {\n     \"return Acknowledged in case of success\" in {\n       val mockValidator = mock[BatchedSubmissionValidator[Unit]]\n-      when(\n-        mockValidator.validateAndCommit(\n-          any[ByteString](),\n-          anyString(),\n-          any[Instant](),\n-          any[ParticipantId](),\n-          any[DamlLedgerStateReader](),\n-          any[CommitStrategy[Unit]]())(any[Materializer](), any[ExecutionContext]()))\n+      whenValidateAndCommit(mockValidator)\n         .thenReturn(Future.unit)\n       val instance =\n         BatchedValidatingCommitter[Unit](() => Instant.now(), mockValidator)\n \n       instance\n-        .commit(\"\", ByteString.EMPTY, aParticipantId, mock[LedgerStateOperations[Unit]])\n+        .commit(\n+          correlationId = \"\",\n+          submissionEnvelope = ByteString.EMPTY,\n+          submittingParticipantId = aParticipantId,\n+          ledgerStateOperations = mock[LedgerStateOperations[Unit]])\n         .map { actual =>\n           actual shouldBe SubmissionResult.Acknowledged\n         }\n     }\n \n     \"return InternalError in case of an exception\" in {\n       val mockValidator = mock[BatchedSubmissionValidator[Unit]]\n-      when(\n-        mockValidator.validateAndCommit(\n-          any[ByteString](),\n-          anyString(),\n-          any[Instant](),\n-          any[ParticipantId](),\n-          any[DamlLedgerStateReader](),\n-          any[CommitStrategy[Unit]]())(any[Materializer](), any[ExecutionContext]()))\n+      whenValidateAndCommit(mockValidator)\n         .thenReturn(Future.failed(new IllegalArgumentException(\"Validation failure\")))\n       val instance = BatchedValidatingCommitter[Unit](() => Instant.now(), mockValidator)\n \n       instance\n-        .commit(\"\", ByteString.EMPTY, aParticipantId, mock[LedgerStateOperations[Unit]])\n+        .commit(\n+          correlationId = \"\",\n+          submissionEnvelope = ByteString.EMPTY,\n+          submittingParticipantId = aParticipantId,\n+          ledgerStateOperations = mock[LedgerStateOperations[Unit]])\n         .map { actual =>\n           actual shouldBe SubmissionResult.InternalError(\"Validation failure\")\n         }\n     }\n   }\n+\n+  private def whenValidateAndCommit(\n+      mockValidator: BatchedSubmissionValidator[Unit]): OngoingStubbing[Future[Unit]] =\n+    when(\n+      mockValidator.validateAndCommit(\n+        any[ByteString](),\n+        anyString(),\n+        any[Instant](),\n+        any[ParticipantId](),\n+        any[DamlLedgerStateReader](),\n+        any[CommitStrategy[Unit]]())(any[Materializer](), any[ExecutionContext]()))\n+\n+  private type LedgerStateTransaction = LedgerStateOperations[Unit] => Future[Unit]"
+  }
+]

@@ -1,0 +1,174 @@
+[
+  {
+    "id" : "73ec21b5-793c-46f7-992b-d560846b7770",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "5c9a6348-f64c-432c-9ce5-a9ef36bcc0a0",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n      case Right(Envelope.SubmissionBatchMessage(_)) =>\r\n```",
+        "createdAt" : "2020-07-14T08:52:42Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "838ff2d9-7977-4168-8f2e-cd1b148c6a40",
+        "parentId" : "5c9a6348-f64c-432c-9ce5-a9ef36bcc0a0",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Change.",
+        "createdAt" : "2020-07-14T10:15:39Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,140 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlStateKey,\n+  DamlStateValue,\n+  DamlSubmission\n+}\n+import com.daml.ledger.participant.state.kvutils.KeyValueCommitting.PreExecutionResult\n+import com.daml.ledger.participant.state.kvutils.api.LedgerReader\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Envelope, Fingerprint, KeyValueCommitting}\n+import com.daml.ledger.participant.state.v1.ParticipantId\n+import com.daml.ledger.validator.batch.BatchedSubmissionValidator\n+import com.daml.ledger.validator.preexecution.PreExecutionCommitResult.ReadSet\n+import com.daml.ledger.validator.{StateKeySerializationStrategy, ValidationFailed}\n+import com.daml.logging.{ContextualizedLogger, LoggingContext}\n+import com.daml.metrics.{Metrics, Timed}\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+sealed case class PreExecutionOutput[WriteSet](\n+    minRecordTime: Option[Instant],\n+    maxRecordTime: Option[Instant],\n+    successWriteSet: WriteSet,\n+    outOfTimeBoundsWriteSet: WriteSet,\n+    readSet: ReadSet,\n+    involvedParticipants: Set[ParticipantId]\n+)\n+\n+/**\n+  * Validator pre-executing submissions.\n+  */\n+class PreExecutingSubmissionValidator[WriteSet](\n+    committer: KeyValueCommitting,\n+    metrics: Metrics,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    commitStrategy: PreExecutingCommitStrategy[WriteSet]) {\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  def validate(\n+      submissionEnvelope: Bytes,\n+      correlationId: String,\n+      submittingParticipantId: ParticipantId,\n+      ledgerStateReader: DamlLedgerStateReaderWithFingerprints,\n+  )(implicit executionContext: ExecutionContext): Future[PreExecutionOutput[WriteSet]] =\n+    LoggingContext.newLoggingContext(\"correlationId\" -> correlationId) { implicit logCtx =>\n+      for {\n+        decodedSubmission <- decodeSubmission(submissionEnvelope)\n+        fetchedInputs <- fetchSubmissionInputs(decodedSubmission, ledgerStateReader)\n+        preExecutionResult <- preExecuteSubmission(\n+          decodedSubmission,\n+          submittingParticipantId,\n+          fetchedInputs)\n+        logEntryId = BatchedSubmissionValidator.bytesToLogEntryId(submissionEnvelope)\n+        inputState = fetchedInputs.map { case (key, (value, _)) => key -> value }\n+        generatedWriteSets <- commitStrategy.generateWriteSets(\n+          submittingParticipantId,\n+          logEntryId,\n+          inputState,\n+          preExecutionResult)\n+      } yield {\n+        PreExecutionOutput(\n+          minRecordTime = preExecutionResult.minimumRecordTime.map(_.toInstant),\n+          maxRecordTime = preExecutionResult.maximumRecordTime.map(_.toInstant),\n+          successWriteSet = generatedWriteSets.successWriteSet,\n+          outOfTimeBoundsWriteSet = generatedWriteSets.outOfTimeBoundsWriteSet,\n+          readSet = generateReadSet(preExecutionResult.readSet),\n+          involvedParticipants = generatedWriteSets.involvedParticipants\n+        )\n+      }\n+    }\n+\n+  private def decodeSubmission(submissionEnvelope: Bytes)(\n+      implicit logCtx: LoggingContext): Future[DamlSubmission] =\n+    metrics.daml.kvutils.submission.validator.decode\n+      .time(() => Envelope.open(submissionEnvelope)) match {\n+      case Right(Envelope.SubmissionMessage(submission)) =>\n+        metrics.daml.kvutils.submission.validator.receivedSubmissionBytes\n+          .update(submission.getSerializedSize)\n+        Future.successful(submission)\n+\n+      case Right(Envelope.SubmissionBatchMessage(batch)) =>"
+  },
+  {
+    "id" : "556df11a-92b1-4d48-837f-fb5538fa8a03",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "06a43415-b247-4f88-89b1-cdc5e1d369de",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "add assertion that exactly the requested number of keys have been read.",
+        "createdAt" : "2020-07-14T09:50:41Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "90add7aa-0b9f-4498-a6e2-dbc05bebec3a",
+        "parentId" : "06a43415-b247-4f88-89b1-cdc5e1d369de",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added. Though, that would be not honoring the contract of the interface.",
+        "createdAt" : "2020-07-14T10:22:44Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b5c35e9c-2145-446b-800a-56396106feb3",
+        "parentId" : "06a43415-b247-4f88-89b1-cdc5e1d369de",
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "agreed. making the contract explicit in code is helpful though to catch buggy implementations early.",
+        "createdAt" : "2020-07-14T11:19:03Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : 106,
+    "diffHunk" : "@@ -0,0 +1,140 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlStateKey,\n+  DamlStateValue,\n+  DamlSubmission\n+}\n+import com.daml.ledger.participant.state.kvutils.KeyValueCommitting.PreExecutionResult\n+import com.daml.ledger.participant.state.kvutils.api.LedgerReader\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Envelope, Fingerprint, KeyValueCommitting}\n+import com.daml.ledger.participant.state.v1.ParticipantId\n+import com.daml.ledger.validator.batch.BatchedSubmissionValidator\n+import com.daml.ledger.validator.preexecution.PreExecutionCommitResult.ReadSet\n+import com.daml.ledger.validator.{StateKeySerializationStrategy, ValidationFailed}\n+import com.daml.logging.{ContextualizedLogger, LoggingContext}\n+import com.daml.metrics.{Metrics, Timed}\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+sealed case class PreExecutionOutput[WriteSet](\n+    minRecordTime: Option[Instant],\n+    maxRecordTime: Option[Instant],\n+    successWriteSet: WriteSet,\n+    outOfTimeBoundsWriteSet: WriteSet,\n+    readSet: ReadSet,\n+    involvedParticipants: Set[ParticipantId]\n+)\n+\n+/**\n+  * Validator pre-executing submissions.\n+  */\n+class PreExecutingSubmissionValidator[WriteSet](\n+    committer: KeyValueCommitting,\n+    metrics: Metrics,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    commitStrategy: PreExecutingCommitStrategy[WriteSet]) {\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  def validate(\n+      submissionEnvelope: Bytes,\n+      correlationId: String,\n+      submittingParticipantId: ParticipantId,\n+      ledgerStateReader: DamlLedgerStateReaderWithFingerprints,\n+  )(implicit executionContext: ExecutionContext): Future[PreExecutionOutput[WriteSet]] =\n+    LoggingContext.newLoggingContext(\"correlationId\" -> correlationId) { implicit logCtx =>\n+      for {\n+        decodedSubmission <- decodeSubmission(submissionEnvelope)\n+        fetchedInputs <- fetchSubmissionInputs(decodedSubmission, ledgerStateReader)\n+        preExecutionResult <- preExecuteSubmission(\n+          decodedSubmission,\n+          submittingParticipantId,\n+          fetchedInputs)\n+        logEntryId = BatchedSubmissionValidator.bytesToLogEntryId(submissionEnvelope)\n+        inputState = fetchedInputs.map { case (key, (value, _)) => key -> value }\n+        generatedWriteSets <- commitStrategy.generateWriteSets(\n+          submittingParticipantId,\n+          logEntryId,\n+          inputState,\n+          preExecutionResult)\n+      } yield {\n+        PreExecutionOutput(\n+          minRecordTime = preExecutionResult.minimumRecordTime.map(_.toInstant),\n+          maxRecordTime = preExecutionResult.maximumRecordTime.map(_.toInstant),\n+          successWriteSet = generatedWriteSets.successWriteSet,\n+          outOfTimeBoundsWriteSet = generatedWriteSets.outOfTimeBoundsWriteSet,\n+          readSet = generateReadSet(preExecutionResult.readSet),\n+          involvedParticipants = generatedWriteSets.involvedParticipants\n+        )\n+      }\n+    }\n+\n+  private def decodeSubmission(submissionEnvelope: Bytes)(\n+      implicit logCtx: LoggingContext): Future[DamlSubmission] =\n+    metrics.daml.kvutils.submission.validator.decode\n+      .time(() => Envelope.open(submissionEnvelope)) match {\n+      case Right(Envelope.SubmissionMessage(submission)) =>\n+        metrics.daml.kvutils.submission.validator.receivedSubmissionBytes\n+          .update(submission.getSerializedSize)\n+        Future.successful(submission)\n+\n+      case Right(Envelope.SubmissionBatchMessage(batch)) =>\n+        logger.error(\"Batched submissions are not supported for pre-execution\")\n+        Future.failed(\n+          ValidationFailed.ValidationError(\n+            \"Batched submissions are not supported for pre-execution\"))\n+\n+      case Right(other) =>\n+        Future.failed(\n+          ValidationFailed.ValidationError(\n+            s\"Unexpected message in envelope: ${other.getClass.getSimpleName}\"))\n+\n+      case Left(error) =>\n+        Future.failed(ValidationFailed.ValidationError(s\"Cannot open envelope: $error\"))\n+    }\n+\n+  type DamlInputStateWithFingerprints = Map[DamlStateKey, (Option[DamlStateValue], Fingerprint)]\n+\n+  private def fetchSubmissionInputs(\n+      submission: DamlSubmission,\n+      ledgerStateReader: DamlLedgerStateReaderWithFingerprints)(\n+      implicit executionContext: ExecutionContext): Future[DamlInputStateWithFingerprints] = {\n+    val inputKeys = submission.getInputDamlStateList.asScala\n+    Timed.timedAndTrackedFuture(\n+      metrics.daml.kvutils.submission.validator.fetchInputs,\n+      metrics.daml.kvutils.submission.validator.fetchInputsRunning,\n+      ledgerStateReader\n+        .read(inputKeys)\n+        .map { values =>\n+          inputKeys.zip(values).toMap"
+  },
+  {
+    "id" : "4d4e9fe6-58f7-4215-898e-288493deb633",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "614e1635-2920-4cc8-ba3d-bd4258466ec0",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "I'd expect a comment here explaining the meaning of the fields.",
+        "createdAt" : "2020-07-14T10:01:19Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "31398f9f-ba66-4a41-aca6-7f8b08186a6d",
+        "parentId" : "614e1635-2920-4cc8-ba3d-bd4258466ec0",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Will do later.",
+        "createdAt" : "2020-07-14T10:20:43Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,140 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.preexecution\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlStateKey,\n+  DamlStateValue,\n+  DamlSubmission\n+}\n+import com.daml.ledger.participant.state.kvutils.KeyValueCommitting.PreExecutionResult\n+import com.daml.ledger.participant.state.kvutils.api.LedgerReader\n+import com.daml.ledger.participant.state.kvutils.{Bytes, Envelope, Fingerprint, KeyValueCommitting}\n+import com.daml.ledger.participant.state.v1.ParticipantId\n+import com.daml.ledger.validator.batch.BatchedSubmissionValidator\n+import com.daml.ledger.validator.preexecution.PreExecutionCommitResult.ReadSet\n+import com.daml.ledger.validator.{StateKeySerializationStrategy, ValidationFailed}\n+import com.daml.logging.{ContextualizedLogger, LoggingContext}\n+import com.daml.metrics.{Metrics, Timed}\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+sealed case class PreExecutionOutput[WriteSet]("
+  }
+]

@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "da73908b-5b53-4e16-a148-679c90791a91",
+    "prId" : 7006,
+    "comments" : [
+      {
+        "id" : "6fd367ee-fa5b-48d3-94f9-d8eb30f2b03b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can we match the full string in this case? I'd like to make sure there's no instance of \"List(\".",
+        "createdAt" : "2020-08-06T13:10:14Z",
+        "updatedAt" : "2020-08-06T13:10:23Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0666ac52-7d20-4281-a564-cb3b6a673e12",
+        "parentId" : "6fd367ee-fa5b-48d3-94f9-d8eb30f2b03b",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "We could, however, I didn't want to replicate the full code for generating the explanation string. Instead, here we just count the number of new lines in the result which will ensure that we have converted list elements into separate lines.",
+        "createdAt" : "2020-08-06T13:14:27Z",
+        "updatedAt" : "2020-08-06T13:14:28Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f9a8a714960c9893798e81f83f27699d28b2cfa1",
+    "line" : 47,
+    "diffHunk" : "@@ -0,0 +1,101 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.tools\n+\n+import com.daml.ledger.participant.state.kvutils.export.FileBasedLedgerDataExporter.WriteSet\n+import com.daml.ledger.participant.state.kvutils.tools.export.{\n+  CommitStrategySupport,\n+  IntegrityChecker\n+}\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+import com.google.protobuf.ByteString\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{Matchers, WordSpec}\n+\n+class IntegrityCheckerSpec extends WordSpec with Matchers with MockitoSugar {\n+  \"compareSameSizeWriteSets\" should {\n+    \"return None in case strategy cannot explain difference\" in {\n+      val mockCommitStrategySupport = mock[CommitStrategySupport[Unit]]\n+      when(mockCommitStrategySupport.explainMismatchingValue(any[Key], any[Value], any[Value]))\n+        .thenReturn(None)\n+      val instance = new IntegrityChecker[Unit](mockCommitStrategySupport)\n+\n+      instance.compareSameSizeWriteSets(toWriteSet(\"key\" -> \"a\"), toWriteSet(\"key\" -> \"b\")) shouldBe None\n+    }\n+\n+    \"return None in case of no difference\" in {\n+      val mockCommitStrategySupport = mock[CommitStrategySupport[Unit]]\n+      val instance = new IntegrityChecker[Unit](mockCommitStrategySupport)\n+      val aWriteSet = toWriteSet(\"key\" -> \"value\")\n+\n+      instance.compareSameSizeWriteSets(aWriteSet, aWriteSet) shouldBe None\n+    }\n+\n+    \"return explanation from strategy in case it can explain the difference\" in {\n+      val mockCommitStrategySupport = mock[CommitStrategySupport[Unit]]\n+      when(mockCommitStrategySupport.explainMismatchingValue(any[Key], any[Value], any[Value]))\n+        .thenReturn(Some(\"expected explanation\"))\n+      val instance = new IntegrityChecker[Unit](mockCommitStrategySupport)\n+\n+      val actual =\n+        instance.compareSameSizeWriteSets(toWriteSet(\"key\" -> \"a\"), toWriteSet(\"key\" -> \"b\"))\n+\n+      actual match {\n+        case Some(explanation) => explanation should include(\"expected explanation\")"
+  }
+]

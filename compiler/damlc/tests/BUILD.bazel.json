@@ -1,0 +1,212 @@
+[
+  {
+    "id" : "67fa1510-253c-4b2f-8508-2ae31981e5d3",
+    "prId" : 6577,
+    "comments" : [
+      {
+        "id" : "71b6967a-9a3f-474f-930c-413a10745459",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I wonder if it makes sense to make `integration-lib` above a binary this one a `sh_test`. Any thoughts?",
+        "createdAt" : "2020-07-02T09:59:43Z",
+        "updatedAt" : "2020-07-02T11:03:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c2b2d682-27d0-46a0-a387-faa55edd9803",
+        "parentId" : "71b6967a-9a3f-474f-930c-413a10745459",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "In principle this should work, however, there is an issue with the path to the runfiles tree not being overridden correctly when a Haskell binary is wrapped in a `sh_test` directly. In this particular case none of the `data` dependencies on the test case are specific to the LF version, so moving the `data` attribute to the underlying `da_haskell_binary` should work around that issue.",
+        "createdAt" : "2020-07-02T10:26:43Z",
+        "updatedAt" : "2020-07-02T11:03:32Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4216eec5-f459-49de-a9a4-fb917285ff24",
+        "parentId" : "71b6967a-9a3f-474f-930c-413a10745459",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'll try that in a follow-up PR. Thanks.",
+        "createdAt" : "2020-07-02T10:39:22Z",
+        "updatedAt" : "2020-07-02T11:03:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "69089fe1d101ed9af4f61eba93a5adaae4f286b1",
+    "line" : 70,
+    "diffHunk" : "@@ -107,11 +107,80 @@ da_haskell_test(\n     ],\n )\n \n-# Integration tests for all non-dev DAML-LF versions\n-damlc_integration_test(\"integration-stable\", \"DA.Test.DamlcIntegration.mainAll\")\n+da_haskell_library(\n+    name = \"integration-lib\",\n+    srcs = [\"src/DA/Test/DamlcIntegration.hs\"],\n+    deps = [\n+        \"//compiler/daml-lf-ast\",\n+        \"//compiler/daml-lf-proto\",\n+        \"//compiler/damlc/daml-compiler\",\n+        \"//compiler/damlc/daml-ide-core\",\n+        \"//compiler/damlc/daml-lf-conversion\",\n+        \"//compiler/damlc/daml-opts:daml-opts-types\",\n+        \"//compiler/damlc/daml-opts\",\n+        \"//compiler/scenario-service/client\",\n+        \"//daml-lf/archive:daml_lf_dev_archive_haskell_proto\",\n+        \"//libs-haskell/bazel-runfiles\",\n+        \"//libs-haskell/da-hs-base\",\n+        \"//libs-haskell/test-utils\",\n+    ],\n+    hackage_deps = [\n+        \"aeson-pretty\",\n+        \"base\",\n+        \"bytestring\",\n+        \"data-default\",\n+        \"deepseq\",\n+        \"directory\",\n+        \"dlist\",\n+        \"extra\",\n+        \"filepath\",\n+        \"ghc-lib\",\n+        \"ghc-lib-parser\",\n+        \"ghcide\",\n+        \"haskell-lsp-types\",\n+        \"optparse-applicative\",\n+        \"process\",\n+        \"proto3-suite\",\n+        \"shake\",\n+        \"tagged\",\n+        \"tasty\",\n+        \"tasty-hunit\",\n+        \"text\",\n+        \"time\",\n+        \"unordered-containers\",\n+    ],\n+    visibility = [\"//visibility:public\"],\n+)\n \n-# Integration tests for DAML-LF 1.dev\n-damlc_integration_test(\"integration-dev\", \"DA.Test.DamlcIntegration.main\")\n+[\n+    da_haskell_test("
+  },
+  {
+    "id" : "679528d8-f278-415a-93c1-137cbe8e1802",
+    "prId" : 2325,
+    "comments" : [
+      {
+        "id" : "50287fc5-7554-4ca7-8495-04b766eed84a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I believe that change is inconsistent with the module names for other tests.",
+        "createdAt" : "2019-07-30T07:09:38Z",
+        "updatedAt" : "2019-07-31T18:57:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3a390e5baed8d24cb1eac9a25b9951eb49ad4db9",
+    "line" : null,
+    "diffHunk" : "@@ -27,15 +27,17 @@ da_haskell_test(\n # Tests for damlc visual\n da_haskell_test(\n     name = \"damlc-visual\",\n-    srcs = [\"src/DamlcVisual.hs\"],\n+    srcs = [\"src/VisualTest.hs\"],"
+  },
+  {
+    "id" : "b2b82514-c3a6-47bc-98c0-ac27166984d3",
+    "prId" : 2325,
+    "comments" : [
+      {
+        "id" : "2b4ec0df-ebd8-4655-a62a-2cc506f2892f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I am not sure we gain much by having this be a separate test suite from the existing shake tests so I would propose that you just move it to that test suite.",
+        "createdAt" : "2019-07-30T07:10:49Z",
+        "updatedAt" : "2019-07-31T18:57:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "94a57e23-70bb-4c95-9697-ae5f2f2bdf01",
+        "parentId" : "2b4ec0df-ebd8-4655-a62a-2cc506f2892f",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Moved all this to shake test suite ",
+        "createdAt" : "2019-07-30T16:31:45Z",
+        "updatedAt" : "2019-07-31T18:57:12Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3a390e5baed8d24cb1eac9a25b9951eb49ad4db9",
+    "line" : 3,
+    "diffHunk" : "@@ -27,15 +27,17 @@ da_haskell_test(\n # Tests for damlc visual\n da_haskell_test("
+  },
+  {
+    "id" : "fc68fac6-38be-43f3-8661-6abcce0a3447",
+    "prId" : 2178,
+    "comments" : [
+      {
+        "id" : "40f71382-f2f0-4388-acc7-9a6443508bf1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Please don’t simply bump these limits. That defeats the whole purpose of these tests. If we need to bump the stack limit (even if just on Windows), there is a reason for it and at the very least we need to figure out what it is before we blindly bump the limit and accept regressions.",
+        "createdAt" : "2019-07-31T05:46:48Z",
+        "updatedAt" : "2019-07-31T05:46:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "04f6b4b8-af8d-4a29-a329-af623f1a6be6",
+        "parentId" : "40f71382-f2f0-4388-acc7-9a6443508bf1",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I suppose the reason why we need more stack space now is that generate more code during the template desugaring. The bump to `300K` seems excessive though. @rohanjr can you please shrink it to something more reasonable, like `40K` or `50K`.",
+        "createdAt" : "2019-07-31T07:39:10Z",
+        "updatedAt" : "2019-07-31T07:39:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3ede1552-f1ac-4b01-8c53-f26a8337dd11",
+        "parentId" : "40f71382-f2f0-4388-acc7-9a6443508bf1",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I could see higher heap usage originating from generating more code but higher stack usage does at least not necessarily seem related and is often a sign of spaceleaks.",
+        "createdAt" : "2019-07-31T07:42:29Z",
+        "updatedAt" : "2019-07-31T07:42:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ca591f5890a7d9487d0b2351de3d08b4592a1a87",
+    "line" : 5,
+    "diffHunk" : "@@ -227,7 +227,7 @@ damlc_compile_test(\n     srcs = [\":bond-trading\"],\n     heap_limit = \"200M\" if is_windows else \"100M\",\n     main = \"bond-trading/Test.daml\",\n-    stack_limit = \"35K\",\n+    stack_limit = \"300K\" if is_windows else \"35K\","
+  }
+]

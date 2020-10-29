@@ -1,0 +1,371 @@
+[
+  {
+    "id" : "1e1dbdf1-e015-4299-84e2-54c28982d0c9",
+    "prId" : 6646,
+    "comments" : [
+      {
+        "id" : "a583371a-fcdc-46a1-8edb-1b17b84e98d6",
+        "parentId" : null,
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "IMO test should move from the `.services.completion` package to `.services.configuration`",
+        "createdAt" : "2020-07-08T12:20:57Z",
+        "updatedAt" : "2020-07-08T13:16:41Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1fff2974-cb5d-4dae-b8c3-91e1faeb1088",
+        "parentId" : "a583371a-fcdc-46a1-8edb-1b17b84e98d6",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Will do.",
+        "createdAt" : "2020-07-08T12:39:34Z",
+        "updatedAt" : "2020-07-08T13:16:41Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7d93fa5fb876e41f24d6d98a451a08e0f381e545",
+    "line" : null,
+    "diffHunk" : "@@ -44,38 +71,118 @@ class EmptyLedgerIT\n       implicitPartyAllocation = false\n     )\n \n-  private[this] val applicationId = getClass.getSimpleName\n+  \"CommandCompletionService gives sensible ledger end on an empty ledger\" in {\n+    val lid = ledgerId()\n+    val party = \"partyA\"\n+    val completionService = CommandCompletionServiceGrpc.stub(channel)\n+    for {\n+      end <- completionService.completionEnd(CompletionEndRequest(lid.unwrap))\n+      completions <- completionsFromOffset(\n+        completionService = completionService,\n+        ledgerId = lid,\n+        parties = List(party),\n+        offset = end.getOffset,\n+        completionTimeout = 2.seconds,\n+      )\n+    } yield {\n+      end.getOffset.value.absolute.get shouldBe ApiOffset.begin.toHexString\n+      completions shouldBe empty\n+    }\n+  }\n+\n+  \"ConfigManagementService accepts a configuration when none is set\" in {"
+  },
+  {
+    "id" : "f1007fc2-9f40-416f-ae07-a29af397d8dd",
+    "prId" : 6646,
+    "comments" : [
+      {
+        "id" : "d320782e-df64-4556-bbee-e56d97a2661a",
+        "parentId" : null,
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "This looks like there's flakiness potential here, if this spawned `Future` completes before the `.submit` below spawns off?",
+        "createdAt" : "2020-07-08T12:26:47Z",
+        "updatedAt" : "2020-07-08T13:16:41Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b5b86a40-1438-45dd-8d4d-fce61315118c",
+        "parentId" : "d320782e-df64-4556-bbee-e56d97a2661a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "It will always take 5 seconds to complete.",
+        "createdAt" : "2020-07-08T12:39:03Z",
+        "updatedAt" : "2020-07-08T13:16:41Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2f8ae9e8-0567-4338-bd03-2f91b3e12462",
+        "parentId" : "d320782e-df64-4556-bbee-e56d97a2661a",
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "Yeah, I guess you'd need to be majorly unlucky with the scheduling, but I don't really see that you gain anything from spawning the future earlier.",
+        "createdAt" : "2020-07-08T12:40:24Z",
+        "updatedAt" : "2020-07-08T13:16:41Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "69113afd-a7b8-4e1d-a202-cc8f5bb33e08",
+        "parentId" : "d320782e-df64-4556-bbee-e56d97a2661a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I agree, there's flakiness potential, but hopefully not too much. If I see it flake, I'll bump the wait time.",
+        "createdAt" : "2020-07-08T12:57:41Z",
+        "updatedAt" : "2020-07-08T13:16:41Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fd5963b6-cf88-44b2-ad55-6e0a7a8d1cc8",
+        "parentId" : "d320782e-df64-4556-bbee-e56d97a2661a",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Well, it flaked. You were right. Reordering so we query for completions afterwards.",
+        "createdAt" : "2020-07-08T13:16:08Z",
+        "updatedAt" : "2020-07-08T13:16:41Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7d93fa5fb876e41f24d6d98a451a08e0f381e545",
+    "line" : null,
+    "diffHunk" : "@@ -44,38 +71,118 @@ class EmptyLedgerIT\n       implicitPartyAllocation = false\n     )\n \n-  private[this] val applicationId = getClass.getSimpleName\n+  \"CommandCompletionService gives sensible ledger end on an empty ledger\" in {\n+    val lid = ledgerId()\n+    val party = \"partyA\"\n+    val completionService = CommandCompletionServiceGrpc.stub(channel)\n+    for {\n+      end <- completionService.completionEnd(CompletionEndRequest(lid.unwrap))\n+      completions <- completionsFromOffset(\n+        completionService = completionService,\n+        ledgerId = lid,\n+        parties = List(party),\n+        offset = end.getOffset,\n+        completionTimeout = 2.seconds,\n+      )\n+    } yield {\n+      end.getOffset.value.absolute.get shouldBe ApiOffset.begin.toHexString\n+      completions shouldBe empty\n+    }\n+  }\n+\n+  \"ConfigManagementService accepts a configuration when none is set\" in {\n+    val lid = ledgerId().unwrap\n+    val completionService = CommandCompletionServiceGrpc.stub(channel)\n+    for {\n+      _ <- publishATimeModel(channel)\n+      end <- completionService.completionEnd(CompletionEndRequest(lid))\n+    } yield {\n+      end.getOffset.value.absolute.get should not be ApiOffset.begin.toHexString\n+    }\n+  }\n+\n+  \"CommandCompletionService can stream completions from the beginning\" in {\n+    val lid = ledgerId()\n+    val party = \"partyA\"\n+    val commandId = \"commandId\"\n+\n+    val submissionService = CommandSubmissionServiceGrpc.stub(channel)\n+    val completionService = CommandCompletionServiceGrpc.stub(channel)\n+    for {\n+      end <- completionService.completionEnd(CompletionEndRequest(lid.unwrap))\n+      _ <- publishATimeModel(channel)\n+      _ <- uploadDarFile(darFile, channel)\n+      _ <- allocateParty(party, channel)\n+      completionsF = completionsFromOffset("
+  },
+  {
+    "id" : "edafdea2-bf05-4c8d-a958-68bcce8d8a55",
+    "prId" : 6638,
+    "comments" : [
+      {
+        "id" : "a2111dc9-1988-4165-8c96-171bc0d6261a",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Should this have the same name as the class?\r\n```suggestion\r\n  private[this] val applicationId = getClass.getSimpleName\r\n```",
+        "createdAt" : "2020-07-07T12:39:21Z",
+        "updatedAt" : "2020-07-07T14:00:57Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e499dfbe66379ccb8b24c52d1eea8a9610c851ea",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,82 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.sandbox.services.completion\n+\n+import java.time.Duration\n+import java.util.concurrent.TimeUnit\n+\n+import com.daml.ledger.api.testing.utils.SuiteResourceManagementAroundAll\n+import com.daml.ledger.api.v1.command_completion_service.{\n+  CommandCompletionServiceGrpc,\n+  CompletionEndRequest,\n+  CompletionStreamRequest,\n+  CompletionStreamResponse\n+}\n+import com.daml.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.daml.platform.sandbox.SandboxBackend\n+import com.daml.platform.sandbox.config.SandboxConfig\n+import com.daml.platform.sandbox.services.TestCommands\n+import com.daml.platform.sandboxnext.SandboxNextFixture\n+import com.daml.platform.testing.StreamConsumer\n+import org.scalatest.{AsyncWordSpec, Inspectors, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration.FiniteDuration\n+import scalaz.syntax.tag._\n+\n+class EmptyLedgerIT\n+    extends AsyncWordSpec\n+    with Matchers\n+    with Inspectors\n+    with SandboxNextFixture\n+    with SandboxBackend.Postgresql\n+    with TestCommands\n+    with SuiteResourceManagementAroundAll {\n+\n+  // Start with empty daml packages and a large configuration delay, such that we can test the API's behavior\n+  // on an empty index\n+  override protected def config: SandboxConfig =\n+    super.config.copy(\n+      damlPackages = List.empty,\n+      ledgerConfig = super.config.ledgerConfig.copy(\n+        initialConfigurationSubmitDelay = Duration.ofDays(5)\n+      ),\n+      implicitPartyAllocation = false\n+    )\n+\n+  private[this] val applicationId = \"CompletionServiceIT\""
+  },
+  {
+    "id" : "0e87141b-d3ba-4d1d-97d4-9db137766df4",
+    "prId" : 6638,
+    "comments" : [
+      {
+        "id" : "09695c98-b87a-433e-a38f-91498b2c1f1c",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n  private[this] val completionTimeout = 2.seconds\r\n```\r\n\r\nYou'll need to import `scala.concurrent.duration.DurationInt`.",
+        "createdAt" : "2020-07-07T12:39:42Z",
+        "updatedAt" : "2020-07-07T14:00:57Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e499dfbe66379ccb8b24c52d1eea8a9610c851ea",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,82 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.sandbox.services.completion\n+\n+import java.time.Duration\n+import java.util.concurrent.TimeUnit\n+\n+import com.daml.ledger.api.testing.utils.SuiteResourceManagementAroundAll\n+import com.daml.ledger.api.v1.command_completion_service.{\n+  CommandCompletionServiceGrpc,\n+  CompletionEndRequest,\n+  CompletionStreamRequest,\n+  CompletionStreamResponse\n+}\n+import com.daml.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.daml.platform.sandbox.SandboxBackend\n+import com.daml.platform.sandbox.config.SandboxConfig\n+import com.daml.platform.sandbox.services.TestCommands\n+import com.daml.platform.sandboxnext.SandboxNextFixture\n+import com.daml.platform.testing.StreamConsumer\n+import org.scalatest.{AsyncWordSpec, Inspectors, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration.FiniteDuration\n+import scalaz.syntax.tag._\n+\n+class EmptyLedgerIT\n+    extends AsyncWordSpec\n+    with Matchers\n+    with Inspectors\n+    with SandboxNextFixture\n+    with SandboxBackend.Postgresql\n+    with TestCommands\n+    with SuiteResourceManagementAroundAll {\n+\n+  // Start with empty daml packages and a large configuration delay, such that we can test the API's behavior\n+  // on an empty index\n+  override protected def config: SandboxConfig =\n+    super.config.copy(\n+      damlPackages = List.empty,\n+      ledgerConfig = super.config.ledgerConfig.copy(\n+        initialConfigurationSubmitDelay = Duration.ofDays(5)\n+      ),\n+      implicitPartyAllocation = false\n+    )\n+\n+  private[this] val applicationId = \"CompletionServiceIT\"\n+\n+  // How long it takes to download the entire completion stream.\n+  // Because the stream does not terminate, we use a timeout to determine when the stream\n+  // is done emitting elements.\n+  private[this] val completionTimeout = FiniteDuration(2, TimeUnit.SECONDS)"
+  },
+  {
+    "id" : "8e4bc679-752c-46d3-b90c-d1985897280d",
+    "prId" : 6638,
+    "comments" : [
+      {
+        "id" : "75ab6d1e-57ca-4319-90cb-05a75a6d8018",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "What happens when a transaction is written to the ledger after opening the stream? Does using `end.getOffset` get that completion?",
+        "createdAt" : "2020-07-07T12:40:53Z",
+        "updatedAt" : "2020-07-07T14:00:57Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dfb0c7a0-d6e5-449d-9c91-c2a94ded6b75",
+        "parentId" : "75ab6d1e-57ca-4319-90cb-05a75a6d8018",
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "`.getOffset` is just an unsafe value getter for the (optional) protobuf field, so it should return the empty ledger begin regardless of what happens later. The cases where there are existing transactions before the end is requested are covered by the `CompletionServiceIT`",
+        "createdAt" : "2020-07-07T12:53:15Z",
+        "updatedAt" : "2020-07-07T14:00:57Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b2b2123a-52be-40e4-a079-8bfd8a2614a6",
+        "parentId" : "75ab6d1e-57ca-4319-90cb-05a75a6d8018",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'm specifically wondering what happens in the case where we return `Offset.begin` rather than a value from the database, which we don't test elsewhere.",
+        "createdAt" : "2020-07-07T12:56:41Z",
+        "updatedAt" : "2020-07-07T14:00:57Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9fc7fd75-6787-4b99-9af1-c23c146fa8d8",
+        "parentId" : "75ab6d1e-57ca-4319-90cb-05a75a6d8018",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Discussed with @oggy-; this flags further issues so we're going to open a separate issue.",
+        "createdAt" : "2020-07-07T14:20:15Z",
+        "updatedAt" : "2020-07-07T14:20:15Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "964d68d6-db66-41a5-a84c-29353f5e4d14",
+        "parentId" : "75ab6d1e-57ca-4319-90cb-05a75a6d8018",
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "Tracked now in #6640 ",
+        "createdAt" : "2020-07-07T15:07:58Z",
+        "updatedAt" : "2020-07-07T15:07:58Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e499dfbe66379ccb8b24c52d1eea8a9610c851ea",
+    "line" : 78,
+    "diffHunk" : "@@ -0,0 +1,82 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.sandbox.services.completion\n+\n+import java.time.Duration\n+import java.util.concurrent.TimeUnit\n+\n+import com.daml.ledger.api.testing.utils.SuiteResourceManagementAroundAll\n+import com.daml.ledger.api.v1.command_completion_service.{\n+  CommandCompletionServiceGrpc,\n+  CompletionEndRequest,\n+  CompletionStreamRequest,\n+  CompletionStreamResponse\n+}\n+import com.daml.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.daml.platform.sandbox.SandboxBackend\n+import com.daml.platform.sandbox.config.SandboxConfig\n+import com.daml.platform.sandbox.services.TestCommands\n+import com.daml.platform.sandboxnext.SandboxNextFixture\n+import com.daml.platform.testing.StreamConsumer\n+import org.scalatest.{AsyncWordSpec, Inspectors, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.concurrent.duration.FiniteDuration\n+import scalaz.syntax.tag._\n+\n+class EmptyLedgerIT\n+    extends AsyncWordSpec\n+    with Matchers\n+    with Inspectors\n+    with SandboxNextFixture\n+    with SandboxBackend.Postgresql\n+    with TestCommands\n+    with SuiteResourceManagementAroundAll {\n+\n+  // Start with empty daml packages and a large configuration delay, such that we can test the API's behavior\n+  // on an empty index\n+  override protected def config: SandboxConfig =\n+    super.config.copy(\n+      damlPackages = List.empty,\n+      ledgerConfig = super.config.ledgerConfig.copy(\n+        initialConfigurationSubmitDelay = Duration.ofDays(5)\n+      ),\n+      implicitPartyAllocation = false\n+    )\n+\n+  private[this] val applicationId = \"CompletionServiceIT\"\n+\n+  // How long it takes to download the entire completion stream.\n+  // Because the stream does not terminate, we use a timeout to determine when the stream\n+  // is done emitting elements.\n+  private[this] val completionTimeout = FiniteDuration(2, TimeUnit.SECONDS)\n+\n+  private[this] def completionsFromOffset(\n+      completionService: CommandCompletionServiceGrpc.CommandCompletionServiceStub,\n+      ledgerId: String,\n+      parties: Seq[String],\n+      offset: LedgerOffset,\n+  ): Future[Vector[String]] = {\n+    new StreamConsumer[CompletionStreamResponse](\n+      completionService.completionStream(\n+        CompletionStreamRequest(ledgerId, applicationId, parties, Some(offset)),\n+        _\n+      )\n+    ).within(completionTimeout)\n+      .map(_.flatMap(_.completions).map(_.commandId))\n+  }\n+\n+  \"CommandCompletionService gives sensible ledger end on an empty ledger\" in {\n+\n+    val partyA = \"partyA\"\n+    val lid = ledgerId().unwrap\n+    val completionService = CommandCompletionServiceGrpc.stub(channel)\n+    for {\n+      end <- completionService.completionEnd(CompletionEndRequest(lid))\n+      completions <- completionsFromOffset(completionService, lid, List(partyA), end.getOffset)\n+    } yield {\n+      completions shouldBe empty"
+  },
+  {
+    "id" : "05c999a3-cf1f-4af3-88c2-edb58659f5da",
+    "prId" : 6638,
+    "comments" : [
+      {
+        "id" : "a33c7815-4dff-4d6c-89e3-bb296b0a81e6",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "This import is no longer used.",
+        "createdAt" : "2020-07-07T12:57:12Z",
+        "updatedAt" : "2020-07-07T14:00:57Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e499dfbe66379ccb8b24c52d1eea8a9610c851ea",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,82 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.sandbox.services.completion\n+\n+import java.time.Duration\n+import java.util.concurrent.TimeUnit"
+  }
+]

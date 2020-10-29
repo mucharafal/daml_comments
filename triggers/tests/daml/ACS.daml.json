@@ -1,0 +1,88 @@
+[
+  {
+    "id" : "785b3af9-faa1-4808-8dbe-13d8327b50a0",
+    "prId" : 2973,
+    "comments" : [
+      {
+        "id" : "b910f56b-2190-4a63-b32d-e92a2d140955",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Cool, this is much nicer!",
+        "createdAt" : "2019-09-23T10:12:17Z",
+        "updatedAt" : "2019-09-23T10:12:25Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "256118b7f2894aaab5f49184e0422475cb64d3dd",
+    "line" : 23,
+    "diffHunk" : "@@ -43,23 +43,26 @@ test = Trigger\n       where\n         updateEvent : ([Command], TextMap Identifier) -> Event -> ([Command], TextMap Identifier)\n         updateEvent (cmds, acs) ev = case ev of\n-          CreatedEvent (Created _ cId)\n-            | cId.templateId.entityName == \"Asset\" ->\n-            let proposeMirror : Command = createCmd (AssetMirrorProposal { issuer = party })\n+          CreatedEvent (Created _ cId argument)\n+            | Some (Asset {issuer}) <- fromAnyTemplate @(Asset ()) argument ->\n+            let proposeMirror : Command = createCmd (AssetMirrorProposal { issuer })\n             in (proposeMirror :: cmds, TM.insert cId.contractId cId.templateId acs)\n-            | cId.templateId.entityName == \"AssetMirrorProposal\" ->\n+            | Some (AssetMirrorProposal {}) <- fromAnyTemplate argument ->"
+  },
+  {
+    "id" : "e62625af-3e5b-4496-8cdd-e61c8204a2f4",
+    "prId" : 2945,
+    "comments" : [
+      {
+        "id" : "5419fef2-820a-4891-a107-3dfa52d597b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m confused, it looks like you don’t expose `AnyContractId` (or more likely I’m too stupid to see it) but you can still access the fields?",
+        "createdAt" : "2019-09-18T08:04:06Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8c0b187c-c1c5-45a6-b65e-0d716fafe0c9",
+        "parentId" : "5419fef2-820a-4891-a107-3dfa52d597b8",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Indeed, that's why I didn't notice that I hadn't exposed it. I don't know how the field is accessible without export. The code still compiles, even if I explicitly export the type without the constructors.",
+        "createdAt" : "2019-09-18T08:16:47Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "418cfb3a-945b-45c1-9318-08ef3a97aba5",
+        "parentId" : "5419fef2-820a-4891-a107-3dfa52d597b8",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I think that might be because of how our record desugaring (the dot syntax used here) works. That does seem rather confusing and potentially problematic since it removes the ability to have abstract record types.",
+        "createdAt" : "2019-09-18T08:18:56Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "833cab6997bcd9eadf1ccd597c9c4eb33d76d128",
+    "line" : 7,
+    "diffHunk" : "@@ -19,8 +19,8 @@ initState : Party -> ActiveContracts -> TriggerState\n initState party (ActiveContracts events) = TriggerState (foldl updateAcs TM.empty events) 0 party\n   where\n     updateAcs : TextMap Identifier -> Created -> TextMap Identifier\n-    updateAcs acs (Created _ cId tId)\n-      | tId.entityName == \"Asset\" = TM.insert cId tId acs\n+    updateAcs acs (Created _ cId)\n+      | cId.templateId.entityName == \"Asset\" = TM.insert cId.contractId cId.templateId acs"
+  }
+]

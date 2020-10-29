@@ -1,0 +1,1167 @@
+[
+  {
+    "id" : "e159c22a-1a71-47be-91a3-d01ce3f2b5c5",
+    "prId" : 7787,
+    "comments" : [
+      {
+        "id" : "93cf35f9-38f2-49cc-9303-30bd944a3b31",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "This choice of ACS preserves the behavior prior to #7632. With respect to the commands-in-flight, which is new, it seems that it should be the choice that is consistent with the ACS. However, that implies that\r\n\r\n```haskell\r\n  updateState = \\message -> do\r\n    let commandId = case message of\r\n          MTransaction tx -> tx.commandId\r\n          MCompletion cmp -> Some cmp.commandId\r\n          MHeartbeat -> None\r\n    cif <- getCommandsInFlight\r\n    pure $ any (\\cid -> Map.member cid cif) commandId\r\n    -- ^ may yield True\r\n```\r\n\r\nAs such we may want slightly different expected behavior for updateState's commands-in-flight and pendingContracts.",
+        "createdAt" : "2020-10-22T19:40:12Z",
+        "updatedAt" : "2020-10-22T21:24:15Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6b037a1d-e731-44c2-9349-af896af94423",
+        "parentId" : "93cf35f9-38f2-49cc-9303-30bd944a3b31",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Fully agree on keeping commands in flight and the ACS in sync. How do you feel about running `updateState` after updating the ACS and commands in flight instead of the behavior we have now? I don’t have a strong preference either way and it’s definitely something for another PR.",
+        "createdAt" : "2020-10-23T08:23:39Z",
+        "updatedAt" : "2020-10-23T08:23:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1635e82d-9b2d-488f-a5cc-7db49518d409",
+        "parentId" : "93cf35f9-38f2-49cc-9303-30bd944a3b31",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "#7799 ",
+        "createdAt" : "2020-10-23T14:48:54Z",
+        "updatedAt" : "2020-10-23T14:48:55Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2cbb09991aa2c34876e8626cefef5d8a6c452363",
+    "line" : 100,
+    "diffHunk" : "@@ -257,14 +275,15 @@ runTrigger userTrigger = LowLevel.Trigger\n                 runRule userTrigger.rule\n         MTransaction transaction -> do\n           let acs = applyTransaction transaction state.acs\n-              userState = utUpdateState acs (MTransaction transaction) state.userState\n+              -- again, we use the commands-in-flight and ACS before the update below\n+              userState = utUpdateState state.commandsInFlight acs (MTransaction transaction) state.userState"
+  },
+  {
+    "id" : "4478cb80-0474-4a0a-a86c-65e058d2b9d5",
+    "prId" : 7674,
+    "comments" : [
+      {
+        "id" : "ca532cd2-b12d-44bc-a56a-72a23efbbced",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "We should note that `initialize` is once again the odd one out, as there is nothing to `get` at first.",
+        "createdAt" : "2020-10-13T18:42:48Z",
+        "updatedAt" : "2020-10-14T14:32:14Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9afc54ea51fa2221dd79f3cb4c39d92731d4a7d0",
+    "line" : 14,
+    "diffHunk" : "@@ -89,7 +89,7 @@ data Trigger s = Trigger\n   -- ^ Update the user-defined state based on a transaction or\n   -- completion message.  It can manipulate the state with `get`, `put`,\n   -- and `modify`, or query the ACS with `query`.\n-  , rule : Party -> s -> TriggerA ()\n+  , rule : Party -> TriggerA s ()"
+  },
+  {
+    "id" : "33cb44bc-6dab-4e09-85a0-fc4e40a9e5b2",
+    "prId" : 7632,
+    "comments" : [
+      {
+        "id" : "79071014-7ced-431a-8bec-fc2fd3edb55c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":+1: ",
+        "createdAt" : "2020-10-13T07:09:50Z",
+        "updatedAt" : "2020-10-13T16:38:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ff9c6cdb061569d69928ce65252f33699b9f793b",
+    "line" : 21,
+    "diffHunk" : "@@ -54,10 +55,6 @@ import qualified Daml.Trigger.LowLevel as LowLevel\n \n -- public API\n \n-{-# DEPRECATED getTemplates \"getTemplates is deprecated in favor of getContracts\" #-}"
+  },
+  {
+    "id" : "5d994aab-735b-4422-9760-8d7321deb0a8",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "7c26d040-8299-458c-afa9-62a2e4c15406",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not part of this PR (I might have already mentioned this in #7392 not quite sure) but we could consider deprecating the name `emitCommands` in favor of `submitCommands`. `emit` isn’t really terminology that we use anywhere else and just seems confusing. I don’t quite want to use just `submit` since we use that for the synchronous submissions in scenarios and daml script.",
+        "createdAt" : "2020-10-02T07:06:58Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "73639013-48a4-431f-a442-963a038ada64",
+        "parentId" : "7c26d040-8299-458c-afa9-62a2e4c15406",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "`submitCommands` is the low-level primitive corresponding to \"add an element to the returned `[Commands]`\". As far as I can tell, the distinction with `emitCommands` needs to be preserved. The names can be anything.",
+        "createdAt" : "2020-10-02T15:08:56Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "36c4cbcc-4236-4fc0-9e7a-ee4a5156c6d3",
+        "parentId" : "7c26d040-8299-458c-afa9-62a2e4c15406",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Right I wasn’t suggesting to remove the distinction, just cleaning up names for the high-level API. But definitely not something for this PR and maybe sticking to `emit` is also sensible. I didn’t spend too much time thinking about this.",
+        "createdAt" : "2020-10-02T15:10:53Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : 21,
+    "diffHunk" : "@@ -104,6 +103,7 @@ emitCommands cmds pending = do\n     , pendingContracts = Map.insert id pending s.pendingContracts\n     , nextCommandId = s.nextCommandId + 1\n     }\n+  submitCommands commands"
+  },
+  {
+    "id" : "dfc2f918-8744-4bdb-80c8-d981a05d0704",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "8ef9d7ae-b6ca-408a-a14a-c27fb370c1b2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Nice cleanup. The StateT looks much nicer here.",
+        "createdAt" : "2020-10-02T07:07:46Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : 36,
+    "diffHunk" : "@@ -184,35 +184,37 @@ runTrigger userTrigger = LowLevel.Trigger\n   , heartbeat = userTrigger.heartbeat\n   }\n   where\n-    initialState party time (ActiveContracts createdEvents) =\n+    initialState party (ActiveContracts createdEvents) =\n       let acs = foldl (\\acs created -> applyEvent (CreatedEvent created) acs) (ACS mempty Map.empty) createdEvents\n           userState = userTrigger.initialize acs\n           state = TriggerState acs party userState Map.empty 0\n-      in runRule userTrigger.rule time state\n-    update time msg state =\n+      in TriggerSetup $ execStateT (runTriggerRule $ runRule userTrigger.rule) state"
+  },
+  {
+    "id" : "219b5566-2667-4a7a-b28e-0247fd15d708",
+    "prId" : 5990,
+    "comments" : [
+      {
+        "id" : "7db88af0-84b5-4842-ab2a-95d3e78ae8f6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "fwiw I’m considering removing the `dedupX` functions completely in favor of the pending commands in `emitCommands`. While they seem convenient on simple examples, I think they also make it easy to get the condition you want to deduplicate on wrong and they don’t scale to multi-command transactions.\r\n\r\nLet’s add it for now so we are consistent. If you have an opinion on this, I’d be interested in hearing it (probably not on this PR though, it’s completely unrelated :))",
+        "createdAt" : "2020-05-14T16:41:45Z",
+        "updatedAt" : "2020-05-14T16:54:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7614430a9f7cd3897734e26a06d0bb44eca2c6d7",
+    "line" : 23,
+    "diffHunk" : "@@ -110,6 +112,22 @@ dedupCreate t = do\n   unless (any ((Some t ==) . fromCreate) cmds) $\n     void $ emitCommands [createCmd t] []\n \n+-- | Create the template and exercise a choice on it it’s not already in the list of commands\n+-- in flight (it will still be created if it is in the ACS).\n+--\n+-- Note that this will send the create as a single-command transaction.\n+-- If you need to send multiple commands in one transaction, use\n+-- `emitCommands` with `createCmd` and handle filtering yourself.\n+dedupCreateAndExercise : (Eq t, Eq c, Template t, Choice t c r) => t -> c -> TriggerA ()"
+  },
+  {
+    "id" : "b8e2fb6d-aeac-422b-b9ab-a80703f1d48b",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "0f408d68-d5a2-47b8-ac3b-ecd3ae468108",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Let’s leave it here for this PR but I wonder if it might make sense to move the testing functions to something like `Daml.Trigger.Test` or `Daml.Trigger.Assert` to match `DA.Assert`.",
+        "createdAt" : "2020-01-28T08:21:52Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e083e662-e656-40fe-93b7-0561ed7e7369",
+        "parentId" : "0f408d68-d5a2-47b8-ac3b-ecd3ae468108",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, that sounds like a good idea. In the specific case of `ACSBuilder`, we'd either have to also export `ACS (..)` from `Daml.Trigger`, or keep `ACSBuilder` and `buildACS` in `Daml.Trigger`.",
+        "createdAt" : "2020-01-28T09:40:14Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2845d841-fac7-4799-958d-e4a8cdfef048",
+        "parentId" : "0f408d68-d5a2-47b8-ac3b-ecd3ae468108",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We could have a separate `Daml.Trigger.Internal` module that exports `ACS(..)` and import it from both `Daml.Trigger` which then only needs to reexport `ACS` and `Daml.Trigger.Assert`.",
+        "createdAt" : "2020-01-28T09:41:43Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f5fd426a-661b-4cd1-a621-202c45d988d5",
+        "parentId" : "0f408d68-d5a2-47b8-ac3b-ecd3ae468108",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, that sounds good.",
+        "createdAt" : "2020-01-28T09:43:00Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : 5,
+    "diffHunk" : "@@ -28,13 +28,21 @@ module Daml.Trigger\n  , RegisteredTemplates(..)\n  , registeredTemplate\n  , RelTime(..)\n+ , toACS"
+  },
+  {
+    "id" : "5cadd1f6-c669-4001-9e44-2d6a667978c6",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "fbb93a0e-3dd0-4b4a-8555-171e7039da1c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Shouldn't we export the `ACSBuilder` _type_ as well?",
+        "createdAt" : "2020-01-28T08:35:36Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "da99e4e5-e3a4-47ad-a1ba-e4b8053e8864",
+        "parentId" : "fbb93a0e-3dd0-4b4a-8555-171e7039da1c",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Indeed, done.",
+        "createdAt" : "2020-01-28T08:46:53Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : 5,
+    "diffHunk" : "@@ -28,13 +28,21 @@ module Daml.Trigger\n  , RegisteredTemplates(..)\n  , registeredTemplate\n  , RelTime(..)\n+ , toACS"
+  },
+  {
+    "id" : "b8c167b8-a89e-4d81-b95f-0695d6960ad0",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "3094b2af-16d6-4d59-a646-44e2229bef0e",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "`GeneralizedNewtypeDeriving` should allows us to write\r\n```suggestion\r\nnewtype ACSBuilder = ACSBuilder [Update (AnyContractId, AnyTemplate)]\r\n  deriving (Semigroup, Monoid)\r\n```",
+        "createdAt" : "2020-01-28T08:36:50Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6118efad-7607-4c50-a99f-9665fa0394e3",
+        "parentId" : "3094b2af-16d6-4d59-a646-44e2229bef0e",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I tried that, but it fails with\r\n```\r\nSeverity: DsError\r\nMessage:\r\n  Failure to process DAML program, this feature is not currently supported.\r\n  Coercion with tyconappco.\r\n  ([Sym (N:ACSBuilder[0])])_R\r\n```",
+        "createdAt" : "2020-01-28T09:32:47Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "69eb4f59-708d-4023-af99-9336d4644a27",
+        "parentId" : "3094b2af-16d6-4d59-a646-44e2229bef0e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Opened https://github.com/digital-asset/daml/issues/4237 to track this",
+        "createdAt" : "2020-01-28T09:38:25Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7ac45c46-01e7-4369-823f-7d29db07de73",
+        "parentId" : "3094b2af-16d6-4d59-a646-44e2229bef0e",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Thanks!",
+        "createdAt" : "2020-01-28T09:42:19Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : 29,
+    "diffHunk" : "@@ -260,3 +268,109 @@ data TriggerState s = TriggerState\n   , commandsInFlight : Map CommandId [Command]\n   , nextCommandId : Int\n   }\n+\n+-- | Used to construct an 'ACS' for 'testRule'.\n+newtype ACSBuilder = ACSBuilder [Update (AnyContractId, AnyTemplate)]"
+  },
+  {
+    "id" : "86a31847-71a4-4265-8fa6-45a80dfed885",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "15c8889a-4b00-4374-8abe-d1312c736fca",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n-- | Check that at least one command is a create command whose payload fulfills the given assertions.\r\n```",
+        "createdAt" : "2020-01-28T08:38:49Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b1093653-b4a9-4e86-b3e2-a0cea9261423",
+        "parentId" : "15c8889a-4b00-4374-8abe-d1312c736fca",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "done.",
+        "createdAt" : "2020-01-28T09:34:43Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : null,
+    "diffHunk" : "@@ -260,3 +268,109 @@ data TriggerState s = TriggerState\n   , commandsInFlight : Map CommandId [Command]\n   , nextCommandId : Int\n   }\n+\n+-- | Used to construct an 'ACS' for 'testRule'.\n+newtype ACSBuilder = ACSBuilder [Update (AnyContractId, AnyTemplate)]\n+\n+instance Semigroup ACSBuilder where\n+  ACSBuilder l <> ACSBuilder r = ACSBuilder (l <> r)\n+\n+instance Monoid ACSBuilder where\n+  mempty = ACSBuilder mempty\n+\n+buildACS : Party -> ACSBuilder -> Scenario ACS\n+buildACS party (ACSBuilder fetches) = do\n+  activeContracts <- submit party $ sequence fetches\n+  pure ACS\n+    { activeContracts = activeContracts\n+    , pendingContracts = Map.empty\n+    }\n+\n+-- | Include the given contract in the 'ACS'.\n+toACS : Template t => ContractId t -> ACSBuilder\n+toACS cid = ACSBuilder\n+  [fetch cid >>= \\tpl -> pure (toAnyContractId cid, toAnyTemplate tpl)]\n+\n+-- | Execute a trigger's rule once in a scenario.\n+testRule\n+  : Trigger s  -- ^ Test this trigger's 'Trigger.rule'.\n+  -> Party  -- ^ Execute the rule as this 'Party'.\n+  -> ACSBuilder  -- ^ List these contracts in the 'ACS'.\n+  -> Map CommandId [Command]  -- ^ The commands in flight.\n+  -> s  -- ^ The trigger state.\n+  -> Scenario [Commands]  -- ^ The 'Commands' emitted by the rule. The 'CommandId's will start from @\"0\"@.\n+testRule trigger party acsBuilder commandsInFlight s = do\n+  time <- getTime\n+  acs <- buildACS party acsBuilder\n+  let state = TriggerState\n+        { acs = acs\n+        , party = party\n+        , userState = s\n+        , commandsInFlight = commandsInFlight\n+        , nextCommandId = 0\n+        }\n+  let (_, commands) = runRule trigger.rule time state\n+  pure commands\n+\n+-- | Drop 'CommandId's and extract all 'Command's.\n+flattenCommands : [Commands] -> [Command]\n+flattenCommands = concatMap commands\n+\n+expectCommand\n+  : [Command]\n+  -> (Command -> Optional a)\n+  -> (a -> Either Text ())\n+  -> Either [Text] ()\n+expectCommand commands fromCommand assertion = foldl step (Left []) commands\n+  where\n+    step : Either [Text] () -> Command -> Either [Text] ()\n+    step (Right ()) _ = Right ()\n+    step (Left msgs) command =\n+      case assertion <$> fromCommand command of\n+        None -> Left msgs\n+        Some (Left msg) -> Left (msg :: msgs)\n+        Some (Right ()) -> Right ()\n+\n+-- | Check that at least one command fulfills the given assertions."
+  },
+  {
+    "id" : "c85434a0-1e0d-4f9a-8bab-4e8613bb7d42",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "160047d3-be9d-4a13-a858-2c17085112b2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n-- | Check that at least one command is an exercise command whose contract id and choice argument fulfill the given assertions.\r\n```\r\nSimilarly for `assertExerciseByKeyCmd`.",
+        "createdAt" : "2020-01-28T08:39:55Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "12ef7531-d3e6-46f7-b8e3-4c58de5978a1",
+        "parentId" : "160047d3-be9d-4a13-a858-2c17085112b2",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-01-28T09:34:53Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : null,
+    "diffHunk" : "@@ -260,3 +268,109 @@ data TriggerState s = TriggerState\n   , commandsInFlight : Map CommandId [Command]\n   , nextCommandId : Int\n   }\n+\n+-- | Used to construct an 'ACS' for 'testRule'.\n+newtype ACSBuilder = ACSBuilder [Update (AnyContractId, AnyTemplate)]\n+\n+instance Semigroup ACSBuilder where\n+  ACSBuilder l <> ACSBuilder r = ACSBuilder (l <> r)\n+\n+instance Monoid ACSBuilder where\n+  mempty = ACSBuilder mempty\n+\n+buildACS : Party -> ACSBuilder -> Scenario ACS\n+buildACS party (ACSBuilder fetches) = do\n+  activeContracts <- submit party $ sequence fetches\n+  pure ACS\n+    { activeContracts = activeContracts\n+    , pendingContracts = Map.empty\n+    }\n+\n+-- | Include the given contract in the 'ACS'.\n+toACS : Template t => ContractId t -> ACSBuilder\n+toACS cid = ACSBuilder\n+  [fetch cid >>= \\tpl -> pure (toAnyContractId cid, toAnyTemplate tpl)]\n+\n+-- | Execute a trigger's rule once in a scenario.\n+testRule\n+  : Trigger s  -- ^ Test this trigger's 'Trigger.rule'.\n+  -> Party  -- ^ Execute the rule as this 'Party'.\n+  -> ACSBuilder  -- ^ List these contracts in the 'ACS'.\n+  -> Map CommandId [Command]  -- ^ The commands in flight.\n+  -> s  -- ^ The trigger state.\n+  -> Scenario [Commands]  -- ^ The 'Commands' emitted by the rule. The 'CommandId's will start from @\"0\"@.\n+testRule trigger party acsBuilder commandsInFlight s = do\n+  time <- getTime\n+  acs <- buildACS party acsBuilder\n+  let state = TriggerState\n+        { acs = acs\n+        , party = party\n+        , userState = s\n+        , commandsInFlight = commandsInFlight\n+        , nextCommandId = 0\n+        }\n+  let (_, commands) = runRule trigger.rule time state\n+  pure commands\n+\n+-- | Drop 'CommandId's and extract all 'Command's.\n+flattenCommands : [Commands] -> [Command]\n+flattenCommands = concatMap commands\n+\n+expectCommand\n+  : [Command]\n+  -> (Command -> Optional a)\n+  -> (a -> Either Text ())\n+  -> Either [Text] ()\n+expectCommand commands fromCommand assertion = foldl step (Left []) commands\n+  where\n+    step : Either [Text] () -> Command -> Either [Text] ()\n+    step (Right ()) _ = Right ()\n+    step (Left msgs) command =\n+      case assertion <$> fromCommand command of\n+        None -> Left msgs\n+        Some (Left msg) -> Left (msg :: msgs)\n+        Some (Right ()) -> Right ()\n+\n+-- | Check that at least one command fulfills the given assertions.\n+assertCreateCmd\n+  : (Template t, CanAbort m)\n+  => [Command]  -- ^ Check these commands.\n+  -> (t -> Either Text ())  -- ^ Perform these assertions.\n+  -> m ()\n+assertCreateCmd commands assertion =\n+  case expectCommand commands fromCreate assertion of\n+    Right () -> pure ()\n+    Left msgs ->\n+      abort $ \"Failure, found no matching create command.\" <> collectMessages msgs\n+\n+-- | Check that at least one command fulfills the given assertions."
+  },
+  {
+    "id" : "f332fbba-8fba-441e-a8e0-764bcecff926",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "41f3daeb-0259-4d0c-99cc-0bdac430d7b6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We should probably export this type but without the constructor. We leak it anyway since we expose `toACS`.",
+        "createdAt" : "2020-01-28T08:41:46Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "95de1620-329b-4118-8503-623e7a755005",
+        "parentId" : "41f3daeb-0259-4d0c-99cc-0bdac430d7b6",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, done.",
+        "createdAt" : "2020-01-28T09:40:30Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : 28,
+    "diffHunk" : "@@ -260,3 +268,109 @@ data TriggerState s = TriggerState\n   , commandsInFlight : Map CommandId [Command]\n   , nextCommandId : Int\n   }\n+\n+-- | Used to construct an 'ACS' for 'testRule'."
+  },
+  {
+    "id" : "22334e96-605f-4d78-9f4e-b0ef4ec7d802",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "789203cd-b5a4-4458-8c5c-1caec401d8fc",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "With these assertion helpers it is easy to check that a given command was emitted but it is tricky to assert that a command was not emitted or that a given command was emitted multiple times (although I don’t really see a good usecase for the latter). Not sure how important this is so let’s definitely leave it for a separate PR but worth keeping in mind.",
+        "createdAt" : "2020-01-28T08:47:01Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f98170a2-f5ac-41b3-9511-eeaccf219670",
+        "parentId" : "789203cd-b5a4-4458-8c5c-1caec401d8fc",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, agreed. I'd say this is a first draft at the assertion API. We'll have to see what API is demanded as use-cases come up. ",
+        "createdAt" : "2020-01-28T09:41:47Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : 91,
+    "diffHunk" : "@@ -260,3 +268,109 @@ data TriggerState s = TriggerState\n   , commandsInFlight : Map CommandId [Command]\n   , nextCommandId : Int\n   }\n+\n+-- | Used to construct an 'ACS' for 'testRule'.\n+newtype ACSBuilder = ACSBuilder [Update (AnyContractId, AnyTemplate)]\n+\n+instance Semigroup ACSBuilder where\n+  ACSBuilder l <> ACSBuilder r = ACSBuilder (l <> r)\n+\n+instance Monoid ACSBuilder where\n+  mempty = ACSBuilder mempty\n+\n+buildACS : Party -> ACSBuilder -> Scenario ACS\n+buildACS party (ACSBuilder fetches) = do\n+  activeContracts <- submit party $ sequence fetches\n+  pure ACS\n+    { activeContracts = activeContracts\n+    , pendingContracts = Map.empty\n+    }\n+\n+-- | Include the given contract in the 'ACS'.\n+toACS : Template t => ContractId t -> ACSBuilder\n+toACS cid = ACSBuilder\n+  [fetch cid >>= \\tpl -> pure (toAnyContractId cid, toAnyTemplate tpl)]\n+\n+-- | Execute a trigger's rule once in a scenario.\n+testRule\n+  : Trigger s  -- ^ Test this trigger's 'Trigger.rule'.\n+  -> Party  -- ^ Execute the rule as this 'Party'.\n+  -> ACSBuilder  -- ^ List these contracts in the 'ACS'.\n+  -> Map CommandId [Command]  -- ^ The commands in flight.\n+  -> s  -- ^ The trigger state.\n+  -> Scenario [Commands]  -- ^ The 'Commands' emitted by the rule. The 'CommandId's will start from @\"0\"@.\n+testRule trigger party acsBuilder commandsInFlight s = do\n+  time <- getTime\n+  acs <- buildACS party acsBuilder\n+  let state = TriggerState\n+        { acs = acs\n+        , party = party\n+        , userState = s\n+        , commandsInFlight = commandsInFlight\n+        , nextCommandId = 0\n+        }\n+  let (_, commands) = runRule trigger.rule time state\n+  pure commands\n+\n+-- | Drop 'CommandId's and extract all 'Command's.\n+flattenCommands : [Commands] -> [Command]\n+flattenCommands = concatMap commands\n+\n+expectCommand\n+  : [Command]\n+  -> (Command -> Optional a)\n+  -> (a -> Either Text ())\n+  -> Either [Text] ()\n+expectCommand commands fromCommand assertion = foldl step (Left []) commands\n+  where\n+    step : Either [Text] () -> Command -> Either [Text] ()\n+    step (Right ()) _ = Right ()\n+    step (Left msgs) command =\n+      case assertion <$> fromCommand command of\n+        None -> Left msgs\n+        Some (Left msg) -> Left (msg :: msgs)\n+        Some (Right ()) -> Right ()\n+\n+-- | Check that at least one command fulfills the given assertions.\n+assertCreateCmd"
+  },
+  {
+    "id" : "e54342c6-509b-420f-816e-53d52555b9c9",
+    "prId" : 3577,
+    "comments" : [
+      {
+        "id" : "edc88989-a3cd-4345-ba53-9fc0f3cffb85",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n  -- ^ The templates the trigger will receive events for.\r\n```",
+        "createdAt" : "2019-11-21T14:26:54Z",
+        "updatedAt" : "2019-11-21T15:16:34Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d866ba2178ab39b0bdc29c0e9f4efa7d5f71650a",
+    "line" : null,
+    "diffHunk" : "@@ -71,6 +73,8 @@ data Trigger s = Trigger\n   -- Given the party your trigger is running as, the ACS, the commands in flight\n   -- and the user-defined state, you can send commands to the ledger using\n   -- `emitCommands` to change the ACS.\n+  , registeredTemplates : RegisteredTemplates\n+  -- The templates the trigger will receive events for."
+  },
+  {
+    "id" : "330f4ec0-6acf-4563-82a2-daca15ce72c2",
+    "prId" : 3502,
+    "comments" : [
+      {
+        "id" : "c28cb47f-d74e-4ead-8493-e418cc38adec",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Why does `dedupExerciseByKey` behave differently from `dedupExercise` w.r.t. pending-set?",
+        "createdAt" : "2019-11-18T13:16:48Z",
+        "updatedAt" : "2019-11-18T13:55:27Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "545006f0-2bcc-4cee-9654-b20ee2fa571c",
+        "parentId" : "c28cb47f-d74e-4ead-8493-e418cc38adec",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "See comment below, they now both behave the same.",
+        "createdAt" : "2019-11-18T13:22:03Z",
+        "updatedAt" : "2019-11-18T13:55:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3d13162377f09d4f1d1de46bdfa825680c1a0e0e",
+    "line" : 81,
+    "diffHunk" : "@@ -130,7 +144,7 @@ dedupExerciseByKey k c = do\n   -- map to make these lookups cheaper.\n   let cmds = concat $ map snd (Map.toList aState.commandsInFlight) <> map commands aState.emittedCommands\n   unless (any ((Some (k, c) ==) . fromExerciseByKey @t) cmds) $\n-    void $ emitCommands [exerciseByKeyCmd @t k c]\n+    void $ emitCommands [exerciseByKeyCmd @t k c] []"
+  },
+  {
+    "id" : "c89accf5-14ba-4127-9d6d-1693d6e370d8",
+    "prId" : 3502,
+    "comments" : [
+      {
+        "id" : "79649a0b-b8e2-4521-97bf-1ee893c67764",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I'm not sure I understand the motivation behind this. Is this to model consuming choices? If so, how does this interact with nonconsuming choices?",
+        "createdAt" : "2019-11-18T13:16:54Z",
+        "updatedAt" : "2019-11-18T13:55:27Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f17b342d-4da2-4334-b846-90ebb2cd6a2e",
+        "parentId" : "79649a0b-b8e2-4521-97bf-1ee893c67764",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point, I’ve removed the automatic pending thing here and then it behaves like `exerciseByKeyCmd`.",
+        "createdAt" : "2019-11-18T13:21:48Z",
+        "updatedAt" : "2019-11-18T13:55:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3d13162377f09d4f1d1de46bdfa825680c1a0e0e",
+    "line" : null,
+    "diffHunk" : "@@ -98,10 +110,12 @@ dedupCreate t = do\n   -- map to make these lookups cheaper.\n   let cmds = concat $ map snd (Map.toList aState.commandsInFlight) <> map commands aState.emittedCommands\n   unless (any ((Some t ==) . fromCreate) cmds) $\n-    void $ emitCommands [createCmd t]\n+    void $ emitCommands [createCmd t] []\n \n -- | Exercise the choice on the given contract if it is not already\n -- in flight.\n+-- dedupExercise will also mark the contract id as pending so it will not show up\n+-- in `getContracts` in the next run."
+  },
+  {
+    "id" : "1aac2535-c24a-466f-afd1-b04c73b2db84",
+    "prId" : 3502,
+    "comments" : [
+      {
+        "id" : "e85b31d4-917e-4a44-ac0f-eaf9093d26bc",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Maybe add some haddocks for completeness?",
+        "createdAt" : "2019-11-18T13:21:15Z",
+        "updatedAt" : "2019-11-18T13:55:27Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e3e5c7cc-9235-4344-adca-731db97060fd",
+        "parentId" : "e85b31d4-917e-4a44-ac0f-eaf9093d26bc",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good call, added.",
+        "createdAt" : "2019-11-18T13:33:41Z",
+        "updatedAt" : "2019-11-18T13:55:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3d13162377f09d4f1d1de46bdfa825680c1a0e0e",
+    "line" : null,
+    "diffHunk" : "@@ -216,6 +232,7 @@ data TriggerAState = TriggerAState\n   -- This will be used for dedupCreateCmd/dedupExerciseCmd helpers.\n   , emittedCommands : [Commands]\n   -- ^ Emitted commands in reverse because I can’t be bothered to implement a dlist.\n+  , pendingContracts : Map CommandId [AnyContractId]\n   , nextCommandId : Int"
+  },
+  {
+    "id" : "c84c9077-6f1f-45a3-b6e0-133cd23b628d",
+    "prId" : 3127,
+    "comments" : [
+      {
+        "id" : "e46cde70-ab60-456d-8703-5d31d7649e22",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Apparently git doesn’t realize this but `Daml.Trigger.LowLevel` is almost a 1:1 copy of the previous state of `Daml.Trigger`. The only changes are a bunch of exports (e.g. `Command` turns out to be useful for handling `commandsInFlight`), a few instances (e.g. `Ord` for `CommandId`) and an optional `CommandId` field on transaction.",
+        "createdAt" : "2019-10-08T12:10:16Z",
+        "updatedAt" : "2019-10-08T12:10:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "117caf652530168bef4bc08c0f9db3b4b69f0877",
+    "line" : 7,
+    "diffHunk" : "@@ -1,130 +1,164 @@\n -- Copyright (c) 2019 The DAML Authors. All rights reserved.\n -- SPDX-License-Identifier: Apache-2.0\n-{-# LANGUAGE AllowAmbiguousTypes #-}\n+\n daml 1.2\n module Daml.Trigger\n-  ( Message(..)"
+  },
+  {
+    "id" : "10af0c1a-9527-4439-9b35-febd2fa9323b",
+    "prId" : 3127,
+    "comments" : [
+      {
+        "id" : "391aeee1-595e-44b4-a81c-3d03cba1b73c",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Trying to understand these two functions. `updateState` is run on any `Message`, both `MCompletion` and `MTransaction`, but it can only determine the new state and not issue any new commands. `rule` is only run on `MTransaction`, and it has the ability to issue new commands. Is that correct? Why can't the user issue new commands after an `MCompletion`?",
+        "createdAt" : "2019-10-08T12:31:25Z",
+        "updatedAt" : "2019-10-08T12:31:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "72102d7f-84b8-46d2-b760-65de65261ecb",
+        "parentId" : "391aeee1-595e-44b4-a81c-3d03cba1b73c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "In general, the idea is that `rule` is idempotent can basically be run at any point and should only depend on the ACS and the user state (the user state is often not even required, see the copy example in this PR). As mentioned in a comment, we do want to run the rule on failed completions but I’m leaving that for a separate PR. Running it on successful completions doesn’t make that much sense since in that case you will also get a transaction event and running the rule before the ACS has been updated can be a bit confusing.\r\n\r\nWe might want to change how and when exactly these events are triggered but I’d like to see some more examples before we finalize on something.",
+        "createdAt" : "2019-10-08T12:35:22Z",
+        "updatedAt" : "2019-10-08T12:35:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fd2f317f-7ff7-45ba-9fe3-367e62b09cc1",
+        "parentId" : "391aeee1-595e-44b4-a81c-3d03cba1b73c",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Okay, thanks for explaining. Didn't see that comment.",
+        "createdAt" : "2019-10-08T12:39:11Z",
+        "updatedAt" : "2019-10-08T12:39:11Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "117caf652530168bef4bc08c0f9db3b4b69f0877",
+    "line" : 113,
+    "diffHunk" : "@@ -1,130 +1,164 @@\n -- Copyright (c) 2019 The DAML Authors. All rights reserved.\n -- SPDX-License-Identifier: Apache-2.0\n-{-# LANGUAGE AllowAmbiguousTypes #-}\n+\n daml 1.2\n module Daml.Trigger\n-  ( Message(..)\n-  , Completion(..)\n-  , CompletionStatus(..)\n-  , Transaction(..)\n-  , Identifier(..)\n-  , AnyContractId(..)\n-  , TransactionId(..)\n-  , EventId(..)\n-  , CommandId(..)\n-  , Event(..)\n-  , Created(..)\n-  , Archived(..)\n-  , Trigger(..)\n-  , ActiveContracts(..)\n-  , Commands(..)\n-  , TemplateId(..)\n-  , Command\n-  , exerciseCmd\n-  , createCmd\n-  ) where\n-\n-data Identifier = Identifier\n-  { packageId : Text\n-  , moduleName : Text\n-  , entityName : Text\n-  } deriving (Show, Eq)\n-\n-data AnyContractId = AnyContractId\n-  { templateId : Identifier\n-  , contractId : Text\n-  } deriving (Show, Eq)\n-\n-newtype TransactionId = TransactionId Text\n-  deriving (Show, Eq)\n-\n-newtype EventId = EventId Text\n-  deriving (Show, Eq)\n-\n-newtype CommandId = CommandId Text\n-  deriving (Show, Eq)\n-\n-data Transaction = Transaction\n- { transactionId : TransactionId\n- , events : [Event]\n- }\n-\n-data Event\n-  = CreatedEvent Created\n-  | ArchivedEvent Archived\n-\n-data Created = Created\n-  { eventId : EventId\n-  , contractId : AnyContractId\n-  , argument : AnyTemplate\n-  }\n+ ( ACS\n+ , getTemplates\n+ , Trigger(..)\n+ , TriggerA\n+ , emitCommands\n+ , runTrigger\n+ , CommandId\n+ , Command(..)\n+ , AnyContractId(..)\n+ , exerciseCmd\n+ , createCmd\n+ ) where\n \n-data Archived = Archived\n-  { eventId : EventId\n-  , contractId : AnyContractId\n-  } deriving (Show, Eq)\n+import DA.Next.Map (Map)\n+import qualified DA.Next.Map as Map\n+import DA.Optional\n \n-data Message\n-  = MTransaction Transaction\n-  | MCompletion Completion\n+import Daml.Trigger.LowLevel hiding (Trigger)\n+import qualified Daml.Trigger.LowLevel as LowLevel\n \n-data Completion = Completion\n-  { commandId : CommandId\n-  , status : CompletionStatus\n-  } deriving Show\n+-- public API\n \n-data CompletionStatus\n-  = Failed { status : Int, message : Text }\n-  | Succeeded { transactionId : TransactionId }\n-  deriving Show\n+newtype ACS = ACS [(AnyContractId, AnyTemplate)]\n \n-data ActiveContracts = ActiveContracts { activeContracts : [Created] }\n+getTemplates : Template a => ACS -> [(AnyContractId, a)]\n+getTemplates (ACS tpls) = mapOptional (\\(cid, tpl) -> (cid,) <$> fromAnyTemplate tpl) tpls\n \n--- | Trigger is (approximately) a left-fold over `Message` with\n--- an accumulator of type `s`.\n data Trigger s = Trigger\n-  { initialState : Party -> ActiveContracts -> s\n-  , update : Message -> s -> (s, [Commands], Text)\n+  { initialize : ACS -> s\n+  -- The ACS already includes the updates from the Message\n+  , updateState : ACS -> Message -> s -> s\n+  , rule : Party -> ACS -> Map CommandId [Command] -> s -> TriggerA ()"
+  },
+  {
+    "id" : "43552e72-2f8c-43ba-9a83-e94430d9b3b6",
+    "prId" : 2945,
+    "comments" : [
+      {
+        "id" : "717f033a-d119-48a7-b217-6121815d5e7c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Shouldn’t we expose this type (but not the constructors). I also wonder if we might just want to keep calling this `ContractId` for now until we have a variant with a phantom type parameter but I guess changing it now is better for backwards compatibility.",
+        "createdAt" : "2019-09-18T07:57:08Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "940e8a19-1a07-493d-8c96-3779584e73bc",
+        "parentId" : "717f033a-d119-48a7-b217-6121815d5e7c",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Indeed, we should expose it. I overlooked that, good catch!\r\n\r\nEven if we introduce a `ContractId t` with a phantom type parameter, we'd still need something like `AnyContractId` for the `Created` and `Archived` events. I figured once we introduce `ContractId t` we need to change `exerciseCmd` anyway, but we can keep `Created` and `Archived` untouched.\r\n\r\nI have no strong opinion on the name, though, so happy to rename it if you prefer.",
+        "createdAt" : "2019-09-18T08:13:28Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2334eff1-b58f-4316-9641-8dfa04d6861d",
+        "parentId" : "717f033a-d119-48a7-b217-6121815d5e7c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Let’s keep `AnyContractId` for now.",
+        "createdAt" : "2019-09-18T08:16:09Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "20efff34-7419-4383-a316-ca2e1fefb9b0",
+        "parentId" : "717f033a-d119-48a7-b217-6121815d5e7c",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "> Shouldn’t we expose this type **(but not the constructors)**\r\n\r\nFor now we need access to the `templateId` field in `ACS.daml` `updateEvent`.",
+        "createdAt" : "2019-09-18T08:19:48Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fdea33e5-ee31-4db1-8d63-fd7e49b63577",
+        "parentId" : "717f033a-d119-48a7-b217-6121815d5e7c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Seems reasonable :+1:",
+        "createdAt" : "2019-09-18T08:22:07Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "833cab6997bcd9eadf1ccd597c9c4eb33d76d128",
+    "line" : 12,
+    "diffHunk" : "@@ -24,6 +24,11 @@ data Identifier = Identifier\n   , entityName : Text\n   } deriving (Show, Eq)\n \n+data AnyContractId = AnyContractId"
+  },
+  {
+    "id" : "79de9bfc-afbd-4b67-81eb-75eefdba2dd9",
+    "prId" : 2945,
+    "comments" : [
+      {
+        "id" : "b2e3da85-fca5-43f7-b16f-4c3b25048666",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Very nice, this is starting to look very usable!",
+        "createdAt" : "2019-09-18T07:57:51Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "833cab6997bcd9eadf1ccd597c9c4eb33d76d128",
+    "line" : 56,
+    "diffHunk" : "@@ -80,23 +83,20 @@ toLedgerValue = error \"toLedgerValue should be removed.\"\n \n data Command\n   = CreateCommand\n-      { templateId : TemplateId\n-      , templateArg : LedgerValue\n+      { templateArg : LedgerValue\n       }\n   | ExerciseCommand\n-      { templateId : TemplateId\n-      , contractId : Text\n-      , choiceName : Text\n+      { contractId : AnyContractId\n       , choiceArg : LedgerValue\n       }\n \n-createCmd : Template t => TemplateId -> t -> Command\n-createCmd templateId templateArg =\n-  CreateCommand templateId (toLedgerValue templateArg)\n+createCmd : Template t => t -> Command"
+  },
+  {
+    "id" : "def013fb-750a-4418-b570-d36b42d65c6d",
+    "prId" : 2945,
+    "comments" : [
+      {
+        "id" : "91bf01e2-0429-48e2-875e-fd7fa15e56d6",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can we use something like `ContractId ()` here? There as a DAML-LF function `coerce_contract_id : ContractId a -> ContractId b` which we could use then.",
+        "createdAt" : "2019-09-19T06:38:30Z",
+        "updatedAt" : "2019-09-19T06:39:21Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4b1ba722-d8e5-410a-8c22-a9cb1f6e8c5d",
+        "parentId" : "91bf01e2-0429-48e2-875e-fd7fa15e56d6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We could but I think it makes more sense to keep this consistent with `AnyTemplate`. I also deliberately don’t want to use the DAML-LF `ContractId` type to avoid annoyances around the absence of things like `Ord` instances.",
+        "createdAt" : "2019-09-19T06:48:27Z",
+        "updatedAt" : "2019-09-19T06:48:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "833cab6997bcd9eadf1ccd597c9c4eb33d76d128",
+    "line" : 14,
+    "diffHunk" : "@@ -24,6 +25,11 @@ data Identifier = Identifier\n   , entityName : Text\n   } deriving (Show, Eq)\n \n+data AnyContractId = AnyContractId\n+  { templateId : Identifier\n+  , contractId : Text"
+  },
+  {
+    "id" : "e013b20c-f24e-43d7-83d5-47fda47a4ff6",
+    "prId" : 2762,
+    "comments" : [
+      {
+        "id" : "375666a8-f53e-4022-982c-de492408be82",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nmodule DA.Trigger\r\n```",
+        "createdAt" : "2019-09-05T09:52:37Z",
+        "updatedAt" : "2019-09-05T10:51:33Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dec26f03-db91-4efd-8a52-770a54ba0880",
+        "parentId" : "375666a8-f53e-4022-982c-de492408be82",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Leaving it at `Daml.Trigger` for now since that matches the fact that we call them DAML triggers and we might want to change other module names. We can make a decision on what we go with when we are closer to exposing users to this.",
+        "createdAt" : "2019-09-05T10:56:12Z",
+        "updatedAt" : "2019-09-05T10:56:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9f15aa222ab18523ccec19fd330ce060d95a62ce",
+    "line" : 5,
+    "diffHunk" : "@@ -0,0 +1,51 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+module Daml.Trigger"
+  }
+]

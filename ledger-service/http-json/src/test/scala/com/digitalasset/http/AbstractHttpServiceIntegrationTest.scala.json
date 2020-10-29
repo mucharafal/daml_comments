@@ -1,0 +1,92 @@
+[
+  {
+    "id" : "a2c779cf-ef89-4acb-9175-0c30c29d3b19",
+    "prId" : 5326,
+    "comments" : [
+      {
+        "id" : "eb9a46a8-df15-4509-99b2-c9d354640a00",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "More type-y\r\n\r\n```suggestion\r\n          case domain.ErrorResponse(errors, warnings, StatusCodes.BadRequest) =>\r\n```",
+        "createdAt" : "2020-04-02T16:31:11Z",
+        "updatedAt" : "2020-04-02T18:25:14Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1efdaeb153f0a8e7ae67dc78d8febf70042fdc1b",
+    "line" : null,
+    "diffHunk" : "@@ -465,19 +465,41 @@ abstract class AbstractHttpServiceIntegrationTest\n     }\n   }\n \n-  \"query returns unknown Template IDs as warnings\" in withHttpService { (uri, _, _) =>\n+  \"query returns unknown Template IDs as warnings\" in withHttpService { (uri, encoder, _) =>\n     val query =\n       jsObject(\n         \"\"\"{\"templateIds\": [\"Iou:Iou\", \"UnknownModule:UnknownEntity\"], \"query\": {\"currency\": \"EUR\"}}\"\"\")\n \n-    postJsonRequest(uri.withPath(Uri.Path(\"/v1/query\")), query)\n-      .map {\n-        case (status, output) =>\n-          status shouldBe StatusCodes.OK\n-          assertStatus(output, StatusCodes.OK)\n-          getResult(output) shouldBe JsArray.empty\n-          getWarnings(output) shouldBe JsObject(\n-            \"unknownTemplateIds\" -> JsArray(Vector(JsString(\"UnknownModule:UnknownEntity\"))))\n+    search(List(), query, uri, encoder).map { response =>\n+      inside(response) {\n+        case domain.OkResponse(acl, warnings, StatusCodes.OK) =>\n+          acl.size shouldBe 0\n+          warnings shouldBe Some(\n+            domain.UnknownTemplateIds(\n+              List(domain.TemplateId(None, \"UnknownModule\", \"UnknownEntity\"))))\n+      }\n+    }\n+  }\n+\n+  \"query returns unknown Template IDs as warnings and error\" in withHttpService {\n+    (uri, encoder, _) =>\n+      search(\n+        searchDataSet,\n+        jsObject(\"\"\"{\"templateIds\": [\"AAA:BBB\", \"XXX:YYY\"]}\"\"\"),\n+        uri,\n+        encoder\n+      ).map { response =>\n+        inside(response) {\n+          case domain.ErrorResponse(errors, warnings, status) =>\n+            status shouldBe StatusCodes.BadRequest"
+  },
+  {
+    "id" : "c186d3f8-1d30-4f27-be42-bcccf0b9eb11",
+    "prId" : 4754,
+    "comments" : [
+      {
+        "id" : "d3ef4b96-d99c-4035-8a6a-334b61d56fd3",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "created and archived right away + the final contract that is the result of the choice exercise.",
+        "createdAt" : "2020-02-28T19:15:08Z",
+        "updatedAt" : "2020-03-02T17:35:31Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "37358a488d97c38be7a565409fb1d175d37a70b3",
+    "line" : 183,
+    "diffHunk" : "@@ -604,6 +640,41 @@ abstract class AbstractHttpServiceIntegrationTest\n       }: Future[Assertion]\n   }\n \n+  \"create-and-exercise IOU_Transfer\" in withHttpService { (uri, encoder, _) =>\n+    import encoder.implicits._\n+\n+    val cmd: domain.CreateAndExerciseCommand[v.Record, v.Value] =\n+      iouCreateAndExerciseTransferCommand()\n+\n+    val json: JsValue = SprayJson.encode2(cmd).valueOr(e => fail(e.shows))\n+\n+    postJsonRequest(uri.withPath(Uri.Path(\"/v1/create-and-exercise\")), json)\n+      .flatMap {\n+        case (status, output) =>\n+          status shouldBe StatusCodes.OK\n+          inside(\n+            decode2[domain.OkResponse, domain.ExerciseResponse[JsValue], Unit](output)\n+          ) {\n+            case \\/-(response) =>\n+              response.status shouldBe StatusCodes.OK\n+              (response.warnings: Option[Unit]) shouldBe Option.empty[Unit]\n+              inside(response.result.events) {\n+                case List(\n+                    domain.Contract(\\/-(created0)),\n+                    domain.Contract(-\\/(archived0)),\n+                    domain.Contract(\\/-(created1))) =>"
+  },
+  {
+    "id" : "b1ac8017-48a6-4784-9ede-3c1878f888b4",
+    "prId" : 4680,
+    "comments" : [
+      {
+        "id" : "4f12da05-d580-4852-bfba-4b81e897a7a6",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n    withHttpServiceAndClient((a, b, c, _) => f(a, b, c))\r\n```",
+        "createdAt" : "2020-02-25T22:59:48Z",
+        "updatedAt" : "2020-02-26T14:39:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1c893cbb4ae4c432898f1636e3e8be6fbf07f824",
+    "line" : null,
+    "diffHunk" : "@@ -83,11 +83,17 @@ trait AbstractHttpServiceIntegrationTestFuns extends StrictLogging {\n   import shapeless.tag, tag.@@ // used for subtyping to make `AHS ec` beat executionContext\n   implicit val `AHS ec`: ExecutionContext @@ this.type = tag[this.type](`AHS asys`.dispatcher)\n \n-  protected def withHttpService[A]\n-    : ((Uri, DomainJsonEncoder, DomainJsonDecoder) => Future[A]) => Future[A] =\n+  protected def withHttpServiceAndClient[A]\n+    : ((Uri, DomainJsonEncoder, DomainJsonDecoder, LedgerClient) => Future[A]) => Future[A] =\n     HttpServiceTestFixture\n       .withHttpService[A](testId, List(dar1, dar2), jdbcConfig, staticContentConfig)\n \n+  protected def withHttpService[A](\n+      f3: (Uri, DomainJsonEncoder, DomainJsonDecoder) => Future[A]): Future[A] =\n+    HttpServiceTestFixture"
+  }
+]

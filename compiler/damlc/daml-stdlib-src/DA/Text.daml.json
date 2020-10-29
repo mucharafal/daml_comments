@@ -1,0 +1,437 @@
+[
+  {
+    "id" : "8c9f7c7e-bd28-47a9-8995-314bddf4af5a",
+    "prId" : 5872,
+    "comments" : [
+      {
+        "id" : "c24300b3-6eb3-4be1-99c4-ef24621d0d48",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "`L.stripInfix` seems more appropriate than `L.breakOn`.",
+        "createdAt" : "2020-05-06T16:32:41Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe58f696d955231cdbf94f377200772127f71017",
+    "line" : null,
+    "diffHunk" : "@@ -205,14 +205,21 @@ dropWhile p = implode . P.dropWhile p . explode\n dropWhileEnd : (Text -> Bool) -> Text -> Text\n dropWhileEnd p = implode . L.dropWhileEnd p . explode\n \n+-- Separate function because recursion is only allowed at the top-level and we\n+-- don't want to pay for many implode/explode operations.\n+-- This shoud not be exported.\n+splitOnHelper : [Text] -> [Text] -> [[Text]]\n+splitOnHelper s [] = []\n+splitOnHelper s t | s == t = [[\"\"], [\"\"]]\n+splitOnHelper s t = a :: splitOnHelper s (L.dropPrefix s b)\n+                    where (a, b) = L.breakOn s t"
+  },
+  {
+    "id" : "5c4343ec-90aa-4607-80ae-9f702ae5f334",
+    "prId" : 5872,
+    "comments" : [
+      {
+        "id" : "d64154f7-bfe6-4117-b350-fa8a4cd97a51",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nsplitOn s t = splitOnHelper (explode s) (explode t)\r\n```\r\nand `implode` everything in the helper.",
+        "createdAt" : "2020-05-06T16:33:47Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe58f696d955231cdbf94f377200772127f71017",
+    "line" : null,
+    "diffHunk" : "@@ -205,14 +205,21 @@ dropWhile p = implode . P.dropWhile p . explode\n dropWhileEnd : (Text -> Bool) -> Text -> Text\n dropWhileEnd p = implode . L.dropWhileEnd p . explode\n \n+-- Separate function because recursion is only allowed at the top-level and we\n+-- don't want to pay for many implode/explode operations.\n+-- This shoud not be exported.\n+splitOnHelper : [Text] -> [Text] -> [[Text]]\n+splitOnHelper s [] = []\n+splitOnHelper s t | s == t = [[\"\"], [\"\"]]\n+splitOnHelper s t = a :: splitOnHelper s (L.dropPrefix s b)\n+                    where (a, b) = L.breakOn s t\n+\n -- | Break a text into pieces separated by the first text argument\n -- (which cannot be empty), consuming the delimiter.\n splitOn : Text -> Text -> [Text]\n splitOn \"\" t' = [t']\n splitOn _ \"\" = [\"\"]\n-splitOn (explode -> s) (explode -> t) =\n-  let fixit = if L.isSuffixOf s t then (++ [\"\"]) else identity\n-  in fixit $ implode <$> L.repeatedly (fmap (L.dropPrefix s) . L.breakOn s) t\n+splitOn s t = map implode $ splitOnHelper (explode s) (explode t)"
+  },
+  {
+    "id" : "53c8c9f4-b0d3-4d7f-a124-90cfa5e12513",
+    "prId" : 5872,
+    "comments" : [
+      {
+        "id" : "86a2830b-6312-49db-b82a-fcae019f7237",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "If I'm not missing something, this should work as well:\r\n```suggestion\r\nsplitOnHelper s [] = [\"\"]\r\n```\r\nIf it does, we can remove the\r\n```haskell\r\nsplitOn _ \"\" = [\"\"]\r\n```\r\nline below.",
+        "createdAt" : "2020-05-07T08:59:14Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7ec47d46-e7fd-4f87-8c96-22558d0be419",
+        "parentId" : "86a2830b-6312-49db-b82a-fcae019f7237",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Makes sense (and passes the tests). Thanks!",
+        "createdAt" : "2020-05-07T09:12:18Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe58f696d955231cdbf94f377200772127f71017",
+    "line" : null,
+    "diffHunk" : "@@ -205,14 +205,22 @@ dropWhile p = implode . P.dropWhile p . explode\n dropWhileEnd : (Text -> Bool) -> Text -> Text\n dropWhileEnd p = implode . L.dropWhileEnd p . explode\n \n+-- Separate function because recursion is only allowed at the top-level and we\n+-- don't want to pay for many implode/explode operations.\n+-- This shoud not be exported.\n+splitOnHelper : [Text] -> [Text] -> [Text]\n+splitOnHelper s [] = []\n+splitOnHelper s t | s == t = [\"\", \"\"]"
+  },
+  {
+    "id" : "5533ae96-fbbb-42bb-aa5f-83c329c59805",
+    "prId" : 5872,
+    "comments" : [
+      {
+        "id" : "2385777e-0fb9-4144-a782-1f874448e7ca",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm generally in favor of making indentation depth independent of identifier lengths:\r\n```suggestion\r\n    None -> [implode t]\r\n    Some (before, after) -> implode before :: splitOnHelper s after\r\n```",
+        "createdAt" : "2020-05-07T09:00:12Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4b430b63-d43e-427e-b374-e96d48e3d888",
+        "parentId" : "2385777e-0fb9-4144-a782-1f874448e7ca",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Fixed.",
+        "createdAt" : "2020-05-07T09:12:28Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe58f696d955231cdbf94f377200772127f71017",
+    "line" : null,
+    "diffHunk" : "@@ -205,14 +205,22 @@ dropWhile p = implode . P.dropWhile p . explode\n dropWhileEnd : (Text -> Bool) -> Text -> Text\n dropWhileEnd p = implode . L.dropWhileEnd p . explode\n \n+-- Separate function because recursion is only allowed at the top-level and we\n+-- don't want to pay for many implode/explode operations.\n+-- This shoud not be exported.\n+splitOnHelper : [Text] -> [Text] -> [Text]\n+splitOnHelper s [] = []\n+splitOnHelper s t | s == t = [\"\", \"\"]\n+splitOnHelper s t = case L.stripInfix s t of\n+                    None -> [implode t]\n+                    Some (before, after) -> implode before :: splitOnHelper s after"
+  },
+  {
+    "id" : "55b61c51-3757-4494-be2e-c01d5b229379",
+    "prId" : 5872,
+    "comments" : [
+      {
+        "id" : "bf3cf9e2-d1d8-43be-9b34-004fc47e3fe7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Apologies for my slow thinking. Seeing the new version in front of me made me realize that we don't need this line either. The line below has the same outcome for `t = \"\"`.\r\n```suggestion\r\n```",
+        "createdAt" : "2020-05-07T10:11:42Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bbe36ef8-0343-48ba-a5c6-4d72e596486c",
+        "parentId" : "bf3cf9e2-d1d8-43be-9b34-004fc47e3fe7",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "What about performance? Is that something I should worry about at all here? This case does less work but I suppose it adds a check to each recursive call, so my guess would be removing this case is probably a win overall.",
+        "createdAt" : "2020-05-07T11:57:46Z",
+        "updatedAt" : "2020-05-07T12:05:27Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "43c5455d-5641-40bb-b80c-2bbc0b0b9ac8",
+        "parentId" : "bf3cf9e2-d1d8-43be-9b34-004fc47e3fe7",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The only call which we slow down as the final call where all the calls in the \"hot loop\" will have one less pattern matching to perform. Thus, performance should not be impacted negatively.",
+        "createdAt" : "2020-05-07T12:08:36Z",
+        "updatedAt" : "2020-05-07T12:08:36Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe58f696d955231cdbf94f377200772127f71017",
+    "line" : null,
+    "diffHunk" : "@@ -205,14 +205,21 @@ dropWhile p = implode . P.dropWhile p . explode\n dropWhileEnd : (Text -> Bool) -> Text -> Text\n dropWhileEnd p = implode . L.dropWhileEnd p . explode\n \n+-- Separate function because recursion is only allowed at the top-level and we\n+-- don't want to pay for many implode/explode operations.\n+-- This shoud not be exported.\n+splitOnHelper : [Text] -> [Text] -> [Text]\n+splitOnHelper s [] = [\"\"]"
+  },
+  {
+    "id" : "fedc7778-5cb8-4396-ad64-1537d171a5c8",
+    "prId" : 3734,
+    "comments" : [
+      {
+        "id" : "af350468-090e-4d6e-9bb8-cead748dd06b",
+        "parentId" : null,
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "This is a very bad idea. The stdlib should never be different (in terms of types and existence of functions) depending on the _target language_. \r\nAlso, having functions with different names makes it very cumbersome to compare anything.\r\nTo achieve the goal of comparing performance impacts for these primitives, I suggest either leaving this on a branch (if we are unsure about whether anything works) or branching the _existing_  `DA.Text` interface, like so\r\n```\r\nsplitOn : Text -> Text -> [Text]\r\n#ifdef DAML_UNSTABLE\r\nsplitOn = primitive  @\"BETextSplitOn\"\r\n#else\r\nsplitOn \"\" t' = [t']\r\nsplitOn _ \"\" = [\"\"]\r\nsplitOn ... current master\r\n#endif\r\n```\r\nUsing separate pragmas instead of a single `DAML_UNSTABLE` you can then implement a \"switchboard\" for test setups (testing on a branch) to measure the individual primitives or combinations.\r\nObviously more startup cost, but the only thing that makes sense for measurements (nobody will sit down inserting `unstable` prefixes at all the call sites for such measurements)",
+        "createdAt" : "2019-12-04T21:28:30Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ba8b94a0-590a-4b53-8e00-dad438efcacd",
+        "parentId" : "af350468-090e-4d6e-9bb8-cead748dd06b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "> This is a very bad idea. The stdlib should never be different (in terms of types and existence of functions) depending on the _target language_.\r\n\r\nThis is not possible in general. E.g., consider the addition of the new map type. There is no way to have this for older LF versions.\r\n\r\nBranching the existing DA.Text interface means that we have to recompile the SDK for every experiment we want to run which seems much more cumbersome than running a search and replace to add `unstable` prefixes.",
+        "createdAt" : "2019-12-05T05:29:36Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "46836511-960c-4cea-9389-20bb0e22ce3d",
+        "parentId" : "af350468-090e-4d6e-9bb8-cead748dd06b",
+        "author" : null,
+        "body" : "I agree with @cocreature here. Recompiling the compiler and the SDK for each experiment isn't really a good idea. It's not only extremely slow but also has the potential to introduce unrelated compilation artifacts into the benchmarks. By exposing all of these unstable functions for the same target (1.dev), we're always testing the same SDK, compiler, stdlib packages, and the only question is \"do these primitives result in a significant improvement\"? (That said, we don't currently have a way to make any conclusions about statistical significance in DAML. All we can do is eyeball it . . .)\r\n\r\nThe point of `DAML_UNSTABLE` is that it's only available for those working on 1.dev and it's 100% not a stable interface, so it's perfect for this kind of experimentation. We already have different parts of the stdlib that depending on the LF target (see Numeric, GenMap, AnyTemplate, etc features), because otherwise we would have to drop support for older LF versions.",
+        "createdAt" : "2019-12-05T11:01:37Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "630fdd17-f595-470a-ad24-e6b7895fa3f3",
+        "parentId" : "af350468-090e-4d6e-9bb8-cead748dd06b",
+        "author" : {
+          "login" : "filmackay",
+          "name" : "Fil Mackay",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1817552?v=4"
+        },
+        "body" : "What about in a `Data.Text.Unstable` module?",
+        "createdAt" : "2020-01-10T03:06:44Z",
+        "updatedAt" : "2020-01-10T03:06:44Z",
+        "lastEditedBy" : {
+          "login" : "filmackay",
+          "name" : "Fil Mackay",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1817552?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ea94ecd7a45890252cd55edbd0adda2787b8cbdc",
+    "line" : 5,
+    "diffHunk" : "@@ -53,6 +53,25 @@ module DA.Text\n   , DA.Text.sha256\n   , DA.Text.toCodePoints\n   , DA.Text.fromCodePoints\n+\n+#ifdef DAML_UNSTABLE"
+  },
+  {
+    "id" : "f0c5410d-9669-421c-b5bb-d89bef8d5741",
+    "prId" : 3063,
+    "comments" : [
+      {
+        "id" : "d5345b9e-be79-451b-8f30-1eae698a26b3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Should we deprecate `parseDecimal` (not necessarily now but at some point).",
+        "createdAt" : "2019-09-30T07:48:55Z",
+        "updatedAt" : "2019-09-30T07:49:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d2c4ea2d-ed2c-42c1-a7c8-1b1bef1c2546",
+        "parentId" : "d5345b9e-be79-451b-8f30-1eae698a26b3",
+        "author" : null,
+        "body" : "At some point, I think so",
+        "createdAt" : "2019-09-30T10:02:30Z",
+        "updatedAt" : "2019-09-30T10:02:31Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f632ada94e98c59084ee19f61536cfeab9a5c850",
+    "line" : 16,
+    "diffHunk" : "@@ -44,6 +46,9 @@ module DA.Text\n   , DA.Text.isAlpha\n   , DA.Text.isAlphaNum\n   , DA.Text.parseInt\n+#ifdef DAML_NUMERIC\n+  , DA.Text.parseNumeric\n+#endif\n   , DA.Text.parseDecimal"
+  },
+  {
+    "id" : "fb7b0880-eb1b-455b-8ef0-abc849a7e9fe",
+    "prId" : 2394,
+    "comments" : [
+      {
+        "id" : "5c8f1b5c-4be9-49fe-b2a7-d04c3d13637d",
+        "parentId" : null,
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "Probably you don't want to keep this test case?",
+        "createdAt" : "2019-08-05T11:22:39Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f1c59682-8f4b-4fb3-a3f7-e89c840878fa",
+        "parentId" : "5c8f1b5c-4be9-49fe-b2a7-d04c3d13637d",
+        "author" : null,
+        "body" : "Oh wow, yes, oops. Thank you :)",
+        "createdAt" : "2019-08-05T11:36:09Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0b9d15a77e50bf8780331c378c6b7080345b1c42",
+    "line" : null,
+    "diffHunk" : "@@ -61,7 +61,7 @@ implode : [Text] -> Text\n implode = primitive @\"BEImplodeText\"\n \n -- | Test for emptiness.\n-isEmpty : Text -> Bool\n+isEmpty : P.Text -> Bool"
+  },
+  {
+    "id" : "d4e56c91-6965-40e9-9bc9-ec65a96894b8",
+    "prId" : 2394,
+    "comments" : [
+      {
+        "id" : "8ff1152d-3a54-443f-8e13-1093c6e459a5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This should probably go away again?",
+        "createdAt" : "2019-08-05T11:36:07Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0b9d15a77e50bf8780331c378c6b7080345b1c42",
+    "line" : null,
+    "diffHunk" : "@@ -61,7 +61,7 @@ implode : [Text] -> Text\n implode = primitive @\"BEImplodeText\"\n \n -- | Test for emptiness.\n-isEmpty : Text -> Bool\n+isEmpty : P.Text -> Bool"
+  }
+]

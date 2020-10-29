@@ -1,0 +1,182 @@
+[
+  {
+    "id" : "4214ef74-3b98-4730-9ed9-83fd3daf618c",
+    "prId" : 7566,
+    "comments" : [
+      {
+        "id" : "7be62d4f-1bf3-46a4-b48b-45fbced4e848",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Answering my own question: The reason why this works is that `Ledger` already accepted an optional parameter.",
+        "createdAt" : "2020-10-05T14:04:14Z",
+        "updatedAt" : "2020-10-05T14:44:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ebc4c68bf722830ccd1e0f5a1be7ba977b4ab6a3",
+    "line" : 16,
+    "diffHunk" : "@@ -86,9 +87,9 @@ export function createLedgerContext(contextName=\"DamlLedgerContext\"): LedgerCont\n   // not make a new network request although they are required to refresh data.\n \n   const ledgerContext = React.createContext<DamlLedgerState | undefined>(undefined);\n-  const DamlLedger: React.FC<LedgerProps> = ({token, httpBaseUrl, wsBaseUrl, party, children}) => {\n+  const DamlLedger: React.FC<LedgerProps> = ({token, httpBaseUrl, wsBaseUrl, reconnectThreshold, party, children}) => {\n     const [reloadToken, setReloadToken] = useState(0);\n-    const ledger = useMemo(() => new Ledger({token, httpBaseUrl, wsBaseUrl}), [token, httpBaseUrl, wsBaseUrl]);\n+    const ledger = useMemo(() => new Ledger({token, httpBaseUrl, wsBaseUrl, reconnectThreshold}), [token, httpBaseUrl, wsBaseUrl, reconnectThreshold]);"
+  },
+  {
+    "id" : "5b785043-900b-4477-be59-4d10c1eca045",
+    "prId" : 7559,
+    "comments" : [
+      {
+        "id" : "bd154868-2eaa-4fd0-a1db-2c0e084d9be6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Definitely looks like a bug to me :+1:",
+        "createdAt" : "2020-10-02T14:08:18Z",
+        "updatedAt" : "2020-10-02T16:41:13Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "036ca11300592a70fad0c569d3e92707de1d9f03",
+    "line" : 86,
+    "diffHunk" : "@@ -165,50 +165,68 @@ export function createLedgerContext(contextName=\"DamlLedgerContext\"): LedgerCont\n     return result;\n   }\n \n-  function useStreamQuery<T extends object, K, I extends string>(template: Template<T, K, I>, queryFactory?: () => Query<T>, queryDeps?: readonly unknown[]): QueryResult<T, K, I> {\n-    const [result, setResult] = useState<QueryResult<T, K, I>>({contracts: [], loading: true});\n+  // private\n+  interface StreamArgs<T extends object, K, I extends string, S, Result> {\n+    name: string,\n+    template: Template<T, K, I>,\n+    init: Result,\n+    mkStream: (state: DamlLedgerState) => [Stream<T, K, I, S>, object],\n+    setLoading: (r: Result, loading: boolean) => Result,\n+    setData: (r: Result, data: S) => Result,\n+    deps: readonly unknown[]\n+  }\n+  function useStream<T extends object, K, I extends string, S, Result>({name, template, init, mkStream, setLoading, setData, deps}: StreamArgs<T, K, I, S, Result>): Result {\n+    const [result, setResult] = useState<Result>(init);\n     const state = useDamlState();\n     useEffect(() => {\n-      setResult({contracts: [], loading: true});\n-      const query = queryFactory ? [queryFactory()] : [];\n-      console.debug(`mount useStreamQuery(${template.templateId}, ...)`, query);\n-      const stream = state.ledger.streamQueries(template, query);\n-      stream.on('live', () => setResult(result => ({...result, loading: false})));\n-      stream.on('change', contracts => setResult(result => ({...result, contracts})));\n+      setResult(init);\n+      const [stream, debugQuery] = mkStream(state);\n+      console.debug(`mount ${name}(${template.templateId}, ...)`, debugQuery);\n+      stream.on('live', () => setResult(result => setLoading(result, false)));\n+      stream.on('change', contracts => setResult(result => setData(result, contracts)));\n       stream.on('close', closeEvent => {\n-        console.error('useStreamQuery: web socket closed', closeEvent);\n-        setResult(result => ({...result, loading: true}));\n+        console.error(`${name}: web socket closed`, closeEvent);\n+        setResult(result => setLoading(result, true));\n       });\n       return (): void => {\n-        console.debug(`unmount useStreamQuery(${template.templateId}, ...)`, query);\n+        console.debug(`unmount ${name}(${template.templateId}, ...)`, debugQuery);\n         stream.close();\n       };\n     // NOTE(MH): See note at the top of the file regarding \"useEffect dependencies\".\n-    }, [state.ledger, template, ...(queryDeps ?? [])]);\n+    }, [state.ledger, template, ...deps]);\n     return result;\n   }\n \n+  function useStreamQuery<T extends object, K, I extends string>(template: Template<T, K, I>, queryFactory?: () => Query<T>, queryDeps?: readonly unknown[]): QueryResult<T, K, I> {\n+    return useStream<T, K, I, readonly CreateEvent<T, K, I>[], QueryResult<T, K, I>>({\n+      name: \"useStreamQuery\",\n+      template,\n+      init: {loading: true, contracts: []},\n+      mkStream: (state) => {\n+        const query = queryFactory ? [queryFactory()] : [];\n+        const stream = state.ledger.streamQueries(template, query);\n+        return [stream, query];\n+      },\n+      setLoading: (r, b) => ({...r, loading: b}),\n+      setData: (r, d) => ({...r, contracts: d}),\n+      deps: queryDeps ?? []\n+    });\n+  }\n+\n   function useStreamFetchByKey<T extends object, K, I extends string>(template: Template<T, K, I>, keyFactory: () => K, keyDeps: readonly unknown[]): FetchResult<T, K, I> {\n-    const [result, setResult] = useState<FetchResult<T, K, I>>({contract: null, loading: true});\n-    const state = useDamlState();\n-    useEffect(() => {\n-      setResult({contract: null, loading: true});\n-      const key = keyFactory();\n-      console.debug(`mount useStreamFetchByKey(${template.templateId}, ...)`, key);\n-      const stream = state.ledger.streamFetchByKeys(template, [key]);\n-      stream.on('change', contracts => setResult(result => ({...result, contract: contracts[0]})));\n-      stream.on('close', closeEvent => {\n-        console.error('useStreamFetchByKey: web socket closed', closeEvent);\n-        setResult(result => ({...result, loading: true}));\n-      });\n-      setResult(result => ({...result, loading: false}));"
+  },
+  {
+    "id" : "3da0389e-4ddb-4b34-932d-246bf826fcb3",
+    "prId" : 6451,
+    "comments" : [
+      {
+        "id" : "bcac7b53-a53e-4e3d-beb0-74f0178e2864",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "For the sake of consistency with the immediate surroundings:\r\n```suggestion\r\nimport { Party, Template } from '@daml/types';\r\n```\r\nSimilarly below.",
+        "createdAt" : "2020-06-23T12:34:33Z",
+        "updatedAt" : "2020-06-23T14:16:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe7b232411152656bfde57923a85f0fa4c932bc8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import React, {createContext, useContext, useEffect, useMemo, useState } from 'react';\n+import { Party, Template } from \"@daml/types\";"
+  },
+  {
+    "id" : "1b2a3221-60dd-4ff9-a42b-845b613b1b80",
+    "prId" : 6451,
+    "comments" : [
+      {
+        "id" : "318cf873-947b-49a1-8350-011ecd450138",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'd prefer to not export this as the default as it doesn't really help here and we also need to export/import a bunch of other stuff from this module.\r\n```suggestion\r\nexport function createLedgerContext(contextName: string = 'DamlLedgerContext'): LedgerContext {\r\n```",
+        "createdAt" : "2020-06-23T12:35:37Z",
+        "updatedAt" : "2020-06-23T14:16:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe7b232411152656bfde57923a85f0fa4c932bc8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import React, {createContext, useContext, useEffect, useMemo, useState } from 'react';\n+import { Party, Template } from \"@daml/types\";\n+import Ledger, { CreateEvent, Query } from '@daml/ledger';\n+\n+/**\n+ * @internal\n+ */\n+type DamlLedgerState = {\n+  reloadToken: unknown;\n+  triggerReload: () => void;\n+  party: Party;\n+  ledger: Ledger;\n+}\n+\n+/**\n+ * React props to initiate a connect to a DAML ledger.\n+ */\n+export type LedgerProps = {\n+  token: string;\n+  httpBaseUrl?: string;\n+  wsBaseUrl?: string;\n+  party: Party;\n+}\n+\n+/**\n+ * The result of a ``query`` against the ledger.\n+ *\n+ * @typeparam T The contract template type of the query.\n+ * @typeparam K The contract key type of the query.\n+ * @typeparam I The template id type.\n+ */\n+export type QueryResult<T extends object, K, I extends string> = {\n+  /** Contracts matching the query. */\n+  contracts: readonly CreateEvent<T, K, I>[];\n+  /** Indicator for whether the query is executing. */\n+  loading: boolean;\n+}\n+\n+/**\n+ * The result of a ``fetch`` against the ledger.\n+ *\n+ * @typeparam T The contract template type of the query.\n+ * @typeparam K The contract key type of the query.\n+ * @typeparam I The template id type.\n+ */\n+export type FetchResult<T extends object, K, I extends string> = {\n+  /** Contracts of the given contract template and key. */\n+  contract: CreateEvent<T, K, I> | null;\n+  /** Indicator for whether the fetch is executing. */\n+  loading: boolean;\n+}\n+\n+/**\n+ * A LedgerContext is a React context that stores information about a DAML Ledger\n+ * and hooks necessary to use it.\n+ */\n+export type LedgerContext = {\n+  DamlLedger: React.FC<LedgerProps>;\n+  useParty: () => Party;\n+  useLedger: () => Ledger;\n+  useQuery: <T extends object, K, I extends string>(template: Template<T, K, I>, queryFactory?: () => Query<T>, queryDeps?: readonly unknown[]) => QueryResult<T, K, I>;\n+  useFetchByKey: <T extends object, K, I extends string>(template: Template<T, K, I>, keyFactory: () => K, keyDeps: readonly unknown[]) => FetchResult<T, K, I>;\n+  useStreamQuery: <T extends object, K, I extends string>(template: Template<T, K, I>, queryFactory?: () => Query<T>, queryDeps?: readonly unknown[]) => QueryResult<T, K, I>;\n+  useStreamFetchByKey: <T extends object, K, I extends string>(template: Template<T, K, I>, keyFactory: () => K, keyDeps: readonly unknown[]) => FetchResult<T, K, I>;\n+  useReload: () => () => void;\n+}\n+\n+/**\n+ * Create a [[LedgerContext]]. One should use this function, instead of the default [[DamlLedger]],\n+ * where one needs to be able to nest ledger interactions, by different parties or connections, within\n+ * one React application.\n+ *\n+ * @param contextName Used to refer to a context in case of errors.\n+ */\n+export default function createLedgerContext(contextName=\"DamlLedgerContext\"): LedgerContext {"
+  },
+  {
+    "id" : "48cb7fe6-5410-4517-9ffd-2cec722627aa",
+    "prId" : 6451,
+    "comments" : [
+      {
+        "id" : "bede3c3f-0d33-4018-9c0e-dcbaf43f0ece",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  const ledgerContext = React.createContext<DamlLedgerState | undefined>(undefined);\r\n```",
+        "createdAt" : "2020-06-23T12:35:47Z",
+        "updatedAt" : "2020-06-23T14:16:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe7b232411152656bfde57923a85f0fa4c932bc8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import React, {createContext, useContext, useEffect, useMemo, useState } from 'react';\n+import { Party, Template } from \"@daml/types\";\n+import Ledger, { CreateEvent, Query } from '@daml/ledger';\n+\n+/**\n+ * @internal\n+ */\n+type DamlLedgerState = {\n+  reloadToken: unknown;\n+  triggerReload: () => void;\n+  party: Party;\n+  ledger: Ledger;\n+}\n+\n+/**\n+ * React props to initiate a connect to a DAML ledger.\n+ */\n+export type LedgerProps = {\n+  token: string;\n+  httpBaseUrl?: string;\n+  wsBaseUrl?: string;\n+  party: Party;\n+}\n+\n+/**\n+ * The result of a ``query`` against the ledger.\n+ *\n+ * @typeparam T The contract template type of the query.\n+ * @typeparam K The contract key type of the query.\n+ * @typeparam I The template id type.\n+ */\n+export type QueryResult<T extends object, K, I extends string> = {\n+  /** Contracts matching the query. */\n+  contracts: readonly CreateEvent<T, K, I>[];\n+  /** Indicator for whether the query is executing. */\n+  loading: boolean;\n+}\n+\n+/**\n+ * The result of a ``fetch`` against the ledger.\n+ *\n+ * @typeparam T The contract template type of the query.\n+ * @typeparam K The contract key type of the query.\n+ * @typeparam I The template id type.\n+ */\n+export type FetchResult<T extends object, K, I extends string> = {\n+  /** Contracts of the given contract template and key. */\n+  contract: CreateEvent<T, K, I> | null;\n+  /** Indicator for whether the fetch is executing. */\n+  loading: boolean;\n+}\n+\n+/**\n+ * A LedgerContext is a React context that stores information about a DAML Ledger\n+ * and hooks necessary to use it.\n+ */\n+export type LedgerContext = {\n+  DamlLedger: React.FC<LedgerProps>;\n+  useParty: () => Party;\n+  useLedger: () => Ledger;\n+  useQuery: <T extends object, K, I extends string>(template: Template<T, K, I>, queryFactory?: () => Query<T>, queryDeps?: readonly unknown[]) => QueryResult<T, K, I>;\n+  useFetchByKey: <T extends object, K, I extends string>(template: Template<T, K, I>, keyFactory: () => K, keyDeps: readonly unknown[]) => FetchResult<T, K, I>;\n+  useStreamQuery: <T extends object, K, I extends string>(template: Template<T, K, I>, queryFactory?: () => Query<T>, queryDeps?: readonly unknown[]) => QueryResult<T, K, I>;\n+  useStreamFetchByKey: <T extends object, K, I extends string>(template: Template<T, K, I>, keyFactory: () => K, keyDeps: readonly unknown[]) => FetchResult<T, K, I>;\n+  useReload: () => () => void;\n+}\n+\n+/**\n+ * Create a [[LedgerContext]]. One should use this function, instead of the default [[DamlLedger]],\n+ * where one needs to be able to nest ledger interactions, by different parties or connections, within\n+ * one React application.\n+ *\n+ * @param contextName Used to refer to a context in case of errors.\n+ */\n+export default function createLedgerContext(contextName=\"DamlLedgerContext\"): LedgerContext {\n+\n+  // NOTE(MH, useEffect dependencies): There are various places in this file\n+  // where we need to maintain the dependencies of the `useEffect` hook manually\n+  // and there's no tool to help us enfore they are correct. Thus, we need to be\n+  // extra careful in these locations. If we add too many dependencies, we will\n+  // make unnecessary network requests. If we forget adding some dependencies, we\n+  // not make a new network request although they are required to refresh data.\n+\n+  const ledgerContext = createContext<DamlLedgerState|undefined>(undefined);"
+  },
+  {
+    "id" : "fd4ba88c-03e9-4fe6-af7c-a2d05ead12e3",
+    "prId" : 6451,
+    "comments" : [
+      {
+        "id" : "f3c9deca-aa91-4182-a987-b97743f6f906",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm somewhat in favour of using `createContext` qualified like before:\r\n```suggestion\r\nimport React, {useContext, useEffect, useMemo, useState } from 'react';\r\n```",
+        "createdAt" : "2020-06-23T12:36:33Z",
+        "updatedAt" : "2020-06-23T14:16:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fe7b232411152656bfde57923a85f0fa4c932bc8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import React, {createContext, useContext, useEffect, useMemo, useState } from 'react';"
+  }
+]

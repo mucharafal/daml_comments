@@ -1,0 +1,210 @@
+[
+  {
+    "id" : "9181ddec-21a5-474e-ad4a-836916f18b85",
+    "prId" : 2178,
+    "comments" : [
+      {
+        "id" : "9e6827fc-cf4a-4553-bd4c-3f09b30d96af",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nclass Template t => Choice t c r | t c -> r where\r\n```\r\nplus all consequences of this renaming.",
+        "createdAt" : "2019-07-17T08:16:33Z",
+        "updatedAt" : "2019-07-30T22:55:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "95fe019a-6d15-4705-bc8f-d4f206a6a20c",
+        "parentId" : "9e6827fc-cf4a-4553-bd4c-3f09b30d96af",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Done, it was only the one occurrence.",
+        "createdAt" : "2019-07-18T19:06:33Z",
+        "updatedAt" : "2019-07-30T22:55:02Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ca591f5890a7d9487d0b2351de3d08b4592a1a87",
+    "line" : null,
+    "diffHunk" : "@@ -38,145 +38,117 @@ template Iou\n The `class Template` (defined by the DAML standard library) represents the set of all contract types:\n \n ```haskell\n-class Template c where\n-    -- | Predicate that must hold for the succesful creation of the contract.\n-    ensure : c -> Bool ; ensure _ = True\n-    -- | The signatories of a contract.\n-    signatory : c -> [Party]\n-    -- | The observers of a contract.\n-    observer : c -> [Party] ; observer _ = []\n-    -- | The agreement text of a contract.\n-    agreement : c -> Text ; agreement _ = \"\"\n+class Template t where\n+  signatory : t -> [Party]\n+  observer : t -> [Party]\n+  ensure : t -> Bool\n+  agreement : t -> Text\n+  create : t -> Update (ContractId t)\n+  fetch : ContractId t -> Update t\n+  archive : ContractId t -> Update ()\n ```\n \n-In this example, `c` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n+In this example, `t` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n \n-First, the definition of `Iou`:\n+First we have data type definitions for the `Iou` template and the `Transfer` choice.\n \n ```haskell\n-data Iou = Iou {\n+data Iou = Iou with\n     issuer : Party\n-  , owner : Party\n-  , currency : Party\n-  , amount : Float\n-  , account : Party\n-  , regulators :[Party] } deriving (Eq, Show)\n-```\n-\n-Next, an `instance` declaration for `Iou` to declare its membership in `Template`:\n+    owner : Party\n+    currency : Party\n+    amount : Decimal\n+    account : Party\n+    regulators : [Party]\n+  deriving (Eq, Show)\n \n-```haskell\n-instance Template Iou where\n-  ensure this@Iou{..} = amount > 0.0\n-  signatory this@Iou{..} = concat [toParties issuer, toParties owner]\n-  observer this@Iou{..} = concat [toParties owner, toParties regulators]\n-  agreement this@Iou{..} = issuer <> \" will pay \" <> owner <>  \" \" <> (show amount)\n+data Transfer = Transfer with\n+    newOwner : Party\n+  deriving (Eq, Show)\n ```\n \n-When a type `c` is a `Template` instance, `class Choice` (defined by the DAML standard library) defines a (multi-parameter type class) relation on types `c`, `e` and `r` such that `r` is uniquely determined by the pair `(c, e)`:\n+Next we have a `class IouInstance` with the bulk of the definitions we will need.\n \n ```haskell\n-class Template c => Choice c e r | c e -> r where\n-    consuming : NoEvent c e -> ChoiceType ; consuming _ = Consuming\n-    choiceController : c -> e -> [Party]\n-    choice : c -> ContractId c -> e -> Update r\n+class IouInstance where\n+  signatoryIou : Iou -> [Party]\n+  signatoryIou this@Iou{..} = [issuer, owner]\n+  observerIou : Iou -> [Party]\n+  observerIou this@Iou{..} = regulators\n+  ensureIou : Iou -> Bool\n+  ensureIou this@Iou{..} = amount > 0.0\n+  agreementIou : Iou -> Text\n+  agreementIou this@Iou{..} = show issuer <> \" will pay \" <> show owner <> \" \" <> show amount\n+  createIou : Iou -> Update (ContractId Iou)\n+  createIou = error \"code will be injected by the compiler\"\n+  fetchIou : ContractId Iou -> Update Iou\n+  fetchIou = error \"code will be injected by the compiler\"\n+  archiveIou : ContractId Iou -> Update ()\n+  archiveIou cid = exerciseIouArchive cid Archive\n+\n+  consumptionIouArchive : PreConsuming Iou\n+  consumptionIouArchive = PreConsuming\n+  controllerIouArchive : Iou -> Archive -> [Party]\n+  controllerIouArchive this@Iou{..} arg@Archive = signatoryIou this\n+  actionIouArchive : ContractId Iou -> Iou -> Archive -> Update ()\n+  actionIouArchive self this@Iou{..} arg@Archive = pure ()\n+  exerciseIouArchive : ContractId Iou -> Archive -> Update ()\n+  exerciseIouArchive = error \"code will be injected by the compiler\"\n+\n+  consumptionIouTransfer : PreConsuming Iou\n+  consumptionIouTransfer = PreConsuming\n+  controllerIouTransfer : Iou -> Transfer -> [Party]\n+  controllerIouTransfer this@Iou{..} arg@Transfer{..} = [owner]\n+  actionIouTransfer : ContractId Iou -> Iou -> Transfer -> Update (ContractId Iou)\n+  actionIouTransfer self this@Iou{..} arg@Transfer{..} = create this with owner = newOwner\n+  exerciseIouTransfer : ContractId Iou -> Transfer -> Update (ContractId Iou)\n+  exerciseIouTransfer = error \"code will be injected by the compiler\"\n ```\n \n-In this example, `e` is identified with `Transfer` and `r` with `ContractId Iou`.\n-\n-Desugaring first defines type `Transfer`:\n-\n+With that class defined, we can define an `instance` declaration for `Iou` to declare its membership in `Template`:\n ```haskell\n-data Transfer = Transfer {\n-  newOwner : String } deriving (Eq, Show)\n+instance IouInstance => Template Iou where\n+  signatory = signatoryIou\n+  observer = observerIou\n+  ensure = ensureIou\n+  agreement = agreementIou\n+  create = createIou\n+  fetch = fetchIou\n+  archive = archiveIou\n+\n+instance IouInstance where\n ```\n \n-Next, an `instance` declaration establishes the triple `(Iou, Transfer, ContractID Iou)` as satisfying the `Choice` relation:\n+When a type `t` is a `Template` instance, `class Choice` (defined by the DAML standard library) defines a (multi-parameter type class) relation on types `t`, `c` and `r` such that `r` is uniquely determined by the pair `(t, c)`:\n \n ```haskell\n-instance Choice Iou Transfer (ContractId Iou) where\n-  choiceController this@Iou{..} arg@Transfer{..} = [owner]\n-  choice this@Iou{..} self arg@Transfer{..} = create this with owner = newOwner\n+class Template t => Chc t c r | t c -> r where"
+  },
+  {
+    "id" : "300d8d29-91dd-40aa-8c18-1a434e3f551e",
+    "prId" : 2178,
+    "comments" : [
+      {
+        "id" : "ac91178d-ed3b-42ad-9c75-dd78b151f966",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  createIou = magic @\"create\"\r\n```\r\nplus same change everywhere below and in implementation.",
+        "createdAt" : "2019-07-17T08:17:28Z",
+        "updatedAt" : "2019-07-30T22:55:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ca591f5890a7d9487d0b2351de3d08b4592a1a87",
+    "line" : null,
+    "diffHunk" : "@@ -38,145 +38,117 @@ template Iou\n The `class Template` (defined by the DAML standard library) represents the set of all contract types:\n \n ```haskell\n-class Template c where\n-    -- | Predicate that must hold for the succesful creation of the contract.\n-    ensure : c -> Bool ; ensure _ = True\n-    -- | The signatories of a contract.\n-    signatory : c -> [Party]\n-    -- | The observers of a contract.\n-    observer : c -> [Party] ; observer _ = []\n-    -- | The agreement text of a contract.\n-    agreement : c -> Text ; agreement _ = \"\"\n+class Template t where\n+  signatory : t -> [Party]\n+  observer : t -> [Party]\n+  ensure : t -> Bool\n+  agreement : t -> Text\n+  create : t -> Update (ContractId t)\n+  fetch : ContractId t -> Update t\n+  archive : ContractId t -> Update ()\n ```\n \n-In this example, `c` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n+In this example, `t` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n \n-First, the definition of `Iou`:\n+First we have data type definitions for the `Iou` template and the `Transfer` choice.\n \n ```haskell\n-data Iou = Iou {\n+data Iou = Iou with\n     issuer : Party\n-  , owner : Party\n-  , currency : Party\n-  , amount : Float\n-  , account : Party\n-  , regulators :[Party] } deriving (Eq, Show)\n-```\n-\n-Next, an `instance` declaration for `Iou` to declare its membership in `Template`:\n+    owner : Party\n+    currency : Party\n+    amount : Decimal\n+    account : Party\n+    regulators : [Party]\n+  deriving (Eq, Show)\n \n-```haskell\n-instance Template Iou where\n-  ensure this@Iou{..} = amount > 0.0\n-  signatory this@Iou{..} = concat [toParties issuer, toParties owner]\n-  observer this@Iou{..} = concat [toParties owner, toParties regulators]\n-  agreement this@Iou{..} = issuer <> \" will pay \" <> owner <>  \" \" <> (show amount)\n+data Transfer = Transfer with\n+    newOwner : Party\n+  deriving (Eq, Show)\n ```\n \n-When a type `c` is a `Template` instance, `class Choice` (defined by the DAML standard library) defines a (multi-parameter type class) relation on types `c`, `e` and `r` such that `r` is uniquely determined by the pair `(c, e)`:\n+Next we have a `class IouInstance` with the bulk of the definitions we will need.\n \n ```haskell\n-class Template c => Choice c e r | c e -> r where\n-    consuming : NoEvent c e -> ChoiceType ; consuming _ = Consuming\n-    choiceController : c -> e -> [Party]\n-    choice : c -> ContractId c -> e -> Update r\n+class IouInstance where\n+  signatoryIou : Iou -> [Party]\n+  signatoryIou this@Iou{..} = [issuer, owner]\n+  observerIou : Iou -> [Party]\n+  observerIou this@Iou{..} = regulators\n+  ensureIou : Iou -> Bool\n+  ensureIou this@Iou{..} = amount > 0.0\n+  agreementIou : Iou -> Text\n+  agreementIou this@Iou{..} = show issuer <> \" will pay \" <> show owner <> \" \" <> show amount\n+  createIou : Iou -> Update (ContractId Iou)\n+  createIou = error \"code will be injected by the compiler\""
+  },
+  {
+    "id" : "af518ba4-f53f-4d1e-90fc-a80bbd4adbf3",
+    "prId" : 2178,
+    "comments" : [
+      {
+        "id" : "2263fb5c-75f3-4db8-9c5f-d15a30c43973",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  fetchIou = magic @\"fetch\"\r\n```",
+        "createdAt" : "2019-07-17T08:17:42Z",
+        "updatedAt" : "2019-07-30T22:55:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ca591f5890a7d9487d0b2351de3d08b4592a1a87",
+    "line" : null,
+    "diffHunk" : "@@ -38,145 +38,117 @@ template Iou\n The `class Template` (defined by the DAML standard library) represents the set of all contract types:\n \n ```haskell\n-class Template c where\n-    -- | Predicate that must hold for the succesful creation of the contract.\n-    ensure : c -> Bool ; ensure _ = True\n-    -- | The signatories of a contract.\n-    signatory : c -> [Party]\n-    -- | The observers of a contract.\n-    observer : c -> [Party] ; observer _ = []\n-    -- | The agreement text of a contract.\n-    agreement : c -> Text ; agreement _ = \"\"\n+class Template t where\n+  signatory : t -> [Party]\n+  observer : t -> [Party]\n+  ensure : t -> Bool\n+  agreement : t -> Text\n+  create : t -> Update (ContractId t)\n+  fetch : ContractId t -> Update t\n+  archive : ContractId t -> Update ()\n ```\n \n-In this example, `c` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n+In this example, `t` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n \n-First, the definition of `Iou`:\n+First we have data type definitions for the `Iou` template and the `Transfer` choice.\n \n ```haskell\n-data Iou = Iou {\n+data Iou = Iou with\n     issuer : Party\n-  , owner : Party\n-  , currency : Party\n-  , amount : Float\n-  , account : Party\n-  , regulators :[Party] } deriving (Eq, Show)\n-```\n-\n-Next, an `instance` declaration for `Iou` to declare its membership in `Template`:\n+    owner : Party\n+    currency : Party\n+    amount : Decimal\n+    account : Party\n+    regulators : [Party]\n+  deriving (Eq, Show)\n \n-```haskell\n-instance Template Iou where\n-  ensure this@Iou{..} = amount > 0.0\n-  signatory this@Iou{..} = concat [toParties issuer, toParties owner]\n-  observer this@Iou{..} = concat [toParties owner, toParties regulators]\n-  agreement this@Iou{..} = issuer <> \" will pay \" <> owner <>  \" \" <> (show amount)\n+data Transfer = Transfer with\n+    newOwner : Party\n+  deriving (Eq, Show)\n ```\n \n-When a type `c` is a `Template` instance, `class Choice` (defined by the DAML standard library) defines a (multi-parameter type class) relation on types `c`, `e` and `r` such that `r` is uniquely determined by the pair `(c, e)`:\n+Next we have a `class IouInstance` with the bulk of the definitions we will need.\n \n ```haskell\n-class Template c => Choice c e r | c e -> r where\n-    consuming : NoEvent c e -> ChoiceType ; consuming _ = Consuming\n-    choiceController : c -> e -> [Party]\n-    choice : c -> ContractId c -> e -> Update r\n+class IouInstance where\n+  signatoryIou : Iou -> [Party]\n+  signatoryIou this@Iou{..} = [issuer, owner]\n+  observerIou : Iou -> [Party]\n+  observerIou this@Iou{..} = regulators\n+  ensureIou : Iou -> Bool\n+  ensureIou this@Iou{..} = amount > 0.0\n+  agreementIou : Iou -> Text\n+  agreementIou this@Iou{..} = show issuer <> \" will pay \" <> show owner <> \" \" <> show amount\n+  createIou : Iou -> Update (ContractId Iou)\n+  createIou = error \"code will be injected by the compiler\"\n+  fetchIou : ContractId Iou -> Update Iou\n+  fetchIou = error \"code will be injected by the compiler\""
+  },
+  {
+    "id" : "2b237763-3591-48ec-9f5e-8baee3dddbb8",
+    "prId" : 2178,
+    "comments" : [
+      {
+        "id" : "6fc87e24-7d09-4dd8-8362-2d005a329349",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  exerciseIouArchive = magic @\"archive\"\r\n```\r\nor `magic @\"exercise\"` if `\"archive\"` is too hard to achieve here.",
+        "createdAt" : "2019-07-17T08:18:30Z",
+        "updatedAt" : "2019-07-30T22:55:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ca591f5890a7d9487d0b2351de3d08b4592a1a87",
+    "line" : null,
+    "diffHunk" : "@@ -38,145 +38,117 @@ template Iou\n The `class Template` (defined by the DAML standard library) represents the set of all contract types:\n \n ```haskell\n-class Template c where\n-    -- | Predicate that must hold for the succesful creation of the contract.\n-    ensure : c -> Bool ; ensure _ = True\n-    -- | The signatories of a contract.\n-    signatory : c -> [Party]\n-    -- | The observers of a contract.\n-    observer : c -> [Party] ; observer _ = []\n-    -- | The agreement text of a contract.\n-    agreement : c -> Text ; agreement _ = \"\"\n+class Template t where\n+  signatory : t -> [Party]\n+  observer : t -> [Party]\n+  ensure : t -> Bool\n+  agreement : t -> Text\n+  create : t -> Update (ContractId t)\n+  fetch : ContractId t -> Update t\n+  archive : ContractId t -> Update ()\n ```\n \n-In this example, `c` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n+In this example, `t` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n \n-First, the definition of `Iou`:\n+First we have data type definitions for the `Iou` template and the `Transfer` choice.\n \n ```haskell\n-data Iou = Iou {\n+data Iou = Iou with\n     issuer : Party\n-  , owner : Party\n-  , currency : Party\n-  , amount : Float\n-  , account : Party\n-  , regulators :[Party] } deriving (Eq, Show)\n-```\n-\n-Next, an `instance` declaration for `Iou` to declare its membership in `Template`:\n+    owner : Party\n+    currency : Party\n+    amount : Decimal\n+    account : Party\n+    regulators : [Party]\n+  deriving (Eq, Show)\n \n-```haskell\n-instance Template Iou where\n-  ensure this@Iou{..} = amount > 0.0\n-  signatory this@Iou{..} = concat [toParties issuer, toParties owner]\n-  observer this@Iou{..} = concat [toParties owner, toParties regulators]\n-  agreement this@Iou{..} = issuer <> \" will pay \" <> owner <>  \" \" <> (show amount)\n+data Transfer = Transfer with\n+    newOwner : Party\n+  deriving (Eq, Show)\n ```\n \n-When a type `c` is a `Template` instance, `class Choice` (defined by the DAML standard library) defines a (multi-parameter type class) relation on types `c`, `e` and `r` such that `r` is uniquely determined by the pair `(c, e)`:\n+Next we have a `class IouInstance` with the bulk of the definitions we will need.\n \n ```haskell\n-class Template c => Choice c e r | c e -> r where\n-    consuming : NoEvent c e -> ChoiceType ; consuming _ = Consuming\n-    choiceController : c -> e -> [Party]\n-    choice : c -> ContractId c -> e -> Update r\n+class IouInstance where\n+  signatoryIou : Iou -> [Party]\n+  signatoryIou this@Iou{..} = [issuer, owner]\n+  observerIou : Iou -> [Party]\n+  observerIou this@Iou{..} = regulators\n+  ensureIou : Iou -> Bool\n+  ensureIou this@Iou{..} = amount > 0.0\n+  agreementIou : Iou -> Text\n+  agreementIou this@Iou{..} = show issuer <> \" will pay \" <> show owner <> \" \" <> show amount\n+  createIou : Iou -> Update (ContractId Iou)\n+  createIou = error \"code will be injected by the compiler\"\n+  fetchIou : ContractId Iou -> Update Iou\n+  fetchIou = error \"code will be injected by the compiler\"\n+  archiveIou : ContractId Iou -> Update ()\n+  archiveIou cid = exerciseIouArchive cid Archive\n+\n+  consumptionIouArchive : PreConsuming Iou\n+  consumptionIouArchive = PreConsuming\n+  controllerIouArchive : Iou -> Archive -> [Party]\n+  controllerIouArchive this@Iou{..} arg@Archive = signatoryIou this\n+  actionIouArchive : ContractId Iou -> Iou -> Archive -> Update ()\n+  actionIouArchive self this@Iou{..} arg@Archive = pure ()\n+  exerciseIouArchive : ContractId Iou -> Archive -> Update ()\n+  exerciseIouArchive = error \"code will be injected by the compiler\""
+  },
+  {
+    "id" : "3c8a6c64-89ff-4cf3-93ec-3b5a04f03986",
+    "prId" : 2178,
+    "comments" : [
+      {
+        "id" : "f25cae4c-162b-46f8-bc9a-2ab610786429",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  exerciseIouTransfer = magic @\"exercise\"\r\n```",
+        "createdAt" : "2019-07-17T08:18:43Z",
+        "updatedAt" : "2019-07-30T22:55:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ca591f5890a7d9487d0b2351de3d08b4592a1a87",
+    "line" : null,
+    "diffHunk" : "@@ -38,145 +38,117 @@ template Iou\n The `class Template` (defined by the DAML standard library) represents the set of all contract types:\n \n ```haskell\n-class Template c where\n-    -- | Predicate that must hold for the succesful creation of the contract.\n-    ensure : c -> Bool ; ensure _ = True\n-    -- | The signatories of a contract.\n-    signatory : c -> [Party]\n-    -- | The observers of a contract.\n-    observer : c -> [Party] ; observer _ = []\n-    -- | The agreement text of a contract.\n-    agreement : c -> Text ; agreement _ = \"\"\n+class Template t where\n+  signatory : t -> [Party]\n+  observer : t -> [Party]\n+  ensure : t -> Bool\n+  agreement : t -> Text\n+  create : t -> Update (ContractId t)\n+  fetch : ContractId t -> Update t\n+  archive : ContractId t -> Update ()\n ```\n \n-In this example, `c` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n+In this example, `t` is identified with `Iou`. The rest of this section shows you how desugaring proceeds.\n \n-First, the definition of `Iou`:\n+First we have data type definitions for the `Iou` template and the `Transfer` choice.\n \n ```haskell\n-data Iou = Iou {\n+data Iou = Iou with\n     issuer : Party\n-  , owner : Party\n-  , currency : Party\n-  , amount : Float\n-  , account : Party\n-  , regulators :[Party] } deriving (Eq, Show)\n-```\n-\n-Next, an `instance` declaration for `Iou` to declare its membership in `Template`:\n+    owner : Party\n+    currency : Party\n+    amount : Decimal\n+    account : Party\n+    regulators : [Party]\n+  deriving (Eq, Show)\n \n-```haskell\n-instance Template Iou where\n-  ensure this@Iou{..} = amount > 0.0\n-  signatory this@Iou{..} = concat [toParties issuer, toParties owner]\n-  observer this@Iou{..} = concat [toParties owner, toParties regulators]\n-  agreement this@Iou{..} = issuer <> \" will pay \" <> owner <>  \" \" <> (show amount)\n+data Transfer = Transfer with\n+    newOwner : Party\n+  deriving (Eq, Show)\n ```\n \n-When a type `c` is a `Template` instance, `class Choice` (defined by the DAML standard library) defines a (multi-parameter type class) relation on types `c`, `e` and `r` such that `r` is uniquely determined by the pair `(c, e)`:\n+Next we have a `class IouInstance` with the bulk of the definitions we will need.\n \n ```haskell\n-class Template c => Choice c e r | c e -> r where\n-    consuming : NoEvent c e -> ChoiceType ; consuming _ = Consuming\n-    choiceController : c -> e -> [Party]\n-    choice : c -> ContractId c -> e -> Update r\n+class IouInstance where\n+  signatoryIou : Iou -> [Party]\n+  signatoryIou this@Iou{..} = [issuer, owner]\n+  observerIou : Iou -> [Party]\n+  observerIou this@Iou{..} = regulators\n+  ensureIou : Iou -> Bool\n+  ensureIou this@Iou{..} = amount > 0.0\n+  agreementIou : Iou -> Text\n+  agreementIou this@Iou{..} = show issuer <> \" will pay \" <> show owner <> \" \" <> show amount\n+  createIou : Iou -> Update (ContractId Iou)\n+  createIou = error \"code will be injected by the compiler\"\n+  fetchIou : ContractId Iou -> Update Iou\n+  fetchIou = error \"code will be injected by the compiler\"\n+  archiveIou : ContractId Iou -> Update ()\n+  archiveIou cid = exerciseIouArchive cid Archive\n+\n+  consumptionIouArchive : PreConsuming Iou\n+  consumptionIouArchive = PreConsuming\n+  controllerIouArchive : Iou -> Archive -> [Party]\n+  controllerIouArchive this@Iou{..} arg@Archive = signatoryIou this\n+  actionIouArchive : ContractId Iou -> Iou -> Archive -> Update ()\n+  actionIouArchive self this@Iou{..} arg@Archive = pure ()\n+  exerciseIouArchive : ContractId Iou -> Archive -> Update ()\n+  exerciseIouArchive = error \"code will be injected by the compiler\"\n+\n+  consumptionIouTransfer : PreConsuming Iou\n+  consumptionIouTransfer = PreConsuming\n+  controllerIouTransfer : Iou -> Transfer -> [Party]\n+  controllerIouTransfer this@Iou{..} arg@Transfer{..} = [owner]\n+  actionIouTransfer : ContractId Iou -> Iou -> Transfer -> Update (ContractId Iou)\n+  actionIouTransfer self this@Iou{..} arg@Transfer{..} = create this with owner = newOwner\n+  exerciseIouTransfer : ContractId Iou -> Transfer -> Update (ContractId Iou)\n+  exerciseIouTransfer = error \"code will be injected by the compiler\""
+  },
+  {
+    "id" : "1a5f41d3-7462-40b7-a648-84473dc6b526",
+    "prId" : 465,
+    "comments" : [
+      {
+        "id" : "536b55bb-5863-4fa6-8770-2e6fb4f2b88d",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "```suggestion\r\nThe next contract exercises the so-called \"contract keys\" feature of DAML. Contract key syntax desugars to `instance` declarations of the following typeclass.\r\n```",
+        "createdAt" : "2019-04-13T10:40:21Z",
+        "updatedAt" : "2019-04-13T10:40:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f0a3916c3d27faf3b6cf8c1cf846d080dcf8b332",
+    "line" : null,
+    "diffHunk" : "@@ -167,3 +167,47 @@ instance Choice Iou Transfer (ContractId Iou) where\n   choiceController this@Iou{..} arg@Transfer{..} = [owner]\n   choice this@Iou{..} self arg@Transfer{..} = create this with owner = newOwner\n ```\n+\n+### Example (3)\n+\n+The next contract exercises the so-called \"contract key\" feature of DAML. Contract key syntax desugars to `instance` declarations of the following typeclass."
+  }
+]

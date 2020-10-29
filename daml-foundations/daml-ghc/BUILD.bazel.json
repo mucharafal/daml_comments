@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "2424e42b-c807-463b-be2e-457167cd52d9",
+    "prId" : 1165,
+    "comments" : [
+      {
+        "id" : "e7bb7d1d-aa3d-42dd-b864-dafe7cfe4e05",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can we put all of damldoc into this library?",
+        "createdAt" : "2019-05-16T08:58:42Z",
+        "updatedAt" : "2019-05-16T13:04:51Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8fc6501f-908e-4b09-a42a-79e463b2256c",
+        "parentId" : "e7bb7d1d-aa3d-42dd-b864-dafe7cfe4e05",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "The rest of `damldoc` is in [the target called `daml-ghc-damldoc`](https://github.com/digital-asset/daml/pull/1165/files#diff-48f80e007f92d8454827e7e5ea770aa8R214). I'm guessing you'd want all of `damldoc` in that target.\r\n\r\nSure, we can do that. However, as the comment says\r\n```\r\n# This target takes a while to compile, probably due to TemplateHaskell.\r\n# It's separated into its own target not to inflict that compilation\r\n# time on changes outside the DA.Daml.GHC.Damldoc.Types module\r\n```\r\n\r\nBut, if you prefer to not separate out `Damldoc.Types` knowing that cost, I'm happy to keep it in there.",
+        "createdAt" : "2019-05-16T09:09:51Z",
+        "updatedAt" : "2019-05-16T13:04:51Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9188cb5d-8131-4adf-9d74-99f2043872bb",
+        "parentId" : "e7bb7d1d-aa3d-42dd-b864-dafe7cfe4e05",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Putting a single module into a package seems quite extreme to me and is something I'd like to avoid. Let's move it to the rest of of `damldoc`. We can probably improve compilation time by removing the Template Haskell.",
+        "createdAt" : "2019-05-16T11:30:56Z",
+        "updatedAt" : "2019-05-16T13:04:51Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ab75f7b6c5576ec195005ab1acf1d25406f86dde",
+    "line" : null,
+    "diffHunk" : "@@ -14,74 +14,269 @@ load(\n )\n \n da_haskell_library(\n-    name = \"daml-ghc-lib\",\n+    name = \"daml-ghc-compiler\",\n     srcs = glob([\n-        \"src/DA/Daml/GHC/**/*.hs\",\n-        \"src/DA/Service/**/*.hs\",\n-        \"src/Development/IDE/**/*.hs\",\n+        \"src/DA/Daml/GHC/Compiler/**/*.hs\",\n     ]),\n     hazel_deps = [\n-        \"aeson-pretty\",\n+        \"base\",\n+        \"bytestring\",\n+        \"containers\",\n+        \"directory\",\n+        \"extra\",\n+        \"filepath\",\n+        \"ghc-lib-parser\",\n+        \"ghc-lib\",\n+        \"lens\",\n+        \"mtl\",\n+        \"recursion-schemes\",\n+        \"safe\",\n+        \"tagged\",\n+        \"text\",\n+        \"uniplate\",\n+    ],\n+    src_strip_prefix = \"src\",\n+    visibility = [\"//visibility:public\"],\n+    deps = [\n+        \"//compiler/daml-lf-ast\",\n+        \"//compiler/daml-lf-proto\",\n+        \"//compiler/daml-lf-tools\",\n+        \"//compiler/haskell-ide-core\",\n+        \"//libs-haskell/bazel-runfiles\",\n+        \"//libs-haskell/da-hs-base\",\n+    ],\n+)\n+\n+da_haskell_library(\n+    name = \"daml-development\",\n+    srcs = glob(\n+        [\n+            \"src/Development/IDE/**/*.hs\",\n+        ],\n+        exclude = [\"src/Development/IDE/State/API/Testing.hs\"],\n+    ),\n+    hazel_deps = [\n         \"aeson\",\n-        \"async\",\n         \"base\",\n         \"binary\",\n-        \"blaze-html\",\n         \"bytestring\",\n-        \"cmark-gfm\",\n         \"containers\",\n         \"deepseq\",\n-        \"Diff\",\n         \"directory\",\n-        \"either\",\n         \"extra\",\n         \"filepath\",\n-        \"filepattern\",\n         \"ghc-lib-parser\",\n         \"ghc-lib\",\n         \"hashable\",\n         \"haskell-lsp-types\",\n-        \"http-types\",\n-        \"lens\",\n-        \"managed\",\n         \"mtl\",\n-        \"network-uri\",\n-        \"prettyprinter\",\n-        \"process\",\n-        \"proto3-suite\",\n-        \"recursion-schemes\",\n-        \"safe-exceptions\",\n-        \"safe\",\n         \"shake\",\n         \"stm\",\n-        \"syb\",\n         \"tagged\",\n-        \"tasty-hunit\",\n         \"temporary\",\n         \"text\",\n         \"time\",\n-        \"transformers-base\",\n-        \"transformers\",\n-        \"uniplate\",\n-        \"unordered-containers\",\n-        \"uri-encode\",\n         \"vector\",\n-        \"zip-archive\",\n     ],\n     src_strip_prefix = \"src\",\n     visibility = [\"//visibility:public\"],\n     deps = [\n+        \":daml-ghc-compiler\",\n         \"//compiler/daml-lf-ast\",\n         \"//compiler/daml-lf-proto\",\n         \"//compiler/daml-lf-tools\",\n         \"//compiler/haskell-ide-core\",\n         \"//compiler/scenario-service/client\",\n+        \"//libs-haskell/da-hs-base\",\n+    ],\n+)\n+\n+da_haskell_library(\n+    name = \"daml-service-daml-compiler\",\n+    srcs = glob([\n+        \"src/DA/Service/Daml/Compiler/**/*.hs\",\n+    ]),\n+    hazel_deps = [\n+        \"base\",\n+        \"bytestring\",\n+        \"containers\",\n+        \"directory\",\n+        \"extra\",\n+        \"filepath\",\n+        \"ghc-lib-parser\",\n+        \"http-types\",\n+        \"mtl\",\n+        \"network-uri\",\n+        \"safe\",\n+        \"tagged\",\n+        \"text\",\n+        \"time\",\n+        \"transformers\",\n+        \"zip-archive\",\n+    ],\n+    src_strip_prefix = \"src\",\n+    visibility = [\"//visibility:public\"],\n+    deps = [\n+        \":daml-development\",\n+        \":daml-ghc-compiler\",\n+        \"//compiler/daml-lf-ast\",\n+        \"//compiler/daml-lf-proto\",\n+        \"//compiler/haskell-ide-core\",\n+        \"//compiler/scenario-service/client\",\n+        \"//libs-haskell/da-hs-base\",\n+    ],\n+)\n+\n+da_haskell_library(\n+    name = \"daml-development-testing\",\n+    srcs = glob([\n+        \"src/Development/IDE/State/API/Testing.hs\",\n+    ]),\n+    hazel_deps = [\n+        \"aeson\",\n+        \"base\",\n+        \"containers\",\n+        \"directory\",\n+        \"extra\",\n+        \"filepath\",\n+        \"haskell-lsp-types\",\n+        \"mtl\",\n+        \"stm\",\n+        \"temporary\",\n+        \"text\",\n+        \"time\",\n+        \"vector\",\n+    ],\n+    src_strip_prefix = \"src\",\n+    visibility = [\"//visibility:public\"],\n+    deps = [\n+        \":daml-development\",\n+        \":daml-ghc-compiler\",\n+        \":daml-service-daml-compiler\",\n+        \"//compiler/haskell-ide-core\",\n+    ],\n+)\n+\n+da_haskell_library(\n+    name = \"daml-service-daml-language-server\",\n+    srcs = glob([\n+        \"src/DA/Service/Daml/LanguageServer.hs\",\n+        \"src/DA/Service/Daml/LanguageServer/**/*.hs\",\n+    ]),\n+    hazel_deps = [\n+        \"aeson\",\n+        \"async\",\n+        \"base\",\n+        \"containers\",\n+        \"extra\",\n+        \"managed\",\n+        \"network-uri\",\n+        \"safe\",\n+        \"safe-exceptions\",\n+        \"stm\",\n+        \"tagged\",\n+        \"uri-encode\",\n+    ],\n+    src_strip_prefix = \"src\",\n+    visibility = [\"//visibility:public\"],\n+    deps = [\n+        \":daml-service-daml-compiler\",\n+        \"//compiler/daml-lf-ast\",\n+        \"//compiler/haskell-ide-core\",\n         \"//daml-assistant:daml-project-config\",\n-        \"//daml-lf/archive:daml_lf_haskell_proto\",\n-        \"//libs-haskell/bazel-runfiles\",\n         \"//libs-haskell/da-hs-base\",\n         \"//libs-haskell/da-hs-language-server\",\n-        \"//libs-haskell/prettyprinter-syntax\",\n+    ],\n+)\n+\n+# This target takes a while to compile, probably due to TemplateHaskell.\n+# It's separated into its own target not to inflict that compilation\n+# time on changes outside the DA.Daml.GHC.Damldoc.Types module\n+da_haskell_library("
+  }
+]

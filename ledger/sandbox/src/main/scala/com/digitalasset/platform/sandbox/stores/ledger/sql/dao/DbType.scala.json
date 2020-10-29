@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "976990c7-3e51-4674-b5ec-caac3328f1cf",
+    "prId" : 2832,
+    "comments" : [
+      {
+        "id" : "3753b405-71c9-4e2d-b449-3df568e69b2a",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Probably worth having an explicit exception thrown on the default case to prevent future headaches.",
+        "createdAt" : "2019-09-10T08:56:22Z",
+        "updatedAt" : "2019-09-10T11:15:58Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "81c8302f-87f6-46d7-bdf4-22d2822399e4",
+        "parentId" : "3753b405-71c9-4e2d-b449-3df568e69b2a",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Addressed in 3c9abe76b.",
+        "createdAt" : "2019-09-10T09:38:19Z",
+        "updatedAt" : "2019-09-10T11:15:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "dbe33b773d0811bdb407a6d326f5ff19c607716a",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,21 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.stores.ledger.sql.dao\n+\n+sealed abstract class DbType(val name: String, val supportsParallelWrites: Boolean)\n+\n+object DbType {\n+  object Postgres extends DbType(\"postgres\", true)\n+\n+  // H2 does not support concurrent, conditional updates to the ledger_end at read committed isolation\n+  // level: \"It is possible that a transaction from one connection overtakes a transaction from a different\n+  // connection. Depending on the operations, this might result in different results, for example when conditionally\n+  // incrementing a value in a row.\" - from http://www.h2database.com/html/advanced.html\n+  object H2Database extends DbType(\"h2database\", false)\n+\n+  def jdbcType(jdbcUrl: String): DbType = jdbcUrl match {\n+    case h2 if h2.startsWith(\"jdbc:h2:\") => H2Database\n+    case _ => Postgres"
+  }
+]

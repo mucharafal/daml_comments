@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "a28cdf32-8bf2-4965-b799-1cb298c88a07",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "2b007877-33cb-4bec-9dca-5a6b9ced73e6",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Can it be made more precise?",
+        "createdAt" : "2020-05-22T16:34:42Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8a4b72cf-0047-4e67-8ff6-dd6ee51b5caa",
+        "parentId" : "2b007877-33cb-4bec-9dca-5a6b9ced73e6",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added check for exception type.",
+        "createdAt" : "2020-05-25T10:13:31Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,69 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlPartyAllocation,\n+  DamlStateKey,\n+  DamlStateValue\n+}\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.validator.TestHelper.{invalidEnvelope, makePartySubmission}\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+import org.scalatest.mockito.MockitoSugar\n+\n+import scala.concurrent.Future\n+\n+class RawToDamlLedgerStateReaderAdapterSpec extends AsyncWordSpec with Matchers with MockitoSugar {\n+  \"readState\" should {\n+    \"read the right key and deserialize it\" in {\n+      val expectedKey = DefaultStateKeySerializationStrategy.serializeStateKey(aDamlStateKey())\n+      val expectedValue = DamlStateValue.newBuilder\n+        .setParty(DamlPartyAllocation.newBuilder.setDisplayName(\"aParty\"))\n+        .build\n+      val mockReader = mock[LedgerStateReader]\n+      when(mockReader.read(any[Seq[LedgerStateOperations.Key]]()))\n+        .thenReturn(Future.successful(Seq(Some(Envelope.enclose(expectedValue)))))\n+      val instance =\n+        new RawToDamlLedgerStateReaderAdapter(mockReader, DefaultStateKeySerializationStrategy)\n+\n+      instance.readState(Seq(aDamlStateKey())).map { actual =>\n+        verify(mockReader, times(1)).read(Seq(expectedKey))\n+        actual shouldBe Seq(Some(expectedValue))\n+      }\n+    }\n+\n+    \"throw in case of an invalid envelope returned from underlying reader\" in {\n+      val mockReader = mock[LedgerStateReader]\n+      when(mockReader.read(any[Seq[LedgerStateOperations.Key]]()))\n+        .thenReturn(Future.successful(Seq(Some(invalidEnvelope))))\n+      val instance =\n+        new RawToDamlLedgerStateReaderAdapter(mockReader, DefaultStateKeySerializationStrategy)\n+\n+      instance.readState(Seq(aDamlStateKey())).failed.map { actual =>\n+        actual.getLocalizedMessage should include(\"failed\")"
+  },
+  {
+    "id" : "df30a5bc-0fb8-40f1-b052-fcb5c94941b3",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "4de208bd-7b1b-4e0a-a44a-31931f6eccaf",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Can it be made more precise?",
+        "createdAt" : "2020-05-22T16:35:15Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "31b9abae-7150-48b3-a80a-86cbfc37fe24",
+        "parentId" : "4de208bd-7b1b-4e0a-a44a-31931f6eccaf",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added check for exception type.",
+        "createdAt" : "2020-05-25T10:13:38Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,69 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlPartyAllocation,\n+  DamlStateKey,\n+  DamlStateValue\n+}\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.validator.TestHelper.{invalidEnvelope, makePartySubmission}\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.Mockito._\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+import org.scalatest.mockito.MockitoSugar\n+\n+import scala.concurrent.Future\n+\n+class RawToDamlLedgerStateReaderAdapterSpec extends AsyncWordSpec with Matchers with MockitoSugar {\n+  \"readState\" should {\n+    \"read the right key and deserialize it\" in {\n+      val expectedKey = DefaultStateKeySerializationStrategy.serializeStateKey(aDamlStateKey())\n+      val expectedValue = DamlStateValue.newBuilder\n+        .setParty(DamlPartyAllocation.newBuilder.setDisplayName(\"aParty\"))\n+        .build\n+      val mockReader = mock[LedgerStateReader]\n+      when(mockReader.read(any[Seq[LedgerStateOperations.Key]]()))\n+        .thenReturn(Future.successful(Seq(Some(Envelope.enclose(expectedValue)))))\n+      val instance =\n+        new RawToDamlLedgerStateReaderAdapter(mockReader, DefaultStateKeySerializationStrategy)\n+\n+      instance.readState(Seq(aDamlStateKey())).map { actual =>\n+        verify(mockReader, times(1)).read(Seq(expectedKey))\n+        actual shouldBe Seq(Some(expectedValue))\n+      }\n+    }\n+\n+    \"throw in case of an invalid envelope returned from underlying reader\" in {\n+      val mockReader = mock[LedgerStateReader]\n+      when(mockReader.read(any[Seq[LedgerStateOperations.Key]]()))\n+        .thenReturn(Future.successful(Seq(Some(invalidEnvelope))))\n+      val instance =\n+        new RawToDamlLedgerStateReaderAdapter(mockReader, DefaultStateKeySerializationStrategy)\n+\n+      instance.readState(Seq(aDamlStateKey())).failed.map { actual =>\n+        actual.getLocalizedMessage should include(\"failed\")\n+      }\n+    }\n+\n+    \"throw in case an enveloped value other than a DamlStateValue is returned from underlying reader\" in {\n+      val notADamlStateValue = makePartySubmission(\"aParty\")\n+      val mockReader = mock[LedgerStateReader]\n+      when(mockReader.read(any[Seq[LedgerStateOperations.Key]]()))\n+        .thenReturn(Future.successful(Seq(Some(Envelope.enclose(notADamlStateValue)))))\n+      val instance =\n+        new RawToDamlLedgerStateReaderAdapter(mockReader, DefaultStateKeySerializationStrategy)\n+\n+      instance.readState(Seq(aDamlStateKey())).failed.map { actual =>\n+        actual.getLocalizedMessage should include(\"failed\")"
+  }
+]

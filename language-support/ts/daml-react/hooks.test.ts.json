@@ -1,0 +1,556 @@
+[
+  {
+    "id" : "ddc8f753-8c23-48df-b421-3454d54209b3",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "315930ef-32ca-4e55-8202-b37036155100",
+        "parentId" : null,
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "This fails, and I don't get why right now.",
+        "createdAt" : "2020-03-18T09:28:38Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c44a83ce-acde-4808-8faa-46a69fa9b311",
+        "parentId" : "315930ef-32ca-4e55-8202-b37036155100",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "this is resolved now.",
+        "createdAt" : "2020-03-18T14:14:06Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -199,4 +244,66 @@ describe('useFetchByKey', () => {\n     expect(mockFetchByKey).not.toHaveBeenCalled();\n     expect(result.current.queryResult).toEqual({contract, loading: false});\n   });\n+\n+describe('useStreamQuery', () => {\n+  test('empty stream', () => {\n+    const query1 = 'foo-query';\n+    const [stream, handle] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const {result} = renderDamlHook(() => {\n+      const [query, setQuery] = useState(query1);\n+      const queryResult = useStreamQuery(Foo, () => ({query}), [query]);\n+      return {queryResult, query, setQuery};\n+    })\n+    expect(handle.onChange).toBeDefined();\n+    expect(handle.onClose).toBeDefined();\n+    expect(handle.offChange).not.toBeDefined();\n+    expect(handle.offClose).not.toBeDefined();\n+    expect(mockStreamQuery).toHaveBeenCalledTimes(1);\n+    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query: query1});\n+    expect(result.current.queryResult.contracts).toEqual([]);\n+    expect(result.current.queryResult.loading).toBe(false);\n+    act(() => handle.onChange([]));\n+    expect(result.current.queryResult.contracts).toEqual([]);\n+    expect(result.current.queryResult.loading).toBe(false);\n+\n+    mockStreamQuery.mockClear();\n+    const [stream1, handle1] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream1);\n+    expect(mockStreamQuery).not.toHaveBeenCalled();\n+    expect(handle1.onChange).not.toBeDefined();\n+    expect(handle1.onClose).not.toBeDefined();\n+    expect(handle1.offChange).not.toBeDefined();\n+    expect(handle1.offClose).not.toBeDefined();\n+  });\n+\n+  test('new events', () => {\n+    const query1 = 'foo-query';\n+    const [stream, handle] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const {result, waitForNextUpdate} = renderDamlHook(() => {\n+      const [query, setQuery] = useState(query1);\n+      const queryResult = useStreamQuery(Foo, () => ({query}), [query]);\n+      return {queryResult, query, setQuery};\n+    })\n+    waitForNextUpdate();\n+    expect(handle.onChange).toBeDefined();"
+  },
+  {
+    "id" : "3f8c5e09-1f74-4f9e-ba0d-181738c01699",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "7aa3895d-2fd0-4d1f-aadc-371dfa4ac3a5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "For the sake of consistency:\r\n```suggestion\r\nconst mockStream = <T>(): [Stream <object, string, string, T>, EventEmitter] =>\r\n```",
+        "createdAt" : "2020-03-19T13:28:31Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -26,8 +30,37 @@ jest.mock('@daml/ledger', () => class {\n   fetchByKey(...args: unknown[]): Promise<string> {\n     return mockFetchByKey(...args);\n   }\n+\n+  streamQuery(...args: unknown[]): Stream<object, string, string, string>{\n+    return mockStreamQuery(...args);\n+  }\n+\n+  streamFetchByKey(...args: unknown[]): Stream<object, string, string, string>{\n+    return mockStreamFetchByKey(...args);\n+  }\n });\n \n+/**\n+ * Returns a mock stream object using an `EventEmitter` to implement on, off functions.\n+ */\n+const mockStream = (): [Stream <string[], string, string, string>, EventEmitter] =>"
+  },
+  {
+    "id" : "b2495f73-d278-4827-8371-ca8b4d96801c",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "4c1baf97-8586-4e71-9979-6e8377d94973",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "No need for parentheses here.\r\n```suggestion\r\n  return [stream, emitter];\r\n```",
+        "createdAt" : "2020-03-19T13:35:15Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -26,8 +30,37 @@ jest.mock('@daml/ledger', () => class {\n   fetchByKey(...args: unknown[]): Promise<string> {\n     return mockFetchByKey(...args);\n   }\n+\n+  streamQuery(...args: unknown[]): Stream<object, string, string, string>{\n+    return mockStreamQuery(...args);\n+  }\n+\n+  streamFetchByKey(...args: unknown[]): Stream<object, string, string, string>{\n+    return mockStreamFetchByKey(...args);\n+  }\n });\n \n+/**\n+ * Returns a mock stream object using an `EventEmitter` to implement on, off functions.\n+ */\n+const mockStream = (): [Stream <string[], string, string, string>, EventEmitter] =>\n+{\n+  const emitter = new EventEmitter();\n+  const stream =\n+    {\n+      on: (type: string, listener: any) => emitter.on(type, listener),\n+      off: (type: string, listener: any) => emitter.off(type, listener),\n+      close: () => {\n+        emitter.removeAllListeners();\n+        console.log('mock stream closed');\n+      }\n+\n+    };\n+  return(\n+    [ stream, emitter]\n+  );"
+  },
+  {
+    "id" : "3f12c146-de40-43f7-8761-d4caf7932d90",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "995eebb2-8afc-4985-8931-f0d4760a28dd",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "JS and TS have field punning:\r\n```suggestion\r\n    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query});\r\n```",
+        "createdAt" : "2020-03-19T13:35:58Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -200,3 +232,138 @@ describe('useFetchByKey', () => {\n     expect(result.current.queryResult).toEqual({contract, loading: false});\n   });\n });\n+\n+describe('useStreamQuery', () => {\n+  test('empty stream', () => {\n+    // setup\n+    const query = 'foo-query';\n+    const [stream, emitter] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n+    expect(mockStreamQuery).toHaveBeenCalledTimes(1);\n+    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query: query});"
+  },
+  {
+    "id" : "743fd49a-56c3-40d6-a87b-213dc2aa5087",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "f891de3f-8bc7-40f6-8cca-35c355edbf4b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Since we actually emit arrays of strings on this stream, I'd be more comfortable to type it as:\r\n```suggestion\r\n  streamQuery(...args: unknown[]): Stream<object, string, string, string[]>{\r\n```",
+        "createdAt" : "2020-03-19T13:44:04Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -26,8 +30,37 @@ jest.mock('@daml/ledger', () => class {\n   fetchByKey(...args: unknown[]): Promise<string> {\n     return mockFetchByKey(...args);\n   }\n+\n+  streamQuery(...args: unknown[]): Stream<object, string, string, string>{"
+  },
+  {
+    "id" : "510123f7-a62c-4ea0-b76f-0d0ed146a5b7",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "da5811ba-438c-4703-aff7-b5bd82ac1b07",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "With the same reasoning as above:\r\n```suggestion\r\n  streamFetchByKey(...args: unknown[]): Stream<object, string, string, string | null>{\r\n```",
+        "createdAt" : "2020-03-19T13:48:03Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -26,8 +30,37 @@ jest.mock('@daml/ledger', () => class {\n   fetchByKey(...args: unknown[]): Promise<string> {\n     return mockFetchByKey(...args);\n   }\n+\n+  streamQuery(...args: unknown[]): Stream<object, string, string, string>{\n+    return mockStreamQuery(...args);\n+  }\n+\n+  streamFetchByKey(...args: unknown[]): Stream<object, string, string, string>{"
+  },
+  {
+    "id" : "31fd0144-009e-4f87-8acc-315194ed351f",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "16ea2904-a810-41b4-b6f4-1e7689ba4879",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "There are many lines to save here and elsewhere:\r\n```suggestion\r\n    expect(hookResult.result.current).toEqual({contracts: [], loading: false});\r\n```\r\nI should have done that above as well..",
+        "createdAt" : "2020-03-19T13:49:52Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -200,3 +232,138 @@ describe('useFetchByKey', () => {\n     expect(result.current.queryResult).toEqual({contract, loading: false});\n   });\n });\n+\n+describe('useStreamQuery', () => {\n+  test('empty stream', () => {\n+    // setup\n+    const query = 'foo-query';\n+    const [stream, emitter] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n+    expect(mockStreamQuery).toHaveBeenCalledTimes(1);\n+    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query: query});\n+    expect(hookResult.result.current.contracts).toEqual([]);\n+    expect(hookResult.result.current.loading).toBe(false);"
+  },
+  {
+    "id" : "eb074cf4-8ad1-42f8-8aaf-eca5050496a2",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "12bec7f5-fb20-49cf-83e8-9061143f429a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nimport DamlLedger, { useParty, useQuery, useFetchByKey, useStreamQuery, useStreamFetchByKey } from './index';\r\n```\r\nand remove it below.\r\n\r\nWe should also rename this test to `index.text.ts` since we're testing the `./index` module here not the `./hooks` module.",
+        "createdAt" : "2020-03-19T13:53:30Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -6,14 +6,18 @@\n /* eslint-disable @typescript-eslint/no-floating-promises */\n import React, { ComponentType, useState } from 'react';\n import { renderHook, RenderHookResult, act } from '@testing-library/react-hooks';\n-import DamlLedger, { useParty, useQuery, useFetchByKey, useLedger } from './index';\n-import Ledger from '@daml/ledger';\n+import DamlLedger, { useParty, useQuery, useFetchByKey, useStreamQuery } from './index';"
+  },
+  {
+    "id" : "34b46876-97d2-4c30-8d29-9a6a15a6b9dc",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "83a0ed35-b08f-43fc-b2e0-db9d7910bf06",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "To be somewhat closer to reality and make the linter shut up (at least in my editor):\r\n```suggestion\r\n      // eslint-disable-next-line @typescript-eslint/no-explicit-any\r\n      on: (type: string, listener: (...args: any[]) => void) => emitter.on(type, listener),\r\n      // eslint-disable-next-line @typescript-eslint/no-explicit-any\r\n      off: (type: string, listener: (...args: any[]) => void) => emitter.on(type, listener),\r\n```\r\nI'm actually surprised our linting test has not complained about the `any`. Can you please find out if the linter is really running?",
+        "createdAt" : "2020-03-19T14:02:35Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -26,8 +30,37 @@ jest.mock('@daml/ledger', () => class {\n   fetchByKey(...args: unknown[]): Promise<string> {\n     return mockFetchByKey(...args);\n   }\n+\n+  streamQuery(...args: unknown[]): Stream<object, string, string, string>{\n+    return mockStreamQuery(...args);\n+  }\n+\n+  streamFetchByKey(...args: unknown[]): Stream<object, string, string, string>{\n+    return mockStreamFetchByKey(...args);\n+  }\n });\n \n+/**\n+ * Returns a mock stream object using an `EventEmitter` to implement on, off functions.\n+ */\n+const mockStream = (): [Stream <string[], string, string, string>, EventEmitter] =>\n+{\n+  const emitter = new EventEmitter();\n+  const stream =\n+    {\n+      on: (type: string, listener: any) => emitter.on(type, listener),\n+      off: (type: string, listener: any) => emitter.off(type, listener),"
+  },
+  {
+    "id" : "1cffc9dd-7aad-4063-ba7a-e9fa5ae5eb67",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "da642b79-2025-41d6-abc3-d0a28aef8bcd",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Apparently `void` is an operator. We can save lots of parentheses hence:\r\n```suggestion\r\n    act(() => void emitter.emit('change', []));\r\n```",
+        "createdAt" : "2020-03-19T14:09:11Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "534e631b-b235-4b1f-a9c8-c8b31d0cf9de",
+        "parentId" : "da642b79-2025-41d6-abc3-d0a28aef8bcd",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "changed all cases locally.",
+        "createdAt" : "2020-03-19T14:39:00Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -200,3 +232,138 @@ describe('useFetchByKey', () => {\n     expect(result.current.queryResult).toEqual({contract, loading: false});\n   });\n });\n+\n+describe('useStreamQuery', () => {\n+  test('empty stream', () => {\n+    // setup\n+    const query = 'foo-query';\n+    const [stream, emitter] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n+    expect(mockStreamQuery).toHaveBeenCalledTimes(1);\n+    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query: query});\n+    expect(hookResult.result.current.contracts).toEqual([]);\n+    expect(hookResult.result.current.loading).toBe(false);\n+\n+    // no events have been emitted.\n+    expect(hookResult.result.current.contracts).toEqual([]);\n+    expect(hookResult.result.current.loading).toBe(false);\n+\n+    // empty events\n+    act(() =>\n+      void(emitter.emit('change', []))\n+    );"
+  },
+  {
+    "id" : "b153e8b7-c0a5-4613-b22b-87c1c6bfd42e",
+    "prId" : 5059,
+    "comments" : [
+      {
+        "id" : "aaccf6a6-4e0f-4f22-8254-e59a85f61a77",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can we please always check for the `loading` indicator as well. Currently, this indicator is not super useful but this will change. And having a good test infrastructure in place for that would be helpful.",
+        "createdAt" : "2020-03-19T14:17:00Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "53b6c38f-7553-4888-bc2c-6164049787f6",
+        "parentId" : "aaccf6a6-4e0f-4f22-8254-e59a85f61a77",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "changed.",
+        "createdAt" : "2020-03-19T14:39:49Z",
+        "updatedAt" : "2020-03-19T14:50:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "972508bd05883fc0f85244a4d2cfeda2f80ae886",
+    "line" : null,
+    "diffHunk" : "@@ -200,3 +232,138 @@ describe('useFetchByKey', () => {\n     expect(result.current.queryResult).toEqual({contract, loading: false});\n   });\n });\n+\n+describe('useStreamQuery', () => {\n+  test('empty stream', () => {\n+    // setup\n+    const query = 'foo-query';\n+    const [stream, emitter] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n+    expect(mockStreamQuery).toHaveBeenCalledTimes(1);\n+    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query: query});\n+    expect(hookResult.result.current.contracts).toEqual([]);\n+    expect(hookResult.result.current.loading).toBe(false);\n+\n+    // no events have been emitted.\n+    expect(hookResult.result.current.contracts).toEqual([]);\n+    expect(hookResult.result.current.loading).toBe(false);\n+\n+    // empty events\n+    act(() =>\n+      void(emitter.emit('change', []))\n+    );\n+    expect(hookResult.result.current.contracts).toEqual([]);\n+    expect(hookResult.result.current.loading).toBe(false);\n+  });\n+\n+  test('new events', () => {\n+    // setup\n+    const query = 'foo-query';\n+    const [stream, emitter] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const hookResult = renderDamlHook(() => useStreamQuery(Foo, () => ({query}), [query]));\n+    expect(mockStreamQuery).toHaveBeenCalledTimes(1);\n+    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query: query});\n+    expect(hookResult.result.current.contracts).toEqual([]);\n+    expect(hookResult.result.current.loading).toBe(false);\n+\n+    // one new event\n+    act(() => void(emitter.emit('change', ['event1'])));\n+    expect(hookResult.result.current.contracts).toEqual(['event1']);\n+    expect(hookResult.result.current.loading).toBe(false);\n+\n+    // two new events replacing old one.\n+    act(() => void(emitter.emit('change', ['event2', 'event3'])));\n+    expect(hookResult.result.current.contracts).toEqual(['event2', 'event3']);\n+    expect(hookResult.result.current.loading).toBe(false);\n+  });\n+\n+  test('changed query triggers reload', () => {\n+    // setup\n+    const query1 = 'foo-query';\n+    const query2 = 'bar-query';\n+    const [stream, emitter] = mockStream();\n+    mockStreamQuery.mockReturnValueOnce(stream);\n+    const {result} = renderDamlHook(() => {\n+      const [query, setQuery] = useState(query1);\n+      const queryResult = useStreamQuery(Foo, () => ({query}), [query]);\n+      return {queryResult, query, setQuery};\n+    })\n+    expect(mockStreamQuery).toHaveBeenCalledTimes(1);\n+    expect(mockStreamQuery).toHaveBeenLastCalledWith(Foo, {query: query1});\n+    expect(result.current.queryResult.contracts).toEqual([]);\n+    expect(result.current.queryResult.loading).toBe(false);\n+\n+    // new events\n+    act(() => void(emitter.emit('change', ['foo'])));\n+    expect(result.current.queryResult.contracts).toEqual(['foo']);"
+  },
+  {
+    "id" : "6eccf6f8-c7ad-4b2b-b726-bbe30da1f669",
+    "prId" : 4972,
+    "comments" : [
+      {
+        "id" : "1be28161-f69a-4229-a5b1-54548ad1ffbd",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This should be imported from `./index` like the rest above.",
+        "createdAt" : "2020-03-16T11:29:16Z",
+        "updatedAt" : "2020-03-16T13:09:28Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6944a3d0-3f2a-47be-b354-71bc9afb992f",
+        "parentId" : "1be28161-f69a-4229-a5b1-54548ad1ffbd",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "changed.",
+        "createdAt" : "2020-03-16T12:10:24Z",
+        "updatedAt" : "2020-03-16T13:09:28Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69373fe4a2c42ce761b666e5f98233422141ea9f",
+    "line" : null,
+    "diffHunk" : "@@ -7,7 +7,9 @@\n import React, { ComponentType, useState } from 'react';\n import { renderHook, RenderHookResult, act } from '@testing-library/react-hooks';\n import DamlLedger, { useParty, useQuery, useFetchByKey } from './index';\n+import Ledger from '@daml/ledger';\n import { Template } from '@daml/types';\n+import {useLedger} from './hooks';"
+  },
+  {
+    "id" : "91d59372-5a02-48f6-ab27-e55bb5c6c039",
+    "prId" : 4663,
+    "comments" : [
+      {
+        "id" : "4e292daf-e125-4c78-8674-db7e502eeb01",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I realized that this is not used while adding the tests below.",
+        "createdAt" : "2020-02-24T11:04:21Z",
+        "updatedAt" : "2020-02-24T11:04:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c290da9532e049f709d64206e9a6218a0d166354",
+    "line" : 32,
+    "diffHunk" : "@@ -105,7 +110,7 @@ describe('useQuery', () => {\n     const {result, waitForNextUpdate} = renderDamlHook(() => {\n       const setState = useState('state')[1];\n       const queryResult = useQuery(Foo, () => ({query}), [query]);\n-      return {queryResult, query, setState};\n+      return {queryResult, setState};"
+  },
+  {
+    "id" : "3ef6439a-4124-43ac-95d9-a283b8aa508e",
+    "prId" : 4650,
+    "comments" : [
+      {
+        "id" : "a4045636-efe8-4fdd-a61d-414113edc99f",
+        "parentId" : null,
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "is this used anywhere?",
+        "createdAt" : "2020-02-21T13:45:02Z",
+        "updatedAt" : "2020-02-21T13:45:52Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3cdb8ac5-ed3e-42ef-a580-0f90eae74462",
+        "parentId" : "a4045636-efe8-4fdd-a61d-414113edc99f",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This registers a hook that runs before each test.",
+        "createdAt" : "2020-02-21T14:31:09Z",
+        "updatedAt" : "2020-02-21T14:31:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fcf0b254-6599-4904-9cb1-a8ca557e80b1",
+        "parentId" : "a4045636-efe8-4fdd-a61d-414113edc99f",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "understood now, this is called before each test.",
+        "createdAt" : "2020-02-21T14:31:42Z",
+        "updatedAt" : "2020-02-21T14:31:42Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a36b77245272dee150effe531ad2991067e003d9",
+    "line" : 40,
+    "diffHunk" : "@@ -1,31 +1,60 @@\n // Copyright (c) 2020 The DAML Authors. All rights reserved.\n // SPDX-License-Identifier: Apache-2.0\n import React, { ComponentType } from 'react';\n-import { renderHook } from '@testing-library/react-hooks';\n-import DamlLedger from './DamlLedger'\n-import { useQuery } from './hooks';\n+import { renderHook, RenderHookResult } from '@testing-library/react-hooks';\n+import DamlLedger, { useQuery} from './index';\n import { Template } from '@daml/types';\n+import { useParty } from './hooks';\n \n-let mockResolveQuery: (contracts: string[]) => void = () => {\n-  throw Error('using mockResolveQuery before init');\n-}\n+const mockConstructor = jest.fn();\n+const mockQuery = jest.fn();\n+const mockFunctions = [mockConstructor, mockQuery];\n \n jest.mock('@daml/ledger', () => class {\n-  query(): Promise<string[]> {\n-    return new Promise((resolve) => mockResolveQuery = resolve);\n+  constructor(...args: unknown[]) {\n+    mockConstructor(...args);\n+  }\n+  query(...args: unknown[]): Promise<string> {\n+    return mockQuery(...args);\n   }\n });\n \n+const TOKEN = 'test_token';\n+const PARTY = 'test_party';\n+\n+function renderDamlHook<P, R>(callback: (props: P) => R): RenderHookResult<P, R> {\n+  const wrapper: ComponentType = ({children}) => React.createElement(DamlLedger, {token: TOKEN, party: PARTY}, children);\n+  return renderHook(callback, {wrapper});\n+}\n+\n const Foo = undefined as unknown as Template<object>;\n \n+beforeEach(() => {"
+  }
+]

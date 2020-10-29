@@ -1,0 +1,195 @@
+[
+  {
+    "id" : "6d7aca8c-a564-4283-9130-567c99ba321b",
+    "prId" : 4100,
+    "comments" : [
+      {
+        "id" : "b858c3eb-c5b7-46ed-87e3-1f3cb6ab982a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks like you are erasing all instances. I would have expected that we keep non-orphan instances? And even for orphan instances, I would have expected that we want to keep them and only remove whatever indicates that they are orphan.",
+        "createdAt" : "2020-01-17T15:44:27Z",
+        "updatedAt" : "2020-01-17T16:24:31Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "387b875e-517f-40aa-ad6b-11ad2629974e",
+        "parentId" : "b858c3eb-c5b7-46ed-87e3-1f3cb6ab982a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "OK, I think I understand this now. The instances are attached to the datatypes in `distributeInstanceDocs`. Afterwards, this field is only used to display a module-level list of orphan instances so we don’t care about it and can just erase it.\r\n\r\nSo the previous behavior was:\r\n1. An orphan instance is attached to the datatype in `distributeInstanceDocs`.\r\n2. In addition to that the instance is listed in the list of orphan instances in the module.\r\n\r\nThe new behavior (with the flag turned on) is:\r\n\r\n1. The orphan instance is attached to the datatype.\r\n2. The list of orphan instances will be empty.\r\n\r\nMight be nice to add a comment here that explains why we can erase this field completely.",
+        "createdAt" : "2020-01-17T15:49:40Z",
+        "updatedAt" : "2020-01-17T16:24:31Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "78791fb1-a0af-43c4-814c-5d7a4d7b98ce",
+        "parentId" : "b858c3eb-c5b7-46ed-87e3-1f3cb6ab982a",
+        "author" : null,
+        "body" : "I agree that a comment here would be good :-)",
+        "createdAt" : "2020-01-17T15:54:50Z",
+        "updatedAt" : "2020-01-17T16:24:31Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9d61972b-3336-4f68-adda-8d312acf1c5c",
+        "parentId" : "b858c3eb-c5b7-46ed-87e3-1f3cb6ab982a",
+        "author" : null,
+        "body" : "I ended up rewriting the filter to only drop instances that were marked as orphans, since that makes the most sense to me after thinking about it some more. (Also I moved this filter to DA.Daml.Doc.Transform.Instances). Maybe I will revisit this later, but at least this way it's clear what \"drop orphan instances\" actually does.",
+        "createdAt" : "2020-01-17T16:23:36Z",
+        "updatedAt" : "2020-01-17T16:24:31Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "26225807-e0a9-43cb-8a75-ab07d5117fd7",
+        "parentId" : "b858c3eb-c5b7-46ed-87e3-1f3cb6ab982a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Sounds good, thank you!",
+        "createdAt" : "2020-01-17T20:08:15Z",
+        "updatedAt" : "2020-01-17T20:08:16Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3d3965e7a575619fb514fabeca470a7e31c6dfe0",
+    "line" : null,
+    "diffHunk" : "@@ -8,61 +8,17 @@ module DA.Daml.Doc.Transform\n   ) where\n \n import DA.Daml.Doc.Types\n-import DA.Daml.Doc.Annotate\n+import DA.Daml.Doc.Transform.Options\n+import DA.Daml.Doc.Transform.Annotations\n+import DA.Daml.Doc.Transform.Instances\n+import DA.Daml.Doc.Transform.DropEmpty\n \n import Data.Maybe\n-import Data.List.Extra\n-import System.FilePath (pathSeparator) -- because FilePattern uses it\n-import System.FilePattern\n-import qualified Data.Text as T\n-import qualified Data.Map as Map\n-import qualified Data.Set as Set\n-\n-data TransformOptions = TransformOptions\n-    { to_includeModules :: Maybe [String]\n-    , to_excludeModules :: Maybe [String]\n-    , to_excludeInstances :: Set.Set String\n-    , to_dataOnly :: Bool -- ^ do not generate docs for functions and classes\n-    , to_ignoreAnnotations :: Bool -- ^ ignore MOVE and HIDE annotations\n-    , to_omitEmpty :: Bool -- ^ omit all items that do not have documentation\n-    }\n-\n-defaultTransformOptions :: TransformOptions\n-defaultTransformOptions = TransformOptions\n-    { to_includeModules = Nothing\n-    , to_excludeModules = Nothing\n-    , to_excludeInstances = Set.empty\n-    , to_dataOnly = False\n-    , to_ignoreAnnotations = False\n-    , to_omitEmpty = False\n-    }\n-\n-keepModule :: TransformOptions -> ModuleDoc -> Bool\n-keepModule TransformOptions{..} m = includeModuleFilter && excludeModuleFilter\n-  where\n-    includeModuleFilter :: Bool\n-    includeModuleFilter = maybe True moduleMatchesAny to_includeModules\n-\n-    excludeModuleFilter :: Bool\n-    excludeModuleFilter = maybe True (not . moduleMatchesAny) to_excludeModules\n-\n-    moduleMatchesAny :: [String] -> Bool\n-    moduleMatchesAny ps = any (?== name) (map withSlashes ps)\n-\n-    withSlashes :: String -> String\n-    withSlashes = replace \".\" [pathSeparator]\n-\n-    name :: String\n-    name = withSlashes . T.unpack . unModulename . md_name $ m\n-\n-keepInstance :: TransformOptions -> InstanceDoc -> Bool\n-keepInstance TransformOptions{..} InstanceDoc{..} =\n-    let nameM = T.unpack . unTypename <$> getTypeAppName id_type\n-    in maybe True (`Set.notMember` to_excludeInstances) nameM\n \n applyTransform :: TransformOptions -> [ModuleDoc] -> [ModuleDoc]\n applyTransform opts@TransformOptions{..}\n-    = distributeInstanceDocs opts\n+    = (if to_dropOrphanInstances then map pruneOrphanInstances else id)"
+  },
+  {
+    "id" : "fca83fbc-607d-4c31-b397-866130370aa2",
+    "prId" : 3962,
+    "comments" : [
+      {
+        "id" : "0b9c2d1f-8761-43eb-9e3c-e20e52665790",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nkeepInstance :: TransformOptions -> InstanceDoc -> Bool\r\n```",
+        "createdAt" : "2020-01-07T13:35:56Z",
+        "updatedAt" : "2020-01-07T13:40:21Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c8bee42d-0d75-4dc9-9c86-00e3736d4232",
+        "parentId" : "0b9c2d1f-8761-43eb-9e3c-e20e52665790",
+        "author" : null,
+        "body" : "Thanks!",
+        "createdAt" : "2020-01-07T13:40:23Z",
+        "updatedAt" : "2020-01-07T13:40:24Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3d295869d04cea3878627bc3cff409ae32b2e6ae",
+    "line" : null,
+    "diffHunk" : "@@ -17,63 +18,56 @@ import qualified Data.Text as T\n import qualified Data.Map as Map\n import qualified Data.Set as Set\n \n--- | Documentation filtering options, applied in the order given here\n-data DocOption =\n-  IncludeModules [String]    -- ^ only include modules whose name matches one of the given file patterns\n-  | ExcludeModules [String]  -- ^ exclude modules whose name matches one of the given file patterns\n-  | DataOnly            -- ^ do not generate doc.s for functions and classes\n-  | IgnoreAnnotations   -- ^ move or hide items based on annotations in the source\n-  | OmitEmpty           -- ^ omit all items that do not have documentation\n-  deriving (Eq, Ord, Show, Read)\n-\n-\n-applyTransform :: [DocOption] -> [ModuleDoc] -> [ModuleDoc]\n-applyTransform opts = distributeInstanceDocs . maybeDoAnnotations opts'\n+data TransformOptions = TransformOptions\n+    { to_includeModules :: Maybe [String]\n+    , to_excludeModules :: Maybe [String]\n+    , to_excludeInstances :: Set.Set String\n+    , to_dataOnly :: Bool -- ^ do not generate docs for functions and classes\n+    , to_ignoreAnnotations :: Bool -- ^ ignore MOVE and HIDE annotations\n+    , to_omitEmpty :: Bool -- ^ omit all items that do not have documentation\n+    }\n+\n+defaultTransformOptions :: TransformOptions\n+defaultTransformOptions = TransformOptions\n+    { to_includeModules = Nothing\n+    , to_excludeModules = Nothing\n+    , to_excludeInstances = Set.empty\n+    , to_dataOnly = False\n+    , to_ignoreAnnotations = False\n+    , to_omitEmpty = False\n+    }\n+\n+filterModule :: TransformOptions -> ModuleDoc -> Bool\n+filterModule TransformOptions{..} m = includeModuleFilter && excludeModuleFilter\n   where\n-    opts' = nubOrd $ sort opts\n-\n-    -- Options are processed in order, the option list is assumed to be sorted\n-    -- (without duplicates).\n-    processWith :: [DocOption] -> [ModuleDoc] -> [ModuleDoc]\n-\n-    processWith [] ms = ms\n-\n-    -- merge adjacent file pattern lists\n-    processWith (IncludeModules rs : IncludeModules rs' : rest) ms\n-      = processWith (IncludeModules (rs <> rs') : rest) ms\n-    processWith (ExcludeModules rs : ExcludeModules rs' : rest) ms\n-      = processWith (ExcludeModules (rs <> rs') : rest) ms\n-\n-    processWith (IncludeModules rs : rest) ms\n-      = maybeDoAnnotations rest $ filter (moduleMatchesAny $ map withSlashes rs) ms\n-    processWith (ExcludeModules rs : rest) ms\n-      = maybeDoAnnotations rest $ filter (not . moduleMatchesAny (map withSlashes rs)) ms\n-\n-    processWith (DataOnly : rest) ms = maybeDoAnnotations rest $ map pruneNonData ms\n-\n-    processWith (IgnoreAnnotations : rest) ms = processWith rest ms\n-\n-    -- Empty items are (recursively) dropped after applying MOVE and HIDE.\n-    -- If we reach OmitEmpty, it must be the single last option in the sorted list.\n-    -- Guaranteed by the call with nubOrd (sort opts) above\n-    processWith [OmitEmpty] ms       = mapMaybe dropEmptyDocs ms\n-    processWith (OmitEmpty : rest) _ = error $ \"Remainder options after OmitEmpty: \"\n-                                             <> show rest\n+    includeModuleFilter :: Bool\n+    includeModuleFilter = maybe True moduleMatchesAny to_includeModules\n \n+    excludeModuleFilter :: Bool\n+    excludeModuleFilter = maybe True (not . moduleMatchesAny) to_excludeModules\n \n-    -- Apply annotations after DataOnly to save work, unless IgnoreAnnotations\n-    -- is present. Assuming sorted and deduplicated options, the\n-    -- IgnoreAnnotations option must come second-last.\n-    maybeDoAnnotations [] ms = applyAnnotations ms\n-    maybeDoAnnotations things@(opt : rest) ms =\n-      case compare opt IgnoreAnnotations of\n-        LT -> processWith things ms  -- not there yet, continue processing\n-        EQ -> processWith rest ms    -- found IgnoreAnnotations, so proceed\n-                                     -- without applying them\n-        GT -> processWith things $ applyAnnotations ms\n-          -- went past it without finding IgnoreAnnotations, so apply them\n+    moduleMatchesAny :: [String] -> Bool\n+    moduleMatchesAny ps = any (?== name) (map withSlashes ps)\n \n+    withSlashes :: String -> String\n+    withSlashes = replace \".\" [pathSeparator]\n \n+    name :: String\n+    name = withSlashes . T.unpack . unModulename . md_name $ m\n+\n+filterInstance :: TransformOptions -> InstanceDoc -> Bool"
+  },
+  {
+    "id" : "84e593b0-dcaf-4647-a2c6-3e2d5134b573",
+    "prId" : 3962,
+    "comments" : [
+      {
+        "id" : "12dc91f0-7a0d-43aa-ade2-8c5d624a12db",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    in maybe True (`Set.notMember` to_excludeInstances) nameM\r\n```",
+        "createdAt" : "2020-01-07T13:36:15Z",
+        "updatedAt" : "2020-01-07T13:40:21Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0b078892-dc23-444c-90bc-eee7f2fdd113",
+        "parentId" : "12dc91f0-7a0d-43aa-ade2-8c5d624a12db",
+        "author" : null,
+        "body" : "Thanks!",
+        "createdAt" : "2020-01-07T13:40:27Z",
+        "updatedAt" : "2020-01-07T13:40:28Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3d295869d04cea3878627bc3cff409ae32b2e6ae",
+    "line" : null,
+    "diffHunk" : "@@ -17,63 +18,56 @@ import qualified Data.Text as T\n import qualified Data.Map as Map\n import qualified Data.Set as Set\n \n--- | Documentation filtering options, applied in the order given here\n-data DocOption =\n-  IncludeModules [String]    -- ^ only include modules whose name matches one of the given file patterns\n-  | ExcludeModules [String]  -- ^ exclude modules whose name matches one of the given file patterns\n-  | DataOnly            -- ^ do not generate doc.s for functions and classes\n-  | IgnoreAnnotations   -- ^ move or hide items based on annotations in the source\n-  | OmitEmpty           -- ^ omit all items that do not have documentation\n-  deriving (Eq, Ord, Show, Read)\n-\n-\n-applyTransform :: [DocOption] -> [ModuleDoc] -> [ModuleDoc]\n-applyTransform opts = distributeInstanceDocs . maybeDoAnnotations opts'\n+data TransformOptions = TransformOptions\n+    { to_includeModules :: Maybe [String]\n+    , to_excludeModules :: Maybe [String]\n+    , to_excludeInstances :: Set.Set String\n+    , to_dataOnly :: Bool -- ^ do not generate docs for functions and classes\n+    , to_ignoreAnnotations :: Bool -- ^ ignore MOVE and HIDE annotations\n+    , to_omitEmpty :: Bool -- ^ omit all items that do not have documentation\n+    }\n+\n+defaultTransformOptions :: TransformOptions\n+defaultTransformOptions = TransformOptions\n+    { to_includeModules = Nothing\n+    , to_excludeModules = Nothing\n+    , to_excludeInstances = Set.empty\n+    , to_dataOnly = False\n+    , to_ignoreAnnotations = False\n+    , to_omitEmpty = False\n+    }\n+\n+filterModule :: TransformOptions -> ModuleDoc -> Bool\n+filterModule TransformOptions{..} m = includeModuleFilter && excludeModuleFilter\n   where\n-    opts' = nubOrd $ sort opts\n-\n-    -- Options are processed in order, the option list is assumed to be sorted\n-    -- (without duplicates).\n-    processWith :: [DocOption] -> [ModuleDoc] -> [ModuleDoc]\n-\n-    processWith [] ms = ms\n-\n-    -- merge adjacent file pattern lists\n-    processWith (IncludeModules rs : IncludeModules rs' : rest) ms\n-      = processWith (IncludeModules (rs <> rs') : rest) ms\n-    processWith (ExcludeModules rs : ExcludeModules rs' : rest) ms\n-      = processWith (ExcludeModules (rs <> rs') : rest) ms\n-\n-    processWith (IncludeModules rs : rest) ms\n-      = maybeDoAnnotations rest $ filter (moduleMatchesAny $ map withSlashes rs) ms\n-    processWith (ExcludeModules rs : rest) ms\n-      = maybeDoAnnotations rest $ filter (not . moduleMatchesAny (map withSlashes rs)) ms\n-\n-    processWith (DataOnly : rest) ms = maybeDoAnnotations rest $ map pruneNonData ms\n-\n-    processWith (IgnoreAnnotations : rest) ms = processWith rest ms\n-\n-    -- Empty items are (recursively) dropped after applying MOVE and HIDE.\n-    -- If we reach OmitEmpty, it must be the single last option in the sorted list.\n-    -- Guaranteed by the call with nubOrd (sort opts) above\n-    processWith [OmitEmpty] ms       = mapMaybe dropEmptyDocs ms\n-    processWith (OmitEmpty : rest) _ = error $ \"Remainder options after OmitEmpty: \"\n-                                             <> show rest\n+    includeModuleFilter :: Bool\n+    includeModuleFilter = maybe True moduleMatchesAny to_includeModules\n \n+    excludeModuleFilter :: Bool\n+    excludeModuleFilter = maybe True (not . moduleMatchesAny) to_excludeModules\n \n-    -- Apply annotations after DataOnly to save work, unless IgnoreAnnotations\n-    -- is present. Assuming sorted and deduplicated options, the\n-    -- IgnoreAnnotations option must come second-last.\n-    maybeDoAnnotations [] ms = applyAnnotations ms\n-    maybeDoAnnotations things@(opt : rest) ms =\n-      case compare opt IgnoreAnnotations of\n-        LT -> processWith things ms  -- not there yet, continue processing\n-        EQ -> processWith rest ms    -- found IgnoreAnnotations, so proceed\n-                                     -- without applying them\n-        GT -> processWith things $ applyAnnotations ms\n-          -- went past it without finding IgnoreAnnotations, so apply them\n+    moduleMatchesAny :: [String] -> Bool\n+    moduleMatchesAny ps = any (?== name) (map withSlashes ps)\n \n+    withSlashes :: String -> String\n+    withSlashes = replace \".\" [pathSeparator]\n \n+    name :: String\n+    name = withSlashes . T.unpack . unModulename . md_name $ m\n+\n+filterInstance :: TransformOptions -> InstanceDoc -> Bool\n+filterInstance TransformOptions{..} InstanceDoc{..} =\n+    let nameM = T.unpack . unTypename <$> getTypeAppName id_type\n+    in maybe True (not . (`Set.member` to_excludeInstances)) nameM"
+  }
+]

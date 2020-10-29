@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "d5d9d7d7-454d-42e9-9379-8899f809e70a",
+    "prId" : 5523,
+    "comments" : [
+      {
+        "id" : "c7f8bd6f-c570-4843-bff6-b07d35ff46a2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Having two consecutive separators in the middle seems interesting too.\r\n```suggestion\r\n  T.unstableSplitOn \" \" \"  foo bar baz  \" === [ \"\", \"\", \"foo\", \"bar\", \"baz\", \"\", \"\" ]\r\n  T.unstableSplitOn \" \" \"foo  bar\" === [ \"foo\", \"\", \"bar\" ]\r\n```",
+        "createdAt" : "2020-04-09T15:50:16Z",
+        "updatedAt" : "2020-04-09T15:59:07Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d70759b1684850324ad9eeed278f7edf5df039a4",
+    "line" : 50,
+    "diffHunk" : "@@ -0,0 +1,58 @@\n+-- Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.\n+-- All rights reserved.\n+\n+-- @SINCE-LF 1.dev\n+module UnstableText where\n+\n+import DA.Text as T\n+import DA.Assert\n+\n+testUnstableDrop : Scenario ()\n+testUnstableDrop = do\n+  T.unstableDrop 0 \"abc\" === \"abc\"\n+  T.unstableDrop 1 \"abc\" === \"bc\"\n+  T.unstableDrop 2 \"abc\" === \"c\"\n+  T.unstableDrop 3 \"abc\" === \"\"\n+  T.unstableDrop 4 \"abc\" === \"\"\n+\n+testUnstableTake : Scenario ()\n+testUnstableTake = do\n+  T.unstableTake 0 \"abc\" === \"\"\n+  T.unstableTake 1 \"abc\" === \"a\"\n+  T.unstableTake 2 \"abc\" === \"ab\"\n+  T.unstableTake 3 \"abc\" === \"abc\"\n+  T.unstableTake 4 \"abc\" === \"abc\"\n+\n+testBreakOn : Scenario ()\n+testBreakOn = do\n+  T.unstableBreakOn \"|\" \"|\"     === (\"\", \"|\")\n+  T.unstableBreakOn \"|\" \"|b\"    === (\"\", \"|b\")\n+  T.unstableBreakOn \"|\" \"a|\"    === (\"a\", \"|\")\n+  T.unstableBreakOn \"|\" \"a|b\"   === (\"a\", \"|b\")\n+  T.unstableBreakOn \"|\" \"a|b|c\" === (\"a\", \"|b|c\")\n+  T.unstableBreakOn \"|\" \"ab\"    === (\"ab\", \"\")\n+\n+testUnstableStripInfix : Scenario ()\n+testUnstableStripInfix = do\n+  T.unstableStripInfix \"|\" \"|\"     === Some (\"\", \"\")\n+  T.unstableStripInfix \"|\" \"|b\"    === Some (\"\", \"b\")\n+  T.unstableStripInfix \"|\" \"a|\"    === Some (\"a\", \"\")\n+  T.unstableStripInfix \"|\" \"a|b\"   === Some (\"a\", \"b\")\n+  T.unstableStripInfix \"|\" \"a|b|c\" === Some (\"a\", \"b|c\")\n+  T.unstableStripInfix \"|\" \"ab\"    === None\n+\n+testUnstableSplitOn = scenario do\n+  T.unstableSplitOn \"\" \"\"                 === [ \"\" ]\n+  T.unstableSplitOn \"\" \" \"                === [ \" \" ]\n+  T.unstableSplitOn \" \" \"\"                === [ \"\" ]\n+  T.unstableSplitOn \" \" \" \"               === [ \"\", \"\" ]\n+  T.unstableSplitOn \" \" \"foo bar baz\"     === [ \"foo\", \"bar\", \"baz\" ]\n+  T.unstableSplitOn \" \" \"  foo bar baz  \" === [ \"\", \"\", \"foo\", \"bar\", \"baz\", \"\", \"\" ]"
+  }
+]

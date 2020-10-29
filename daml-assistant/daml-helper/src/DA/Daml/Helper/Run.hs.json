@@ -1,0 +1,1266 @@
+[
+  {
+    "id" : "87935c2d-3c6d-418e-aca8-493b4dff3b4d",
+    "prId" : 5632,
+    "comments" : [
+      {
+        "id" : "80e8146d-f737-4a54-8795-c5c2ed12cf65",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "In my experience, mutually-exclusive switches either cause an error or operate on a \"last one wins\" principle. Is it worth tweaking this behavior so it follows one of these?",
+        "createdAt" : "2020-04-20T13:54:12Z",
+        "updatedAt" : "2020-04-20T14:16:28Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fdeef931-c814-4089-87f6-ec6ee55c8ad5",
+        "parentId" : "80e8146d-f737-4a54-8795-c5c2ed12cf65",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point, I copied the way sandbox handles this since it seems to make sense to be consistent here. Also I really miss optparse-applicative now :slightly_smiling_face: ",
+        "createdAt" : "2020-04-20T14:16:57Z",
+        "updatedAt" : "2020-04-20T14:16:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "91ed94de-5a3b-4a5f-8295-ae0d5d21ed54",
+        "parentId" : "80e8146d-f737-4a54-8795-c5c2ed12cf65",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I miss optparse-applicative in Scala too.",
+        "createdAt" : "2020-04-20T14:21:20Z",
+        "updatedAt" : "2020-04-20T14:21:20Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "42a4e3bcdf25023c98e4452c8dc45c3453a2d5ad",
+    "line" : 9,
+    "diffHunk" : "@@ -728,9 +728,9 @@ runStart\n                     , darPath\n                     , \"--script-name\"\n                     , initScript\n-                    , if any (`elem` [\"-w\", \"--wall-clock-time\"]) sandboxOpts\n-                        then \"--wall-clock-time\"\n-                        else \"--static-time\"\n+                    , if any (`elem` [\"-s\", \"--static-time\"]) sandboxOpts\n+                        then \"--static-time\"\n+                        else \"--wall-clock-time\""
+  },
+  {
+    "id" : "99e93eaf-91ec-496a-a7d1-b47eba3dbe15",
+    "prId" : 5394,
+    "comments" : [
+      {
+        "id" : "79a089be-11a4-43be-bb76-63b609b0ec5a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Shouldn’t this say `daml codegen js`. The executable invoked by that seems like an implementation detail.",
+        "createdAt" : "2020-04-03T06:32:18Z",
+        "updatedAt" : "2020-04-03T06:48:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c763dd33aa767a9fa2e939b30d95300335c1b08b",
+    "line" : 22,
+    "diffHunk" : "@@ -325,11 +325,11 @@ runJar jarPath mbLogbackPath remainingArgs = do\n     mbLogbackArg <- traverse getLogbackArg mbLogbackPath\n     withJar jarPath (toList mbLogbackArg) remainingArgs (const $ pure ())\n \n-runDaml2ts :: [String] -> IO ()\n-runDaml2ts remainingArgs = do\n-    daml2ts <- fmap (</> \"daml2ts\" </> \"daml2ts\") getSdkPath\n-    withProcessWait_' (proc daml2ts remainingArgs) (const $ pure ()) `catchIO`\n-      (\\e -> hPutStrLn stderr \"Failed to invoke daml2ts.\" *> throwIO e)\n+runDaml2js :: [String] -> IO ()\n+runDaml2js remainingArgs = do\n+    daml2js <- fmap (</> \"daml2js\" </> \"daml2js\") getSdkPath\n+    withProcessWait_' (proc daml2js remainingArgs) (const $ pure ()) `catchIO`\n+      (\\e -> hPutStrLn stderr \"Failed to invoke daml2js.\" *> throwIO e)"
+  },
+  {
+    "id" : "52995f74-4180-47d4-ad9b-273857c7c251",
+    "prId" : 5262,
+    "comments" : [
+      {
+        "id" : "e021c73b-703c-4285-ae66-c3fb2b78e50a",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Hmm, I assume we removed these metavariables (`__DEPENDENCIES__`, `__DATA_DEPENDENCIES__`) from the templates?",
+        "createdAt" : "2020-03-30T08:36:21Z",
+        "updatedAt" : "2020-03-30T08:36:34Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7e550650-cc4b-4d05-acf3-d6b058e16dbe",
+        "parentId" : "e021c73b-703c-4285-ae66-c3fb2b78e50a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Even better, we removed the whole templates as part of removing `damlc migrate` :slightly_smiling_face: ",
+        "createdAt" : "2020-03-30T08:39:38Z",
+        "updatedAt" : "2020-03-30T08:39:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3c9e2e324cb96cbefc995e5dcf0f38118f6b9b6a",
+    "line" : 16,
+    "diffHunk" : "@@ -646,8 +646,6 @@ runNew targetFolder templateNameM pkgDeps dataDeps = do\n         sdkVersion <- getSdkVersion\n         let config = replace \"__VERSION__\"  sdkVersion\n                    . replace \"__PROJECT_NAME__\" projectName\n-                   . replace \"__DEPENDENCIES__\" (unlines [\"  - \" <> dep | dep <- pkgDeps])\n-                   . replace \"__DATA_DEPENDENCIES__\" (unlines [\"  - \" <> dep | dep <- dataDeps])"
+  },
+  {
+    "id" : "6c252dd7-7d14-40ea-85ed-40a1db169ae7",
+    "prId" : 5259,
+    "comments" : [
+      {
+        "id" : "1a2ebeb8-9efd-4d7f-97f4-e5cdd0c3f69f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    let templateFiles = filter (\".template\" `isExtensionOf`) files\r\n```",
+        "createdAt" : "2020-03-30T06:50:54Z",
+        "updatedAt" : "2020-04-01T23:57:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3fd1e1e34624b602bb4585644d0d7669f4ddafa8",
+    "line" : null,
+    "diffHunk" : "@@ -633,20 +633,20 @@ runNew targetFolder templateNameM pkgDeps dataDeps = do\n     files <- listFilesRecursive targetFolder\n     mapM_ setWritable files\n \n-    -- Update daml.yaml\n-    let configPath = targetFolder </> projectConfigName\n-        configTemplatePath = configPath <.> \"template\"\n-\n-    whenM (doesFileExist configTemplatePath) $ do\n-        configTemplate <- readFileUTF8 configTemplatePath\n+    -- Substitute strings in template files (not a DAML template!)\n+    -- e.g. the SDK version numbers in daml.yaml and package.json\n+    let templateFiles = filter (\".template\" `isSuffixOf`) files"
+  },
+  {
+    "id" : "c5de9dc4-112e-4e28-9a78-9df750b80ceb",
+    "prId" : 5152,
+    "comments" : [
+      {
+        "id" : "1ad00c6a-d425-405d-bbbf-b31a59060ca2",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Didn't know this URL existed, that's cool.",
+        "createdAt" : "2020-03-24T17:20:14Z",
+        "updatedAt" : "2020-03-24T17:27:27Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "76ef5485-6103-42a6-adcc-f098c895eee8",
+        "parentId" : "1ad00c6a-d425-405d-bbbf-b31a59060ca2",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It exists for at least every commit, branch and tag.",
+        "createdAt" : "2020-03-24T17:29:36Z",
+        "updatedAt" : "2020-03-24T17:29:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6d59130e585d20018e3b1d91fc3e82aefaa532aa",
+    "line" : 87,
+    "diffHunk" : "@@ -645,6 +653,49 @@ runNew targetFolder templateNameM pkgDeps dataDeps = do\n         \"Created a new project in \\\"\" <> targetFolder <>\n         \"\\\" based on the template \\\"\" <> templateName <> \"\\\".\"\n \n+runCreateDamlApp :: FilePath -> IO ()\n+runCreateDamlApp targetFolder = do\n+    whenM (doesDirectoryExist targetFolder) $ do\n+        hPutStr stderr $ unlines\n+            [ \"Directory \" <> show targetFolder <> \" already exists.\"\n+            , \"Please specify a new directory or delete the directory.\"\n+            ]\n+        exitFailure\n+\n+    sdkVersion <- getSdkVersion\n+    request <- HTTP.parseRequest (\"GET \" <> url sdkVersion)\n+    HTTP.withResponse request $ \\response -> do\n+        if | HTTP.getResponseStatus response == HTTP.notFound404 -> do\n+                 -- We treat 404s specially to provide a better error message.\n+                 hPutStrLn stderr $ unlines\n+                     [ \"create-daml-app is not available for SDK version \" <> sdkVersion <> \".\"\n+                     , \"You need to use at least SDK version 1.0. If this is a new release,\"\n+                     , \"try again in a few hours.\"\n+                     ]\n+                 exitFailure\n+           | not (HTTP.statusIsSuccessful $ HTTP.getResponseStatus response) -> do\n+                 hPutStrLn stderr $ unlines\n+                     [ \"Failed to download create-daml-app from \" <> show (url sdkVersion) <> \".\"\n+                     , \"Verify that your network is working and that you can\"\n+                     , \"access https://github.com/digital-asset/create-daml-app\"\n+                     ]\n+                 hPrint stderr (HTTP.getResponseStatus response)\n+                 runConduitRes (HTTP.getResponseBody response .| sinkHandle stderr )\n+                 -- trailing newline\n+                 BSChar8.hPutStrLn stderr \"\"\n+                 exitFailure\n+           | otherwise -> do\n+                 -- Successful request so now extract it to the target folder.\n+                 let extractError msg e = liftIO $ fail $\n+                         \"Failed to extract tarball: \" <> T.unpack msg <> \": \" <> T.unpack e\n+                 runConduitRes $\n+                     HTTP.getResponseBody response\n+                     .| Zlib.ungzip\n+                     .| Tar.untar (Tar.restoreFile extractError targetFolder)\n+                 putStrLn $ \"Created a new DAML app in \" <> show targetFolder <> \".\"\n+    where\n+        url version = \"https://github.com/digital-asset/create-daml-app/archive/v\" <> version <> \".tar.gz\""
+  },
+  {
+    "id" : "f21e8238-622d-4598-b3f2-64e3143f4db6",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "4e183f97-e333-4b62-bd9f-eb796f1e95da",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t think this logic should be in `daml-helper`. `daml2ts` should call `getSdkVersion` itself. That also avoids the slightly awkward logic below where you have to check if the argument is specified.",
+        "createdAt" : "2020-03-04T07:34:37Z",
+        "updatedAt" : "2020-03-04T19:19:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b7ff2978-1f0d-4487-a348-7292d295e2f5",
+        "parentId" : "4e183f97-e333-4b62-bd9f-eb796f1e95da",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "ok. will fix that.",
+        "createdAt" : "2020-03-04T14:00:45Z",
+        "updatedAt" : "2020-03-04T19:19:03Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : null,
+    "diffHunk" : "@@ -319,9 +319,15 @@ runJar jarPath mbLogbackPath remainingArgs = do\n \n runDaml2ts :: [String] -> IO ()\n runDaml2ts remainingArgs = do\n-  daml2ts <- fmap (</> \"daml2ts\" </> \"daml2ts\") getSdkPath\n-  withProcessWait_' (proc daml2ts remainingArgs) (const $ pure ()) `catchIO`\n-    (\\e -> hPutStrLn stderr \"Failed to invoke daml2ts.\" *> throwIO e)\n+    sdkVersion <- getSdkVersion"
+  },
+  {
+    "id" : "96b7d9f4-e6e4-4d99-b3a1-f6aee0df804e",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "b51180d8-2bbb-42ae-a210-a8c508d1756b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is there a reason behind doing that?",
+        "createdAt" : "2020-03-04T19:19:51Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "68688b0a-330f-4f30-9079-bceb51976e41",
+        "parentId" : "b51180d8-2bbb-42ae-a210-a8c508d1756b",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Yes. Although I ended up not adding/modifying code here in a material way, the indentation level was found to be inconsistent with the surrounding code so I fixed it.",
+        "createdAt" : "2020-03-04T21:15:04Z",
+        "updatedAt" : "2020-03-04T21:15:05Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "10125095-d7f5-49a4-b2cd-465f2b5d3d7e",
+        "parentId" : "b51180d8-2bbb-42ae-a210-a8c508d1756b",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not a huge fan of such corrections, particularly not in unrelated PRs which are already quite big.",
+        "createdAt" : "2020-03-05T00:21:33Z",
+        "updatedAt" : "2020-03-05T00:21:33Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "842fe6d0-c152-474b-b13d-ad7ef29744a7",
+        "parentId" : "b51180d8-2bbb-42ae-a210-a8c508d1756b",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-03-05T00:32:03Z",
+        "updatedAt" : "2020-03-05T00:32:03Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 7,
+    "diffHunk" : "@@ -319,9 +319,9 @@ runJar jarPath mbLogbackPath remainingArgs = do\n \n runDaml2ts :: [String] -> IO ()\n runDaml2ts remainingArgs = do\n-  daml2ts <- fmap (</> \"daml2ts\" </> \"daml2ts\") getSdkPath\n-  withProcessWait_' (proc daml2ts remainingArgs) (const $ pure ()) `catchIO`\n-    (\\e -> hPutStrLn stderr \"Failed to invoke daml2ts.\" *> throwIO e)\n+    daml2ts <- fmap (</> \"daml2ts\" </> \"daml2ts\") getSdkPath"
+  },
+  {
+    "id" : "5a520697-d840-4863-90e3-6505fde0f290",
+    "prId" : 3607,
+    "comments" : [
+      {
+        "id" : "1763ce09-4998-431a-8145-d581b1b5f291",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  , jwtFileM :: Maybe FilePath\r\n```",
+        "createdAt" : "2019-11-25T13:23:24Z",
+        "updatedAt" : "2019-11-25T17:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ef41787eb4966f740c1592548f83beacd3dcca51",
+    "line" : null,
+    "diffHunk" : "@@ -786,21 +788,35 @@ runStart\n                 Nothing -> f sandboxPh\n                 Just jsonApiPort -> withJsonApi sandboxPort jsonApiPort args f\n \n-data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+data LedgerFlags = LedgerFlags\n+  { hostM :: Maybe String\n+  , portM :: Maybe Int\n+  , jwtFileM :: Maybe String"
+  },
+  {
+    "id" : "7cdf0f78-ca7e-40e8-a19e-c9525fa8b03b",
+    "prId" : 3607,
+    "comments" : [
+      {
+        "id" : "a9fd6883-9818-452f-a9d4-736bcfd9b288",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\ngetJwtFromFile :: Maybe FilePath -> IO (Maybe Jwt)\r\n```",
+        "createdAt" : "2019-11-25T13:23:36Z",
+        "updatedAt" : "2019-11-25T17:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ef41787eb4966f740c1592548f83beacd3dcca51",
+    "line" : null,
+    "diffHunk" : "@@ -786,21 +788,35 @@ runStart\n                 Nothing -> f sandboxPh\n                 Just jsonApiPort -> withJsonApi sandboxPort jsonApiPort args f\n \n-data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+data LedgerFlags = LedgerFlags\n+  { hostM :: Maybe String\n+  , portM :: Maybe Int\n+  , jwtFileM :: Maybe String\n+  }\n \n-getHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort\n-getHostAndPortDefaults HostAndPortFlags{hostM,portM} = do\n+getJwtFromFile :: Maybe String -> IO (Maybe Jwt)"
+  },
+  {
+    "id" : "b33c1b5f-ffd5-4039-83a0-f6f40f8df25a",
+    "prId" : 3607,
+    "comments" : [
+      {
+        "id" : "da1335f1-4f3b-49b0-bff0-f427f60dbe9c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n      jwt <-either fail pure $ Jwt.tryCreateFromString contents\r\n```",
+        "createdAt" : "2019-11-25T13:23:49Z",
+        "updatedAt" : "2019-11-25T17:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ef41787eb4966f740c1592548f83beacd3dcca51",
+    "line" : null,
+    "diffHunk" : "@@ -786,21 +788,35 @@ runStart\n                 Nothing -> f sandboxPh\n                 Just jsonApiPort -> withJsonApi sandboxPort jsonApiPort args f\n \n-data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+data LedgerFlags = LedgerFlags\n+  { hostM :: Maybe String\n+  , portM :: Maybe Int\n+  , jwtFileM :: Maybe String\n+  }\n \n-getHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort\n-getHostAndPortDefaults HostAndPortFlags{hostM,portM} = do\n+getJwtFromFile :: Maybe String -> IO (Maybe Jwt)\n+getJwtFromFile jwtFileM = do\n+  case jwtFileM of\n+    Nothing -> return Nothing\n+    Just jwtFile -> do\n+      contents <- readFileUTF8 jwtFile\n+      let jwt = either error id $ Jwt.tryCreateFromString contents"
+  },
+  {
+    "id" : "9f1a061c-d5a5-41d4-8578-77993a263adc",
+    "prId" : 2430,
+    "comments" : [
+      {
+        "id" : "db98a198-6d23-4e56-9f95-2c5829c12699",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why did you change the format here?",
+        "createdAt" : "2019-08-06T15:06:14Z",
+        "updatedAt" : "2019-08-06T15:06:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f012b746-af1e-4493-87d2-ab405b45792e",
+        "parentId" : "db98a198-6d23-4e56-9f95-2c5829c12699",
+        "author" : null,
+        "body" : "I *think* the json format doesn't work, but I could be wrong. This might have just been the case of fixing the wrong thing by accident, before fixing the right thing.\r\n\r\nBut this format definitely works.",
+        "createdAt" : "2019-08-06T15:08:41Z",
+        "updatedAt" : "2019-08-06T15:08:41Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e5d08126-465e-47a6-a901-0363f05ab5f5",
+        "parentId" : "db98a198-6d23-4e56-9f95-2c5829c12699",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It definitely used to work at some point and iirc that was a feature of the underlying configuration lib so I would be surprised if it has changed. Using a standard format such as JSON does seem nicer than using whatever weird format that scala config lib is using but given that this will go away with #2418, it’s not worth spending any effort trying to figure out what’s going wrong :slightly_smiling_face: ",
+        "createdAt" : "2019-08-06T15:10:34Z",
+        "updatedAt" : "2019-08-06T15:10:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9bb06456-09f3-47cf-bdc5-8d2b8f191b18",
+        "parentId" : "db98a198-6d23-4e56-9f95-2c5829c12699",
+        "author" : null,
+        "body" : "I agree with everything you ~say~wrote :)",
+        "createdAt" : "2019-08-06T15:13:09Z",
+        "updatedAt" : "2019-08-06T15:13:24Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "83bc4b932fa966153b0f5754a96cdc1ecb00c64f",
+    "line" : 46,
+    "diffHunk" : "@@ -795,35 +795,46 @@ runLedgerNavigator flags remainingArguments = do\n     partyDetails <- Ledger.listParties hostAndPort\n \n     withTempDir $ \\confDir -> do\n-        -- Navigator determines the file format based on the extension so we need a .json file.\n-        let navigatorConfPath = confDir </> \"navigator-config.json\"\n+        let navigatorConfPath = confDir </> \"ui-backend.conf\"\n             navigatorArgs = concat\n                 [ [\"server\"]\n-                , [\"-c\", navigatorConfPath]\n                 , [host hostAndPort, show (port hostAndPort)]\n                 , navigatorPortNavigatorArgs navigatorPort\n                 , remainingArguments\n                 ]\n+\n         writeFileUTF8 navigatorConfPath (T.unpack $ navigatorConfig partyDetails)\n-        withJar navigatorPath navigatorArgs $ \\ph -> do\n-            putStrLn \"Waiting for navigator to start: \"\n-            -- TODO We need to figure out a sane timeout for this step.\n-            waitForHttpServer (putStr \".\" *> threadDelay 500000) (navigatorURL navigatorPort)\n-            putStr . unlines $\n-                [ \"Navigator is running at \" <> navigatorURL navigatorPort\n-                , \"Use Ctrl+C to stop.\"\n-                ]\n-            exitWith =<< waitExitCode ph\n+        unsetEnv \"DAML_PROJECT\" -- necessary to prevent config contamination\n+        withCurrentDirectory confDir $ do\n+            withJar navigatorPath navigatorArgs $ \\ph -> do\n+                putStrLn \"Waiting for navigator to start: \"\n+                -- TODO We need to figure out a sane timeout for this step.\n+                waitForHttpServer (putStr \".\" *> threadDelay 500000) (navigatorURL navigatorPort)\n+                putStr . unlines $\n+                    [ \"\"\n+                    , \"Navigator is running at \" <> navigatorURL navigatorPort\n+                    , \"Use Ctrl+C to stop.\"\n+                    ]\n+                exitWith =<< waitExitCode ph\n \n   where\n     navigatorConfig :: [PartyDetails] -> T.Text\n-    navigatorConfig partyDetails =\n-        TL.toStrict . encodeToLazyText $ object\n-            [\"users\" .= object\n-                [ TL.toStrict displayName .= object [ \"party\" .= TL.toStrict (unParty party) ]\n-                | PartyDetails{..} <- partyDetails\n-                ]\n+    navigatorConfig partyDetails = T.unlines . concat $"
+  },
+  {
+    "id" : "9d2a5c2a-4bdf-4a25-be29-9009b22982d6",
+    "prId" : 2426,
+    "comments" : [
+      {
+        "id" : "8bba4f17-29dc-47cf-9606-55a3814e28ed",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "A trailing newline still is nice even when outputting JSON imho.",
+        "createdAt" : "2019-08-06T13:23:46Z",
+        "updatedAt" : "2019-08-06T14:08:16Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2bd95e37-c643-41d0-a8b5-76af0964d4db",
+        "parentId" : "8bba4f17-29dc-47cf-9606-55a3814e28ed",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        Text.Lazy.IO.putStrLn . encodeToLazyText . toJSON $\r\n```",
+        "createdAt" : "2019-08-06T13:35:08Z",
+        "updatedAt" : "2019-08-06T14:08:16Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a75e3ff3-58b9-4d82-9bfd-ffddca2e4076",
+        "parentId" : "8bba4f17-29dc-47cf-9606-55a3814e28ed",
+        "author" : null,
+        "body" : "👍  Thanks!",
+        "createdAt" : "2019-08-06T13:37:26Z",
+        "updatedAt" : "2019-08-06T14:08:16Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "895383f29356c6e19bf5f6ec71b5817ab66fb9f8",
+    "line" : null,
+    "diffHunk" : "@@ -732,13 +733,27 @@ runDeploy flags = do\n     putStrLn \"Deploy succeeded.\"\n     exitSuccess\n \n+newtype JsonFlag = JsonFlag { unJsonFlag :: Bool }\n+\n -- | Fetch list of parties from ledger.\n-runLedgerListParties :: HostAndPortFlags -> IO ()\n-runLedgerListParties flags = do\n+runLedgerListParties :: HostAndPortFlags -> JsonFlag -> IO ()\n+runLedgerListParties flags (JsonFlag json) = do\n     hp <- getHostAndPortDefaults flags\n-    putStrLn $ \"Listing parties at \" <> show hp\n+    unless json . putStrLn $ \"Listing parties at \" <> show hp\n     xs <- Ledger.listParties hp\n-    if null xs then putStrLn \"no parties are known\" else mapM_ print xs\n+    if json then do\n+        putStr . T.unpack . TL.toStrict . encodeToLazyText . toJSON $"
+  },
+  {
+    "id" : "23b7a5f3-cd39-452f-9d8e-0c046ca21c39",
+    "prId" : 2416,
+    "comments" : [
+      {
+        "id" : "83245606-baff-4f7f-8089-ad9ee42172c5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Should `runDeploy` call `runLedgerAllocateParty` and `runLedgerUploadDar`? It seems like this has a risk of the two getting slightly out of sync which could get rather confusing.",
+        "createdAt" : "2019-08-06T11:28:36Z",
+        "updatedAt" : "2019-08-06T11:29:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4d3e1caa-0a78-4f88-869e-829f445ee94f",
+        "parentId" : "83245606-baff-4f7f-8089-ad9ee42172c5",
+        "author" : null,
+        "body" : "👍 I'll save that for another PR, because the behavior is already a little bit different wrt allocate parties, and this seems like a good idea.",
+        "createdAt" : "2019-08-06T11:41:01Z",
+        "updatedAt" : "2019-08-06T11:41:11Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "172becf84237e97507ffe46f870956648ed94aa0",
+    "line" : 84,
+    "diffHunk" : "@@ -674,35 +678,24 @@ runStart sandboxPortM (StartNavigator shouldStartNavigator) (OpenBrowser shouldO\n             when shouldWaitForSignal $\n                 void $ race (waitExitCode navigatorPh) (waitExitCode sandboxPh)\n \n-    where navigatorPort = NavigatorPort 7500\n-          withNavigator' sandboxPh =\n-              if shouldStartNavigator\n-                  then withNavigator\n-                  else (\\_ _ _ f -> f sandboxPh)\n+    where\n+        navigatorPort = NavigatorPort 7500\n+        defaultSandboxPort = SandboxPort 6865\n+        withNavigator' sandboxPh =\n+            if shouldStartNavigator\n+                then withNavigator\n+                else (\\_ _ _ f -> f sandboxPh)\n \n data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n \n getHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort\n getHostAndPortDefaults HostAndPortFlags{hostM,portM} = do\n     host <- fromMaybeM getProjectLedgerHost hostM\n     port <- fromMaybeM getProjectLedgerPort portM\n-    return HostAndPort {host,port}\n-\n-runListParties :: HostAndPortFlags -> IO ()\n-runListParties flags = do\n-    hp <- getHostAndPortDefaults flags\n-    putStrLn $ \"Listing parties at \" <> show hp\n-    xs <- Ledger.listParties hp\n-    if null xs then putStrLn \"no parties are known\" else mapM_ print xs\n-    exitSuccess\n+    return HostAndPort {..}\n \n-runAllocateParty :: HostAndPortFlags -> String -> IO ()\n-runAllocateParty flags name = do\n-    hp <- getHostAndPortDefaults flags\n-    putStrLn $ \"Checking party allocation at \" <> show hp\n-    allocatePartyIfRequired hp name\n-    exitSuccess\n \n+-- | Allocate project parties and upload project DAR file to ledger.\n runDeploy :: HostAndPortFlags -> IO ()\n runDeploy flags = do\n     hp <- getHostAndPortDefaults flags"
+  },
+  {
+    "id" : "ad14ccba-ece4-410c-8432-80ef9ad5ab56",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "249d03de-6b14-4c4e-8465-39adc6672f2b",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Prefer `requiredE` which is defined above, results in better error messages.",
+        "createdAt" : "2019-08-02T16:56:44Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5ea03ba4-5232-45ac-91e7-ad5d757ec7e5",
+        "parentId" : "249d03de-6b14-4c4e-8465-39adc6672f2b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "There is something odd about using `requiredE` for non required config.",
+        "createdAt" : "2019-08-02T17:04:31Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e18e9934-51bd-419b-a9b9-a84fbc5ec3b1",
+        "parentId" : "249d03de-6b14-4c4e-8465-39adc6672f2b",
+        "author" : null,
+        "body" : "It throws an error on the error part, not the config part ... just like `defaulting`.",
+        "createdAt" : "2019-08-02T17:10:11Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "59359e19-b8fc-4ffb-b2a4-6fa233d89bcd",
+        "parentId" : "249d03de-6b14-4c4e-8465-39adc6672f2b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I was having trouble seeing what config error could occur... given that the requirement for the field is optional. But I suppose the field might exist but be of the wrong type...\r\n\r\nWhich now makes more sense of the existing code...\r\n```\r\n mbScenario :: Maybe String <-\r\n        requiredE \"Failed to parse scenario\" $\r\n        queryProjectConfig [\"scenario\"] projectConfig\r\n```\r\n\r\nok, I will change to be the same.\r\n\r\n",
+        "createdAt" : "2019-08-02T17:22:52Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b493a3b4-0374-40f8-9e9b-324c1c70b2f0",
+        "parentId" : "249d03de-6b14-4c4e-8465-39adc6672f2b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-08-02T17:32:18Z",
+        "updatedAt" : "2019-08-02T17:32:18Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : null,
+    "diffHunk" : "@@ -81,6 +84,9 @@ required msg = fromMaybeM (throwIO $ DamlHelperError msg Nothing)\n requiredE :: Exception e => T.Text -> Either e t -> IO t\n requiredE msg = fromRightM (throwIO . DamlHelperError msg . Just . T.pack . displayException)\n \n+defaulting :: a -> Either ConfigError (Maybe a) -> IO a\n+defaulting a e = fmap (fromMaybe a) $ either throwIO return e"
+  },
+  {
+    "id" : "d5318a48-2edc-4f58-a02d-e47ad6653d21",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "61c961ff-04d5-4113-bb22-ed20eb4d67f8",
+        "parentId" : null,
+        "author" : null,
+        "body" : "I think it would be better to use `queryProjectConfig [\"deploy\", \"port\"]` here, and `queryProjectConfig [\"deploy\", \"host\"]` below.\r\n\r\n",
+        "createdAt" : "2019-08-02T16:57:58Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "011cde5a-7414-4ff0-948c-e2deca644d02",
+        "parentId" : "61c961ff-04d5-4113-bb22-ed20eb4d67f8",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Ok. Do we already make use of this kind hierarchical config anywhere else?",
+        "createdAt" : "2019-08-02T17:05:56Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fc9f4a4e-8021-410b-b3d5-b775ff16569d",
+        "parentId" : "61c961ff-04d5-4113-bb22-ed20eb4d67f8",
+        "author" : null,
+        "body" : "Not yet, but it's probably a bad thing that the project config file is so unstructured at the moment. E.g. build config really ought to be separate from project metadata.\r\n\r\nHierarchy is used in the SDK config to determine commands that are available, but it doesn't use `querySdkConfig` to get the individual command data (it couldn't, since it's a list).",
+        "createdAt" : "2019-08-02T17:20:29Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2816453e-7b20-44c2-9c88-19290b7df186",
+        "parentId" : "61c961ff-04d5-4113-bb22-ed20eb4d67f8",
+        "author" : null,
+        "body" : "Here's the right way to do it: Define a `DeployConfig` data structure. Implement `FromJSON` for it. Then use `queryProjectConfig [\"deploy\"]` to get it.\r\n\r\nBut using `queryProjectConfig [\"deploy\", \"host\"]` and `queryProjectConfig [\"deploy\", \"port\"]` is cheaper (on the programmer, not on the CPU).",
+        "createdAt" : "2019-08-02T17:21:31Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "04c70a1f-f992-476a-9b43-798b4cc3aa40",
+        "parentId" : "61c961ff-04d5-4113-bb22-ed20eb4d67f8",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Again,  we can postpone this kind of restructuring to later.",
+        "createdAt" : "2019-08-05T10:05:00Z",
+        "updatedAt" : "2019-08-05T10:05:00Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : null,
+    "diffHunk" : "@@ -711,6 +753,26 @@ getProjectName = do\n     requiredE \"Project must have a name\" $\n         queryProjectConfigRequired [\"name\"] projectConfig\n \n+getProjectParties :: IO [String]\n+getProjectParties = do\n+    projectConfig <- getProjectConfig\n+    requiredE \"Project must have parties listed\" $\n+        queryProjectConfigRequired [\"parties\"] projectConfig\n+\n+-- TODO: `daml sandbox` should also consult the config for the ledger-port\n+-- Have daml-helper wrap the `sandbox` command\n+getProjectLedgerPort :: IO Int\n+getProjectLedgerPort = do\n+    projectConfig <- getProjectConfig\n+    -- TODO: remove default; insist ledger-port is in the config ?!\n+    defaulting 6865 $ queryProjectConfig [\"ledger-port\"] projectConfig"
+  },
+  {
+    "id" : "ad2f82c1-c08e-4265-ac3e-d34dd312cdad",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "27634a5f-b7f7-49da-a41f-50ef5b56ce05",
+        "parentId" : null,
+        "author" : null,
+        "body" : "In both of these cases, you only really want to get the default host and port if they weren't specified, right? I think `fromMaybeM getProjectLedgerHost hostM` and `fromMaybeM getProjectLedgerPort portM` do what we want here.",
+        "createdAt" : "2019-08-02T17:04:21Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "107f7820-c0f2-4d65-93b5-b5495f131db7",
+        "parentId" : "27634a5f-b7f7-49da-a41f-50ef5b56ce05",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok!",
+        "createdAt" : "2019-08-02T17:14:22Z",
+        "updatedAt" : "2019-08-02T17:31:48Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b681c58b-8b09-4af3-bc31-c007bcff3fc5",
+        "parentId" : "27634a5f-b7f7-49da-a41f-50ef5b56ce05",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-08-02T17:33:11Z",
+        "updatedAt" : "2019-08-02T17:33:11Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : null,
+    "diffHunk" : "@@ -672,23 +680,57 @@ runStart sandboxPort (StartNavigator shouldStartNavigator) (OpenBrowser shouldOp\n                   then withNavigator\n                   else (\\_ _ _ f -> f sandboxPh)\n \n-runDeploy :: String -> SandboxPort -> IO ()\n-runDeploy host sandboxPort = do\n+data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+\n+withHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort\n+withHostAndPortDefaults HostAndPortFlags{hostM,portM} = do\n+    defaultHost <- getProjectLedgerHost\n+    defaultPort <- getProjectLedgerPort\n+    let host = fromMaybe defaultHost hostM\n+    let port = fromMaybe defaultPort portM"
+  },
+  {
+    "id" : "41e74f4c-0a3d-457a-916f-8194fb68026e",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "f47c3d4f-4668-4cae-aa71-a7c5bd4866fd",
+        "parentId" : null,
+        "author" : null,
+        "body" : "ah, ocaml...\r\n\r\nI think the more idiomatic phrasing would be:\r\n\r\n```Haskell\r\npartyM <- Ledger.lookupParty hp name\r\nparty <- flip fromMaybeM partyM $ do\r\n    putStrLn $ \"Allocating party for '\" <> name <> \"' at \" <> show hp\r\n    Ledger.allocateParty hp name\r\n```",
+        "createdAt" : "2019-08-02T17:50:28Z",
+        "updatedAt" : "2019-08-02T17:50:41Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3c18e9fc-a3c3-4e33-8a91-6cf5960a8a8a",
+        "parentId" : "f47c3d4f-4668-4cae-aa71-a7c5bd4866fd",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I wish we had `whenNothing :: Applicative f => Maybe a -> f a -> f a`. @ndmitchell would you accept that for the `extra` package?",
+        "createdAt" : "2019-08-05T12:28:19Z",
+        "updatedAt" : "2019-08-05T12:37:51Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "da3476f0-94d2-405b-a040-9a3f2ac21206",
+        "parentId" : "f47c3d4f-4668-4cae-aa71-a7c5bd4866fd",
+        "author" : {
+          "login" : "ndmitchell",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1651197?u=2a7f401a0bc6c1e722d5fbecc923715861c4567c&v=4"
+        },
+        "body" : "concern is that I'd expect whenNothing to be when (isNothing x) ... and this doesn't have that type. flip fromMaybeM seems quite nice here, without inventing any new names. ",
+        "createdAt" : "2019-08-05T13:50:20Z",
+        "updatedAt" : "2019-08-05T13:50:20Z",
+        "lastEditedBy" : {
+          "login" : "ndmitchell",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1651197?u=2a7f401a0bc6c1e722d5fbecc923715861c4567c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5bea9cff-7fdc-4874-a834-bceb503f760d",
+        "parentId" : "f47c3d4f-4668-4cae-aa71-a7c5bd4866fd",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Happy to change to Fran's suggestion",
+        "createdAt" : "2019-08-05T14:23:53Z",
+        "updatedAt" : "2019-08-05T14:23:53Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9f5f2ff8-7876-4acb-8fb7-f4bc4d9292e3",
+        "parentId" : "f47c3d4f-4668-4cae-aa71-a7c5bd4866fd",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "depends what you idioms are :)\r\nbut I'll change it",
+        "createdAt" : "2019-08-05T14:50:35Z",
+        "updatedAt" : "2019-08-05T14:50:35Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : 126,
+    "diffHunk" : "@@ -672,23 +680,55 @@ runStart sandboxPort (StartNavigator shouldStartNavigator) (OpenBrowser shouldOp\n                   then withNavigator\n                   else (\\_ _ _ f -> f sandboxPh)\n \n-runDeploy :: String -> SandboxPort -> IO ()\n-runDeploy host sandboxPort = do\n+data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+\n+withHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort\n+withHostAndPortDefaults HostAndPortFlags{hostM,portM} = do\n+    host <- fromMaybeM getProjectLedgerHost hostM\n+    port <- fromMaybeM getProjectLedgerPort portM\n+    return HostAndPort {host,port}\n+\n+runListParties :: HostAndPortFlags -> IO ()\n+runListParties flags = do\n+    hp <- withHostAndPortDefaults flags\n+    putStrLn $ \"Listing parties at \" <> show hp\n+    xs <- Ledger.listParties hp\n+    when (null xs) $ putStrLn \"no parties are known\"\n+    mapM_ print xs\n+    exitSuccess\n+\n+runAllocateParty :: HostAndPortFlags -> String -> IO ()\n+runAllocateParty flags name = do\n+    hp <- withHostAndPortDefaults flags\n+    putStrLn $ \"Checking party allocation at \" <> show hp\n+    allocatePartyIfRequired hp name\n+    exitSuccess\n+\n+runDeploy :: HostAndPortFlags -> IO ()\n+runDeploy flags = do\n+    hp <- withHostAndPortDefaults flags\n+    putStrLn $ \"Deploying to \" <> show hp\n+    parties <- getProjectParties\n+    mapM_ (allocatePartyIfRequired hp) parties\n     darPath <- getDarPath\n     doBuild\n-    let SandboxPort port = sandboxPort\n-    putStrLn $ \"Deploying \" <> darPath <> \" to ledger on \" <> host <> \":\" <> show port\n+    putStrLn $ \"Uploading \" <> darPath <> \" to \" <> show hp\n     bytes <- BS.readFile darPath\n-    let ls = L.uploadDarFile bytes\n-    let timeout = 30 :: L.TimeoutSeconds\n-    let ledgerClientConfig = L.configOfHostAndPort (L.Host $ fromString host) (L.Port port)\n-    L.runLedgerService ls timeout ledgerClientConfig >>= \\case\n-        Right () -> do\n-            putStrLn \"Deploy succeeded.\"\n-            exitSuccess\n-        Left e -> do\n-            hPutStrLn stderr $ \"Deploy failed: \" <> e\n-            exitFailure\n+    Ledger.uploadDarFile hp bytes\n+    putStrLn \"Deploy succeeded.\"\n+    exitSuccess\n+\n+\n+allocatePartyIfRequired :: HostAndPort -> String -> IO ()\n+allocatePartyIfRequired hp name = do\n+    party <-\n+        Ledger.lookupParty hp name >>= \\case"
+  },
+  {
+    "id" : "c5d51ba4-b032-43fd-8c7b-663462fc22aa",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "233c045c-a4c6-4827-a883-3852cdd3664f",
+        "parentId" : null,
+        "author" : null,
+        "body" : "The error message seems a bit off, because it might appear if the parties are there but are ill formed, and only the left side of the Either has enough information to disambiguate the issue. I think something like `\"Failed to read list of parties from project config\"` would be better, which also lets the config error's `displayException` explain the error in more detail.",
+        "createdAt" : "2019-08-02T17:54:37Z",
+        "updatedAt" : "2019-08-02T17:56:03Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1f4e956e-3b06-4d6d-ba28-9e4ab775d88c",
+        "parentId" : "233c045c-a4c6-4827-a883-3852cdd3664f",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "This message was modelled of the exiting message in the code:\r\n```\r\ngetProjectName :: IO String\r\ngetProjectName = do\r\n    projectConfig <- getProjectConfig\r\n    requiredE \"Project must have a name\" $\r\n        queryProjectConfigRequired [\"name\"] projectConfig\r\n```",
+        "createdAt" : "2019-08-05T14:25:43Z",
+        "updatedAt" : "2019-08-05T14:25:43Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "03ca1efb-0815-49d1-bb25-7732d6ea82e0",
+        "parentId" : "233c045c-a4c6-4827-a883-3852cdd3664f",
+        "author" : null,
+        "body" : "I see. That message has the same problem. Please change it to `\"Failed to read project name from project config\"` or so.",
+        "createdAt" : "2019-08-05T14:41:47Z",
+        "updatedAt" : "2019-08-05T14:41:47Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4006b470-72a6-4b56-9e0d-2b617460c8cd",
+        "parentId" : "233c045c-a4c6-4827-a883-3852cdd3664f",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "will fix both messages in next PR",
+        "createdAt" : "2019-08-05T14:53:36Z",
+        "updatedAt" : "2019-08-05T14:53:36Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "02a4b9e9-ec93-4fa6-b544-8039997b6a42",
+        "parentId" : "233c045c-a4c6-4827-a883-3852cdd3664f",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "@associahedron We could be more DRY here. The config lookup combinators should automate these messages.",
+        "createdAt" : "2019-08-05T14:55:01Z",
+        "updatedAt" : "2019-08-05T14:55:01Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : 143,
+    "diffHunk" : "@@ -711,6 +751,28 @@ getProjectName = do\n     requiredE \"Project must have a name\" $\n         queryProjectConfigRequired [\"name\"] projectConfig\n \n+getProjectParties :: IO [String]\n+getProjectParties = do\n+    projectConfig <- getProjectConfig\n+    requiredE \"Project must have parties listed\" $"
+  },
+  {
+    "id" : "9ef1bb04-dd35-4978-87ab-5c2d0512cbab",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "d14d2d9f-6c66-4cf9-ab78-348c53ec07fa",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is there a way to do a batch allocation?",
+        "createdAt" : "2019-08-05T12:31:42Z",
+        "updatedAt" : "2019-08-05T12:37:51Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "046b2050-b2a1-4ed3-982d-ea82c5478230",
+        "parentId" : "d14d2d9f-6c66-4cf9-ab78-348c53ec07fa",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "`daml deploy` does batch allocation of everything in the `daml.yaml` config.",
+        "createdAt" : "2019-08-05T14:49:18Z",
+        "updatedAt" : "2019-08-05T14:49:19Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "991cb5a4-ed79-4a4d-b804-697de7751502",
+        "parentId" : "d14d2d9f-6c66-4cf9-ab78-348c53ec07fa",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I meant batch allocation over the Ledger API. This looks like we're checking for each individual party if it already exists and allocate it when it doesn't. That's `O(n)` API calls for allocating `n` parties. I'm wondering if there's a way to do it in `O(1)` API calls? (\"No\" is a perfectly fine answer.)",
+        "createdAt" : "2019-08-05T14:52:37Z",
+        "updatedAt" : "2019-08-05T14:52:38Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "de5d86b3-fc43-4b2d-8ac1-39df76285208",
+        "parentId" : "d14d2d9f-6c66-4cf9-ab78-348c53ec07fa",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "\"No\", the API does not support batch allocation.",
+        "createdAt" : "2019-08-05T15:20:12Z",
+        "updatedAt" : "2019-08-05T15:20:12Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "addf50ca-3a27-4a84-935c-c80da105468e",
+        "parentId" : "d14d2d9f-6c66-4cf9-ab78-348c53ec07fa",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Thanks.",
+        "createdAt" : "2019-08-05T15:21:46Z",
+        "updatedAt" : "2019-08-05T15:21:47Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : 101,
+    "diffHunk" : "@@ -672,23 +680,55 @@ runStart sandboxPort (StartNavigator shouldStartNavigator) (OpenBrowser shouldOp\n                   then withNavigator\n                   else (\\_ _ _ f -> f sandboxPh)\n \n-runDeploy :: String -> SandboxPort -> IO ()\n-runDeploy host sandboxPort = do\n+data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+\n+withHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort\n+withHostAndPortDefaults HostAndPortFlags{hostM,portM} = do\n+    host <- fromMaybeM getProjectLedgerHost hostM\n+    port <- fromMaybeM getProjectLedgerPort portM\n+    return HostAndPort {host,port}\n+\n+runListParties :: HostAndPortFlags -> IO ()\n+runListParties flags = do\n+    hp <- withHostAndPortDefaults flags\n+    putStrLn $ \"Listing parties at \" <> show hp\n+    xs <- Ledger.listParties hp\n+    when (null xs) $ putStrLn \"no parties are known\"\n+    mapM_ print xs\n+    exitSuccess\n+\n+runAllocateParty :: HostAndPortFlags -> String -> IO ()\n+runAllocateParty flags name = do\n+    hp <- withHostAndPortDefaults flags\n+    putStrLn $ \"Checking party allocation at \" <> show hp\n+    allocatePartyIfRequired hp name\n+    exitSuccess\n+\n+runDeploy :: HostAndPortFlags -> IO ()\n+runDeploy flags = do\n+    hp <- withHostAndPortDefaults flags\n+    putStrLn $ \"Deploying to \" <> show hp\n+    parties <- getProjectParties\n+    mapM_ (allocatePartyIfRequired hp) parties"
+  },
+  {
+    "id" : "77695e79-aacc-4d32-853b-23a331d0bb71",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "88e4b0a9-2692-42b1-9aa2-028d373ba6c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "To me a function called `withX` suggests that it wants a continuation as one of its arguments, most likely the last one. Renaming this to `getX` might be a good idea.",
+        "createdAt" : "2019-08-05T12:34:06Z",
+        "updatedAt" : "2019-08-05T12:37:51Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6c9c76a2-7786-4aba-b6ea-92873e05ac5a",
+        "parentId" : "88e4b0a9-2692-42b1-9aa2-028d373ba6c0",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok, will do",
+        "createdAt" : "2019-08-05T14:55:55Z",
+        "updatedAt" : "2019-08-05T14:55:55Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : 74,
+    "diffHunk" : "@@ -672,23 +680,55 @@ runStart sandboxPort (StartNavigator shouldStartNavigator) (OpenBrowser shouldOp\n                   then withNavigator\n                   else (\\_ _ _ f -> f sandboxPh)\n \n-runDeploy :: String -> SandboxPort -> IO ()\n-runDeploy host sandboxPort = do\n+data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+\n+withHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort"
+  },
+  {
+    "id" : "c8154bc6-1d21-43e1-aa72-3b1b5076486e",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "7ac646db-0da5-4998-afbc-28ea15ad4396",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I think\r\n```suggestion\r\n    if null xs then putStrLn \"no parties are known\" else mapM_ print xs\r\n```\r\nand removing the next line is clearer.",
+        "createdAt" : "2019-08-05T12:37:33Z",
+        "updatedAt" : "2019-08-05T12:37:51Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5b4872ee-d179-4197-9f3d-5ab2170c4a4e",
+        "parentId" : "7ac646db-0da5-4998-afbc-28ea15ad4396",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "man, we are getting dangerously close to the bike shed here, but I will do it...",
+        "createdAt" : "2019-08-05T14:57:06Z",
+        "updatedAt" : "2019-08-05T14:57:06Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : 85,
+    "diffHunk" : "@@ -672,23 +680,55 @@ runStart sandboxPort (StartNavigator shouldStartNavigator) (OpenBrowser shouldOp\n                   then withNavigator\n                   else (\\_ _ _ f -> f sandboxPh)\n \n-runDeploy :: String -> SandboxPort -> IO ()\n-runDeploy host sandboxPort = do\n+data HostAndPortFlags = HostAndPortFlags { hostM :: Maybe String, portM :: Maybe Int }\n+\n+withHostAndPortDefaults :: HostAndPortFlags -> IO HostAndPort\n+withHostAndPortDefaults HostAndPortFlags{hostM,portM} = do\n+    host <- fromMaybeM getProjectLedgerHost hostM\n+    port <- fromMaybeM getProjectLedgerPort portM\n+    return HostAndPort {host,port}\n+\n+runListParties :: HostAndPortFlags -> IO ()\n+runListParties flags = do\n+    hp <- withHostAndPortDefaults flags\n+    putStrLn $ \"Listing parties at \" <> show hp\n+    xs <- Ledger.listParties hp\n+    when (null xs) $ putStrLn \"no parties are known\""
+  }
+]

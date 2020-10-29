@@ -1,0 +1,117 @@
+[
+  {
+    "id" : "e50bbaaf-5d01-44ae-9fb7-2b13e665a8ca",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "e9e7d527-1eb7-4650-ade4-382d72c04150",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "We don't have Char",
+        "createdAt" : "2019-05-15T18:25:37Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4fb13faf-09ae-47a6-a5de-d2da1dae0934",
+        "parentId" : "e9e7d527-1eb7-4650-ade4-382d72c04150",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "@neil-da Shall we just drop `showList` from the class?",
+        "createdAt" : "2019-05-16T07:48:45Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -21,97 +21,55 @@ import GHC.CString (fromString)\n import GHC.Tuple ()  -- We're using tuples but they are builtin syntax.\n import GHC.Types\n \n--- | The `shows` functions return a function that prepends the\n--- output 'String' to an existing 'String'.  This allows constant-time\n+-- | `showS` is a function that prepends the\n+-- output `Text` to an existing `Text`.  This allows constant-time\n -- concatenation of results using function composition.\n type ShowS = Text -> Text\n \n--- | Conversion of values to readable 'String's.\n+-- | Use the `Show` class for values that can be converted to a\n+-- readable `Text` value.\n --\n--- Derived instances of 'Show' have the following properties, which\n--- are compatible with derived instances of 'Text.Read.Read':\n+-- Derived instances of `Show` have the following properties:\n --\n--- * The result of 'show' is a syntactically correct Haskell\n---   expression containing only constants, given the fixity\n---   declarations in force at the point where the type is declared.\n---   It contains only the constructor names defined in the data type,\n---   parentheses, and spaces.  When labelled constructor fields are\n+-- * The result of `show` is a syntactically correct expression\n+--   that only contains constants (given the fixity declarations in\n+--   force at the point where the type is declared.)\n+--   It only contains the constructor names defined in the data type,\n+--   parentheses, and spaces. When labelled constructor fields are\n --   used, braces, commas, field names, and equal signs are also used.\n --\n -- * If the constructor is defined to be an infix operator, then\n---   'showsPrec' will produce infix applications of the constructor.\n+--   `showsPrec` produces infix applications of the constructor.\n --\n--- * the representation will be enclosed in parentheses if the\n---   precedence of the top-level constructor in `x` is less than `d`\n---   (associativity is ignored).  Thus, if `d` is `0` then the result\n+-- * If the  precedence of the top-level constructor in `x` is less than `d`\n+--   (associativity is ignored), the representation will be enclosed in\n+--   parentheses. For example, if `d` is `0` then the result\n --   is never surrounded in parentheses; if `d` is `11` it is always\n --   surrounded in parentheses, unless it is an atomic expression.\n --\n--- * If the constructor is defined using record syntax, then 'show'\n+-- * If the constructor is defined using record syntax, then `show`\n --   will produce the record-syntax form, with the fields given in the\n --   same order as the original declaration.\n---\n--- For example, given the declarations\n---\n--- ```\n--- infixr 5 :^:\n--- data Tree a =  Leaf a  |  Tree a :^: Tree a\n--- ```\n---\n--- the derived instance of 'Show' is equivalent to\n---\n--- ```\n--- instance (Show a) => Show (Tree a) where\n---   showsPrec d (Leaf m) = showParen (d > app_prec) $\n---        showString \"Leaf \" . showsPrec (app_prec+1) m\n---     where app_prec = 10\n---\n---   showsPrec d (u :^: v) = showParen (d > up_prec) $\n---        showsPrec (up_prec+1) u .\n---        showString \" :^: \"      .\n---        showsPrec (up_prec+1) v\n---     where up_prec = 5\n--- ```\n---\n--- Note that right-associativity of `:^:` is ignored.  For example,\n---\n--- * `show (Leaf 1 :^: Leaf 2 :^: Leaf 3)` produces the string\n---   `\"Leaf 1 :^: (Leaf 2 :^: Leaf 3)\"`.\n \n class  Show a  where\n     {-# MINIMAL showsPrec | show #-}\n \n-    -- | Convert a value to a readable `String`.\n-    --\n-    -- `showsPrec` should satisfy the law\n-    --\n-    -- ```\n-    -- showsPrec d x r ++ s  ==  showsPrec d x (r ++ s)\n-    -- ```\n-    --\n-    -- Derived instances of 'Text.Read.Read' and 'Show' satisfy the following:\n-    --\n-    -- * `(x,\"\")` is an element of\n-    --   `(Text.Read.readsPrec d (showsPrec d x \"\"))`.\n-    --\n-    -- That is, `Text.Read.readsPrec` parses the string produced by\n-    -- `showsPrec`, and delivers the value that `showsPrec` started with.\n+    -- | Convert a value to a readable `Text` value. Unlike `show`,\n+    -- showsPrec` should satisfy the rule `showsPrec d x r ++ s  ==\n+    -- showsPrec d x (r ++ s)`\n \n     showsPrec : Int    -- ^ the operator precedence of the enclosing\n                         -- context (a number from `0` to `11`).\n                         -- Function application has precedence `10`.\n               -> a      -- ^ the value to be converted to a 'String'\n               -> ShowS\n \n-    -- | A specialised variant of 'showsPrec', using precedence context\n-    -- zero, and returning an ordinary 'String'.\n+    -- | Convert a value to a readable `Text` value.\n     show      : a   -> Text\n \n-    -- | The method 'showList' is provided to allow the programmer to\n-    -- give a specialised way of showing lists of values.\n-    -- For example, this is used by the predefined 'Show' instance of\n-    -- the 'Char' type, where values of type 'String' should be shown\n-    -- in double quotes, rather than between square brackets.\n+    -- | Allows you to show lists of values.\n+    -- For example, this is used by the `Char` type, where values of type"
+  },
+  {
+    "id" : "cd8649aa-4397-4fdf-a426-d5029603f5f7",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "175627ee-1381-45d3-9893-4aed38b56655",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This is pretty tricky to document since we can only document the _intent_ of a function of type `ShowS`. Maybe something like:\r\nA function of type `ShowS` _should_ represent some text and applying it so some argument _should_ prepend the argument to the represented text.",
+        "createdAt" : "2019-05-16T07:46:16Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -21,97 +21,55 @@ import GHC.CString (fromString)\n import GHC.Tuple ()  -- We're using tuples but they are builtin syntax.\n import GHC.Types\n \n--- | The `shows` functions return a function that prepends the\n--- output 'String' to an existing 'String'.  This allows constant-time\n+-- | `showS` is a function that prepends the\n+-- output `Text` to an existing `Text`.  This allows constant-time"
+  },
+  {
+    "id" : "deebfc83-92e5-4591-8904-ff11a47609b4",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "1d83787a-5923-44fb-a808-7868cef9572d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n              -> a      -- ^ the value to be converted to a `Text`\r\n```",
+        "createdAt" : "2019-05-16T07:47:04Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -21,97 +21,55 @@ import GHC.CString (fromString)\n import GHC.Tuple ()  -- We're using tuples but they are builtin syntax.\n import GHC.Types\n \n--- | The `shows` functions return a function that prepends the\n--- output 'String' to an existing 'String'.  This allows constant-time\n+-- | `showS` is a function that prepends the\n+-- output `Text` to an existing `Text`.  This allows constant-time\n -- concatenation of results using function composition.\n type ShowS = Text -> Text\n \n--- | Conversion of values to readable 'String's.\n+-- | Use the `Show` class for values that can be converted to a\n+-- readable `Text` value.\n --\n--- Derived instances of 'Show' have the following properties, which\n--- are compatible with derived instances of 'Text.Read.Read':\n+-- Derived instances of `Show` have the following properties:\n --\n--- * The result of 'show' is a syntactically correct Haskell\n---   expression containing only constants, given the fixity\n---   declarations in force at the point where the type is declared.\n---   It contains only the constructor names defined in the data type,\n---   parentheses, and spaces.  When labelled constructor fields are\n+-- * The result of `show` is a syntactically correct expression\n+--   that only contains constants (given the fixity declarations in\n+--   force at the point where the type is declared.)\n+--   It only contains the constructor names defined in the data type,\n+--   parentheses, and spaces. When labelled constructor fields are\n --   used, braces, commas, field names, and equal signs are also used.\n --\n -- * If the constructor is defined to be an infix operator, then\n---   'showsPrec' will produce infix applications of the constructor.\n+--   `showsPrec` produces infix applications of the constructor.\n --\n--- * the representation will be enclosed in parentheses if the\n---   precedence of the top-level constructor in `x` is less than `d`\n---   (associativity is ignored).  Thus, if `d` is `0` then the result\n+-- * If the  precedence of the top-level constructor in `x` is less than `d`\n+--   (associativity is ignored), the representation will be enclosed in\n+--   parentheses. For example, if `d` is `0` then the result\n --   is never surrounded in parentheses; if `d` is `11` it is always\n --   surrounded in parentheses, unless it is an atomic expression.\n --\n--- * If the constructor is defined using record syntax, then 'show'\n+-- * If the constructor is defined using record syntax, then `show`\n --   will produce the record-syntax form, with the fields given in the\n --   same order as the original declaration.\n---\n--- For example, given the declarations\n---\n--- ```\n--- infixr 5 :^:\n--- data Tree a =  Leaf a  |  Tree a :^: Tree a\n--- ```\n---\n--- the derived instance of 'Show' is equivalent to\n---\n--- ```\n--- instance (Show a) => Show (Tree a) where\n---   showsPrec d (Leaf m) = showParen (d > app_prec) $\n---        showString \"Leaf \" . showsPrec (app_prec+1) m\n---     where app_prec = 10\n---\n---   showsPrec d (u :^: v) = showParen (d > up_prec) $\n---        showsPrec (up_prec+1) u .\n---        showString \" :^: \"      .\n---        showsPrec (up_prec+1) v\n---     where up_prec = 5\n--- ```\n---\n--- Note that right-associativity of `:^:` is ignored.  For example,\n---\n--- * `show (Leaf 1 :^: Leaf 2 :^: Leaf 3)` produces the string\n---   `\"Leaf 1 :^: (Leaf 2 :^: Leaf 3)\"`.\n \n class  Show a  where\n     {-# MINIMAL showsPrec | show #-}\n \n-    -- | Convert a value to a readable `String`.\n-    --\n-    -- `showsPrec` should satisfy the law\n-    --\n-    -- ```\n-    -- showsPrec d x r ++ s  ==  showsPrec d x (r ++ s)\n-    -- ```\n-    --\n-    -- Derived instances of 'Text.Read.Read' and 'Show' satisfy the following:\n-    --\n-    -- * `(x,\"\")` is an element of\n-    --   `(Text.Read.readsPrec d (showsPrec d x \"\"))`.\n-    --\n-    -- That is, `Text.Read.readsPrec` parses the string produced by\n-    -- `showsPrec`, and delivers the value that `showsPrec` started with.\n+    -- | Convert a value to a readable `Text` value. Unlike `show`,\n+    -- showsPrec` should satisfy the rule `showsPrec d x r ++ s  ==\n+    -- showsPrec d x (r ++ s)`\n \n     showsPrec : Int    -- ^ the operator precedence of the enclosing\n                         -- context (a number from `0` to `11`).\n                         -- Function application has precedence `10`.\n               -> a      -- ^ the value to be converted to a 'String'"
+  }
+]

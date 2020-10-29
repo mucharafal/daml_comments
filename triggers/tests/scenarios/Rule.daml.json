@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "7f6bb308-fc07-4351-b5c1-9058b53404d7",
+    "prId" : 4233,
+    "comments" : [
+      {
+        "id" : "704c9151-b0ee-4aaa-bef3-2d59ca8b3ffc",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  let commandsInFlight = Map.empty\r\n```\r\nBetter safe than sorry. 😃 ",
+        "createdAt" : "2020-01-28T08:41:14Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3c8738cd-85cb-497f-bc4e-9a87eb0e8357",
+        "parentId" : "704c9151-b0ee-4aaa-bef3-2d59ca8b3ffc",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-01-28T09:35:45Z",
+        "updatedAt" : "2020-01-28T10:56:40Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7f33fdace1c0823e750c7ff0b6ad930c0031ffd2",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,61 @@\n+-- Copyright (c) 2020 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+module Rule where\n+\n+import DA.Action\n+import DA.Assert\n+import qualified DA.Next.Map as Map\n+import Daml.Trigger\n+\n+template T\n+  with\n+    party : Party\n+    count : Int\n+  where\n+    signatory party\n+    key (party, count) : (Party, Int)\n+    maintainer key._1\n+\n+    nonconsuming choice Poke : ()\n+      with\n+        n : Int\n+      controller party\n+        do\n+          pure ()\n+\n+trigger : Trigger Int\n+trigger = Trigger with\n+  initialize = const 0\n+  updateState = \\acs _msg count -> length (getContracts @T acs)\n+  rule = \\party acs _time _commandsInFlight count -> do\n+    when (count == 1) do\n+      -- Create two additional T.\n+      dedupCreate T with party, count\n+      dedupCreate T with party, count = succ count\n+      -- Exercise a choice\n+      let [(tId, _)] = getContracts @T acs\n+      dedupExercise tId Poke with n = 0\n+      -- Exercise a choice by key\n+      dedupExerciseByKey @T (party, 0) Poke with n = 1\n+  registeredTemplates = RegisteredTemplates [registeredTemplate @T]\n+  heartbeat = None\n+\n+test = scenario do\n+  alice <- getParty \"Alice\"\n+  tId <- submit alice do create T with party = alice, count = 1\n+  let activeContracts = toACS tId\n+      commandsInFlight = Map.empty"
+  }
+]

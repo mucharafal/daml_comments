@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "92baab2f-e5cd-4cc2-b22b-bad971893f73",
+    "prId" : 3842,
+    "comments" : [
+      {
+        "id" : "938a04a9-ce1e-42e0-a642-61be60d8252c",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "I think you can inline this.",
+        "createdAt" : "2019-12-13T13:50:28Z",
+        "updatedAt" : "2019-12-13T15:32:14Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "57f7ef88-e4a6-431e-b869-e1efcd8d1c9b",
+        "parentId" : "938a04a9-ce1e-42e0-a642-61be60d8252c",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/3842/commits/7140b764866192740def4af1edb4dbcf38d81997",
+        "createdAt" : "2019-12-13T15:32:36Z",
+        "updatedAt" : "2019-12-13T15:32:36Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d580b3d9842691d2529c00bd1be55aa2d402f2a2",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,84 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.perf\n+\n+import java.io.File\n+\n+import akka.stream.ActorMaterializer\n+import ch.qos.logback.classic.Level\n+import com.daml.ledger.participant.state.v1.TimeModel\n+import com.digitalasset.daml.lf.archive.UniversalArchiveReader\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.grpc.adapter.ExecutionSequencerFactory\n+import com.digitalasset.ledger.api.domain.LedgerId\n+import com.digitalasset.ledger.api.testing.utils.Resource\n+import com.digitalasset.platform.common.LedgerIdMode\n+import com.digitalasset.platform.sandbox.config.SandboxConfig\n+import com.digitalasset.platform.sandbox.persistence.{PostgresFixture, PostgresResource}\n+import com.digitalasset.platform.services.time.TimeProviderType\n+\n+object LedgerFactories {\n+\n+  private def getPackageIdOrThrow(file: File): Ref.PackageId =\n+    UniversalArchiveReader().readFile(file).map(_.all.head._1).get\n+\n+  private def sandboxConfig(jdbcUrl: Option[String], darFiles: List[File]) =\n+    SandboxConfig(\n+      address = None,\n+      port = 0,\n+      None,\n+      damlPackages = darFiles,\n+      timeProviderType = TimeProviderType.Static,\n+      timeModel = TimeModel.reasonableDefault,\n+      commandConfig = SandboxConfig.defaultCommandConfig,\n+      scenario = None,\n+      tlsConfig = None,\n+      ledgerIdMode =\n+        LedgerIdMode.Static(LedgerId(Ref.LedgerString.assertFromString(\"ledger-server\"))),\n+      maxInboundMessageSize = SandboxConfig.DefaultMaxInboundMessageSize,\n+      jdbcUrl = jdbcUrl,\n+      eagerPackageLoading = false,\n+      logLevel = Level.INFO,\n+      authService = None,\n+    )\n+\n+  val mem = \"InMemory\"\n+  val sql = \"Postgres\"\n+\n+  def createSandboxResource(store: String, darFiles: List[File])(\n+      implicit esf: ExecutionSequencerFactory,\n+      mat: ActorMaterializer): Resource[LedgerContext] = {\n+    val packageIds = darFiles.map(getPackageIdOrThrow)"
+  },
+  {
+    "id" : "c5fe4ccb-cf1f-4a7b-9471-73834c4aa4b1",
+    "prId" : 3842,
+    "comments" : [
+      {
+        "id" : "93b6814e-f3cc-4551-b19a-5a1037e8af00",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Name this one please?",
+        "createdAt" : "2019-12-13T13:51:24Z",
+        "updatedAt" : "2019-12-13T15:32:14Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4baf7890-3215-4de5-87c1-2e06d3b4e66b",
+        "parentId" : "93b6814e-f3cc-4551-b19a-5a1037e8af00",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/3842/commits/e6fd4cfdc9e65fa650778ae358a960ac4c9c0a7f",
+        "createdAt" : "2019-12-13T15:32:51Z",
+        "updatedAt" : "2019-12-13T15:32:52Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d580b3d9842691d2529c00bd1be55aa2d402f2a2",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,84 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.perf\n+\n+import java.io.File\n+\n+import akka.stream.ActorMaterializer\n+import ch.qos.logback.classic.Level\n+import com.daml.ledger.participant.state.v1.TimeModel\n+import com.digitalasset.daml.lf.archive.UniversalArchiveReader\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.grpc.adapter.ExecutionSequencerFactory\n+import com.digitalasset.ledger.api.domain.LedgerId\n+import com.digitalasset.ledger.api.testing.utils.Resource\n+import com.digitalasset.platform.common.LedgerIdMode\n+import com.digitalasset.platform.sandbox.config.SandboxConfig\n+import com.digitalasset.platform.sandbox.persistence.{PostgresFixture, PostgresResource}\n+import com.digitalasset.platform.services.time.TimeProviderType\n+\n+object LedgerFactories {\n+\n+  private def getPackageIdOrThrow(file: File): Ref.PackageId =\n+    UniversalArchiveReader().readFile(file).map(_.all.head._1).get\n+\n+  private def sandboxConfig(jdbcUrl: Option[String], darFiles: List[File]) =\n+    SandboxConfig(\n+      address = None,\n+      port = 0,\n+      None,"
+  }
+]

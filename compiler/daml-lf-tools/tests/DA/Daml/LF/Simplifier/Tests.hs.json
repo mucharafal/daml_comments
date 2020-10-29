@@ -1,0 +1,115 @@
+[
+  {
+    "id" : "54bda57f-e455-4d51-958b-3276e3c285ec",
+    "prId" : 6519,
+    "comments" : [
+      {
+        "id" : "a5e2b07e-7a66-428d-8ca6-2f97f9c8c578",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Aren't we rewriting that into\r\n```\r\n\\z. let x = z in \\y. y\r\n```\r\nbecause `z` is safe?",
+        "createdAt" : "2020-06-29T13:45:52Z",
+        "updatedAt" : "2020-06-29T13:48:29Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "05bee1dc-7963-4a76-bafd-6f122196dcc7",
+        "parentId" : "a5e2b07e-7a66-428d-8ca6-2f97f9c8c578",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "We are not, because `\\xy.y` is closed and is therefore lifted.\r\n\r\nIt's arguable what the right thing to do is (the eta reduced `\\z\\y.y` would be even better than `\\z. let x = z in \\y. y`), but we can achieve both of these with separate optimizations (inlining vs eta reduction).",
+        "createdAt" : "2020-06-29T13:51:20Z",
+        "updatedAt" : "2020-06-29T13:51:20Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "440feb2dd24c7f3dc86bb2c8dd4726f4c78d6f19",
+    "line" : 61,
+    "diffHunk" : "@@ -0,0 +1,118 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.LF.Simplifier.Tests\n+    ( main\n+    ) where\n+\n+import Test.Tasty\n+import Test.Tasty.HUnit\n+import qualified Data.NameMap as NM\n+import qualified Data.Text as T\n+\n+import DA.Daml.LF.Ast.Base\n+import DA.Daml.LF.Ast.Util\n+import DA.Daml.LF.Ast.Version (versionDev)\n+import DA.Daml.LF.Ast.World (initWorld)\n+import DA.Daml.LF.Simplifier (simplifyModule)\n+\n+\n+main :: IO ()\n+main = defaultMain $ testGroup \"DA.Daml.LF.Simplifier\"\n+    [ constantLiftingTests\n+    ]\n+\n+constantLiftingTests :: TestTree\n+constantLiftingTests = testGroup \"Constant Lifting\"\n+    [ mkTestCase \"empty module\" [] []\n+    , mkTestCase \"closed value\"\n+        [ dval \"foo\" TInt64 (EBuiltin (BEInt64 10)) ]\n+        [ dval \"foo\" TInt64 (EBuiltin (BEInt64 10)) ]\n+    , mkTestCase \"nested int\"\n+        [ dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64) (EBuiltin (BEInt64 10))) ]\n+        [ dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64) (EBuiltin (BEInt64 10))) ]\n+    , mkTestCase \"nested arithmetic\"\n+        [ dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64)\n+                (EBuiltin BEAddInt64\n+                    `ETmApp` EBuiltin (BEInt64 10)\n+                    `ETmApp` EBuiltin (BEInt64 10)))\n+        ]\n+        [ dval \"$sc_foo_1\" TInt64\n+            (EBuiltin BEAddInt64\n+                `ETmApp` EBuiltin (BEInt64 10)\n+                `ETmApp` EBuiltin (BEInt64 10))\n+        , dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64) (exprVal \"$sc_foo_1\"))\n+        ]\n+    , mkTestCase \"\\\\xy.y\" -- test that we aren't breaking up λxy.y into two lambdas.\n+        [ dval \"foo\" (TInt64 :-> TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64)\n+                (ETmLam (ExprVarName \"y\", TInt64)\n+                    (EVar (ExprVarName \"y\"))))\n+        ]\n+        [ dval \"foo\" (TInt64 :-> TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64)\n+                (ETmLam (ExprVarName \"y\", TInt64)\n+                    (EVar (ExprVarName \"y\"))))\n+        ]\n+    , mkTestCase \"\\\\z.(\\\\xy.y)z\" -- test that we're lifting closed lambda subexpressions"
+  },
+  {
+    "id" : "3a54c4ee-d934-426e-832c-d92f9d0ef7ae",
+    "prId" : 6519,
+    "comments" : [
+      {
+        "id" : "6d9180d8-dd85-4c6c-acd0-5fefbbf56170",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Maybe it's worth adding one more case that somehow resembles lifting a computed dictionary, like to one for `Show [Int]`.",
+        "createdAt" : "2020-06-29T13:47:58Z",
+        "updatedAt" : "2020-06-29T13:48:29Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0486b848-22c7-4eaa-9de1-f66786a2ee37",
+        "parentId" : "6d9180d8-dd85-4c6c-acd0-5fefbbf56170",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "This is a good idea!",
+        "createdAt" : "2020-06-29T13:52:41Z",
+        "updatedAt" : "2020-06-29T13:52:41Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c426abb8-74ce-43dc-85bf-29405e50fee9",
+        "parentId" : "6d9180d8-dd85-4c6c-acd0-5fefbbf56170",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "(I'm going to add this in a separate PR!)",
+        "createdAt" : "2020-06-29T16:26:02Z",
+        "updatedAt" : "2020-06-29T16:26:02Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "440feb2dd24c7f3dc86bb2c8dd4726f4c78d6f19",
+    "line" : 81,
+    "diffHunk" : "@@ -0,0 +1,118 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.LF.Simplifier.Tests\n+    ( main\n+    ) where\n+\n+import Test.Tasty\n+import Test.Tasty.HUnit\n+import qualified Data.NameMap as NM\n+import qualified Data.Text as T\n+\n+import DA.Daml.LF.Ast.Base\n+import DA.Daml.LF.Ast.Util\n+import DA.Daml.LF.Ast.Version (versionDev)\n+import DA.Daml.LF.Ast.World (initWorld)\n+import DA.Daml.LF.Simplifier (simplifyModule)\n+\n+\n+main :: IO ()\n+main = defaultMain $ testGroup \"DA.Daml.LF.Simplifier\"\n+    [ constantLiftingTests\n+    ]\n+\n+constantLiftingTests :: TestTree\n+constantLiftingTests = testGroup \"Constant Lifting\"\n+    [ mkTestCase \"empty module\" [] []\n+    , mkTestCase \"closed value\"\n+        [ dval \"foo\" TInt64 (EBuiltin (BEInt64 10)) ]\n+        [ dval \"foo\" TInt64 (EBuiltin (BEInt64 10)) ]\n+    , mkTestCase \"nested int\"\n+        [ dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64) (EBuiltin (BEInt64 10))) ]\n+        [ dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64) (EBuiltin (BEInt64 10))) ]\n+    , mkTestCase \"nested arithmetic\"\n+        [ dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64)\n+                (EBuiltin BEAddInt64\n+                    `ETmApp` EBuiltin (BEInt64 10)\n+                    `ETmApp` EBuiltin (BEInt64 10)))\n+        ]\n+        [ dval \"$sc_foo_1\" TInt64\n+            (EBuiltin BEAddInt64\n+                `ETmApp` EBuiltin (BEInt64 10)\n+                `ETmApp` EBuiltin (BEInt64 10))\n+        , dval \"foo\" (TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64) (exprVal \"$sc_foo_1\"))\n+        ]\n+    , mkTestCase \"\\\\xy.y\" -- test that we aren't breaking up λxy.y into two lambdas.\n+        [ dval \"foo\" (TInt64 :-> TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64)\n+                (ETmLam (ExprVarName \"y\", TInt64)\n+                    (EVar (ExprVarName \"y\"))))\n+        ]\n+        [ dval \"foo\" (TInt64 :-> TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64)\n+                (ETmLam (ExprVarName \"y\", TInt64)\n+                    (EVar (ExprVarName \"y\"))))\n+        ]\n+    , mkTestCase \"\\\\z.(\\\\xy.y)z\" -- test that we're lifting closed lambda subexpressions\n+        [ dval \"foo\" (TInt64 :-> TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"z\", TInt64)\n+                (ETmApp\n+                    (ETmLam (ExprVarName \"x\", TInt64)\n+                        (ETmLam (ExprVarName \"y\", TInt64)\n+                            (EVar (ExprVarName \"y\"))))\n+                    (EVar (ExprVarName \"z\"))))\n+        ]\n+        [ dval \"$sc_foo_1\" (TInt64 :-> TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"x\", TInt64)\n+                (ETmLam (ExprVarName \"y\", TInt64)\n+                    (EVar (ExprVarName \"y\"))))\n+        , dval \"foo\" (TInt64 :-> TInt64 :-> TInt64)\n+            (ETmLam (ExprVarName \"z\", TInt64)\n+                (ETmApp\n+                    (exprVal \"$sc_foo_1\")\n+                    (EVar (ExprVarName \"z\"))))\n+            -- NOTE: this is a candidate for eta reduction, may be optimized in the future\n+        ]\n+    ]"
+  }
+]

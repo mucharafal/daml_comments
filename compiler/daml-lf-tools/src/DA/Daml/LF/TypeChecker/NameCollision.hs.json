@@ -1,0 +1,683 @@
+[
+  {
+    "id" : "1949fc54-38f1-4626-acdc-b37594afe8e9",
+    "prId" : 5219,
+    "comments" : [
+      {
+        "id" : "bb5c75fa-6e1c-45a3-9363-aa1f90b88707",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What's wrong with the `newtype`? Not lazy enough?",
+        "createdAt" : "2020-03-26T17:16:40Z",
+        "updatedAt" : "2020-03-26T17:37:16Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fceb39c0-cbb8-4239-a42a-83452cbf8290",
+        "parentId" : "bb5c75fa-6e1c-45a3-9363-aa1f90b88707",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "oops, that was leftover from an experiment where I tried to add two fields to this, reverted.",
+        "createdAt" : "2020-03-26T17:38:40Z",
+        "updatedAt" : "2020-03-26T17:38:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "665f6e8821c0da979ddb3a800d0b3ccca0652576",
+    "line" : null,
+    "diffHunk" : "@@ -107,41 +128,49 @@ fullyResolve = FRName . map T.toLower . \\case\n -- | State of the name collision checker. This is a\n -- map from fully resolved names within a package to their\n -- original names. We update this map as we go along.\n-newtype NCState = NCState (M.Map FRName [Name])\n+data NCState = NCState (M.Map FRName [Name])"
+  },
+  {
+    "id" : "10c1d82c-14c3-4e62-85da-d2a2e2205b79",
+    "prId" : 5219,
+    "comments" : [
+      {
+        "id" : "1b20c8c1-e688-4573-91e9-1cd40692ba78",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "According to the code, you probably mean:\r\n```suggestion\r\n        -- If name is virtual or all badNames are virtual, we demote it to a\r\n```",
+        "createdAt" : "2020-03-26T17:17:18Z",
+        "updatedAt" : "2020-03-26T17:37:16Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "08e50e8d-09df-4bdc-a4c8-8339d047dd0b",
+        "parentId" : "1b20c8c1-e688-4573-91e9-1cd40692ba78",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "english is hard, thanks :)",
+        "createdAt" : "2020-03-26T17:38:49Z",
+        "updatedAt" : "2020-03-26T17:38:49Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "665f6e8821c0da979ddb3a800d0b3ccca0652576",
+    "line" : null,
+    "diffHunk" : "@@ -107,41 +128,49 @@ fullyResolve = FRName . map T.toLower . \\case\n -- | State of the name collision checker. This is a\n -- map from fully resolved names within a package to their\n -- original names. We update this map as we go along.\n-newtype NCState = NCState (M.Map FRName [Name])\n+data NCState = NCState (M.Map FRName [Name])\n \n -- | Initial name collision checker state.\n initialState :: NCState\n initialState = NCState M.empty\n \n -- | Monad in which to run the name collision check.\n-type NCMonad t = S.StateT NCState (Either Error) t\n+type NCMonad t = RWS () [Diagnostic] NCState t\n \n -- | Run the name collision with a blank initial state.\n-runNameCollision :: NCMonad t -> Either Error t\n-runNameCollision = flip S.evalStateT initialState\n+runNameCollision :: NCMonad t -> [Diagnostic]\n+runNameCollision m = snd (evalRWS m () initialState)\n \n -- | Try to add a name to the NCState. Returns Error only\n -- if the name results in a forbidden name collision.\n-addName :: Name -> NCState -> Either Error NCState\n-addName name (NCState nameMap) = do\n-    let frName = fullyResolve name\n-        oldNames = fromMaybe [] (M.lookup frName nameMap)\n-        badNames = filter (nameCollisionForbidden name) oldNames\n-    if null badNames then do\n+addName :: Name -> NCState -> Either Diagnostic NCState\n+addName name (NCState nameMap)\n+    | null badNames =\n         Right . NCState $ M.insert frName (name : oldNames) nameMap\n-    else do\n-        Left $ EForbiddenNameCollision\n-            (displayName name)\n-            (map displayName badNames)\n+    | otherwise =\n+        let err = EForbiddenNameCollision (displayName name) (map displayName badNames)\n+            diag = toDiagnostic DsError err\n+        -- If name is virtual are all badNames are virtual, we demote it to a"
+  },
+  {
+    "id" : "ca413aee-7554-449b-8c4b-17ac407d87de",
+    "prId" : 5219,
+    "comments" : [
+      {
+        "id" : "0715cd88-37f5-4711-a548-4da6118bb3af",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I had exactly the same chain of functions in my prototype. 😃 ",
+        "createdAt" : "2020-03-26T17:19:30Z",
+        "updatedAt" : "2020-03-26T17:37:16Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "665f6e8821c0da979ddb3a800d0b3ccca0652576",
+    "line" : 171,
+    "diffHunk" : "@@ -222,8 +257,15 @@ checkModuleDeps world mod0 = do\n checkPackage :: Package -> NCMonad ()\n checkPackage = mapM_ checkModule . packageModules\n \n-runCheckModuleDeps :: World -> Module -> Either Error ()\n+runCheckModuleDeps :: World -> Module -> [Diagnostic]\n runCheckModuleDeps w m = runNameCollision (checkModuleDeps w m)\n \n-runCheckPackage :: Package -> Either Error ()\n+runCheckPackage :: Package -> [Diagnostic]\n runCheckPackage = runNameCollision . checkPackage\n+\n+-- | Given module name A.B.C produce the virtual module names A and A.B.\n+virtualModuleNames :: Module -> [(ModuleName, ModuleName)]\n+virtualModuleNames Module{moduleName = origin@(ModuleName components)}\n+    | null components = error \"Empty module names are invalid.\"\n+    | otherwise = map (\\v -> (ModuleName v, origin))  ((tail . inits . init) components)\n+    -- init goes from A.B.C to A.B, inits gives us [[], [A], [A,B]], tail drops []"
+  },
+  {
+    "id" : "36930044-fbc3-4068-b803-d15ef351b4d3",
+    "prId" : 5219,
+    "comments" : [
+      {
+        "id" : "fd5dda90-b8a4-4fcf-8629-173647c4fb8c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I completely misunderstood this comment when first reading. I read it as: We want to enforce that `A.B` exists whenever `A.B.C` exists. I suggest we slightly reword this to something like:\r\n\r\n> This is used to check that you do not have a type `B` in a module `A` and a module `A.B.C` at the same time, even if you don't have a module `A.B`.",
+        "createdAt" : "2020-03-26T17:29:39Z",
+        "updatedAt" : "2020-03-26T17:37:16Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "697e8e3b-d469-4c16-bff9-fd4e0be998bc",
+        "parentId" : "fd5dda90-b8a4-4fcf-8629-173647c4fb8c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks, copied your wording!",
+        "createdAt" : "2020-03-26T17:39:46Z",
+        "updatedAt" : "2020-03-26T17:39:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "665f6e8821c0da979ddb3a800d0b3ccca0652576",
+    "line" : null,
+    "diffHunk" : "@@ -24,6 +25,13 @@ import Control.Monad.Except (throwError)\n -- see 'FRName'.\n data Name\n     = NModule ModuleName\n+    | NVirtualModule ModuleName ModuleName\n+    -- ^ For a module A.B.C we insert virtual module names A and A.B.\n+    -- This is an extension of the check that prevents you from having\n+    -- a type B in module A if you have a module A.B to also fail if you\n+    -- have a module A.B.C but not A.B. At the moment, we only emit a warning"
+  },
+  {
+    "id" : "18b81683-c99b-4ce7-97f6-03b4f40cd152",
+    "prId" : 3829,
+    "comments" : [
+      {
+        "id" : "a6d151fd-d5d6-4435-9aef-683ec22c443e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Please include the issue number (i.e. #3616) in the todo comments. That makes it easier to find all of them.",
+        "createdAt" : "2019-12-12T13:32:06Z",
+        "updatedAt" : "2019-12-13T11:43:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "91e36b522dfdac028317d379b5b7991fdef29483",
+    "line" : null,
+    "diffHunk" : "@@ -191,6 +188,7 @@ isAscendant (ModuleName xs) (ModuleName ys) =\n -- the module's ascendants and descendants for potential collisions.\n checkModule :: MonadGamma m => Module -> m ()\n checkModule mod0 = do\n+    -- TODO(NICK) - check for collisions with TypeSynonyms"
+  },
+  {
+    "id" : "cc4226af-f1cf-46b1-ae1c-d1199afa458b",
+    "prId" : 3827,
+    "comments" : [
+      {
+        "id" : "7856d08d-dfa7-475a-a730-6c266261d1b2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "thanks for the nice comment!",
+        "createdAt" : "2019-12-12T12:23:33Z",
+        "updatedAt" : "2019-12-12T12:27:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6475bdd2fc3262167a8b84f938509e3f5be0f358",
+    "line" : 95,
+    "diffHunk" : "@@ -156,48 +164,67 @@ checkDataType moduleName DefDataType{..} =\n         DataSynonym _ ->\n             checkName (NTypeSynonym moduleName dataTypeCon)\n \n-checkTemplate :: MonadGamma m => ModuleName -> Template -> S.StateT NCState m ()\n+checkTemplate :: ModuleName -> Template -> NCMonad ()\n checkTemplate moduleName Template{..} = do\n     forM_ tplChoices $ \\TemplateChoice{..} ->\n         checkName (NChoice moduleName tplTypeCon chcName)\n \n-checkModuleName :: MonadGamma m => Module -> S.StateT NCState m ()\n-checkModuleName m = checkName (NModule (moduleName m))\n+checkModuleName :: Module -> NCMonad ()\n+checkModuleName m =\n+    checkName (NModule (moduleName m))\n \n-checkModuleTypes :: MonadGamma m => Module -> S.StateT NCState m ()\n-checkModuleTypes m = do\n+checkModuleBody :: Module -> NCMonad ()\n+checkModuleBody m = do\n     forM_ (moduleDataTypes m) $ \\dataType ->\n-        withContext (ContextDefDataType m dataType) $\n-            checkDataType (moduleName m) dataType\n+        checkDataType (moduleName m) dataType\n     forM_ (moduleTemplates m) $ \\tpl ->\n-        withContext (ContextTemplate m tpl TPWhole) $\n-            checkTemplate (moduleName m) tpl\n+        checkTemplate (moduleName m) tpl\n \n-checkModuleFully :: MonadGamma m => Module -> S.StateT NCState m ()\n-checkModuleFully m = do\n+checkModule :: Module -> NCMonad ()\n+checkModule m = do\n     checkModuleName m\n-    checkModuleTypes m\n+    checkModuleBody m\n \n--- | Is the first module an ascendant of the second? This check\n--- is case-insensitive because name collisions are case-insensitive.\n+-- | Is one module an ascendant of another? For instance"
+  },
+  {
+    "id" : "16f43c51-dc97-4250-828e-d274abcbf572",
+    "prId" : 3770,
+    "comments" : [
+      {
+        "id" : "2378ceba-ce7e-49fa-8c28-f981f2d34697",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m a bit confused about this. Do we have some concept of hierarchical modules in DAML-LF? I thought this worked just like in Haskell where the hierarchy doesn’t really mean anything.",
+        "createdAt" : "2019-12-06T15:41:13Z",
+        "updatedAt" : "2019-12-09T15:52:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f92a0a29-0310-4487-878e-a2adb0aadff1",
+        "parentId" : "2378ceba-ce7e-49fa-8c28-f981f2d34697",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah I think I got it now, we need to check for collisions between module `A.B` and type `B` in module `A`. It would be good to add a comment on this.",
+        "createdAt" : "2019-12-06T15:55:15Z",
+        "updatedAt" : "2019-12-09T15:52:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b1382228b2d92a9bd730fb850759d8b2e4479841",
+    "line" : 65,
+    "diffHunk" : "@@ -148,21 +154,50 @@ checkDataType moduleName DefDataType{..} =\n                 checkName (NEnumCon moduleName dataTypeCon vconName)\n \n         DataSynonym _ ->\n-            checkName (NEnumType moduleName dataTypeCon)\n+            checkName (NTypeSynonym moduleName dataTypeCon)\n \n checkTemplate :: MonadGamma m => ModuleName -> Template -> S.StateT NCState m ()\n checkTemplate moduleName Template{..} = do\n     forM_ tplChoices $ \\TemplateChoice{..} ->\n         checkName (NChoice moduleName tplTypeCon chcName)\n \n+checkModuleName :: MonadGamma m => Module -> S.StateT NCState m ()\n+checkModuleName m = checkName (NModule (moduleName m))\n+\n+checkModuleTypes :: MonadGamma m => Module -> S.StateT NCState m ()\n+checkModuleTypes m = do\n+    forM_ (moduleDataTypes m) $ \\dataType ->\n+        withContext (ContextDefDataType m dataType) $\n+            checkDataType (moduleName m) dataType\n+    forM_ (moduleTemplates m) $ \\tpl ->\n+        withContext (ContextTemplate m tpl TPWhole) $\n+            checkTemplate (moduleName m) tpl\n+\n+checkModuleFully :: MonadGamma m => Module -> S.StateT NCState m ()\n+checkModuleFully m = do\n+    checkModuleName m\n+    checkModuleTypes m\n+\n+-- | Is the first module an ascendant of the second? This check\n+-- is case-insensitive because name collisions are case-insensitive.\n+isAscendant :: ModuleName -> ModuleName -> Bool"
+  },
+  {
+    "id" : "243778f4-3190-44b0-9e01-5c2ea53f7fe2",
+    "prId" : 3703,
+    "comments" : [
+      {
+        "id" : "3814062d-e649-4f8b-b81d-72a21a946388",
+        "parentId" : null,
+        "author" : null,
+        "body" : "This should be part of the name collision check, or track it with a TODO :-)\r\n\r\n```suggestion\r\n        DataSynonym _ ->\r\n            checkName (NSynonymType moduleName dataTypeCon)\r\n```\r\n\r\nand respective entries for `NSynonymType` in other functions.",
+        "createdAt" : "2019-12-03T08:14:49Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8660f7fd-b46b-474f-84da-85544dac147d",
+        "parentId" : "3814062d-e649-4f8b-b81d-72a21a946388",
+        "author" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "body" : "Ah. yes. I missed this.\r\nI mistakenly thought it was only checking for collision ins the data-constructors.\r\nBut of course it also checks `dataTypeCon`, the name of the type.",
+        "createdAt" : "2019-12-03T12:30:52Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "15464d8b-41ef-4211-a23d-6db40bffe15b",
+        "parentId" : "3814062d-e649-4f8b-b81d-72a21a946388",
+        "author" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-12-03T12:42:18Z",
+        "updatedAt" : "2019-12-03T12:42:18Z",
+        "lastEditedBy" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8e10f3d85f2547f8c6f1968d814c0ffeba77445b",
+    "line" : null,
+    "diffHunk" : "@@ -147,6 +147,8 @@ checkDataType moduleName DefDataType{..} =\n             forM_ constrs $ \\vconName -> do\n                 checkName (NEnumCon moduleName dataTypeCon vconName)\n \n+        DataSynonym _ -> return ()"
+  },
+  {
+    "id" : "147fa755-0329-4cc1-a63a-b851af8dec65",
+    "prId" : 2981,
+    "comments" : [
+      {
+        "id" : "9b54202a-f31e-4309-9561-355246f0e106",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I suspect you want a strict state here. Side note: If you use `Control.Monad.State.Strict` you also save yourself having to add the explicit dependency on `transformers`.",
+        "createdAt" : "2019-09-23T14:58:48Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cdd83861-4ecf-4049-9a89-7156df318378",
+        "parentId" : "9b54202a-f31e-4309-9561-355246f0e106",
+        "author" : null,
+        "body" : "Changed, thanks!",
+        "createdAt" : "2019-09-23T15:36:12Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "717e0bb83a08360e6aa87ffdd32e1bee88891def",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,158 @@\n+module DA.Daml.LF.TypeChecker.NameCollision\n+    ( checkModule\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.TypeChecker.Env\n+import DA.Daml.LF.TypeChecker.Error\n+import Data.Maybe\n+import Control.Monad.Extra\n+import qualified Data.Map.Strict as M\n+import qualified Data.Text as T\n+import qualified Control.Monad.Trans.State as S"
+  },
+  {
+    "id" : "257bfef7-8f39-40e0-9913-06418ec5ef60",
+    "prId" : 2981,
+    "comments" : [
+      {
+        "id" : "cd544da0-bacf-484f-8348-a2211ce5ff1d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You probably wan to force the map here. Otherwise you might end up with an unevaluated `M.insert …` Probably not a big issue since you’ll force it in the next `addName` but that kind of stuff can easily change during an refactoring and turn into a proper leak.",
+        "createdAt" : "2019-09-23T15:05:11Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cd0654da-9c07-42da-a986-2a4bbe533b36",
+        "parentId" : "cd544da0-bacf-484f-8348-a2211ce5ff1d",
+        "author" : null,
+        "body" : "Good call, thanks :)",
+        "createdAt" : "2019-09-23T15:35:43Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "717e0bb83a08360e6aa87ffdd32e1bee88891def",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,158 @@\n+module DA.Daml.LF.TypeChecker.NameCollision\n+    ( checkModule\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.TypeChecker.Env\n+import DA.Daml.LF.TypeChecker.Error\n+import Data.Maybe\n+import Control.Monad.Extra\n+import qualified Data.Map.Strict as M\n+import qualified Data.Text as T\n+import qualified Control.Monad.Trans.State as S\n+\n+-- | The various names we wish to track within a package.\n+-- This type separates all the different kinds of names\n+-- out nicely, and preserves case sensitivity, so the\n+-- names are easy to display in error messages. To get\n+-- the corresponding case insensitive fully resolved name,\n+-- see 'FRName'.\n+data Name\n+    = NModule ModuleName\n+    | NRecordType ModuleName TypeConName\n+    | NVariantType ModuleName TypeConName\n+    | NEnumType ModuleName TypeConName\n+    | NVariantCon ModuleName TypeConName VariantConName\n+    | NEnumCon ModuleName TypeConName VariantConName\n+    | NField ModuleName TypeConName FieldName\n+    | NChoice ModuleName TypeConName ChoiceName\n+\n+-- | Display a name in a super unambiguous way.\n+displayName :: Name -> T.Text\n+displayName = \\case\n+    NModule (ModuleName m) ->\n+        T.concat [\"module \", dot m]\n+    NRecordType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"record \", dot m, \":\", dot t]\n+    NVariantType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"variant \", dot m, \":\", dot t]\n+    NEnumType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"enum \", dot m, \":\", dot t]\n+    NVariantCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"variant constructor \", dot m, \":\", dot t, \".\", v]\n+    NEnumCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"enum constructor \", dot m, \":\", dot t, \".\", v]\n+    NField (ModuleName m) (TypeConName t) (FieldName f) ->\n+        T.concat [\"field \", dot m, \":\", dot t, \".\", f]\n+    NChoice (ModuleName m) (TypeConName t) (ChoiceName c) ->\n+        T.concat [\"choice \", dot m, \":\", dot t, \".\", c]\n+  where\n+    dot = T.intercalate \".\"\n+\n+-- | Asks whether a name collision is permitted. According to the\n+-- LF Spec, a name collision is only permitted when it occurs\n+-- between a record type and a variant constructor defined in\n+-- the same module.\n+nameCollisionPermitted :: Name -> Name -> Bool\n+nameCollisionPermitted a b =\n+    case (a,b) of\n+        (NRecordType m1 _, NVariantCon m2 _ _) -> m1 == m2\n+        (NVariantCon m1 _ _, NRecordType m2 _) -> m1 == m2\n+        _ -> False\n+\n+-- | Asks whether a name collision is forbidden.\n+nameCollisionForbidden :: Name -> Name -> Bool\n+nameCollisionForbidden a b = not (nameCollisionPermitted a b)\n+\n+-- | Fully resolved name within a package. We don't use\n+-- Qualified from DA.Daml.LF.Ast because that hides collisions\n+-- between module names and type names. This should only be\n+-- constructed lower case in order to have case-insensitivity.\n+--\n+-- This corresponds to the following section of the LF spec:\n+-- https://github.com/digital-asset/daml/blob/master/daml-lf/spec/daml-lf-1.rst#fully-resolved-name\n+newtype FRName = FRName [T.Text]\n+    deriving (Eq, Ord)\n+\n+-- | Turn a name into a fully resolved name.\n+fullyResolve :: Name -> FRName\n+fullyResolve = FRName . map T.toLower . \\case\n+    NModule (ModuleName m) ->\n+        m\n+    NRecordType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NVariantType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NEnumType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NVariantCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        m ++ t ++ [v]\n+    NEnumCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        m ++ t ++ [v]\n+    NField (ModuleName m) (TypeConName t) (FieldName f) ->\n+        m ++ t ++ [f]\n+    NChoice (ModuleName m) (TypeConName t) (ChoiceName c) ->\n+        m ++ t ++ [c]\n+\n+-- | State of the name collision checker. This is a\n+-- map from fully resolved names within a package to their\n+-- original names. We update this map as we go along.\n+newtype NCState = NCState (M.Map FRName [Name])\n+\n+-- | Initial name collision checker state.\n+initialState :: NCState\n+initialState = NCState M.empty\n+\n+-- | Try to add a name to the NCState. Returns Error only\n+-- if the name results in a forbidden name collision.\n+addName :: Name -> NCState -> Either Error NCState\n+addName name (NCState nameMap) = do\n+    let frName = fullyResolve name\n+        oldNames = fromMaybe [] (M.lookup frName nameMap)\n+        badNames = filter (nameCollisionForbidden name) oldNames\n+    if null badNames then do\n+        Right . NCState $ M.insert frName (oldNames ++ [name]) nameMap\n+    else do\n+        Left $ EForbiddenNameCollision\n+            (displayName name)\n+            (map displayName badNames)\n+\n+checkName :: MonadGamma m => Name -> S.StateT NCState m ()\n+checkName name = do\n+    ncState <- S.get\n+    either throwWithContext S.put (addName name ncState)"
+  },
+  {
+    "id" : "24b79424-ec68-4a68-8aaa-8e0017ee3563",
+    "prId" : 2981,
+    "comments" : [
+      {
+        "id" : "8b3136f3-ae2f-4ba0-acd3-1346f8e8e3b2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That seems like a weird rule, I would have expected the opposite if anything, i.e., collisions are only allowed if they are in different modules …",
+        "createdAt" : "2019-09-23T15:06:15Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8860c4f7-3b0e-4f9c-bea7-55687354661b",
+        "parentId" : "8b3136f3-ae2f-4ba0-acd3-1346f8e8e3b2",
+        "author" : null,
+        "body" : "I think it's got something to do with the conversion of named fields in variant types.",
+        "createdAt" : "2019-09-23T15:15:43Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6ef3e5b3-ed59-4e7a-a5bb-22fa393fcf51",
+        "parentId" : "8b3136f3-ae2f-4ba0-acd3-1346f8e8e3b2",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Let consider the following daml:\r\n```\r\nmodule Mod where\r\ndata T @a : A = {x: a, y: a} | B {x: a, y: a}\r\n```\r\n\r\nis compiled in LF\r\n```\r\nmod Mod {\r\n  \r\nrecord T.A @a = {x: a, y: a};\r\nrecord T.B @a = {x: a, y: a};\r\n\r\nvariant T @a := A (Mod:T.A a) | B (Mod:T.B b);\r\n}\r\n```\r\n \r\nIn this case you have a collision between\r\n\r\n- the record constructor `A.C` (noted `Mod:A.C` in LF and translated in java/scala as `Mod.A.C`) and \r\n- the constructor `A` of the variant `T` (noted `Mod:A:C` in LF and translated in java/scala as `Mod.A.C`).\r\n\r\nThis is OK to have such \"collision\" because the record constructor and the variant constructor will be merged back in the same object in java/scala.\r\n\r\n\r\n",
+        "createdAt" : "2019-09-23T15:32:34Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1293e18e-6327-460b-a59e-c467c200abbe",
+        "parentId" : "8b3136f3-ae2f-4ba0-acd3-1346f8e8e3b2",
+        "author" : null,
+        "body" : "Thanks for the explanation @remyhaemmerle-da! ",
+        "createdAt" : "2019-09-23T15:35:28Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "717e0bb83a08360e6aa87ffdd32e1bee88891def",
+    "line" : 57,
+    "diffHunk" : "@@ -0,0 +1,162 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.LF.TypeChecker.NameCollision\n+    ( checkModule\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.TypeChecker.Env\n+import DA.Daml.LF.TypeChecker.Error\n+import Data.Maybe\n+import Control.Monad.Extra\n+import qualified Data.Map.Strict as M\n+import qualified Data.Text as T\n+import qualified Control.Monad.Trans.State as S\n+\n+-- | The various names we wish to track within a package.\n+-- This type separates all the different kinds of names\n+-- out nicely, and preserves case sensitivity, so the\n+-- names are easy to display in error messages. To get\n+-- the corresponding case insensitive fully resolved name,\n+-- see 'FRName'.\n+data Name\n+    = NModule ModuleName\n+    | NRecordType ModuleName TypeConName\n+    | NVariantType ModuleName TypeConName\n+    | NEnumType ModuleName TypeConName\n+    | NVariantCon ModuleName TypeConName VariantConName\n+    | NEnumCon ModuleName TypeConName VariantConName\n+    | NField ModuleName TypeConName FieldName\n+    | NChoice ModuleName TypeConName ChoiceName\n+\n+-- | Display a name in a super unambiguous way.\n+displayName :: Name -> T.Text\n+displayName = \\case\n+    NModule (ModuleName m) ->\n+        T.concat [\"module \", dot m]\n+    NRecordType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"record \", dot m, \":\", dot t]\n+    NVariantType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"variant \", dot m, \":\", dot t]\n+    NEnumType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"enum \", dot m, \":\", dot t]\n+    NVariantCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"variant constructor \", dot m, \":\", dot t, \".\", v]\n+    NEnumCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"enum constructor \", dot m, \":\", dot t, \".\", v]\n+    NField (ModuleName m) (TypeConName t) (FieldName f) ->\n+        T.concat [\"field \", dot m, \":\", dot t, \".\", f]\n+    NChoice (ModuleName m) (TypeConName t) (ChoiceName c) ->\n+        T.concat [\"choice \", dot m, \":\", dot t, \".\", c]\n+  where\n+    dot = T.intercalate \".\"\n+\n+-- | Asks whether a name collision is permitted. According to the\n+-- LF Spec, a name collision is only permitted when it occurs\n+-- between a record type and a variant constructor defined in"
+  },
+  {
+    "id" : "63a7fd05-3959-4261-b9b8-da4bf141b5fd",
+    "prId" : 2981,
+    "comments" : [
+      {
+        "id" : "7be5e593-3a33-412e-b8bd-7a2bb4d03eaf",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do we care about the order here? Otherwise, prepending rather than appending would make me more comfortable even though it looks like these lists can’t get long :slightly_smiling_face: ",
+        "createdAt" : "2019-09-23T15:08:46Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ad614a09-4a7d-451e-aa45-ba46c167fde3",
+        "parentId" : "7be5e593-3a33-412e-b8bd-7a2bb4d03eaf",
+        "author" : null,
+        "body" : "Ah, yeah, it probably doesn't matter. I'm using `(:)` now :) ",
+        "createdAt" : "2019-09-23T15:36:41Z",
+        "updatedAt" : "2019-09-23T16:49:09Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "717e0bb83a08360e6aa87ffdd32e1bee88891def",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,162 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.LF.TypeChecker.NameCollision\n+    ( checkModule\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.TypeChecker.Env\n+import DA.Daml.LF.TypeChecker.Error\n+import Data.Maybe\n+import Control.Monad.Extra\n+import qualified Data.Map.Strict as M\n+import qualified Data.Text as T\n+import qualified Control.Monad.Trans.State as S\n+\n+-- | The various names we wish to track within a package.\n+-- This type separates all the different kinds of names\n+-- out nicely, and preserves case sensitivity, so the\n+-- names are easy to display in error messages. To get\n+-- the corresponding case insensitive fully resolved name,\n+-- see 'FRName'.\n+data Name\n+    = NModule ModuleName\n+    | NRecordType ModuleName TypeConName\n+    | NVariantType ModuleName TypeConName\n+    | NEnumType ModuleName TypeConName\n+    | NVariantCon ModuleName TypeConName VariantConName\n+    | NEnumCon ModuleName TypeConName VariantConName\n+    | NField ModuleName TypeConName FieldName\n+    | NChoice ModuleName TypeConName ChoiceName\n+\n+-- | Display a name in a super unambiguous way.\n+displayName :: Name -> T.Text\n+displayName = \\case\n+    NModule (ModuleName m) ->\n+        T.concat [\"module \", dot m]\n+    NRecordType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"record \", dot m, \":\", dot t]\n+    NVariantType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"variant \", dot m, \":\", dot t]\n+    NEnumType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"enum \", dot m, \":\", dot t]\n+    NVariantCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"variant constructor \", dot m, \":\", dot t, \".\", v]\n+    NEnumCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"enum constructor \", dot m, \":\", dot t, \".\", v]\n+    NField (ModuleName m) (TypeConName t) (FieldName f) ->\n+        T.concat [\"field \", dot m, \":\", dot t, \".\", f]\n+    NChoice (ModuleName m) (TypeConName t) (ChoiceName c) ->\n+        T.concat [\"choice \", dot m, \":\", dot t, \".\", c]\n+  where\n+    dot = T.intercalate \".\"\n+\n+-- | Asks whether a name collision is permitted. According to the\n+-- LF Spec, a name collision is only permitted when it occurs\n+-- between a record type and a variant constructor defined in\n+-- the same module.\n+nameCollisionPermitted :: Name -> Name -> Bool\n+nameCollisionPermitted a b =\n+    case (a,b) of\n+        (NRecordType m1 _, NVariantCon m2 _ _) -> m1 == m2\n+        (NVariantCon m1 _ _, NRecordType m2 _) -> m1 == m2\n+        _ -> False\n+\n+-- | Asks whether a name collision is forbidden.\n+nameCollisionForbidden :: Name -> Name -> Bool\n+nameCollisionForbidden a b = not (nameCollisionPermitted a b)\n+\n+-- | Fully resolved name within a package. We don't use\n+-- Qualified from DA.Daml.LF.Ast because that hides collisions\n+-- between module names and type names. This should only be\n+-- constructed lower case in order to have case-insensitivity.\n+--\n+-- This corresponds to the following section of the LF spec:\n+-- https://github.com/digital-asset/daml/blob/master/daml-lf/spec/daml-lf-1.rst#fully-resolved-name\n+newtype FRName = FRName [T.Text]\n+    deriving (Eq, Ord)\n+\n+-- | Turn a name into a fully resolved name.\n+fullyResolve :: Name -> FRName\n+fullyResolve = FRName . map T.toLower . \\case\n+    NModule (ModuleName m) ->\n+        m\n+    NRecordType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NVariantType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NEnumType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NVariantCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        m ++ t ++ [v]\n+    NEnumCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        m ++ t ++ [v]\n+    NField (ModuleName m) (TypeConName t) (FieldName f) ->\n+        m ++ t ++ [f]\n+    NChoice (ModuleName m) (TypeConName t) (ChoiceName c) ->\n+        m ++ t ++ [c]\n+\n+-- | State of the name collision checker. This is a\n+-- map from fully resolved names within a package to their\n+-- original names. We update this map as we go along.\n+newtype NCState = NCState (M.Map FRName [Name])\n+\n+-- | Initial name collision checker state.\n+initialState :: NCState\n+initialState = NCState M.empty\n+\n+-- | Try to add a name to the NCState. Returns Error only\n+-- if the name results in a forbidden name collision.\n+addName :: Name -> NCState -> Either Error NCState\n+addName name (NCState nameMap) = do\n+    let frName = fullyResolve name\n+        oldNames = fromMaybe [] (M.lookup frName nameMap)\n+        badNames = filter (nameCollisionForbidden name) oldNames\n+    if null badNames then do\n+        Right . NCState $ M.insert frName (oldNames ++ [name]) nameMap"
+  },
+  {
+    "id" : "cb788916-147f-49f9-83e0-c0c9f4b65f08",
+    "prId" : 2981,
+    "comments" : [
+      {
+        "id" : "bd892b6a-5992-4d37-b4fb-9ea70da92e23",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Could we remove the `ModuleName` from each constructor and use `Qualified Name` instead?",
+        "createdAt" : "2019-09-23T16:57:15Z",
+        "updatedAt" : "2019-09-23T17:04:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "86a66cd2-9a1e-4b47-808b-e55dab33c21e",
+        "parentId" : "bd892b6a-5992-4d37-b4fb-9ea70da92e23",
+        "author" : null,
+        "body" : "We don't care about carrying around the package name though. Maybe I will change it later if it turns out to be useful?",
+        "createdAt" : "2019-09-23T17:17:23Z",
+        "updatedAt" : "2019-09-23T17:17:23Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "717e0bb83a08360e6aa87ffdd32e1bee88891def",
+    "line" : 23,
+    "diffHunk" : "@@ -0,0 +1,165 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.LF.TypeChecker.NameCollision\n+    ( checkModule\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.TypeChecker.Env\n+import DA.Daml.LF.TypeChecker.Error\n+import Data.Maybe\n+import Control.Monad.Extra\n+import qualified Data.Map.Strict as M\n+import qualified Data.Text as T\n+import qualified Control.Monad.State.Strict as S\n+\n+-- | The various names we wish to track within a package.\n+-- This type separates all the different kinds of names\n+-- out nicely, and preserves case sensitivity, so the\n+-- names are easy to display in error messages. To get\n+-- the corresponding case insensitive fully resolved name,\n+-- see 'FRName'.\n+data Name"
+  },
+  {
+    "id" : "2cc05846-ec99-4293-83be-8e2c9d074dd5",
+    "prId" : 2981,
+    "comments" : [
+      {
+        "id" : "4ce2548b-b68b-4370-a2f0-ba30bfcc57ab",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Does this detect collisions when the modules don't depend on each other? Please convince me it does by adding a test. :smiley: ",
+        "createdAt" : "2019-09-23T17:02:14Z",
+        "updatedAt" : "2019-09-23T17:04:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "70949413-2e0b-4bcc-b24b-f32816fcbed1",
+        "parentId" : "4ce2548b-b68b-4370-a2f0-ba30bfcc57ab",
+        "author" : null,
+        "body" : "I think for that we need to check the full package, not just a module? This PR only deals with a single module check.",
+        "createdAt" : "2019-09-23T17:10:22Z",
+        "updatedAt" : "2019-09-23T17:10:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "717e0bb83a08360e6aa87ffdd32e1bee88891def",
+    "line" : 156,
+    "diffHunk" : "@@ -0,0 +1,165 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.LF.TypeChecker.NameCollision\n+    ( checkModule\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.TypeChecker.Env\n+import DA.Daml.LF.TypeChecker.Error\n+import Data.Maybe\n+import Control.Monad.Extra\n+import qualified Data.Map.Strict as M\n+import qualified Data.Text as T\n+import qualified Control.Monad.State.Strict as S\n+\n+-- | The various names we wish to track within a package.\n+-- This type separates all the different kinds of names\n+-- out nicely, and preserves case sensitivity, so the\n+-- names are easy to display in error messages. To get\n+-- the corresponding case insensitive fully resolved name,\n+-- see 'FRName'.\n+data Name\n+    = NModule ModuleName\n+    | NRecordType ModuleName TypeConName\n+    | NVariantType ModuleName TypeConName\n+    | NEnumType ModuleName TypeConName\n+    | NVariantCon ModuleName TypeConName VariantConName\n+    | NEnumCon ModuleName TypeConName VariantConName\n+    | NField ModuleName TypeConName FieldName\n+    | NChoice ModuleName TypeConName ChoiceName\n+\n+-- | Display a name in a super unambiguous way.\n+displayName :: Name -> T.Text\n+displayName = \\case\n+    NModule (ModuleName m) ->\n+        T.concat [\"module \", dot m]\n+    NRecordType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"record \", dot m, \":\", dot t]\n+    NVariantType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"variant \", dot m, \":\", dot t]\n+    NEnumType (ModuleName m) (TypeConName t) ->\n+        T.concat [\"enum \", dot m, \":\", dot t]\n+    NVariantCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"variant constructor \", dot m, \":\", dot t, \".\", v]\n+    NEnumCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        T.concat [\"enum constructor \", dot m, \":\", dot t, \".\", v]\n+    NField (ModuleName m) (TypeConName t) (FieldName f) ->\n+        T.concat [\"field \", dot m, \":\", dot t, \".\", f]\n+    NChoice (ModuleName m) (TypeConName t) (ChoiceName c) ->\n+        T.concat [\"choice \", dot m, \":\", dot t, \".\", c]\n+  where\n+    dot = T.intercalate \".\"\n+\n+-- | Asks whether a name collision is permitted. According to the\n+-- LF Spec, a name collision is only permitted when it occurs\n+-- between a record type and a variant constructor defined in\n+-- the same module.\n+nameCollisionPermitted :: Name -> Name -> Bool\n+nameCollisionPermitted a b =\n+    case (a,b) of\n+        (NRecordType m1 _, NVariantCon m2 _ _) -> m1 == m2\n+        (NVariantCon m1 _ _, NRecordType m2 _) -> m1 == m2\n+        _ -> False\n+\n+-- | Asks whether a name collision is forbidden.\n+nameCollisionForbidden :: Name -> Name -> Bool\n+nameCollisionForbidden a b = not (nameCollisionPermitted a b)\n+\n+-- | Fully resolved name within a package. We don't use\n+-- Qualified from DA.Daml.LF.Ast because that hides collisions\n+-- between module names and type names. This should only be\n+-- constructed lower case in order to have case-insensitivity.\n+--\n+-- This corresponds to the following section of the LF spec:\n+-- https://github.com/digital-asset/daml/blob/master/daml-lf/spec/daml-lf-1.rst#fully-resolved-name\n+newtype FRName = FRName [T.Text]\n+    deriving (Eq, Ord)\n+\n+-- | Turn a name into a fully resolved name.\n+fullyResolve :: Name -> FRName\n+fullyResolve = FRName . map T.toLower . \\case\n+    NModule (ModuleName m) ->\n+        m\n+    NRecordType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NVariantType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NEnumType (ModuleName m) (TypeConName t) ->\n+        m ++ t\n+    NVariantCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        m ++ t ++ [v]\n+    NEnumCon (ModuleName m) (TypeConName t) (VariantConName v) ->\n+        m ++ t ++ [v]\n+    NField (ModuleName m) (TypeConName t) (FieldName f) ->\n+        m ++ t ++ [f]\n+    NChoice (ModuleName m) (TypeConName t) (ChoiceName c) ->\n+        m ++ t ++ [c]\n+\n+-- | State of the name collision checker. This is a\n+-- map from fully resolved names within a package to their\n+-- original names. We update this map as we go along.\n+newtype NCState = NCState (M.Map FRName [Name])\n+\n+-- | Initial name collision checker state.\n+initialState :: NCState\n+initialState = NCState M.empty\n+\n+-- | Try to add a name to the NCState. Returns Error only\n+-- if the name results in a forbidden name collision.\n+addName :: Name -> NCState -> Either Error NCState\n+addName name (NCState nameMap) = do\n+    let frName = fullyResolve name\n+        oldNames = fromMaybe [] (M.lookup frName nameMap)\n+        badNames = filter (nameCollisionForbidden name) oldNames\n+    if null badNames then do\n+        Right . NCState $ M.insert frName (name : oldNames) nameMap\n+    else do\n+        Left $ EForbiddenNameCollision\n+            (displayName name)\n+            (map displayName badNames)\n+\n+checkName :: MonadGamma m => Name -> S.StateT NCState m ()\n+checkName name = do\n+    oldState <- S.get\n+    case addName name oldState of\n+        Left err ->\n+            throwWithContext err\n+        Right !newState ->\n+            S.put newState\n+\n+checkDataType :: MonadGamma m => ModuleName -> DefDataType -> S.StateT NCState m ()\n+checkDataType moduleName DefDataType{..} =\n+    case dataCons of\n+        DataRecord fields -> do\n+            checkName (NRecordType moduleName dataTypeCon)\n+            forM_ fields $ \\(fieldName, _) -> do\n+                checkName (NField moduleName dataTypeCon fieldName)\n+\n+        DataVariant constrs -> do\n+            checkName (NVariantType moduleName dataTypeCon)\n+            forM_ constrs $ \\(vconName, _) -> do\n+                checkName (NVariantCon moduleName dataTypeCon vconName)\n+\n+        DataEnum constrs -> do\n+            checkName (NEnumType moduleName dataTypeCon)\n+            forM_ constrs $ \\vconName -> do\n+                checkName (NEnumCon moduleName dataTypeCon vconName)\n+\n+checkTemplate :: MonadGamma m => ModuleName -> Template -> S.StateT NCState m ()\n+checkTemplate moduleName Template{..} = do\n+    forM_ tplChoices $ \\TemplateChoice{..} ->\n+        checkName (NChoice moduleName tplTypeCon chcName)\n+\n+-- | Check whether a module satisfies the name collision condition.\n+checkModule :: MonadGamma m => Module -> m ()"
+  },
+  {
+    "id" : "38c427cb-d263-4517-a179-c12b0f82ba0a",
+    "prId" : 2981,
+    "comments" : [
+      {
+        "id" : "b8ec73d8-475b-40eb-8fc7-af7279a0061c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can field and choice names actually collide with anything?",
+        "createdAt" : "2019-09-23T17:04:05Z",
+        "updatedAt" : "2019-09-23T17:04:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c89021e2-40df-4619-9594-a33ccea80ebb",
+        "parentId" : "b8ec73d8-475b-40eb-8fc7-af7279a0061c",
+        "author" : null,
+        "body" : "I don't think so, at least not from DAML, but it's in the spec (unlike fully resolved value names, which aren't in the spec for some reason).",
+        "createdAt" : "2019-09-23T17:09:19Z",
+        "updatedAt" : "2019-09-23T17:09:39Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "717e0bb83a08360e6aa87ffdd32e1bee88891def",
+    "line" : 30,
+    "diffHunk" : "@@ -0,0 +1,165 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.LF.TypeChecker.NameCollision\n+    ( checkModule\n+    ) where\n+\n+import DA.Daml.LF.Ast\n+import DA.Daml.LF.TypeChecker.Env\n+import DA.Daml.LF.TypeChecker.Error\n+import Data.Maybe\n+import Control.Monad.Extra\n+import qualified Data.Map.Strict as M\n+import qualified Data.Text as T\n+import qualified Control.Monad.State.Strict as S\n+\n+-- | The various names we wish to track within a package.\n+-- This type separates all the different kinds of names\n+-- out nicely, and preserves case sensitivity, so the\n+-- names are easy to display in error messages. To get\n+-- the corresponding case insensitive fully resolved name,\n+-- see 'FRName'.\n+data Name\n+    = NModule ModuleName\n+    | NRecordType ModuleName TypeConName\n+    | NVariantType ModuleName TypeConName\n+    | NEnumType ModuleName TypeConName\n+    | NVariantCon ModuleName TypeConName VariantConName\n+    | NEnumCon ModuleName TypeConName VariantConName\n+    | NField ModuleName TypeConName FieldName"
+  }
+]

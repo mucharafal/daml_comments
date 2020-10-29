@@ -1,0 +1,250 @@
+[
+  {
+    "id" : "973a838d-a755-4555-84fa-ed37bc840adf",
+    "prId" : 1119,
+    "comments" : [
+      {
+        "id" : "7af196b3-3f5f-40e7-88cb-50dfd9a87128",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Suggest using the search path functions from System.Filepath here:\r\n```suggestion\r\n            let newPath = intercalate searchPathSeparator $ targetPath : splitSearchPath oldPath\r\n```",
+        "createdAt" : "2019-05-14T07:56:36Z",
+        "updatedAt" : "2019-05-14T08:15:46Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a4034f1d-06a1-40c9-b5dc-b6a2e58361fd",
+        "parentId" : "7af196b3-3f5f-40e7-88cb-50dfd9a87128",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good idea, changed.",
+        "createdAt" : "2019-05-14T08:12:27Z",
+        "updatedAt" : "2019-05-14T08:15:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0398579d8b2475e1d5e94807ce6cdaca4b9c5c7e",
+    "line" : null,
+    "diffHunk" : "@@ -22,19 +23,24 @@ import Graphics.Win32.Message\n import Graphics.Win32.Window.PostMessage\n import System.Win32.Registry hiding (regQueryValueEx)\n import System.Win32.Types\n-#else\n-import System.FilePath\n #endif\n \n-updatePath :: (String -> IO ()) -> FilePath -> IO ()\n+import DAML.Assistant.Types\n+\n+updatePath :: InstallOptions -> (String -> IO ()) -> FilePath -> IO ()\n #ifdef mingw32_HOST_OS\n-updatePath output targetPath = do\n+updatePath installOpts output targetPath\n+    | SetPath b <- iSetPath installOpts, not b = suggestAddToPath output targetPath\n+    | otherwise = do\n     -- Updating PATH on Windows is annoying so we do it automatically.\n     bracket (regOpenKeyEx hKEY_CURRENT_USER \"Environment\" kEY_ALL_ACCESS) regCloseKey $ \\envKey -> do\n-        path <- regQueryStringValue envKey \"Path\"\n-        let paths = split (== ';') path\n-        when (targetPath `notElem` paths) $ do\n-            let newPath = intercalate \";\" $ targetPath : paths\n+        -- We use getSearchPath for the check instead of reading from the registry\n+        -- since that allows users to modify the environment variable to temporarily\n+        -- add it to PATH.\n+        searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n+        when (targetPath `notElem` searchPaths) $ do\n+            oldPath <- regQueryStringValue envKey \"Path\"\n+            let newPath = intercalate \";\" $ targetPath : split (== ';') oldPath"
+  },
+  {
+    "id" : "eb8d8777-e0ce-48f9-b572-c6ac304be3da",
+    "prId" : 1119,
+    "comments" : [
+      {
+        "id" : "24ce1d9c-6a89-4f84-91f7-b85b659c1561",
+        "parentId" : null,
+        "author" : null,
+        "body" : "You're testing the search path from `getSearchPath`, but then you are updating the registry value instead. Is `getSearchPath` always guaranteed to be a superset of the registry value? Otherwise you may end up updating the registry key multiple times. Would be better to just test the registry value, I think?",
+        "createdAt" : "2019-05-14T08:02:25Z",
+        "updatedAt" : "2019-05-14T08:15:46Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "24304ff0-73dd-4b3f-973e-da43ce50e660",
+        "parentId" : "24ce1d9c-6a89-4f84-91f7-b85b659c1561",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That’s what I did before but it leads to modifying the registry even if the user either modified PATH directly, or added it to the global registry, … which sems like a bad idea.  I’ve now changed it to check both the registry and what we get from `getSearchPath` before modifying the registry which seems like a reasonably sane choice.",
+        "createdAt" : "2019-05-14T08:12:21Z",
+        "updatedAt" : "2019-05-14T08:15:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "19d14937-ec29-4d7d-b65e-17c58a77e685",
+        "parentId" : "24ce1d9c-6a89-4f84-91f7-b85b659c1561",
+        "author" : null,
+        "body" : "Perfect, thanks! :+1:",
+        "createdAt" : "2019-05-14T08:16:35Z",
+        "updatedAt" : "2019-05-14T08:16:35Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0398579d8b2475e1d5e94807ce6cdaca4b9c5c7e",
+    "line" : null,
+    "diffHunk" : "@@ -22,19 +23,24 @@ import Graphics.Win32.Message\n import Graphics.Win32.Window.PostMessage\n import System.Win32.Registry hiding (regQueryValueEx)\n import System.Win32.Types\n-#else\n-import System.FilePath\n #endif\n \n-updatePath :: (String -> IO ()) -> FilePath -> IO ()\n+import DAML.Assistant.Types\n+\n+updatePath :: InstallOptions -> (String -> IO ()) -> FilePath -> IO ()\n #ifdef mingw32_HOST_OS\n-updatePath output targetPath = do\n+updatePath installOpts output targetPath\n+    | SetPath b <- iSetPath installOpts, not b = suggestAddToPath output targetPath\n+    | otherwise = do\n     -- Updating PATH on Windows is annoying so we do it automatically.\n     bracket (regOpenKeyEx hKEY_CURRENT_USER \"Environment\" kEY_ALL_ACCESS) regCloseKey $ \\envKey -> do\n-        path <- regQueryStringValue envKey \"Path\"\n-        let paths = split (== ';') path\n-        when (targetPath `notElem` paths) $ do\n-            let newPath = intercalate \";\" $ targetPath : paths\n+        -- We use getSearchPath for the check instead of reading from the registry\n+        -- since that allows users to modify the environment variable to temporarily\n+        -- add it to PATH.\n+        searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n+        when (targetPath `notElem` searchPaths) $ do"
+  },
+  {
+    "id" : "cd81cc6a-7c04-4d41-8662-bfb09e744f52",
+    "prId" : 757,
+    "comments" : [
+      {
+        "id" : "fb343276-1c21-4d48-8125-c22b1af59607",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Would be better to use sendMessageTimeout here - I believe a timeout of 5 seconds is pretty standard.",
+        "createdAt" : "2019-04-29T12:26:06Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d494e027-0cba-4db2-a6db-799009cf6d2b",
+        "parentId" : "fb343276-1c21-4d48-8125-c22b1af59607",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I considered doing that but `Win32` doesn’t have bindings for that and I’m not too keen on adding my own.",
+        "createdAt" : "2019-04-29T12:27:08Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "76c5533e-5547-46ba-9e33-2460747c9835",
+        "parentId" : "fb343276-1c21-4d48-8125-c22b1af59607",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Wrapping an API call on Windows is very easy. Shouldn't take more than a few mins. Compare to sendMessage in the Win32 package:\r\n\r\n```\r\nforeign import WINDOWS_CCONV \"windows.h SendMessageW\"\r\n  sendMessage :: HWND -> WindowMessage -> WPARAM -> LPARAM -> IO LRESULT\r\n```",
+        "createdAt" : "2019-04-29T12:29:36Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "39b608f2-1209-40d7-ab6f-ce392998ed82",
+        "parentId" : "fb343276-1c21-4d48-8125-c22b1af59607",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "(Happy to help if you want - I've done this kind of thing a lot before :) )",
+        "createdAt" : "2019-04-29T12:30:01Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b3c703a2cdcf26b94b1ff0e621bf7f944497f05",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,65 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE CPP #-}\n+module DAML.Assistant.Install.Path\n+    ( updatePath\n+    ) where\n+\n+import Control.Monad\n+\n+#ifdef mingw32_HOST_OS\n+import Control.Exception.Safe\n+import Data.List.Extra\n+import Foreign.C.Types\n+import Foreign.ForeignPtr\n+import Foreign.Marshal.Alloc\n+import Foreign.Marshal.Array\n+import Foreign.Ptr\n+import Foreign.Storable\n+import Graphics.Win32.Message\n+import Graphics.Win32.Window\n+import Graphics.Win32.Window.PostMessage\n+import System.Win32.Registry hiding (regQueryValueEx)\n+import System.Win32.Types\n+#else\n+import System.FilePath\n+#endif\n+\n+updatePath :: (String -> IO ()) -> FilePath -> IO ()\n+#ifdef mingw32_HOST_OS\n+updatePath output targetPath = do\n+    -- Updating PATH on Windows is annoying so we do it automatically.\n+    bracket (regOpenKeyEx hKEY_CURRENT_USER \"Environment\" kEY_ALL_ACCESS) regCloseKey $ \\envKey -> do\n+        path <- regQueryStringValue envKey \"Path\"\n+        let paths = split (== ';') path\n+        when (targetPath `notElem` paths) $ do\n+            let newPath = intercalate \";\" $ targetPath : paths\n+            regSetStringValue envKey \"Path\" newPath\n+            -- Ask applications to pick up the change.\n+            _ <- withTString \"Environment\" $ \\ptr ->\n+                let IntPtr ptr' = ptrToIntPtr ptr\n+                in sendMessage hWND_BROADCAST wM_WININICHANGE 0 (CIntPtr $ fromIntegral ptr')"
+  },
+  {
+    "id" : "521b4b18-5337-419a-96ab-0f9f044aeb25",
+    "prId" : 757,
+    "comments" : [
+      {
+        "id" : "bba40f92-0164-4312-9cb3-aac7f00d762e",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "64bit Windows only has one calling convention so I'd have been tempted to specify `ccall` and leave it at that. We're never going to support 32 bit. But happy either way.",
+        "createdAt" : "2019-04-29T12:51:14Z",
+        "updatedAt" : "2019-04-29T13:02:51Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5c93568c-8c14-49e5-8dd2-c0e02e46db60",
+        "parentId" : "bba40f92-0164-4312-9cb3-aac7f00d762e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah that would have been my fallback if just adding this didn’t work but since it does work it seems easy enough to do it properly.",
+        "createdAt" : "2019-04-29T13:13:40Z",
+        "updatedAt" : "2019-04-29T13:13:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b3c703a2cdcf26b94b1ff0e621bf7f944497f05",
+    "line" : 54,
+    "diffHunk" : "@@ -0,0 +1,80 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE CPP #-}\n+module DAML.Assistant.Install.Path\n+    ( updatePath\n+    ) where\n+\n+import Control.Monad\n+\n+#ifdef mingw32_HOST_OS\n+import Control.Exception.Safe\n+import Data.List.Extra\n+import Foreign.C.Types\n+import Foreign.ForeignPtr\n+import Foreign.Marshal.Alloc\n+import Foreign.Marshal.Array\n+import Foreign.Ptr\n+import Foreign.Storable\n+import Graphics.Win32.GDI.Types\n+import Graphics.Win32.Message\n+import Graphics.Win32.Window\n+import Graphics.Win32.Window.PostMessage\n+import System.Win32.Registry hiding (regQueryValueEx)\n+import System.Win32.Types\n+#else\n+import System.FilePath\n+#endif\n+\n+updatePath :: (String -> IO ()) -> FilePath -> IO ()\n+#ifdef mingw32_HOST_OS\n+updatePath output targetPath = do\n+    -- Updating PATH on Windows is annoying so we do it automatically.\n+    bracket (regOpenKeyEx hKEY_CURRENT_USER \"Environment\" kEY_ALL_ACCESS) regCloseKey $ \\envKey -> do\n+        path <- regQueryStringValue envKey \"Path\"\n+        let paths = split (== ';') path\n+        when (targetPath `notElem` paths) $ do\n+            let newPath = intercalate \";\" $ targetPath : paths\n+            regSetStringValue envKey \"Path\" newPath\n+            -- Ask applications to pick up the change.\n+            _ <-\n+                withTString \"Environment\" $ \\ptr ->\n+                alloca $ \\lpdwResult ->\n+                let IntPtr ptr' = ptrToIntPtr ptr\n+                in sendMessageTimeout\n+                       hWND_BROADCAST\n+                       wM_WININICHANGE\n+                       0\n+                       (CIntPtr $ fromIntegral ptr')\n+                       0 -- SMTO_NORMAL\n+                       5000\n+                       lpdwResult\n+            output (targetPath <> \" has been added to your PATH..\")\n+\n+#include \"windows_cconv.h\""
+  }
+]

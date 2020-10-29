@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "bcead952-2a02-49d6-85a4-06d49ff8c306",
+    "prId" : 1062,
+    "comments" : [
+      {
+        "id" : "7d8278be-dd68-48c1-addf-03911203c0e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t know anything about `gsutil` so this could be totally wrong but this looks like you might end up uploading the tarball as well. You might want to extract it to a different directory and only upload the files in that directory.",
+        "createdAt" : "2019-05-10T07:11:50Z",
+        "updatedAt" : "2019-05-11T02:39:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c0abfea0-b06a-46ea-b472-2f6fcce4936f",
+        "parentId" : "7d8278be-dd68-48c1-addf-03911203c0e9",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Good catch! That dot should actually read `html` as what we want to upload are the extracted contents of the tarball.",
+        "createdAt" : "2019-05-10T08:48:59Z",
+        "updatedAt" : "2019-05-11T02:39:27Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "677c967d36eeaaf969fa10e1409a8fdc649d81dc",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,38 @@\n+# Azure Pipelines file, see https://aka.ms/yaml\n+\n+# scheduled triggers are not supported in pipeline syntax yet, so it had to be\n+# set up from Azure UI\n+trigger: none\n+\n+jobs:\n+  - job: Daily Docs\n+    timeoutInMinutes: 360\n+    pool:\n+      name: 'linux-pool'\n+    checkout:\n+    steps:\n+      - checkout: self\n+      - bash: ci/dev-env-install.sh\n+        displayName: 'Build/Install the Developer Environment'\n+      - bash: ci/configure-bazel.sh\n+        displayName: 'Configure Bazel'\n+      - bash: |\n+        set -euo pipefail\n+        export GOOGLE_APPLICATION_CREDENTIALS=$(mktemp)\n+        echo \"$GOOGLE_APPLICATION_CREDENTIALS_CONTENT\" > $GOOGLE_APPLICATION_CREDENTIALS\n+        LATEST_RELEASE=$(curl https://api.github.com/repos/digital-asset/daml/releases -s | jq -r '. | map(select(.prerelease == false)) | map(.tag_name)[0]')\n+        git checkout $LATEST_RELEASE\n+        bazel build //docs\n+        cp bazel-genfiles/docs/html.tar.gz $(Build.StagingDirectory)/\n+        cd $(Build.StagingDirectory)\n+        tar xzf html.tar.gz\n+        gsutil rsync -d -r . gs://daml-docs"
+  }
+]

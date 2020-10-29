@@ -1,0 +1,158 @@
+[
+  {
+    "id" : "2f246278-ed74-497f-9e05-296982af5307",
+    "prId" : 5232,
+    "comments" : [
+      {
+        "id" : "74798b1d-9e09-421c-9f54-ab0eb5f213d5",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'm not sure this kind of conditional logic in tests helps. Can we just use the resolved values in the assertions, and change the test names to explain why?\r\n\r\nIt might even make sense to delete some tests.",
+        "createdAt" : "2020-03-30T07:40:17Z",
+        "updatedAt" : "2020-03-30T12:47:37Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d466c620-b333-4ccd-8f71-f084b3202725",
+        "parentId" : "74798b1d-9e09-421c-9f54-ab0eb5f213d5",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Add a comments.",
+        "createdAt" : "2020-03-30T10:00:11Z",
+        "updatedAt" : "2020-03-30T12:47:37Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5c6abb1ddeaaaca45f76e15787825b533f45f1d7",
+    "line" : null,
+    "diffHunk" : "@@ -16,27 +16,33 @@ import scala.collection.immutable.HashMap\n class TransactionVersionSpec extends WordSpec with Matchers {\n   import TransactionVersionSpec._\n \n+  def fixVersion(v: TransactionVersion) =\n+    VersionTimeline.maxVersion(TransactionVersions.minOutputVersion, v)"
+  },
+  {
+    "id" : "64767055-8d8f-4756-a837-c1bee69e5111",
+    "prId" : 5232,
+    "comments" : [
+      {
+        "id" : "8ea94522-7a06-44bb-b5d2-ac26c94e98b0",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Why does this test have such a similar name to the previous one? It seems almost contradictory.",
+        "createdAt" : "2020-03-30T07:41:03Z",
+        "updatedAt" : "2020-03-30T12:47:37Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "33d9d35a-3ad9-488f-b856-80aa19343db6",
+        "parentId" : "8ea94522-7a06-44bb-b5d2-ac26c94e98b0",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-03-30T09:57:49Z",
+        "updatedAt" : "2020-03-30T12:47:37Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5c6abb1ddeaaaca45f76e15787825b533f45f1d7",
+    "line" : 38,
+    "diffHunk" : "@@ -16,27 +16,33 @@ import scala.collection.immutable.HashMap\n class TransactionVersionSpec extends WordSpec with Matchers {\n   import TransactionVersionSpec._\n \n+  def fixVersion(v: TransactionVersion) =\n+    VersionTimeline.maxVersion(TransactionVersions.minOutputVersion, v)\n+\n   \"assignVersion\" should {\n     \"prefer picking an older version\" in {\n-      assignVersion(assignValueVersions(dummyCreateTransaction)) shouldBe TransactionVersion(\"1\")\n+      assignVersion(assignValueVersions(dummyCreateTransaction)) shouldBe fixVersion(\n+        TransactionVersion(\"1\"))\n     }\n \n     \"pick version 2 when confronted with newer data\" in {\n       val usingOptional = dummyCreateTransaction map3 (identity, identity, v =>\n         ValueOptional(Some(v)): Value[Value.AbsoluteContractId])\n-      assignVersion(assignValueVersions(usingOptional)) shouldBe TransactionVersion(\"2\")\n+      assignVersion(assignValueVersions(usingOptional)) shouldBe fixVersion(TransactionVersion(\"2\"))\n     }\n \n     \"pick version 7 when confronted with exercise result\" in {\n       val hasExerciseResult = dummyExerciseWithResultTransaction map3 (identity, identity, v =>\n         ValueOptional(Some(v)): Value[Value.AbsoluteContractId])\n-      assignVersion(assignValueVersions(hasExerciseResult)) shouldBe TransactionVersion(\"7\")\n+      assignVersion(assignValueVersions(hasExerciseResult)) shouldBe fixVersion(\n+        TransactionVersion(\"7\"))\n     }\n \n     \"pick version 2 when confronted with exercise result\" in {"
+  },
+  {
+    "id" : "44fe2dc0-7c61-4ac0-b517-955e18c75a28",
+    "prId" : 5232,
+    "comments" : [
+      {
+        "id" : "b257b39f-4921-42cd-86c1-b736a03d8274",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Please reword the test descriptions. `prefer picking an older version` doesn't make sense anymore.",
+        "createdAt" : "2020-03-30T14:54:09Z",
+        "updatedAt" : "2020-03-30T14:54:10Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5c6abb1ddeaaaca45f76e15787825b533f45f1d7",
+    "line" : 13,
+    "diffHunk" : "@@ -16,27 +16,43 @@ import scala.collection.immutable.HashMap\n class TransactionVersionSpec extends WordSpec with Matchers {\n   import TransactionVersionSpec._\n \n+  import VersionTimeline.maxVersion\n+\n+  // FIXME: https://github.com/digital-asset/daml/issues/5164\n+  // Currently the engine uses `TransactionVersions.minOutputVersion` or latter.\n+  // #5164 should provide a more granular way to control the versioning.\n+  // Once #5164 is resolved, update those tests with different values for `minOutputVersion`.\n+  val minOutputVersion = TransactionVersions.minOutputVersion\n+\n   \"assignVersion\" should {\n     \"prefer picking an older version\" in {"
+  },
+  {
+    "id" : "21b4b2bb-69d4-48f9-9db0-95ace7779b9e",
+    "prId" : 5232,
+    "comments" : [
+      {
+        "id" : "c3d6c644-02c6-4999-94f9-e9ff578de2d3",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "@remyhaemmerle-da: test description doesn't match the test anymore.",
+        "createdAt" : "2020-03-30T14:54:47Z",
+        "updatedAt" : "2020-03-30T14:54:47Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5c6abb1ddeaaaca45f76e15787825b533f45f1d7",
+    "line" : 20,
+    "diffHunk" : "@@ -16,27 +16,43 @@ import scala.collection.immutable.HashMap\n class TransactionVersionSpec extends WordSpec with Matchers {\n   import TransactionVersionSpec._\n \n+  import VersionTimeline.maxVersion\n+\n+  // FIXME: https://github.com/digital-asset/daml/issues/5164\n+  // Currently the engine uses `TransactionVersions.minOutputVersion` or latter.\n+  // #5164 should provide a more granular way to control the versioning.\n+  // Once #5164 is resolved, update those tests with different values for `minOutputVersion`.\n+  val minOutputVersion = TransactionVersions.minOutputVersion\n+\n   \"assignVersion\" should {\n     \"prefer picking an older version\" in {\n-      assignVersion(assignValueVersions(dummyCreateTransaction)) shouldBe TransactionVersion(\"1\")\n+      assignVersion(assignValueVersions(dummyCreateTransaction)) shouldBe maxVersion(\n+        minOutputVersion,\n+        TransactionVersion(\"1\"))\n     }\n \n     \"pick version 2 when confronted with newer data\" in {"
+  }
+]

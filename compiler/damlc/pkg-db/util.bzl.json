@@ -1,0 +1,75 @@
+[
+  {
+    "id" : "6206d1dd-2ada-4b42-a7d0-ba0736c274b0",
+    "prId" : 2991,
+    "comments" : [
+      {
+        "id" : "196e0057-3598-481c-aaf9-1eee70929123",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Do we keep `--debug` on?",
+        "createdAt" : "2019-09-24T12:54:54Z",
+        "updatedAt" : "2019-09-24T12:56:37Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6de59494-97b9-48ab-84d0-203bc247644e",
+        "parentId" : "196e0057-3598-481c-aaf9-1eee70929123",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "oops, good catch fixed",
+        "createdAt" : "2019-09-24T12:56:35Z",
+        "updatedAt" : "2019-09-24T12:56:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a71d5b398a3589354bfb04261126bddf3d4ac516",
+    "line" : null,
+    "diffHunk" : "@@ -105,21 +105,27 @@ def _daml_package_rule_impl(ctx):\n         tools = [ctx.executable.damlc_bootstrap, ctx.executable.cpp],\n         progress_message = \"Compiling \" + name + \".daml to daml-lf \" + ctx.attr.daml_lf_version,\n         command = \"\"\"\n-      set -eoux pipefail\n+      set -eou pipefail\n       PKG_NAME=`cat {pkg_name_version_file}`\n \n+      # We use a temp directory here to avoid issues due to the lack of sandboxing\n+      # on Windows.\n+      IFACE_DIR=$(mktemp -d)\n+\n       # Compile the dalf file\n-      {damlc_bootstrap} compile \\\n+      {damlc_bootstrap} compile --debug \\"
+  },
+  {
+    "id" : "3c83486c-a3cc-470e-893a-4b0a80da6f5c",
+    "prId" : 2479,
+    "comments" : [
+      {
+        "id" : "d0487bdc-a5dc-4a6e-a724-ae5c02543146",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n          echo -n {pkg_name} > {pkg_name_version_file}\r\n          cat {sdk_version_file} >> {pkg_name_version_file}\r\n```",
+        "createdAt" : "2019-08-12T09:33:52Z",
+        "updatedAt" : "2019-08-12T13:32:17Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "92f579792fb9f279eb305722f47a03c104a58fb8",
+    "line" : 38,
+    "diffHunk" : "@@ -30,25 +30,41 @@\n \n PACKAGE_CONF_TEMPLATE = \"\"\"\n name: {name}\n-version: 1.0.0\n-id: {name}\n-key: {name}\n+version: __SDK_VERSION__\n+id: __ID__\n+key: __ID__\n copyright: 2015-2018 Digital Asset Holdings\n maintainer: Digital Asset\n exposed: True\n exposed-modules: {modules}\n-import-dirs: $topdir/{name}\n-library-dirs: $topdir/{name}\n-data-dir: $topdir/{name}\n+import-dirs: \\$topdir/__ID__\n+library-dirs: \\$topdir/__ID__\n+data-dir: \\$topdir/__ID__\n depends: {depends}\n \"\"\"\n \n-DamlPackage = provider(fields = [\"daml_lf_version\", \"pkg_name\", \"pkg_conf\", \"iface_dir\", \"dalf\", \"modules\"])\n+DamlPackage = provider(fields = [\"daml_lf_version\", \"pkg_name\", \"pkg_name_version\", \"pkg_conf\", \"iface_dir\", \"dalf\", \"modules\"])\n \n # Compile a DAML file and create the GHC package database\n # for it.\n def _daml_package_rule_impl(ctx):\n     name = ctx.attr.name\n+    pkg_name_version = ctx.actions.declare_file(\"\".join([name, \"_pkg_name_version\"]))\n+    ctx.actions.run_shell(\n+        outputs = [pkg_name_version],\n+        inputs = [ctx.file.sdk_version],\n+        command = \"\"\"\n+        if [ \"daml-prim\" = {pkg_name} ]; then\n+          echo {pkg_name} > {pkg_name_version_file}\n+        else\n+          echo {pkg_name}-`cat {sdk_version_file}` > {pkg_name_version_file}"
+  }
+]

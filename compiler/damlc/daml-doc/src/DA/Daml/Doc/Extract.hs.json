@@ -1,0 +1,767 @@
+[
+  {
+    "id" : "b0d1ce31-4200-4c45-ab53-755798b6d908",
+    "prId" : 4112,
+    "comments" : [
+      {
+        "id" : "9747d89d-44e6-46dd-bf28-e00b09d5a1a2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks like we will attach a `DocCommentPrev` at the beginning to the next declaration which seems odd. I _think_ this is the same behavior as before but it seems weird. Is there a case where this actually makes sense?",
+        "createdAt" : "2020-01-20T14:49:15Z",
+        "updatedAt" : "2020-01-20T15:37:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "52163de1-33d5-4706-87ac-8a695ec29713",
+        "parentId" : "9747d89d-44e6-46dd-bf28-e00b09d5a1a2",
+        "author" : null,
+        "body" : "I'm not sure if it comes up in practice, but if a `DocCommentNext` is followed up by a `DocCommentPrev` ... or we have a `DocCommentPrev` at the beginning of the list ... this will treat the `DocCommentPrev` as a `DocCommentNext` instead of silently ignoring it or treating it as a standalone declaration. ",
+        "createdAt" : "2020-01-20T15:36:25Z",
+        "updatedAt" : "2020-01-20T15:37:55Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "963c4e5ed4bd0c0fab26ee50c703b5f58e68582b",
+    "line" : 112,
+    "diffHunk" : "@@ -119,70 +95,49 @@ extractDocs extractOpts diagsLogger ideOpts fp = do\n                 = MS.elems . MS.withoutKeys typeMap . Set.unions\n                 $ dc_templates : MS.elems dc_choices\n \n-            md_adts = mapMaybe (filterTypeByExports ctx) adts\n+            md_adts = mapMaybe (filterTypeByExports dc_exports) adts\n \n         in ModuleDoc {..}\n \n -- | This is equivalent to Haddock’s Haddock.Interface.Create.collectDocs\n-collectDocs :: [LHsDecl a] -> [(LHsDecl a, Maybe DocText)]\n-collectDocs = go Nothing []\n+collectDocs :: [LHsDecl GhcPs] -> [DeclData]\n+collectDocs ds\n+    | (nextDocs, decl:ds') <- spanMaybe getNextOrPrevDoc ds"
+  },
+  {
+    "id" : "debcabf8-f22d-4a8c-bbbe-d18acd0275df",
+    "prId" : 4112,
+    "comments" : [
+      {
+        "id" : "4fe013cf-f87d-4327-96e9-ed816e577548",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I initially misunderstood the line this was referring to. Maybe add it on the same line or make it clear in the comment that this is about `DocCommentPrev`.",
+        "createdAt" : "2020-01-20T14:50:17Z",
+        "updatedAt" : "2020-01-20T15:37:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7dc6a5d7-cb4e-404b-a901-89e09fa6d1f5",
+        "parentId" : "4fe013cf-f87d-4327-96e9-ed816e577548",
+        "author" : null,
+        "body" : "I added a little `^`, hopefully that makes it clearer :)",
+        "createdAt" : "2020-01-20T15:38:12Z",
+        "updatedAt" : "2020-01-20T15:38:12Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b9d8f9b0-3d35-4dbb-9a7c-008588ec2211",
+        "parentId" : "4fe013cf-f87d-4327-96e9-ed816e577548",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "thanks!",
+        "createdAt" : "2020-01-20T15:39:52Z",
+        "updatedAt" : "2020-01-20T15:39:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "963c4e5ed4bd0c0fab26ee50c703b5f58e68582b",
+    "line" : null,
+    "diffHunk" : "@@ -119,70 +95,49 @@ extractDocs extractOpts diagsLogger ideOpts fp = do\n                 = MS.elems . MS.withoutKeys typeMap . Set.unions\n                 $ dc_templates : MS.elems dc_choices\n \n-            md_adts = mapMaybe (filterTypeByExports ctx) adts\n+            md_adts = mapMaybe (filterTypeByExports dc_exports) adts\n \n         in ModuleDoc {..}\n \n -- | This is equivalent to Haddock’s Haddock.Interface.Create.collectDocs\n-collectDocs :: [LHsDecl a] -> [(LHsDecl a, Maybe DocText)]\n-collectDocs = go Nothing []\n+collectDocs :: [LHsDecl GhcPs] -> [DeclData]\n+collectDocs ds\n+    | (nextDocs, decl:ds') <- spanMaybe getNextOrPrevDoc ds\n+    , (prevDocs, ds'') <- spanMaybe getPrevDoc ds'\n+    = DeclData decl (joinDocs nextDocs prevDocs)\n+    : collectDocs ds''\n+\n+    | otherwise\n+    = [] -- nothing to document\n   where\n-    go :: Maybe (LHsDecl p) -> [DocText] -> [LHsDecl p] -> [(LHsDecl p, Maybe DocText)]\n-    go Nothing _ [] = []\n-    go (Just prev) docs [] = finished prev docs []\n-    go prev docs (L _ (DocD _ (DocCommentNext str)) : ds)\n-      | Nothing <- prev = go Nothing (docToText str:docs) ds\n-      | Just decl <- prev = finished decl docs (go Nothing [docToText str] ds)\n-    go prev docs (L _ (DocD _ (DocCommentPrev str)) : ds) =\n-      go prev (docToText str:docs) ds\n-    go Nothing docs (d:ds) = go (Just d) docs ds\n-    go (Just prev) docs (d:ds) = finished prev docs (go (Just d) [] ds)\n-\n-    finished decl docs rest = (decl, toDocText . map unDocText . reverse $ docs) : rest\n-\n--- | Context in which to extract a module's docs. This is created from\n--- 'TypecheckedModule' by 'buildDocCtx'.\n-data DocCtx = DocCtx\n-    { dc_ghcMod :: GHC.Module\n-        -- ^ ghc name for current module\n-    , dc_modname :: Modulename\n-        -- ^ name of the current module\n-    , dc_tcmod :: TypecheckedModule\n-        -- ^ typechecked module\n-    , dc_decls :: [DeclData]\n-        -- ^ module declarations\n-    , dc_insts :: [ClsInst]\n-        -- ^ typeclass instances\n-    , dc_tycons :: MS.Map Typename TyCon\n-        -- ^ types defined in this module\n-    , dc_datacons :: MS.Map Typename DataCon\n-        -- ^ constructors defined in this module\n-    , dc_ids :: MS.Map Fieldname Id\n-        -- ^ values defined in this module\n-    , dc_templates :: Set.Set Typename\n-        -- ^ DAML templates defined in this module\n-    , dc_choices :: MS.Map Typename (Set.Set Typename)\n-        -- ^ choices per DAML template defined in this module\n-    , dc_extractOptions :: ExtractOptions\n-        -- ^ command line options that affect the doc extractor\n-    , dc_exports :: ExportSet\n-        -- ^ set of export, unless everything is exported\n-    }\n-\n--- | Parsed declaration with associated docs.\n-data DeclData = DeclData\n-    { _dd_decl :: LHsDecl GhcPs\n-    , _dd_docs :: Maybe DocText\n-    }\n+\n+    joinDocs :: [DocText] -> [DocText] -> Maybe DocText\n+    joinDocs nextDocs prevDocs =\n+        let docs = map unDocText (nextDocs ++ prevDocs)\n+        in if null docs\n+            then Nothing\n+            else Just . DocText . T.strip $ T.unlines docs\n+\n+    getNextOrPrevDoc :: LHsDecl a -> Maybe DocText\n+    getNextOrPrevDoc = \\case\n+        L _ (DocD _ (DocCommentNext str)) -> Just (docToText str)\n+        L _ (DocD _ (DocCommentPrev str)) -> Just (docToText str)\n+            -- technically this is a malformed doc, but we'll take it"
+  },
+  {
+    "id" : "9078d861-16d5-414d-beb0-f7d6d0764b47",
+    "prId" : 3670,
+    "comments" : [
+      {
+        "id" : "a59b8348-a364-472f-ace9-0c9870c50622",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "@associahedron I’ve hacked around this for now since I don’t want to clutter this PR too much but we should kill the generic templates support from `daml-docs` in a separate PR.",
+        "createdAt" : "2019-11-29T09:48:59Z",
+        "updatedAt" : "2019-11-29T13:04:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f776002e-b57e-4188-a16e-ca7954702e20",
+        "parentId" : "a59b8348-a364-472f-ace9-0c9870c50622",
+        "author" : null,
+        "body" : "Makes sense. I can do it if you don't mind.",
+        "createdAt" : "2019-11-29T11:17:57Z",
+        "updatedAt" : "2019-11-29T13:04:50Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "abb363aad65b2173e41b6b0e0e9a16e83c6474a2",
+    "line" : 5,
+    "diffHunk" : "@@ -123,9 +123,14 @@ extractDocs extractOpts diagsLogger ideOpts fp = do\n \n             (adts, md_templateInstances) =\n                 partitionEithers . flip map filteredTyCons $ \\adt ->\n-                    case getTemplateInstanceDoc adt of\n+                    case find (\\td -> td_name td == ad_name adt) md_templates of"
+  },
+  {
+    "id" : "d7a437d4-c7a5-44a1-92c7-1d2396ad84e8",
+    "prId" : 3165,
+    "comments" : [
+      {
+        "id" : "8348210e-a139-4cc0-b17a-555a5b185807",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we be more specific here and at least check the module name this is coming from, maybe even the package id?",
+        "createdAt" : "2019-10-14T11:56:37Z",
+        "updatedAt" : "2019-10-14T15:24:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a34f8b8f-e2f5-45b5-bf94-c1f1216dc06b",
+        "parentId" : "8348210e-a139-4cc0-b17a-555a5b185807",
+        "author" : null,
+        "body" : "Based on my reading of the code, there's no way to be more specific here without rewriting the way we extract template data from the module. That's probably worth doing at some point.",
+        "createdAt" : "2019-10-14T15:34:16Z",
+        "updatedAt" : "2019-10-14T15:34:28Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b1bf6930f83002bbac256a37b2ca19c53473b676",
+    "line" : 13,
+    "diffHunk" : "@@ -503,12 +503,16 @@ getTemplateDocs DocCtx{..} typeMap templateInstanceMap =\n     -- (possible if choice instances are defined directly outside the template).\n     -- This wouldn't be necessary if we used the type-checked AST.\n       where dummyDT = ADTDoc { ad_anchor = Nothing\n-                             , ad_name    = Typename $ \"External:\" <> unTypename n\n-                             , ad_descr   = Nothing\n+                             , ad_name = dummyName n\n+                             , ad_descr = Nothing\n                              , ad_args = []\n                              , ad_constrs = []\n                              , ad_instances = Nothing\n                              }\n+\n+            dummyName (Typename \"Archive\") = Typename \"Archive\""
+  },
+  {
+    "id" : "fe48e804-7bcd-4656-b9a0-0f3916ba8fa7",
+    "prId" : 3013,
+    "comments" : [
+      {
+        "id" : "9d51205e-de6d-40c5-b47c-6001f24dbe50",
+        "parentId" : null,
+        "author" : null,
+        "body" : "This looks like it will only recognise the template instance if the user does not supply any docs for it.\r\n\r\nFor example,\r\n\r\n```Haskell\r\n-- | This is my template instance\r\ntemplate instance ProposalIou = Proposal Iou\r\n```\r\n\r\nwould desugar into something like\r\n\r\n```Haskell\r\n-- | This is my template instance\r\n-- | TEMPLATE_INSTANCE\r\ntype ProposalIou = Proposal Iou\r\n```\r\n\r\nAs a quick fix I suggest checking for `TEMPLATE_INSTANCE` inside the doctext with `isInfixOf`, and we can fix the contents of the doctext later.",
+        "createdAt" : "2019-09-25T10:30:35Z",
+        "updatedAt" : "2019-09-26T17:05:43Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7da6ae95-afc3-4cd6-9b99-cd93472c48b4",
+        "parentId" : "9d51205e-de6d-40c5-b47c-6001f24dbe50",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Thanks for the review! I've added something like a suffix check here to remove `\"TEMPLATE_INSTANCE\"` from the real documentation. I haven't seen if it works yet because there is still some work to handle type synonyms in the compiler back end.",
+        "createdAt" : "2019-09-25T21:13:18Z",
+        "updatedAt" : "2019-09-26T17:05:43Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d8e6295d-60f5-4fc6-b733-ead9069112b6",
+        "parentId" : "9d51205e-de6d-40c5-b47c-6001f24dbe50",
+        "author" : null,
+        "body" : "👍 That looks good, but definitely worth testing :-) ",
+        "createdAt" : "2019-09-26T08:19:27Z",
+        "updatedAt" : "2019-09-26T17:05:43Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "41b53d977e904db034d8dd8bb2cb16222a269486",
+    "line" : null,
+    "diffHunk" : "@@ -497,28 +500,29 @@ getTemplateDocs DocCtx{..} typeMap templateInstanceMap =\n                       [] -> [] -- catching the dummy case here, see above\n                       _other -> error \"getFields: found multiple constructors\"\n \n--- | A template instance is desugared into a newtype with a docs marker.\n+-- | A template instance is desugared to a type synonym with a doc decl\n+-- around it.\n+--\n -- For example,\n --\n -- @template instance ProposalIou = Proposal Iou@\n --\n -- becomes\n --\n--- @newtype ProposalIou = ProposalIou (Proposal Iou) -- ^ TEMPLATE_INSTANCE@\n+-- @--| TEMPLATE_INSTANCE@\n+-- @type ProposalIou = Proposal Iou@\n --\n -- So the goal of this function is to extract the template instance doc\n--- from the newtype doc if it exists.\n+-- from the doc preceding the type synonym if it exists.\n getTemplateInstanceDoc :: ADTDoc -> Maybe TemplateInstanceDoc\n-getTemplateInstanceDoc adt\n-    | ADTDoc{..} <- adt\n-    , [PrefixC{..}] <- ad_constrs\n-    , Just (DocText \"TEMPLATE_INSTANCE\") <- ac_descr\n-    , [argType] <- ac_args\n+getTemplateInstanceDoc tyConDoc\n+    | TypeSynDoc{..} <- tyConDoc\n+    , Just (DocText \"TEMPLATE_INSTANCE\") <- ad_descr"
+  },
+  {
+    "id" : "47dbdc39-41c6-4beb-a535-213ef8664930",
+    "prId" : 2667,
+    "comments" : [
+      {
+        "id" : "813352b5-2134-4c14-bb1d-8b1336dddade",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Note to myself and other reviewers: This corresponds to most of what `memberDocs` did before. What changed is that now we postprocess this with `getMethodDocs`.",
+        "createdAt" : "2019-08-27T11:15:17Z",
+        "updatedAt" : "2019-08-27T12:05:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d42c9a445d00d6609a82fee50c9ba51fa1ee4914",
+    "line" : 122,
+    "diffHunk" : "@@ -298,53 +267,91 @@ getFctDocs ctx@DocCtx{..} cl_nameM (DeclData decl docs) = do\n         fct_anchor = Just $ functionAnchor dc_modname fct_name\n         fct_descr = docs\n \n-    guard $ case cl_nameM of\n-        Just cl_name -> exportsField dc_exports cl_name fct_name\n-        Nothing -> exportsFunction dc_exports fct_name\n-\n+    guard (exportsFunction dc_exports fct_name)\n     Just FunctionDoc {..}\n \n getClsDocs :: DocCtx -> DeclData -> Maybe ClassDoc\n-getClsDocs ctx@DocCtx{..} (DeclData (L _ (TyClD _ c@ClassDecl{..})) docs) = do\n+getClsDocs ctx@DocCtx{..} (DeclData (L _ (TyClD _ ClassDecl{..})) tcdocs) = do\n     let cl_name = Typename . packRdrName $ unLoc tcdLName\n-        tyconMb = MS.lookup cl_name dc_tycons\n-        cl_anchor = tyConAnchor ctx =<< tyconMb\n-        cl_descr = docs\n+    tycon <- MS.lookup cl_name dc_tycons\n+    tycls <- tyConClass_maybe tycon\n+    let cl_anchor = Just $ classAnchor dc_modname cl_name\n+        cl_descr = tcdocs\n         cl_args = map (tyVarText . unLoc) $ hsq_explicit tcdTyVars\n-        cl_functions = map (dropMemberContext cl_anchor cl_args) $\n-            concatMap (f cl_name) tcdSigs\n+        opMap = MS.fromList\n+            [ (Fieldname $ packId id, (id, dmInfoM))\n+            | (id, dmInfoM) <- classOpItems tycls ]\n+        cl_methods = concatMap (getMethodDocs opMap cl_anchor cl_name cl_args) subDecls\n         cl_super = do\n-            tycon <- tyconMb\n-            cls <- tyConClass_maybe tycon\n-            let theta = classSCTheta cls\n+            let theta = classSCTheta tycls\n             guard (notNull theta)\n             Just (TypeTuple $ map (typeToType ctx) theta)\n         cl_instances = Nothing -- filled out later in 'distributeInstanceDocs'\n     guard (exportsType dc_exports cl_name)\n     Just ClassDoc {..}\n   where\n-    f :: Typename -> LSig GhcPs -> [FunctionDoc]\n-    f cl_name (L dloc (ClassOpSig p b names n)) = catMaybes\n-      [ getFctDocs ctx (Just cl_name) (DeclData (L dloc (SigD noExt (ClassOpSig p b [L loc name] n))) (MS.lookup name subdocs))\n-      | L loc name <- names\n-      ]\n-    f _ _ = []\n+    -- All documentation of class members is stored in tcdDocs.\n+    -- To associate the docs with the correct member, we convert all members\n+    -- and docs to declarations, sort them by their location\n+    -- and then use collectDocs.\n+    -- This is the equivalent of Haddock’s Haddock.Interface.Create.classDecls.\n+    subDecls :: [(LHsDecl GhcPs, Maybe DocText)]"
+  },
+  {
+    "id" : "da5f5f07-f5cd-40e2-b927-5d728701f5fe",
+    "prId" : 2667,
+    "comments" : [
+      {
+        "id" : "4835002e-22a8-42f5-b33b-a3587c9fd3cd",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can it ever happen that we get `(False, Just …)`? If that should also be an error I would suggest to change this to only case on `dmInfoM` and instead have something like `when (cm_isDefault /= isJust dmInfoM) $ error …`.",
+        "createdAt" : "2019-08-27T11:20:17Z",
+        "updatedAt" : "2019-08-27T12:05:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c5c84f44-4b91-432e-8aba-e89e57efe6bb",
+        "parentId" : "4835002e-22a8-42f5-b33b-a3587c9fd3cd",
+        "author" : null,
+        "body" : "`(False, Just ...)` is expected whenever we're processing a typeclass method's original signature, but there also exists a default implementation. It's not an error. The `cm_isDefault` comes from the parsed AST and it just tells us whether we're processing a type signature that is marked as `default`. ",
+        "createdAt" : "2019-08-27T11:34:37Z",
+        "updatedAt" : "2019-08-27T12:05:42Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8e8ca155-231b-4049-a0cb-19d1fa481d4b",
+        "parentId" : "4835002e-22a8-42f5-b33b-a3587c9fd3cd",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah I see, in that case maybe spell that out in a comment? :)",
+        "createdAt" : "2019-08-27T11:35:26Z",
+        "updatedAt" : "2019-08-27T12:05:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "132cc489-0f61-4ee6-847c-eaa938fbcbc9",
+        "parentId" : "4835002e-22a8-42f5-b33b-a3587c9fd3cd",
+        "author" : null,
+        "body" : "👍 ",
+        "createdAt" : "2019-08-27T11:40:31Z",
+        "updatedAt" : "2019-08-27T12:05:42Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d42c9a445d00d6609a82fee50c9ba51fa1ee4914",
+    "line" : null,
+    "diffHunk" : "@@ -298,53 +267,91 @@ getFctDocs ctx@DocCtx{..} cl_nameM (DeclData decl docs) = do\n         fct_anchor = Just $ functionAnchor dc_modname fct_name\n         fct_descr = docs\n \n-    guard $ case cl_nameM of\n-        Just cl_name -> exportsField dc_exports cl_name fct_name\n-        Nothing -> exportsFunction dc_exports fct_name\n-\n+    guard (exportsFunction dc_exports fct_name)\n     Just FunctionDoc {..}\n \n getClsDocs :: DocCtx -> DeclData -> Maybe ClassDoc\n-getClsDocs ctx@DocCtx{..} (DeclData (L _ (TyClD _ c@ClassDecl{..})) docs) = do\n+getClsDocs ctx@DocCtx{..} (DeclData (L _ (TyClD _ ClassDecl{..})) tcdocs) = do\n     let cl_name = Typename . packRdrName $ unLoc tcdLName\n-        tyconMb = MS.lookup cl_name dc_tycons\n-        cl_anchor = tyConAnchor ctx =<< tyconMb\n-        cl_descr = docs\n+    tycon <- MS.lookup cl_name dc_tycons\n+    tycls <- tyConClass_maybe tycon\n+    let cl_anchor = Just $ classAnchor dc_modname cl_name\n+        cl_descr = tcdocs\n         cl_args = map (tyVarText . unLoc) $ hsq_explicit tcdTyVars\n-        cl_functions = map (dropMemberContext cl_anchor cl_args) $\n-            concatMap (f cl_name) tcdSigs\n+        opMap = MS.fromList\n+            [ (Fieldname $ packId id, (id, dmInfoM))\n+            | (id, dmInfoM) <- classOpItems tycls ]\n+        cl_methods = concatMap (getMethodDocs opMap cl_anchor cl_name cl_args) subDecls\n         cl_super = do\n-            tycon <- tyconMb\n-            cls <- tyConClass_maybe tycon\n-            let theta = classSCTheta cls\n+            let theta = classSCTheta tycls\n             guard (notNull theta)\n             Just (TypeTuple $ map (typeToType ctx) theta)\n         cl_instances = Nothing -- filled out later in 'distributeInstanceDocs'\n     guard (exportsType dc_exports cl_name)\n     Just ClassDoc {..}\n   where\n-    f :: Typename -> LSig GhcPs -> [FunctionDoc]\n-    f cl_name (L dloc (ClassOpSig p b names n)) = catMaybes\n-      [ getFctDocs ctx (Just cl_name) (DeclData (L dloc (SigD noExt (ClassOpSig p b [L loc name] n))) (MS.lookup name subdocs))\n-      | L loc name <- names\n-      ]\n-    f _ _ = []\n+    -- All documentation of class members is stored in tcdDocs.\n+    -- To associate the docs with the correct member, we convert all members\n+    -- and docs to declarations, sort them by their location\n+    -- and then use collectDocs.\n+    -- This is the equivalent of Haddock’s Haddock.Interface.Create.classDecls.\n+    subDecls :: [(LHsDecl GhcPs, Maybe DocText)]\n+    subDecls = collectDocs . sortOn getLoc $ decls\n+    decls = docs ++ defs ++ sigs ++ ats\n+    docs = map (fmap (DocD noExt)) tcdDocs\n+    defs = map (fmap (ValD noExt)) (bagToList tcdMeths)\n+    sigs = map (fmap (SigD noExt)) tcdSigs\n+    ats = map (fmap (TyClD noExt . FamDecl noExt)) tcdATs\n+\n+    -- | Extract typeclass method docs from a subDecl. Notice that\n+    -- we may have to generate multiple docs from a single declaration,\n+    -- thanks to declarations of the form\n+    --\n+    -- @\n+    --     (+), (-) : t -> t -> t\n+    -- @\n+    --\n+    -- where multiple names are present. In that case we just duplicate\n+    -- the associated docs for each name that is defined.\n+    getMethodDocs ::\n+        MS.Map Fieldname ClassOpItem\n+        -> Maybe Anchor\n+        -> Typename\n+        -> [T.Text]\n+        -> (LHsDecl GhcPs, Maybe DocText)\n+        -> [ClassMethodDoc]\n+    getMethodDocs opMap cl_anchor cl_name cl_args = \\case\n+        (L _ (SigD _ (ClassOpSig _ cm_isDefault rdrNamesL _)), cm_descr) ->\n+            flip mapMaybe rdrNamesL $ \\rdrNameL -> do\n+                let cm_name = Fieldname . packRdrName . unLoc $ rdrNameL\n+                    cm_anchor = guard (not cm_isDefault) >>\n+                        Just (functionAnchor dc_modname cm_name)\n+                (id, dmInfoM) <- MS.lookup cm_name opMap\n+                ty <- case (cm_isDefault, dmInfoM) of\n+                    (True, Nothing) ->\n+                        error \"getMethodDocs: expected default method to have associated default method info\"\n+                    (True, Just (_, GenericDM ty)) -> Just ty\n+                    _ -> Just (idType id)"
+  },
+  {
+    "id" : "3a49e16f-50ec-43ac-9c3c-57405745846c",
+    "prId" : 2632,
+    "comments" : [
+      {
+        "id" : "f771a22a-a012-44f2-a984-02fb2c1c96ce",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do we expect to ever reach this case atm? If not, maybe just call `error` so we see if we mess it up instead of silently doing something that might be wrong?",
+        "createdAt" : "2019-08-22T12:29:14Z",
+        "updatedAt" : "2019-08-22T13:17:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bbcd2c41d3a0b442a584d575d784209b0d007d0b",
+    "line" : 55,
+    "diffHunk" : "@@ -330,6 +329,34 @@ getClsDocs ctx@DocCtx{..} (DeclData (L _ (TyClD _ c@ClassDecl{..})) docs) = do\n       | L loc name <- names\n       ]\n     f _ _ = []\n+\n+    -- | Remove the implied context from typeclass member functions.\n+    dropMemberContext :: Maybe Anchor -> [T.Text] -> FunctionDoc -> FunctionDoc\n+    dropMemberContext cl_anchor cl_args fn = fn\n+        { fct_context = do\n+            context <- fct_context fn\n+            case context of\n+                TypeTuple xs -> do\n+                    let xs' = filter (not . matchesMemberContext cl_anchor cl_args) xs\n+                    guard (notNull xs')\n+                    Just (TypeTuple xs')\n+\n+                _ -> Just context\n+                    -- TODO: Move to using a more appropriate type"
+  },
+  {
+    "id" : "124ea419-775e-4ace-933f-93a8c6cdf83b",
+    "prId" : 2632,
+    "comments" : [
+      {
+        "id" : "5a908b39-1cdd-4b0c-a213-35cb7dc9b10a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I guess we can’t use an anchor here as well since there is no easy way to get access to one?",
+        "createdAt" : "2019-08-22T12:32:50Z",
+        "updatedAt" : "2019-08-22T13:17:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "445b3ff2-9a40-40c3-9b6a-d0c0a3ef0121",
+        "parentId" : "5a908b39-1cdd-4b0c-a213-35cb7dc9b10a",
+        "author" : null,
+        "body" : "These are type variables so there isn't an anchor. ",
+        "createdAt" : "2019-08-22T12:48:03Z",
+        "updatedAt" : "2019-08-22T13:17:36Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "46b3b9ee-b2c5-451b-82ad-72519675a317",
+        "parentId" : "5a908b39-1cdd-4b0c-a213-35cb7dc9b10a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense, thanks for the explanation.",
+        "createdAt" : "2019-08-22T12:57:11Z",
+        "updatedAt" : "2019-08-22T13:17:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bbcd2c41d3a0b442a584d575d784209b0d007d0b",
+    "line" : null,
+    "diffHunk" : "@@ -330,6 +329,34 @@ getClsDocs ctx@DocCtx{..} (DeclData (L _ (TyClD _ c@ClassDecl{..})) docs) = do\n       | L loc name <- names\n       ]\n     f _ _ = []\n+\n+    -- | Remove the implied context from typeclass member functions.\n+    dropMemberContext :: Maybe Anchor -> [T.Text] -> FunctionDoc -> FunctionDoc\n+    dropMemberContext cl_anchor cl_args fn = fn\n+        { fct_context = do\n+            context <- fct_context fn\n+            case context of\n+                TypeTuple xs -> do\n+                    let xs' = filter (not . matchesMemberContext cl_anchor cl_args) xs\n+                    guard (notNull xs')\n+                    Just (TypeTuple xs')\n+\n+                _ -> Just context\n+                    -- TODO: Move to using a more appropriate type\n+                    -- for contexts in damldocs, to avoid this case.\n+        }\n+\n+    -- | Is this the implied context for member functions? We use an anchor\n+    -- for comparison because it is more accurate than typenames (which are\n+    -- generally susceptible to qualification and shadowing).\n+    matchesMemberContext :: Maybe Anchor -> [T.Text] -> DDoc.Type -> Bool\n+    matchesMemberContext cl_anchor cl_args ty = and\n+        [ cl_anchor == getTypeAppAnchor ty\n+        , Just [(Just (Typename arg), Just []) | arg <- cl_args] =="
+  },
+  {
+    "id" : "401cc6fa-3bb1-4b01-b8b1-0e3916688cb6",
+    "prId" : 2589,
+    "comments" : [
+      {
+        "id" : "ce1f2ef3-1638-4af4-bf01-a05e1fb32176",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Does it ever happen that we get `Nothing` here but `nameModule_maybe` returns `Just`? My understanding was that during compilation we have an `IndefiniteUnitId` for the current package so that case should already check for whether the name is from the current package.",
+        "createdAt" : "2019-08-19T10:03:37Z",
+        "updatedAt" : "2019-08-21T09:33:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c31287ba-8bfa-4218-a0c6-6619596562dd",
+        "parentId" : "ce1f2ef3-1638-4af4-bf01-a05e1fb32176",
+        "author" : null,
+        "body" : "Hm. It seems to affect the docs somehow (if I remove this check, the instances disappear from the golden tests ... which seems like a bug. But it does suggest that by the time we look at instances the unit IDs are no longer indefinite.). I need to investigate this further.",
+        "createdAt" : "2019-08-21T09:14:22Z",
+        "updatedAt" : "2019-08-21T09:33:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fa441d50-48d8-4954-9a87-3e89ed9bd364",
+        "parentId" : "ce1f2ef3-1638-4af4-bf01-a05e1fb32176",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It could very well just be me misunderstanding unit ids. No need to investigate this before merging or even anytime soon if it works but maybe add a comment.",
+        "createdAt" : "2019-08-21T09:15:49Z",
+        "updatedAt" : "2019-08-21T09:33:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "80f5251971e764b85072660bef0b75497f5e4d90",
+    "line" : 33,
+    "diffHunk" : "@@ -634,6 +643,17 @@ tyConAnchor DocCtx{..} tycon = do\n             | otherwise = typeAnchor\n     Just (anchorFn mod name)\n \n+-- | Create a (possibly external) reference from a TyCon.\n+tyConReference :: DocCtx -> TyCon -> Maybe Reference\n+tyConReference ctx@DocCtx{..} tycon = do\n+    referenceAnchor <- tyConAnchor ctx tycon\n+    let ghcName = tyConName tycon\n+        referencePackage = do\n+            guard (not (nameIsHomePackage dc_ghcMod ghcName))"
+  },
+  {
+    "id" : "e6331714-8596-43d1-a31b-e6eb51434cc6",
+    "prId" : 2492,
+    "comments" : [
+      {
+        "id" : "78e3badd-9fbd-4669-b073-d1497d9a879a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "🕴️",
+        "createdAt" : "2019-08-12T14:38:12Z",
+        "updatedAt" : "2019-08-12T14:46:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c9036c763dbb375fc675db8191ae81710f66b9b0",
+    "line" : 5,
+    "diffHunk" : "@@ -702,6 +702,13 @@ typeToType ctx = \\case\n     TyConApp tycon [b] | \"[]\" == packName (tyConName tycon) ->\n         TypeList (typeToType ctx b)\n \n+    -- Special case for unsaturated (->) to remove the levity arguments.\n+    TyConApp tycon (_:_:bs) | isFunTyCon tycon ->"
+  },
+  {
+    "id" : "49602181-f3fd-41a9-a4e7-dde0ec61f847",
+    "prId" : 2487,
+    "comments" : [
+      {
+        "id" : "de1d52b8-1a05-4213-a44a-30ff489aac3a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I wonder if it would make sense to add a phantom type parameter indicating the “phase”, i.e., whetehr we are before or after `distributeInstanceDocs`.",
+        "createdAt" : "2019-08-12T12:13:20Z",
+        "updatedAt" : "2019-08-12T12:42:13Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ca40d61a-4788-4342-b17f-16829e941375",
+        "parentId" : "de1d52b8-1a05-4213-a44a-30ff489aac3a",
+        "author" : null,
+        "body" : "I think it's a bit much, but I'll keep it in mind for the future.",
+        "createdAt" : "2019-08-12T12:24:37Z",
+        "updatedAt" : "2019-08-12T12:42:13Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e788b2a993c57598623ba9cd06bff1615ac6bb39",
+    "line" : 55,
+    "diffHunk" : "@@ -354,6 +363,7 @@ getTypeDocs ctx@DocCtx{..} (DeclData (L _ (TyClD _ decl)) doc)\n             ad_args = map (tyVarText . unLoc) $ hsq_explicit tcdTyVars\n             ad_anchor = Just $ typeAnchor dc_modname ad_name\n             ad_constrs = mapMaybe (constrDoc ad_name) . dd_cons $ tcdDataDefn\n+            ad_instances = Nothing -- filled out later in 'distributeInstanceDocs'"
+  },
+  {
+    "id" : "ce5c902c-3c88-43e6-92b4-b2c166496f9b",
+    "prId" : 2394,
+    "comments" : [
+      {
+        "id" : "001f1e15-518c-4a44-a3a6-2e4be2e71458",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This option seems weird to me. Why would you want to qualify stuff from the same package but not stuff from other packages?",
+        "createdAt" : "2019-08-05T11:06:17Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3fc1c074-5ba1-4618-b787-355e683d4567",
+        "parentId" : "001f1e15-518c-4a44-a3a6-2e4be2e71458",
+        "author" : null,
+        "body" : "That's why it's an option from many. I think the main reason you'd want it is if your package has some strange convention (...like where you name all your types `T` like in OCaml...), but you still want the standard library (& other packages) to be unqualified like the default.",
+        "createdAt" : "2019-08-05T11:11:27Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0fc0d7b4-8289-4c79-b6a5-9bddc51e4da4",
+        "parentId" : "001f1e15-518c-4a44-a3a6-2e4be2e71458",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That makes sense. Thanks a lot for the explanation. I have not thought of using the OCaml convention in DAML but I know some people who do use it. :)",
+        "createdAt" : "2019-08-05T11:20:22Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b9d15a77e50bf8780331c378c6b7080345b1c42",
+    "line" : 36,
+    "diffHunk" : "@@ -39,13 +47,35 @@ import qualified Data.Text                                 as T\n import           Data.Tuple.Extra                          (second)\n import Data.Either\n \n--- | Parse, and process documentation in, a dependency graph of modules.\n-mkDocs\n-    :: IdeOptions\n+-- | Options that affect doc extraction.\n+data ExtractOptions = ExtractOptions\n+    { eo_qualifyTypes :: QualifyTypes\n+        -- ^ qualify non-local types\n+    , eo_simplifyQualifiedTypes :: Bool\n+        -- ^ drop common module prefix when qualifying types\n+    } deriving (Eq, Show, Read)\n+\n+data QualifyTypes\n+    = QualifyTypesAlways\n+    | QualifyTypesInPackage"
+  },
+  {
+    "id" : "e8a93e44-4a87-4590-8c36-f47cd3074a49",
+    "prId" : 2394,
+    "comments" : [
+      {
+        "id" : "64e41c4e-e888-40cb-ab4c-5b415787ab72",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not convinced this option is a good idea in a Haskell-based language since you cannot refer to `X.Y.z` as `Y.z` when you're in `X`. (In OCaml this would be a great option though.)",
+        "createdAt" : "2019-08-05T11:08:09Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "91d1aec9-de91-4cf7-b372-3c99b94dcab6",
+        "parentId" : "64e41c4e-e888-40cb-ab4c-5b415787ab72",
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "I see this option as a viable compromise to achieve a short but qualified name . Use case being something like `import X.Y.Z.Blah as Blah` - imported `stuff` may come out as `Z.Blah.stuff` but that is better than the full name or simply `stuff`.",
+        "createdAt" : "2019-08-05T11:27:32Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f9243b1e-358a-43b5-a2da-518977904b35",
+        "parentId" : "64e41c4e-e888-40cb-ab4c-5b415787ab72",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I disagree that `Z.Blah.stuff` is better than `X.Y.Z.Blah.stuff` or `stuff`. If there's actually something whose fully qualified names is `Z.Blah.stuff`, this can be incredibly confusing.",
+        "createdAt" : "2019-08-05T12:21:46Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "49ed5c7c-bc85-42a3-b961-3f9e984a4449",
+        "parentId" : "64e41c4e-e888-40cb-ab4c-5b415787ab72",
+        "author" : null,
+        "body" : "The links are still pointing to the right place though, it's just the text that is a little more qualified. This really is for the use case where fully unqualified names (the default) are too ambiguous (e.g. with OCaml convention), but fully qualified names are overly verbose. Some ambiguity is expected.",
+        "createdAt" : "2019-08-05T12:25:34Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b9d15a77e50bf8780331c378c6b7080345b1c42",
+    "line" : 30,
+    "diffHunk" : "@@ -39,13 +47,35 @@ import qualified Data.Text                                 as T\n import           Data.Tuple.Extra                          (second)\n import Data.Either\n \n--- | Parse, and process documentation in, a dependency graph of modules.\n-mkDocs\n-    :: IdeOptions\n+-- | Options that affect doc extraction.\n+data ExtractOptions = ExtractOptions\n+    { eo_qualifyTypes :: QualifyTypes\n+        -- ^ qualify non-local types\n+    , eo_simplifyQualifiedTypes :: Bool"
+  },
+  {
+    "id" : "8322512e-ceec-4cd8-a9e6-073492670827",
+    "prId" : 2394,
+    "comments" : [
+      {
+        "id" : "994f3784-a35e-4ad7-84f1-84c8c8c9df31",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is `dc_modname` the same as the root module of your DALF? In that case, I am not sure this option is very useful as a lot of people seem to just call that module `LibraryModules`. Maybe an option that strips away everything but the last component would be more useful? (I realize that this makes things potentially ambiguous.)",
+        "createdAt" : "2019-08-05T11:32:52Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "34d922b1-a8fb-4d29-89e7-e114fb17d4d5",
+        "parentId" : "994f3784-a35e-4ad7-84f1-84c8c8c9df31",
+        "author" : null,
+        "body" : "`dc_modname` is the name of the current module.\r\n\r\n> Maybe an option that strips away everything but the last component would be more useful?\r\n\r\nThat's definitely another possibility.",
+        "createdAt" : "2019-08-05T11:37:41Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ac669aff-2d8e-4a3e-bb38-20daca91e960",
+        "parentId" : "994f3784-a35e-4ad7-84f1-84c8c8c9df31",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see, in that case the current behavior seems fine.",
+        "createdAt" : "2019-08-05T11:39:32Z",
+        "updatedAt" : "2019-08-05T12:47:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b9d15a77e50bf8780331c378c6b7080345b1c42",
+    "line" : 154,
+    "diffHunk" : "@@ -557,6 +590,43 @@ tyConAnchor DocCtx{..} tycon = do\n             | otherwise = typeAnchor\n     Just (anchorFn mod name)\n \n+-- | Extract a potentially qualified typename from a TyCon.\n+tyConTypename :: DocCtx -> TyCon -> Typename\n+tyConTypename DocCtx{..} tycon =\n+    let ExtractOptions{..} = dc_extractOptions\n+        ghcName = tyConName tycon\n+        qualify =\n+            case eo_qualifyTypes of\n+                QualifyTypesAlways -> True\n+                QualifyTypesInPackage -> nameIsHomePackageImport dc_ghcMod ghcName\n+                QualifyTypesNever -> False\n+\n+        moduleM = guard qualify >> nameModule_maybe ghcName\n+        modNameM = getModulename <$> moduleM\n+        simplifyModName\n+            | eo_simplifyQualifiedTypes = dropCommonModulePrefix dc_modname\n+            | otherwise = id\n+        prefix = maybe \"\" ((<> \".\") . unModulename . simplifyModName) modNameM\n+    in Typename (prefix <> packName ghcName)\n+\n+-- | Drop common module name prefix, returning the second module name\n+-- sans the module prefix it has in common with the first module name.\n+-- This will not return an empty module name however (unless given an\n+-- empty module name to start).\n+--\n+-- This function respects the atomicity of the module names between\n+-- periods. For instance @dropCommonModulePrefix \"Foo.BarBaz\" \"Foo.BarSpam\"@\n+-- will evaluate to @\"BarSpam\"@, not @\"Spam\"@.\n+dropCommonModulePrefix :: Modulename -> Modulename -> Modulename"
+  }
+]

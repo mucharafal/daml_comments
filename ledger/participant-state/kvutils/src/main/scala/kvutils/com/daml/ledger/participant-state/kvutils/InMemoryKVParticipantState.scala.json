@@ -1,0 +1,161 @@
+[
+  {
+    "id" : "dcf09e96-cddf-47cf-ad14-b8583bb55922",
+    "prId" : 637,
+    "comments" : [
+      {
+        "id" : "1496563b-b9af-4a93-b25f-7196e187a592",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "Why are the rejections not stored as `KVEntry` blobs as well? These rejections model rejections created during sequencing, which can only be communicated on-ledger.",
+        "createdAt" : "2019-04-24T08:01:37Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f4296a21-484b-4baa-88eb-289c34acec34",
+        "parentId" : "1496563b-b9af-4a93-b25f-7196e187a592",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "you're right, the rejections during sequencing need to go into the ledger.",
+        "createdAt" : "2019-04-24T09:51:41Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d5b2167d99861a69fd3366ab5fb08acc35514642",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,143 @@\n+package com.daml.ledger.participant.state.kvutils\n+\n+import java.util.concurrent.atomic.AtomicReference\n+\n+import akka.NotUsed\n+import akka.stream.scaladsl.Source\n+import com.daml.ledger.participant.state.v1._\n+import com.digitalasset.daml.lf.data.Ref.SimpleString\n+import com.digitalasset.daml.lf.data.Time.Timestamp\n+import com.digitalasset.daml.lf.engine.Engine\n+import com.digitalasset.daml_lf.DamlLf.Archive\n+import com.digitalasset.platform.akkastreams.Dispatcher\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.immutable.TreeMap\n+import scala.concurrent.Future\n+\n+/* Implementation of the participant-state using the key-value utilities and an in-memory map. */\n+class InMemoryKVParticipantState extends ReadService with WriteService {\n+  val ledgerId = SimpleString.assertFromString(\"InMemoryKVParticipantState\")\n+\n+  val engine = Engine()\n+\n+  val stateRef = new AtomicReference(\n+    State(0, Timestamp.Epoch, TreeMap.empty, TreeMap.empty, Map.empty))\n+  case class State(\n+      nextIdx: Long,\n+      recordTime: Timestamp,\n+      // FIXME(JM): Add command de-duplication\n+      entries: TreeMap[Long, (Timestamp, KeyValueUtils.KVEntryBlob)], // Tree map, so we can have ordered iteration.\n+      rejections: TreeMap[Long, Update.CommandRejected],"
+  },
+  {
+    "id" : "9a16fe71-862e-4b14-944a-1665921e3ff1",
+    "prId" : 637,
+    "comments" : [
+      {
+        "id" : "77f4f098-d655-4dd3-8dc3-a1ff21a8229d",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "The ACS check is missing here isn't it?",
+        "createdAt" : "2019-04-24T08:02:34Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "da58d343-495a-4a97-a6b4-73a4a0b953d3",
+        "parentId" : "77f4f098-d655-4dd3-8dc3-a1ff21a8229d",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "yes it is.",
+        "createdAt" : "2019-04-24T09:51:47Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d5b2167d99861a69fd3366ab5fb08acc35514642",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,143 @@\n+package com.daml.ledger.participant.state.kvutils\n+\n+import java.util.concurrent.atomic.AtomicReference\n+\n+import akka.NotUsed\n+import akka.stream.scaladsl.Source\n+import com.daml.ledger.participant.state.v1._\n+import com.digitalasset.daml.lf.data.Ref.SimpleString\n+import com.digitalasset.daml.lf.data.Time.Timestamp\n+import com.digitalasset.daml.lf.engine.Engine\n+import com.digitalasset.daml_lf.DamlLf.Archive\n+import com.digitalasset.platform.akkastreams.Dispatcher\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.immutable.TreeMap\n+import scala.concurrent.Future\n+\n+/* Implementation of the participant-state using the key-value utilities and an in-memory map. */\n+class InMemoryKVParticipantState extends ReadService with WriteService {\n+  val ledgerId = SimpleString.assertFromString(\"InMemoryKVParticipantState\")\n+\n+  val engine = Engine()\n+\n+  val stateRef = new AtomicReference(\n+    State(0, Timestamp.Epoch, TreeMap.empty, TreeMap.empty, Map.empty))\n+  case class State(\n+      nextIdx: Long,\n+      recordTime: Timestamp,\n+      // FIXME(JM): Add command de-duplication\n+      entries: TreeMap[Long, (Timestamp, KeyValueUtils.KVEntryBlob)], // Tree map, so we can have ordered iteration.\n+      rejections: TreeMap[Long, Update.CommandRejected],\n+      archives: Map[PackageId, ByteString]\n+  )\n+  private val beginning = 0L\n+  val dispatcher: Dispatcher[Long, Update] = Dispatcher(\n+    (idx, _) => idx + 1L,\n+    idx => Future.successful(getUpdate(idx, stateRef.get)),\n+    beginning,\n+    beginning\n+  )\n+\n+  private def getUpdate(idx: Long, state: State): Update = {\n+    state.entries\n+      .get(idx)\n+      .map {\n+        case (recordTime, entry) =>\n+          KeyValueUtils.entryToUpdate(idxToKVEntryId(idx), entry, recordTime)\n+      }\n+      .getOrElse {\n+        state.rejections(idx)\n+      }\n+  }\n+\n+  private def idxToKVEntryId(idx: Long): KeyValueUtils.KVEntryId =\n+    ByteString.copyFromUtf8(idx.toString)\n+\n+  private def kvEntryIdToIdx(entryId: KeyValueUtils.KVEntryId): Long =\n+    entryId.toStringUtf8.toLong\n+\n+  override def stateUpdates(beginAfter: Option[Offset]): Source[(Offset, Update), NotUsed] = {\n+    dispatcher\n+      .startingAt(beginAfter.map(_.components.head.toLong).getOrElse(beginning))\n+      .map {\n+        case (idx, update) =>\n+          Offset(Array(idx)) -> update\n+      }\n+  }\n+\n+  override def submitTransaction(\n+      submitterInfo: SubmitterInfo,\n+      transactionMeta: TransactionMeta,\n+      transaction: SubmittedTransaction): Unit = {\n+    val entry = KeyValueUtils.transactionToEntry(submitterInfo, transactionMeta, transaction)\n+\n+    // Simulate a validation of the transaction. If the validation\n+    // fails we inject a rejected command, otherwise we store the blob.\n+    val txInfo = KeyValueUtils.computeTxInfo(entry)\n+    val stateSnapshot = stateRef.get\n+\n+    // FIXME(JM): Add some error handling\n+    val inputEntries = txInfo.inputs.contracts\n+      .map(_._1)\n+      .map { entryId =>\n+        entryId -> stateSnapshot.entries(kvEntryIdToIdx(entryId))._2\n+      }\n+      .toMap\n+\n+    KeyValueUtils.validateTransaction(\n+      engine,\n+      stateSnapshot.archives, // FIXME(JM): \"txInfo.inputs.packages\" aren't correctly computed yet.\n+      /*\n+      txInfo.inputs.packages.map { k =>\n+        k -> stateSnapshot.archives(k)\n+      }.toMap,*/\n+      inputEntries,\n+      txInfo\n+    ) match {\n+      case Left(err) =>\n+        val rejection =\n+          Update.CommandRejected(Some(submitterInfo), RejectionReason.Disputed(err.toString))\n+        val updatedState = stateRef.updateAndGet { state =>\n+          state.copy(\n+            nextIdx = state.nextIdx + 1,\n+            rejections = state.rejections + (state.nextIdx -> rejection)\n+          )\n+        }\n+        dispatcher.signalNewHead(updatedState.nextIdx)\n+\n+      case Right(()) =>\n+        val updatedState = stateRef.updateAndGet { state =>"
+  },
+  {
+    "id" : "53273e3a-7a5a-46fd-82de-934607700cda",
+    "prId" : 637,
+    "comments" : [
+      {
+        "id" : "d5bcba99-83c0-4f5b-a3db-ca05d7f08c73",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "why \"epoch of the ledger record time\"; wouldn't just \"ledger record time\" be as precise?",
+        "createdAt" : "2019-04-24T08:23:11Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "aab24db0-65d1-4221-acae-219dd5dafbb8",
+        "parentId" : "d5bcba99-83c0-4f5b-a3db-ca05d7f08c73",
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "and less confusing... to me at least",
+        "createdAt" : "2019-04-24T08:23:53Z",
+        "updatedAt" : "2019-04-29T09:35:03Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d5b2167d99861a69fd3366ab5fb08acc35514642",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,143 @@\n+package com.daml.ledger.participant.state.kvutils\n+\n+import java.util.concurrent.atomic.AtomicReference\n+\n+import akka.NotUsed\n+import akka.stream.scaladsl.Source\n+import com.daml.ledger.participant.state.v1._\n+import com.digitalasset.daml.lf.data.Ref.SimpleString\n+import com.digitalasset.daml.lf.data.Time.Timestamp\n+import com.digitalasset.daml.lf.engine.Engine\n+import com.digitalasset.daml_lf.DamlLf.Archive\n+import com.digitalasset.platform.akkastreams.Dispatcher\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.immutable.TreeMap\n+import scala.concurrent.Future\n+\n+/* Implementation of the participant-state using the key-value utilities and an in-memory map. */\n+class InMemoryKVParticipantState extends ReadService with WriteService {\n+  val ledgerId = SimpleString.assertFromString(\"InMemoryKVParticipantState\")\n+\n+  val engine = Engine()\n+\n+  val stateRef = new AtomicReference(\n+    State(0, Timestamp.Epoch, TreeMap.empty, TreeMap.empty, Map.empty))\n+  case class State(\n+      nextIdx: Long,\n+      recordTime: Timestamp,\n+      // FIXME(JM): Add command de-duplication\n+      entries: TreeMap[Long, (Timestamp, KeyValueUtils.KVEntryBlob)], // Tree map, so we can have ordered iteration.\n+      rejections: TreeMap[Long, Update.CommandRejected],\n+      archives: Map[PackageId, ByteString]\n+  )\n+  private val beginning = 0L\n+  val dispatcher: Dispatcher[Long, Update] = Dispatcher(\n+    (idx, _) => idx + 1L,\n+    idx => Future.successful(getUpdate(idx, stateRef.get)),\n+    beginning,\n+    beginning\n+  )\n+\n+  private def getUpdate(idx: Long, state: State): Update = {\n+    state.entries\n+      .get(idx)\n+      .map {\n+        case (recordTime, entry) =>\n+          KeyValueUtils.entryToUpdate(idxToKVEntryId(idx), entry, recordTime)\n+      }\n+      .getOrElse {\n+        state.rejections(idx)\n+      }\n+  }\n+\n+  private def idxToKVEntryId(idx: Long): KeyValueUtils.KVEntryId =\n+    ByteString.copyFromUtf8(idx.toString)\n+\n+  private def kvEntryIdToIdx(entryId: KeyValueUtils.KVEntryId): Long =\n+    entryId.toStringUtf8.toLong\n+\n+  override def stateUpdates(beginAfter: Option[Offset]): Source[(Offset, Update), NotUsed] = {\n+    dispatcher\n+      .startingAt(beginAfter.map(_.components.head.toLong).getOrElse(beginning))\n+      .map {\n+        case (idx, update) =>\n+          Offset(Array(idx)) -> update\n+      }\n+  }\n+\n+  override def submitTransaction(\n+      submitterInfo: SubmitterInfo,\n+      transactionMeta: TransactionMeta,\n+      transaction: SubmittedTransaction): Unit = {\n+    val entry = KeyValueUtils.transactionToEntry(submitterInfo, transactionMeta, transaction)\n+\n+    // Simulate a validation of the transaction. If the validation\n+    // fails we inject a rejected command, otherwise we store the blob.\n+    val txInfo = KeyValueUtils.computeTxInfo(entry)\n+    val stateSnapshot = stateRef.get\n+\n+    // FIXME(JM): Add some error handling\n+    val inputEntries = txInfo.inputs.contracts\n+      .map(_._1)\n+      .map { entryId =>\n+        entryId -> stateSnapshot.entries(kvEntryIdToIdx(entryId))._2\n+      }\n+      .toMap\n+\n+    KeyValueUtils.validateTransaction(\n+      engine,\n+      stateSnapshot.archives, // FIXME(JM): \"txInfo.inputs.packages\" aren't correctly computed yet.\n+      /*\n+      txInfo.inputs.packages.map { k =>\n+        k -> stateSnapshot.archives(k)\n+      }.toMap,*/\n+      inputEntries,\n+      txInfo\n+    ) match {\n+      case Left(err) =>\n+        val rejection =\n+          Update.CommandRejected(Some(submitterInfo), RejectionReason.Disputed(err.toString))\n+        val updatedState = stateRef.updateAndGet { state =>\n+          state.copy(\n+            nextIdx = state.nextIdx + 1,\n+            rejections = state.rejections + (state.nextIdx -> rejection)\n+          )\n+        }\n+        dispatcher.signalNewHead(updatedState.nextIdx)\n+\n+      case Right(()) =>\n+        val updatedState = stateRef.updateAndGet { state =>\n+          state.copy(\n+            nextIdx = state.nextIdx + 1,\n+            entries = state.entries + (state.nextIdx -> ((state.recordTime, entry)))\n+          )\n+        }\n+        dispatcher.signalNewHead(updatedState.nextIdx)\n+    }\n+  }\n+\n+  // Back-channel for uploading DAML-LF archives.\n+  def uploadArchive(archive: Archive): Unit = {\n+    val entry = KeyValueUtils.archiveToEntry(archive)\n+    val updatedState = stateRef.updateAndGet { state =>\n+      state.copy(\n+        nextIdx = state.nextIdx + 1,\n+        entries = state.entries + (state.nextIdx -> ((state.recordTime, entry))),\n+        archives = state.archives + (SimpleString\n+          .assertFromString(archive.getHash) -> archive.toByteString)\n+      )\n+    }\n+    dispatcher.signalNewHead(updatedState.nextIdx)\n+  }\n+\n+  /** Retrieve the static initial conditions of the ledger, containing\n+    * the ledger identifier and the epoch of the ledger record time."
+  }
+]

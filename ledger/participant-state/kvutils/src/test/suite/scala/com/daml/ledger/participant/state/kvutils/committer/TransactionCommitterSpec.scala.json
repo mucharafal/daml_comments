@@ -1,0 +1,558 @@
+[
+  {
+    "id" : "ce0fb6ab-07e1-46e3-80d9-999be5da1160",
+    "prId" : 6852,
+    "comments" : [
+      {
+        "id" : "fc13d32b-636b-4df4-9805-b0a754802d5e",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n      \"compute and correctly set the min/max ledger time and out-of-time-bounds log entry without deduplicateUntil\" in {\r\n```",
+        "createdAt" : "2020-07-24T10:11:01Z",
+        "updatedAt" : "2020-07-24T10:29:13Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e74a3e98b1c9a6b60582189b86edb8a2836dca76",
+    "line" : null,
+    "diffHunk" : "@@ -132,27 +127,36 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n       }\n \n       \"compute and correctly set the min/max ledger time without deduplicateUntil\" in {"
+  },
+  {
+    "id" : "7366b719-2591-41f1-96f7-0de875bc02d9",
+    "prId" : 6852,
+    "comments" : [
+      {
+        "id" : "e0a8b654-aaa3-4915-8c83-4685cb242ebb",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n      \"compute and correctly set the min/max ledger time and out-of-time-bounds log entry with deduplicateUntil\" in {\r\n```",
+        "createdAt" : "2020-07-24T10:11:30Z",
+        "updatedAt" : "2020-07-24T10:29:13Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e74a3e98b1c9a6b60582189b86edb8a2836dca76",
+    "line" : null,
+    "diffHunk" : "@@ -132,27 +127,36 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n       }\n \n       \"compute and correctly set the min/max ledger time without deduplicateUntil\" in {\n+        val context = contextWithTimeModelAndEmptyCommandDeduplication()\n         instance.validateLedgerTime(\n-          contextWithTimeModelAndEmptyCommandDeduplication,\n+          context,\n           aDamlTransactionEntrySummaryWithSubmissionAndLedgerEffectiveTimes)\n-        contextWithTimeModelAndEmptyCommandDeduplication.minimumRecordTime shouldEqual Some(\n-          Instant.ofEpochSecond(-28))\n-        contextWithTimeModelAndEmptyCommandDeduplication.maximumRecordTime shouldEqual Some(\n-          Instant.ofEpochSecond(31))\n-        contextWithTimeModelAndEmptyCommandDeduplication.deduplicateUntil shouldBe empty\n+        context.minimumRecordTime shouldEqual Some(Instant.ofEpochSecond(-28))\n+        context.maximumRecordTime shouldEqual Some(Instant.ofEpochSecond(31))\n+        context.deduplicateUntil shouldBe empty\n+        context.outOfTimeBoundsLogEntry should not be empty\n+        context.outOfTimeBoundsLogEntry.foreach { actualOutOfTimeBoundsLogEntry =>\n+          actualOutOfTimeBoundsLogEntry.hasTransactionRejectionEntry shouldBe true\n+          actualOutOfTimeBoundsLogEntry.getTransactionRejectionEntry.hasInvalidLedgerTime shouldBe true\n+        }\n       }\n \n       \"compute and correctly set the min/max ledger time with deduplicateUntil\" in {"
+  },
+  {
+    "id" : "84ced68e-862a-4e1a-9f3d-53930fc23e04",
+    "prId" : 6630,
+    "comments" : [
+      {
+        "id" : "e31dabe4-1400-4a48-a11f-b7481ce061e7",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Why are the success log entry assertions present only in this test and not in others?",
+        "createdAt" : "2020-07-09T07:00:17Z",
+        "updatedAt" : "2020-07-09T10:04:48Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "16896679-9b9e-4b15-ac2d-f45731a662d4",
+        "parentId" : "e31dabe4-1400-4a48-a11f-b7481ce061e7",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added test cases for checking just the success log entry independent from pre-execution (it's a separate concern).",
+        "createdAt" : "2020-07-09T09:41:14Z",
+        "updatedAt" : "2020-07-09T10:04:48Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "30f59a7ea813c8683703e913a307efff5574108f",
+    "line" : null,
+    "diffHunk" : "@@ -196,6 +196,35 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n     }\n   }\n \n+  \"buildLogEntry\" should {\n+    \"produce an out-of-time-bounds rejection log entry in case pre-execution is enabled\" in {\n+      val context = new FakeCommitContext(recordTime = None)\n+\n+      val actualSuccessLogEntry = instance.buildLogEntry(aTransactionEntrySummary, context)"
+  },
+  {
+    "id" : "cbeb27e5-0bca-4218-ba05-d5dbda368452",
+    "prId" : 6591,
+    "comments" : [
+      {
+        "id" : "9a473c44-4d10-4149-bd7f-908e55276603",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Use `Conversions.buildTimestamp`.",
+        "createdAt" : "2020-07-02T15:46:03Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4cceffbc-bb4e-4e23-89c6-39f5b5d5dda7",
+        "parentId" : "9a473c44-4d10-4149-bd7f-908e55276603",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done",
+        "createdAt" : "2020-07-03T15:26:47Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69acdd932ebffbf0a5f1f579bdea8256ed94439f",
+    "line" : null,
+    "diffHunk" : "@@ -152,4 +206,7 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n \n   private def createTransactionCommitter(): TransactionCommitter =\n     new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+\n+  private def createProtobufTimestamp(seconds: Long) =\n+    com.google.protobuf.Timestamp.newBuilder().setSeconds(seconds).build()"
+  },
+  {
+    "id" : "b6e62321-a035-43fc-99bc-9b8ebb1a7885",
+    "prId" : 6591,
+    "comments" : [
+      {
+        "id" : "3e22f99f-8937-430b-beaf-38a3fbe5aab1",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "It's personal taste but I find test cases highly unreadable if I have to read through lots of boilerplate first before I get to the actual test case definition. I'd suggest either keeping these near the top where they were or making them `private def`s and putting them at the end of the file.",
+        "createdAt" : "2020-07-03T09:21:32Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7964f271-b018-49e0-a452-0c4cda406548",
+        "parentId" : "3e22f99f-8937-430b-beaf-38a3fbe5aab1",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Yes I agree, moved everything at the top.",
+        "createdAt" : "2020-07-03T15:27:46Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69acdd932ebffbf0a5f1f579bdea8256ed94439f",
+    "line" : null,
+    "diffHunk" : "@@ -100,32 +105,81 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n     }\n   }\n \n-  \"validateLedgerTime\" should {\n-    \"continue without accessing ledger configuration if record time is not available\" in {\n-      val instance = createTransactionCommitter()\n-      val context = new FakeCommitContext(recordTime = None)\n-      val actual = instance.validateLedgerTime(context, aTransactionEntrySummary)\n+  \"validateLedgerTime\" can {\n+    \"when the record time is not available\" should {\n+      val configurationStateValue = defaultConfigurationStateValueBuilder.build\n+      val inputWithDeclaredConfig =\n+        Map(Conversions.configurationStateKey -> Some(configurationStateValue))\n+      val context = new FakeCommitContext(recordTime = None, inputs = inputWithDeclaredConfig)\n \n-      actual match {\n-        case StepContinue(_) => succeed\n-        case StepStop(_) => fail\n+      \"continue\" in {\n+        val result = instance.validateLedgerTime(context, aTransactionEntrySummary)\n+\n+        result match {\n+          case StepContinue(_) => succeed\n+          case StepStop(_) => fail\n+        }\n+      }\n+\n+      val aSubmissionTime = createProtobufTimestamp(seconds = 1)"
+  },
+  {
+    "id" : "7b30777a-f46e-473e-a524-0295bfc384e3",
+    "prId" : 6591,
+    "comments" : [
+      {
+        "id" : "741999e5-d4cc-4876-bccb-66f1bda8921e",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please merge these two test cases. Also, please explicitly spell out how you arrive at the expected values as they are non-obvious.",
+        "createdAt" : "2020-07-03T16:01:44Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "69acdd932ebffbf0a5f1f579bdea8256ed94439f",
+    "line" : 113,
+    "diffHunk" : "@@ -98,32 +135,60 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n     }\n   }\n \n-  \"validateLedgerTime\" should {\n-    \"continue without accessing ledger configuration if record time is not available\" in {\n-      val instance = createTransactionCommitter()\n-      val context = new FakeCommitContext(recordTime = None)\n-      val actual = instance.validateLedgerTime(context, aTransactionEntrySummary)\n+  \"validateLedgerTime\" can {\n+    \"when the record time is not available\" should {\n+      \"continue\" in {\n+        val result = instance.validateLedgerTime(\n+          contextWithTimeModelAndEmptyCommandDeduplication,\n+          aTransactionEntrySummary)\n \n-      actual match {\n-        case StepContinue(_) => succeed\n-        case StepStop(_) => fail\n+        result match {\n+          case StepContinue(_) => succeed\n+          case StepStop(_) => fail\n+        }\n+      }\n+\n+      \"compute and correctly set the minimum ledger time without deduplicateUntil\" in {\n+        instance.validateLedgerTime("
+  },
+  {
+    "id" : "a82441be-bf63-4683-85fa-9210d93b05e1",
+    "prId" : 6591,
+    "comments" : [
+      {
+        "id" : "3e20d105-a51c-43b1-98a9-5774860010fd",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please merge these two test cases. Also, please explicitly spell out how you arrive at the expected values as they are non-obvious.",
+        "createdAt" : "2020-07-03T16:01:56Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "69acdd932ebffbf0a5f1f579bdea8256ed94439f",
+    "line" : 123,
+    "diffHunk" : "@@ -98,32 +135,60 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n     }\n   }\n \n-  \"validateLedgerTime\" should {\n-    \"continue without accessing ledger configuration if record time is not available\" in {\n-      val instance = createTransactionCommitter()\n-      val context = new FakeCommitContext(recordTime = None)\n-      val actual = instance.validateLedgerTime(context, aTransactionEntrySummary)\n+  \"validateLedgerTime\" can {\n+    \"when the record time is not available\" should {\n+      \"continue\" in {\n+        val result = instance.validateLedgerTime(\n+          contextWithTimeModelAndEmptyCommandDeduplication,\n+          aTransactionEntrySummary)\n \n-      actual match {\n-        case StepContinue(_) => succeed\n-        case StepStop(_) => fail\n+        result match {\n+          case StepContinue(_) => succeed\n+          case StepStop(_) => fail\n+        }\n+      }\n+\n+      \"compute and correctly set the minimum ledger time without deduplicateUntil\" in {\n+        instance.validateLedgerTime(\n+          contextWithTimeModelAndEmptyCommandDeduplication,\n+          aDamlTransactionEntrySummaryWithSubmissionAndLedgerEffectiveTimes)\n+        contextWithTimeModelAndEmptyCommandDeduplication.minimumRecordTime shouldEqual Some(\n+          Instant.ofEpochSecond(-28))\n+      }\n+\n+      \"compute and correctly set the maximum ledger time without deduplicateUntil\" in {\n+        instance.validateLedgerTime(\n+          contextWithTimeModelAndEmptyCommandDeduplication,\n+          aDamlTransactionEntrySummaryWithSubmissionAndLedgerEffectiveTimes)\n+        contextWithTimeModelAndEmptyCommandDeduplication.maximumRecordTime shouldEqual Some(\n+          Instant.ofEpochSecond(31))\n+      }\n+\n+      \"compute and correctly set the minimum ledger time with deduplicateUntil\" in {\n+        instance.validateLedgerTime("
+  },
+  {
+    "id" : "42066f6b-d1e8-4e76-b712-30c4d61e9580",
+    "prId" : 6591,
+    "comments" : [
+      {
+        "id" : "07b60fc7-c715-4b9f-9b4c-1895b14d9237",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n      Timestamp.assertFromInstant(Instant.ofEpochSecond(seconds))\r\n```",
+        "createdAt" : "2020-07-03T16:04:24Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69acdd932ebffbf0a5f1f579bdea8256ed94439f",
+    "line" : null,
+    "diffHunk" : "@@ -159,4 +224,8 @@ class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar\n       .setCommandDedup(\n         DamlCommandDedupValue.newBuilder.setDeduplicatedUntil(buildTimestamp(deduplicationTime)))\n       .build\n+\n+  private def createProtobufTimestamp(seconds: Long) =\n+    Conversions.buildTimestamp(\n+      Timestamp.assertFromInstant(Instant.EPOCH.plus(Duration.ofSeconds(seconds))))"
+  },
+  {
+    "id" : "45d5bf1c-fd19-4885-95b8-057156ccc408",
+    "prId" : 6591,
+    "comments" : [
+      {
+        "id" : "7e68d462-b182-43b9-a552-8c5e00b80fe9",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "It's preferred not to reuse builders as they are mutable:\r\n```suggestion\r\n  private def defaultConfigurationStateValueBuilder() =\r\n```",
+        "createdAt" : "2020-07-03T16:09:55Z",
+        "updatedAt" : "2020-07-07T09:21:34Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69acdd932ebffbf0a5f1f579bdea8256ed94439f",
+    "line" : null,
+    "diffHunk" : "@@ -19,6 +22,12 @@ import org.scalatest.{Matchers, WordSpec}\n \n class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar {\n   private val metrics = new Metrics(new MetricRegistry)\n+  private val defaultConfigurationStateValueBuilder ="
+  },
+  {
+    "id" : "2e48ab82-4706-44c5-af78-5825aae1473b",
+    "prId" : 6538,
+    "comments" : [
+      {
+        "id" : "7c2c0423-eed2-43a6-b182-2984e259015d",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Could you also check that the same happens even in case a deduplication entry is present?",
+        "createdAt" : "2020-07-01T09:53:06Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f6b38445-22cb-459b-a7c9-9d5da59a9c8a",
+        "parentId" : "7c2c0423-eed2-43a6-b182-2984e259015d",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "We branch on whether there's a record time available. Hence, whether there's or not a deduplication entry does not play a role in case we don't have a record time. However, I added a test case for checking if a record time is available and a deduplication entry is not available (that wasn't covered).",
+        "createdAt" : "2020-07-01T13:06:13Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e5ec2b48-f4af-47f3-83d7-5287d7510252",
+        "parentId" : "7c2c0423-eed2-43a6-b182-2984e259015d",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I think we should test all the valid situations regardless of our knowledge of how the code currently works, so that we are covered against regressions. Good catch RE the other one.",
+        "createdAt" : "2020-07-01T13:30:00Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a111449e-3fb0-4aa2-949f-651878b1fb67",
+        "parentId" : "7c2c0423-eed2-43a6-b182-2984e259015d",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "That's a good point -- here I was focusing more on testing the risky parts and skipping the trivial parts for now as I didn't see much value spending more time on that.",
+        "createdAt" : "2020-07-01T13:33:47Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7fcd13b1e8abafa8318221497401dd1746cfe5e2",
+    "line" : 35,
+    "diffHunk" : "@@ -0,0 +1,145 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.committer\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.Conversions\n+import com.daml.ledger.participant.state.kvutils.Conversions.buildTimestamp\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.ledger.participant.state.kvutils.TestHelpers._\n+import com.daml.ledger.participant.state.kvutils.committer.TransactionCommitter.DamlTransactionEntrySummary\n+import com.daml.ledger.participant.state.v1.Configuration\n+import com.daml.lf.data.Time.Timestamp\n+import com.daml.lf.engine.Engine\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{Matchers, WordSpec}\n+\n+class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar {\n+  private val metrics = new Metrics(new MetricRegistry)\n+  private val aDamlTransactionEntry = DamlTransactionEntry.newBuilder\n+    .setSubmitterInfo(\n+      DamlSubmitterInfo.newBuilder\n+        .setCommandId(\"commandId\")\n+        .setSubmitter(\"aSubmitter\"))\n+    .setSubmissionSeed(ByteString.copyFromUtf8(\"a\" * 32))\n+    .build\n+  private val aTransactionEntrySummary = DamlTransactionEntrySummary(aDamlTransactionEntry)\n+  private val aRecordTime = Timestamp(100)\n+\n+  \"deduplicateCommand\" should {\n+    \"continue if record time is not available\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      val context = new FakeCommitContext(recordTime = None)"
+  },
+  {
+    "id" : "5fd04758-1303-4f8b-a7b0-fc6e910d226b",
+    "prId" : 6538,
+    "comments" : [
+      {
+        "id" : "6ac7c1eb-c893-4acc-9212-621f9b36032a",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Is the actual rejection content already tested somewhere? Else it should be tested here. Similarly for other similar occurrences in the test of this test.",
+        "createdAt" : "2020-07-01T09:56:44Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2a6d9e2c-bad6-4e75-b874-66d78075984f",
+        "parentId" : "6ac7c1eb-c893-4acc-9212-621f9b36032a",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "No, it's not tested at this level yet. However, I wouldn't like to make up for the missing test coverage in kvutils as part of this PR so will be focusing on adding tests for the changed logic only. When we get to implementing generation of the different log entries for pre-execution we'll be adding more tests related to that functionality as well.",
+        "createdAt" : "2020-07-01T13:02:00Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7fcd13b1e8abafa8318221497401dd1746cfe5e2",
+    "line" : 97,
+    "diffHunk" : "@@ -0,0 +1,145 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.committer\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.Conversions\n+import com.daml.ledger.participant.state.kvutils.Conversions.buildTimestamp\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.ledger.participant.state.kvutils.TestHelpers._\n+import com.daml.ledger.participant.state.kvutils.committer.TransactionCommitter.DamlTransactionEntrySummary\n+import com.daml.ledger.participant.state.v1.Configuration\n+import com.daml.lf.data.Time.Timestamp\n+import com.daml.lf.engine.Engine\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{Matchers, WordSpec}\n+\n+class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar {\n+  private val metrics = new Metrics(new MetricRegistry)\n+  private val aDamlTransactionEntry = DamlTransactionEntry.newBuilder\n+    .setSubmitterInfo(\n+      DamlSubmitterInfo.newBuilder\n+        .setCommandId(\"commandId\")\n+        .setSubmitter(\"aSubmitter\"))\n+    .setSubmissionSeed(ByteString.copyFromUtf8(\"a\" * 32))\n+    .build\n+  private val aTransactionEntrySummary = DamlTransactionEntrySummary(aDamlTransactionEntry)\n+  private val aRecordTime = Timestamp(100)\n+\n+  \"deduplicateCommand\" should {\n+    \"continue if record time is not available\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      val context = new FakeCommitContext(recordTime = None)\n+\n+      val actual = instance.deduplicateCommand(context, aTransactionEntrySummary)\n+\n+      actual match {\n+        case StepContinue(_) => succeed\n+        case StepStop(_) => fail\n+      }\n+    }\n+\n+    \"continue if record time is after deduplication time in case a deduplication entry is found\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      val dedupValue = DamlStateValue.newBuilder\n+        .setCommandDedup(\n+          DamlCommandDedupValue.newBuilder.setDeduplicatedUntil(buildTimestamp(aRecordTime)))\n+        .build\n+      val inputs =\n+        Map(Conversions.commandDedupKey(aTransactionEntrySummary.submitterInfo) -> Some(dedupValue))\n+      val context =\n+        new FakeCommitContext(recordTime = Some(aRecordTime.addMicros(1)), inputs = inputs)\n+\n+      val actual = instance.deduplicateCommand(context, aTransactionEntrySummary)\n+\n+      actual match {\n+        case StepContinue(_) => succeed\n+        case StepStop(_) => fail\n+      }\n+    }\n+\n+    \"produce rejection log entry in case record time is on or before deduplication time\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      for ((recordTime, deduplicationTime) <- Iterable(\n+          (aRecordTime, aRecordTime),\n+          (aRecordTime, aRecordTime.addMicros(1)))) {\n+        val dedupValue = DamlStateValue.newBuilder\n+          .setCommandDedup(DamlCommandDedupValue.newBuilder.setDeduplicatedUntil(\n+            buildTimestamp(deduplicationTime)))\n+          .build\n+        val inputs =\n+          Map(\n+            Conversions.commandDedupKey(aTransactionEntrySummary.submitterInfo) -> Some(dedupValue))\n+        val context =\n+          new FakeCommitContext(recordTime = Some(recordTime), inputs = inputs)\n+\n+        val actual = instance.deduplicateCommand(context, aTransactionEntrySummary)\n+\n+        actual match {\n+          case StepContinue(_) => fail\n+          case StepStop(actualLogEntry) =>\n+            actualLogEntry.hasTransactionRejectionEntry shouldBe true"
+  },
+  {
+    "id" : "8a731b50-4f6c-49c8-a064-cbf3f442bae4",
+    "prId" : 6538,
+    "comments" : [
+      {
+        "id" : "5b296a8a-aa9c-4147-8536-44249f487eff",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Could you also check that the same happens even if a time model is present as an input?",
+        "createdAt" : "2020-07-01T10:03:24Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "585771ed-3e17-4ef3-a9d3-81bf1c904ead",
+        "parentId" : "5b296a8a-aa9c-4147-8536-44249f487eff",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "What do you mean? There must always be a time model present otherwise we cannot resolve the current configuration (i.e., `Configuration.decode` will throw in case there's no time model present). Outside of pre-execution we will always check against the time-model whereas with pre-execution we will only perform time-bound checks during post-execution by a different component.",
+        "createdAt" : "2020-07-01T13:18:10Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c59ce78a-d16d-4592-95fd-a0e2cb582ddf",
+        "parentId" : "5b296a8a-aa9c-4147-8536-44249f487eff",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Right, so this test is stricter than it should be, i.e. it should also provide for a configuration input because it would be valid for the tested code to fail without it. Alternatively, if this is the intended spec for the foreseeable future, I suggest changing the description into e.g. `continue without accessing the ledger configuration if record time is not available`.",
+        "createdAt" : "2020-07-01T13:36:54Z",
+        "updatedAt" : "2020-07-01T13:47:51Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0e903995-44f2-4d2c-8fee-82fbda4a57b0",
+        "parentId" : "5b296a8a-aa9c-4147-8536-44249f487eff",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "It's the simplest you can write to test this code path ; ) OK, changed the description.",
+        "createdAt" : "2020-07-01T13:48:35Z",
+        "updatedAt" : "2020-07-01T13:48:35Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7fcd13b1e8abafa8318221497401dd1746cfe5e2",
+    "line" : 106,
+    "diffHunk" : "@@ -0,0 +1,145 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.committer\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.Conversions\n+import com.daml.ledger.participant.state.kvutils.Conversions.buildTimestamp\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.ledger.participant.state.kvutils.TestHelpers._\n+import com.daml.ledger.participant.state.kvutils.committer.TransactionCommitter.DamlTransactionEntrySummary\n+import com.daml.ledger.participant.state.v1.Configuration\n+import com.daml.lf.data.Time.Timestamp\n+import com.daml.lf.engine.Engine\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{Matchers, WordSpec}\n+\n+class TransactionCommitterSpec extends WordSpec with Matchers with MockitoSugar {\n+  private val metrics = new Metrics(new MetricRegistry)\n+  private val aDamlTransactionEntry = DamlTransactionEntry.newBuilder\n+    .setSubmitterInfo(\n+      DamlSubmitterInfo.newBuilder\n+        .setCommandId(\"commandId\")\n+        .setSubmitter(\"aSubmitter\"))\n+    .setSubmissionSeed(ByteString.copyFromUtf8(\"a\" * 32))\n+    .build\n+  private val aTransactionEntrySummary = DamlTransactionEntrySummary(aDamlTransactionEntry)\n+  private val aRecordTime = Timestamp(100)\n+\n+  \"deduplicateCommand\" should {\n+    \"continue if record time is not available\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      val context = new FakeCommitContext(recordTime = None)\n+\n+      val actual = instance.deduplicateCommand(context, aTransactionEntrySummary)\n+\n+      actual match {\n+        case StepContinue(_) => succeed\n+        case StepStop(_) => fail\n+      }\n+    }\n+\n+    \"continue if record time is after deduplication time in case a deduplication entry is found\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      val dedupValue = DamlStateValue.newBuilder\n+        .setCommandDedup(\n+          DamlCommandDedupValue.newBuilder.setDeduplicatedUntil(buildTimestamp(aRecordTime)))\n+        .build\n+      val inputs =\n+        Map(Conversions.commandDedupKey(aTransactionEntrySummary.submitterInfo) -> Some(dedupValue))\n+      val context =\n+        new FakeCommitContext(recordTime = Some(aRecordTime.addMicros(1)), inputs = inputs)\n+\n+      val actual = instance.deduplicateCommand(context, aTransactionEntrySummary)\n+\n+      actual match {\n+        case StepContinue(_) => succeed\n+        case StepStop(_) => fail\n+      }\n+    }\n+\n+    \"produce rejection log entry in case record time is on or before deduplication time\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      for ((recordTime, deduplicationTime) <- Iterable(\n+          (aRecordTime, aRecordTime),\n+          (aRecordTime, aRecordTime.addMicros(1)))) {\n+        val dedupValue = DamlStateValue.newBuilder\n+          .setCommandDedup(DamlCommandDedupValue.newBuilder.setDeduplicatedUntil(\n+            buildTimestamp(deduplicationTime)))\n+          .build\n+        val inputs =\n+          Map(\n+            Conversions.commandDedupKey(aTransactionEntrySummary.submitterInfo) -> Some(dedupValue))\n+        val context =\n+          new FakeCommitContext(recordTime = Some(recordTime), inputs = inputs)\n+\n+        val actual = instance.deduplicateCommand(context, aTransactionEntrySummary)\n+\n+        actual match {\n+          case StepContinue(_) => fail\n+          case StepStop(actualLogEntry) =>\n+            actualLogEntry.hasTransactionRejectionEntry shouldBe true\n+        }\n+      }\n+    }\n+  }\n+\n+  \"validateLedgerTime\" should {\n+    \"continue if record time is not available\" in {\n+      val instance =\n+        new TransactionCommitter(theDefaultConfig, mock[Engine], metrics, inStaticTimeMode = false)\n+      val context = new FakeCommitContext(recordTime = None)"
+  }
+]

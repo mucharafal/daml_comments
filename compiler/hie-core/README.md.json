@@ -1,0 +1,103 @@
+[
+  {
+    "id" : "23a0abb2-df63-4e79-b9b1-e329d179f6cf",
+    "prId" : 2820,
+    "comments" : [
+      {
+        "id" : "0fad8264-558b-4381-9458-16b21f8cbfae",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Could we turn the reference into a proper clickable link?",
+        "createdAt" : "2019-09-09T13:23:11Z",
+        "updatedAt" : "2019-09-09T13:26:12Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2021fbc088823a5bb1e54c2dcebc2442081a086b",
+    "line" : null,
+    "diffHunk" : "@@ -1,125 +1,4 @@\n-# `hie-core` (Haskell IDE engine)\n+# Note\n \n-Our vision is that you should build an IDE by combining:\n-\n-\n-<img style=\"float:right;\" src=\"img/vscode2.png\"/>\n-\n-* [`hie-bios`](https://github.com/mpickering/hie-bios) for determining where your files are, what are their dependencies, what extensions are enabled and so on;\n-* `hie-core` (i.e. this library) for defining how to type check, when to type check, and producing diagnostic messages;\n-* A bunch of plugins that haven't yet been written, e.g. [`hie-hlint`](https://github.com/ndmitchell/hlint) and [`hie-ormolu`](https://github.com/tweag/ormolu), to choose which features you want;\n-* [`haskell-lsp`](https://github.com/alanz/haskell-lsp) for sending those messages to a [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) server;\n-* An extension for your editor. We provide a [VS Code extension](https://code.visualstudio.com/api) as `extension` in this directory, although the components work in other LSP editors too (see below for instructions using Emacs).\n-\n-There are more details about our approach [in this blog post](https://4ta.uk/p/shaking-up-the-ide).\n-\n-## Using it\n-\n-### Install `hie-core`\n-\n-#### With Nix\n-\n-[See hie-core-nix repository](https://github.com/hercules-ci/hie-core-nix)\n-\n-#### With Cabal or Stack\n-\n-First install the `hie-core` binary using `stack` or `cabal`, e.g.\n-\n-1. `git clone https://github.com/digital-asset/daml.git`\n-2. `cd daml/compiler/hie-core`\n-3. `cabal install` or `stack install` (and make sure `~/.local/bin` is on your `$PATH`)\n-\n-It's important that `hie-core` is compiled with the same compiler you use to build your projects.\n-\n-### Test `hie-core`\n-\n-Next, check that `hie-core` is capable of loading your code. Change to the project directory and run `hie-core`, which will try and load everything using the same code as the IDE, but in a way that's much easier to understand. For example, taking the example of [`shake`](https://github.com/ndmitchell/shake), running `hie-core` gives some error messages and warnings before reporting at the end:\n-\n-```\n-Files that worked: 152\n-Files that failed: 6\n- * .\\model\\Main.hs\n- * .\\model\\Model.hs\n- * .\\model\\Test.hs\n- * .\\model\\Util.hs\n- * .\\output\\docs\\Main.hs\n- * .\\output\\docs\\Part_Architecture_md.hs\n-Done\n-```\n-\n-Of the 158 files in Shake, as of this moment, 152 can be loaded by the IDE, but 6 can't (error messages for the reasons they can't be loaded are given earlier). The failing files are all prototype work or test output, meaning I can confidently use Shake.\n-\n-The `hie-core` executable mostly relies on [`hie-bios`](https://github.com/mpickering/hie-bios) to do the difficult work of setting up your GHC environment. If it doesn't work, see [the `hie-bios` manual](https://github.com/mpickering/hie-bios#readme) to get it working. My default fallback is to figure it out by hand and create a `direct` style [`hie.yaml`](https://github.com/ndmitchell/shake/blob/master/hie.yaml) listing the command line arguments to load the project.\n-\n-Once you have got `hie-core` working outside the editor, the next step is to pick which editor to integrate with.\n-\n-### Using with VS Code\n-\n-Install the VS code extension (see https://code.visualstudio.com/docs/setup/mac for details on adding `code` to your `$PATH`):\n-\n-1. `cd compiler/hie-core/extension`\n-2. `npm ci`\n-3. `npm install vsce --global` (may require `sudo`)\n-4. `vsce package`\n-5. `code --install-extension hie-core-0.0.1.vsix`\n-\n-Now openning a `.hs` file should work with `hie-core`.\n-\n-### Using with Emacs\n-\n-If you don't already have [MELPA](https://melpa.org/#/) package installation configured, visit MELPA [getting started](https://melpa.org/#/getting-started) page to get set up. Then, install [`use-package`](https://melpa.org/#/use-package). Finally, add the following lines to your `.emacs`.\n-```elisp\n-;; LSP\n-(use-package flycheck\n-  :ensure t\n-  :init\n-  (global-flycheck-mode t))\n-(use-package yasnippet\n-  :ensure t)\n-(use-package lsp-mode\n-  :ensure t\n-  :hook (haskell-mode . lsp)\n-  :commands lsp)\n-(use-package lsp-ui\n-  :ensure t\n-  :commands lsp-ui-mode)\n-(use-package lsp-haskell\n- :ensure t\n- :config\n- (setq lsp-haskell-process-path-hie \"hie-core\")\n- (setq lsp-haskell-process-args-hie '())\n- ;; Comment/uncomment this line to see interactions between lsp client/server.\n- ;;(setq lsp-log-io t)\n-)\n-```\n-\n-### Using with Vim/Neovim\n-\n-#### LanguageClient-neovim\n-Install [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)\n-\n-Add this to your vim config:\n-```vim\n-let g:LanguageClient_rootMarkers = ['*.cabal', 'stack.yaml']\n-let g:LanguageClient_serverCommands = {\n-    \\ 'rust': ['rls'],\n-    \\ 'haskell': ['hie-core', '--lsp'],\n-    \\ }\n-```\n-\n-Refer to `:he LanguageClient` for more details on usage and configuration.\n-\n-#### vim-lsp\n-Install [vim-lsp](https://github.com/prabirshrestha/vim-lsp).\n-\n-Add this to your vim config:\n-\n-```vim\n-au User lsp_setup call lsp#register_server({\n-    \\ 'name': 'hie-core',\n-    \\ 'cmd': {server_info->['/your/path/to/hie-core', '--lsp']},\n-    \\ 'whitelist': ['haskell'],\n-    \\ })\n-```\n-\n-To verify it works move your cursor over a symbol and run `:LspHover`.\n+`hie-core` has been renamed to `ghcide`. See `compiler/ghcide` for the"
+  },
+  {
+    "id" : "d3b7c040-d77c-4fd3-b0fc-c240df01b835",
+    "prId" : 2567,
+    "comments" : [
+      {
+        "id" : "23fc8ff1-1750-43dc-9013-27791042cc75",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe we should just link to https://melpa.org/#/getting-started instead of copying the melpa installation instructions here?",
+        "createdAt" : "2019-08-16T06:53:53Z",
+        "updatedAt" : "2019-08-16T15:34:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e350369cf58ffe91e7127b8ce77ac163e990666e",
+    "line" : null,
+    "diffHunk" : "@@ -61,10 +61,9 @@ Now openning a `.hs` file should work with `hie-core`.\n \n ### Using with Emacs\n \n-The frst step is to install required Emacs packages. If you don't already have [Melpa](https://melpa.org/#/) package installation configured in your `.emacs`, put this stanza at the top.\n-\n+If you don't already have [Melpa](https://melpa.org/#/) package installation configured in your `.emacs`, put this stanza at the top.\n ```elisp"
+  },
+  {
+    "id" : "7e316c49-38e6-4e18-8f79-f07be9e0114c",
+    "prId" : 1869,
+    "comments" : [
+      {
+        "id" : "9ba0606c-8a8e-4b03-b2d7-ab5401b1c2aa",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Grammar a bit odd here.",
+        "createdAt" : "2019-06-25T18:41:21Z",
+        "updatedAt" : "2019-06-25T18:44:02Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "87358e6e-ace1-47b6-834c-8ddfd184b3c1",
+        "parentId" : "9ba0606c-8a8e-4b03-b2d7-ab5401b1c2aa",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/pull/1871",
+        "createdAt" : "2019-06-25T19:04:29Z",
+        "updatedAt" : "2019-06-25T19:04:30Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "298bba82ad8fafa9198fe8c2d4e515d275f665db",
+    "line" : 8,
+    "diffHunk" : "@@ -3,32 +3,43 @@\n Our vision is that you should build an IDE by combining:\n \n * [`hie-bios`](https://github.com/mpickering/hie-bios) for determining where your files are, what are their dependencies, what extensions are enabled and so on;\n-* `hie-core` (i.e. this library) for defining how to type check, when to type check, and producing messages;\n-* [`haskell-lsp`](https://github.com/alanz/haskell-lsp) for sending those messages to an LSP ([Language Server Protocol](https://microsoft.github.io/language-server-protocol/)) server;\n-* A [VS Code extension](https://code.visualstudio.com/api), e.g. `extension` in this directory (although the above components enable Haskell IDE features in other editors too).\n+* `hie-core` (i.e. this library) for defining how to type check, when to type check, and producing diagnostic messages;\n+* A bunch of plugins that haven't yet been written, e.g. [`hie-hlint`](https://github.com/ndmitchell/hlint) and [`hie-ormolu`](https://github.com/tweag/ormolu) for your specific choices of plugin;"
+  }
+]

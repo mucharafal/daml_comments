@@ -1,0 +1,146 @@
+[
+  {
+    "id" : "70422757-7e72-4d1d-9954-d9b5143df64d",
+    "prId" : 5142,
+    "comments" : [
+      {
+        "id" : "754bc9cf-5a56-4f14-9508-f0b7445f8875",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "This can be on the same level as `ignored` to avoid computing it every iteration.",
+        "createdAt" : "2020-03-23T17:34:35Z",
+        "updatedAt" : "2020-03-24T08:26:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9095ca8d-3d31-4c04-aaa7-b8bc56e9aaa3",
+        "parentId" : "754bc9cf-5a56-4f14-9508-f0b7445f8875",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I would prefer to keep it closer to the tests.",
+        "createdAt" : "2020-03-23T17:40:15Z",
+        "updatedAt" : "2020-03-24T08:26:36Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "674091bf-86b5-4cce-88e7-d9f2f5c9864b",
+        "parentId" : "754bc9cf-5a56-4f14-9508-f0b7445f8875",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Then why not have three test cases?",
+        "createdAt" : "2020-03-23T17:48:09Z",
+        "updatedAt" : "2020-03-24T08:26:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "27cda0b3-e686-41c6-9e28-43175ee9e45b",
+        "parentId" : "754bc9cf-5a56-4f14-9508-f0b7445f8875",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "So that exceptions to the \"all tables are empty\" rule are grouped together in one place. I don't think that re-initializing a set multiple times is an issue in a test where we shoot 10 commands, wait for completions and reset the ledger. :wink: But thanks for the feedback.",
+        "createdAt" : "2020-03-24T08:33:26Z",
+        "updatedAt" : "2020-03-24T08:33:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "949020edf749fae3f6c20aed81172e3126f77b11",
+    "line" : 44,
+    "diffHunk" : "@@ -0,0 +1,109 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.reset\n+\n+import java.sql.{Connection, DriverManager}\n+\n+import anorm.SqlParser._\n+import anorm.{SQL, SqlStringInterpolation}\n+import com.digitalasset.platform.sandbox.services.reset.ResetServiceDatabaseIT.countRowsOfAllTables\n+import com.digitalasset.platform.sandbox.services.{DbInfo, SandboxFixture}\n+import com.digitalasset.platform.store.DbType\n+import com.digitalasset.resources.ResourceOwner\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.Try\n+\n+abstract class ResetServiceDatabaseIT extends ResetServiceITBase with SandboxFixture {\n+\n+  \"ResetService\" when {\n+\n+    \"run against a database backend\" should {\n+\n+      \"leave the tables in the expected state\" in {\n+\n+        val ignored = Set(\n+          \"flyway_schema_history\", // this is not touched by resets, it's used for migrations\n+          \"packages\" // preserved by the reset to match the compiled packages still loaded in the engine\n+        )\n+\n+        for {\n+          ledgerId <- fetchLedgerId()\n+          _ <- reset(ledgerId)\n+          counts <- countRowsOfAllTables(ignored, database.get)\n+        } yield {\n+\n+          val expectedToHaveOneItem = Set(\n+            \"parameters\", // a new set of parameters is stored at startup\n+            \"participant_command_completions\", // using static time, one checkpoint is going to be saved\n+            \"ledger_entries\" // using static time, one checkpoint is going to be saved\n+          )"
+  },
+  {
+    "id" : "62207ae8-8cb4-4123-9ce2-51ac4b624032",
+    "prId" : 5142,
+    "comments" : [
+      {
+        "id" : "6eeae171-f57a-468f-91c4-c642454b1198",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "As can this.",
+        "createdAt" : "2020-03-23T17:35:00Z",
+        "updatedAt" : "2020-03-24T08:26:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "949020edf749fae3f6c20aed81172e3126f77b11",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,109 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.reset\n+\n+import java.sql.{Connection, DriverManager}\n+\n+import anorm.SqlParser._\n+import anorm.{SQL, SqlStringInterpolation}\n+import com.digitalasset.platform.sandbox.services.reset.ResetServiceDatabaseIT.countRowsOfAllTables\n+import com.digitalasset.platform.sandbox.services.{DbInfo, SandboxFixture}\n+import com.digitalasset.platform.store.DbType\n+import com.digitalasset.resources.ResourceOwner\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.Try\n+\n+abstract class ResetServiceDatabaseIT extends ResetServiceITBase with SandboxFixture {\n+\n+  \"ResetService\" when {\n+\n+    \"run against a database backend\" should {\n+\n+      \"leave the tables in the expected state\" in {\n+\n+        val ignored = Set(\n+          \"flyway_schema_history\", // this is not touched by resets, it's used for migrations\n+          \"packages\" // preserved by the reset to match the compiled packages still loaded in the engine\n+        )\n+\n+        for {\n+          ledgerId <- fetchLedgerId()\n+          _ <- reset(ledgerId)\n+          counts <- countRowsOfAllTables(ignored, database.get)\n+        } yield {\n+\n+          val expectedToHaveOneItem = Set(\n+            \"parameters\", // a new set of parameters is stored at startup\n+            \"participant_command_completions\", // using static time, one checkpoint is going to be saved\n+            \"ledger_entries\" // using static time, one checkpoint is going to be saved\n+          )\n+\n+          for ((table, count) <- counts if expectedToHaveOneItem(table)) {\n+            withClue(s\"$table has $count items: \") {\n+              count shouldBe 1\n+            }\n+          }\n+\n+          // Everything else should be empty\n+          val expectedToBeEmpty = counts.keySet.diff(ignored).diff(expectedToHaveOneItem)"
+  },
+  {
+    "id" : "19a7280c-c0e8-4c7b-a773-be5c66b57ff6",
+    "prId" : 5142,
+    "comments" : [
+      {
+        "id" : "87785b14-52e5-4eb1-a1e7-2cd1aed779ac",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This is caused by some apparent race condition in the initialization with regards to `configuration_entries`, opening a ticket to track this.",
+        "createdAt" : "2020-03-24T09:00:54Z",
+        "updatedAt" : "2020-03-24T09:00:54Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "949020edf749fae3f6c20aed81172e3126f77b11",
+    "line" : 61,
+    "diffHunk" : "@@ -0,0 +1,124 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.reset\n+\n+import java.sql.{Connection, DriverManager}\n+\n+import anorm.SqlParser._\n+import anorm.{SQL, SqlStringInterpolation}\n+import com.digitalasset.ledger.api.testing.utils.MockMessages\n+import com.digitalasset.platform.sandbox.services.reset.ResetServiceDatabaseIT.countRowsOfAllTables\n+import com.digitalasset.platform.sandbox.services.{DbInfo, SandboxFixture}\n+import com.digitalasset.platform.store.DbType\n+import com.digitalasset.resources.ResourceOwner\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+import scala.util.Try\n+\n+abstract class ResetServiceDatabaseIT extends ResetServiceITBase with SandboxFixture {\n+\n+  \"ResetService\" when {\n+\n+    \"run against a database backend\" should {\n+\n+      \"leave the tables in the expected state\" in {\n+\n+        val ignored = Set(\n+          \"flyway_schema_history\", // this is not touched by resets, it's used for migrations\n+          \"packages\" // preserved by the reset to match the compiled packages still loaded in the engine\n+        )\n+\n+        for {\n+          ledgerId <- fetchLedgerId()\n+          party <- allocateParty(MockMessages.party)\n+          _ <- submitAndExpectCompletions(ledgerId, 10, party)\n+          _ <- reset(ledgerId)\n+          counts <- countRowsOfAllTables(ignored, database.get)\n+        } yield {\n+\n+          val expectedToHaveOneItem = Set(\n+            \"parameters\", // a new set of parameters is stored at startup\n+            \"participant_command_completions\", // using static time, one checkpoint is going to be saved\n+            \"ledger_entries\" // using static time, one checkpoint is going to be saved\n+          )\n+\n+          for ((table, count) <- counts if expectedToHaveOneItem(table)) {\n+            withClue(s\"$table has $count item(s): \") {\n+              count shouldBe 1\n+            }\n+          }\n+\n+          // FIXME this appears to be racy, forcing us to make a loose check\n+          val expectedToHaveOneItemOrLess = Set(\n+            \"configuration_entries\"\n+          )\n+\n+          for ((table, count) <- counts if expectedToHaveOneItemOrLess(table)) {\n+            withClue(s\"$table has $count item(s): \") {\n+              count should be <= 1\n+            }\n+          }"
+  }
+]

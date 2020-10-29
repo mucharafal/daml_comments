@@ -1,0 +1,83 @@
+[
+  {
+    "id" : "c792c4b7-f546-48e6-8fbd-01ef90f0b503",
+    "prId" : 2000,
+    "comments" : [
+      {
+        "id" : "49d01cbb-fbac-4280-b299-a13f6537a189",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "This seems surprising? If we want to print it, at least we should say what we are printing. Or are these debug droppings?",
+        "createdAt" : "2019-07-04T08:17:17Z",
+        "updatedAt" : "2019-07-04T08:25:39Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fd95a369-7126-4645-885f-ddba15f983b6",
+        "parentId" : "49d01cbb-fbac-4280-b299-a13f6537a189",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "oops debug output",
+        "createdAt" : "2019-07-04T08:20:16Z",
+        "updatedAt" : "2019-07-04T08:25:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8ccf2bb2fc68344058ccd5cc685f8e44a57ac2cb",
+    "line" : null,
+    "diffHunk" : "@@ -10,26 +10,31 @@ module DA.Service.Daml.Compiler.Impl.Scenario (\n   , EnableScenarioService(..)\n   , withScenarioService\n   , withScenarioService'\n+  , SS.ScenarioServiceConfig\n+  , SS.readScenarioServiceConfig\n   ) where\n \n import DA.Daml.GHC.Compiler.Options\n import qualified DA.Daml.LF.ScenarioServiceClient as SS\n import qualified DA.Service.Logger                          as Logger\n import           Control.Monad.IO.Class                     (liftIO)\n import qualified Data.Text                                  as T\n+import System.IO\n \n withScenarioService\n     :: Logger.Handle IO\n+    -> SS.ScenarioServiceConfig\n     -> (SS.Handle -> IO a)\n     -> IO a\n-withScenarioService loggerH f = do\n+withScenarioService loggerH conf f = do\n+    hPrint stderr conf"
+  },
+  {
+    "id" : "de7073a0-3e84-420b-8acc-ec5660559bb0",
+    "prId" : 1508,
+    "comments" : [
+      {
+        "id" : "47f28252-abcd-4a88-a1cb-e7ae62d9813a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This didn’t really make any sense:\r\n\r\n1. We catch also the exceptions emitted by the callback not only those by the scenario service process so the log message is misleading.\r\n2. Proxying this through the event logger doesn’t help with anything.\r\n3. It actually doesn’t even work since the call to `exitFailure` in the event logger isn’t run from the main thread so it won’t tear anything down.\r\n4. On the other hand we do run this from the main thread so if an exception bubbles up to here (which it shouldn’t), it will tear down everything anyway.",
+        "createdAt" : "2019-06-04T09:55:07Z",
+        "updatedAt" : "2019-06-04T14:03:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "17411959141284526399ee9f2ef5735ad2a26033",
+    "line" : 39,
+    "diffHunk" : "@@ -35,13 +30,4 @@ startScenarioService eventHandler loggerH =\n           , optLogInfo = wrapLog Logger.logInfo\n           , optLogError = wrapLog Logger.logError\n           }\n-    SS.start opts >>= \\case\n-      Left err -> error $ \"Failed to start scenario service: \" ++ show err\n-      Right h -> pure h\n-\n-logScenarioException :: (LSP.Event -> IO ()) -> Logger.Handle IO -> IO a -> IO a"
+  }
+]

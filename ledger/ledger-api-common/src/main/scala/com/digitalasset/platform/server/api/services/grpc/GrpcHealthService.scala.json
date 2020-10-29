@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "429082eb-0768-4a0c-869c-bed4a92c3fe4",
+    "prId" : 3655,
+    "comments" : [
+      {
+        "id" : "e456b6dc-e3d6-4d99-ba95-43d60573a80b",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It's probably safer to wrap this in a `Try` and wrap it in a `Future` with `Future.fromTry`.",
+        "createdAt" : "2019-11-28T12:10:17Z",
+        "updatedAt" : "2019-11-29T13:33:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1d9fa47e-92b4-4de5-a002-2aad7f452af2",
+        "parentId" : "e456b6dc-e3d6-4d99-ba95-43d60573a80b",
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "I did that and then undid it because too much noise. I think I prefer it though, so I'll change it back.",
+        "createdAt" : "2019-11-28T12:57:37Z",
+        "updatedAt" : "2019-11-29T13:33:04Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6faa9af0e976c271138c3d4af75a805e9497ba39",
+    "line" : null,
+    "diffHunk" : "@@ -8,36 +8,57 @@ import akka.stream.Materializer\n import akka.stream.scaladsl.Source\n import com.digitalasset.grpc.adapter.ExecutionSequencerFactory\n import com.digitalasset.grpc.adapter.utils.DirectExecutionContext\n+import com.digitalasset.ledger.api.health.HealthChecks\n import com.digitalasset.platform.api.grpc.GrpcApiService\n import com.digitalasset.platform.server.api.DropRepeated\n-import io.grpc.ServerServiceDefinition\n+import com.digitalasset.platform.server.api.services.grpc.GrpcHealthService._\n import io.grpc.health.v1.health.{\n   HealthAkkaGrpc,\n   HealthCheckRequest,\n   HealthCheckResponse,\n   HealthGrpc\n }\n+import io.grpc.{ServerServiceDefinition, Status, StatusException}\n \n-import scala.concurrent.duration.DurationInt\n+import scala.concurrent.duration.{DurationInt, FiniteDuration}\n import scala.concurrent.{ExecutionContext, Future}\n \n class GrpcHealthService(\n+    healthChecks: HealthChecks,\n+    maximumWatchFrequency: FiniteDuration = 1.second,\n+)(\n     implicit protected val esf: ExecutionSequencerFactory,\n     protected val mat: Materializer,\n     executionContext: ExecutionContext,\n ) extends HealthAkkaGrpc\n     with GrpcApiService {\n-  private val servingResponse = HealthCheckResponse(HealthCheckResponse.ServingStatus.SERVING)\n-\n   override def bindService(): ServerServiceDefinition =\n     HealthGrpc.bindService(this, DirectExecutionContext)\n \n   override def check(request: HealthCheckRequest): Future[HealthCheckResponse] =\n-    Future.successful(servingResponse)\n+    Future(matchResponse(Option(request.service).filter(_.nonEmpty)))\n \n   override def watchSource(request: HealthCheckRequest): Source[HealthCheckResponse, NotUsed] =\n     Source\n-      .repeat(servingResponse)\n-      .throttle(1, per = 1.second)\n+      .fromIterator(() =>\n+        Iterator.continually(matchResponse(Option(request.service).filter(_.nonEmpty))))\n+      .throttle(1, per = maximumWatchFrequency)\n       .via(DropRepeated())\n+\n+  private def matchResponse(componentName: Option[String]): HealthCheckResponse = {"
+  }
+]

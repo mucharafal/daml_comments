@@ -1,0 +1,99 @@
+[
+  {
+    "id" : "e9764856-0bf6-435d-8baa-5fa5c7232104",
+    "prId" : 1378,
+    "comments" : [
+      {
+        "id" : "63eb34cd-450e-4547-81ff-d029422d83e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```suggestion\r\n        desc <- Arbitrary.arbitrary[String].map(_.filterNot(_ == 0)).filter(_.nonEmpty)\r\n```",
+        "createdAt" : "2019-05-24T12:38:28Z",
+        "updatedAt" : "2019-05-24T13:01:24Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b75b7f82-b0bb-443c-8da7-aa94cecd5a9a",
+        "parentId" : "63eb34cd-450e-4547-81ff-d029422d83e5",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "`Arbitrary.arbString.arbitrary` is the same things as `Arbitrary.arbitrary[String]` once you resolve implictis.\r\n\r\nThe issue is that `Arbitrary.arbString.arbitrary`  is based on `Arbitrary.arbChar` that may generate null character.",
+        "createdAt" : "2019-05-24T12:39:51Z",
+        "updatedAt" : "2019-05-24T13:01:24Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cf72d034-5cd5-47a5-bcbf-38154611a0ab",
+        "parentId" : "63eb34cd-450e-4547-81ff-d029422d83e5",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "I actually checked this and it seems to me that `arbString`s are list of of `arbChar`s, where latter is filtered for invalid UTF characters.\r\n\r\nSee: \r\nhttps://github.com/rickynils/scalacheck/blob/master/src/main/scala/org/scalacheck/Arbitrary.scala#L152\r\nand\r\nhttps://github.com/rickynils/scalacheck/blob/master/src/main/scala/org/scalacheck/Arbitrary.scala#L123\r\n",
+        "createdAt" : "2019-05-24T12:58:59Z",
+        "updatedAt" : "2019-05-24T13:01:24Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "81da74dd-8824-46c1-b2df-e4104f840795",
+        "parentId" : "63eb34cd-450e-4547-81ff-d029422d83e5",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "`0` is not excluded there however, so you are right!",
+        "createdAt" : "2019-05-24T13:00:06Z",
+        "updatedAt" : "2019-05-24T13:01:24Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a0344d86fbbc6d4ddda56f70d9afb2c27ec423db",
+    "line" : null,
+    "diffHunk" : "@@ -170,17 +170,19 @@ class PostgresDaoSpec\n       }\n     }\n \n-    val rejectionReasonGen: Gen[RejectionReason] = for {\n-      const <- Gen.oneOf[String => RejectionReason](\n-        Seq[String => RejectionReason](\n-          RejectionReason.Inconsistent.apply(_),\n-          RejectionReason.OutOfQuota.apply(_),\n-          RejectionReason.TimedOut.apply(_),\n-          RejectionReason.Disputed.apply(_),\n-          RejectionReason.DuplicateCommandId.apply(_)\n-        ))\n-      desc <- Arbitrary.arbitrary[String].filter(_.nonEmpty)\n-    } yield const(desc)\n+    val rejectionReasonGen: Gen[RejectionReason] =\n+      for {\n+        const <- Gen.oneOf[String => RejectionReason](\n+          Seq[String => RejectionReason](\n+            RejectionReason.Inconsistent.apply(_),\n+            RejectionReason.OutOfQuota.apply(_),\n+            RejectionReason.TimedOut.apply(_),\n+            RejectionReason.Disputed.apply(_),\n+            RejectionReason.DuplicateCommandId.apply(_)\n+          ))\n+        // need to use Arbitrary.arbString to get only valid unicode characters\n+        desc <- Arbitrary.arbString.arbitrary.filter(_.nonEmpty)"
+  }
+]

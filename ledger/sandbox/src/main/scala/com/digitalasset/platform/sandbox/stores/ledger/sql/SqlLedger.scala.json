@@ -1,0 +1,1177 @@
+[
+  {
+    "id" : "28f01849-c374-44b6-a363-386558cb1a87",
+    "prId" : 6497,
+    "comments" : [
+      {
+        "id" : "51579dab-1a00-4bdf-b051-80afdd368646",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "For readability it would probably make sense to define multi-line expressions as methods and call them here.",
+        "createdAt" : "2020-06-29T08:12:25Z",
+        "updatedAt" : "2020-06-29T12:37:10Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2094457c-c347-4ac0-a700-b667c672d963",
+        "parentId" : "51579dab-1a00-4bdf-b051-80afdd368646",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I realize you just copied this code here, feel free to leave it as is for now.",
+        "createdAt" : "2020-06-29T08:17:36Z",
+        "updatedAt" : "2020-06-29T12:37:10Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "92611797-747f-4763-b14c-f51313b82b66",
+        "parentId" : "51579dab-1a00-4bdf-b051-80afdd368646",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Good advice. I extracted some methods.",
+        "createdAt" : "2020-06-29T11:20:27Z",
+        "updatedAt" : "2020-06-29T12:37:10Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e04ba8b02c573c9662e687359ab1660af5532190",
+    "line" : null,
+    "diffHunk" : "@@ -62,43 +63,204 @@ object SqlLedger {\n       eventsPageSize: Int,\n       metrics: Metrics,\n       lfValueTranslationCache: LfValueTranslation.Cache\n-  )(implicit mat: Materializer, logCtx: LoggingContext): ResourceOwner[Ledger] =\n-    for {\n-      _ <- ResourceOwner.forFuture(() => new FlywayMigrations(jdbcUrl).migrate()(DEC))\n-      ledgerDao <- JdbcLedgerDao.validatingWriteOwner(\n-        serverRole,\n-        jdbcUrl,\n-        eventsPageSize,\n-        metrics,\n-        lfValueTranslationCache)\n-      ledger <- ResourceOwner.forFutureCloseable(\n-        () =>\n-          new SqlLedgerFactory(ledgerDao).createSqlLedger(\n-            ledgerId,\n+  )(implicit mat: Materializer, logCtx: LoggingContext)\n+      extends ResourceOwner[Ledger] {\n+\n+    private val logger = ContextualizedLogger.get(this.getClass)\n+\n+    override def acquire()(implicit executionContext: ExecutionContext): Resource[Ledger] =\n+      for {\n+        _ <- Resource.fromFuture(new FlywayMigrations(jdbcUrl).migrate())\n+        ledgerDao <- JdbcLedgerDao\n+          .validatingWriteOwner(\n+            serverRole,\n+            jdbcUrl,\n+            eventsPageSize,\n+            metrics,\n+            lfValueTranslationCache,\n+          )\n+          .acquire()\n+        _ <- startMode match {\n+          case SqlStartMode.AlwaysReset =>\n+            Resource.fromFuture(ledgerDao.reset())\n+          case SqlStartMode.ContinueIfExists =>\n+            Resource.unit\n+        }\n+        ledgerId <- Resource.fromFuture(\n+          initialize(\n+            initialLedgerId,\n             participantId,\n             timeProvider,\n-            startMode,\n             acs,\n             packages,\n             initialLedgerEntries,\n-            queueDepth,\n-            transactionCommitter,\n-        ))\n-    } yield ledger\n+            ledgerDao,\n+          ))\n+        ledgerEnd <- Resource.fromFuture(ledgerDao.lookupLedgerEnd())\n+        ledgerConfig <- Resource.fromFuture(ledgerDao.lookupLedgerConfiguration())\n+        dispatcher <- ResourceOwner\n+          .forCloseable(() => Dispatcher[Offset](\"sql-ledger\", Offset.beforeBegin, ledgerEnd))\n+          .acquire()\n+        ledger <- ResourceOwner\n+          .forCloseable(\n+            () =>\n+              new SqlLedger(\n+                ledgerId,\n+                participantId,\n+                ledgerConfig.map(_._2),\n+                ledgerDao,\n+                dispatcher,\n+                timeProvider,\n+                packages,\n+                queueDepth,\n+                transactionCommitter,\n+            ))\n+          .acquire()"
+  },
+  {
+    "id" : "7c77a8db-1967-4ba9-9424-9a5126a5dc13",
+    "prId" : 6497,
+    "comments" : [
+      {
+        "id" : "640d3cb5-9d59-4c61-b1f7-c32d4afc44dd",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Given that there's a string and two parameters with the same type, named parameters could make sense here.",
+        "createdAt" : "2020-06-29T08:13:04Z",
+        "updatedAt" : "2020-06-29T12:37:10Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1ca38a69-da55-42a2-9fcc-13dd34882d1a",
+        "parentId" : "640d3cb5-9d59-4c61-b1f7-c32d4afc44dd",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Yup! I added named parameters for all calls to the dispatcher constructor that I could find.",
+        "createdAt" : "2020-06-29T11:20:47Z",
+        "updatedAt" : "2020-06-29T12:37:10Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e04ba8b02c573c9662e687359ab1660af5532190",
+    "line" : null,
+    "diffHunk" : "@@ -62,43 +63,204 @@ object SqlLedger {\n       eventsPageSize: Int,\n       metrics: Metrics,\n       lfValueTranslationCache: LfValueTranslation.Cache\n-  )(implicit mat: Materializer, logCtx: LoggingContext): ResourceOwner[Ledger] =\n-    for {\n-      _ <- ResourceOwner.forFuture(() => new FlywayMigrations(jdbcUrl).migrate()(DEC))\n-      ledgerDao <- JdbcLedgerDao.validatingWriteOwner(\n-        serverRole,\n-        jdbcUrl,\n-        eventsPageSize,\n-        metrics,\n-        lfValueTranslationCache)\n-      ledger <- ResourceOwner.forFutureCloseable(\n-        () =>\n-          new SqlLedgerFactory(ledgerDao).createSqlLedger(\n-            ledgerId,\n+  )(implicit mat: Materializer, logCtx: LoggingContext)\n+      extends ResourceOwner[Ledger] {\n+\n+    private val logger = ContextualizedLogger.get(this.getClass)\n+\n+    override def acquire()(implicit executionContext: ExecutionContext): Resource[Ledger] =\n+      for {\n+        _ <- Resource.fromFuture(new FlywayMigrations(jdbcUrl).migrate())\n+        ledgerDao <- JdbcLedgerDao\n+          .validatingWriteOwner(\n+            serverRole,\n+            jdbcUrl,\n+            eventsPageSize,\n+            metrics,\n+            lfValueTranslationCache,\n+          )\n+          .acquire()\n+        _ <- startMode match {\n+          case SqlStartMode.AlwaysReset =>\n+            Resource.fromFuture(ledgerDao.reset())\n+          case SqlStartMode.ContinueIfExists =>\n+            Resource.unit\n+        }\n+        ledgerId <- Resource.fromFuture(\n+          initialize(\n+            initialLedgerId,\n             participantId,\n             timeProvider,\n-            startMode,\n             acs,\n             packages,\n             initialLedgerEntries,\n-            queueDepth,\n-            transactionCommitter,\n-        ))\n-    } yield ledger\n+            ledgerDao,\n+          ))\n+        ledgerEnd <- Resource.fromFuture(ledgerDao.lookupLedgerEnd())\n+        ledgerConfig <- Resource.fromFuture(ledgerDao.lookupLedgerConfiguration())\n+        dispatcher <- ResourceOwner\n+          .forCloseable(() => Dispatcher[Offset](\"sql-ledger\", Offset.beforeBegin, ledgerEnd))"
+  },
+  {
+    "id" : "9e084ca8-bb1a-4bae-8c1c-d58a2faf9e53",
+    "prId" : 5929,
+    "comments" : [
+      {
+        "id" : "253fc4b1-78df-401a-b3cc-05f51b39af79",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Why the `0` at the end?",
+        "createdAt" : "2020-05-11T16:19:48Z",
+        "updatedAt" : "2020-05-13T10:04:55Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "dba967f9f02fe374fa8a168129d2d6976b15b151",
+    "line" : null,
+    "diffHunk" : "@@ -171,13 +174,19 @@ private final class SqlLedger(\n   override def publishTransaction(\n       submitterInfo: SubmitterInfo,\n       transactionMeta: TransactionMeta,\n-      transaction: SubmittedTransaction): Future[SubmissionResult] =\n+      transaction0: SubmittedTransaction): Future[SubmissionResult] ="
+  },
+  {
+    "id" : "f84bca52-df5e-4741-9286-2451b03dc4f1",
+    "prId" : 5315,
+    "comments" : [
+      {
+        "id" : "10d3eb6d-fafe-4ae8-abfa-2967f6d32da0",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Correct the wrapping of this line as well, please.",
+        "createdAt" : "2020-04-01T15:22:19Z",
+        "updatedAt" : "2020-04-01T15:23:05Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2beee020cac3ccd86a87358e05512687af93e7d4",
+    "line" : 102,
+    "diffHunk" : "@@ -458,7 +434,7 @@ private final class SqlLedgerFactory(ledgerDao: LedgerDao)(implicit logCtx: Logg\n       initialConfig: Configuration,\n   ): Future[LedgerId] = {\n     // Note that here we only store the ledger entry and we do not update anything else, such as the\n-    // headRef. We also are not concerns with heartbeats / checkpoints. This is OK since this initialization\n+    // headRef. This is OK since this initialization"
+  },
+  {
+    "id" : "93e72857-073e-4a89-b1ce-414d43cd58d4",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "9d20b2f6-3b19-41d6-a6b9-e8e2679223f2",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Probably we should keep a `@volatile var` reference to the time model inside `SqlLedger`, whenever it is persisted to have easy acccess to it: https://github.com/digital-asset/daml/blob/f67c32b002fd28a68e6cfd279ec1782db4a07336/ledger/sandbox/src/main/scala/com/digitalasset/platform/sandbox/stores/ledger/sql/SqlLedger.scala#L327-L328",
+        "createdAt" : "2020-03-20T17:37:28Z",
+        "updatedAt" : "2020-03-25T08:01:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : null,
+    "diffHunk" : "@@ -206,38 +206,39 @@ private final class SqlLedger(\n       val (transactionForIndex, disclosureForIndex, globalDivulgence) =\n         Ledger.convertToCommittedTransaction(transactionId, transaction)\n \n+      val ledgerTime = transactionMeta.ledgerEffectiveTime.toInstant\n       val recordTime = timeProvider.getCurrentTime\n-      val entry = if (recordTime.isAfter(submitterInfo.maxRecordTime.toInstant)) {\n-        // This can happen if the DAML-LF computation (i.e. exercise of a choice) takes longer\n-        // than the time window between LET and MRT allows for.\n-        // See https://github.com/digital-asset/daml/issues/987\n-        PersistenceEntry.Rejection(\n-          LedgerEntry.Rejection(\n-            recordTime,\n-            submitterInfo.commandId,\n-            submitterInfo.applicationId,\n-            submitterInfo.submitter,\n-            RejectionReason.TimedOut(\n-              s\"RecordTime $recordTime is after MaximumRecordTime ${submitterInfo.maxRecordTime}\")\n-          )\n-        )\n-      } else {\n-        PersistenceEntry.Transaction(\n-          LedgerEntry.Transaction(\n-            Some(submitterInfo.commandId),\n-            transactionId,\n-            Some(submitterInfo.applicationId),\n-            Some(submitterInfo.submitter),\n-            transactionMeta.workflowId,\n-            transactionMeta.ledgerEffectiveTime.toInstant,\n-            recordTime,\n-            transactionForIndex,\n-            disclosureForIndex\n+      val timeModel: TimeModel = ???"
+  },
+  {
+    "id" : "380bee52-0b33-4d0a-b7a7-7cbd875c6317",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "70b42189-9b2f-4a76-98c2-dc0d2e64b8ac",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "cannot",
+        "createdAt" : "2020-03-25T11:26:40Z",
+        "updatedAt" : "2020-03-25T11:28:29Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : 33,
+    "diffHunk" : "@@ -168,6 +170,25 @@ private final class SqlLedger(\n     checkpointQueue.complete()\n   }\n \n+  // Note: ledger entries are written in batches, and this variable is updated while writing a ledger configuration\n+  // changed entry. Transactions written around the same time as a configuration change entry might not use the correct\n+  // time model.\n+  private[this] val currentConfiguration =\n+    new AtomicReference[Option[Configuration]](configAtInitialization)\n+\n+  // Validates the given ledger time according to the ledger time model\n+  private def checkTimeModel(ledgerTime: Instant): Either[String, Unit] = {\n+    val recordTime = timeProvider.getCurrentTime\n+\n+    currentConfiguration\n+      .get()\n+      .fold[Either[String, Unit]](\n+        Left(\"No ledger configuration available, can not validate ledger time\")"
+  },
+  {
+    "id" : "db9b50fa-502c-4623-a346-93cfd2e0a4fa",
+    "prId" : 4953,
+    "comments" : [
+      {
+        "id" : "d65e0f17-5178-4678-815d-cd1b86f88dd2",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n          logger.error(s\"Failed to persist entry with offset: $offset.toApiString\", t)\r\n```",
+        "createdAt" : "2020-03-17T13:31:09Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a6a1aed1-34d3-444d-a9f1-8fe8662cd467",
+        "parentId" : "d65e0f17-5178-4678-815d-cd1b86f88dd2",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Watch out for the missing braces before committing the suggestion. :wink: ",
+        "createdAt" : "2020-03-17T14:49:06Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8c9c3ccf491dcebc26c083911d9714d2fa5d032f",
+    "line" : null,
+    "diffHunk" : "@@ -180,14 +180,14 @@ private final class SqlLedger(\n     checkpointQueue.complete()\n   }\n \n-  private def storeLedgerEntry(offsets: Offsets, entry: PersistenceEntry): Future[Unit] =\n+  private def storeLedgerEntry(offset: Offset, entry: PersistenceEntry): Future[Unit] =\n     ledgerDao\n-      .storeLedgerEntry(offsets.offset, offsets.nextOffset, None, entry)\n+      .storeLedgerEntry(offset, entry)\n       .map(_ => ())(DEC)\n       .recover {\n         case t =>\n           //recovering from the failure so the persistence stream doesn't die\n-          logger.error(s\"Failed to persist entry with offsets: $offsets\", t)\n+          logger.error(s\"Failed to persist entry with offset: $offset\", t)"
+  },
+  {
+    "id" : "13654a3b-9a47-4010-9f95-c253d73b77a4",
+    "prId" : 4607,
+    "comments" : [
+      {
+        "id" : "e7434df5-27ba-4cb1-9b8c-6ab57337c48d",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Previously, this code path was never hit. Which is a good thing, because it was wrong—it didn't take into account any packages or entries provided.",
+        "createdAt" : "2020-02-19T14:00:35Z",
+        "updatedAt" : "2020-02-19T20:48:13Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2631a6f3d08f69f84454f5b30c7ebcb7581b0e28",
+    "line" : 125,
+    "diffHunk" : "@@ -425,89 +426,93 @@ private final class SqlLedgerFactory(ledgerDao: LedgerDao)(implicit logCtx: Logg\n     ledgerDao.reset()\n \n   private def initialize(\n-      initialLedgerId: Option[LedgerId],\n+      initialLedgerId: LedgerIdMode,\n       timeProvider: TimeProvider,\n       acs: InMemoryActiveLedgerState,\n       packages: InMemoryPackageStore,\n-      initialLedgerEntries: ImmArray[LedgerEntryOrBump]): Future[LedgerId] = {\n+      initialLedgerEntries: ImmArray[LedgerEntryOrBump],\n+  ): Future[LedgerId] = {\n     // Note that here we only store the ledger entry and we do not update anything else, such as the\n     // headRef. We also are not concerns with heartbeats / checkpoints. This is OK since this initialization\n     // step happens before we start up the sql ledger at all, so it's running in isolation.\n \n-    initialLedgerId match {\n-      case Some(initialId) =>\n-        ledgerDao\n-          .lookupLedgerId()\n-          .flatMap {\n-            case Some(foundLedgerId) if foundLedgerId == initialId =>\n-              if (initialLedgerEntries.nonEmpty) {\n-                logger.warn(\n-                  s\"Initial ledger entries provided, presumably from scenario, but I'm picking up from an existing database, and thus they will not be used\")\n-              }\n-              if (packages.listLfPackagesSync().nonEmpty) {\n-                logger.warn(\n-                  s\"Initial packages provided, presumably as command line arguments, but I'm picking up from an existing database, and thus they will not be used\")\n-              }\n-              ledgerFound(foundLedgerId)\n-            case Some(foundLedgerId) =>\n-              val errorMsg =\n-                s\"Ledger id mismatch. Ledger id given ('$initialId') is not equal to the existing one ('$foundLedgerId')!\"\n-              logger.error(errorMsg)\n-              sys.error(errorMsg)\n-            case None =>\n-              if (initialLedgerEntries.nonEmpty) {\n-                logger.info(\n-                  s\"Initializing ledger with ${initialLedgerEntries.length} ledger entries\")\n-              }\n-\n-              val contracts = acs.activeContracts.values.toList\n-\n-              val initialLedgerEnd = 0L\n-              val entriesWithOffset = initialLedgerEntries.foldLeft(\n-                (initialLedgerEnd, immutable.Seq.empty[(Long, LedgerEntry)]))((acc, le) => {\n-                val offset = acc._1\n-                val seq = acc._2\n-                le match {\n-                  case LedgerEntryOrBump.Entry(entry) =>\n-                    (offset + 1, seq :+ offset -> entry)\n-                  case LedgerEntryOrBump.Bump(increment) =>\n-                    (offset + increment, seq)\n-                }\n-              })\n-\n-              implicit val ec: ExecutionContext = DEC\n-              for {\n-                _ <- doInit(initialId)\n-                _ <- copyPackages(packages, timeProvider.getCurrentTime, entriesWithOffset._1)\n-                _ <- ledgerDao.storeInitialState(\n-                  contracts,\n-                  entriesWithOffset._2,\n-                  entriesWithOffset._1)\n-              } yield { initialId }\n-\n-          }(DEC)\n-\n-      case None =>\n-        logger.info(\"No ledger id given. Looking for existing ledger in database.\")\n-        ledgerDao\n-          .lookupLedgerId()\n-          .flatMap {\n-            case Some(foundLedgerId) => ledgerFound(foundLedgerId)\n-            case None =>\n-              val randomLedgerId = LedgerIdGenerator.generateRandomId()\n-              doInit(randomLedgerId).map(_ => randomLedgerId)(DEC)\n-          }(DEC)"
+  },
+  {
+    "id" : "82f69d56-e433-4286-bc2c-54fe3f68c27e",
+    "prId" : 3744,
+    "comments" : [
+      {
+        "id" : "88c2f109-00b3-4e6b-ac49-d8ffe9a3f581",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "comment shouldn't be here",
+        "createdAt" : "2019-12-05T10:55:43Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "85f9b249-6566-46b6-abdd-cb1192e74071",
+        "parentId" : "88c2f109-00b3-4e6b-ac49-d8ffe9a3f581",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Addressed in 9ac958eb4.",
+        "createdAt" : "2019-12-05T11:01:24Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d8204b7c377ce994002fb11ce1227c245747b3d0",
+    "line" : null,
+    "diffHunk" : "@@ -312,17 +312,34 @@ private final class SqlLedger(\n         case Failure(f) => Failure(f)\n       }(DEC)\n \n-  override def allocateParty(\n+  override def publishPartyAllocation(\n+      submissionId: SubmissionId,\n       party: Party,\n-      displayName: Option[String]): Future[PartyAllocationResult] =\n-    ledgerDao\n-      .storeParty(party, displayName, None)\n-      .map {\n-        case PersistenceResponse.Ok =>\n-          PartyAllocationResult.Ok(PartyDetails(party, displayName, true))\n-        case PersistenceResponse.Duplicate =>\n-          PartyAllocationResult.AlreadyExists\n-      }(DEC)\n+      displayName: Option[String]): Future[SubmissionResult] = {\n+    enqueue { offsets =>\n+      val recordTime = timeProvider.getCurrentTime\n+      // NOTE(JM): If the generation in the new configuration is invalid"
+  },
+  {
+    "id" : "b18e6c75-d2ef-4a53-90ee-36e3cc74411a",
+    "prId" : 3553,
+    "comments" : [
+      {
+        "id" : "45ac512c-8307-442f-ba51-0eb3d88e7663",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Todo",
+        "createdAt" : "2019-11-25T08:42:42Z",
+        "updatedAt" : "2019-11-27T14:09:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "04d3118b43225ee033b4c9bba93102cdc650df6a",
+    "line" : null,
+    "diffHunk" : "@@ -331,6 +345,35 @@ private class SqlLedger(\n         UploadPackagesResult.Ok\n       }(DEC)\n   }\n+\n+  override def publishConfiguration(\n+      maxRecordTime: Time.Timestamp,\n+      submissionId: String,\n+      config: Configuration): Future[SubmissionResult] =\n+    enqueue { offsets =>\n+      val recordTime = timeProvider.getCurrentTime\n+      // FIXME(JM): Configurations with wrong generation or used submission id will result in 'Duplicate'."
+  },
+  {
+    "id" : "d814023e-80b0-42db-854f-29830f7cd51c",
+    "prId" : 2131,
+    "comments" : [
+      {
+        "id" : "bdc9c12e-d5df-4d65-b7e7-aab4cb08e6dc",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "This makes the code less resistant against adding a new case to `PersistenceResponse` (e.g., `PersistenceResponse.Error`). I don't have a strong opinion, but my personal preference would be listing both cases explicitly.",
+        "createdAt" : "2019-07-16T14:09:30Z",
+        "updatedAt" : "2019-07-29T11:11:32Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1034bbe7-720c-4293-a1f6-2eea345e3be9",
+        "parentId" : "bdc9c12e-d5df-4d65-b7e7-aab4cb08e6dc",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "It's not clear to me why we should change the api of `LedgerDao` to return a `Map`, but then immediately discard the value with `_`. ",
+        "createdAt" : "2019-07-17T07:21:55Z",
+        "updatedAt" : "2019-07-29T11:11:32Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b425fea2-e2bf-4e76-b1e7-683c3c53d614",
+        "parentId" : "bdc9c12e-d5df-4d65-b7e7-aab4cb08e6dc",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It's not strictly necessary right now, but since it's information that it's available to the data access object I see no reason to discard it upstream either. Furthermore, it would be very difficult to understand in which case to return `Ok` and in which return `Duplicate` if the end result is mixed. Do you think we should add the concept of `Duplicate` to this layer as well?",
+        "createdAt" : "2019-07-26T15:06:19Z",
+        "updatedAt" : "2019-07-29T11:11:32Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "32b9c53286fc57cb866c7a586b41bb9fdf2064f6",
+    "line" : 21,
+    "diffHunk" : "@@ -349,13 +349,11 @@ private class SqlLedger(\n       (archive, PackageDetails(archive.getPayload.size().toLong, knownSince, sourceDescription)))\n     ledgerDao\n       .uploadLfPackages(submissionId, packages)\n-      .map {\n-        case PersistenceResponse.Ok =>\n-          UploadPackagesResult.Ok\n-        case PersistenceResponse.Duplicate =>\n-          // Note: package upload is idempotent, apart from the fact that we only keep\n-          // the knownSince and sourceDescription of the first upload.\n-          UploadPackagesResult.Ok\n+      .map { _ =>\n+        // Note: We discard any information about duplicates vs. non-duplicates here,\n+        // as package upload is idempotent, apart from the fact that we only keep\n+        // the knownSince and sourceDescription of the first upload.\n+        UploadPackagesResult.Ok"
+  },
+  {
+    "id" : "37a100b2-2d68-4a63-bfab-40b2376f69ef",
+    "prId" : 2131,
+    "comments" : [
+      {
+        "id" : "f5078456-8cde-4b64-93ea-68c71100e47b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n        for (duplicates <- result.get(PersistenceResponse.Duplicate)) {\r\n```",
+        "createdAt" : "2019-07-29T06:03:00Z",
+        "updatedAt" : "2019-07-29T11:11:32Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d5a8d0ee-30bb-4297-ba18-56e4ee53f03b",
+        "parentId" : "f5078456-8cde-4b64-93ea-68c71100e47b",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Ugh, thanks, fixed.",
+        "createdAt" : "2019-07-29T07:05:29Z",
+        "updatedAt" : "2019-07-29T11:11:32Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "32b9c53286fc57cb866c7a586b41bb9fdf2064f6",
+    "line" : null,
+    "diffHunk" : "@@ -349,13 +349,17 @@ private class SqlLedger(\n       (archive, PackageDetails(archive.getPayload.size().toLong, knownSince, sourceDescription)))\n     ledgerDao\n       .uploadLfPackages(submissionId, packages)\n-      .map {\n-        case PersistenceResponse.Ok =>\n-          UploadPackagesResult.Ok\n-        case PersistenceResponse.Duplicate =>\n-          // Note: package upload is idempotent, apart from the fact that we only keep\n-          // the knownSince and sourceDescription of the first upload.\n-          UploadPackagesResult.Ok\n+      .map { result =>\n+        result.get(PersistenceResponse.Ok).fold(logger.info(s\"No package uploaded\")) { uploaded =>\n+          logger.info(s\"Successfully uploaded $uploaded packages\")\n+        }\n+        for (duplicates <- result.get(PersistenceResponse.Ok)) {"
+  },
+  {
+    "id" : "9d088597-9ff2-4262-917d-d48cee69e993",
+    "prId" : 1818,
+    "comments" : [
+      {
+        "id" : "b656c34c-32c7-45d2-8bcc-9f21685b3c8f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Not sure I understand. Why do we use `InMemoryPackageStore` for the SqlLedger?",
+        "createdAt" : "2019-06-24T07:52:21Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e3c17c96-2131-4203-87da-bcc2ce3c7f00",
+        "parentId" : "b656c34c-32c7-45d2-8bcc-9f21685b3c8f",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "This PR is just WIP so far. First part was to move ownership of the package store to the `Ledger` instance. Next part will be copying the given `InMemoryPackageStore` (populated by the CLI arguments and scenario loader) to the PostgreSQL database on startup, and then serving package management calls from the database.",
+        "createdAt" : "2019-06-24T14:27:31Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ce352aff-e375-44ab-956b-b29f84b18c36",
+        "parentId" : "b656c34c-32c7-45d2-8bcc-9f21685b3c8f",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Alright, I'll shut up now and wait for your signal :)",
+        "createdAt" : "2019-06-24T14:28:14Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bae23a0a96200d0ece436a646cceb68a50511f37",
+    "line" : 66,
+    "diffHunk" : "@@ -82,6 +79,7 @@ object SqlLedger {\n       ledgerId: Option[LedgerId],\n       timeProvider: TimeProvider,\n       acs: InMemoryActiveContracts,\n+      packages: InMemoryPackageStore,"
+  },
+  {
+    "id" : "1ffdeaa7-9a6c-4fbe-a047-2654f56ea6db",
+    "prId" : 1818,
+    "comments" : [
+      {
+        "id" : "ab31125a-9ed2-430a-b43e-559a7431f729",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "you could just use `sys.error` here",
+        "createdAt" : "2019-06-28T08:18:40Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bae23a0a96200d0ece436a646cceb68a50511f37",
+    "line" : null,
+    "diffHunk" : "@@ -455,6 +484,26 @@ private class SqlLedgerFactory(ledgerDao: LedgerDao) {\n     ledgerDao.initializeLedger(ledgerId, 0)\n   }\n \n+  private def copyPackages(store: InMemoryPackageStore, knownSince: Instant): Future[Unit] = {\n+    val packages = store.listLfPackagesSync()\n+    if (packages.nonEmpty) {\n+      logger.info(s\"Copying initial packages ${packages.keys.mkString(\",\")}\")\n+      ledgerDao\n+        .uploadLfPackages(packages.toList.map(pkg => {\n+          val archive =\n+            store.getLfArchiveSync(pkg._1).getOrElse(sys.error(s\"Package ${pkg._1} not found\"))\n+          archive -> PackageDetails(archive.getPayload.size.toLong, knownSince, None)\n+        }))\n+        .flatMap {\n+          case UploadPackagesResult.Ok => Future.successful(())\n+          case r @ _ =>\n+            Future.failed(new RuntimeException(\"Failed to copy initial packages: \" + r.description))"
+  },
+  {
+    "id" : "9be6ce12-7261-4bfb-84d5-26689130fab4",
+    "prId" : 1818,
+    "comments" : [
+      {
+        "id" : "406fbdf2-e4ca-4c28-8392-ae9395a6581b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I'd rather we don't thread the `InMemoryPackageStore` all the way to the Ledger initialization, but rather we simply initialize the ledger and automatically upload the packages from \"the outside\" via the regular mechanism. What do you think? Duplicate packages will be \"ignored\" and the other packages just uploaded.",
+        "createdAt" : "2019-06-28T08:33:09Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "da4a9d16-23ad-4350-87ff-7cfdbda1c830",
+        "parentId" : "406fbdf2-e4ca-4c28-8392-ae9395a6581b",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Not sure about that. This `initialize` method also inserts the provided ACS and ledger entries (generated by the scenario loader) into the database, and conceptually the packages should be added before the ledger entries.\r\n\r\nIn practice, nothing would happen if we first copied the given ledger entries and ACS upon initialization, and then uploaded the packages later from the outside.",
+        "createdAt" : "2019-06-28T09:08:50Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3c904bf1-fb64-4074-871a-0f209abf494a",
+        "parentId" : "406fbdf2-e4ca-4c28-8392-ae9395a6581b",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I see. Looking at my postgres-index(er) branch, I see that it won't be a problem. 👍 ",
+        "createdAt" : "2019-06-28T09:17:07Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bae23a0a96200d0ece436a646cceb68a50511f37",
+    "line" : 178,
+    "diffHunk" : "@@ -396,6 +420,10 @@ private class SqlLedgerFactory(ledgerDao: LedgerDao) {\n                 logger.warn(\n                   s\"Initial ledger entries provided, presumably from scenario, but I'm picking up from an existing database, and thus they will not be used\")\n               }\n+              if (packages.listLfPackagesSync().nonEmpty) {"
+  },
+  {
+    "id" : "969d307a-168c-4948-bbc8-32717f166cb8",
+    "prId" : 1505,
+    "comments" : [
+      {
+        "id" : "e44a91b4-1427-4232-91f6-e3468c850b67",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "That's merely ignoring the error, right? Which means that we actually lose the ledger entry. We probably should rather retry n times and then crash the application?",
+        "createdAt" : "2019-06-04T07:58:15Z",
+        "updatedAt" : "2019-06-04T09:19:19Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dda12f6b-5f00-44b0-bebf-335666112d14",
+        "parentId" : "e44a91b4-1427-4232-91f6-e3468c850b67",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "I am not sure. Why can't the command just fail, and we put the retry responsibility on the client? I tend to shy away from ad-hoc retry logics, because you have to make arbitrary decisions which you might not be entitled to. In this case the commands in-flight have time related constraints for instance, so how long should we retry them?",
+        "createdAt" : "2019-06-04T08:15:11Z",
+        "updatedAt" : "2019-06-04T09:19:19Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "139d0811-9f69-4979-aaf7-d34fd2ae138b",
+        "parentId" : "e44a91b4-1427-4232-91f6-e3468c850b67",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "Another thing is that a Postgres database can be down for a long time. A robust application should survive that and recover when it comes back. ",
+        "createdAt" : "2019-06-04T08:16:23Z",
+        "updatedAt" : "2019-06-04T09:19:19Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4a928e4d-f6fe-4b54-aa8d-ede4a47067fe",
+        "parentId" : "e44a91b4-1427-4232-91f6-e3468c850b67",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Is the command/transaction actually rejected? This would then trigger another write to the database that would fail, right?",
+        "createdAt" : "2019-06-04T09:09:30Z",
+        "updatedAt" : "2019-06-04T09:19:19Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5ecb77da-0389-466b-ac51-f52f53bd1f71",
+        "parentId" : "e44a91b4-1427-4232-91f6-e3468c850b67",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Discussed offline: the postgres transaction will fail and thus be rolled back by `HikariJdbcConnectionProvider`. Since the client will never get a completion or a transaction, it should run into a command timeout and retry the command.",
+        "createdAt" : "2019-06-04T09:31:48Z",
+        "updatedAt" : "2019-06-04T09:31:49Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "13bdebb80c5a71ce211dbac7c888c01f2468a665",
+    "line" : 26,
+    "diffHunk" : "@@ -170,19 +177,24 @@ private class SqlLedger(\n               ledgerDao\n                 .storeLedgerEntry(offset, offset + 1, ledgerEntryGen(offset))\n                 .map(_ => ())(DEC)\n+                .recover {\n+                  case t =>\n+                    //recovering from the failure so the persistence stream doesn't die\n+                    logger.error(s\"Failed to persist entry with offset: $offset\", t)\n+                    ()"
+  },
+  {
+    "id" : "ec121095-7115-4e73-982d-a76983570824",
+    "prId" : 1505,
+    "comments" : [
+      {
+        "id" : "db6c8ba2-158d-47fe-8edf-7e7b4cf88c03",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Is it really a warning though? For example, when shutting down the sandbox, this is just a normal event that happens.",
+        "createdAt" : "2019-06-04T07:58:48Z",
+        "updatedAt" : "2019-06-04T09:19:19Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6faeac76-9048-4375-a4e5-1e861c6b33c4",
+        "parentId" : "db6c8ba2-158d-47fe-8edf-7e7b4cf88c03",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "good point! The thing is that it's only valuable if it fails with an error. I'll look if there is a callback for that.",
+        "createdAt" : "2019-06-04T08:18:11Z",
+        "updatedAt" : "2019-06-04T09:19:19Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9deaa489-f5bc-485b-9b86-c4e44044e0a0",
+        "parentId" : "db6c8ba2-158d-47fe-8edf-7e7b4cf88c03",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "I addressed this.",
+        "createdAt" : "2019-06-04T09:19:44Z",
+        "updatedAt" : "2019-06-04T09:19:44Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "13bdebb80c5a71ce211dbac7c888c01f2468a665",
+    "line" : null,
+    "diffHunk" : "@@ -131,6 +131,13 @@ private class SqlLedger(\n       SourceQueueWithComplete[Long => PersistenceEntry],\n       SourceQueueWithComplete[Long => PersistenceEntry]) = createQueues()\n \n+  checkpointQueue\n+    .watchCompletion()\n+    .foreach(_ => logger.warn(\"checkpoint queue has been closed!\"))(DEC)"
+  },
+  {
+    "id" : "4a34bca5-ca8c-4bce-9ab5-3149429f4bdd",
+    "prId" : 1105,
+    "comments" : [
+      {
+        "id" : "d649e76e-b61c-445e-8cc5-66e81a58a415",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "please factor this out into a separate method with a descriptive name",
+        "createdAt" : "2019-05-13T14:51:33Z",
+        "updatedAt" : "2019-05-14T09:16:28Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "73a29d11-9b51-46aa-b294-67bb5c90b2bc",
+        "parentId" : "d649e76e-b61c-445e-8cc5-66e81a58a415",
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "why?",
+        "createdAt" : "2019-05-14T07:19:13Z",
+        "updatedAt" : "2019-05-14T09:16:28Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "59e011ac-3fd9-45bb-8116-3e095a78a066",
+        "parentId" : "d649e76e-b61c-445e-8cc5-66e81a58a415",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "Because it's good hygiene. `initialize` is getting too big and `go` (although a perfectly acceptable name for an internal tail-rec helper), doesn't tell anything about what this code is doing, hence one cannot have a quick overview of the pattern matching cases without understanding the recursive logic within.",
+        "createdAt" : "2019-05-14T07:35:54Z",
+        "updatedAt" : "2019-05-14T09:16:28Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d6328acb-d103-4928-ae84-66462ba09a54",
+        "parentId" : "d649e76e-b61c-445e-8cc5-66e81a58a415",
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "I think having it inside makes the class easier to read, since this method is _only used here_ and thus having it here removes the need for jumping around.\r\n\r\nRegarding visualizing pattern matching, I've floated `go` to the top of the definition itself and renamed it.",
+        "createdAt" : "2019-05-14T07:43:06Z",
+        "updatedAt" : "2019-05-14T09:16:28Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2812d848-2a91-4326-bf9b-b4500e893989",
+        "parentId" : "d649e76e-b61c-445e-8cc5-66e81a58a415",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "Ok, it looks better now.",
+        "createdAt" : "2019-05-14T07:48:29Z",
+        "updatedAt" : "2019-05-14T09:16:28Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6d81164920cc6c9affc0286dc658e1a78e9b981e",
+    "line" : null,
+    "diffHunk" : "@@ -334,33 +319,70 @@ private class SqlLedgerFactory(ledgerDao: LedgerDao) {\n   private def reset(): Future[Unit] =\n     ledgerDao.reset()\n \n-  private def initialize(initialLedgerId: Option[String]): Future[String] = initialLedgerId match {\n-    case Some(initialId) =>\n-      ledgerDao\n-        .lookupLedgerId()\n-        .flatMap {\n-          case Some(foundLedgerId) if (foundLedgerId == initialId) =>\n-            ledgerFound(foundLedgerId)\n-          case Some(foundLedgerId) =>\n-            val errorMsg =\n-              s\"Ledger id mismatch. Ledger id given ('$initialId') is not equal to the existing one ('$foundLedgerId')!\"\n-            logger.error(errorMsg)\n-            sys.error(errorMsg)\n-          case None =>\n-            doInit(initialId).map(_ => initialId)(DEC)\n-        }(DEC)\n-\n-    case None =>\n-      logger.info(\"No ledger id given. Looking for existing ledger in database.\")\n-      ledgerDao\n-        .lookupLedgerId()\n-        .flatMap {\n-          case Some(foundLedgerId) => ledgerFound(foundLedgerId)\n-          case None =>\n-            val randomLedgerId = LedgerIdGenerator.generateRandomId()\n-            doInit(randomLedgerId).map(_ => randomLedgerId)(DEC)\n-        }(DEC)\n-  }\n+  private def initialize(\n+      initialLedgerId: Option[String],\n+      initialLedgerEntries: ImmArray[LedgerEntryWithLedgerEndIncrement]): Future[String] =\n+    initialLedgerId match {\n+      case Some(initialId) =>\n+        ledgerDao\n+          .lookupLedgerId()\n+          .flatMap {\n+            case Some(foundLedgerId) if (foundLedgerId == initialId) =>\n+              if (initialLedgerEntries.nonEmpty) {\n+                logger.warn(\n+                  s\"Initial ledger entries provided, presumably from scenario, but I'm picking up from an existing database, and thus they will not be used\")\n+              }\n+              ledgerFound(foundLedgerId)\n+            case Some(foundLedgerId) =>\n+              val errorMsg =\n+                s\"Ledger id mismatch. Ledger id given ('$initialId') is not equal to the existing one ('$foundLedgerId')!\"\n+              logger.error(errorMsg)\n+              sys.error(errorMsg)\n+            case None =>\n+              if (initialLedgerEntries.nonEmpty) {\n+                logger.info(\n+                  s\"Initializing ledger with ${initialLedgerEntries.length} ledger entries\")\n+              }\n+              // Note that here we only store the ledger entry and we do not update anything else, such as the\n+              // headRef. We also are not concerns with heartbeats / checkpoints. This is OK since this initialization\n+              // step happens before we start up the sql ledger at all, so it's running in isolation.\n+              @tailrec"
+  },
+  {
+    "id" : "129a7259-2f66-41fb-99f6-8bf590cf9949",
+    "prId" : 990,
+    "comments" : [
+      {
+        "id" : "e6401003-422e-4731-a3db-31f5d265405c",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "it's not your fault, but I just noticed that we have a race in the persistence pipeline. As the entries can be persisted concurrently, they might get saved with non strictly increasing record times. The question is: When `offsetT2 > offsetT1 ` is/must `recordTimeT2 >= recordTimeT1` implied from it?",
+        "createdAt" : "2019-05-08T09:21:48Z",
+        "updatedAt" : "2019-05-09T08:23:50Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8a4ea9c4-61f7-4898-8aba-75ba64a2684f",
+        "parentId" : "e6401003-422e-4731-a3db-31f5d265405c",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "I take it back. I forgot that it's actually called via a callback, where the order is guaranteed. ",
+        "createdAt" : "2019-05-08T10:58:23Z",
+        "updatedAt" : "2019-05-09T08:23:50Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "09bbdf689d930ffefebf0ef91ebc9a3d81880874",
+    "line" : 49,
+    "diffHunk" : "@@ -231,17 +235,29 @@ private class SqlLedger(\n               parties.toSet[String]\n         }\n \n-      LedgerEntry.Transaction(\n-        tx.commandId,\n-        transactionId,\n-        tx.applicationId,\n-        tx.submitter,\n-        tx.workflowId,\n-        tx.ledgerEffectiveTime,\n-        timeProvider.getCurrentTime,\n-        mappedTx,\n-        mappedDisclosure\n-      )\n+      val recordTime = timeProvider.getCurrentTime\n+      if (recordTime.isAfter(tx.maximumRecordTime)) {\n+        LedgerEntry.Rejection(\n+          recordTime,\n+          tx.commandId,\n+          tx.applicationId,\n+          tx.submitter,\n+          RejectionReason.TimedOut(\n+            s\"RecordTime $recordTime is after MaximumRecordTime ${tx.maximumRecordTime}\")\n+        )\n+      } else {\n+        LedgerEntry.Transaction(\n+          tx.commandId,\n+          transactionId,\n+          tx.applicationId,\n+          tx.submitter,\n+          tx.workflowId,\n+          tx.ledgerEffectiveTime,\n+          recordTime,"
+  },
+  {
+    "id" : "9b50c287-67c6-43b2-af66-5da9235beaba",
+    "prId" : 959,
+    "comments" : [
+      {
+        "id" : "c8eb1412-48a7-4051-97cd-708df155ae8c",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "@francesco-da This part was written while resolving a rebase conflict. It assigns an absolute ledger offset to each ledger entry produced by the scenario loader, and gives that whole list to the DAO to persist (along with the list of active contracts produced by the scenario loader).\r\n\r\nWhile writing this, I realize that because we are using the contracts produced by the scenario loader, the SQL backend will not persist contracts that have been created *and* archived within a scenario, so it will not be able to produce a valid ledger snapshot before the end of the scenario. I don't think this is an issue, just worth mentioning.",
+        "createdAt" : "2019-05-15T14:13:22Z",
+        "updatedAt" : "2019-05-15T16:27:45Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e4dc5b75fb95575adb8e21bb2ae04bcccdc97acf",
+    "line" : 249,
+    "diffHunk" : "@@ -373,9 +373,28 @@ private class SqlLedgerFactory(ledgerDao: LedgerDao) {\n                 logger.info(\n                   s\"Initializing ledger with ${initialLedgerEntries.length} ledger entries\")\n               }\n-              processInitialLedgerEntries(doInit(initialId), 0, initialLedgerEntries).map { _ =>\n-                initialId\n-              }(DEC)\n+\n+              val contracts = acs.contracts\n+                .map(f => Contract.fromActiveContract(f._1, f._2))\n+                .to[collection.immutable.Seq]\n+              val initialLedgerEnd = 0L\n+              val entriesWithOffset = initialLedgerEntries.foldLeft(\n+                (initialLedgerEnd, immutable.Seq.empty[(Long, LedgerEntry)]))((acc, le) => {\n+                val offset = acc._1\n+                val seq = acc._2\n+                (offset + le.increment, seq :+ offset -> le.entry)\n+              })\n+\n+              @SuppressWarnings(Array(\"org.wartremover.warts.ExplicitImplicitTypes\"))\n+              implicit val ec = DEC\n+              for {\n+                _ <- doInit(initialId)\n+                _ <- ledgerDao.storeInitialState(\n+                  contracts,\n+                  entriesWithOffset._2,\n+                  entriesWithOffset._1)\n+              } yield { initialId }"
+  },
+  {
+    "id" : "66c8977f-5518-4b55-90de-e444a582d50a",
+    "prId" : 752,
+    "comments" : [
+      {
+        "id" : "4a86d8f3-4c5f-44e9-9032-ff6e663b5bb8",
+        "parentId" : null,
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "```suggestion\r\n    // We process the requests in batches when under pressure (see semantics of `batch`). Note\r\n    // that this is safe on the read end because the readers rely on the dispatchers to know the\r\n    // ledger end, and not the database itself. This means that they will not start reading from the new\r\n    // ledger end until we tell them so, which we do when _all_ the entries have been committed.\r\n    mergedSources\r\n```",
+        "createdAt" : "2019-04-29T16:10:26Z",
+        "updatedAt" : "2019-04-29T16:12:32Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "274ca7de6c735c916257d57e61908ae8f5777ca0",
+    "line" : 57,
+    "diffHunk" : "@@ -134,18 +135,22 @@ private class SqlLedger(\n     })\n \n     mergedSources"
+  },
+  {
+    "id" : "25cdff4c-1223-4a24-94d5-880131df9db0",
+    "prId" : 611,
+    "comments" : [
+      {
+        "id" : "b7cad754-3b8f-4ee4-a9da-2137e8fc7be2",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "doesn't make a difference in performance according to my local tests",
+        "createdAt" : "2019-04-23T07:17:16Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "80a155bf0253163f8e06e1fb42f82f22e3ae95fe",
+    "line" : 14,
+    "diffHunk" : "@@ -61,8 +62,8 @@ object SqlLedger {\n       implicit mat: Materializer): Future[Ledger] = {\n     implicit val ec: ExecutionContext = DirectExecutionContext\n \n-    val noOfShortLivedConnections = 10\n-    val noOfStreamingConnections = 8\n+    val noOfShortLivedConnections = 8"
+  },
+  {
+    "id" : "28abac32-4346-404e-8444-ac8f153fe736",
+    "prId" : 611,
+    "comments" : [
+      {
+        "id" : "dba29503-6818-4c2e-98a4-1c86db64f15a",
+        "parentId" : null,
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "what's this?",
+        "createdAt" : "2019-04-24T08:59:47Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c6d4db45-1baf-4de1-8be9-0baaf8ae14ee",
+        "parentId" : "dba29503-6818-4c2e-98a4-1c86db64f15a",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : " Good catch. It's just a left-over as I was testing with both approaches. I removed it.",
+        "createdAt" : "2019-04-24T09:04:59Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "80a155bf0253163f8e06e1fb42f82f22e3ae95fe",
+    "line" : null,
+    "diffHunk" : "@@ -87,11 +88,18 @@ private class SqlLedger(\n \n   private def nextOffset(o: Long): Long = o + 1\n \n+  //  private val dispatcher = Dispatcher[Long, LedgerEntry]("
+  }
+]

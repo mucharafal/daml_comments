@@ -1,0 +1,96 @@
+[
+  {
+    "id" : "05241ff2-1f5f-4168-93e5-fea563c4fd82",
+    "prId" : 541,
+    "comments" : [
+      {
+        "id" : "9b41de73-9f63-4b15-94da-0a09c7c5c9c9",
+        "parentId" : null,
+        "author" : {
+          "login" : "recurse",
+          "name" : "Andrae Muys",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/351191?v=4"
+        },
+        "body" : "I think it is important to show how to auto-finalize the contract, even if we show this one first. The basic manipulation of `Either` and `Optional` within `Update` is a basic DAML skill.",
+        "createdAt" : "2019-04-16T23:27:04Z",
+        "updatedAt" : "2019-04-24T14:05:23Z",
+        "lastEditedBy" : {
+          "login" : "recurse",
+          "name" : "Andrae Muys",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/351191?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9633c922-4a58-47e1-9965-5f7cf3d8c74c",
+        "parentId" : "9b41de73-9f63-4b15-94da-0a09c7c5c9c9",
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "I'd like to do this, but within a separate pattern.",
+        "createdAt" : "2019-04-24T14:05:57Z",
+        "updatedAt" : "2019-04-24T14:05:57Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "41f806df342cd67b7ab003250481a6db6cb446d5",
+    "line" : 46,
+    "diffHunk" : "@@ -11,60 +11,82 @@ import Utilities\n import DA.List\n \n -- start snippet: agreement template\n-template Agreement\n+template ContractPlaceholder\n   with\n     signatories: [Party]\n   where\n     signatory signatories\n+    ensure\n+      unique signatories\n+  -- The rest of the template to be agreed to would follow here\n -- end snippet: agreement template\n \n -- start snippet: first half pending template\n template Pending\n   with\n-    agree: Agreement\n-    signed: [Party]\n-    toSign: [Party]\n+    finalContract: ContractPlaceholder\n+    alreadySigned: [Party]\n   where\n-    signatory signed\n-    observer toSign\n+    signatory alreadySigned\n+    observer finalContract.signatories\n+    ensure\n+      -- Can't have duplicate signatories\n+      unique alreadySigned\n+\n+    -- The parties who need to sign is the finalContract.signatories with alreadySigned filtered out\n+    let toSign = filter (`notElem` alreadySigned) finalContract.signatories\n \n     choice Sign : ContractId Pending with\n         signer : Party\n       controller signer\n         do\n+          -- Check the controller is in the toSign list, and if they are, sign the Pending contract\n           assert (signer `elem` toSign)\n-          create this with signed = signer :: signed, toSign = delete signer toSign\n+          create this with alreadySigned = signer :: alreadySigned\n     -- end snippet: first half pending template\n     -- start snippet: second half pending template\n-    choice Finalize : ContractId Agreement with\n+    choice Finalize : ContractId ContractPlaceholder with"
+  },
+  {
+    "id" : "3328e2b2-79a8-4683-b71b-15dab9e7d7c2",
+    "prId" : 541,
+    "comments" : [
+      {
+        "id" : "81b99aee-dca6-4d1f-9e02-351edb68ada2",
+        "parentId" : null,
+        "author" : {
+          "login" : "recurse",
+          "name" : "Andrae Muys",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/351191?v=4"
+        },
+        "body" : "Flexible controller choice is a nice change.",
+        "createdAt" : "2019-04-16T23:27:42Z",
+        "updatedAt" : "2019-04-24T14:05:23Z",
+        "lastEditedBy" : {
+          "login" : "recurse",
+          "name" : "Andrae Muys",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/351191?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "001d720c-b533-4154-a27f-82df3489a092",
+        "parentId" : "81b99aee-dca6-4d1f-9e02-351edb68ada2",
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "I agree!",
+        "createdAt" : "2019-04-24T14:06:05Z",
+        "updatedAt" : "2019-04-24T14:06:05Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "41f806df342cd67b7ab003250481a6db6cb446d5",
+    "line" : 35,
+    "diffHunk" : "@@ -11,60 +11,82 @@ import Utilities\n import DA.List\n \n -- start snippet: agreement template\n-template Agreement\n+template ContractPlaceholder\n   with\n     signatories: [Party]\n   where\n     signatory signatories\n+    ensure\n+      unique signatories\n+  -- The rest of the template to be agreed to would follow here\n -- end snippet: agreement template\n \n -- start snippet: first half pending template\n template Pending\n   with\n-    agree: Agreement\n-    signed: [Party]\n-    toSign: [Party]\n+    finalContract: ContractPlaceholder\n+    alreadySigned: [Party]\n   where\n-    signatory signed\n-    observer toSign\n+    signatory alreadySigned\n+    observer finalContract.signatories\n+    ensure\n+      -- Can't have duplicate signatories\n+      unique alreadySigned\n+\n+    -- The parties who need to sign is the finalContract.signatories with alreadySigned filtered out\n+    let toSign = filter (`notElem` alreadySigned) finalContract.signatories\n \n     choice Sign : ContractId Pending with"
+  }
+]

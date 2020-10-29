@@ -1,0 +1,376 @@
+[
+  {
+    "id" : "72a02314-f075-462b-bc27-a84dc2bbdb18",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "2661a2c0-aef4-482d-a33d-20e5a772db43",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Why not just getting the values?",
+        "createdAt" : "2020-07-14T08:38:05Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e57b9f8f-9baf-4aa1-a036-d4c8dccb152d",
+        "parentId" : "2661a2c0-aef4-482d-a33d-20e5a772db43",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "What do you mean? The cache stores values in a bit different way than we need it in the output.",
+        "createdAt" : "2020-07-14T10:13:34Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : 50,
+    "diffHunk" : "@@ -0,0 +1,50 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.caching\n+\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{DamlKvutils, Fingerprint}\n+import com.daml.ledger.validator.StateKeySerializationStrategy\n+import com.daml.ledger.validator.preexecution.DamlLedgerStateReaderWithFingerprints\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class CachingDamlLedgerStateReaderWithFingerprints(\n+    val cache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    shouldCache: DamlStateKey => Boolean,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    delegate: DamlLedgerStateReaderWithFingerprints)(implicit executionContext: ExecutionContext)\n+    extends DamlLedgerStateReaderWithFingerprints {\n+  override def read(keys: Seq[DamlKvutils.DamlStateKey])\n+    : Future[Seq[(Option[DamlKvutils.DamlStateValue], Fingerprint)]] = {\n+    @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) // Required to make `.view` work.\n+    val cachedValues: Map[DamlStateKey, (Option[DamlStateValue], Fingerprint)] = keys.view\n+      .map(key => key -> cache.getIfPresent(key))\n+      .collect {\n+        case (key, Some((value, fingerprint))) => (key, (Some(value), fingerprint))\n+      }\n+      .toMap\n+    val keysToRead = keys.toSet -- cachedValues.keySet\n+    if (keysToRead.nonEmpty) {\n+      delegate\n+        .read(keysToRead.toSeq)\n+        .map { readStateValues =>\n+          val readValues = keysToRead.zip(readStateValues).toMap\n+          readValues.collect {\n+            case (key, (Some(value), fingerprint)) if shouldCache(key) =>\n+              cache.put(key, value -> fingerprint)\n+          }\n+          val all = cachedValues ++ readValues\n+          keys.map(all(_))\n+        }\n+    } else {\n+      Future {\n+        keys.map(cachedValues(_))"
+  },
+  {
+    "id" : "07b4b4cb-506f-4ceb-ae0f-a6a3407e8eed",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "c54b906e-e748-4cb9-8f5a-d912e4c45fb2",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Why are you discarding the cache with this return?",
+        "createdAt" : "2020-07-14T08:43:19Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e65c149f-8f79-4691-b9d7-ee79bab8a688",
+        "parentId" : "c54b906e-e748-4cb9-8f5a-d912e4c45fb2",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Removed, that was accidentally left in.",
+        "createdAt" : "2020-07-14T10:14:21Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,50 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.caching\n+\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{DamlKvutils, Fingerprint}\n+import com.daml.ledger.validator.StateKeySerializationStrategy\n+import com.daml.ledger.validator.preexecution.DamlLedgerStateReaderWithFingerprints\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class CachingDamlLedgerStateReaderWithFingerprints(\n+    val cache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    shouldCache: DamlStateKey => Boolean,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    delegate: DamlLedgerStateReaderWithFingerprints)(implicit executionContext: ExecutionContext)\n+    extends DamlLedgerStateReaderWithFingerprints {\n+  override def read(keys: Seq[DamlKvutils.DamlStateKey])\n+    : Future[Seq[(Option[DamlKvutils.DamlStateValue], Fingerprint)]] = {\n+    @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) // Required to make `.view` work.\n+    val cachedValues: Map[DamlStateKey, (Option[DamlStateValue], Fingerprint)] = keys.view\n+      .map(key => key -> cache.getIfPresent(key))\n+      .collect {\n+        case (key, Some((value, fingerprint))) => (key, (Some(value), fingerprint))\n+      }\n+      .toMap\n+    val keysToRead = keys.toSet -- cachedValues.keySet\n+    if (keysToRead.nonEmpty) {\n+      delegate\n+        .read(keysToRead.toSeq)\n+        .map { readStateValues =>\n+          val readValues = keysToRead.zip(readStateValues).toMap\n+          readValues.collect {\n+            case (key, (Some(value), fingerprint)) if shouldCache(key) =>\n+              cache.put(key, value -> fingerprint)\n+          }\n+          val all = cachedValues ++ readValues\n+          keys.map(all(_))\n+        }\n+    } else {\n+      Future {\n+        keys.map(cachedValues(_))\n+      }\n+    }\n+\n+    delegate.read(keys)"
+  },
+  {
+    "id" : "e4ecb8d2-075a-4e6d-9530-40a1f58bd255",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "059be087-13d5-4c5a-a7ea-0a2ed20c6754",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "add an assertion here on the `keysToRead` being of equal length as `readStateValues`, as `zip` otherwise silently drops them.",
+        "createdAt" : "2020-07-14T09:33:09Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2b88d290-1a4c-487d-8fc1-5d8c245b06d2",
+        "parentId" : "059be087-13d5-4c5a-a7ea-0a2ed20c6754",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added.",
+        "createdAt" : "2020-07-14T10:21:51Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : 40,
+    "diffHunk" : "@@ -0,0 +1,50 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.caching\n+\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{DamlKvutils, Fingerprint}\n+import com.daml.ledger.validator.StateKeySerializationStrategy\n+import com.daml.ledger.validator.preexecution.DamlLedgerStateReaderWithFingerprints\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class CachingDamlLedgerStateReaderWithFingerprints(\n+    val cache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    shouldCache: DamlStateKey => Boolean,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    delegate: DamlLedgerStateReaderWithFingerprints)(implicit executionContext: ExecutionContext)\n+    extends DamlLedgerStateReaderWithFingerprints {\n+  override def read(keys: Seq[DamlKvutils.DamlStateKey])\n+    : Future[Seq[(Option[DamlKvutils.DamlStateValue], Fingerprint)]] = {\n+    @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) // Required to make `.view` work.\n+    val cachedValues: Map[DamlStateKey, (Option[DamlStateValue], Fingerprint)] = keys.view\n+      .map(key => key -> cache.getIfPresent(key))\n+      .collect {\n+        case (key, Some((value, fingerprint))) => (key, (Some(value), fingerprint))\n+      }\n+      .toMap\n+    val keysToRead = keys.toSet -- cachedValues.keySet\n+    if (keysToRead.nonEmpty) {\n+      delegate\n+        .read(keysToRead.toSeq)\n+        .map { readStateValues =>\n+          val readValues = keysToRead.zip(readStateValues).toMap"
+  },
+  {
+    "id" : "8396f149-ec74-4911-9ad4-bdc039250247",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "2c45d25c-80fd-4af4-8a94-dbac14e08abf",
+        "parentId" : null,
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "I'd suggest caching `Option [DamlStateValue]` as this is the lookup function provided by `DamlLedgerStateReaderWithFingerprints`. It even slightly simplifies the code below.",
+        "createdAt" : "2020-07-14T09:38:55Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "96843622-52b8-4241-b3a2-48444694b9e9",
+        "parentId" : "2c45d25c-80fd-4af4-8a94-dbac14e08abf",
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "You will then probably want to switch from `readValues` to `readResults`",
+        "createdAt" : "2020-07-14T09:39:31Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0bbb2e06-2478-410d-9399-f680b2b1ccf3",
+        "parentId" : "2c45d25c-80fd-4af4-8a94-dbac14e08abf",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "We only want to store values that are available in the cache (hence we don't store an option). A simplification that I can see is switching to `Option[(DamlStateValue, Fingerprint)]` from `(Option[DamlStateValue], Fingerprint)` as we'll have the same fingerprint for empty values anyway hence wouldn't need to store such fingerprints unnecessarily (and this would also simplify the code below).\r\nWhat do you think?",
+        "createdAt" : "2020-07-14T10:28:15Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "975b5f54-5bb1-4dc6-960e-6b19b3f445c3",
+        "parentId" : "2c45d25c-80fd-4af4-8a94-dbac14e08abf",
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "I'd be wary about making assumptions about the fingerprints of reading `None`. Underlying implementations might use the same fingerprint or they might not. As an example think about a key-value store that uses the last-modified-time of a value was as the fingerprint (assuming every transaction is committed at a different time). In that case, a `None` value might be due to the key never having been written, or it might be due to the key having been deleted in some transaction.\r\n\r\nMentally, the model I'm using is that we are caching results of lookups from the backing store; and these lookups can return `Option[DamlStateValue]`. This allows the non-existence of a key to mean something as well.",
+        "createdAt" : "2020-07-14T11:17:07Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "375c9b8f-941a-47aa-b195-5dd2053d5bd9",
+        "parentId" : "2c45d25c-80fd-4af4-8a94-dbac14e08abf",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Makes sense, however, this design has one con: we will cache failed lookups for immutable objects such as party allocations and package uploads. This way the committer node will have all submissions fail that depend on a yet to be uploaded party or package. I.e., if the party allocation required for a submission is being processed after the submission itself on a committer node then the committer won't be able to process the submission till the cache entry expires for the failed party lookup. Do you think we should handle this corner case?",
+        "createdAt" : "2020-07-14T14:03:58Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "707c66c9-2223-46c0-bc87-21cb08513c51",
+        "parentId" : "2c45d25c-80fd-4af4-8a94-dbac14e08abf",
+        "author" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "body" : "OK. I see. What we are saying is that only positive lookups for immutable keys are to be cached. That makes sense, as they are immutable in an append-only fashion. Not immutable by default.\r\n\r\nThanks for raising this. If you could add a comment as to why we only cache positive lookups that would be helpful",
+        "createdAt" : "2020-07-14T17:00:49Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "meiersi-da",
+          "name" : "Simon Meier",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/13766136?u=a00dd223b1cde8578fe208ebbb7cccd4db41eb9a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1c6698ee-8aed-488d-a0e2-396d420d90e0",
+        "parentId" : "2c45d25c-80fd-4af4-8a94-dbac14e08abf",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-07-15T08:15:00Z",
+        "updatedAt" : "2020-07-15T08:15:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : 20,
+    "diffHunk" : "@@ -0,0 +1,50 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.caching\n+\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{DamlKvutils, Fingerprint}\n+import com.daml.ledger.validator.StateKeySerializationStrategy\n+import com.daml.ledger.validator.preexecution.DamlLedgerStateReaderWithFingerprints\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class CachingDamlLedgerStateReaderWithFingerprints(\n+    val cache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],"
+  },
+  {
+    "id" : "1a73fbac-b834-48ba-8625-e3fba1e4b37b",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "6201f5e2-4aed-4b3d-9915-e4a9eb6fe810",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n        cachedValues.values.toSeq\r\n```\r\n\r\nAlthough probably it won't make much of a difference.",
+        "createdAt" : "2020-07-14T10:28:49Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a205b43d-1a72-4e7e-b5cc-377333c43d10",
+        "parentId" : "6201f5e2-4aed-4b3d-9915-e4a9eb6fe810",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Perhaps a bit more readable though, as it implies that the values in there are exactly the ones needed.",
+        "createdAt" : "2020-07-14T10:31:41Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0617b960-bf4b-4106-a38d-9b2362336866",
+        "parentId" : "6201f5e2-4aed-4b3d-9915-e4a9eb6fe810",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "We cannot do this as the order of the returned keys may not be the same as the input keys. The contract for the `LedgerReader` interface requires identical ordering hence we need to look up the keys in their original order and construct the output list.",
+        "createdAt" : "2020-07-14T10:35:36Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "427f7c07-66bb-4576-b2c1-509e94890300",
+        "parentId" : "6201f5e2-4aed-4b3d-9915-e4a9eb6fe810",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added a test case as well so that this requirement is captured.",
+        "createdAt" : "2020-07-14T14:04:23Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : 50,
+    "diffHunk" : "@@ -0,0 +1,50 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.caching\n+\n+import com.daml.caching.Cache\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{DamlKvutils, Fingerprint}\n+import com.daml.ledger.validator.StateKeySerializationStrategy\n+import com.daml.ledger.validator.preexecution.DamlLedgerStateReaderWithFingerprints\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class CachingDamlLedgerStateReaderWithFingerprints(\n+    val cache: Cache[DamlStateKey, (DamlStateValue, Fingerprint)],\n+    shouldCache: DamlStateKey => Boolean,\n+    keySerializationStrategy: StateKeySerializationStrategy,\n+    delegate: DamlLedgerStateReaderWithFingerprints)(implicit executionContext: ExecutionContext)\n+    extends DamlLedgerStateReaderWithFingerprints {\n+  override def read(keys: Seq[DamlKvutils.DamlStateKey])\n+    : Future[Seq[(Option[DamlKvutils.DamlStateValue], Fingerprint)]] = {\n+    @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) // Required to make `.view` work.\n+    val cachedValues: Map[DamlStateKey, (Option[DamlStateValue], Fingerprint)] = keys.view\n+      .map(key => key -> cache.getIfPresent(key))\n+      .collect {\n+        case (key, Some((value, fingerprint))) => (key, (Some(value), fingerprint))\n+      }\n+      .toMap\n+    val keysToRead = keys.toSet -- cachedValues.keySet\n+    if (keysToRead.nonEmpty) {\n+      delegate\n+        .read(keysToRead.toSeq)\n+        .map { readStateValues =>\n+          val readValues = keysToRead.zip(readStateValues).toMap\n+          readValues.collect {\n+            case (key, (Some(value), fingerprint)) if shouldCache(key) =>\n+              cache.put(key, value -> fingerprint)\n+          }\n+          val all = cachedValues ++ readValues\n+          keys.map(all(_))\n+        }\n+    } else {\n+      Future {\n+        keys.map(cachedValues(_))"
+  }
+]

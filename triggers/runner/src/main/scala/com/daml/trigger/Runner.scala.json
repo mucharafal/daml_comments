@@ -1,0 +1,345 @@
+[
+  {
+    "id" : "80347531-1ba3-4a6f-b5c7-effc5069570a",
+    "prId" : 3341,
+    "comments" : [
+      {
+        "id" : "3014a5b5-62c9-4c30-ae15-6af154311aa8",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Should we throw the `ConverterException` here that you’ve defined? Given that we don’t catch it it probably doesn’t really matter but seems nice to be specific.",
+        "createdAt" : "2019-11-05T14:29:37Z",
+        "updatedAt" : "2019-11-05T15:53:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5878c763-5305-4391-9aa0-7893715e6d1d",
+        "parentId" : "3014a5b5-62c9-4c30-ae15-6af154311aa8",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, that's a good idea. I've changed it to throw `ConverterException` in cases where the converter returns `Left`.",
+        "createdAt" : "2019-11-05T15:53:21Z",
+        "updatedAt" : "2019-11-05T15:53:21Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d3fe342274d41c33d0bef94e7eb4b2b0ad501bd8",
+    "line" : null,
+    "diffHunk" : "@@ -178,7 +178,10 @@ class Runner(\n       compiler.compile(ERecProj(triggerTy, Name.assertFromString(\"initialState\"), triggerExpr))\n \n     val machine = Speedy.Machine.fromSExpr(null, false, compiledPackages)\n-    val createdExpr: SExpr = SEValue(converter.fromACS(acs))\n+    val createdExpr: SExpr = SEValue(converter.fromACS(acs) match {\n+      case Left(err) => throw new RuntimeException(err)"
+  },
+  {
+    "id" : "6151a3ca-80b6-4ba4-a698-8fbc0f7ff29b",
+    "prId" : 3210,
+    "comments" : [
+      {
+        "id" : "2ea7dd60-0fab-451d-b34d-a427085d94f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Does `machine.traceLog` accumulate log messages across `step`s, or do we need to `logTraces` here too, to avoid swallowing traces?",
+        "createdAt" : "2019-10-17T10:01:12Z",
+        "updatedAt" : "2019-10-17T10:02:43Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5583c55a-ff87-4286-b8cb-0436aaff2050",
+        "parentId" : "2ea7dd60-0fab-451d-b34d-a427085d94f9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It accumulates them between steps. There is currently a limit of `100` but that seems high enough that I think it’s fine for now to only do it once after the end.",
+        "createdAt" : "2019-10-17T10:06:07Z",
+        "updatedAt" : "2019-10-17T10:06:07Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7d00df3432884e046a2407edc49fe4aa5b802c70",
+    "line" : 64,
+    "diffHunk" : "@@ -109,20 +106,48 @@ class Runner(\n         newState\n       }\n       case v => {\n-        throw new RuntimeException(s\"Expected Tuple3 but got $v\")\n+        throw new RuntimeException(s\"Expected Tuple2 but got $v\")\n       }\n     }\n \n+  def logTraces(machine: Speedy.Machine) = {\n+    machine.traceLog.iterator.foreach {\n+      case (msg, optLoc) =>\n+        logger.info(s\"TRACE ${Pretty.prettyLoc(optLoc).render(80)}: $msg\")\n+    }\n+  }\n+\n+  def stepToValue(machine: Speedy.Machine) = {\n+    while (!machine.isFinal) {\n+      machine.step() match {\n+        case SResultContinue => ()"
+  },
+  {
+    "id" : "95b49aec-287e-4cc4-9ee8-ff68c53feb49",
+    "prId" : 3170,
+    "comments" : [
+      {
+        "id" : "7871ab83-6d8c-407f-a336-daf92e928d2f",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "debug leftover?",
+        "createdAt" : "2019-10-14T14:17:04Z",
+        "updatedAt" : "2019-10-14T14:18:35Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2f372b20-6f85-4776-b531-f807dc511413",
+        "parentId" : "7871ab83-6d8c-407f-a336-daf92e928d2f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "good catch, fixed.",
+        "createdAt" : "2019-10-14T14:18:38Z",
+        "updatedAt" : "2019-10-14T14:18:38Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5b2df95f40b12430dbccc9c7c7f32e558465cbf",
+    "line" : null,
+    "diffHunk" : "@@ -188,6 +216,7 @@ object Runner {\n         party,\n         dar,\n         submitRequest => {\n+          println(submitRequest)"
+  },
+  {
+    "id" : "659c41c7-8a39-4f5f-b362-6be0c85103f3",
+    "prId" : 2945,
+    "comments" : [
+      {
+        "id" : "4757af52-a534-4910-b5da-f816e232659e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Should this take a value of type `AnyContractId`? Seems more consistent with `toAnyContractId`.",
+        "createdAt" : "2019-09-18T07:59:11Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "40f6f045-42f3-4a71-a57e-3b8f7a27bc52",
+        "parentId" : "4757af52-a534-4910-b5da-f816e232659e",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "In principle that would be more consistent, yes. It's a bit noisy, though, because here we have a `value.Identifier`, but `AnyContractId` holds an `Identifier`. So, we'd be converting back and forth between the two identifier types.",
+        "createdAt" : "2019-09-18T08:24:34Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c8ea139f-7555-4bd6-a794-c52b195b510b",
+        "parentId" : "4757af52-a534-4910-b5da-f816e232659e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah I see, makes sense to keep it this way then. There are clearly too many things called `Identifier` here :slightly_smiling_face: ",
+        "createdAt" : "2019-09-18T08:25:51Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "833cab6997bcd9eadf1ccd597c9c4eb33d76d128",
+    "line" : null,
+    "diffHunk" : "@@ -177,13 +181,21 @@ object Converter {\n       (\"name\", SText(id.entityName)))\n   }\n \n+  private def fromAnyContractId(triggerIds: TriggerIds, templateId: value.Identifier, contractId: String): SValue = {"
+  },
+  {
+    "id" : "1e616083-2925-47f5-9ba0-3372ca4d2724",
+    "prId" : 2945,
+    "comments" : [
+      {
+        "id" : "8c2112b2-e616-441a-ab68-06dc28a4cf90",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This function is somewhat different from the other `toX` functions in that it doesn’t convert the actual value but only the metadata stored in the record. Maybe `extractTemplateId` would be a better name?",
+        "createdAt" : "2019-09-18T08:00:42Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d15b6f76-7bca-4380-ae2e-11ba018c0b4d",
+        "parentId" : "8c2112b2-e616-441a-ab68-06dc28a4cf90",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Agreed, that's a better name.",
+        "createdAt" : "2019-09-18T08:22:27Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "833cab6997bcd9eadf1ccd597c9c4eb33d76d128",
+    "line" : null,
+    "diffHunk" : "@@ -240,26 +251,56 @@ object Converter {\n     }\n   }\n \n-  private def toTemplateId(triggerIds: TriggerIds, v: SValue): Either[String, Identifier] = {\n+  private def toIdentifier(v: SValue): Either[String, Identifier] = {\n+    v match {\n+      case SRecord(_, _, vals) => {\n+        assert(vals.size == 3)\n+        for {\n+          packageId <- toText(vals.get(0)).flatMap(PackageId.fromString)\n+          moduleName <- toText(vals.get(1)).flatMap(DottedName.fromString)\n+          entityName <- toText(vals.get(2)).flatMap(DottedName.fromString)\n+        } yield Identifier(packageId, QualifiedName(moduleName, entityName))\n+      }\n+      case _ => Left(s\"Expected Identifier but got $v\")\n+    }\n+  }\n+\n+  private def toTemplateId(v: SValue): Either[String, Identifier] = {"
+  },
+  {
+    "id" : "3b940730-9200-41e1-a3e6-105025e96b3c",
+    "prId" : 2945,
+    "comments" : [
+      {
+        "id" : "782bb4c0-a3cf-45da-8726-675daf35baec",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Same here, so maybe also go for `extractChoiceName` here.",
+        "createdAt" : "2019-09-18T08:01:52Z",
+        "updatedAt" : "2019-09-18T08:30:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "833cab6997bcd9eadf1ccd597c9c4eb33d76d128",
+    "line" : null,
+    "diffHunk" : "@@ -240,26 +251,56 @@ object Converter {\n     }\n   }\n \n-  private def toTemplateId(triggerIds: TriggerIds, v: SValue): Either[String, Identifier] = {\n+  private def toIdentifier(v: SValue): Either[String, Identifier] = {\n+    v match {\n+      case SRecord(_, _, vals) => {\n+        assert(vals.size == 3)\n+        for {\n+          packageId <- toText(vals.get(0)).flatMap(PackageId.fromString)\n+          moduleName <- toText(vals.get(1)).flatMap(DottedName.fromString)\n+          entityName <- toText(vals.get(2)).flatMap(DottedName.fromString)\n+        } yield Identifier(packageId, QualifiedName(moduleName, entityName))\n+      }\n+      case _ => Left(s\"Expected Identifier but got $v\")\n+    }\n+  }\n+\n+  private def toTemplateId(v: SValue): Either[String, Identifier] = {\n+    v match {\n+      case SRecord(templateId, _, _) => Right(templateId)\n+      case _ => Left(s\"Expected contract value but got $v\")\n+    }\n+  }\n+\n+  private def toAnyContractId(v: SValue): Either[String, AnyContractId] = {\n     v match {\n       case SRecord(_, _, vals) => {\n         assert(vals.size == 2)\n         for {\n-          moduleName <- toText(vals.get(0)).flatMap(DottedName.fromString)\n-          entityName <- toText(vals.get(1)).flatMap(DottedName.fromString)\n-        } yield Identifier(triggerIds.mainPackageId, QualifiedName(moduleName, entityName))\n+          templateId <- toIdentifier(vals.get(0))\n+          contractId <- toText(vals.get(1))\n+        } yield AnyContractId(templateId, contractId)\n       }\n-      case _ => Left(s\"Expected TemplateId but got $v\")\n+      case _ => Left(s\"Expected AnyContractId but got $v\")\n+    }\n+  }\n+\n+  private def toChoiceName(v: SValue): Either[String, String] = {"
+  },
+  {
+    "id" : "f7323d0d-653b-4ae6-8361-5988bd1e7752",
+    "prId" : 2864,
+    "comments" : [
+      {
+        "id" : "4614abc5-548d-4ed5-975c-1bed7c054568",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n          throw new RuntimeException(s\"Unexpected speedy result $res\")\r\n```",
+        "createdAt" : "2019-09-10T14:57:15Z",
+        "updatedAt" : "2019-09-10T15:02:38Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b6158f01bc1aa1911759163f9b640469262f619",
+    "line" : null,
+    "diffHunk" : "@@ -198,36 +327,77 @@ object Converter {\n \n   def fromDar(dar: Dar[(PackageId, Package)]): Converter = {\n     val triggerIds = TriggerIds.fromDar(dar)\n-    Converter(fromTransaction(triggerIds, _), fromACS(triggerIds, _))\n+    Converter(\n+      fromTransaction(triggerIds, _),\n+      fromACS(triggerIds, _),\n+      toCommands(triggerIds, _)\n+    )\n   }\n }\n \n-case class Runner(getTriggerSink: Seq[CreatedEvent] => Sink[Transaction, Future[SExpr]])\n-\n-object Runner {\n-  def fromDar(dar: Dar[(PackageId, Package)], triggerId: Identifier): Runner = {\n-    val converter = Converter.fromDar(dar)\n-    val compiledPackages = PureCompiledPackages(dar.all.toMap).right.get\n-    val compiler = Compiler(compiledPackages.packages)\n-\n+class Runner(\n+    ledgerId: LedgerId,\n+    applicationId: ApplicationId,\n+    party: String,\n+    dar: Dar[(PackageId, Package)],\n+    submit: SubmitRequest => Unit) {\n+\n+  private val converter = Converter.fromDar(dar)\n+  private val triggerIds = TriggerIds.fromDar(dar)\n+  private val darMap: Map[PackageId, Package] = dar.all.toMap\n+  private val compiler = Compiler(darMap)\n+  // We overwrite the definition of toLedgerValue with an identity function.\n+  // This is a type error but Speedy doesn’t care about the types and the only thing we do\n+  // with the result is convert it to ledger values/record so this is safe.\n+  private val definitionMap =\n+    compiler.compilePackages(darMap.keys) +\n+      (LfDefRef(\n+        Identifier(\n+          triggerIds.triggerPackageId,\n+          QualifiedName(\n+            triggerIds.triggerModuleName,\n+            DottedName.assertFromString(\"toLedgerValue\")))) ->\n+        SEMakeClo(Array(), 1, SEVar(1)))\n+  private val compiledPackages = PureCompiledPackages(darMap, definitionMap).right.get\n+\n+  def getTriggerSink(\n+      triggerId: Identifier,\n+      acs: Seq[CreatedEvent]): Sink[Transaction, Future[SExpr]] = {\n     val triggerExpr = EVal(triggerId)\n     val (tyCon: TypeConName, stateTy) =\n-      dar.main._2.lookupIdentifier(triggerId.qualifiedName).right.get match {\n-        case DValue(TApp(TTyCon(tcon), stateTy), _, _, _) => (tcon, stateTy)\n+      dar.main._2.lookupIdentifier(triggerId.qualifiedName).toOption match {\n+        case Some(DValue(TApp(TTyCon(tcon), stateTy), _, _, _)) => (tcon, stateTy)\n         case _ => {\n-          throw new RuntimeException(s\"Identifier does not point to trigger\")\n+          throw new RuntimeException(\n+            s\"Identifier ${triggerId.qualifiedName} does not point to trigger\")\n         }\n       }\n     val triggerTy: TypeConApp = TypeConApp(tyCon, ImmArray(stateTy))\n     val update = compiler.compile(ERecProj(triggerTy, Name.assertFromString(\"update\"), triggerExpr))\n     val getInitialState =\n       compiler.compile(ERecProj(triggerTy, Name.assertFromString(\"initialState\"), triggerExpr))\n \n-    def getSink(acs: Seq[CreatedEvent]): Sink[Transaction, Future[SExpr]] = {\n-      val machine = Speedy.Machine.fromSExpr(null, false, compiledPackages)\n-      val createdExpr: SExpr = SEValue(converter.fromACS(acs))\n-      val initialState = SEApp(getInitialState, Array(createdExpr))\n-      machine.ctrl = Speedy.CtrlExpr(initialState)\n+    val machine = Speedy.Machine.fromSExpr(null, false, compiledPackages)\n+    val createdExpr: SExpr = SEValue(converter.fromACS(acs))\n+    val initialState =\n+      SEApp(getInitialState, Array(SEValue(SParty(Party.assertFromString(party))), createdExpr))\n+    machine.ctrl = Speedy.CtrlExpr(initialState)\n+    while (!machine.isFinal) {\n+      machine.step() match {\n+        case SResultContinue => ()\n+        case SResultError(err) => {\n+          throw new RuntimeException(err)\n+        }\n+        case res => {\n+          throw new RuntimeException(s\"Unexpected speed result $res\")"
+  }
+]

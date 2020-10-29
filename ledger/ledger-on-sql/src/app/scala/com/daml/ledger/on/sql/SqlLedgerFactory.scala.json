@@ -1,0 +1,117 @@
+[
+  {
+    "id" : "f5ed331c-cd60-4b5d-859e-dca6eba1da2c",
+    "prId" : 4792,
+    "comments" : [
+      {
+        "id" : "45110ecb-074f-4ebe-aa4d-7e7cebc08f5b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "The parentheses are unnecessary.",
+        "createdAt" : "2020-03-03T11:22:18Z",
+        "updatedAt" : "2020-03-05T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "44862d1f28b75065ae9e7ceeb3dd627cb7f18ae3",
+    "line" : null,
+    "diffHunk" : "@@ -28,22 +29,24 @@ object SqlLedgerFactory extends LedgerFactory[SqlLedgerReaderWriter, ExtraConfig\n   override def manipulateConfig(config: Config[ExtraConfig]): Config[ExtraConfig] =\n     config.copy(participants = config.participants.map(_.copy(allowExistingSchemaForIndex = true)))\n \n-  override def owner(\n+  override def readWriterServiceOwner(\n       config: Config[ExtraConfig],\n       participantConfig: ParticipantConfig\n   )(\n       implicit executionContext: ExecutionContext,\n       materializer: Materializer,\n       logCtx: LoggingContext,\n-  ): ResourceOwner[SqlLedgerReaderWriter] = {\n+  ): ResourceOwner[KeyValueParticipantState] = {\n     val jdbcUrl = config.extra.jdbcUrl.getOrElse {\n       throw new IllegalStateException(\"No JDBC URL provided.\")\n     }\n-    SqlLedgerReaderWriter.owner(\n-      config.ledgerId,\n-      participantConfig.participantId,\n-      jdbcUrl,\n-      SqlLedgerReaderWriter.DefaultTimeProvider\n-    )\n+    for {\n+      ledgerReadWriter <- SqlLedgerReaderWriter.owner(\n+        config.ledgerId,\n+        participantConfig.participantId,\n+        jdbcUrl,\n+        SqlLedgerReaderWriter.DefaultTimeProvider\n+      )\n+    } yield (new KeyValueParticipantState(ledgerReadWriter, ledgerReadWriter))"
+  },
+  {
+    "id" : "a6a7ac27-4fb3-46e0-bfcd-577afe700072",
+    "prId" : 4792,
+    "comments" : [
+      {
+        "id" : "ba8d6f08-0cc8-47b8-8cfa-9f6956a53273",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Why `KeyValueParticipantState` and not `ReadWrite(r)Service`? `ResourceOwner` is covariant.",
+        "createdAt" : "2020-03-03T11:25:41Z",
+        "updatedAt" : "2020-03-05T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "44862d1f28b75065ae9e7ceeb3dd627cb7f18ae3",
+    "line" : null,
+    "diffHunk" : "@@ -28,22 +29,24 @@ object SqlLedgerFactory extends LedgerFactory[SqlLedgerReaderWriter, ExtraConfig\n   override def manipulateConfig(config: Config[ExtraConfig]): Config[ExtraConfig] =\n     config.copy(participants = config.participants.map(_.copy(allowExistingSchemaForIndex = true)))\n \n-  override def owner(\n+  override def readWriterServiceOwner(\n       config: Config[ExtraConfig],\n       participantConfig: ParticipantConfig\n   )(\n       implicit executionContext: ExecutionContext,\n       materializer: Materializer,\n       logCtx: LoggingContext,\n-  ): ResourceOwner[SqlLedgerReaderWriter] = {\n+  ): ResourceOwner[KeyValueParticipantState] = {"
+  },
+  {
+    "id" : "69b7b5b1-df2b-4780-9f88-82cc3d3d4f42",
+    "prId" : 4669,
+    "comments" : [
+      {
+        "id" : "1e7fbf7b-4dfe-4e0f-a3bf-5e4a8e755d2f",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n          s\"${getClass.getSimpleName} should always provide a timeServiceBackend but it didn't\"))\r\n```",
+        "createdAt" : "2020-02-25T13:15:33Z",
+        "updatedAt" : "2020-02-26T07:26:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cd7ea97c-eb08-4f2e-93db-2d202b3c1b5b",
+        "parentId" : "1e7fbf7b-4dfe-4e0f-a3bf-5e4a8e755d2f",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "That code is not needed anymore but thanks!",
+        "createdAt" : "2020-02-25T13:37:11Z",
+        "updatedAt" : "2020-02-26T07:26:00Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ae0a86ecb50b24000dc0788888770635bf7f5fd9",
+    "line" : null,
+    "diffHunk" : "@@ -30,17 +30,25 @@ object SqlLedgerFactory extends LedgerFactory[SqlLedgerReaderWriter, ExtraConfig\n     config.copy(allowExistingSchemaForIndex = true)\n \n   override def owner(\n-      initialLedgerId: Option[LedgerId],\n-      participantId: ParticipantId,\n-      config: ExtraConfig,\n+      config: Config[ExtraConfig],\n   )(\n       implicit executionContext: ExecutionContext,\n       materializer: Materializer,\n       logCtx: LoggingContext,\n   ): ResourceOwner[SqlLedgerReaderWriter] = {\n-    val jdbcUrl = config.jdbcUrl.getOrElse {\n+    val jdbcUrl = config.extra.jdbcUrl.getOrElse {\n       throw new IllegalStateException(\"No JDBC URL provided.\")\n     }\n-    SqlLedgerReaderWriter.owner(initialLedgerId, participantId, jdbcUrl)\n+    SqlLedgerReaderWriter.owner(\n+      config.ledgerId,\n+      config.participantId,\n+      jdbcUrl,\n+      timeServiceBackend(config).getOrElse(\n+        throw new IllegalStateException(\n+          s\"${getClass.getSimpleName} should always provide a timeServerBackend but didn't\"))"
+  }
+]

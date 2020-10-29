@@ -1,0 +1,154 @@
+[
+  {
+    "id" : "3576fa0e-ae74-417d-b73c-117465b08906",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "778f53bc-88c2-4a64-b310-7c4ee4be4604",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`getParty` does nothing so it didn’t really seem useful to keep this here. The text doesn’t explain the intention either. Arguably the `passTime` statements are also useless but at least they show up in the transaction view so I kept them.",
+        "createdAt" : "2020-08-31T10:18:51Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : 148,
+    "diffHunk" : "@@ -107,95 +107,91 @@ test_restrictions = scenario do\n -- TRANSFER_TEST_BEGIN\n   -- Alice can't transfer to herself...\n   submitMustFail alice do\n-    exercise iou Transfer with\n+    exerciseCmd iou Transfer with\n       newOwner = alice\n \n   -- ... but can transfer to Bob.\n   iou2 <- submit alice do\n-    exercise iou Transfer with\n+    exerciseCmd iou Transfer with\n       newOwner = bob\n -- TRANSFER_TEST_END\n \n \n -- REDEEM_TEST_BEGIN\n   -- June 1st 2019 is a Saturday.\n-  passToDate (date 2019 Jun 1)\n+  setTime (time (date 2019 Jun 1) 0 0 0)\n   -- Bob cannot redeem on a Saturday.\n   submitMustFail bob do\n-    exercise iou2 Redeem\n+    exerciseCmd iou2 Redeem\n \n   -- Not even at mid-day.\n-  pass (hours 12)\n+  passTime (hours 12)\n   -- Bob cannot redeem on a Saturday.\n   submitMustFail bob do\n-    exercise iou2 Redeem\n+    exerciseCmd iou2 Redeem\n \n   -- Bob also cannot redeem at 6am on a Monday.\n-  pass (hours 42)\n+  passTime (hours 42)\n   submitMustFail bob do\n-    exercise iou2 Redeem\n+    exerciseCmd iou2 Redeem\n \n   -- Bob can redeem at 8am on Monday.\n-  pass (hours 2)\n+  passTime (hours 2)\n   submit bob do\n-    exercise iou2 Redeem\n+    exerciseCmd iou2 Redeem\n -- REDEEM_TEST_END\n \n   -- CAUSALITY_TEST_BEGIN\n   iou3 <- submit dora do\n-    create SimpleIou with\n+    createCmd SimpleIou with\n       issuer = dora\n       owner = alice\n       cash = Cash with\n         amount = 100.0\n         currency = \"USD\"\n \n-  pass (days (-3))\n+  passTime (days (-3))\n   submitMustFail alice do\n-    exercise iou3 Redeem\n+    exerciseCmd iou3 Redeem\n   -- CAUSALITY_TEST_END\n \n -- DO_DEMO_BEGIN\n-sub_scenario1 : Scenario (ContractId SimpleIou) = scenario do\n-  alice <- getParty \"Alice\"\n-  dora <- getParty \"Dora\"\n-\n+sub_scenario1 (alice, dora) = do\n   submit dora do\n-    create SimpleIou with\n+    createCmd SimpleIou with\n       issuer = dora\n       owner = alice\n       cash = Cash with\n         amount = 100.0\n         currency = \"USD\"\n \n-sub_scenario2 : Scenario Int = scenario do\n-  getParty \"Nobody\""
+  },
+  {
+    "id" : "379004a3-f4b3-4f01-9deb-48495e0b7592",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "901ba2e7-2fac-4a58-85a6-ee5cc63f0eec",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\ntest = script do\r\n```\r\nOr is the type signature referenced somewhere in text?",
+        "createdAt" : "2020-09-01T08:29:55Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : null,
+    "diffHunk" : "@@ -303,15 +300,15 @@ errPow base exponent\n \n {-\n -- NON_PERFORMED_ERROR_BEGIN\n-nonPerformedError = scenario do\n+nonPerformedError = do\n   let causeError = False\n   let failingComputation = errPow 1 (-1)\n   let successfulComputation = errPow 1 1\n   return if causeError then failingComputation else successfulComputation\n -- NON_PERFORMED_ERROR_END\n -}\n \n-test = scenario do\n+test: Script () = do"
+  },
+  {
+    "id" : "5eabe0d5-ee38-4352-924e-a5c9b527bebc",
+    "prId" : 7264,
+    "comments" : [
+      {
+        "id" : "73692f8a-a09a-4173-a590-19f788b93bd5",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\nnonPerformedError = script do\r\n```\r\nI think this wouldn't be inferred as `Script _`.",
+        "createdAt" : "2020-09-01T08:32:10Z",
+        "updatedAt" : "2020-09-08T11:42:48Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edfcefed5831fd27018f4cb3fdeb4a98f8ea266a",
+    "line" : null,
+    "diffHunk" : "@@ -303,15 +300,15 @@ errPow base exponent\n \n {-\n -- NON_PERFORMED_ERROR_BEGIN\n-nonPerformedError = scenario do\n+nonPerformedError = do"
+  },
+  {
+    "id" : "8c4a3e79-955e-4cff-96ce-5db3703de770",
+    "prId" : 3509,
+    "comments" : [
+      {
+        "id" : "078909b9-36d6-4941-8d78-bc90769b0136",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "```suggestion\r\n  -- ... but can transfer to Bob.\r\n```",
+        "createdAt" : "2019-11-18T15:13:17Z",
+        "updatedAt" : "2019-11-20T09:42:42Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "04a187679d9dc48783dc4667ae0234f9ac48f725",
+    "line" : null,
+    "diffHunk" : "@@ -104,37 +104,37 @@ test_restrictions = scenario do\n -- RESTRICTIONS_TEST_END\n \n -- TRANSFER_TEST_BEGIN\n-  -- Alice can't transfer to herself\n+  -- Alice can't transfer to herself...\n   submitMustFail alice do\n     exercise iou Transfer with\n       newOwner = alice\n \n-  -- but can transfer to bob\n+  -- ...but can transfer to Bob."
+  },
+  {
+    "id" : "2f598a20-6437-4eab-8ae6-76baee7fc49f",
+    "prId" : 2763,
+    "comments" : [
+      {
+        "id" : "606d1336-12ba-46f5-9b61-f2e16eeba6ee",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I think we should prefix each of the three bindings with a `let`.",
+        "createdAt" : "2019-09-05T10:55:53Z",
+        "updatedAt" : "2019-09-05T11:29:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8595f5ecfdc29822bde1ecb774508262169c4f5e",
+    "line" : null,
+    "diffHunk" : "@@ -273,3 +273,40 @@ instance Action CoinGame where\n           ng = f rx\n         in ng.play nc1\n       )\n+\n+-- NON_PERFORMED_ABORT_BEGIN\n+nonPerformedAbort = scenario do\n+  let\n+    abortScenario = False\n+    failingAction : Scenario () = abort \"Foo\"\n+    successfulAction : Scenario () = return ()\n+  if abortScenario then failingAction else successfulAction\n+-- NON_PERFORMED_ABORT_END\n+\n+-- OPTIONAL_POW_BEGIN\n+optPow : Int -> Int -> Optional Int\n+optPow x y \n+ | y == 0 = Some 1\n+ | y > 0 = let Some z = optPow x (y - 1)\n+           in Some (y * z)\n+ | otherwise = None\n+-- OPTIONAL_POW_END\n+\n+-- ERROR_POW_BEGIN\n+errPow : Int -> Int -> Int\n+errPow x y \n+ | y == 0 = 1\n+ | y > 0 = y * errPow x (y - 1)\n+ | otherwise = error \"Negative exponent not supported\"\n+-- ERROR_POW_END\n+\n+{-\n+-- NON_PERFORMED_ERROR_BEGIN\n+nonPerformedError = scenario do\n+  let"
+  }
+]

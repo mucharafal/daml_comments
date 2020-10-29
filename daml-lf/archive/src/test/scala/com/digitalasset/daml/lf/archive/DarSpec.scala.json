@@ -1,0 +1,33 @@
+[
+  {
+    "id" : "3a0ad012-5ce7-4113-9bdf-48ce4c1f68ae",
+    "prId" : 366,
+    "comments" : [
+      {
+        "id" : "b5fe43f8-19c9-4e31-b2a4-1eb15536575a",
+        "parentId" : null,
+        "author" : {
+          "login" : "stephencompall-DA",
+          "name" : "Actually @S11001001 (Stephen Compall)",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/32464278?u=2f0eaeb2500ecacccd6c1af95b27424d5193ad65&v=4"
+        },
+        "body" : "I would forgo this whole unit test in favor of using the prepackaged traverse laws:\r\n\r\nhttps://github.com/digital-asset/daml/blob/6af84051ee6dfe81f35a2b854f25c17c14117ac9/daml-lf/data/src/test/scala/com/digitalasset/daml/lf/data/ImmArrayTest.scala#L65\r\n\r\nSee that file for definitions of `checkLaws` and such.\r\n\r\nThe same might apply to the Functor test, but that's less important.",
+        "createdAt" : "2019-04-15T05:07:19Z",
+        "updatedAt" : "2019-04-15T19:25:09Z",
+        "lastEditedBy" : {
+          "login" : "stephencompall-DA",
+          "name" : "Actually @S11001001 (Stephen Compall)",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/32464278?u=2f0eaeb2500ecacccd6c1af95b27424d5193ad65&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f33e6acf24d0adf2018e2aa0c52a01834a47a100",
+    "line" : null,
+    "diffHunk" : "@@ -5,19 +5,40 @@ package com.digitalasset.daml.lf\n import org.scalacheck.{Arbitrary, Gen}\n import org.scalatest.prop.GeneratorDrivenPropertyChecks\n import org.scalatest.{FlatSpec, Matchers}\n+import scalaz.\\/\n \n class DarSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {\n   behavior of Dar.getClass.getSimpleName\n \n-  it should \"implement Functor with proper map\" in forAll(darGen[Int]) { dar =>\n+  it should \"implement Functor\" in forAll(darGen[Int]) { dar =>\n     import scalaz.Functor\n-    import scalaz.syntax.functor._\n \n-    implicit val sut: Functor[Dar] = Dar.darFunctor\n+    val sut: Functor[Dar] = Dar.darFunctor\n \n     def f(a: Int): Int = a + 100\n \n-    dar.map(f) shouldBe Dar(f(dar.main), dar.dependencies.map(f))\n+    sut.map(dar)(f) shouldBe Dar(f(dar.main), dar.dependencies.map(f))\n+  }\n+\n+  it should \"implement Traverse\" in forAll(darGen[Int]) { dar =>"
+  }
+]

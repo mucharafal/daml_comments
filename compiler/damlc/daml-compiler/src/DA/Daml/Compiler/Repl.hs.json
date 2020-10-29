@@ -1,0 +1,1117 @@
+[
+  {
+    "id" : "16d5bf8a-2d1b-499b-a43c-836ce4e0855b",
+    "prId" : 7544,
+    "comments" : [
+      {
+        "id" : "6ce24b4b-9d93-4e24-821a-90957c44c46b",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n    -- Typecheck once to get the GlobalRdrEnv\r\n```",
+        "createdAt" : "2020-10-02T10:03:00Z",
+        "updatedAt" : "2020-10-02T10:18:04Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4fea2aeb19f36d50d35597db4587eae2f35fcb86",
+    "line" : null,
+    "diffHunk" : "@@ -373,10 +375,24 @@ runRepl\n     -> IO ()\n runRepl importPkgs opts replClient logger ideState = do\n     imports <- loadPackages importPkgs replClient ideState\n+    -- Typecheck ones to get the GlobalRdrEnv"
+  },
+  {
+    "id" : "e871c6a3-a2f3-4338-9701-da29be791524",
+    "prId" : 7544,
+    "comments" : [
+      {
+        "id" : "b07bd544-ae8f-4502-a1c9-304e2ec783ae",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Maybe factor this part out? There are another couple instances of this in the module.",
+        "createdAt" : "2020-10-02T10:09:32Z",
+        "updatedAt" : "2020-10-02T10:18:04Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "63ae4602-756d-4b07-bf58-0606a672eff6",
+        "parentId" : "b07bd544-ae8f-4502-a1c9-304e2ec783ae",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "good idea, done!",
+        "createdAt" : "2020-10-02T10:18:13Z",
+        "updatedAt" : "2020-10-02T10:18:13Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4fea2aeb19f36d50d35597db4587eae2f35fcb86",
+    "line" : null,
+    "diffHunk" : "@@ -373,10 +375,24 @@ runRepl\n     -> IO ()\n runRepl importPkgs opts replClient logger ideState = do\n     imports <- loadPackages importPkgs replClient ideState\n+    -- Typecheck ones to get the GlobalRdrEnv\n+    let initialLineNumber = 0\n+    dflags <- liftIO $\n+         hsc_dflags . hscEnv <$>\n+         runAction ideState (use_ GhcSession $ lineFilePath initialLineNumber)\n+    (_, tcr) <-\n+        (runExceptT $ printDelayedDiagnostics $ tryTypecheck initialLineNumber $\n+         T.pack (unlines $ moduleHeader dflags (importFromList imports) initialLineNumber)"
+  },
+  {
+    "id" : "d9a55c28-e08e-417e-84ab-78a04d94277b",
+    "prId" : 7202,
+    "comments" : [
+      {
+        "id" : "8a64c796-d771-432d-85f5-8525cdbb3310",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Hm, I was initially only thinking of supporting pure expressions. But I don’t really see any reason not to support script expressions as well so I guess we might as well do it.",
+        "createdAt" : "2020-08-21T14:27:22Z",
+        "updatedAt" : "2020-08-21T14:34:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "59babe9b-8f0b-4925-a56a-6b5f322b490f",
+        "parentId" : "8a64c796-d771-432d-85f5-8525cdbb3310",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, initially I implemented it only supporting pure expressions, i.e. only using `tryTypecheck lineNumber (T.pack pureArbitraryExpr)`. But, when a user then tries to use `:json` on a `Script` expression they will get a confusing type error due to the prefixed `return`. I didn't see a good reason not to support `Script` expressions either, so that's the way I went to solve this.",
+        "createdAt" : "2020-08-21T14:52:43Z",
+        "updatedAt" : "2020-08-21T14:52:44Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "69003e8d75763053c000aab7fcaa5540389eb817",
+    "line" : 45,
+    "diffHunk" : "@@ -390,27 +393,34 @@ runRepl importPkgs opts replClient logger ideState = do\n         :: DynFlags\n         -> String\n         -> Stmt GhcPs (LHsExpr GhcPs)\n+        -> ReplClient.ReplResponseType\n         -> ExceptT Error ReplM ()\n-    handleStmt dflags line stmt = do\n+    handleStmt dflags line stmt rspType = do\n         ReplState {imports, bindings, lineNumber} <- State.get\n         supportedStmt <- maybe (throwError (UnsupportedStatement line)) pure (validateStmt stmt)\n         let rendering = renderModule dflags imports lineNumber bindings supportedStmt\n-        (lfMod, tmrModule -> tcMod) <- printDelayedDiagnostics $ case rendering of\n-            BindingRendering t ->\n+        (lfMod, tmrModule -> tcMod) <- printDelayedDiagnostics $ case (rspType, rendering) of\n+            (ReplClient.ReplText, BindingRendering t) ->\n                 tryTypecheck lineNumber (T.pack t)\n-            BodyRenderings {..} ->\n+            (ReplClient.ReplText, BodyRenderings {..}) ->\n                 withExceptT getLast\n                 $   withExceptT Last (tryTypecheck lineNumber (T.pack unitScript))\n                 <!> withExceptT Last (tryTypecheck lineNumber (T.pack printableScript))\n-                <!> withExceptT Last (tryTypecheck lineNumber (T.pack nonprintableScript))\n+                <!> withExceptT Last (tryTypecheck lineNumber (T.pack arbitraryScript))\n                 <!> withExceptT Last (tryTypecheck lineNumber (T.pack purePrintableExpr))\n+            (ReplClient.ReplJson, BindingRendering _) ->\n+                throwError (ExpectedExpression line, [])\n+            (ReplClient.ReplJson, BodyRenderings {..}) ->\n+                withExceptT getLast\n+                $   withExceptT Last (tryTypecheck lineNumber (T.pack arbitraryScript))"
+  },
+  {
+    "id" : "5440d309-77fd-41fc-abb1-ab6d3ec299ce",
+    "prId" : 6865,
+    "comments" : [
+      {
+        "id" : "265b60c1-6fe8-4b8b-b326-8475505963a4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Surprised hlint doesn’t complain about the redundant parentheses here. (I never cared about that rule so no need to change anything).",
+        "createdAt" : "2020-07-24T17:41:13Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6cab735d361bea852ebf35c1964c6db6922cc870",
+    "line" : null,
+    "diffHunk" : "@@ -83,6 +84,8 @@ renderError dflags err = case err of\n         putStrLn (showSDoc dflags err)\n     (UnsupportedStatement str) ->\n         putStrLn (\"Unsupported statement: \" <> str)\n+    (UnknownModules names) ->"
+  },
+  {
+    "id" : "2a6b5962-bd49-4501-8af0-4bbc78e3782d",
+    "prId" : 6865,
+    "comments" : [
+      {
+        "id" : "509cf326-85c5-4ea5-9aae-388bbb2f9bc2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Just for my own clarification: Do you know why `replline` special cases commands? Is there any advantage to using this over implementing it in the `replLine` function?",
+        "createdAt" : "2020-07-24T17:42:23Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cb4e219c-0302-44de-ad9e-c154c9d35b0c",
+        "parentId" : "509cf326-85c5-4ea5-9aae-388bbb2f9bc2",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "It automatically generates short-cuts like `:m` for `:modules` and generates a \"no such command\" error in case of unknown commands.",
+        "createdAt" : "2020-07-27T08:09:25Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "de4ea4fd-dcf4-4951-bbca-282c4f4ddc6b",
+        "parentId" : "509cf326-85c5-4ea5-9aae-388bbb2f9bc2",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks for the explanation!",
+        "createdAt" : "2020-07-27T08:27:51Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6cab735d361bea852ebf35c1964c6db6922cc870",
+    "line" : 23,
+    "diffHunk" : "@@ -325,8 +328,8 @@ runRepl importPkgs opts replClient logger ideState = do\n           where\n             banner = pure \"daml> \"\n             command = replLine\n-            options = []\n-            prefix = Nothing\n+            options = replOptions"
+  },
+  {
+    "id" : "1012148d-15a0-409b-b6e8-4498b06c8d16",
+    "prId" : 6865,
+    "comments" : [
+      {
+        "id" : "769201a4-db3f-459d-9d81-f2a69fc4afad",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n      [ \"Commands available from the prompt:\"\r\n```\r\n(unless I’m missing something and this is helpful for formatting)",
+        "createdAt" : "2020-07-24T17:43:16Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d4d7335a-3006-4448-827e-f4128ff9e555",
+        "parentId" : "769201a4-db3f-459d-9d81-f2a69fc4afad",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I followed GHCi's example here which indents the help message by one column. Presumably as a guide for the eye. Happy to remove the indent if you prefer.",
+        "createdAt" : "2020-07-27T08:10:59Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "35b5670a-5a37-4ff0-87da-63dcb2cd71a1",
+        "parentId" : "769201a4-db3f-459d-9d81-f2a69fc4afad",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense, let’s keep it.",
+        "createdAt" : "2020-07-27T08:28:01Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6cab735d361bea852ebf35c1964c6db6922cc870",
+    "line" : 69,
+    "diffHunk" : "@@ -419,6 +412,64 @@ runRepl importPkgs opts replClient logger ideState = do\n             Left err -> liftIO $ renderError dflags err\n             Right () -> pure ()\n \n+    mkReplOption\n+        :: (DynFlags -> [String] -> ExceptT Error ReplM ())\n+        -> [String] -> ReplM ()\n+    mkReplOption option args = do\n+        ReplState {lineNumber} <- State.get\n+        dflags <- liftIO $\n+            hsc_dflags . hscEnv <$>\n+            runAction ideState (use_ GhcSession $ lineFilePath lineNumber)\n+        r <- runExceptT $ option dflags args\n+        case r of\n+            Left err -> liftIO $ renderError dflags err\n+            Right () -> pure ()\n+    replOptions :: [(String, [String] -> ReplM ())]\n+    replOptions =\n+      [ (\"help\", mkReplOption optHelp)\n+      , (\"module\", mkReplOption optModule)\n+      ]\n+    optHelp _dflags _args = liftIO $ T.putStrLn $ T.unlines\n+      [ \" Commands available from the prompt:\""
+  },
+  {
+    "id" : "d650a960-15aa-49a3-b9fc-b7e882df8df4",
+    "prId" : 6865,
+    "comments" : [
+      {
+        "id" : "be43ed48-7637-4d85-985a-106b56d8ba43",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`UnknownModules` sounds slightly confusing. If a module is in a package that we know about I would expect it to be known. Similarly, I would expect an import for a module in a package we don’t know about to count as unknown.\r\n\r\nMaybe something like `NotImportedModules`. Not a great name so if you have a better suggestion go for it.",
+        "createdAt" : "2020-07-24T17:46:27Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3679c89a-1245-4521-980c-c9bfd9250d6b",
+        "parentId" : "be43ed48-7637-4d85-985a-106b56d8ba43",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Agreed, `NotImportedModules` is better.",
+        "createdAt" : "2020-07-27T08:18:48Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6cab735d361bea852ebf35c1964c6db6922cc870",
+    "line" : null,
+    "diffHunk" : "@@ -419,6 +412,64 @@ runRepl importPkgs opts replClient logger ideState = do\n             Left err -> liftIO $ renderError dflags err\n             Right () -> pure ()\n \n+    mkReplOption\n+        :: (DynFlags -> [String] -> ExceptT Error ReplM ())\n+        -> [String] -> ReplM ()\n+    mkReplOption option args = do\n+        ReplState {lineNumber} <- State.get\n+        dflags <- liftIO $\n+            hsc_dflags . hscEnv <$>\n+            runAction ideState (use_ GhcSession $ lineFilePath lineNumber)\n+        r <- runExceptT $ option dflags args\n+        case r of\n+            Left err -> liftIO $ renderError dflags err\n+            Right () -> pure ()\n+    replOptions :: [(String, [String] -> ReplM ())]\n+    replOptions =\n+      [ (\"help\", mkReplOption optHelp)\n+      , (\"module\", mkReplOption optModule)\n+      ]\n+    optHelp _dflags _args = liftIO $ T.putStrLn $ T.unlines\n+      [ \" Commands available from the prompt:\"\n+      , \"\"\n+      , \"   <statement>                 evaluate/run <statement>\"\n+      , \"   :module [+/-] <mod> ...     add or remove the modules from the import list\"\n+      ]\n+    optModule _dflags (\"-\" : modules) = do\n+        ReplState {imports} <- lift State.get\n+        -- TODO[AH] Use a more appropriate data structure to track imports.\n+        let unknown =\n+              [ removed\n+              | removed <- map mkModuleName modules\n+              , removed `notElem` map (unLoc . ideclName) imports\n+              ]\n+            newImports =\n+              [ simpleImportDecl imported\n+              | imported <- map (unLoc . ideclName) imports\n+              , imported `notElem` map mkModuleName modules\n+              ]\n+        unless (null unknown) $\n+            throwError $ UnknownModules unknown"
+  },
+  {
+    "id" : "b3e8e1fb-68db-42e9-82f0-d77466167029",
+    "prId" : 6865,
+    "comments" : [
+      {
+        "id" : "90dc2308-4a2a-4f46-9108-c42eb168101f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I got curious what ghci does and it also just has the list https://gitlab.haskell.org/ghc/ghc/-/blob/master/ghc/GHCi/UI.hs#L2524. So maybe this isn’t actually worth worrying about?",
+        "createdAt" : "2020-07-24T17:55:26Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0e91eb4b-3f63-4b13-8971-4e6b511c1ba4",
+        "parentId" : "90dc2308-4a2a-4f46-9108-c42eb168101f",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That's true, though at least it filters out redundant imports https://gitlab.haskell.org/ghc/ghc/-/blob/52685cf7c077c51e3719e3c4dd5ca8257a99c4ea/ghc/GHCi/UI.hs#L2687.",
+        "createdAt" : "2020-07-27T08:12:57Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "10d77a2e-96da-491e-b9fe-8036f9b188e4",
+        "parentId" : "90dc2308-4a2a-4f46-9108-c42eb168101f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good catch!",
+        "createdAt" : "2020-07-27T08:31:03Z",
+        "updatedAt" : "2020-07-27T08:37:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6cab735d361bea852ebf35c1964c6db6922cc870",
+    "line" : 76,
+    "diffHunk" : "@@ -419,6 +412,64 @@ runRepl importPkgs opts replClient logger ideState = do\n             Left err -> liftIO $ renderError dflags err\n             Right () -> pure ()\n \n+    mkReplOption\n+        :: (DynFlags -> [String] -> ExceptT Error ReplM ())\n+        -> [String] -> ReplM ()\n+    mkReplOption option args = do\n+        ReplState {lineNumber} <- State.get\n+        dflags <- liftIO $\n+            hsc_dflags . hscEnv <$>\n+            runAction ideState (use_ GhcSession $ lineFilePath lineNumber)\n+        r <- runExceptT $ option dflags args\n+        case r of\n+            Left err -> liftIO $ renderError dflags err\n+            Right () -> pure ()\n+    replOptions :: [(String, [String] -> ReplM ())]\n+    replOptions =\n+      [ (\"help\", mkReplOption optHelp)\n+      , (\"module\", mkReplOption optModule)\n+      ]\n+    optHelp _dflags _args = liftIO $ T.putStrLn $ T.unlines\n+      [ \" Commands available from the prompt:\"\n+      , \"\"\n+      , \"   <statement>                 evaluate/run <statement>\"\n+      , \"   :module [+/-] <mod> ...     add or remove the modules from the import list\"\n+      ]\n+    optModule _dflags (\"-\" : modules) = do\n+        ReplState {imports} <- lift State.get\n+        -- TODO[AH] Use a more appropriate data structure to track imports."
+  },
+  {
+    "id" : "57fb832f-8a65-44b4-be60-f181b017190e",
+    "prId" : 6799,
+    "comments" : [
+      {
+        "id" : "f58c30dc-9547-44f4-bcd7-61bdb111fe73",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Maybe a better name would be `newReplLogger` or `createReplLogger`? `getReplLogger` sounds like it would return a reference to a shared object.",
+        "createdAt" : "2020-07-21T07:56:34Z",
+        "updatedAt" : "2020-07-21T08:01:36Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "925a6441-cabb-4c03-9f2d-068cd60eab08",
+        "parentId" : "f58c30dc-9547-44f4-bcd7-61bdb111fe73",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good call, renamed to `newReplLogger`.",
+        "createdAt" : "2020-07-21T08:00:01Z",
+        "updatedAt" : "2020-07-21T08:01:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "316e7db2d68c3b594b051c09da3b7bb1a6c740f1",
+    "line" : null,
+    "diffHunk" : "@@ -216,9 +236,40 @@ loadPackages importPkgs replClient ideState = do\n       , mod <- NM.names $ LF.packageModules pkg\n       ]\n \n+data ReplLogger = ReplLogger\n+  { withReplLogger :: forall a. ([FileDiagnostic] -> IO ()) -> IO a -> IO a\n+  -- ^ Temporarily modify what happens to diagnostics\n+  , replEventLogger :: FromServerMessage -> IO ()\n+  -- ^ Logger to pass to `withDamlIdeState`\n+  }\n+\n \n-runRepl :: [(LF.PackageName, Maybe LF.PackageVersion)] -> Options -> ReplClient.Handle -> IdeState -> IO ()\n-runRepl importPkgs opts replClient ideState = do\n+getReplLogger :: IO ReplLogger"
+  },
+  {
+    "id" : "e20c4e0c-496c-4278-a2eb-66ae781e6bb1",
+    "prId" : 6707,
+    "comments" : [
+      {
+        "id" : "eadc0342-2c10-4d37-b88d-607a652ae9a4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "GHC already forbids segments (things separated by `-`) that only consist of numbers https://gitlab.haskell.org/ghc/ghc/-/blob/master/compiler/GHC/Utils/Misc.hs#L1060 so you can uniquely parse things into a name and an optional version and parse in `(PackageName, Maybe PackageVersion)` here (`splitUnitId` does that). Maybe that would be a bit cleaner?",
+        "createdAt" : "2020-07-13T15:24:07Z",
+        "updatedAt" : "2020-07-14T10:14:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9492fa29-6dea-4623-a465-9bcecce96529",
+        "parentId" : "eadc0342-2c10-4d37-b88d-607a652ae9a4",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : ":+1: I've pulled the `(PackageName, Maybe PackageVersion)` conversion up into the CLI parser and added validation of package names as well.",
+        "createdAt" : "2020-07-14T10:15:15Z",
+        "updatedAt" : "2020-07-14T10:15:15Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2f4a5b241cc9a50a4f78cae3c4538f5f1e87352d",
+    "line" : null,
+    "diffHunk" : "@@ -183,9 +185,9 @@ parseReplInput input dflags =\n \n -- | Load all packages in the given session.\n --\n--- Returns the list of modules in the main DALFs.\n-loadPackages :: ReplClient.Handle -> IdeState -> IO [ImportDecl GhcPs]\n-loadPackages replClient ideState = do\n+-- Returns the list of modules in the specified import packages.\n+loadPackages :: [String] -> ReplClient.Handle -> IdeState -> IO [ImportDecl GhcPs]"
+  },
+  {
+    "id" : "17c9d964-68c7-4ee8-ae4b-284b709baf5a",
+    "prId" : 6707,
+    "comments" : [
+      {
+        "id" : "438f99aa-dd21-43c5-8244-6186ae963563",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "If we do make the change wtr to the package/version stuff mentioned above, I would suggest to push it through here as well and parse at the edge.",
+        "createdAt" : "2020-07-13T15:28:48Z",
+        "updatedAt" : "2020-07-14T10:14:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2f4a5b241cc9a50a4f78cae3c4538f5f1e87352d",
+    "line" : null,
+    "diffHunk" : "@@ -196,19 +198,33 @@ loadPackages replClient ideState = do\n                 hPutStrLn stderr (\"Package could not be loaded: \" <> show err)\n                 exitFailure\n             Right _ -> pure ()\n-    -- Determine module names in main DALFs.\n-    md <- readMetadata (toNormalizedFilePath' \".\")\n+    -- Determine module names in imported DALFs.\n+    let getPackage = LF.extPackagePkg . LF.dalfPackagePkg\n+        unversionedPkgs = Map.fromList\n+          [ (LF.packageName md, pkg)\n+          | pkg@LF.Package {LF.packageMetadata = Just md} <- getPackage <$> Map.elems pkgs\n+          ]\n+    importLfPkgs <- forM importPkgs $ \\nameOrId ->\n+        let mbVersioned = getPackage <$> Map.lookup (stringToUnitId nameOrId) pkgs\n+            mbUnversioned = Map.lookup (LF.PackageName . T.pack $ nameOrId) unversionedPkgs\n+        in\n+        case mbVersioned <|> mbUnversioned of\n+            Just lfPkg -> pure lfPkg\n+            Nothing -> do\n+                hPutStrLn stderr $\n+                    \"Could not find package for import: \" <> show nameOrId <> \"\\n\"\n+                    <> \"Known packages: \" <> intercalate \", \" (unitIdString <$> Map.keys pkgs)\n+                exitFailure\n     pure\n       [ simpleImportDecl . mkModuleName . T.unpack . LF.moduleNameString $ mod\n-      | dep <- directDependencies md\n-      , let pkg = LF.extPackagePkg $ LF.dalfPackagePkg $ pkgs Map.! dep\n+      | pkg <- importLfPkgs\n       , mod <- NM.names $ LF.packageModules pkg\n       ]\n \n \n-runRepl :: Options -> ReplClient.Handle -> IdeState -> IO ()\n-runRepl opts replClient ideState = do\n-    imports <- loadPackages replClient ideState\n+runRepl :: [String] -> Options -> ReplClient.Handle -> IdeState -> IO ()"
+  },
+  {
+    "id" : "af79dea9-3364-428e-a507-17be63ad53ae",
+    "prId" : 6656,
+    "comments" : [
+      {
+        "id" : "3dd75046-3840-4a2a-aab5-4d85b9e25d26",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    -- Determine module names in main DALFs.\r\n```",
+        "createdAt" : "2020-07-09T09:32:01Z",
+        "updatedAt" : "2020-07-09T10:01:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7143096ea63e977e720ea0eb222cfaca1e7241f4",
+    "line" : null,
+    "diffHunk" : "@@ -197,8 +196,21 @@ runRepl opts mainDar replClient ideState = do\n                 hPutStrLn stderr (\"Package could not be loaded: \" <> show err)\n                 exitFailure\n             Right _ -> pure ()\n+    -- Determine module names"
+  },
+  {
+    "id" : "0d1f99f9-6479-4f53-947e-0dc7d25a396b",
+    "prId" : 5450,
+    "comments" : [
+      {
+        "id" : "272b3db6-ff25-4593-bd5d-24d45c156bc3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "These are out of date now and trying to ensure code in a comment seems a bit of a lost cause so I’ve removed them for now. Happy to add them back under a debugging flag separately.",
+        "createdAt" : "2020-04-06T19:51:13Z",
+        "updatedAt" : "2020-04-07T06:39:23Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9e526fb13548ec2a6ed5eb583311d1c63b0759ed",
+    "line" : 26,
+    "diffHunk" : "@@ -249,15 +245,11 @@ runRepl opts mainDar replClient ideState = do\n         -- TODO[AH] Deduplicate imports.\n         let newImports = imp : imports\n         -- TODO[AH] Factor out the module render and typecheck step.\n-        liftIO $ writeFileUTF8 (fromNormalizedFilePath $ lineFilePath lineNumber)\n-            (renderModule dflags newImports lineNumber [] (WildPat noExt)\n+        liftIO $ setBufferModified ideState (lineFilePath lineNumber)\n+            $ Just $ T.pack (renderModule dflags newImports lineNumber [] (WildPat noExt)\n                 (noLoc $ HsApp noExt\n                     (noLoc $ HsVar noExt $ noLoc $ mkRdrUnqual $ mkVarOcc \"return\")\n                     (noLoc $ ExplicitTuple noExt [] Boxed)))\n-        -- Useful for debugging, probably best to put it behind a --debug flag"
+  },
+  {
+    "id" : "a6e3e5dc-cdcf-43af-816c-1aacebb06d8f",
+    "prId" : 5386,
+    "comments" : [
+      {
+        "id" : "64a9bdcd-9baf-4a1e-9918-4adae537b104",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`Either a b` has a  `Semigroup` instance that should do what you want here and avoids the somewhat confusing `swapEither` thing. Alternatively (no pun intended), you can use https://hackage.haskell.org/package/semigroupoids-5.2.2/docs/Data-Functor-Alt.html#t:Alt which is a bit clearer than the `Semigroup` instance imho.",
+        "createdAt" : "2020-04-03T07:24:33Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5f37bb87-f55d-4643-a693-5d0e9652be94",
+        "parentId" : "64a9bdcd-9baf-4a1e-9918-4adae537b104",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Thanks, I was sure there was one, but ended up looking at the wrong [`Alt`](https://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Monoid.html#t:Alt).",
+        "createdAt" : "2020-04-03T08:28:17Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "13e879a4-40ba-4bab-a4b7-1dab5ace308d",
+        "parentId" : "64a9bdcd-9baf-4a1e-9918-4adae537b104",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Done. The only downside of `Alt` vs the swapped `Either` is that we have to attempt statement parsing last to get statement parse errors on invalid inputs. Shouldn't be a big issue though.",
+        "createdAt" : "2020-04-03T09:03:27Z",
+        "updatedAt" : "2020-04-03T09:03:27Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c73b467aef8338af9bc082e37549881f971c2da5",
+    "line" : null,
+    "diffHunk" : "@@ -154,12 +154,31 @@ topologicalSort lfPkgs = map toPkg $ topSort $ transposeG graph\n     toPkg = (\\(pkg, _, _) -> pkg) . fromVertex\n \n data ReplState = ReplState\n-  { moduleNames :: [LF.ModuleName]\n+  { imports :: [ImportDecl GhcPs]\n   , bindings :: [(LPat GhcPs, Type)]\n   , lineNumber :: Int\n   }\n \n-type ReplM a = Repl.HaskelineT (State.StateT ReplState IO) a\n+type ReplM = Repl.HaskelineT (State.StateT ReplState IO)\n+\n+data ReplInput\n+  = ReplStatement (Stmt GhcPs (LHsExpr GhcPs))\n+  | ReplImport (ImportDecl GhcPs)\n+\n+parseReplInput :: String -> DynFlags -> Either Error ReplInput\n+parseReplInput input dflags = swapEither $ do"
+  },
+  {
+    "id" : "8793743d-876d-49db-b51a-57b0c80810d9",
+    "prId" : 5386,
+    "comments" : [
+      {
+        "id" : "78230e62-9d07-4be9-98bb-2b189d04df35",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Slightly disappointed that neither `ParseResult` nor `P` have alternative instances or anything close to it.",
+        "createdAt" : "2020-04-03T07:25:43Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "904b42bc-adf4-40ae-a0e2-902788dfdabd",
+        "parentId" : "78230e62-9d07-4be9-98bb-2b189d04df35",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, my thoughts exactly :disappointed: ",
+        "createdAt" : "2020-04-03T08:29:15Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c73b467aef8338af9bc082e37549881f971c2da5",
+    "line" : null,
+    "diffHunk" : "@@ -154,12 +154,31 @@ topologicalSort lfPkgs = map toPkg $ topSort $ transposeG graph\n     toPkg = (\\(pkg, _, _) -> pkg) . fromVertex\n \n data ReplState = ReplState\n-  { moduleNames :: [LF.ModuleName]\n+  { imports :: [ImportDecl GhcPs]\n   , bindings :: [(LPat GhcPs, Type)]\n   , lineNumber :: Int\n   }\n \n-type ReplM a = Repl.HaskelineT (State.StateT ReplState IO) a\n+type ReplM = Repl.HaskelineT (State.StateT ReplState IO)\n+\n+data ReplInput\n+  = ReplStatement (Stmt GhcPs (LHsExpr GhcPs))\n+  | ReplImport (ImportDecl GhcPs)\n+\n+parseReplInput :: String -> DynFlags -> Either Error ReplInput\n+parseReplInput input dflags = swapEither $ do\n+    -- We use @Either ReplInput Error@ to short-circuit on success.\n+    -- The most common input will be statements. So, we try parsing statements\n+    -- first and emit statement parse errors on failure.\n+    e <- tryParse (parseStatement input dflags) (ReplStatement . unLoc)\n+    _ <- tryParse (parseImport input dflags) (ReplImport . unLoc)\n+    pure e\n+  where\n+    swapEither = either Right Left\n+    tryParse :: ParseResult a -> (a -> ReplInput) -> Either ReplInput Error"
+  },
+  {
+    "id" : "39ce07d8-8515-4aeb-b325-505ab99ff386",
+    "prId" : 5386,
+    "comments" : [
+      {
+        "id" : "84803f39-0207-4565-a700-897cb2fe037d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We should probably just add that debugging flag :slightly_smiling_face:  (separately)",
+        "createdAt" : "2020-04-03T07:26:40Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c73b467aef8338af9bc082e37549881f971c2da5",
+    "line" : 80,
+    "diffHunk" : "@@ -191,54 +210,73 @@ runRepl opts mainDar replClient ideState = do\n             initialiser = pure ()\n     State.evalStateT replM initReplState\n   where\n-    handleLine\n-        :: [LF.ModuleName]\n-        -> [(LPat GhcPs, Type)]\n-        -> DynFlags\n+    handleStmt\n+        :: DynFlags\n         -> String\n-        -> Int\n-        -> IO (Either Error (LPat GhcPs, Type))\n-    handleLine moduleNames binds dflags l i = runExceptT $ do\n-        stmt <- case parseStatement l dflags of\n-            POk _ lStmt -> pure (unLoc lStmt)\n-            PFailed _ _ errMsg -> throwError (ParseError errMsg)\n-        (bind, expr) <- maybe (throwError (UnsupportedStatement l)) pure (splitStmt stmt)\n-        liftIO $ writeFileUTF8 (fromNormalizedFilePath $ lineFilePath i)\n-            (renderModule dflags moduleNames i binds bind expr)\n+        -> Stmt GhcPs (LHsExpr GhcPs)\n+        -> ExceptT Error ReplM ()\n+    handleStmt dflags line stmt = do\n+        ReplState {imports, bindings, lineNumber} <- State.get\n+        (bind, expr) <- maybe (throwError (UnsupportedStatement line)) pure (splitStmt stmt)\n+        liftIO $ writeFileUTF8 (fromNormalizedFilePath $ lineFilePath lineNumber)\n+            (renderModule dflags imports lineNumber bindings bind expr)\n         -- Useful for debugging, probably best to put it behind a --debug flag\n-        -- rendered <- liftIO  $readFileUTF8 (fromNormalizedFilePath $ lineFilePath i)\n+        -- rendered <- liftIO $ readFileUTF8 (fromNormalizedFilePath $ lineFilePath lineNumber)"
+  },
+  {
+    "id" : "b69f4525-1752-4c76-8f86-522fbc7387bf",
+    "prId" : 5386,
+    "comments" : [
+      {
+        "id" : "89e5179b-c8d9-47bd-975f-de2413450079",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The `liftIO` here is unnecessary here I believe and confused me for a moment (I thought we were lifting into `ExceptT` and didn’t understand why we need the `withExceptT` then).",
+        "createdAt" : "2020-04-03T07:29:34Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3bf678f5-1125-4b89-8b7e-c6de53173a93",
+        "parentId" : "89e5179b-c8d9-47bd-975f-de2413450079",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "No, it's needed to lift into `ReplM`. The monad here is `ExceptT Error ReplM`. `ReplM` is used for state in `handleStmt`. See https://github.com/digital-asset/daml/pull/5386/commits/a78a847c17cfee1e5e4bdca14bde09469b14f9a7 and https://github.com/digital-asset/daml/pull/5386/commits/9d05b82077272101f9ddcbf7dc1fbf8621fdf43b .",
+        "createdAt" : "2020-04-03T08:33:40Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c73b467aef8338af9bc082e37549881f971c2da5",
+    "line" : 98,
+    "diffHunk" : "@@ -191,54 +210,73 @@ runRepl opts mainDar replClient ideState = do\n             initialiser = pure ()\n     State.evalStateT replM initReplState\n   where\n-    handleLine\n-        :: [LF.ModuleName]\n-        -> [(LPat GhcPs, Type)]\n-        -> DynFlags\n+    handleStmt\n+        :: DynFlags\n         -> String\n-        -> Int\n-        -> IO (Either Error (LPat GhcPs, Type))\n-    handleLine moduleNames binds dflags l i = runExceptT $ do\n-        stmt <- case parseStatement l dflags of\n-            POk _ lStmt -> pure (unLoc lStmt)\n-            PFailed _ _ errMsg -> throwError (ParseError errMsg)\n-        (bind, expr) <- maybe (throwError (UnsupportedStatement l)) pure (splitStmt stmt)\n-        liftIO $ writeFileUTF8 (fromNormalizedFilePath $ lineFilePath i)\n-            (renderModule dflags moduleNames i binds bind expr)\n+        -> Stmt GhcPs (LHsExpr GhcPs)\n+        -> ExceptT Error ReplM ()\n+    handleStmt dflags line stmt = do\n+        ReplState {imports, bindings, lineNumber} <- State.get\n+        (bind, expr) <- maybe (throwError (UnsupportedStatement line)) pure (splitStmt stmt)\n+        liftIO $ writeFileUTF8 (fromNormalizedFilePath $ lineFilePath lineNumber)\n+            (renderModule dflags imports lineNumber bindings bind expr)\n         -- Useful for debugging, probably best to put it behind a --debug flag\n-        -- rendered <- liftIO  $readFileUTF8 (fromNormalizedFilePath $ lineFilePath i)\n+        -- rendered <- liftIO $ readFileUTF8 (fromNormalizedFilePath $ lineFilePath lineNumber)\n         -- liftIO $ for_ (lines rendered) $ \\line ->\n         --      hPutStrLn stderr (\"> \" <> line)\n         (lfMod, tmrModule -> tcMod) <-\n             maybe (throwError TypeError) pure =<< liftIO (runAction ideState $ runMaybeT $\n-            (,) <$> useE GenerateDalf (lineFilePath i)\n-                <*> useE TypeCheck (lineFilePath i))\n+            (,) <$> useE GenerateDalf (lineFilePath lineNumber)\n+                <*> useE TypeCheck (lineFilePath lineNumber))\n         -- Type of the statement so we can give it a type annotation\n         -- and avoid incurring a typeclass constraint.\n         stmtTy <- maybe (throwError TypeError) pure (exprTy $ tm_typechecked_source tcMod)\n-        scriptRes <- liftIO $ ReplClient.runScript replClient (optDamlLfVersion opts) lfMod\n-        case scriptRes of\n-            Right _ -> pure (bind, stmtTy)\n-            Left err -> throwError (ScriptError err)\n+        -- If we get an error we don’t increment lineNumber and we\n+        -- do not get a new binding\n+        withExceptT ScriptError $ ExceptT $ liftIO $"
+  },
+  {
+    "id" : "4dadcbe5-ed37-48e6-ba84-424f9da28f84",
+    "prId" : 5386,
+    "comments" : [
+      {
+        "id" : "9fac72fb-1f3b-4e87-ae69-acf0d8f372a1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You probably want bang patterns on this given that you’re using `$!` below.",
+        "createdAt" : "2020-04-03T07:30:53Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0c35730c-166d-4bd1-96d7-5567f14afb96",
+        "parentId" : "9fac72fb-1f3b-4e87-ae69-acf0d8f372a1",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Good catch, done.",
+        "createdAt" : "2020-04-03T08:34:26Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c73b467aef8338af9bc082e37549881f971c2da5",
+    "line" : null,
+    "diffHunk" : "@@ -154,12 +154,31 @@ topologicalSort lfPkgs = map toPkg $ topSort $ transposeG graph\n     toPkg = (\\(pkg, _, _) -> pkg) . fromVertex\n \n data ReplState = ReplState\n-  { moduleNames :: [LF.ModuleName]\n+  { imports :: [ImportDecl GhcPs]"
+  },
+  {
+    "id" : "10f1e974-4684-436b-b6a4-4e959e4187da",
+    "prId" : 5386,
+    "comments" : [
+      {
+        "id" : "a4b76df0-b71d-41c4-a959-b55e1c05eada",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Hm, this seems surprisingly tricky with qualified import, explicit imports, …. I wonder if we can biggypack on `-ddump-minimal-imports` (no idea how and that drops too much).",
+        "createdAt" : "2020-04-03T07:34:02Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7ef5e59f-6d09-44cc-9bbf-0cbeac32e20a",
+        "parentId" : "a4b76df0-b71d-41c4-a959-b55e1c05eada",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, I haven't looked at all the options, yet. Duplicate imports don't make it fail, but only add bloat, so this didn't seem too critical.\r\n\r\nHmm, AFAIK `-ddump-minimal-imports` takes into account which symbols you actually use in the module. In the REPL use case that's almost always going to lead to too few imports. But, maybe we can re-use some piece of its implementation.\r\n\r\nAnother very dumb, but simple, solution could be to deduplicate on how the import declarations render. That doesn't yield a minimal set, but at least eliminates obvious duplicates.",
+        "createdAt" : "2020-04-03T08:41:07Z",
+        "updatedAt" : "2020-04-03T09:02:06Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c73b467aef8338af9bc082e37549881f971c2da5",
+    "line" : 113,
+    "diffHunk" : "@@ -191,54 +210,73 @@ runRepl opts mainDar replClient ideState = do\n             initialiser = pure ()\n     State.evalStateT replM initReplState\n   where\n-    handleLine\n-        :: [LF.ModuleName]\n-        -> [(LPat GhcPs, Type)]\n-        -> DynFlags\n+    handleStmt\n+        :: DynFlags\n         -> String\n-        -> Int\n-        -> IO (Either Error (LPat GhcPs, Type))\n-    handleLine moduleNames binds dflags l i = runExceptT $ do\n-        stmt <- case parseStatement l dflags of\n-            POk _ lStmt -> pure (unLoc lStmt)\n-            PFailed _ _ errMsg -> throwError (ParseError errMsg)\n-        (bind, expr) <- maybe (throwError (UnsupportedStatement l)) pure (splitStmt stmt)\n-        liftIO $ writeFileUTF8 (fromNormalizedFilePath $ lineFilePath i)\n-            (renderModule dflags moduleNames i binds bind expr)\n+        -> Stmt GhcPs (LHsExpr GhcPs)\n+        -> ExceptT Error ReplM ()\n+    handleStmt dflags line stmt = do\n+        ReplState {imports, bindings, lineNumber} <- State.get\n+        (bind, expr) <- maybe (throwError (UnsupportedStatement line)) pure (splitStmt stmt)\n+        liftIO $ writeFileUTF8 (fromNormalizedFilePath $ lineFilePath lineNumber)\n+            (renderModule dflags imports lineNumber bindings bind expr)\n         -- Useful for debugging, probably best to put it behind a --debug flag\n-        -- rendered <- liftIO  $readFileUTF8 (fromNormalizedFilePath $ lineFilePath i)\n+        -- rendered <- liftIO $ readFileUTF8 (fromNormalizedFilePath $ lineFilePath lineNumber)\n         -- liftIO $ for_ (lines rendered) $ \\line ->\n         --      hPutStrLn stderr (\"> \" <> line)\n         (lfMod, tmrModule -> tcMod) <-\n             maybe (throwError TypeError) pure =<< liftIO (runAction ideState $ runMaybeT $\n-            (,) <$> useE GenerateDalf (lineFilePath i)\n-                <*> useE TypeCheck (lineFilePath i))\n+            (,) <$> useE GenerateDalf (lineFilePath lineNumber)\n+                <*> useE TypeCheck (lineFilePath lineNumber))\n         -- Type of the statement so we can give it a type annotation\n         -- and avoid incurring a typeclass constraint.\n         stmtTy <- maybe (throwError TypeError) pure (exprTy $ tm_typechecked_source tcMod)\n-        scriptRes <- liftIO $ ReplClient.runScript replClient (optDamlLfVersion opts) lfMod\n-        case scriptRes of\n-            Right _ -> pure (bind, stmtTy)\n-            Left err -> throwError (ScriptError err)\n+        -- If we get an error we don’t increment lineNumber and we\n+        -- do not get a new binding\n+        withExceptT ScriptError $ ExceptT $ liftIO $\n+            ReplClient.runScript replClient (optDamlLfVersion opts) lfMod\n+        let boundVars = mkOccSet (map occName (collectPatBinders bind))\n+        State.put $! ReplState\n+          { imports = imports\n+          , bindings = map (first (shadowPat boundVars)) bindings <> [(toTuplePat bind, stmtTy)]\n+          , lineNumber = lineNumber + 1\n+          }\n+    handleImport\n+        :: DynFlags\n+        -> ImportDecl GhcPs\n+        -> ExceptT Error ReplM ()\n+    handleImport dflags imp = do\n+        ReplState {imports, lineNumber} <- State.get\n+        -- TODO[AH] Deduplicate imports.\n+        let newImports = imp : imports"
+  },
+  {
+    "id" : "e1f288c9-42ec-4267-86b4-c4ee8b5a2f52",
+    "prId" : 5337,
+    "comments" : [
+      {
+        "id" : "f4e8a3db-e39f-4b30-997e-e1a219550521",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we upgrade already?",
+        "createdAt" : "2020-04-01T11:54:25Z",
+        "updatedAt" : "2020-04-01T11:55:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cda8a168-4f23-40e7-946d-b629dabfe5c2",
+        "parentId" : "f4e8a3db-e39f-4b30-997e-e1a219550521",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Sadly not, there's a version constraint on `haskeline` and that's a core package. So, this is blocked on a GHC upgrade.",
+        "createdAt" : "2020-04-01T12:01:59Z",
+        "updatedAt" : "2020-04-01T12:01:59Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e8ccdc86-7756-4965-ae76-53147eb1fc8e",
+        "parentId" : "f4e8a3db-e39f-4b30-997e-e1a219550521",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah right :disappointed: ",
+        "createdAt" : "2020-04-01T12:12:31Z",
+        "updatedAt" : "2020-04-01T12:12:31Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7edafcdc6d482d8d3947074845131f21846fa79f",
+    "line" : 47,
+    "diffHunk" : "@@ -168,7 +175,21 @@ runRepl opts mainDar replClient ideState = do\n                 hPutStrLn stderr (\"Package could not be loaded: \" <> show err)\n                 exitFailure\n             Right _ -> pure ()\n-    go moduleNames 0 []\n+    let initReplState = ReplState\n+          { moduleNames = moduleNames\n+          , bindings = []\n+          , lineNumber = 0\n+          }\n+    -- TODO[AH] Use Repl.evalReplOpts once we're using repline >= 0.2.2"
+  },
+  {
+    "id" : "2e50b335-8b13-4990-8b31-9031cb2f3177",
+    "prId" : 5087,
+    "comments" : [
+      {
+        "id" : "59fb7740-9eca-4f09-a82d-f67882b781e7",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Don't you still need to recurse here?\r\n```suggestion\r\n        | occName (unLoc a) `elemOccSet` vars = go pat\r\n```",
+        "createdAt" : "2020-03-19T14:50:19Z",
+        "updatedAt" : "2020-03-19T15:15:13Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b1762160-74b8-4e28-b2bf-8cfbbeeee637",
+        "parentId" : "59fb7740-9eca-4f09-a82d-f67882b781e7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Very good catch, I completely missed this!",
+        "createdAt" : "2020-03-19T15:16:13Z",
+        "updatedAt" : "2020-03-19T15:16:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c1174419461c8615e167a4ef5a85c77f259d94ee",
+    "line" : null,
+    "diffHunk" : "@@ -63,15 +63,51 @@ renderError dflags err = case err of\n         -- ^ The error will be displayed by the script runner.\n         pure ()\n \n+-- | Take a set of variables and a pattern and shadow all the variables\n+-- in the pattern by turning them into wildcard patterns.\n+shadowPat :: OccSet -> LPat GhcPs -> LPat GhcPs\n+shadowPat vars p\n+  = go (unLoc p)\n+  where\n+    go p@(VarPat _ var)\n+      | occName (unLoc var) `elemOccSet` vars = WildPat noExt\n+      | otherwise = p\n+    go p@(WildPat _) = p\n+    go (LazyPat ext pat) = LazyPat ext (go pat)\n+    go (BangPat ext pat) = BangPat ext (go pat)\n+    go (AsPat ext a pat)\n+        | occName (unLoc a) `elemOccSet` vars = pat"
+  },
+  {
+    "id" : "315f6f33-cc1e-485e-ab82-9cc6990e5644",
+    "prId" : 5087,
+    "comments" : [
+      {
+        "id" : "1fa3481d-8b79-47a8-99cc-40556f4da1b6",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That's funny, but it's probably better to stick to a technical reason in the error message. Sorry, if I'm being a buzzkill. :wink: ",
+        "createdAt" : "2020-03-19T14:56:01Z",
+        "updatedAt" : "2020-03-19T15:15:13Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ff0e643f-0ebc-41f9-b573-da9ac43402b4",
+        "parentId" : "1fa3481d-8b79-47a8-99cc-40556f4da1b6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Fair, fixed. Although I don’t expect anyone to actually hit  this.",
+        "createdAt" : "2020-03-19T15:15:43Z",
+        "updatedAt" : "2020-03-19T15:15:44Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c1174419461c8615e167a4ef5a85c77f259d94ee",
+    "line" : null,
+    "diffHunk" : "@@ -63,15 +63,51 @@ renderError dflags err = case err of\n         -- ^ The error will be displayed by the script runner.\n         pure ()\n \n+-- | Take a set of variables and a pattern and shadow all the variables\n+-- in the pattern by turning them into wildcard patterns.\n+shadowPat :: OccSet -> LPat GhcPs -> LPat GhcPs\n+shadowPat vars p\n+  = go (unLoc p)\n+  where\n+    go p@(VarPat _ var)\n+      | occName (unLoc var) `elemOccSet` vars = WildPat noExt\n+      | otherwise = p\n+    go p@(WildPat _) = p\n+    go (LazyPat ext pat) = LazyPat ext (go pat)\n+    go (BangPat ext pat) = BangPat ext (go pat)\n+    go (AsPat ext a pat)\n+        | occName (unLoc a) `elemOccSet` vars = pat\n+        | otherwise = AsPat ext a (go pat)\n+    go (ViewPat ext expr pat) = ViewPat ext expr (go pat)\n+    go (ParPat ext pat) = ParPat ext (go pat)\n+    go (ListPat ext pats) = ListPat ext (map go pats)\n+    go (TuplePat ext pats boxity) = TuplePat ext (map go pats) boxity\n+    go (SumPat ext pat tag arity) = SumPat ext (go pat) tag arity\n+    go (ConPatIn ext ps) = ConPatIn ext (shadowDetails ps)\n+    go ConPatOut{} = error \"ConPatOut is never produced by the parser\"\n+    go p@LitPat{} = p\n+    go p@NPat{} = p\n+    go NPlusKPat{} = error \"N+k patterns are stupid\"\n+    go (SigPat ext pat sig) = SigPat ext (go pat) sig\n+    go SplicePat {} = error \"Template haskell is stupid\""
+  },
+  {
+    "id" : "c7697cc2-d28c-40af-9aa2-2bc3dde15b9d",
+    "prId" : 5087,
+    "comments" : [
+      {
+        "id" : "d90767a1-9738-426b-9572-78a737827d3f",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n-- | Split a statement into the name of the binder\r\n```",
+        "createdAt" : "2020-03-19T14:58:05Z",
+        "updatedAt" : "2020-03-19T15:15:13Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c1174419461c8615e167a4ef5a85c77f259d94ee",
+    "line" : null,
+    "diffHunk" : "@@ -63,15 +63,51 @@ renderError dflags err = case err of\n         -- ^ The error will be displayed by the script runner.\n         pure ()\n \n+-- | Take a set of variables and a pattern and shadow all the variables\n+-- in the pattern by turning them into wildcard patterns.\n+shadowPat :: OccSet -> LPat GhcPs -> LPat GhcPs\n+shadowPat vars p\n+  = go (unLoc p)\n+  where\n+    go p@(VarPat _ var)\n+      | occName (unLoc var) `elemOccSet` vars = WildPat noExt\n+      | otherwise = p\n+    go p@(WildPat _) = p\n+    go (LazyPat ext pat) = LazyPat ext (go pat)\n+    go (BangPat ext pat) = BangPat ext (go pat)\n+    go (AsPat ext a pat)\n+        | occName (unLoc a) `elemOccSet` vars = pat\n+        | otherwise = AsPat ext a (go pat)\n+    go (ViewPat ext expr pat) = ViewPat ext expr (go pat)\n+    go (ParPat ext pat) = ParPat ext (go pat)\n+    go (ListPat ext pats) = ListPat ext (map go pats)\n+    go (TuplePat ext pats boxity) = TuplePat ext (map go pats) boxity\n+    go (SumPat ext pat tag arity) = SumPat ext (go pat) tag arity\n+    go (ConPatIn ext ps) = ConPatIn ext (shadowDetails ps)\n+    go ConPatOut{} = error \"ConPatOut is never produced by the parser\"\n+    go p@LitPat{} = p\n+    go p@NPat{} = p\n+    go NPlusKPat{} = error \"N+k patterns are stupid\"\n+    go (SigPat ext pat sig) = SigPat ext (go pat) sig\n+    go SplicePat {} = error \"Template haskell is stupid\"\n+    go (CoPat ext wrap pat ty) = CoPat ext wrap (go pat) ty\n+    go (XPat locP) = XPat (fmap go locP)\n+\n+    shadowDetails :: HsConPatDetails GhcPs -> HsConPatDetails GhcPs\n+    shadowDetails (PrefixCon ps) = PrefixCon (map go ps)\n+    shadowDetails (RecCon fs) =\n+        RecCon fs\n+            { rec_flds =\n+                  map (fmap (\\f -> f { hsRecFieldArg = go (hsRecFieldArg f) }))\n+                      (rec_flds fs)\n+            }\n+    shadowDetails (InfixCon p1 p2) = InfixCon (go p1) (go p2)\n+\n -- | Split a statement into the name of the binder (patterns are not supported)"
+  }
+]

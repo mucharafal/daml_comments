@@ -1,0 +1,123 @@
+[
+  {
+    "id" : "50faf4b5-1b92-4969-9c1b-2b838b1774a3",
+    "prId" : 7732,
+    "comments" : [
+      {
+        "id" : "c90ec5d6-02dd-45dc-9a97-e621db6853b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n    skipDarUpload: Boolean,\r\n```",
+        "createdAt" : "2020-10-19T12:42:30Z",
+        "updatedAt" : "2020-10-20T09:47:16Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b8e6353a94e633a5ccbee4aeec2e63645436d1fb",
+    "line" : null,
+    "diffHunk" : "@@ -39,6 +42,7 @@ final class LedgerTestCasesRunner(\n     identifierSuffix: String,\n     suiteTimeoutScale: Double,\n     concurrentTestRuns: Int,\n+    skipDarUpload: Boolean"
+  },
+  {
+    "id" : "5a3d3ae0-4d0f-4ce8-8ded-795ded5d9842",
+    "prId" : 7732,
+    "comments" : [
+      {
+        "id" : "ff1c382a-affd-41b6-8f05-8edd67c7e786",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I generally prefer the `if` clause, rather than the `else` clause, to do the work.\r\n\r\nPerhaps we can rename the variable to \"uploadDars\" instead of \"skipDarUpload\" and invert the boolean value?",
+        "createdAt" : "2020-10-19T12:43:51Z",
+        "updatedAt" : "2020-10-20T09:47:16Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b8e6353a94e633a5ccbee4aeec2e63645436d1fb",
+    "line" : null,
+    "diffHunk" : "@@ -112,27 +116,33 @@ final class LedgerTestCasesRunner(\n   ): Future[Either[Result.Failure, Result.Success]] =\n     result(start(test, session))\n \n-  private def run(completionCallback: Try[Vector[LedgerTestSummary]] => Unit): Unit = {\n-\n-    val system: ActorSystem = ActorSystem(classOf[LedgerTestCasesRunner].getSimpleName)\n-    implicit val materializer: Materializer = Materializer(system)\n-    implicit val executionContext: ExecutionContext = materializer.executionContext\n+  private def uploadDarsIfRequired(participantSessionManager: ParticipantSessionManager)(\n+      implicit ec: ExecutionContext): Future[Unit] =\n+    if (skipDarUpload) {\n+      Future.successful(logger.info(\"DAR files upload skipped.\"))\n+    } else {"
+  },
+  {
+    "id" : "02c03ff2-6fac-4c9c-a178-3b610c46f0f3",
+    "prId" : 7328,
+    "comments" : [
+      {
+        "id" : "b6406b24-21b2-4f92-b902-9ed64c8867de",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n              concurrentTestRuns,\r\n            )\r\n```",
+        "createdAt" : "2020-09-07T10:28:05Z",
+        "updatedAt" : "2020-09-07T12:51:18Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf7583b91c2f670c439f510026de0dfba0bb94f0",
+    "line" : null,
+    "diffHunk" : "@@ -155,22 +151,31 @@ final class LedgerTestCasesRunner(\n     }\n \n     val (concurrentTestCases, sequentialTestCases) = testCases.partition(_.runConcurrently)\n-\n-    val testResults =\n-      for {\n-        _ <- uploadDars()\n-        concurrentTestsResults <- runTestCases(concurrentTestCases, concurrentTestRuns)\n-        sequentialTestsResults <- runTestCases(sequentialTestCases, concurrency = 1)\n-      } yield concurrentTestsResults ++ sequentialTestsResults\n-\n-    testResults\n-      .recover { case NonFatal(e) => throw new LedgerTestCasesRunner.UncaughtExceptionError(e) }\n+    ParticipantSessionManager(config.participants)\n+      .flatMap { participantSessionManager =>\n+        val ledgerSession = LedgerSession(config, participantSessionManager)\n+        val testResults =\n+          for {\n+            _ <- uploadDars(participantSessionManager)\n+            concurrentTestResults <- runTests(\n+              ledgerSession,\n+              concurrentTestCases,\n+              concurrentTestRuns)"
+  },
+  {
+    "id" : "2afb7847-40d9-4b60-a46d-bc05a362afe8",
+    "prId" : 6458,
+    "comments" : [
+      {
+        "id" : "9cefa93b-2e13-41e0-a0f2-21ba8c9a94e0",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Much nicer.",
+        "createdAt" : "2020-06-23T10:37:24Z",
+        "updatedAt" : "2020-06-23T11:39:22Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "369498b2337dab0f8d310a86dce521d86703c678",
+    "line" : 57,
+    "diffHunk" : "@@ -103,38 +103,37 @@ final class LedgerTestSuiteRunner(\n       result: Either[Result.Failure, Result.Success])(\n       implicit ec: ExecutionContext,\n   ): LedgerTestSummary =\n-    LedgerTestSummary(suite.name, test.description, config, result)\n+    LedgerTestSummary(suite.name, test.name, test.description, config, result)\n \n   private def run(test: LedgerTestCase, session: LedgerSession)(\n       implicit ec: ExecutionContext,\n   ): Future[Either[Result.Failure, Result.Success]] =\n     result(start(test, session))\n \n   private def run(completionCallback: Try[Vector[LedgerTestSummary]] => Unit): Unit = {\n-    val system: ActorSystem = ActorSystem(classOf[LedgerTestSuiteRunner].getSimpleName)\n+    val system: ActorSystem = ActorSystem(classOf[LedgerTestCasesRunner].getSimpleName)\n     implicit val materializer: Materializer = Materializer(system)\n     implicit val executionContext: ExecutionContext = materializer.executionContext\n \n     val participantSessionManager = new ParticipantSessionManager\n     val ledgerSession = new LedgerSession(config, participantSessionManager)\n-    val testCount = suites.map(_.tests.size).sum\n+    val testCount = testCases.size"
+  }
+]

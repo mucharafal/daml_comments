@@ -1,0 +1,205 @@
+[
+  {
+    "id" : "f7539a45-994f-47a6-98de-90c61a6a9190",
+    "prId" : 3051,
+    "comments" : [
+      {
+        "id" : "19087656-4563-41ab-915d-15161dd5eaee",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It's probably safe to restrict the `synchronized` block to lock on `nextListener` rather then the whole object.",
+        "createdAt" : "2019-09-30T12:03:23Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "75ea04b1-95e2-4dc4-92ed-346cbdc632d0",
+        "parentId" : "19087656-4563-41ab-915d-15161dd5eaee",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "How would that look like? The `enqueueOrProcess` method also needs to protect against concurrent modifications of the `stash` list. Unless I change that to something like `ConcurrentLinkedQueue`.",
+        "createdAt" : "2019-10-01T10:00:18Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "09ce76f4-4a3e-4ba4-889c-bf4b097a3c07",
+        "parentId" : "19087656-4563-41ab-915d-15161dd5eaee",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yes, but the only place where you would mutate the state of the list is in the `setNextListener` method. If you synchronize access to both methods using the same object there's no issue.\r\n\r\nBefore commenting on your PR I re-wrote your code (for my own thinking) like this:\r\n\r\n```scala\r\nabstract class AsyncForwardingListener[ReqT] extends ServerCall.Listener[ReqT] {\r\n  private[this] var stash: mutable.ListBuffer[ServerCall.Listener[ReqT] => Unit] =\r\n    new mutable.ListBuffer\r\n  private[this] var nextListener: Option[ServerCall.Listener[ReqT]] = None\r\n\r\n  private def enqueueOrProcess(msg: ServerCall.Listener[ReqT] => Unit): Unit =\r\n    nextListener.synchronized {\r\n      if (nextListener.isDefined) {\r\n        msg(nextListener.get)\r\n      } else {\r\n        stash :+ msg\r\n      }\r\n    }\r\n\r\n  protected def setNextListener(listener: ServerCall.Listener[ReqT]): Unit =\r\n    nextListener.synchronized {\r\n      nextListener = Some(listener)\r\n      for (msg <- stash) {\r\n        msg(listener)\r\n      }\r\n    }\r\n\r\n  // All methods that need to be forwarded\r\n  override def onHalfClose(): Unit = enqueueOrProcess(i => i.onHalfClose())\r\n  override def onCancel(): Unit = enqueueOrProcess(i => i.onCancel())\r\n  override def onComplete(): Unit = enqueueOrProcess(i => i.onComplete())\r\n  override def onReady(): Unit = enqueueOrProcess(i => i.onReady())\r\n  override def onMessage(message: ReqT): Unit = enqueueOrProcess(i => i.onMessage(message))\r\n}\r\n```",
+        "createdAt" : "2019-10-01T12:30:43Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1bc384cf-7c12-47a8-8a4c-315b3a65c129",
+        "parentId" : "19087656-4563-41ab-915d-15161dd5eaee",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "(note that I made a mistake as the `stash` can be a `val` of course)",
+        "createdAt" : "2019-10-01T12:31:06Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7b086d71418f8dd31bcf1d51c0ae1f9e2877d27c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,34 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.server.api.authorization\n+\n+import io.grpc.ServerCall\n+\n+/** This listener buffers all messages until `setNextListener` is called,\n+  * at which point all buffered messages are sent to the given listener.\n+  * From then on, all future messages are sent directly to the given listener.\n+  *\n+  * The target listener is usually created through `Contexts.interceptCall` or `ServerCallHandler.startCall`.\n+  * */\n+abstract class AsyncForwardingListener[ReqT] extends ServerCall.Listener[ReqT] {\n+  protected type Listener = ServerCall.Listener[ReqT]\n+  private var stash: List[Listener => Unit] = List.empty\n+  private var nextListener: Option[Listener] = None\n+\n+  private def enqueueOrProcess(msg: Listener => Unit): Unit = this.synchronized {"
+  },
+  {
+    "id" : "97b8a7b1-cb7b-49d8-ab24-3e38601c583e",
+    "prId" : 3051,
+    "comments" : [
+      {
+        "id" : "181db27f-d853-4047-8fe0-50c02ef6f57a",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Given the heavily procedural nature of this piece of code, it probably makes sense in this case to use a more procedural idiom:\r\n```scala\r\nif (nextListener.isDefined) {\r\n  msg(nextListener.get)\r\n} else {\r\n  stash :+ msg\r\n}\r\n```",
+        "createdAt" : "2019-09-30T12:04:45Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7b086d71418f8dd31bcf1d51c0ae1f9e2877d27c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,34 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.server.api.authorization\n+\n+import io.grpc.ServerCall\n+\n+/** This listener buffers all messages until `setNextListener` is called,\n+  * at which point all buffered messages are sent to the given listener.\n+  * From then on, all future messages are sent directly to the given listener.\n+  *\n+  * The target listener is usually created through `Contexts.interceptCall` or `ServerCallHandler.startCall`.\n+  * */\n+abstract class AsyncForwardingListener[ReqT] extends ServerCall.Listener[ReqT] {\n+  protected type Listener = ServerCall.Listener[ReqT]\n+  private var stash: List[Listener => Unit] = List.empty\n+  private var nextListener: Option[Listener] = None\n+\n+  private def enqueueOrProcess(msg: Listener => Unit): Unit = this.synchronized {\n+    nextListener.fold[Unit]({stash = stash :+ msg})(l => msg(l))"
+  },
+  {
+    "id" : "308027b7-ac02-4093-980f-43dc5a8fbb46",
+    "prId" : 3051,
+    "comments" : [
+      {
+        "id" : "fc0a15a1-98a1-4bfe-90a4-8478cc1d5f72",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Probably not particularly problematic, but it probably makes more sense to use a data structure with sub-linear appending complexity.",
+        "createdAt" : "2019-09-30T12:06:03Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "07b95b61-d6d6-4b1d-a3ec-774725456e99",
+        "parentId" : "fc0a15a1-98a1-4bfe-90a4-8478cc1d5f72",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "What would be a good one? A mutable list? Or just prepend all messages and then reverse the list once before flushing it?",
+        "createdAt" : "2019-10-01T09:54:33Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7260d466-6636-4ba0-ac41-50c862ab9104",
+        "parentId" : "fc0a15a1-98a1-4bfe-90a4-8478cc1d5f72",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I was using a `private[this] val stash: mutable.ListBuffer`",
+        "createdAt" : "2019-10-01T12:28:32Z",
+        "updatedAt" : "2019-10-07T13:17:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7b086d71418f8dd31bcf1d51c0ae1f9e2877d27c",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,34 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.server.api.authorization\n+\n+import io.grpc.ServerCall\n+\n+/** This listener buffers all messages until `setNextListener` is called,\n+  * at which point all buffered messages are sent to the given listener.\n+  * From then on, all future messages are sent directly to the given listener.\n+  *\n+  * The target listener is usually created through `Contexts.interceptCall` or `ServerCallHandler.startCall`.\n+  * */\n+abstract class AsyncForwardingListener[ReqT] extends ServerCall.Listener[ReqT] {\n+  protected type Listener = ServerCall.Listener[ReqT]\n+  private var stash: List[Listener => Unit] = List.empty"
+  }
+]

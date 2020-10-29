@@ -1,0 +1,68 @@
+[
+  {
+    "id" : "4ebdbf2c-493a-4552-9034-f4a4ec68c188",
+    "prId" : 4827,
+    "comments" : [
+      {
+        "id" : "8188f4d6-8ac7-421b-892e-9e7042c3eca0",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Since the future of the indexer startup is discarded in line 59, where does the \"waiting\" actually happen now?",
+        "createdAt" : "2020-03-05T12:51:36Z",
+        "updatedAt" : "2020-03-05T12:51:49Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6ce37235-e5a2-41d2-9154-eca67e779efd",
+        "parentId" : "8188f4d6-8ac7-421b-892e-9e7042c3eca0",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "That future resolves when the indexer is _complete_. [We always discarded it](https://github.com/digital-asset/daml/pull/4827/files#diff-9d56581c46fe29b6c225c0425dc4f49eL36); it's really only there for testing.",
+        "createdAt" : "2020-03-05T13:05:43Z",
+        "updatedAt" : "2020-03-05T13:05:43Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8ff5d285-7c89-4c95-be3f-1555a7a60fa1",
+        "parentId" : "8188f4d6-8ac7-421b-892e-9e7042c3eca0",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Right, I see that now. Thanks.",
+        "createdAt" : "2020-03-05T14:48:37Z",
+        "updatedAt" : "2020-03-05T14:48:37Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c8577472b4fd4a3b703557fe7c4f05734871a615",
+    "line" : 63,
+    "diffHunk" : "@@ -21,44 +21,40 @@ final class StandaloneIndexerServer(\n \n   private val logger = ContextualizedLogger.get(this.getClass)\n \n-  override def acquire()(implicit executionContext: ExecutionContext): Resource[Unit] =\n-    for {\n-      // ActorSystem name not allowed to contain daml-lf LedgerString characters \".:#/ \"\n-      actorSystem <- AkkaResourceOwner\n-        .forActorSystem(() =>\n-          ActorSystem(\"StandaloneIndexerServer-\" + config.participantId.filterNot(\".:#/ \".toSet)))\n-        .acquire()\n-      indexerFactory = new JdbcIndexerFactory(config.jdbcUrl, metrics)\n-      indexer = new RecoveringIndexer(\n-        actorSystem.scheduler,\n-        config.restartDelay,\n-      )\n-      _ <- config.startupMode match {\n-        case IndexerStartupMode.MigrateOnly =>\n-          Resource.successful(Future.unit)\n-        case IndexerStartupMode.MigrateAndStart =>\n-          Resource\n-            .fromFuture(indexerFactory.migrateSchema(config.allowExistingSchema))\n-            .flatMap(startIndexer(indexer, _, actorSystem))\n-        case IndexerStartupMode.ValidateAndStart =>\n-          Resource\n-            .fromFuture(indexerFactory.validateSchema())\n-            .flatMap(startIndexer(indexer, _, actorSystem))\n-      }\n-    } yield {\n-      logger.debug(\"Waiting for indexer to initialize the database\")\n+  override def acquire()(implicit executionContext: ExecutionContext): Resource[Unit] = {\n+    val indexerFactory = new JdbcIndexerFactory(config.jdbcUrl, metrics)\n+    val indexer = new RecoveringIndexer(actorSystem.scheduler, config.restartDelay)\n+    config.startupMode match {\n+      case IndexerStartupMode.MigrateOnly =>\n+        Resource.successful(())\n+      case IndexerStartupMode.MigrateAndStart =>\n+        Resource\n+          .fromFuture(indexerFactory.migrateSchema(config.allowExistingSchema))\n+          .flatMap(startIndexer(indexer, _, actorSystem))\n+          .map { _ =>\n+            logger.debug(\"Waiting for the indexer to initialize the database.\")\n+          }\n+      case IndexerStartupMode.ValidateAndStart =>\n+        Resource\n+          .fromFuture(indexerFactory.validateSchema())\n+          .flatMap(startIndexer(indexer, _, actorSystem))\n+          .map { _ =>\n+            logger.debug(\"Waiting for the indexer to initialize the database.\")"
+  }
+]

@@ -1,0 +1,252 @@
+[
+  {
+    "id" : "725fe0bd-5443-4532-bd06-9122c84eab54",
+    "prId" : 6893,
+    "comments" : [
+      {
+        "id" : "15726a73-f2d5-4ed9-b7a9-2aa52c0628dd",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "The test name is used in all party names, and this has a `.` in it. You'll need to either remove the dots or replace them when generating party names.",
+        "createdAt" : "2020-07-28T15:04:59Z",
+        "updatedAt" : "2020-07-28T15:07:41Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "047f4aae-eedc-4512-b0b5-e0b6d1a68dd6",
+        "parentId" : "15726a73-f2d5-4ed9-b7a9-2aa52c0628dd",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Thanks. :slightly_smiling_face: ",
+        "createdAt" : "2020-07-28T15:06:03Z",
+        "updatedAt" : "2020-07-28T15:07:41Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a2e61bda-df47-4978-a1a2-523c2b1e4fff",
+        "parentId" : "15726a73-f2d5-4ed9-b7a9-2aa52c0628dd",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/6893/commits/37402caec9ece88d389b4b88127164e01c9f3c8b",
+        "createdAt" : "2020-07-28T15:08:36Z",
+        "updatedAt" : "2020-07-28T15:08:37Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "37402caec9ece88d389b4b88127164e01c9f3c8b",
+    "line" : null,
+    "diffHunk" : "@@ -326,68 +291,80 @@ trait PerformanceEnvelope {\n \n object PerformanceEnvelope {\n \n+  def apply[E <: Envelope](\n+      envelope: E,\n+      reporter: (String, Double) => Unit,\n+  ): LedgerTestSuite =\n+    envelope match {\n+      case e: Envelope.Latency => new LatencyTest(e, reporter = reporter)\n+      case e: Envelope.Throughput => new ThroughputTest(e, reporter = reporter)\n+      case e: Envelope.TransactionSize => new TransactionSizeScaleTest(e)\n+    }\n+\n   /** Throughput test\n     *\n     * @param numPings  how many pings to run during the throughput test\n     * @param maxInflight how many inflight commands we can have. set it high enough such that the system saturates, keep it low enough to not hit timeouts.\n     * @param numWarmupPings how many pings to run before the perf test to warm up the system\n     */\n-  class ThroughputTest(\n-      val logger: Logger,\n-      val envelope: Envelope,\n-      val numPings: Int = 200,\n-      val maxInflight: Int = 40,\n-      val numWarmupPings: Int = 40,\n-      reporter: (String, Double) => Unit)\n-      extends LedgerTestSuite\n-      with PerformanceEnvelope {\n+  private final class ThroughputTest(\n+      override protected val envelope: Envelope.Throughput,\n+      override protected val maxInflight: Int = 40,\n+      numPings: Int = 200,\n+      numWarmupPings: Int = 40,\n+      reporter: (String, Double) => Unit,\n+  ) extends LedgerTestSuite\n+      with PerformanceEnvelope[Envelope.Throughput] {\n+\n+    override protected val logger: Logger = LoggerFactory.getLogger(getClass)\n \n     test(\n-      \"perf-envelope-throughput\",\n+      envelope.name,\n       s\"Verify that ledger passes the ${envelope.name} throughput envelope\",\n       allocate(SingleParty, SingleParty),\n-    )(implicit ec => {\n-      case participants =>\n-        waitForParties(participants.participants)\n-\n-        def runTest(num: Int, description: String): Future[(Duration, List[Duration])] =\n-          sendPings(\n-            from = participants.participants.head,\n-            to = participants.participants(1),\n-            workflowIds = (1 to num).map(x => s\"$description-$x\").toList,\n-            payload = description)\n-        for {\n-          _ <- runTest(numWarmupPings, \"throughput-warmup\")\n-          timings <- runTest(numPings, \"throughput-test\")\n-        } yield {\n-          val (elapsed, latencies) = timings\n-          val throughput = numPings / elapsed.toMillis.toDouble * 1000.0\n-          logger.info(\n-            s\"Sending of $numPings succeeded after $elapsed, yielding a throughput of ${\"%.2f\" format throughput}.\")\n-          reporter(\"rate\", throughput)\n-          logger.info(\n-            s\"Throughput latency stats: ${genStats(latencies.map(_.toMillis), (_, _) => ())}\")\n-          assert(\n-            throughput >= envelope.throughput,\n-            s\"Observed throughput of ${\"%.2f\" format throughput} is below the necessary envelope level ${envelope.throughput}\")\n-        }\n+    )(implicit ec => { participants =>\n+      waitForParties(participants.participants)\n+\n+      def runTest(num: Int, description: String): Future[(Duration, List[Duration])] =\n+        sendPings(\n+          from = participants.participants.head,\n+          to = participants.participants(1),\n+          workflowIds = (1 to num).map(x => s\"$description-$x\").toList,\n+          payload = description)\n+      for {\n+        _ <- runTest(numWarmupPings, \"throughput-warmup\")\n+        timings <- runTest(numPings, \"throughput-test\")\n+      } yield {\n+        val (elapsed, latencies) = timings\n+        val throughput = numPings / elapsed.toMillis.toDouble * 1000.0\n+        logger.info(\n+          s\"Sending of $numPings succeeded after $elapsed, yielding a throughput of ${\"%.2f\" format throughput}.\")\n+        reporter(\"rate\", throughput)\n+        logger.info(\n+          s\"Throughput latency stats: ${genStats(latencies.map(_.toMillis), (_, _) => ())}\")\n+        assert(\n+          throughput >= envelope.operationsPerSecond,\n+          s\"Observed throughput of ${\"%.2f\" format throughput} is below the necessary envelope level ${envelope.operationsPerSecond}\"\n+        )\n+      }\n     })\n   }\n \n-  class LatencyTest(\n-      val logger: Logger,\n-      val envelope: Envelope,\n-      val numPings: Int = 20,\n-      val numWarmupPings: Int = 10,\n-      reporter: (String, Double) => Unit)\n-      extends LedgerTestSuite\n-      with PerformanceEnvelope {\n+  private final class LatencyTest(\n+      override protected val envelope: Envelope.Latency,\n+      numPings: Int = 20,\n+      numWarmupPings: Int = 10,\n+      reporter: (String, Double) => Unit,\n+  ) extends LedgerTestSuite\n+      with PerformanceEnvelope[Envelope.Latency] {\n+\n+    override protected val logger: Logger = LoggerFactory.getLogger(getClass)\n \n-    val maxInflight = 1 // will only be one\n+    override protected val maxInflight = 1 // will only be one\n     require(numPings > 0 && numWarmupPings >= 0)\n \n     test(\n-      \"perf-envelope-latency\",\n+      envelope.name,"
+  },
+  {
+    "id" : "0c83e2f0-7b45-4142-b89a-cbbbe2cd15ea",
+    "prId" : 5955,
+    "comments" : [
+      {
+        "id" : "35bfd796-61c8-4d9c-a34a-7e0859e3759f",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can we name these arguments? I find it hard to remember which is which.",
+        "createdAt" : "2020-05-13T10:02:59Z",
+        "updatedAt" : "2020-05-13T10:10:59Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8d10c1f352c88b51b444ea49a307e4dc21507d17",
+    "line" : null,
+    "diffHunk" : "@@ -426,4 +426,26 @@ object PerformanceEnvelope {\n     s\"Sample size of ${sample.length}: avg=${\"%.0f\" format avg} ms, median=$med ms, stdev=${\"%.0f\" format stddev} ms\"\n   }\n \n+  class TransactionSizeScaleTest(val logger: Logger, val envelope: Envelope)(session: LedgerSession)\n+      extends LedgerTestSuite(session)\n+      with PerformanceEnvelope {\n+\n+    val maxInflight = 10\n+\n+    test(\n+      \"perf-envelope-transaction-size\",\n+      s\"Verify that ledger passes the ${envelope.name} transaction size envelope\",\n+      allocate(SingleParty, SingleParty),\n+    ) { participants =>\n+      waitForParties(participants.participants)\n+\n+      sendPings(\n+        participants.participants.head,\n+        participants.participants(1),\n+        List(\"transaction-size\"),"
+  },
+  {
+    "id" : "d5966244-369c-497b-8e7d-fa746d2f83b8",
+    "prId" : 5473,
+    "comments" : [
+      {
+        "id" : "e29898a1-f158-4a44-a472-c7c668a4ce61",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "`case class`es should never be inherited. If anything, I'd recommend making this `final` rather. `sealed` makes little sense.",
+        "createdAt" : "2020-04-07T17:26:31Z",
+        "updatedAt" : "2020-04-08T07:31:01Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2882be97-a0e5-43a7-a43e-f5be6db0f6c3",
+        "parentId" : "e29898a1-f158-4a44-a472-c7c668a4ce61",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Right, the enum-avoiding (sigh) \"recommended path\" for enum-like hierarchies is now `sealed trait` + `case object` I believe. OK with that @stefanobaghino-da ?",
+        "createdAt" : "2020-04-08T07:06:08Z",
+        "updatedAt" : "2020-04-08T07:31:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "46dbd169-58f4-4fa4-84e0-7c9d5b870d73",
+        "parentId" : "e29898a1-f158-4a44-a472-c7c668a4ce61",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Either that, or simply make `Envelope` a `sealed abstract class`. Do you really need it to be a `case class`? The reason why `case class`es should be `final` in vast majority of cases (no pun intended) is to [make sure equality makes sense](https://stackoverflow.com/questions/11158929/what-is-so-wrong-with-case-class-inheritance/11159036#11159036). With [the notable exception of `sealed abstract case class`es](https://gist.github.com/tpolecat/a5cb0dc9adeacc93f846835ed21c92d2).",
+        "createdAt" : "2020-04-08T07:26:49Z",
+        "updatedAt" : "2020-04-08T07:31:01Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3c5e7fcf-420a-4d0e-943d-6737d26d3ac8",
+        "parentId" : "e29898a1-f158-4a44-a472-c7c668a4ce61",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "It was a leftover when the code was ported. Aligned with the recommended pattern.",
+        "createdAt" : "2020-04-08T07:33:07Z",
+        "updatedAt" : "2020-04-08T07:33:07Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e62b602b41a9529c7761125b8fa51ab0d7cf5244",
+    "line" : null,
+    "diffHunk" : "@@ -37,7 +37,7 @@ import scala.util.{Failure, Success, Try}\n import com.daml.ledger.test.performance.{PingPong => PingPongModule}\n import org.slf4j.Logger\n \n-case class Envelope(name: String, transactionSizeKb: Int, throughput: Int, latencyMs: Int)\n+sealed case class Envelope(name: String, transactionSizeKb: Int, throughput: Int, latencyMs: Int)"
+  },
+  {
+    "id" : "eba5e485-74c6-47b3-bc06-f6af3f320ffc",
+    "prId" : 5377,
+    "comments" : [
+      {
+        "id" : "aadcd378-5c2b-4c6c-a205-6a9c6a65a35c",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Perhaps let's rename this to `PerformanceTests`.",
+        "createdAt" : "2020-04-02T13:13:32Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "685e2b84-8a75-484e-aab4-2a818781ccd4",
+        "parentId" : "aadcd378-5c2b-4c6c-a205-6a9c6a65a35c",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "The tests (benchmarks, really) pass only relative to a performance envelope though, which we might want to actually keep. What do you think @meiersi-da?",
+        "createdAt" : "2020-04-03T07:38:15Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "70cc33cce879b665e8969f8d4f92cb39b9b489d5",
+    "line" : 62,
+    "diffHunk" : "@@ -0,0 +1,418 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.api.testtool.tests\n+\n+import java.time.{Duration, Instant}\n+import java.util.concurrent.ConcurrentLinkedQueue\n+import java.util.concurrent.atomic.AtomicInteger\n+\n+import com.daml.ledger.api.testtool.infrastructure.Allocation._\n+import com.daml.ledger.api.testtool.infrastructure.participant.ParticipantTestContext\n+import com.daml.ledger.api.testtool.infrastructure.{\n+  Allocation,\n+  Assertions,\n+  LedgerApiServer,\n+  LedgerSession,\n+  LedgerTestSuite\n+}\n+import com.digitalasset.ledger.api.v1.command_completion_service.{\n+  CompletionEndRequest,\n+  CompletionStreamRequest,\n+  CompletionStreamResponse\n+}\n+import com.digitalasset.ledger.api.v1.command_submission_service.SubmitRequest\n+import com.digitalasset.ledger.client.binding.{Primitive => P}\n+import com.digitalasset.ledger.api.v1.commands.{Command, Commands}\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.digitalasset.ledger.api.v1.transaction.Transaction\n+import com.digitalasset.ledger.api.v1.transaction_filter.{Filters, TransactionFilter}\n+import com.digitalasset.ledger.api.v1.transaction_service.{\n+  GetTransactionsRequest,\n+  GetTransactionsResponse\n+}\n+import io.grpc.{Context, Status}\n+import io.grpc.stub.StreamObserver\n+import scalaz.syntax.tag._\n+\n+import scala.collection.concurrent.TrieMap\n+import scala.concurrent.{ExecutionContext, Future, Promise, blocking}\n+import scala.util.{Failure, Success, Try}\n+import com.digitalasset.ledger.test_dev.{PingPong => M}\n+import org.slf4j.Logger\n+\n+case class Envelope(name: String, transactionSizeKb: Int, throughput: Int, latencyMs: Int)\n+\n+object Envelope {\n+\n+  /** test will unlikely fail */\n+  object ProofOfConcept\n+      extends Envelope(\"PoC\", transactionSizeKb = 1, throughput = 0, latencyMs = 60000)\n+\n+  /** test will fail if performance is lower than alpha envelope */\n+  object Alpha extends Envelope(\"Alpha\", transactionSizeKb = 100, throughput = 5, latencyMs = 3000)\n+\n+  /** test will fail if performance is lower then beta envelope */\n+  object Beta extends Envelope(\"Beta\", transactionSizeKb = 1000, throughput = 20, latencyMs = 1000)\n+\n+  object Public\n+      extends Envelope(\"Public\", transactionSizeKb = 5000, throughput = 50, latencyMs = 1000)\n+\n+  object Enterprise\n+      extends Envelope(\"Enterprise\", transactionSizeKb = 25000, throughput = 500, latencyMs = 500)\n+\n+}\n+\n+trait PerformanceEnvelope {"
+  }
+]

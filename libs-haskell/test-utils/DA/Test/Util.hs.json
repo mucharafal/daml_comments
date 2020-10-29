@@ -1,0 +1,263 @@
+[
+  {
+    "id" : "a2840c58-f714-40f6-aa77-7265cbf35279",
+    "prId" : 6648,
+    "comments" : [
+      {
+        "id" : "0ad95893-d279-403b-a780-a462ab571fd5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is there a particular reason why we install SDK marked read-only? I actually find that quite inconvenient when I need to garbage collect SDK installations every now and then. Shouldn't we rather change the installation process?",
+        "createdAt" : "2020-07-08T10:57:17Z",
+        "updatedAt" : "2020-07-08T13:00:33Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c1f35193-616c-45f0-bdb0-092fa757318a",
+        "parentId" : "0ad95893-d279-403b-a780-a462ab571fd5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Figuring out why something goes wrong for a user is already challenging enough. If we add to that people that accidentally modified their installation we end up in a very messy situation. Currently, it’s at least a very deliberate choice if you do that.\r\n\r\nAs for garbage collecting, I believe that is better solved by adding commands to the assistant for doing that and not by making it easier to delete things manually.",
+        "createdAt" : "2020-07-08T11:00:05Z",
+        "updatedAt" : "2020-07-08T13:00:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7d38d162-cc43-417a-a48e-aadf3e50516b",
+        "parentId" : "0ad95893-d279-403b-a780-a462ab571fd5",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That makes sense. Thanks.",
+        "createdAt" : "2020-07-08T11:30:53Z",
+        "updatedAt" : "2020-07-08T13:00:33Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3988bfc294c03730f7de4cec1318c715e16ab117",
+    "line" : 9,
+    "diffHunk" : "@@ -44,7 +44,12 @@ withTempFileResource :: (IO FilePath -> TestTree) -> TestTree\n withTempFileResource f = withResource newTempFile snd (f . fmap fst)\n \n withTempDirResource :: (IO FilePath -> TestTree) -> TestTree\n-withTempDirResource f = withResource newTempDir snd (f . fmap fst)\n+withTempDirResource f = withResource newTempDir delete (f . fmap fst)\n+  -- The delete action provided by `newTempDir` calls `removeDirectoryRecursively`\n+  -- and silently swallows errors. SDK installations are marked read-only\n+  -- which means that they don’t end up being removed which is obviously\n+  -- not what we intend."
+  },
+  {
+    "id" : "97f3cc7e-e759-4e61-a4bf-b3539e12ba23",
+    "prId" : 5342,
+    "comments" : [
+      {
+        "id" : "0b4c2293-c59b-46ed-ab76-eb0d5afdcc07",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is only needed for the `inspect-dar`. If you just read the DAR directly you should be able to undo all the changes here.",
+        "createdAt" : "2020-04-02T05:45:56Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9502fa05-e4c1-475c-b9ca-a3d1b44a3134",
+        "parentId" : "0b4c2293-c59b-46ed-ab76-eb0d5afdcc07",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "It is often useful to be able to read the stdout during tests. So I would rather not undo the changes.\r\n\r\nLets address the `inspect-dar` improvement in a follow up PR. My preference would be to have a user facing command to get the package-id from a DAR and use that instead.\r\n",
+        "createdAt" : "2020-04-02T08:40:11Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8dcaf066-cbc7-444d-9774-0ade774a9197",
+        "parentId" : "0b4c2293-c59b-46ed-ab76-eb0d5afdcc07",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Alright, let’s keep it for now so we can get this merged.",
+        "createdAt" : "2020-04-02T09:06:26Z",
+        "updatedAt" : "2020-04-02T09:06:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c4585811a1d5dd8c2de2c7598d8e15a88ac1b345",
+    "line" : null,
+    "diffHunk" : "@@ -77,15 +86,28 @@ withEnv vs m = bracket pushEnv popEnv (const m)\n \n newtype ShouldSucceed = ShouldSucceed Bool\n \n-callProcessSilent, callProcessSilentError :: FilePath -> [String] -> IO ()\n-callProcessSilent = callProcessSilent' (ShouldSucceed True)\n-callProcessSilentError = callProcessSilent' (ShouldSucceed False)\n+callProcessSilent :: FilePath -> [String] -> IO ()\n+callProcessSilent cmd args =\n+  void $ run (ShouldSucceed True) (proc cmd args)\n+\n+callProcessSilentError :: FilePath -> [String] -> IO ()\n+callProcessSilentError cmd args =\n+  void $ run (ShouldSucceed False) (proc cmd args)\n+\n+callProcessForStdout :: FilePath -> [String] -> IO String"
+  },
+  {
+    "id" : "10761803-42dd-46c8-b7d4-1aecd4d759f4",
+    "prId" : 5342,
+    "comments" : [
+      {
+        "id" : "f947d14f-6433-4234-a892-25816cad5297",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\nwithDevNull a = withBinaryFile nullDevice WriteMode a\r\n```",
+        "createdAt" : "2020-04-02T09:04:11Z",
+        "updatedAt" : "2020-04-02T09:06:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c4585811a1d5dd8c2de2c7598d8e15a88ac1b345",
+    "line" : 27,
+    "diffHunk" : "@@ -53,6 +49,11 @@ nullDevice\n     | isWindows = \"\\\\\\\\.\\\\NUL\"\n     | otherwise =  \"/dev/null\"\n \n+-- | Getting a dev-null handle in a cross-platform way seems to be somewhat tricky so we instead\n+-- use a temporary file.\n+withDevNull :: (Handle -> IO a) -> IO a\n+withDevNull a = withTempFile $ \\f -> withFile f WriteMode a"
+  },
+  {
+    "id" : "96093d3a-54e5-47c6-b328-d1397920ca3a",
+    "prId" : 5323,
+    "comments" : [
+      {
+        "id" : "f94ea695-e3e8-4299-81db-21daf6f75df6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we pass in a `Maybe`? There are only two values true and false. Pretending that there is a first value `Nothing` is just confusing.",
+        "createdAt" : "2020-04-01T06:23:52Z",
+        "updatedAt" : "2020-04-01T11:02:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c113fb98-d4cd-4563-8cc9-42111024e636",
+        "parentId" : "f94ea695-e3e8-4299-81db-21daf6f75df6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe just make an internal `callProcessSilent'` function that takes the `ShouldSuceeed` argument and then have `callProcessSilent = callProcessSilent' (ShouldSucceed True)` and `callProcessSilentError = callProcessSilent' (ShouldSucceed False)`?",
+        "createdAt" : "2020-04-01T06:26:43Z",
+        "updatedAt" : "2020-04-01T11:02:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "910d8cde2a20dfa2ec955c1f660b07062bec4b51",
+    "line" : null,
+    "diffHunk" : "@@ -69,3 +73,14 @@ withEnv vs m = bracket pushEnv popEnv (const m)\n                     Nothing -> unsetEnv key\n                     Just val -> setEnv key val True\n                 pure (key, oldVal)\n+\n+newtype ShouldSucceed = ShouldSucceed {unShouldSucceed :: Bool}\n+\n+callProcessSilent :: Maybe ShouldSucceed -> FilePath -> [String] -> IO ()"
+  },
+  {
+    "id" : "d16d61e9-a20b-474e-9f3a-b6712ffcb8d0",
+    "prId" : 5323,
+    "comments" : [
+      {
+        "id" : "5d8488ef-4eff-46ec-9398-1ea11b23af90",
+        "parentId" : null,
+        "author" : null,
+        "body" : "just to be consistent:\r\n\r\n```suggestion\r\n      hPutStrLn stderr $ unlines [\"stderr:\", err]\r\n```\r\n\r\n",
+        "createdAt" : "2020-04-01T10:59:48Z",
+        "updatedAt" : "2020-04-01T11:02:41Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "18809104-58f6-4c8c-914a-07c1a8cf2ca6",
+        "parentId" : "5d8488ef-4eff-46ec-9398-1ea11b23af90",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Good catch!",
+        "createdAt" : "2020-04-01T11:01:11Z",
+        "updatedAt" : "2020-04-01T11:02:41Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "910d8cde2a20dfa2ec955c1f660b07062bec4b51",
+    "line" : 36,
+    "diffHunk" : "@@ -69,3 +75,18 @@ withEnv vs m = bracket pushEnv popEnv (const m)\n                     Nothing -> unsetEnv key\n                     Just val -> setEnv key val True\n                 pure (key, oldVal)\n+\n+newtype ShouldSucceed = ShouldSucceed Bool\n+\n+callProcessSilent, callProcessSilentError :: FilePath -> [String] -> IO ()\n+callProcessSilent = callProcessSilent' (ShouldSucceed True)\n+callProcessSilentError = callProcessSilent' (ShouldSucceed False)\n+\n+callProcessSilent' :: ShouldSucceed -> FilePath -> [String] -> IO ()\n+callProcessSilent' (ShouldSucceed shouldSucceed) cmd args = do\n+    (exitCode, out, err) <- readProcessWithExitCode cmd args \"\"\n+    unless (shouldSucceed == (exitCode == ExitSuccess)) $ do\n+      hPutStrLn stderr $ \"Failure: Command \\\"\" <> cmd <> \" \" <> unwords args <> \"\\\" exited with \" <> show exitCode\n+      hPutStrLn stderr $ unlines [\"stdout:\", out]\n+      hPutStrLn stderr $ unlines [\"stderr: \", err]"
+  }
+]

@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "9de62916-68ef-446c-900e-c4bfb3ddbd3f",
+    "prId" : 7217,
+    "comments" : [
+      {
+        "id" : "ef9cbf56-2f9f-4da1-88da-b2ceed03bf0b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Could we use `DA.Text.implode` here?",
+        "createdAt" : "2020-09-02T09:51:02Z",
+        "updatedAt" : "2020-09-02T09:53:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7231eb99-aa4a-482a-a11d-c4b485da8b0c",
+        "parentId" : "ef9cbf56-2f9f-4da1-88da-b2ceed03bf0b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point, I just copied the GHC source code since I’m lazy. I’ll change it. Although now I wonder why GHC doesn’t use `concat` :thinking: ",
+        "createdAt" : "2020-09-02T09:55:56Z",
+        "updatedAt" : "2020-09-02T09:55:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "dd269c142b11dde0ffd08cc747ca0fdbcb5afdd4",
+    "line" : 42,
+    "diffHunk" : "@@ -0,0 +1,90 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE ImplicitParams #-}\n+module DA.Stack\n+  ( CallStack\n+  , HasCallStack\n+  , SrcLoc(..)\n+  , callStack\n+  , getCallStack\n+  , prettyCallStack\n+  ) where\n+\n+import Prelude\n+import DA.Text\n+import GHC.Stack.Types hiding (SrcLoc(..))\n+import qualified GHC.Stack.Types as GHC\n+\n+-- | Request a CallStack.\n+--\n+-- Calls to functions with this constraint will be added to the callstack.\n+-- You can get access to the current call stack with `callStack`.\n+--\n+-- Note that if the call stack is reset if any function in between does not\n+-- have a `HasCallStack` constraint.\n+type HasCallStack = (?callStack : CallStack)\n+\n+-- Pretty-print a `CallStack`.\n+prettyCallStack : CallStack -> Text\n+prettyCallStack = intercalate \"\\n\" . prettyCallStackLines\n+\n+prettyCallStackLines : CallStack -> [Text]\n+prettyCallStackLines cs = case getCallStack cs of\n+  []  -> []\n+  stk -> \"CallStack (from HasCallStack):\"\n+       :: map ((\"  \" <>) . prettyCallSite) stk\n+  where\n+    prettyCallSite (f, loc) = f <> \", called at \" <> prettySrcLoc loc\n+\n+prettySrcLoc : SrcLoc -> Text\n+prettySrcLoc SrcLoc {..}\n+  = foldr (<>) \"\""
+  }
+]

@@ -1,0 +1,610 @@
+[
+  {
+    "id" : "1b005ae9-67d4-43b1-a5d2-e0500ab5d42c",
+    "prId" : 7663,
+    "comments" : [
+      {
+        "id" : "8e963257-0fb4-485e-b717-c387a7eac469",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This is unfortunately a bit more complicated:\r\n```suggestion\r\n        update_ExerciseByKeyChoiceInternedStr <-\r\n            fromRight (error \"INTERNAL: exercise_by_key is only available in DAML-LF versions supporting string interning\")\r\n            <$> encodeName' @(Either TL.Text Int32) unChoiceName exeChoice\r\n```\r\nand add\r\n```haskell\r\nimport Data.Either\r\n```\r\nat the top.",
+        "createdAt" : "2020-10-13T11:15:17Z",
+        "updatedAt" : "2020-10-14T07:40:39Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e1bb99f2dfdce776c237675705d34d396135b71c",
+    "line" : null,
+    "diffHunk" : "@@ -647,6 +647,12 @@ encodeUpdate = fmap (P.Update . Just) . \\case\n         update_ExerciseActor <- traverse encodeExpr' exeActors\n         update_ExerciseArg <- encodeExpr exeArg\n         pure $ P.UpdateSumExercise P.Update_Exercise{..}\n+    UExerciseByKey{..} -> do\n+        update_ExerciseByKeyTemplate <- encodeQualTypeConName exeTemplate\n+        update_ExerciseByKeyChoiceInternedStr <-  allocString (T.pack (show exeChoice))"
+  },
+  {
+    "id" : "66346bf9-bd69-45fc-9e8e-9f4dd00226e8",
+    "prId" : 3067,
+    "comments" : [
+      {
+        "id" : "ebfc254d-49c2-4adb-a4ad-0dcbb84264b4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You seem to be inconsistent in calling functions `…List` and `…DottedName` which is a bit confusing.",
+        "createdAt" : "2019-10-02T14:31:23Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "eb8a3c63a39ce4715734e5fd8e994ef0f0490499",
+    "line" : null,
+    "diffHunk" : "@@ -39,26 +42,42 @@ newtype WithInterning = WithInterning{getWithInterning :: Bool}\n data EncodeEnv = EncodeEnv\n     { version :: !Version\n     , withInterning :: !WithInterning\n-    , internedStrings :: !(HMS.HashMap T.Text Word64)\n+    , internedStrings :: !(HMS.HashMap T.Text Int32)\n+    , internedDottedNames :: !(HMS.HashMap [Int32] Int32)\n     }\n \n initEncodeEnv :: Version -> WithInterning -> EncodeEnv\n-initEncodeEnv version withInterning = EncodeEnv{internedStrings = HMS.empty, ..}\n+initEncodeEnv version withInterning =\n+    EncodeEnv{internedStrings = HMS.empty, internedDottedNames = HMS.empty, ..}\n \n -- | Find or allocate a string in the interning table. Return the index of\n -- the string in the resulting interning table.\n-allocString :: T.Text -> Encode Word64\n+allocString :: T.Text -> Encode Int32\n allocString t = do\n     env@EncodeEnv{internedStrings} <- get\n     case t `HMS.lookup` internedStrings of\n         Just n -> pure n\n         Nothing -> do\n-            -- NOTE(MH): We assumie that the number of interned strings fits\n-            -- in a `Word64`. (More than that would require A LOT of memory.)\n-            let n = fromIntegral (HMS.size internedStrings)\n+            let m = HMS.size internedStrings\n+            when (m > fromIntegral (maxBound :: Int32)) $\n+                error \"String interning table grew too large\"\n+            let n = fromIntegral m :: Int32\n             put $! env{internedStrings = HMS.insert t n internedStrings}\n             pure n\n \n+allocList :: [Int32] -> Encode Int32"
+  },
+  {
+    "id" : "aabad77e-941d-46c7-8a84-43c19a009de0",
+    "prId" : 3067,
+    "comments" : [
+      {
+        "id" : "4c754835-9655-4288-a76a-e3ba2b6298e1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`HMS.size` is `O(n)` so this is quadratic in the number of strings you intern. You probably want to keep track of the next free id in `EncodeEnv` to avoid this (there are other places that suffer from the same problem), e.g., `allocString`.",
+        "createdAt" : "2019-10-02T14:33:08Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6f08a891-131c-42d9-a206-5b3d52855fe0",
+        "parentId" : "4c754835-9655-4288-a76a-e3ba2b6298e1",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I've added fields `nextInternedStringId` and `nextInternedDottedNameId` to the `EncodeEnv` to track these numbers explicitly.",
+        "createdAt" : "2019-10-02T15:46:15Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "eb8a3c63a39ce4715734e5fd8e994ef0f0490499",
+    "line" : null,
+    "diffHunk" : "@@ -39,26 +42,42 @@ newtype WithInterning = WithInterning{getWithInterning :: Bool}\n data EncodeEnv = EncodeEnv\n     { version :: !Version\n     , withInterning :: !WithInterning\n-    , internedStrings :: !(HMS.HashMap T.Text Word64)\n+    , internedStrings :: !(HMS.HashMap T.Text Int32)\n+    , internedDottedNames :: !(HMS.HashMap [Int32] Int32)\n     }\n \n initEncodeEnv :: Version -> WithInterning -> EncodeEnv\n-initEncodeEnv version withInterning = EncodeEnv{internedStrings = HMS.empty, ..}\n+initEncodeEnv version withInterning =\n+    EncodeEnv{internedStrings = HMS.empty, internedDottedNames = HMS.empty, ..}\n \n -- | Find or allocate a string in the interning table. Return the index of\n -- the string in the resulting interning table.\n-allocString :: T.Text -> Encode Word64\n+allocString :: T.Text -> Encode Int32\n allocString t = do\n     env@EncodeEnv{internedStrings} <- get\n     case t `HMS.lookup` internedStrings of\n         Just n -> pure n\n         Nothing -> do\n-            -- NOTE(MH): We assumie that the number of interned strings fits\n-            -- in a `Word64`. (More than that would require A LOT of memory.)\n-            let n = fromIntegral (HMS.size internedStrings)\n+            let m = HMS.size internedStrings\n+            when (m > fromIntegral (maxBound :: Int32)) $\n+                error \"String interning table grew too large\"\n+            let n = fromIntegral m :: Int32\n             put $! env{internedStrings = HMS.insert t n internedStrings}\n             pure n\n \n+allocList :: [Int32] -> Encode Int32\n+allocList ids = do\n+    env@EncodeEnv{internedDottedNames} <- get\n+    case ids `HMS.lookup` internedDottedNames of\n+        Just n -> pure n\n+        Nothing -> do\n+            let m = HMS.size internedDottedNames"
+  },
+  {
+    "id" : "8e0203c5-10af-4f31-a7d6-4cb95c94ca90",
+    "prId" : 3067,
+    "comments" : [
+      {
+        "id" : "2c3859dd-25ad-4238-8356-852259d6de7d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Given that you already went through all the effort of making this monadic, we might also want to add a proper error monad into the stack.",
+        "createdAt" : "2019-10-02T14:34:39Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7a6d1838-7359-4c0d-8ff7-513f0ba858a4",
+        "parentId" : "2c3859dd-25ad-4238-8356-852259d6de7d",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Given that we're _very_ unlikely to go beyond 2^31 entries in the table, I'm reluctant to make this change.",
+        "createdAt" : "2019-10-02T15:37:20Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eb8a3c63a39ce4715734e5fd8e994ef0f0490499",
+    "line" : 85,
+    "diffHunk" : "@@ -39,26 +42,42 @@ newtype WithInterning = WithInterning{getWithInterning :: Bool}\n data EncodeEnv = EncodeEnv\n     { version :: !Version\n     , withInterning :: !WithInterning\n-    , internedStrings :: !(HMS.HashMap T.Text Word64)\n+    , internedStrings :: !(HMS.HashMap T.Text Int32)\n+    , internedDottedNames :: !(HMS.HashMap [Int32] Int32)\n     }\n \n initEncodeEnv :: Version -> WithInterning -> EncodeEnv\n-initEncodeEnv version withInterning = EncodeEnv{internedStrings = HMS.empty, ..}\n+initEncodeEnv version withInterning =\n+    EncodeEnv{internedStrings = HMS.empty, internedDottedNames = HMS.empty, ..}\n \n -- | Find or allocate a string in the interning table. Return the index of\n -- the string in the resulting interning table.\n-allocString :: T.Text -> Encode Word64\n+allocString :: T.Text -> Encode Int32\n allocString t = do\n     env@EncodeEnv{internedStrings} <- get\n     case t `HMS.lookup` internedStrings of\n         Just n -> pure n\n         Nothing -> do\n-            -- NOTE(MH): We assumie that the number of interned strings fits\n-            -- in a `Word64`. (More than that would require A LOT of memory.)\n-            let n = fromIntegral (HMS.size internedStrings)\n+            let m = HMS.size internedStrings\n+            when (m > fromIntegral (maxBound :: Int32)) $\n+                error \"String interning table grew too large\"\n+            let n = fromIntegral m :: Int32\n             put $! env{internedStrings = HMS.insert t n internedStrings}\n             pure n\n \n+allocList :: [Int32] -> Encode Int32\n+allocList ids = do\n+    env@EncodeEnv{internedDottedNames} <- get\n+    case ids `HMS.lookup` internedDottedNames of\n+        Just n -> pure n\n+        Nothing -> do\n+            let m = HMS.size internedDottedNames\n+            when (m > fromIntegral (maxBound :: Int32)) $\n+                error \"Dotted name interning table grew too large\""
+  },
+  {
+    "id" : "415c8d23-bf4a-4ee2-a8c1-50e763ef90b9",
+    "prId" : 3067,
+    "comments" : [
+      {
+        "id" : "6b1ab774-61e4-4580-b082-0de258cb35ea",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "More `EitherLike` :cry:",
+        "createdAt" : "2019-10-02T14:35:48Z",
+        "updatedAt" : "2019-10-04T10:37:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "eb8a3c63a39ce4715734e5fd8e994ef0f0490499",
+    "line" : null,
+    "diffHunk" : "@@ -69,23 +88,54 @@ encodeString :: T.Text -> TL.Text\n encodeString = TL.fromStrict\n \n -- | Encode a string that will be interned in DAML-LF 1.7 and onwards.\n-encodeInternableString :: T.Text -> Encode TL.Text\n-encodeInternableString = pure . encodeString\n+encodeInternableString :: T.Text -> Encode (Either TL.Text Int32)\n+encodeInternableString = coerce (encodeInternableStrings @Identity)\n+\n+-- | Encode a string that will be interned in DAML-LF 1.7 and onwards.\n+encodeInternableStrings :: Traversable t => t T.Text -> Encode (Either (t TL.Text) (t Int32))\n+encodeInternableStrings strs = do\n+    EncodeEnv{..} <- get\n+    if getWithInterning withInterning && version `supports` featureStringInterning\n+        then Right <$> mapM allocString strs\n+        else pure $ Left $ fmap encodeString strs\n \n -- | Encode the name of a syntactic object, e.g., a variable or a data\n -- constructor. These strings are mangled to escape special characters. All\n -- names will be interned in DAML-LF 1.7 and onwards.\n-encodeName :: (a -> T.Text) -> a -> Encode TL.Text\n-encodeName unwrapName (unwrapName -> unmangled) = case mangleIdentifier unmangled of\n-   Left err -> error $ \"IMPOSSIBLE: could not mangle name \" ++ show unmangled ++ \": \" ++ err\n-   Right mangled -> encodeInternableString mangled\n+encodeName\n+    :: Util.EitherLike m1 m2 m3 m4 m5 TL.Text Int32 e"
+  },
+  {
+    "id" : "e9a00903-c85a-4630-ae72-0e07bf270dc5",
+    "prId" : 3039,
+    "comments" : [
+      {
+        "id" : "21f4f1cf-73a6-47bc-9c95-2ecedecb1fbb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This should almost certainly be `Control.Monad.State.Strict`.",
+        "createdAt" : "2019-09-26T03:36:28Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f6474e09-624a-4704-8711-bb3b2c4e6d34",
+        "parentId" : "21f4f1cf-73a6-47bc-9c95-2ecedecb1fbb",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Good catch. Thanks.",
+        "createdAt" : "2019-09-26T07:30:23Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "23c8499f8ef51d8ee678d91116fd9342b9919fd2",
+    "line" : null,
+    "diffHunk" : "@@ -8,19 +8,20 @@ module DA.Daml.LF.Proto3.EncodeV1\n   , encodePackage\n   ) where\n \n-import           Control.Lens ((^.), (^..), matching)\n+import           Control.Lens ((^.), matching)\n import           Control.Lens.Ast (rightSpine)\n-import           Control.Monad.Reader.Class\n+import           Control.Monad.State"
+  },
+  {
+    "id" : "ef321f8f-5fb7-4e8c-bf0d-c91d002cb298",
+    "prId" : 3039,
+    "comments" : [
+      {
+        "id" : "4ff9b4c1-43c5-4723-b395-b2381abc9d08",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n            put $! env{internedStrings = HMS.insert t n internedStrings}\r\n```\r\nNot a big deal right now since you’ll force it on the next lookup but I prefer to not rely on that kind of stuff since it can easily change during a refactoring.",
+        "createdAt" : "2019-09-26T03:37:33Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "23c8499f8ef51d8ee678d91116fd9342b9919fd2",
+    "line" : null,
+    "diffHunk" : "@@ -31,14 +32,29 @@ import qualified Proto3.Suite as P (Enumerated (..))\n -- otherwise always be wrapped in `Just` at their call sites.\n type Just a = Maybe a\n \n-newtype Encode a = Encode{runEncode :: EncodeEnv -> a}\n-    deriving (Functor, Applicative, Monad, MonadReader EncodeEnv)\n+type Encode a = State EncodeEnv a\n+\n+data InternMode = InternNothing | InternPackageIdsOnly\n \n data EncodeEnv = EncodeEnv\n     { _version :: Version\n-    , internedPackageIds :: S.Set PackageId\n+    , internMode :: InternMode\n+    , internedStrings :: HMS.HashMap T.Text Word64\n     }\n \n+initEncodeEnv :: Version -> InternMode -> EncodeEnv\n+initEncodeEnv version mode = EncodeEnv version mode HMS.empty\n+\n+allocString :: T.Text -> Encode Word64\n+allocString t = do\n+    env@EncodeEnv{internedStrings} <- get\n+    case t `HMS.lookup` internedStrings of\n+        Just n -> pure n\n+        Nothing -> do\n+            let n = fromIntegral (HMS.size internedStrings)\n+            put $ env{internedStrings = HMS.insert t n internedStrings}"
+  },
+  {
+    "id" : "c86fda7d-b3fa-4422-be7f-63cf396acbeb",
+    "prId" : 3039,
+    "comments" : [
+      {
+        "id" : "9ed6daae-633b-4513-a1b1-892e60ce3e0a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    execState (encodeModule mod) env\r\n```",
+        "createdAt" : "2019-09-26T03:39:47Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d63541de-c5db-49b0-b6d6-2f062d2f1a82",
+        "parentId" : "9ed6daae-633b-4513-a1b1-892e60ce3e0a",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Good catch. Hlint complained as well. :)",
+        "createdAt" : "2019-09-26T07:32:51Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "23c8499f8ef51d8ee678d91116fd9342b9919fd2",
+    "line" : null,
+    "diffHunk" : "@@ -640,9 +656,9 @@ encodeFeatureFlags FeatureFlags{..} = Just P.FeatureFlags\n \n encodeModuleWithLargePackageIds :: Version -> Module -> P.Module\n encodeModuleWithLargePackageIds version mod =\n-    let env = EncodeEnv version S.empty\n+    let env = initEncodeEnv version InternNothing\n     in\n-    runEncode (encodeModule mod) env\n+    fst $ runState (encodeModule mod) env"
+  },
+  {
+    "id" : "75ebc894-37a0-4e65-90e4-f45e6e233431",
+    "prId" : 3039,
+    "comments" : [
+      {
+        "id" : "fe73c50f-7def-4e53-aaf8-910823bf515f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Have we ever checked if this is actually faster? Due to the increase in allocations I wouldn’t be surprised if this actually ends up being slower in which case there is no point keeping this for the scenario service.",
+        "createdAt" : "2019-09-26T03:44:32Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a92f0433-2c26-4450-b7bf-d7303eade7fb",
+        "parentId" : "fe73c50f-7def-4e53-aaf8-910823bf515f",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The problem right now is that the scenario service takes a single module rather than a package. The string interning table is part of the package not of the module. We should change this by shipping a \"fat module\", i.e. a module with a string interning table to the scenario service. That is on my todo list.",
+        "createdAt" : "2019-09-26T07:32:21Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8935589d-5de0-4e57-b68a-4b9bac39fe21",
+        "parentId" : "fe73c50f-7def-4e53-aaf8-910823bf515f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see, that makes a lot of sense.",
+        "createdAt" : "2019-09-26T07:38:36Z",
+        "updatedAt" : "2019-09-26T08:01:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "23c8499f8ef51d8ee678d91116fd9342b9919fd2",
+    "line" : 79,
+    "diffHunk" : "@@ -640,9 +656,9 @@ encodeFeatureFlags FeatureFlags{..} = Just P.FeatureFlags\n \n encodeModuleWithLargePackageIds :: Version -> Module -> P.Module\n encodeModuleWithLargePackageIds version mod =\n-    let env = EncodeEnv version S.empty\n+    let env = initEncodeEnv version InternNothing"
+  },
+  {
+    "id" : "bf48a354-416c-42e6-96df-9fa94ef00996",
+    "prId" : 1614,
+    "comments" : [
+      {
+        "id" : "5b3b7847-1e64-4898-8db2-44e0d5362afb",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Maybe `EncodeCtx`?",
+        "createdAt" : "2019-06-21T14:22:55Z",
+        "updatedAt" : "2019-06-26T07:32:46Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ccb82fbd-de27-4bea-b6f6-c1f7bd8e6115",
+        "parentId" : "5b3b7847-1e64-4898-8db2-44e0d5362afb",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Sure. 1118ca2455007cb1dc46f868ee5c96f9c61a0b1",
+        "createdAt" : "2019-06-24T09:45:35Z",
+        "updatedAt" : "2019-06-26T07:32:46Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cdebfafb9ac009ed15ea8adb801c50def398bf27",
+    "line" : null,
+    "diffHunk" : "@@ -29,15 +31,23 @@ import qualified Proto3.Suite as P (Enumerated (..))\n -- otherwise always be wrapped in `Just` at their call sites.\n type Just a = Maybe a\n \n+-- package-global state that encodePackageRef requires\n+type PackageRefCtx = S.Set PackageId\n+\n+data VersionAware = VersionAware {"
+  },
+  {
+    "id" : "9058b181-c17e-467e-94b9-220c4c80b2ef",
+    "prId" : 1614,
+    "comments" : [
+      {
+        "id" : "b5fff6ac-8155-4937-8a6f-3fcf81112f02",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'd prefer a `Map PackageId Int` instead of using `lookupIndex`.",
+        "createdAt" : "2019-06-21T14:26:31Z",
+        "updatedAt" : "2019-06-26T07:32:46Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "53432dd9-d8b9-4c35-a10f-486136d2f382",
+        "parentId" : "b5fff6ac-8155-4937-8a6f-3fcf81112f02",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "In that case we lose the easy preservation of the important invariant that the values are always `[0..n]` for some n; what about making the context passed around `PackageId -> Maybe Word64` and have only the set-maker care about `lookupIndex`?",
+        "createdAt" : "2019-06-24T09:45:29Z",
+        "updatedAt" : "2019-06-26T07:32:46Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "852dab47-0782-4bcf-a3d1-6495908e0d52",
+        "parentId" : "b5fff6ac-8155-4937-8a6f-3fcf81112f02",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "⬆️ as in a1c30a08da389207e0db44cf80b63796cbce425e.",
+        "createdAt" : "2019-06-24T13:42:14Z",
+        "updatedAt" : "2019-06-26T07:32:46Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cdebfafb9ac009ed15ea8adb801c50def398bf27",
+    "line" : null,
+    "diffHunk" : "@@ -29,15 +31,23 @@ import qualified Proto3.Suite as P (Enumerated (..))\n -- otherwise always be wrapped in `Just` at their call sites.\n type Just a = Maybe a\n \n+-- package-global state that encodePackageRef requires\n+type PackageRefCtx = S.Set PackageId"
+  },
+  {
+    "id" : "bbf1c2e2-65b6-4a92-ae50-ebe2fb2d0166",
+    "prId" : 663,
+    "comments" : [
+      {
+        "id" : "0547a57e-094e-44f4-abfa-3ffce9df851a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Looks like this did not change in this PR but why are we walling error twice here?",
+        "createdAt" : "2019-04-24T11:46:27Z",
+        "updatedAt" : "2019-04-25T10:40:16Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "71bea7fe-28f3-490d-ae2b-262ebbf64f37",
+        "parentId" : "0547a57e-094e-44f4-abfa-3ffce9df851a",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "👍  - let's error at most once",
+        "createdAt" : "2019-04-24T12:39:35Z",
+        "updatedAt" : "2019-04-25T10:40:16Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0c6a253f4205edcddd905fb7a7812b140b113c8d",
+    "line" : null,
+    "diffHunk" : "@@ -562,19 +562,7 @@ encodeDefName version txt = case mangleIdentifier txt of\n \n -- | NOTE(MH): This functions is used for sanity checking. The actual checks\n -- are done in the conversion to DAML-LF.\n-checkFeature :: (Version -> Bool) -> String -> Version -> a -> a\n-checkFeature hasFeature name version x\n-    | hasFeature version = x\n-    | otherwise = error (error \"DAML-LF \" ++ renderPretty version ++ \" cannot encode feature: \" ++ name)\n-\n-checkOptional :: Version -> a -> a\n-checkOptional = checkFeature supportsOptional \"Optional\"\n-\n-checkArrowType :: Version -> a -> a\n-checkArrowType = checkFeature supportsArrowType \"Partial application of (->)\"\n-\n-checkContractKeys :: Version -> a -> a\n-checkContractKeys = checkFeature supportsContractKeys \"Contract keys\"\n-\n-checkTextMap :: Version -> a -> a\n-checkTextMap = checkFeature supportsTextMap \"TextMap\"\n+checkFeature :: Feature -> Version -> a -> a\n+checkFeature feature version x\n+    | version `supports` feature = x\n+    | otherwise = error (error \"DAML-LF \" ++ renderPretty version ++ \" cannot encode feature: \" ++ T.unpack (featureName feature))"
+  },
+  {
+    "id" : "578c7954-8296-4a69-af30-a1c6ab9ee1ca",
+    "prId" : 663,
+    "comments" : [
+      {
+        "id" : "fb7ec27e-b47b-4a05-847e-184e2d37e6e1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    | otherwise = error $ \"DAML-LF \" ++ renderPretty version ++ \" cannot encode feature: \" ++ T.unpack (featureName feature)\r\n```",
+        "createdAt" : "2019-04-24T11:46:46Z",
+        "updatedAt" : "2019-04-25T10:40:16Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0c6a253f4205edcddd905fb7a7812b140b113c8d",
+    "line" : null,
+    "diffHunk" : "@@ -562,19 +562,7 @@ encodeDefName version txt = case mangleIdentifier txt of\n \n -- | NOTE(MH): This functions is used for sanity checking. The actual checks\n -- are done in the conversion to DAML-LF.\n-checkFeature :: (Version -> Bool) -> String -> Version -> a -> a\n-checkFeature hasFeature name version x\n-    | hasFeature version = x\n-    | otherwise = error (error \"DAML-LF \" ++ renderPretty version ++ \" cannot encode feature: \" ++ name)\n-\n-checkOptional :: Version -> a -> a\n-checkOptional = checkFeature supportsOptional \"Optional\"\n-\n-checkArrowType :: Version -> a -> a\n-checkArrowType = checkFeature supportsArrowType \"Partial application of (->)\"\n-\n-checkContractKeys :: Version -> a -> a\n-checkContractKeys = checkFeature supportsContractKeys \"Contract keys\"\n-\n-checkTextMap :: Version -> a -> a\n-checkTextMap = checkFeature supportsTextMap \"TextMap\"\n+checkFeature :: Feature -> Version -> a -> a\n+checkFeature feature version x\n+    | version `supports` feature = x\n+    | otherwise = error (error \"DAML-LF \" ++ renderPretty version ++ \" cannot encode feature: \" ++ T.unpack (featureName feature))"
+  }
+]

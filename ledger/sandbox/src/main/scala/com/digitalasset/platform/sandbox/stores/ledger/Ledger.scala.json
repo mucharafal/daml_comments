@@ -1,0 +1,102 @@
+[
+  {
+    "id" : "3872318e-1ce5-4ab1-84fd-4f2d571a140c",
+    "prId" : 5929,
+    "comments" : [
+      {
+        "id" : "5e44051c-1ec4-4afd-9667-b83ebe056710",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Instead of having a boolean flag, why not defining `translateTransaction` as an interface and have the two implementations doing either the legacy contract id scheme emulation or asserting there is no relative contract id?",
+        "createdAt" : "2020-05-11T16:22:17Z",
+        "updatedAt" : "2020-05-13T10:04:55Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ddee9fda-0d78-4dc6-91c8-9b0f4c826485",
+        "parentId" : "5e44051c-1ec4-4afd-9667-b83ebe056710",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I try to follow your advice. :)",
+        "createdAt" : "2020-05-12T09:57:08Z",
+        "updatedAt" : "2020-05-13T10:04:55Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "dba967f9f02fe374fa8a168129d2d6976b15b151",
+    "line" : null,
+    "diffHunk" : "@@ -60,12 +60,18 @@ object Ledger {\n   type DisclosureForIndex = Map[EventId, Set[Party]]\n   type GlobalDivulgence = Relation[AbsoluteContractId, Party]\n \n-  def convertToCommittedTransaction(transactionId: TransactionId, transaction: SubmittedTransaction)\n-    : (TransactionForIndex, DisclosureForIndex, GlobalDivulgence) = {\n+  def convertToCommittedTransaction(\n+      emulateLegacyContractIdScheme: Boolean,\n+      transactionId: TransactionId,\n+      transaction: SubmittedTransaction\n+  ): (TransactionForIndex, DisclosureForIndex, GlobalDivulgence) = {\n \n     // First we \"commit\" the transaction by converting all relative contractIds to absolute ones\n     val committedTransaction: GenTransaction.WithTxValue[NodeId, AbsoluteContractId] =\n-      transaction.resolveRelCid(EventIdFormatter.makeAbs(transactionId))\n+      if (emulateLegacyContractIdScheme)"
+  },
+  {
+    "id" : "8fc37900-a709-48f3-8a94-6b9e6ee9c2fe",
+    "prId" : 3553,
+    "comments" : [
+      {
+        "id" : "c5e341e5-e65a-4ea5-a082-a1b661cf4e05",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Do we actually use this stream of configuration entries anywhere?",
+        "createdAt" : "2019-11-27T14:54:37Z",
+        "updatedAt" : "2019-11-27T15:02:54Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "03f35dad-deab-4efb-b133-5fbcbd4ca737",
+        "parentId" : "c5e341e5-e65a-4ea5-a082-a1b661cf4e05",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Not yet. Will have to see whether I'll need it once I implement the admin api. Might end up removing it.",
+        "createdAt" : "2019-11-27T16:41:18Z",
+        "updatedAt" : "2019-11-27T16:41:18Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "04d3118b43225ee033b4c9bba93102cdc650df6a",
+    "line" : 29,
+    "diffHunk" : "@@ -85,6 +94,9 @@ trait ReadOnlyLedger extends AutoCloseable {\n \n   def getLfPackage(packageId: PackageId): Future[Option[Ast.Package]]\n \n+  // Configuration management\n+  def lookupLedgerConfiguration(): Future[Option[Configuration]]\n+  def configurationEntries(offset: Option[Long]): Source[(Long, ConfigurationEntry), NotUsed]"
+  }
+]

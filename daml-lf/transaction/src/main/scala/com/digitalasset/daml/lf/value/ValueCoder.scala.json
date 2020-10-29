@@ -1,0 +1,295 @@
+[
+  {
+    "id" : "ac865719-82fc-4ec6-92cf-314f709f69bb",
+    "prId" : 4460,
+    "comments" : [
+      {
+        "id" : "0ff261b0-f49d-45f3-97dd-354cdb6eb8c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "The error message should say that the version is too old for message `ContractId`.",
+        "createdAt" : "2020-02-13T09:26:32Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f4992e1c-345b-4e82-a732-38e2ff27bc56",
+        "parentId" : "0ff261b0-f49d-45f3-97dd-354cdb6eb8c0",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "You are right",
+        "createdAt" : "2020-02-13T12:17:39Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "59b8325563e5f1d36534e27674434e055016d4ba",
+    "line" : null,
+    "diffHunk" : "@@ -46,61 +46,139 @@ object ValueCoder {\n       EncodeError(s\"${version.showsVersion} is too old to support $isTooOldFor\")\n   }\n \n-  abstract class EncodeCid[-Cid] private[lf] {\n-    def asString(cid: Cid): String\n-    def asStruct(cid: Cid): (String, Boolean)\n-  }\n+  private val defaultVersion: SpecifiedVersion = ValueVersions.acceptedVersions.last\n \n-  abstract class DecodeCid[Cid] private[lf] {\n-    def fromString(s: String): Either[DecodeError, Cid]\n-    def fromStruct(s: String, isRelative: Boolean): Either[DecodeError, Cid]\n+  abstract class EncodeCid[-Cid] private[lf] {\n+    private[lf] def encode(\n+        version: SpecifiedVersion = defaultVersion,\n+        contractId: Cid,\n+    ): Either[EncodeError, Either[String, (proto.ContractId)]]\n   }\n \n   object CidEncoder extends EncodeCid[ContractId] {\n-    override def asString(cid: ContractId): String = cid match {\n-      case RelativeContractId(nid, _) => \"~\" + nid.index.toString\n-      case AbsoluteContractId(coid) => coid\n-    }\n-    override def asStruct(cid: ContractId): (String, Boolean) = cid match {\n-      case RelativeContractId(nid, _) => nid.index.toString -> true\n-      case AbsoluteContractId(coid) => coid -> false\n-    }\n+    private[lf] def encode(\n+        sv: SpecifiedVersion,\n+        cid: ContractId\n+    ): Either[EncodeError, Either[String, (proto.ContractId)]] =\n+      if (useOldStringField(sv))\n+        cid match {\n+          case RelativeContractId(nid, _) =>\n+            Right(Left(\"~\" + nid.index.toString))\n+          case AbsoluteContractId(s) if Ref.ContractIdString.isA(s) =>\n+            Right(Left(s))\n+          case AbsoluteContractId(_) =>\n+            Left(EncodeError(s\"absolute contractId v1 not supported by ${sv.showsVersion}\"))\n+        } else\n+        cid match {\n+          case RelativeContractId(nid, _) =>\n+            Right(\n+              Right(\n+                proto.ContractId.newBuilder\n+                  .setRelative(true)\n+                  .setContractId(nid.index.toString)\n+                  .build))\n+          case AbsoluteContractId(s) =>\n+            if ((sv precedes ValueVersions.minContractIdV1) && (Ref.ContractIdString.isB(s)))\n+              Left(EncodeError(s\"absolute contractId v1 not supported by ${sv.showsVersion}\"))\n+            else\n+              Right(Right(proto.ContractId.newBuilder.setRelative(false).setContractId(s).build))\n+        }\n   }\n \n-  object AbsCidDecoder extends DecodeCid[AbsoluteContractId] {\n-\n-    override def fromString(s: String): Either[DecodeError, AbsoluteContractId] =\n-      ContractIdString\n-        .fromString(s)\n-        .bimap(\n-          _ => DecodeError(s\"cannot parse absolute contractId $s\"),\n-          AbsoluteContractId\n-        )\n-    override def fromStruct(\n-        s: String,\n-        isRelative: Boolean): Either[DecodeError, AbsoluteContractId] =\n-      if (isRelative)\n-        Left(DecodeError(s\"unexpected relative contractId $s\"))\n-      else\n-        fromString(s)\n+  abstract class DecodeCid[Cid] private[lf] {\n+    def decodeOptional(\n+        sv: SpecifiedVersion,\n+        stringForm: String,\n+        structForm: proto.ContractId,\n+    ): Either[DecodeError, Option[Cid]]\n+\n+    final def decode(\n+        sv: SpecifiedVersion,\n+        stringForm: String,\n+        structForm: proto.ContractId,\n+    ): Either[DecodeError, Cid] =\n+      decodeOptional(sv, stringForm, structForm).flatMap {\n+        case Some(cid) => Right(cid)\n+        case None => Left(DecodeError(\"Missing required field contract_id\"))\n+      }\n   }\n \n-  object CidDecoder extends DecodeCid[ContractId] {\n+  val CidDecoder: DecodeCid[ContractId] = new DecodeCid[ContractId] {\n \n-    private def fromStringToRelCid(s: String): Either[DecodeError, RelativeContractId] =\n+    private def stringToRelativeCid(s: String) =\n       scalaz.std.string\n         .parseInt(s)\n         .toEither\n         .bimap(\n-          _ => DecodeError(s\"cannot parse relative contractId $s\"),\n-          idx => RelativeContractId(NodeId(idx), None)\n+          _ => //\n+            DecodeError(s\"\"\"cannot parse relative contractId \"$s\"\"\"\"),\n+          idx => Some(RelativeContractId(NodeId(idx), None))\n         )\n \n-    override def fromString(s: String): Either[DecodeError, ContractId] =\n-      if (s.startsWith(\"~\")) fromStringToRelCid(s.drop(1)) else AbsCidDecoder.fromString(s)\n+    private def stringToCidString(s: String): Either[DecodeError, Ref.ContractIdString] =\n+      Ref.ContractIdString\n+        .fromString(s)\n+        .left\n+        .map(_ => //\n+          DecodeError(s\"\"\"cannot parse absolute contractId \"$s\"\"\"\"))\n+\n+    override def decodeOptional(\n+        sv: SpecifiedVersion,\n+        stringForm: String,\n+        structForm: proto.ContractId,\n+    ): Either[DecodeError, Option[ContractId]] =\n+      if (useOldStringField(sv)) {\n+        if (structForm != proto.ContractId.getDefaultInstance) {\n+          Left(DecodeError(s\"${sv.showsVersion} is too new to use string contract IDs\"))"
+  },
+  {
+    "id" : "84295f5a-69ba-4490-abec-9092eccf1a86",
+    "prId" : 4460,
+    "comments" : [
+      {
+        "id" : "5a18936a-009f-4ef8-8ab3-3a5bd3f47af0",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "The error message should say that string form shouldn't be used.",
+        "createdAt" : "2020-02-13T09:27:53Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "48645918-583a-4188-a4b0-29e94257f4b0",
+        "parentId" : "5a18936a-009f-4ef8-8ab3-3a5bd3f47af0",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "You are right",
+        "createdAt" : "2020-02-13T12:17:54Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "59b8325563e5f1d36534e27674434e055016d4ba",
+    "line" : null,
+    "diffHunk" : "@@ -46,61 +46,139 @@ object ValueCoder {\n       EncodeError(s\"${version.showsVersion} is too old to support $isTooOldFor\")\n   }\n \n-  abstract class EncodeCid[-Cid] private[lf] {\n-    def asString(cid: Cid): String\n-    def asStruct(cid: Cid): (String, Boolean)\n-  }\n+  private val defaultVersion: SpecifiedVersion = ValueVersions.acceptedVersions.last\n \n-  abstract class DecodeCid[Cid] private[lf] {\n-    def fromString(s: String): Either[DecodeError, Cid]\n-    def fromStruct(s: String, isRelative: Boolean): Either[DecodeError, Cid]\n+  abstract class EncodeCid[-Cid] private[lf] {\n+    private[lf] def encode(\n+        version: SpecifiedVersion = defaultVersion,\n+        contractId: Cid,\n+    ): Either[EncodeError, Either[String, (proto.ContractId)]]\n   }\n \n   object CidEncoder extends EncodeCid[ContractId] {\n-    override def asString(cid: ContractId): String = cid match {\n-      case RelativeContractId(nid, _) => \"~\" + nid.index.toString\n-      case AbsoluteContractId(coid) => coid\n-    }\n-    override def asStruct(cid: ContractId): (String, Boolean) = cid match {\n-      case RelativeContractId(nid, _) => nid.index.toString -> true\n-      case AbsoluteContractId(coid) => coid -> false\n-    }\n+    private[lf] def encode(\n+        sv: SpecifiedVersion,\n+        cid: ContractId\n+    ): Either[EncodeError, Either[String, (proto.ContractId)]] =\n+      if (useOldStringField(sv))\n+        cid match {\n+          case RelativeContractId(nid, _) =>\n+            Right(Left(\"~\" + nid.index.toString))\n+          case AbsoluteContractId(s) if Ref.ContractIdString.isA(s) =>\n+            Right(Left(s))\n+          case AbsoluteContractId(_) =>\n+            Left(EncodeError(s\"absolute contractId v1 not supported by ${sv.showsVersion}\"))\n+        } else\n+        cid match {\n+          case RelativeContractId(nid, _) =>\n+            Right(\n+              Right(\n+                proto.ContractId.newBuilder\n+                  .setRelative(true)\n+                  .setContractId(nid.index.toString)\n+                  .build))\n+          case AbsoluteContractId(s) =>\n+            if ((sv precedes ValueVersions.minContractIdV1) && (Ref.ContractIdString.isB(s)))\n+              Left(EncodeError(s\"absolute contractId v1 not supported by ${sv.showsVersion}\"))\n+            else\n+              Right(Right(proto.ContractId.newBuilder.setRelative(false).setContractId(s).build))\n+        }\n   }\n \n-  object AbsCidDecoder extends DecodeCid[AbsoluteContractId] {\n-\n-    override def fromString(s: String): Either[DecodeError, AbsoluteContractId] =\n-      ContractIdString\n-        .fromString(s)\n-        .bimap(\n-          _ => DecodeError(s\"cannot parse absolute contractId $s\"),\n-          AbsoluteContractId\n-        )\n-    override def fromStruct(\n-        s: String,\n-        isRelative: Boolean): Either[DecodeError, AbsoluteContractId] =\n-      if (isRelative)\n-        Left(DecodeError(s\"unexpected relative contractId $s\"))\n-      else\n-        fromString(s)\n+  abstract class DecodeCid[Cid] private[lf] {\n+    def decodeOptional(\n+        sv: SpecifiedVersion,\n+        stringForm: String,\n+        structForm: proto.ContractId,\n+    ): Either[DecodeError, Option[Cid]]\n+\n+    final def decode(\n+        sv: SpecifiedVersion,\n+        stringForm: String,\n+        structForm: proto.ContractId,\n+    ): Either[DecodeError, Cid] =\n+      decodeOptional(sv, stringForm, structForm).flatMap {\n+        case Some(cid) => Right(cid)\n+        case None => Left(DecodeError(\"Missing required field contract_id\"))\n+      }\n   }\n \n-  object CidDecoder extends DecodeCid[ContractId] {\n+  val CidDecoder: DecodeCid[ContractId] = new DecodeCid[ContractId] {\n \n-    private def fromStringToRelCid(s: String): Either[DecodeError, RelativeContractId] =\n+    private def stringToRelativeCid(s: String) =\n       scalaz.std.string\n         .parseInt(s)\n         .toEither\n         .bimap(\n-          _ => DecodeError(s\"cannot parse relative contractId $s\"),\n-          idx => RelativeContractId(NodeId(idx), None)\n+          _ => //\n+            DecodeError(s\"\"\"cannot parse relative contractId \"$s\"\"\"\"),\n+          idx => Some(RelativeContractId(NodeId(idx), None))\n         )\n \n-    override def fromString(s: String): Either[DecodeError, ContractId] =\n-      if (s.startsWith(\"~\")) fromStringToRelCid(s.drop(1)) else AbsCidDecoder.fromString(s)\n+    private def stringToCidString(s: String): Either[DecodeError, Ref.ContractIdString] =\n+      Ref.ContractIdString\n+        .fromString(s)\n+        .left\n+        .map(_ => //\n+          DecodeError(s\"\"\"cannot parse absolute contractId \"$s\"\"\"\"))\n+\n+    override def decodeOptional(\n+        sv: SpecifiedVersion,\n+        stringForm: String,\n+        structForm: proto.ContractId,\n+    ): Either[DecodeError, Option[ContractId]] =\n+      if (useOldStringField(sv)) {\n+        if (structForm != proto.ContractId.getDefaultInstance) {\n+          Left(DecodeError(s\"${sv.showsVersion} is too new to use string contract IDs\"))\n+        } else {\n+          if (stringForm.isEmpty)\n+            Right(None)\n+          else if (stringForm.startsWith(\"~\"))\n+            stringToRelativeCid(stringForm.drop(1))\n+          else\n+            for {\n+              coid <- stringToCidString(stringForm)\n+              _ <- Either.cond(\n+                test = Ref.ContractIdString.isA(coid),\n+                right = (),\n+                left = DecodeError(sv, s\"absolute contractId V1\"),\n+              )\n+            } yield Some(AbsoluteContractId(coid))\n+        }\n+      } else {\n+        if (stringForm.nonEmpty)\n+          Left(DecodeError(sv, isTooOldFor = \"message ContractId\"))"
+  },
+  {
+    "id" : "f9db109e-a40d-4854-9649-084c2dd1082a",
+    "prId" : 4460,
+    "comments" : [
+      {
+        "id" : "82a11d55-dfd5-4fcd-8514-30ee86da4a45",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Debugging?",
+        "createdAt" : "2020-02-13T14:50:01Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3b5c3599-b713-4ef9-aae5-76d20b16d850",
+        "parentId" : "82a11d55-dfd5-4fcd-8514-30ee86da4a45",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Good catch ! \r\nThanks.",
+        "createdAt" : "2020-02-13T15:28:57Z",
+        "updatedAt" : "2020-02-13T15:28:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "59b8325563e5f1d36534e27674434e055016d4ba",
+    "line" : null,
+    "diffHunk" : "@@ -24,6 +22,8 @@ import scalaz.syntax.bifunctor._\n object ValueCoder {\n   import Value.MAXIMUM_NESTING\n \n+  \"a\".r\n+"
+  },
+  {
+    "id" : "c6ac70f6-ae79-453e-a409-7af8bab502eb",
+    "prId" : 4425,
+    "comments" : [
+      {
+        "id" : "b03cdd63-f492-4c42-8cee-b4ed6c2d715b",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "scalaz provides `bimap` on `Either` as well as `\\/`.",
+        "createdAt" : "2020-02-06T16:58:48Z",
+        "updatedAt" : "2020-02-07T10:48:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fba42846-99ed-4d1e-89ed-60b734e048b6",
+        "parentId" : "b03cdd63-f492-4c42-8cee-b4ed6c2d715b",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "thanks.",
+        "createdAt" : "2020-02-06T17:20:15Z",
+        "updatedAt" : "2020-02-07T10:48:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "76171aef4450ee340eab6ce616663f8242cf25c9",
+    "line" : null,
+    "diffHunk" : "@@ -45,17 +45,63 @@ object ValueCoder {\n       EncodeError(s\"${version.showsVersion} is too old to support $isTooOldFor\")\n   }\n \n-  final case class EncodeCid[Cid](asString: Cid => String, asStruct: Cid => (String, Boolean)) {\n-    def contramap[Cid2](f: Cid2 => Cid): EncodeCid[Cid2] =\n-      EncodeCid(f andThen asString, f andThen asStruct)\n+  abstract class EncodeCid[Cid] private[lf] {\n+    def asString(cid: Cid): String\n+    def asStruct(cid: Cid): (String, Boolean)\n   }\n \n-  final case class DecodeCid[Cid](\n-      fromString: String => Either[DecodeError, Cid],\n-      fromStruct: (String, Boolean) => Either[DecodeError, Cid],\n-  ) {\n-    def map[Cid2](f: Cid => Cid2): DecodeCid[Cid2] =\n-      DecodeCid(fromString andThen (_ map f), (s, b) => fromStruct(s, b) map f)\n+  abstract class DecodeCid[Cid] private[lf] {\n+    def fromString(s: String): Either[DecodeError, Cid]\n+    def fromStruct(s: String, isRelative: Boolean): Either[DecodeError, Cid]\n+  }\n+\n+  object AbsCidEncoder extends EncodeCid[AbsoluteContractId] {\n+    override def asString(cid: AbsoluteContractId): String = cid.coid\n+    override def asStruct(cid: AbsoluteContractId): (String, Boolean) = cid.coid -> false\n+  }\n+\n+  object CidEncoder extends EncodeCid[ContractId] {\n+    override def asString(cid: ContractId): String = cid match {\n+      case RelativeContractId(nid, _) => \"~\" + nid.index.toString\n+      case AbsoluteContractId(coid) => coid\n+    }\n+    override def asStruct(cid: ContractId): (String, Boolean) = cid match {\n+      case RelativeContractId(nid, _) => nid.index.toString -> true\n+      case AbsoluteContractId(coid) => coid -> false\n+    }\n+  }\n+  object AbsCidDecoder extends DecodeCid[AbsoluteContractId] {\n+\n+    override def fromString(s: String): Either[DecodeError, AbsoluteContractId] =\n+      ContractIdString\n+        .fromString(s)\n+        .fold("
+  },
+  {
+    "id" : "11d75ea4-3cbb-41b1-82b9-79ffb6644b03",
+    "prId" : 3583,
+    "comments" : [
+      {
+        "id" : "f406f084-ea02-4f3d-837c-950fff1640ea",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Does this need `newNesting` as well here?",
+        "createdAt" : "2019-11-22T12:12:01Z",
+        "updatedAt" : "2019-11-26T12:53:52Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "08df3f60-084a-4066-af9f-bc6a1d7dd1d1",
+        "parentId" : "f406f084-ea02-4f3d-837c-950fff1640ea",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed. Thanks",
+        "createdAt" : "2019-11-22T13:19:37Z",
+        "updatedAt" : "2019-11-26T12:53:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c1383fa14c7b88c29c69f359b78fbefb142afbc8",
+    "line" : null,
+    "diffHunk" : "@@ -515,9 +521,19 @@ object ValueCoder {\n             }\n             builder.setMap(protoMap).build()\n \n-          case ValueGenMap(_) =>\n-            // FIXME https://github.com/digital-asset/daml/issues/2256\n-            throw Err(\"Trying to serialize GenMap which are not currently not supported.\")\n+          case ValueGenMap(entries) =>\n+            val protoMap = proto.GenMap.newBuilder()\n+            entries.foreach {\n+              case (key, value) =>\n+                protoMap.addEntries(\n+                  proto.GenMap.Entry\n+                    .newBuilder()\n+                    .setKey(go(nesting, key))"
+  },
+  {
+    "id" : "ac01b725-ccfb-4d90-96e4-0acf1511cae8",
+    "prId" : 3001,
+    "comments" : [
+      {
+        "id" : "92d65b31-60d4-495c-823e-194fcff0e055",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Minor: you may want to evaluate using a guard on the pattern matching rather than nesting an `if` (doesn't change much apart from less nesting, purely a stylistic preference, ignore at will).",
+        "createdAt" : "2019-09-27T14:22:37Z",
+        "updatedAt" : "2019-10-07T16:53:01Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "16ed755353339e1c8993a492a7a67e3522430f59",
+    "line" : 39,
+    "diffHunk" : "@@ -427,7 +428,10 @@ object ValueCoder {\n           case ValueInt64(i) =>\n             builder.setInt64(i).build()\n           case ValueNumeric(d) =>\n-            builder.setDecimal(Numeric.toUnscaledString(d)).build()\n+            if (useLegacyDecimal(valueVersion))"
+  }
+]

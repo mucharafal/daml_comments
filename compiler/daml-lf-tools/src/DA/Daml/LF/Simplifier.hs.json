@@ -1,0 +1,1310 @@
+[
+  {
+    "id" : "53aaf98d-c491-4e3d-8d75-5716c33962b9",
+    "prId" : 6519,
+    "comments" : [
+      {
+        "id" : "33888996-1156-4a6e-bbcf-421a2c0852f7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Type level lambdas of kind `Nat` are essentially value level lambdas. Any thoughts on how to handle them?",
+        "createdAt" : "2020-06-29T13:43:09Z",
+        "updatedAt" : "2020-06-29T13:48:29Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "02855863-0957-42ed-acd1-67bfd398cfc5",
+        "parentId" : "33888996-1156-4a6e-bbcf-421a2c0852f7",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Do you mean `ETyLam`? I can add special case to treat `ETyLam (_, KNat) _` as if it were a term lambdas. I wonder if those extra cases are worth the added complexity? Hmm...",
+        "createdAt" : "2020-06-29T13:56:49Z",
+        "updatedAt" : "2020-06-29T13:56:49Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "440feb2dd24c7f3dc86bb2c8dd4726f4c78d6f19",
+    "line" : 10,
+    "diffHunk" : "@@ -473,9 +473,11 @@ simplifyExpr = fmap fst . cata go'\n       e -> (embed (fmap fst e), infoStep world (fmap snd e))\n \n -- | If we have a closed term under a lambda, we want to lift it up to the top level,\n--- even though the result of the lambda is also a closed term.\n-alwaysLiftUnder :: ExprF t -> Bool\n+-- even though the result of the lambda is also a closed term. We avoid breaking up\n+-- lambda terms, though.\n+alwaysLiftUnder :: ExprF (Expr, Info) -> Bool\n alwaysLiftUnder = \\case\n+    ETmLamF _ (ETmLam _ _, _) -> False"
+  },
+  {
+    "id" : "30ca6fef-1ec3-4741-810f-70ea8f449243",
+    "prId" : 6430,
+    "comments" : [
+      {
+        "id" : "490e0793-ada6-4573-825b-a6ac0fd1c085",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not convinced we shouldn't lift lambdas at all. In a chain of lambdas, we should still lift the outermost lambda when possible. For instance, in\r\n```haskell\r\nf x y z =\r\n  let g a b = a+b\r\n  in f x (f y z)\r\n```\r\nI would expect the `g` to be lifted to the top-level.\r\n\r\nWe absolutely need tests for the constant lifter. We could either do very specific unit test with hand crafted ASTs or we could use the `jq` based approach.",
+        "createdAt" : "2020-06-22T08:45:03Z",
+        "updatedAt" : "2020-06-22T08:47:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c23800e29d2cb012b70b448ec9d35426a2ac7bbe",
+    "line" : 20,
+    "diffHunk" : "@@ -493,6 +489,12 @@ isWorthLifting = \\case\n     EEnumCon _ _ -> False\n     ENil _ -> False\n     ENone _ -> False\n+    ETmLam _ _ -> False"
+  },
+  {
+    "id" : "f9cbb5ee-8afd-4b99-9c95-5842245bff7b",
+    "prId" : 6274,
+    "comments" : [
+      {
+        "id" : "715bc603-59a6-4803-b306-eaeb81e2ce5d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe that is a silly question but what is the difference between `Safe 0` and `Unsafe`?",
+        "createdAt" : "2020-06-09T14:49:10Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "268653aa-5df3-4c7b-96d0-8aae501f4707",
+        "parentId" : "715bc603-59a6-4803-b306-eaeb81e2ce5d",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "There are no silly questions on such complicated matters!\r\n\r\nThe expression `1` is 0-safe because it does not raise any exceptions. (We do not consider `k`-safe for any `k > 0` because you cannot apply arguments to it.) The expression `1 + error \"boom\"` is unsafe and not 1-safe because it raises an exception. The difference between these two expressions is that it's ok for the simplifier to delete the former when it's dead code but not the latter (because of strictness).",
+        "createdAt" : "2020-06-09T16:17:19Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ca8886da-b09c-4953-8a3c-8878f8fcabf0",
+        "parentId" : "715bc603-59a6-4803-b306-eaeb81e2ce5d",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh that makes sense, I think I got confused by looking at the code and seeing `BEError` marked as 0-safe and was thinking of `error \"abc\"` instead of `error`. Thanks for the explanation!",
+        "createdAt" : "2020-06-09T16:20:40Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e4f09ad2cfa366135e277a471a4bf8608bd948f",
+    "line" : 13,
+    "diffHunk" : "@@ -247,6 +247,27 @@ infoStep world e = Info\n     (safetyStep (fmap safety e))\n     (typeclassStep world (fmap tcinfo e))\n \n+-- | Take the free variables and safety of a let-expression `let x = e1 in e2`\n+-- and compute over-approximations of the free variables and\n+-- under-approximations of the safe of `e1` and `e2`. The reasoning behind the\n+-- choice of `s1` and `s2` is as follows:\n+-- * If `fv(let x = e1 in e2) ⊆ V`, then `fv(e1) ⊆ V` and `fv(e2) ⊆ V ∪ {x}`.\n+-- * If `let x = e1 in e2` is k-safe, then `e1` is 0-safe and `e2` is k-safe.\n+infoUnstepELet :: ExprVarName -> Info -> (Info, Info)\n+infoUnstepELet x (Info fv sf _) = (s1, s2)\n+  where\n+    s1 = Info fv (sf `min` Safe 0) TCNeither"
+  },
+  {
+    "id" : "f7c91eac-2484-4fc9-b44c-42307efd1f1a",
+    "prId" : 6274,
+    "comments" : [
+      {
+        "id" : "60a5c3ae-250c-40fb-9e07-9d466dce0768",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Where is the check that `x` is not free in `s2`? If we don’t need that for some reason the comment needs updating since it says exactly the opposite.",
+        "createdAt" : "2020-06-09T14:59:48Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b086772a-ec1f-405c-97a5-74628a1d98a5",
+        "parentId" : "60a5c3ae-250c-40fb-9e07-9d466dce0768",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We don't need to check if `x` is free in `e2` since `let` are _non_-recursive. Would it help to comment to that effect?\r\n\r\nI assume the comment you're referring to is the one about repeated application of this rule and the one below. The \"if `x` is not free in `e3`\" is supposed to resemble the condition of the rule below. Given the confusion it has already caused, I would simply remove the if-clause. This shouldn't make a difference since there's only one rule for `(let x = e1 in e2) e3` anyway.",
+        "createdAt" : "2020-06-09T16:12:40Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d1a8f9da-5db8-49bf-a467-3bf362da724a",
+        "parentId" : "60a5c3ae-250c-40fb-9e07-9d466dce0768",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah a comment that lets are not recursive + removing the `if` (it’s already below at the case where there is the condition) sounds good, thanks!",
+        "createdAt" : "2020-06-09T16:23:11Z",
+        "updatedAt" : "2020-06-09T17:11:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e4f09ad2cfa366135e277a471a4bf8608bd948f",
+    "line" : 56,
+    "diffHunk" : "@@ -347,16 +368,29 @@ simplifyExpr world = fst . cata go\n         , not (isFreeExprVar x (freeVars (snd e2))) -> e2\n \n       -- (let x = e1 in e2).f    ==>    let x = e1 in e2.f\n-      -- NOTE(MH): The reason for the choice of `s1` and `s2` is as follows:\n-      -- - If `fv(let x = e1 in e2) ⊆ V`, then `fv(e1) ⊆ V` and\n-      --   `fv(e2) ⊆ V ∪ {x}`.\n-      -- - If `let x = e1 in e2` is k-safe, then `e1` is 0-safe and `e2` is\n-      --   k-safe.\n-      EStructProjF f (ELet (Binding (x, t) e1) e2, Info fv sf _) ->\n+      EStructProjF f (ELet (Binding (x, t) e1) e2, s0) ->\n         go $ ELetF (BindingF (x, t) (e1, s1)) (go $ EStructProjF f (e2, s2))\n         where\n-          s1 = Info fv (sf `min` Safe 0) TCNeither\n-          s2 = Info (freeExprVar x <> fv) sf TCNeither\n+          (s1, s2) = infoUnstepELet x s0\n+\n+      -- (λx1 ... xn. e0) e1 ... en    ==>    let x1 = e2 in ... let xn = en in e0,\n+      -- if `xi` is not free in `ej` for any `i < j`\n+      --\n+      -- This rule is achieved by combining the rules for `(λx. e1) e2` and\n+      -- `(let x = e1 in e1) e3`, if `x` is not free in `e3`, repeatedly.\n+\n+      -- (λx. e1) e2    ==>    let x = e2 in e1\n+      ETmAppF (ETmLam (x, t) e1, s0) (e2, s2) ->\n+        go $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)"
+  },
+  {
+    "id" : "5405ba8c-46ff-499f-b13c-475601f5590d",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "8254eabc-8a9b-4f53-bdc5-5a12b4b3af6f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    gets sModule\r\n\r\n```",
+        "createdAt" : "2020-05-26T10:53:19Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : null,
+    "diffHunk" : "@@ -378,14 +489,9 @@ topoSortDefValues m =\n         sccs = G.stronglyConnComp . map dvalNode . NM.toList $ moduleValues m\n     in concatMap toList sccs\n \n-simplifyDefValue :: World -> DefValue -> DefValue\n-simplifyDefValue world dval = dval { dvalBody = simplifyExpr world (dvalBody dval) }\n-\n-simplifyModule :: World -> Module -> Module\n-simplifyModule world m =\n-    let step accum dval =\n-            let m' = m { moduleValues = accum }\n-                w' = extendWorldSelf m' world\n-                d' = simplifyDefValue w' dval\n-            in NM.insert d' accum\n-    in m { moduleValues = foldl' step NM.empty (topoSortDefValues m) }\n+simplifyModule :: World -> Version -> Module -> Module\n+simplifyModule world version m = runSimplifier world version m $ do\n+    forM_ (topoSortDefValues m) $ \\ dval -> do\n+        body' <- simplifyExpr (dvalBody dval)\n+        modify (addDefValue dval { dvalBody = body' })\n+    gets sModule"
+  },
+  {
+    "id" : "5506446e-fbb3-4553-9bb9-50c4f244f71b",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "76216141-6d48-4386-a9c0-976b7692a45a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we not do constant lifting if the list of free variables is null?",
+        "createdAt" : "2020-05-26T11:03:38Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4087c8e8-7321-4223-9b0a-849d4b3bb42d",
+        "parentId" : "76216141-6d48-4386-a9c0-976b7692a45a",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "The idea was to group together the constant liftings, so instead of doing one lift per application (for example), we will lift all the applications at once, as far as we can. This also prevents us from doing a constant lift in cases where the binding is already constant...\r\n\r\n(It might be better to also check isWorthLifting ... I think I'll experiment with that.)",
+        "createdAt" : "2020-05-26T11:15:50Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7915c488-c3d7-4cd1-bd75-06f73bc6ecf9",
+        "parentId" : "76216141-6d48-4386-a9c0-976b7692a45a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I see that makes sense. Would be great to add a comment. Thanks for the explanation!",
+        "createdAt" : "2020-05-26T11:17:28Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 94,
+    "diffHunk" : "@@ -290,12 +292,43 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+simplifyExpr :: Expr -> Simplifier Expr\n+simplifyExpr = fmap fst . cata go'\n   where\n-\n-    go :: ExprF (Expr, Info) -> (Expr, Info)\n-    go = \\case\n+    go' :: ExprF (Simplifier (Expr, Info)) -> Simplifier (Expr, Info)\n+    go' ms = do\n+        es <- sequence ms\n+        world <- gets sWorldExtended\n+        let v' = freeVarsStep (fmap (freeVars . snd) es)\n+        if freeVarsNull v'\n+          then pure (go world es)\n+          else do -- constant lifting"
+  },
+  {
+    "id" : "b0fa4c89-173b-4d6f-a510-f8351d634a5f",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "32668874-000f-4acd-af1a-c3fdb94856d4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n                    addDefValue DefValue -- todo caching??\r\n```",
+        "createdAt" : "2020-05-26T11:07:21Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : null,
+    "diffHunk" : "@@ -290,12 +292,43 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+simplifyExpr :: Expr -> Simplifier Expr\n+simplifyExpr = fmap fst . cata go'\n   where\n-\n-    go :: ExprF (Expr, Info) -> (Expr, Info)\n-    go = \\case\n+    go' :: ExprF (Simplifier (Expr, Info)) -> Simplifier (Expr, Info)\n+    go' ms = do\n+        es <- sequence ms\n+        world <- gets sWorldExtended\n+        let v' = freeVarsStep (fmap (freeVars . snd) es)\n+        if freeVarsNull v'\n+          then pure (go world es)\n+          else do -- constant lifting\n+            version <- gets sVersion\n+            es' <- forM es $ \\case\n+              (e,i)\n+                | freeVarsNull (freeVars i)\n+                , isWorthLifting e\n+                , Right ty <- runGamma world version (typeOf' e)\n+                -> do\n+                    name <- freshExprVarName\n+                    addDefValue DefValue -- todo cacheing??"
+  },
+  {
+    "id" : "fed15413-e695-4398-a0e0-1202c1c36266",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "9c0a4856-18fd-401f-a8a7-d6275f342adb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks like we probably need to address it before merging? Otherwise you will produce invalid LF.",
+        "createdAt" : "2020-05-26T11:08:16Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9882baad-d6fb-4bc3-b3cf-d6cae45f485d",
+        "parentId" : "9c0a4856-18fd-401f-a8a7-d6275f342adb",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Yes -- Will do :-) ",
+        "createdAt" : "2020-05-26T11:16:32Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : null,
+    "diffHunk" : "@@ -290,12 +292,43 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+simplifyExpr :: Expr -> Simplifier Expr\n+simplifyExpr = fmap fst . cata go'\n   where\n-\n-    go :: ExprF (Expr, Info) -> (Expr, Info)\n-    go = \\case\n+    go' :: ExprF (Simplifier (Expr, Info)) -> Simplifier (Expr, Info)\n+    go' ms = do\n+        es <- sequence ms\n+        world <- gets sWorldExtended\n+        let v' = freeVarsStep (fmap (freeVars . snd) es)\n+        if freeVarsNull v'\n+          then pure (go world es)\n+          else do -- constant lifting\n+            version <- gets sVersion\n+            es' <- forM es $ \\case\n+              (e,i)\n+                | freeVarsNull (freeVars i)\n+                , isWorthLifting e\n+                , Right ty <- runGamma world version (typeOf' e)\n+                -> do\n+                    name <- freshExprVarName\n+                    addDefValue DefValue -- todo cacheing??\n+                        { dvalBinder = (name, ty)\n+                        , dvalBody = e\n+                        , dvalLocation = Nothing\n+                        , dvalNoPartyLiterals = HasNoPartyLiterals True -- FIXME"
+  },
+  {
+    "id" : "b602bc2d-66fb-4b04-8ff4-0f20964dfc19",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "4ef5fbc2-627a-4bec-8dee-a9eed0960ed6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "A comment here that explains why we don’t lift everything would be nice. I.e., what are the performance tradeoffs, do we loose performance by lifting things that are “too small”, if so have we benchmarked that this is the right tradeoff, …?",
+        "createdAt" : "2020-05-26T11:09:57Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8913e3c2-a6da-4434-96f8-d8e60c3b26f0",
+        "parentId" : "4ef5fbc2-627a-4bec-8dee-a9eed0960ed6",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should add `EUpdate` and `EScenario` to this list as well since they don't perform any computation.\r\n\r\nSpeedy's internal representation of `Update a` is currently equivalent to `Ledger# -> a`, similar to how Haskell uses `State RealWorld# a` for `IO a`. Thus, if we lift an update to the top-level, we always have to allocate a closure for it. If we leave it in place, we _can_ do something smarter. We're not doing that yet but I have it on my list. (Similarly for `Scenario a`.)\r\n\r\nNevertheless, lifting the children of `EUpdate` and `EScenario` if they are worth still seems like a good idea.\r\n\r\nFor example, in\r\n```haskell\r\nfoo x = do\r\n  _ <- bar x\r\n  _ <- bar 1\r\n  pure (1+1)\r\n```\r\nwe should neither lift `do _ <- bar 1; pure (1+1)` nor `pure (1+1)`. But we should lift `1+1`. Lifting `bar 1` is also fine since we have to allocate a closure for it anyway.",
+        "createdAt" : "2020-06-18T19:54:25Z",
+        "updatedAt" : "2020-06-18T20:11:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 179,
+    "diffHunk" : "@@ -353,14 +387,76 @@ simplifyExpr world = fst . cata go\n       -- - If `let x = e1 in e2` is k-safe, then `e1` is 0-safe and `e2` is\n       --   k-safe.\n       EStructProjF f (ELet (Binding (x, t) e1) e2, Info fv sf _) ->\n-        go $ ELetF (BindingF (x, t) (e1, s1)) (go $ EStructProjF f (e2, s2))\n+        go world $ ELetF (BindingF (x, t) (e1, s1)) (go world $ EStructProjF f (e2, s2))\n         where\n           s1 = Info fv (sf `min` Safe 0) TCNeither\n           s2 = Info (freeExprVar x <> fv) sf TCNeither\n \n       -- e    ==>    e\n       e -> (embed (fmap fst e), infoStep world (fmap snd e))\n \n+isWorthLifting :: Expr -> Bool"
+  },
+  {
+    "id" : "fd835b56-e995-495d-85b9-2748dbebc543",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "6ed60f39-78be-480c-ac05-b65a4bd3924a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This seems like a potentially expensive check. Probably not worth worrying about for now but could we make this cheaper by having `go` return a boolean indicating if we changed it?",
+        "createdAt" : "2020-06-17T12:54:04Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "53244d6f-295b-45fd-885e-433de50ccfd0",
+        "parentId" : "6ed60f39-78be-480c-ac05-b65a4bd3924a",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "That's a good idea. (-:",
+        "createdAt" : "2020-06-17T14:21:48Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : null,
+    "diffHunk" : "@@ -313,12 +315,122 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+-- | Go inside a closed expression and try to inline and beta reduce\n+-- types and arguments, to try monomorphizing.\n+inlineClosedExpr :: Int -> World -> Expr -> Simplifier Expr\n+inlineClosedExpr d world e = do\n+    e' <- go e\n+    if e == e'"
+  },
+  {
+    "id" : "013acd62-31cf-4125-8387-b1b28520acaa",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "836a40d5-0204-4cc7-8a05-6729f89e271f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can this ever happen? If not, should we throw an error here?",
+        "createdAt" : "2020-06-17T13:00:10Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9e90d57b-236b-4214-85fd-6a903e19521e",
+        "parentId" : "836a40d5-0204-4cc7-8a05-6729f89e271f",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "It can happen when the information in the world is incomplete (e.g. it's part of a strongly connected component of definitions, or we are building with --incremental=yes). I can add a comment.",
+        "createdAt" : "2020-06-17T14:12:22Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 71,
+    "diffHunk" : "@@ -313,12 +315,122 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+-- | Go inside a closed expression and try to inline and beta reduce\n+-- types and arguments, to try monomorphizing.\n+inlineClosedExpr :: Int -> World -> Expr -> Simplifier Expr\n+inlineClosedExpr d world e = do\n+    e' <- go e\n+    if e == e'\n+        then pure e\n+        else simplifyExpr' (d-1) e'\n+  where\n+    go = \\case\n+        e@(EVal x) -> do\n+            case lookupValue x world of\n+                Left _ -> pure e\n+                Right dval -> pure (dvalBody dval)\n+\n+        ETmApp e1 e2 -> do\n+            e1' <- go e1\n+            case stripLoc e1' of\n+                ETmLam (x,_) b -> do\n+                    pure (applySubstInExpr (exprSubst x e2) b)\n+                _ ->\n+                    pure (ETmApp e1' e2)\n+\n+        ETyApp e t -> do\n+            e' <- go e\n+            case stripLoc e' of\n+                ETyLam (x,_) b -> do\n+                    pure (applySubstInExpr (typeSubst x t) b)\n+                _ ->\n+                    pure (ETyApp e' t)\n+\n+        ELocation l e -> ELocation l <$> go e\n+\n+        e -> pure e\n+\n+stripLoc :: Expr -> Expr\n+stripLoc = \\case\n+    ELocation _ e -> stripLoc e\n+    e -> e\n+\n+calcPartyLiterals :: Expr -> HasNoPartyLiterals\n+calcPartyLiterals e = HasNoPartyLiterals (cata go e)\n   where\n-\n-    go :: ExprF (Expr, Info) -> (Expr, Info)\n     go = \\case\n+        EBuiltinF (BEParty _) -> False\n+        f -> and f\n+\n+-- | Attempt to lift a closed expression to the top level. Returns either\n+-- a variable expression that references the lifted expression, or\n+-- returns the original expression.\n+liftClosedExpr :: Int -> Expr -> Simplifier Expr\n+liftClosedExpr d e = do\n+    cache <- gets sCache\n+    case Map.lookup e cache of\n+        Just name -> do\n+            EVal <$> selfQualify name\n+\n+        Nothing -> do\n+            world <- gets sWorldExtended\n+            version <- gets sVersion\n+            case runGamma world version (typeOf' e) of\n+                Right ty -> do\n+                    name <- freshExprVarNameFor e\n+                    e' <- inlineClosedExpr d world e\n+                    addDefValue DefValue\n+                        { dvalBinder = (name, ty)\n+                        , dvalBody = e'\n+                        , dvalLocation = Nothing\n+                        , dvalNoPartyLiterals = calcPartyLiterals e'\n+                        , dvalIsTest = IsTest False\n+                        }\n+                    EVal <$> selfQualify name\n+\n+                Left _ ->"
+  },
+  {
+    "id" : "c80606ca-12d9-4c43-819b-aa95a2027f0e",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "43389cab-7fbf-442b-8964-6dd5b1634afc",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why are you inlining values? Aren’t you potentially creating duplication here, i.e., the exact opposite of what this transformation is supposed to achieve?",
+        "createdAt" : "2020-06-17T13:01:44Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dcbefa1c-5881-4b60-82d5-76874ed962a0",
+        "parentId" : "43389cab-7fbf-442b-8964-6dd5b1634afc",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "The point of this is to propagate constants, like types, dictionaries, and other literals. Otherwise you get very little memoization.",
+        "createdAt" : "2020-06-17T14:21:08Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "88398b1e-58ed-4f13-8a66-89b5c5cbac62",
+        "parentId" : "43389cab-7fbf-442b-8964-6dd5b1634afc",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m not sure I’m following, Let’s say I am lifting `f x` where `f` and `x` are bound at the top-level and they are both fairly large. in that case lifting it at `f x` seems better than inlining `f` and `x`.",
+        "createdAt" : "2020-06-17T14:27:15Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : null,
+    "diffHunk" : "@@ -313,12 +315,122 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+-- | Go inside a closed expression and try to inline and beta reduce\n+-- types and arguments, to try monomorphizing.\n+inlineClosedExpr :: Int -> World -> Expr -> Simplifier Expr\n+inlineClosedExpr d world e = do\n+    e' <- go e\n+    if e == e'\n+        then pure e\n+        else simplifyExpr' (d-1) e'\n+  where\n+    go = \\case\n+        e@(EVal x) -> do\n+            case lookupValue x world of\n+                Left _ -> pure e\n+                Right dval -> pure (dvalBody dval)"
+  },
+  {
+    "id" : "7a76d49f-6bac-4a82-b3f4-b5085f494237",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "b3641bf5-3a49-4222-82be-3a110300da1d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can this not blow up if the variable is used very often in the body of the lambda?",
+        "createdAt" : "2020-06-17T13:02:53Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b951439e-3faf-42de-920e-76f0fce2503c",
+        "parentId" : "b3641bf5-3a49-4222-82be-3a110300da1d",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "You're right, this should probably be a let, or be a let if x appears more than once.",
+        "createdAt" : "2020-06-17T14:18:38Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : null,
+    "diffHunk" : "@@ -313,12 +315,122 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+-- | Go inside a closed expression and try to inline and beta reduce\n+-- types and arguments, to try monomorphizing.\n+inlineClosedExpr :: Int -> World -> Expr -> Simplifier Expr\n+inlineClosedExpr d world e = do\n+    e' <- go e\n+    if e == e'\n+        then pure e\n+        else simplifyExpr' (d-1) e'\n+  where\n+    go = \\case\n+        e@(EVal x) -> do\n+            case lookupValue x world of\n+                Left _ -> pure e\n+                Right dval -> pure (dvalBody dval)\n+\n+        ETmApp e1 e2 -> do\n+            e1' <- go e1\n+            case stripLoc e1' of\n+                ETmLam (x,_) b -> do\n+                    pure (applySubstInExpr (exprSubst x e2) b)"
+  },
+  {
+    "id" : "2b58003e-d800-421e-9485-ddfc4fb77c1f",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "6c9ceca1-9abf-44bc-9fb1-b0c7935ec944",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I forgot why but I remember that it was important that we run the simplifier in topological order. Now we are adding new definitions so this becomes a bit more fuzzy. Maybe at least worth adding a comment why this is not an issue?",
+        "createdAt" : "2020-06-17T13:04:46Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5b72c0dc-69b0-414a-87d3-8e4cca01eb3d",
+        "parentId" : "6c9ceca1-9abf-44bc-9fb1-b0c7935ec944",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "It's still in topological order (-:",
+        "createdAt" : "2020-06-17T14:23:22Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 59,
+    "diffHunk" : "@@ -313,12 +315,122 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+-- | Go inside a closed expression and try to inline and beta reduce\n+-- types and arguments, to try monomorphizing.\n+inlineClosedExpr :: Int -> World -> Expr -> Simplifier Expr\n+inlineClosedExpr d world e = do\n+    e' <- go e\n+    if e == e'\n+        then pure e\n+        else simplifyExpr' (d-1) e'\n+  where\n+    go = \\case\n+        e@(EVal x) -> do\n+            case lookupValue x world of\n+                Left _ -> pure e\n+                Right dval -> pure (dvalBody dval)\n+\n+        ETmApp e1 e2 -> do\n+            e1' <- go e1\n+            case stripLoc e1' of\n+                ETmLam (x,_) b -> do\n+                    pure (applySubstInExpr (exprSubst x e2) b)\n+                _ ->\n+                    pure (ETmApp e1' e2)\n+\n+        ETyApp e t -> do\n+            e' <- go e\n+            case stripLoc e' of\n+                ETyLam (x,_) b -> do\n+                    pure (applySubstInExpr (typeSubst x t) b)\n+                _ ->\n+                    pure (ETyApp e' t)\n+\n+        ELocation l e -> ELocation l <$> go e\n+\n+        e -> pure e\n+\n+stripLoc :: Expr -> Expr\n+stripLoc = \\case\n+    ELocation _ e -> stripLoc e\n+    e -> e\n+\n+calcPartyLiterals :: Expr -> HasNoPartyLiterals\n+calcPartyLiterals e = HasNoPartyLiterals (cata go e)\n   where\n-\n-    go :: ExprF (Expr, Info) -> (Expr, Info)\n     go = \\case\n+        EBuiltinF (BEParty _) -> False\n+        f -> and f\n+\n+-- | Attempt to lift a closed expression to the top level. Returns either\n+-- a variable expression that references the lifted expression, or\n+-- returns the original expression.\n+liftClosedExpr :: Int -> Expr -> Simplifier Expr\n+liftClosedExpr d e = do\n+    cache <- gets sCache\n+    case Map.lookup e cache of\n+        Just name -> do\n+            EVal <$> selfQualify name\n+\n+        Nothing -> do\n+            world <- gets sWorldExtended\n+            version <- gets sVersion\n+            case runGamma world version (typeOf' e) of\n+                Right ty -> do\n+                    name <- freshExprVarNameFor e\n+                    e' <- inlineClosedExpr d world e\n+                    addDefValue DefValue"
+  },
+  {
+    "id" : "59ce0210-9d3f-495f-b389-7ea5a2606e82",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "315bcfec-0fe8-4a47-b524-757a67820177",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Don’t you mean that you want to lift below a lambda?",
+        "createdAt" : "2020-06-17T13:06:41Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2e6ce56f-4093-4a17-ba27-cb8f098f8da4",
+        "parentId" : "315bcfec-0fe8-4a47-b524-757a67820177",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "ah, english is hard. I mean lift from below the lambda, to above the lambda (i.e. to the top level)",
+        "createdAt" : "2020-06-17T14:09:14Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : null,
+    "diffHunk" : "@@ -313,12 +315,122 @@ getTypeClassDictionary world = \\case\n     _ ->\n         Nothing\n \n-simplifyExpr :: World -> Expr -> Expr\n-simplifyExpr world = fst . cata go\n+-- | Go inside a closed expression and try to inline and beta reduce\n+-- types and arguments, to try monomorphizing.\n+inlineClosedExpr :: Int -> World -> Expr -> Simplifier Expr\n+inlineClosedExpr d world e = do\n+    e' <- go e\n+    if e == e'\n+        then pure e\n+        else simplifyExpr' (d-1) e'\n+  where\n+    go = \\case\n+        e@(EVal x) -> do\n+            case lookupValue x world of\n+                Left _ -> pure e\n+                Right dval -> pure (dvalBody dval)\n+\n+        ETmApp e1 e2 -> do\n+            e1' <- go e1\n+            case stripLoc e1' of\n+                ETmLam (x,_) b -> do\n+                    pure (applySubstInExpr (exprSubst x e2) b)\n+                _ ->\n+                    pure (ETmApp e1' e2)\n+\n+        ETyApp e t -> do\n+            e' <- go e\n+            case stripLoc e' of\n+                ETyLam (x,_) b -> do\n+                    pure (applySubstInExpr (typeSubst x t) b)\n+                _ ->\n+                    pure (ETyApp e' t)\n+\n+        ELocation l e -> ELocation l <$> go e\n+\n+        e -> pure e\n+\n+stripLoc :: Expr -> Expr\n+stripLoc = \\case\n+    ELocation _ e -> stripLoc e\n+    e -> e\n+\n+calcPartyLiterals :: Expr -> HasNoPartyLiterals\n+calcPartyLiterals e = HasNoPartyLiterals (cata go e)\n   where\n-\n-    go :: ExprF (Expr, Info) -> (Expr, Info)\n     go = \\case\n+        EBuiltinF (BEParty _) -> False\n+        f -> and f\n+\n+-- | Attempt to lift a closed expression to the top level. Returns either\n+-- a variable expression that references the lifted expression, or\n+-- returns the original expression.\n+liftClosedExpr :: Int -> Expr -> Simplifier Expr\n+liftClosedExpr d e = do\n+    cache <- gets sCache\n+    case Map.lookup e cache of\n+        Just name -> do\n+            EVal <$> selfQualify name\n+\n+        Nothing -> do\n+            world <- gets sWorldExtended\n+            version <- gets sVersion\n+            case runGamma world version (typeOf' e) of\n+                Right ty -> do\n+                    name <- freshExprVarNameFor e\n+                    e' <- inlineClosedExpr d world e\n+                    addDefValue DefValue\n+                        { dvalBinder = (name, ty)\n+                        , dvalBody = e'\n+                        , dvalLocation = Nothing\n+                        , dvalNoPartyLiterals = calcPartyLiterals e'\n+                        , dvalIsTest = IsTest False\n+                        }\n+                    EVal <$> selfQualify name\n+\n+                Left _ ->\n+                    pure e\n+\n+simplifyExpr :: Expr -> Simplifier Expr\n+simplifyExpr = simplifyExpr' 3\n+\n+simplifyExpr' :: Int -> Expr -> Simplifier Expr\n+simplifyExpr' d e | d < 0 = pure e\n+simplifyExpr' d e = fmap fst (cata go' e)\n+  where\n+    go' :: ExprF (Simplifier (Expr, Info)) -> Simplifier (Expr, Info)\n+    go' ms = do\n+        es <- sequence ms\n+        world <- gets sWorldExtended\n+        let v' = freeVarsStep (fmap (freeVars . snd) es)\n+\n+        -- We decide here whether it's worth performing constant lifting\n+        -- for closed terms immediately under the current term. We want\n+        -- to avoid creating unnecessary bindings, so we only perform\n+        -- constant lifting when a closed term would become non-closed,\n+        -- thereby grouping all the closed subterms together into a single\n+        -- lift. If possible, we also want to lift above a lambda, even"
+  },
+  {
+    "id" : "307bb805-4e14-4a48-a2a8-c2145a736bed",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "658e930c-abe3-4189-b66d-1c6090c001c5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe a hashmap would be a better idea given that an `Expr` can be quite large?",
+        "createdAt" : "2020-06-17T13:08:09Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f45e3f2d-910d-4d45-a8d1-47b1105070ee",
+        "parentId" : "658e930c-abe3-4189-b66d-1c6090c001c5",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Maybe. I'll look into it, but I'll leave it as a separate PR.",
+        "createdAt" : "2020-06-17T15:02:42Z",
+        "updatedAt" : "2020-06-18T13:06:33Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 195,
+    "diffHunk" : "@@ -386,20 +499,89 @@ simplifyExpr world = fst . cata go\n       -- NOTE(MH): This also works when `x` is free in `e2` since let-bindings\n       -- are _not_ recursive.\n       ETmAppF (ETmLam (x, t) e1, s0) (e2, s2) ->\n-        go $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)\n+        go world $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)\n         where\n           s1 = infoUnstepETmapp x s0\n \n       -- (let x = e1 in e2) e3    ==>    let x = e1 in e2 e3, if x is not free in e3\n       ETmAppF (ELet (Binding (x, t) e1) e2, s0) e3\n         | not (isFreeExprVar x (freeVars (snd e3))) ->\n-          go $ ELetF (BindingF (x, t) (e1, s1)) (go $ ETmAppF (e2, s2) e3)\n+          go world $ ELetF (BindingF (x, t) (e1, s1)) (go world $ ETmAppF (e2, s2) e3)\n           where\n             (s1, s2) = infoUnstepELet x s0\n \n       -- e    ==>    e\n       e -> (embed (fmap fst e), infoStep world (fmap snd e))\n \n+-- | If we have a closed term under a lambda, we want to lift it up to the top level,\n+-- even though the result of the lambda is also a closed term. Similarly, if there\n+-- are branches of a case pattern that are closed, we choose to lift them to the top\n+-- level.\n+alwaysLiftUnder :: ExprF t -> Bool\n+alwaysLiftUnder = \\case\n+    ETyLamF _ _ -> True\n+    ETmLamF _ _ -> True\n+    ECaseF _ _ -> True\n+    _ -> False\n+\n+-- | Some terms are not worth lifting to the top level, because they don't\n+-- require any computation.\n+isWorthLifting :: Expr -> Bool\n+isWorthLifting = \\case\n+    EVar _ -> False\n+    EVal _ -> False\n+    EBuiltin _ -> False\n+    EEnumCon _ _ -> False\n+    ENil _ -> False\n+    ENone _ -> False\n+    ELocation _ e -> isWorthLifting e\n+    _ -> True\n+\n+data SimplifierState = SimplifierState\n+    { sWorld :: World\n+    , sVersion :: Version\n+    , sModule :: Module\n+    , sReserved :: Set.Set ExprValName\n+    , sCache :: Map.Map Expr ExprValName"
+  },
+  {
+    "id" : "afb6705a-f384-48bd-83cf-13d1959c1061",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "43510c63-560c-4bf3-aecb-429929b5330e",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "My understanding of this function is that it indicates when we want to lift the children of a _closed_ term. If that's correct, the effect of this `ECaseF` case here is that we take closed `case` expressions apart. I'm not sure we want that. Even without this `ECaseF` here, we should still lift closed branches of open `case` expression because the (RHS of the) branch is a maximal closed expression itself.",
+        "createdAt" : "2020-06-18T18:28:04Z",
+        "updatedAt" : "2020-06-18T20:11:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 174,
+    "diffHunk" : "@@ -386,20 +458,89 @@ simplifyExpr world = fst . cata go\n       -- NOTE(MH): This also works when `x` is free in `e2` since let-bindings\n       -- are _not_ recursive.\n       ETmAppF (ETmLam (x, t) e1, s0) (e2, s2) ->\n-        go $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)\n+        go world $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)\n         where\n           s1 = infoUnstepETmapp x s0\n \n       -- (let x = e1 in e2) e3    ==>    let x = e1 in e2 e3, if x is not free in e3\n       ETmAppF (ELet (Binding (x, t) e1) e2, s0) e3\n         | not (isFreeExprVar x (freeVars (snd e3))) ->\n-          go $ ELetF (BindingF (x, t) (e1, s1)) (go $ ETmAppF (e2, s2) e3)\n+          go world $ ELetF (BindingF (x, t) (e1, s1)) (go world $ ETmAppF (e2, s2) e3)\n           where\n             (s1, s2) = infoUnstepELet x s0\n \n       -- e    ==>    e\n       e -> (embed (fmap fst e), infoStep world (fmap snd e))\n \n+-- | If we have a closed term under a lambda, we want to lift it up to the top level,\n+-- even though the result of the lambda is also a closed term. Similarly, if there\n+-- are branches of a case pattern that are closed, we choose to lift them to the top\n+-- level.\n+alwaysLiftUnder :: ExprF t -> Bool\n+alwaysLiftUnder = \\case\n+    ETyLamF _ _ -> True\n+    ETmLamF _ _ -> True\n+    ECaseF _ _ -> True"
+  },
+  {
+    "id" : "0ed2bcf7-6e15-49f9-9bed-82bb40765e86",
+    "prId" : 6101,
+    "comments" : [
+      {
+        "id" : "e4ab5cf8-72e1-4d09-bdc0-603fe1baaf92",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should only lift under a lambda if the thing we lift is not a lambda itself. Otherwise, we'll take top-level bindings of the form\r\n```haskell\r\nf _ x = x+x\r\n```\r\napart into\r\n```haskell\r\nf _ = f'\r\nf' x = x+x\r\n```\r\nThis performs worse during interpretation because we would need to go through the process of fully applying a closure twice.\r\nThis should not have significant impact but I suggest we change it nevertheless in order to make sure the simplifier does not end up making the code more complex.",
+        "createdAt" : "2020-06-18T18:49:52Z",
+        "updatedAt" : "2020-06-18T20:11:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6e65688b4d24eb95403a47fa037c0377875f13e",
+    "line" : 173,
+    "diffHunk" : "@@ -386,20 +458,89 @@ simplifyExpr world = fst . cata go\n       -- NOTE(MH): This also works when `x` is free in `e2` since let-bindings\n       -- are _not_ recursive.\n       ETmAppF (ETmLam (x, t) e1, s0) (e2, s2) ->\n-        go $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)\n+        go world $ ELetF (BindingF (x, t) (e2, s2)) (e1, s1)\n         where\n           s1 = infoUnstepETmapp x s0\n \n       -- (let x = e1 in e2) e3    ==>    let x = e1 in e2 e3, if x is not free in e3\n       ETmAppF (ELet (Binding (x, t) e1) e2, s0) e3\n         | not (isFreeExprVar x (freeVars (snd e3))) ->\n-          go $ ELetF (BindingF (x, t) (e1, s1)) (go $ ETmAppF (e2, s2) e3)\n+          go world $ ELetF (BindingF (x, t) (e1, s1)) (go world $ ETmAppF (e2, s2) e3)\n           where\n             (s1, s2) = infoUnstepELet x s0\n \n       -- e    ==>    e\n       e -> (embed (fmap fst e), infoStep world (fmap snd e))\n \n+-- | If we have a closed term under a lambda, we want to lift it up to the top level,\n+-- even though the result of the lambda is also a closed term. Similarly, if there\n+-- are branches of a case pattern that are closed, we choose to lift them to the top\n+-- level.\n+alwaysLiftUnder :: ExprF t -> Bool\n+alwaysLiftUnder = \\case\n+    ETyLamF _ _ -> True\n+    ETmLamF _ _ -> True"
+  },
+  {
+    "id" : "d56621d6-ab5f-4d64-89ca-ec77e19ab78e",
+    "prId" : 6013,
+    "comments" : [
+      {
+        "id" : "52dbc4ee-8ba4-42c9-bda5-56fc4e64af9d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "isn’t the bang pattern redundant if you use a `foldl'`?",
+        "createdAt" : "2020-05-18T15:58:57Z",
+        "updatedAt" : "2020-05-19T10:19:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "68641625-acb3-40ba-a1d1-d203c3744b04",
+        "parentId" : "52dbc4ee-8ba4-42c9-bda5-56fc4e64af9d",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Right, thanks!",
+        "createdAt" : "2020-05-19T10:05:16Z",
+        "updatedAt" : "2020-05-19T10:19:18Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9fdc3e79215bbeec79dac936d74352b0a3bc8111",
+    "line" : null,
+    "diffHunk" : "@@ -356,6 +361,31 @@ simplifyExpr world = fst . cata go\n       -- e    ==>    e\n       e -> (embed (fmap fst e), infoStep world (fmap snd e))\n \n+exprRefs :: Expr -> Set.Set (Qualified ExprValName)\n+exprRefs = cata $ \\case\n+    EValF x -> Set.singleton x\n+    e -> fold e\n+\n+topoSortDefValues :: Module -> [DefValue]\n+topoSortDefValues m =\n+    let isLocal Qualified{..} = do\n+            PRSelf <- pure qualPackage\n+            guard (moduleName m == qualModule)\n+            Just qualObject\n+        dvalDeps = mapMaybe isLocal . Set.toList . exprRefs . dvalBody\n+        dvalName = fst . dvalBinder\n+        dvalNode dval = (dval, dvalName dval, dvalDeps dval)\n+        sccs = G.stronglyConnComp . map dvalNode . NM.toList $ moduleValues m\n+    in concatMap toList sccs\n+\n+simplifyDefValue :: World -> DefValue -> DefValue\n+simplifyDefValue world dval = dval { dvalBody = simplifyExpr world (dvalBody dval) }\n+\n simplifyModule :: World -> Module -> Module\n simplifyModule world m =\n-    over moduleExpr (simplifyExpr (extendWorldSelf m world)) m\n+    let step !accum dval ="
+  },
+  {
+    "id" : "cc1be304-431d-4bda-b441-6edebd278634",
+    "prId" : 6013,
+    "comments" : [
+      {
+        "id" : "f3948098-651a-4b8a-9f14-36cb688a3f7d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks like you are reordering the values. I guess this doesn’t matter for anything?",
+        "createdAt" : "2020-05-18T15:59:54Z",
+        "updatedAt" : "2020-05-19T10:19:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6cb03962-c7ec-48f1-b824-3a626efcca69",
+        "parentId" : "f3948098-651a-4b8a-9f14-36cb688a3f7d",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I _think_ it's ok to reorder.",
+        "createdAt" : "2020-05-19T10:05:06Z",
+        "updatedAt" : "2020-05-19T10:19:18Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9fdc3e79215bbeec79dac936d74352b0a3bc8111",
+    "line" : 55,
+    "diffHunk" : "@@ -356,6 +361,31 @@ simplifyExpr world = fst . cata go\n       -- e    ==>    e\n       e -> (embed (fmap fst e), infoStep world (fmap snd e))\n \n+exprRefs :: Expr -> Set.Set (Qualified ExprValName)\n+exprRefs = cata $ \\case\n+    EValF x -> Set.singleton x\n+    e -> fold e\n+\n+topoSortDefValues :: Module -> [DefValue]\n+topoSortDefValues m =\n+    let isLocal Qualified{..} = do\n+            PRSelf <- pure qualPackage\n+            guard (moduleName m == qualModule)\n+            Just qualObject\n+        dvalDeps = mapMaybe isLocal . Set.toList . exprRefs . dvalBody\n+        dvalName = fst . dvalBinder\n+        dvalNode dval = (dval, dvalName dval, dvalDeps dval)\n+        sccs = G.stronglyConnComp . map dvalNode . NM.toList $ moduleValues m\n+    in concatMap toList sccs\n+\n+simplifyDefValue :: World -> DefValue -> DefValue\n+simplifyDefValue world dval = dval { dvalBody = simplifyExpr world (dvalBody dval) }\n+\n simplifyModule :: World -> Module -> Module\n simplifyModule world m =\n-    over moduleExpr (simplifyExpr (extendWorldSelf m world)) m\n+    let step !accum dval =\n+            let m' = m { moduleValues = accum }\n+                w' = extendWorldSelf m' world\n+                d' = simplifyDefValue w' dval\n+            in NM.insert d' accum\n+    in m { moduleValues = foldl' step NM.empty (topoSortDefValues m) }"
+  },
+  {
+    "id" : "3646286d-4755-4fef-9d78-ac31cd5dfb09",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "fc642a10-351b-4579-84fd-cf84aa6741cb",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I wonder if we should tighten this to \"a bunch of type lambdas followed by something looking like `\\x. x.f unit`\"? But on the other hand, there shouldn't be any other structural record projections, are there?",
+        "createdAt" : "2020-05-08T19:47:18Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "594f1c00-4c97-4f63-bd5c-15238eea129f",
+        "parentId" : "fc642a10-351b-4579-84fd-cf84aa6741cb",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Yeah, I don't think we get anything by making it more precise right now. 🤷 The only structural projections are the ones we insert for typeclass desugaring.",
+        "createdAt" : "2020-05-11T10:59:09Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : 117,
+    "diffHunk" : "@@ -241,14 +200,118 @@ safetyStep = \\case\n   ETypeRepF _ -> Safe 0\n \n \n-infoStep :: ExprF Info -> Info\n-infoStep e = Info (freeVarsStep (fmap freeVars e)) (safetyStep (fmap safety e))\n+isTypeClassDictionary :: DefValue -> Bool\n+isTypeClassDictionary DefValue{..}\n+    = T.isPrefixOf \"$f\" (unExprValName (fst dvalBinder)) -- generic dictionary\n+    || T.isPrefixOf \"$d\" (unExprValName (fst dvalBinder)) -- specialized dictionary\n \n-simplifyExpr :: Expr -> Expr\n-simplifyExpr = fst . cata go\n+isTypeClassProjection :: DefValue -> Bool\n+isTypeClassProjection DefValue{..} = go dvalBody\n   where\n+    go :: Expr -> Bool"
+  },
+  {
+    "id" : "b7b00878-ffae-4eea-bc2f-d9531e1373e7",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "1d86352e-0762-46ad-9e4f-555ea4834f51",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Shall we remove this?",
+        "createdAt" : "2020-05-08T19:50:06Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : null,
+    "diffHunk" : "@@ -241,14 +200,118 @@ safetyStep = \\case\n   ETypeRepF _ -> Safe 0\n \n \n-infoStep :: ExprF Info -> Info\n-infoStep e = Info (freeVarsStep (fmap freeVars e)) (safetyStep (fmap safety e))\n+isTypeClassDictionary :: DefValue -> Bool\n+isTypeClassDictionary DefValue{..}\n+    = T.isPrefixOf \"$f\" (unExprValName (fst dvalBinder)) -- generic dictionary\n+    || T.isPrefixOf \"$d\" (unExprValName (fst dvalBinder)) -- specialized dictionary\n \n-simplifyExpr :: Expr -> Expr\n-simplifyExpr = fst . cata go\n+isTypeClassProjection :: DefValue -> Bool\n+isTypeClassProjection DefValue{..} = go dvalBody\n   where\n+    go :: Expr -> Bool\n+    go (ETyLam _ e) = go e\n+    go (ETmLam _ e) = go e\n+    go (ETmApp e _) = go e\n+    go (EStructProj _ _) = True\n+    go _ = False\n+\n+typeclassStep :: World -> ExprF TypeClassInfo -> TypeClassInfo\n+typeclassStep world = \\case\n+    EValF x ->\n+        case lookupValue x world of\n+            Left _ -> TCNeither\n+            Right dv\n+                | isTypeClassProjection dv -> TCProjection (dvalBody dv)\n+                | isTypeClassDictionary dv -> TCDictionary (dvalBody dv)\n+                | otherwise -> TCNeither\n+\n+    ETyAppF tci ty ->\n+        case tci of\n+            TCProjection (ETyLam (x,_) e) ->\n+                TCProjection (substExpr (typeSubst x ty) e)\n+            TCDictionary (ETyLam (x,_) e) ->\n+                TCDictionary (substExpr (typeSubst x ty) e)\n+            _ ->\n+                TCNeither\n+\n+    _ -> TCNeither\n+\n+\n+-- -- | Should I apply this argument immediately in a lambda?\n+-- shouldApply :: Expr -> Bool\n+-- shouldApply = \\case\n+--     EBuiltin _ -> True\n+-- --    EStructCon _ -> True\n+--     _ -> False"
+  },
+  {
+    "id" : "afe3a6b8-e962-4522-889a-0a285ca0bc9d",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "ccdc4cce-ba14-4712-9014-58f07258a097",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not sure you're aware of our wealth of pattern synonyms:\r\n```suggestion\r\n    ETmApp e EUnit -> do\r\n```",
+        "createdAt" : "2020-05-08T19:53:26Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : null,
+    "diffHunk" : "@@ -241,14 +200,118 @@ safetyStep = \\case\n   ETypeRepF _ -> Safe 0\n \n \n-infoStep :: ExprF Info -> Info\n-infoStep e = Info (freeVarsStep (fmap freeVars e)) (safetyStep (fmap safety e))\n+isTypeClassDictionary :: DefValue -> Bool\n+isTypeClassDictionary DefValue{..}\n+    = T.isPrefixOf \"$f\" (unExprValName (fst dvalBinder)) -- generic dictionary\n+    || T.isPrefixOf \"$d\" (unExprValName (fst dvalBinder)) -- specialized dictionary\n \n-simplifyExpr :: Expr -> Expr\n-simplifyExpr = fst . cata go\n+isTypeClassProjection :: DefValue -> Bool\n+isTypeClassProjection DefValue{..} = go dvalBody\n   where\n+    go :: Expr -> Bool\n+    go (ETyLam _ e) = go e\n+    go (ETmLam _ e) = go e\n+    go (ETmApp e _) = go e\n+    go (EStructProj _ _) = True\n+    go _ = False\n+\n+typeclassStep :: World -> ExprF TypeClassInfo -> TypeClassInfo\n+typeclassStep world = \\case\n+    EValF x ->\n+        case lookupValue x world of\n+            Left _ -> TCNeither\n+            Right dv\n+                | isTypeClassProjection dv -> TCProjection (dvalBody dv)\n+                | isTypeClassDictionary dv -> TCDictionary (dvalBody dv)\n+                | otherwise -> TCNeither\n+\n+    ETyAppF tci ty ->\n+        case tci of\n+            TCProjection (ETyLam (x,_) e) ->\n+                TCProjection (substExpr (typeSubst x ty) e)\n+            TCDictionary (ETyLam (x,_) e) ->\n+                TCDictionary (substExpr (typeSubst x ty) e)\n+            _ ->\n+                TCNeither\n+\n+    _ -> TCNeither\n+\n+\n+-- -- | Should I apply this argument immediately in a lambda?\n+-- shouldApply :: Expr -> Bool\n+-- shouldApply = \\case\n+--     EBuiltin _ -> True\n+-- --    EStructCon _ -> True\n+--     _ -> False\n+\n+infoStep :: World -> ExprF Info -> Info\n+infoStep world e = Info\n+    (freeVarsStep (fmap freeVars e))\n+    (safetyStep (fmap safety e))\n+    (typeclassStep world (fmap tcinfo e))\n+\n+-- | Try to get the actual field value from the body of\n+-- a typeclass projection function, after substitution of the\n+-- dictionary function inside.\n+getProjectedTypeclassField :: World -> Expr -> Maybe Expr\n+getProjectedTypeclassField world = \\case\n+    EStructProj f e -> do\n+        EStructCon fs <- getTypeClassDictionary world e\n+        lookup f fs\n+\n+    ETmApp e (EBuiltin BEUnit) -> do"
+  },
+  {
+    "id" : "dafefdac-6ac3-4f66-87a3-78a3bf904a18",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "cee7eedb-8a55-40be-af62-da0e6ecf6645",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Shouldn't we allow `ETmAppF` for dictionaries as well in order to inline dictionaries like `instance Eq a => Eq [a]`?",
+        "createdAt" : "2020-05-08T20:03:15Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a31116bc-cbcb-4eec-8025-93cc84b319bd",
+        "parentId" : "cee7eedb-8a55-40be-af62-da0e6ecf6645",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Do these count as \"known typeclasses\"? AFAIK if you have a fixed `a`, GHC will specialize the typeclass, so we end up inlining them. But if you have a generic `a` then you aren't going to get inlining.",
+        "createdAt" : "2020-05-11T10:55:09Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "61318404-6ce5-4a60-b1f7-18abc8d90212",
+        "parentId" : "cee7eedb-8a55-40be-af62-da0e6ecf6645",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I think we can perhaps leave this (& further experiments with inlining) to a separate PR.",
+        "createdAt" : "2020-05-11T11:21:19Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : 141,
+    "diffHunk" : "@@ -241,14 +200,118 @@ safetyStep = \\case\n   ETypeRepF _ -> Safe 0\n \n \n-infoStep :: ExprF Info -> Info\n-infoStep e = Info (freeVarsStep (fmap freeVars e)) (safetyStep (fmap safety e))\n+isTypeClassDictionary :: DefValue -> Bool\n+isTypeClassDictionary DefValue{..}\n+    = T.isPrefixOf \"$f\" (unExprValName (fst dvalBinder)) -- generic dictionary\n+    || T.isPrefixOf \"$d\" (unExprValName (fst dvalBinder)) -- specialized dictionary\n \n-simplifyExpr :: Expr -> Expr\n-simplifyExpr = fst . cata go\n+isTypeClassProjection :: DefValue -> Bool\n+isTypeClassProjection DefValue{..} = go dvalBody\n   where\n+    go :: Expr -> Bool\n+    go (ETyLam _ e) = go e\n+    go (ETmLam _ e) = go e\n+    go (ETmApp e _) = go e\n+    go (EStructProj _ _) = True\n+    go _ = False\n+\n+typeclassStep :: World -> ExprF TypeClassInfo -> TypeClassInfo\n+typeclassStep world = \\case\n+    EValF x ->\n+        case lookupValue x world of\n+            Left _ -> TCNeither\n+            Right dv\n+                | isTypeClassProjection dv -> TCProjection (dvalBody dv)\n+                | isTypeClassDictionary dv -> TCDictionary (dvalBody dv)\n+                | otherwise -> TCNeither\n+\n+    ETyAppF tci ty ->\n+        case tci of\n+            TCProjection (ETyLam (x,_) e) ->\n+                TCProjection (substExpr (typeSubst x ty) e)\n+            TCDictionary (ETyLam (x,_) e) ->\n+                TCDictionary (substExpr (typeSubst x ty) e)\n+            _ ->\n+                TCNeither"
+  },
+  {
+    "id" : "d6e92614-0ed0-40ef-abc2-fbf153ab1421",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "2504d34c-7873-40a4-b86f-091e714182ea",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Hasn't `typeclassStep` already remove all type applications?",
+        "createdAt" : "2020-05-08T20:05:17Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8481aab5-b50d-414b-bd95-ebae3c419120",
+        "parentId" : "2504d34c-7873-40a4-b86f-091e714182ea",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Nope, because of type class specialization.",
+        "createdAt" : "2020-05-11T10:52:11Z",
+        "updatedAt" : "2020-05-11T15:11:15Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : 183,
+    "diffHunk" : "@@ -241,14 +200,118 @@ safetyStep = \\case\n   ETypeRepF _ -> Safe 0\n \n \n-infoStep :: ExprF Info -> Info\n-infoStep e = Info (freeVarsStep (fmap freeVars e)) (safetyStep (fmap safety e))\n+isTypeClassDictionary :: DefValue -> Bool\n+isTypeClassDictionary DefValue{..}\n+    = T.isPrefixOf \"$f\" (unExprValName (fst dvalBinder)) -- generic dictionary\n+    || T.isPrefixOf \"$d\" (unExprValName (fst dvalBinder)) -- specialized dictionary\n \n-simplifyExpr :: Expr -> Expr\n-simplifyExpr = fst . cata go\n+isTypeClassProjection :: DefValue -> Bool\n+isTypeClassProjection DefValue{..} = go dvalBody\n   where\n+    go :: Expr -> Bool\n+    go (ETyLam _ e) = go e\n+    go (ETmLam _ e) = go e\n+    go (ETmApp e _) = go e\n+    go (EStructProj _ _) = True\n+    go _ = False\n+\n+typeclassStep :: World -> ExprF TypeClassInfo -> TypeClassInfo\n+typeclassStep world = \\case\n+    EValF x ->\n+        case lookupValue x world of\n+            Left _ -> TCNeither\n+            Right dv\n+                | isTypeClassProjection dv -> TCProjection (dvalBody dv)\n+                | isTypeClassDictionary dv -> TCDictionary (dvalBody dv)\n+                | otherwise -> TCNeither\n+\n+    ETyAppF tci ty ->\n+        case tci of\n+            TCProjection (ETyLam (x,_) e) ->\n+                TCProjection (substExpr (typeSubst x ty) e)\n+            TCDictionary (ETyLam (x,_) e) ->\n+                TCDictionary (substExpr (typeSubst x ty) e)\n+            _ ->\n+                TCNeither\n+\n+    _ -> TCNeither\n+\n+\n+-- -- | Should I apply this argument immediately in a lambda?\n+-- shouldApply :: Expr -> Bool\n+-- shouldApply = \\case\n+--     EBuiltin _ -> True\n+-- --    EStructCon _ -> True\n+--     _ -> False\n+\n+infoStep :: World -> ExprF Info -> Info\n+infoStep world e = Info\n+    (freeVarsStep (fmap freeVars e))\n+    (safetyStep (fmap safety e))\n+    (typeclassStep world (fmap tcinfo e))\n+\n+-- | Try to get the actual field value from the body of\n+-- a typeclass projection function, after substitution of the\n+-- dictionary function inside.\n+getProjectedTypeclassField :: World -> Expr -> Maybe Expr\n+getProjectedTypeclassField world = \\case\n+    EStructProj f e -> do\n+        EStructCon fs <- getTypeClassDictionary world e\n+        lookup f fs\n+\n+    ETmApp e (EBuiltin BEUnit) -> do\n+        ETmLam (x,_) e' <- getProjectedTypeclassField world e\n+        Just (substExpr (exprSubst x (EBuiltin BEUnit)) e')\n+\n+    _ ->\n+        Nothing\n+\n+-- | Try to get typeclass dictionary from the body of\n+-- a typeclass dictionary function, after substitution.\n+-- This is made complicated by GHC's specializer, which\n+-- introduces a level of indirection. That's why we need\n+-- to inline dictionary functions and beta-reduce.\n+getTypeClassDictionary :: World -> Expr -> Maybe Expr\n+getTypeClassDictionary world = \\case\n+    e@(EStructCon _) ->\n+        Just e\n+\n+    EVal x\n+        | Right dv <- lookupValue x world\n+        , isTypeClassDictionary dv\n+        -> do\n+            Just (dvalBody dv)\n+\n+    ETyApp e t -> do"
+  },
+  {
+    "id" : "da813348-6fc4-4028-a9d2-0414660d6753",
+    "prId" : 5759,
+    "comments" : [
+      {
+        "id" : "36f319f5-acf6-468e-95a7-298edc56b020",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Aren't we running danger to duplicate code here? Should we avoid this with a `let` binding when necessary?",
+        "createdAt" : "2020-05-08T20:06:42Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "621c967d-c9ba-4500-9cb9-75fd92aa586a",
+        "parentId" : "36f319f5-acf6-468e-95a7-298edc56b020",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I don't think so. This is here because of typeclass specialization.\r\n\r\nIntroducing a let would make the optimization a lot more complicated -- can't apply typeclass projection on a let directly.",
+        "createdAt" : "2020-05-11T10:47:34Z",
+        "updatedAt" : "2020-05-11T15:11:14Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7e304c5bdbe25b859f5355cd5e3c0b4e8f275415",
+    "line" : null,
+    "diffHunk" : "@@ -241,14 +200,118 @@ safetyStep = \\case\n   ETypeRepF _ -> Safe 0\n \n \n-infoStep :: ExprF Info -> Info\n-infoStep e = Info (freeVarsStep (fmap freeVars e)) (safetyStep (fmap safety e))\n+isTypeClassDictionary :: DefValue -> Bool\n+isTypeClassDictionary DefValue{..}\n+    = T.isPrefixOf \"$f\" (unExprValName (fst dvalBinder)) -- generic dictionary\n+    || T.isPrefixOf \"$d\" (unExprValName (fst dvalBinder)) -- specialized dictionary\n \n-simplifyExpr :: Expr -> Expr\n-simplifyExpr = fst . cata go\n+isTypeClassProjection :: DefValue -> Bool\n+isTypeClassProjection DefValue{..} = go dvalBody\n   where\n+    go :: Expr -> Bool\n+    go (ETyLam _ e) = go e\n+    go (ETmLam _ e) = go e\n+    go (ETmApp e _) = go e\n+    go (EStructProj _ _) = True\n+    go _ = False\n+\n+typeclassStep :: World -> ExprF TypeClassInfo -> TypeClassInfo\n+typeclassStep world = \\case\n+    EValF x ->\n+        case lookupValue x world of\n+            Left _ -> TCNeither\n+            Right dv\n+                | isTypeClassProjection dv -> TCProjection (dvalBody dv)\n+                | isTypeClassDictionary dv -> TCDictionary (dvalBody dv)\n+                | otherwise -> TCNeither\n+\n+    ETyAppF tci ty ->\n+        case tci of\n+            TCProjection (ETyLam (x,_) e) ->\n+                TCProjection (substExpr (typeSubst x ty) e)\n+            TCDictionary (ETyLam (x,_) e) ->\n+                TCDictionary (substExpr (typeSubst x ty) e)\n+            _ ->\n+                TCNeither\n+\n+    _ -> TCNeither\n+\n+\n+-- -- | Should I apply this argument immediately in a lambda?\n+-- shouldApply :: Expr -> Bool\n+-- shouldApply = \\case\n+--     EBuiltin _ -> True\n+-- --    EStructCon _ -> True\n+--     _ -> False\n+\n+infoStep :: World -> ExprF Info -> Info\n+infoStep world e = Info\n+    (freeVarsStep (fmap freeVars e))\n+    (safetyStep (fmap safety e))\n+    (typeclassStep world (fmap tcinfo e))\n+\n+-- | Try to get the actual field value from the body of\n+-- a typeclass projection function, after substitution of the\n+-- dictionary function inside.\n+getProjectedTypeclassField :: World -> Expr -> Maybe Expr\n+getProjectedTypeclassField world = \\case\n+    EStructProj f e -> do\n+        EStructCon fs <- getTypeClassDictionary world e\n+        lookup f fs\n+\n+    ETmApp e (EBuiltin BEUnit) -> do\n+        ETmLam (x,_) e' <- getProjectedTypeclassField world e\n+        Just (substExpr (exprSubst x (EBuiltin BEUnit)) e')\n+\n+    _ ->\n+        Nothing\n+\n+-- | Try to get typeclass dictionary from the body of\n+-- a typeclass dictionary function, after substitution.\n+-- This is made complicated by GHC's specializer, which\n+-- introduces a level of indirection. That's why we need\n+-- to inline dictionary functions and beta-reduce.\n+getTypeClassDictionary :: World -> Expr -> Maybe Expr\n+getTypeClassDictionary world = \\case\n+    e@(EStructCon _) ->\n+        Just e\n+\n+    EVal x\n+        | Right dv <- lookupValue x world\n+        , isTypeClassDictionary dv\n+        -> do\n+            Just (dvalBody dv)\n+\n+    ETyApp e t -> do\n+        ETyLam (x,_) e' <- getTypeClassDictionary world e\n+        Just (substExpr (typeSubst x t) e')\n+\n+    ETmApp e1 e2 -> do\n+        ETmLam (x,_) e1' <- getTypeClassDictionary world e1\n+        Just (substExpr (exprSubst x e2) e1')"
+  },
+  {
+    "id" : "1fa36798-4691-44dc-87bc-6ab058beeaf3",
+    "prId" : 2670,
+    "comments" : [
+      {
+        "id" : "e5824b80-9b89-4662-8209-c0502307f275",
+        "parentId" : null,
+        "author" : null,
+        "body" : "@hurryabit Just to confirm, type applications aren't counted here, right? Otherwise these numbers would have to be higher. (And so would the numbers for BEFoldl, BEFoldr, etc.) But then `BEMapEmpty` says `Safe 1` but it should be `Safe 0`? ",
+        "createdAt" : "2019-08-27T19:59:50Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4194258f-2a10-46b7-9787-d2229bb4448f",
+        "parentId" : "e5824b80-9b89-4662-8209-c0502307f275",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Correct, type applications are not counted. (See the cases for `ETyApp` and `ETyLam` below.) The `Safe 1` for `BEMapEmpty` is wrong and must have slipped through my code review. I'll fix it in a separate PR.",
+        "createdAt" : "2019-08-28T09:47:06Z",
+        "updatedAt" : "2019-08-28T11:30:58Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2c2900d7cd2fd33fbf5de9881afed0fec07bff1f",
+    "line" : 17,
+    "diffHunk" : "@@ -123,6 +123,20 @@ safetyStep = \\case\n       BEMulDecimal        -> Safe 1\n       BEDivDecimal        -> Safe 1\n       BERoundDecimal      -> Safe 1\n+      BEEqualNumeric      -> Safe 2\n+      BELessNumeric       -> Safe 2\n+      BELessEqNumeric     -> Safe 2\n+      BEGreaterNumeric    -> Safe 2\n+      BEGreaterEqNumeric  -> Safe 2\n+      BEAddNumeric        -> Safe 1\n+      BESubNumeric        -> Safe 1\n+      BEMulNumeric        -> Safe 1\n+      BEDivNumeric        -> Safe 1\n+      BEInt64ToNumeric    -> Safe 0\n+      BENumericToInt64    -> Safe 0\n+      BENumericFromText   -> Safe 1\n+      BEToTextNumeric     -> Safe 1\n+      BERoundNumeric      -> Safe 1"
+  },
+  {
+    "id" : "7c8d39d1-2e29-44a2-bd16-9044ae52e486",
+    "prId" : 1480,
+    "comments" : [
+      {
+        "id" : "f3b52df7-c0f7-41ae-b752-1e7ce9d55890",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Since `CODE_POINTS_TO_TEXT` will throw an exception if there's an invalid code point, this should be\r\n```suggestion\r\n      BECodePointsToText  -> Safe 0\r\n```",
+        "createdAt" : "2019-06-03T13:10:09Z",
+        "updatedAt" : "2019-06-04T13:28:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f4d59d529f1dc909384d1bcbc58e2f901116e90b",
+    "line" : 4,
+    "diffHunk" : "@@ -115,6 +115,7 @@ safetyStep = \\case\n       BEGreaterEq _       -> Safe 2\n       BEGreater _         -> Safe 2\n       BEToText _          -> Safe 1\n+      BECodePointsToText  -> Safe 1"
+  }
+]

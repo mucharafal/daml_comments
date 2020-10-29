@@ -1,0 +1,72 @@
+[
+  {
+    "id" : "66125e76-ec06-4502-9367-60cbfeb12228",
+    "prId" : 6932,
+    "comments" : [
+      {
+        "id" : "a9a1c563-d892-4b04-84a9-8783b263a271",
+        "parentId" : null,
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Could this be  `expr` instead of `expr0`?",
+        "createdAt" : "2020-07-30T14:30:48Z",
+        "updatedAt" : "2020-07-30T15:15:05Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d7a4d0b1-6926-4f17-834b-779ad7935e1c",
+        "parentId" : "a9a1c563-d892-4b04-84a9-8783b263a271",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Are you asking about replacing the `expr0` in this line with `expr` or making this rule part of `expr` instead of `expr0` further up?\r\n\r\nThe answer to the former is \"no\". I want the `loc(...)` construct to look like a function and arguments are of the `expr0` form.\r\n\r\nThe answer to the second would be \"good catch\". In fact, `eLoc` should be part of `expr` since it looks like an application. Otherwise expressions like `loc(...) f g` would be parsed as `(loc(...) f) g`, which seems somewhat counterintuitive. When `eLoc` is part of `expr`, this expression will be rejected.\r\n\r\nI moved `eLoc` to `expr` and added a test case demonstrating that the expression above gets rejected.",
+        "createdAt" : "2020-07-30T14:57:30Z",
+        "updatedAt" : "2020-07-30T15:15:05Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3109c58e342d7cc654c81ed03b022ce9f979c0df",
+    "line" : 27,
+    "diffHunk" : "@@ -384,6 +385,22 @@ private[parser] class ExprParser[P](parserParameters: ParserParameters[P]) {\n       updateGetTime |\n       updateEmbedExpr\n \n+  private lazy val int: Parser[Int] =\n+    acceptMatch(\"Int\", { case Number(l) => l.toInt })\n+\n+  private lazy val eLoc: Parser[Expr] =\n+    `loc` ~>! (`(` ~> dottedName) ~ (`,` ~> id) ~ (`,` ~> int) ~ (`,` ~> int) ~ (`,` ~> int) ~ (`,` ~> int) ~ (`)` ~> expr0) ^^ {"
+  },
+  {
+    "id" : "5b98b466-ad82-46da-8c41-380885f8b47b",
+    "prId" : 4983,
+    "comments" : [
+      {
+        "id" : "bbc8fb30-d808-4649-8587-2fde66639ee0",
+        "parentId" : null,
+        "author" : null,
+        "body" : "```suggestion\r\n    \"GREATER_EQ\" -> BEGreaterEq,\r\n```",
+        "createdAt" : "2020-03-13T15:04:25Z",
+        "updatedAt" : "2020-03-13T16:40:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "034cc94c45b4451105e3469d62baf353006c86d8",
+    "line" : null,
+    "diffHunk" : "@@ -285,6 +285,10 @@ private[parser] class ExprParser[P](parserParameters: ParserParameters[P]) {\n     \"EQUAL_LIST\" -> BEqualList,\n     \"EQUAL_CONTRACT_ID\" -> BEqualContractId,\n     \"EQUAL\" -> BEqual,\n+    \"LESS\" -> BELess,\n+    \"LESS_EQ\" -> BELessEq,\n+    \"GREATER\" -> BEGreater,\n+    \"GREATER_EQ\" -> BEGreater,"
+  }
+]

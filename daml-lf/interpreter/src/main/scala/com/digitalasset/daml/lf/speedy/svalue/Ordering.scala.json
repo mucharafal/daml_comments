@@ -1,0 +1,776 @@
+[
+  {
+    "id" : "5c3d0387-4ffa-4d43-9490-e2bf3205827c",
+    "prId" : 7329,
+    "comments" : [
+      {
+        "id" : "eac82f10-8432-42cc-9163-11f1b9e2b086",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I know this is not necessary but it makes the code easier to read for people with limited Scala experience, of which we have many.\r\n```suggestion\r\n        case (SUnit, SUnit) =>\r\n          ()\r\n```",
+        "createdAt" : "2020-09-08T11:24:33Z",
+        "updatedAt" : "2020-09-08T11:40:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "62fb32a4dcf13c3e6444a134bc27819bc6b990e3",
+    "line" : 48,
+    "diffHunk" : "@@ -5,22 +5,105 @@ package com.daml.lf\n package speedy\n package svalue\n \n-import com.daml.lf.data.{Bytes, FrontStack, FrontStackCons, ImmArray, Utf8}\n-import com.daml.lf.data.ScalazEqual._\n-import com.daml.lf.language.TypeOrdering\n-import com.daml.lf.speedy.SError.SErrorCrash\n-import com.daml.lf.speedy.SValue._\n-import com.daml.lf.value.Value.ContractId\n+import data.{Bytes, Utf8}\n+import language.TypeOrdering\n+import value.Value.ContractId\n \n-import scala.annotation.tailrec\n import scala.collection.JavaConverters._\n \n object Ordering extends scala.math.Ordering[SValue] {\n \n-  private def compareText(text1: String, text2: String): Int =\n-    Utf8.Ordering.compare(text1, text2)\n+  @throws[SError.SErrorCrash]\n+  // Ordering between two SValues of same type.\n+  // This follows the equality defined in the daml-lf spec.\n+  def compare(x: SValue, y: SValue): Int = {\n+    import SValue._\n \n-  private def compareCid(cid1: ContractId, cid2: ContractId): Int =\n+    var diff = 0\n+    var stackX = List(Iterator.single(x))\n+    var stackY = List(Iterator.single(y))\n+    // invariant: stackX.length == stackY.length\n+\n+    @inline\n+    def push(xs: Iterator[SValue], ys: Iterator[SValue]): Unit = {\n+      stackX = xs :: stackX\n+      stackY = ys :: stackY\n+    }\n+\n+    @inline\n+    def pop(): Unit = {\n+      stackX = stackX.tail\n+      stackY = stackY.tail\n+    }\n+\n+    @inline\n+    def step(tuple: (SValue, SValue)) =\n+      tuple match {\n+        case (SUnit, SUnit) =>"
+  },
+  {
+    "id" : "872ce426-a615-4f5a-9e25-30d3bd0c28a1",
+    "prId" : 7329,
+    "comments" : [
+      {
+        "id" : "12d6feeb-4b37-48f9-b022-25cb376ef4fa",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n          // parties are ASCII, so UTF16 comparison matches UTF8 comparison.\r\n```",
+        "createdAt" : "2020-09-08T11:25:21Z",
+        "updatedAt" : "2020-09-08T11:40:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "62fb32a4dcf13c3e6444a134bc27819bc6b990e3",
+    "line" : null,
+    "diffHunk" : "@@ -5,22 +5,105 @@ package com.daml.lf\n package speedy\n package svalue\n \n-import com.daml.lf.data.{Bytes, FrontStack, FrontStackCons, ImmArray, Utf8}\n-import com.daml.lf.data.ScalazEqual._\n-import com.daml.lf.language.TypeOrdering\n-import com.daml.lf.speedy.SError.SErrorCrash\n-import com.daml.lf.speedy.SValue._\n-import com.daml.lf.value.Value.ContractId\n+import data.{Bytes, Utf8}\n+import language.TypeOrdering\n+import value.Value.ContractId\n \n-import scala.annotation.tailrec\n import scala.collection.JavaConverters._\n \n object Ordering extends scala.math.Ordering[SValue] {\n \n-  private def compareText(text1: String, text2: String): Int =\n-    Utf8.Ordering.compare(text1, text2)\n+  @throws[SError.SErrorCrash]\n+  // Ordering between two SValues of same type.\n+  // This follows the equality defined in the daml-lf spec.\n+  def compare(x: SValue, y: SValue): Int = {\n+    import SValue._\n \n-  private def compareCid(cid1: ContractId, cid2: ContractId): Int =\n+    var diff = 0\n+    var stackX = List(Iterator.single(x))\n+    var stackY = List(Iterator.single(y))\n+    // invariant: stackX.length == stackY.length\n+\n+    @inline\n+    def push(xs: Iterator[SValue], ys: Iterator[SValue]): Unit = {\n+      stackX = xs :: stackX\n+      stackY = ys :: stackY\n+    }\n+\n+    @inline\n+    def pop(): Unit = {\n+      stackX = stackX.tail\n+      stackY = stackY.tail\n+    }\n+\n+    @inline\n+    def step(tuple: (SValue, SValue)) =\n+      tuple match {\n+        case (SUnit, SUnit) =>\n+        case (SBool(x), SBool(y)) =>\n+          diff = x compareTo y\n+        case (SInt64(x), SInt64(y)) =>\n+          diff = x compareTo y\n+        case (SNumeric(x), SNumeric(y)) =>\n+          diff = x compareTo y\n+        case (SText(x), SText(y)) =>\n+          diff = Utf8.Ordering.compare(x, y)\n+        case (SDate(x), SDate(y)) =>\n+          diff = x compareTo y\n+        case (STimestamp(x), STimestamp(y)) =>\n+          diff = x compareTo y\n+        case (SParty(x), SParty(y)) =>\n+          // party are ASCII, so UTF16 comparison matches UTF8 comparison."
+  },
+  {
+    "id" : "60569c82-f300-4997-ba31-dc5a04c085e9",
+    "prId" : 7329,
+    "comments" : [
+      {
+        "id" : "4d863564-d9aa-4fef-8935-66f1c2bf4fda",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Just to reflect the actual order of comparison in the code.\r\n```suggestion\r\n          diff = xRank compareTo yRank\r\n          push(Iterator.single(x), Iterator.single(y))\r\n```",
+        "createdAt" : "2020-09-08T11:26:44Z",
+        "updatedAt" : "2020-09-08T11:40:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "62fb32a4dcf13c3e6444a134bc27819bc6b990e3",
+    "line" : null,
+    "diffHunk" : "@@ -5,22 +5,105 @@ package com.daml.lf\n package speedy\n package svalue\n \n-import com.daml.lf.data.{Bytes, FrontStack, FrontStackCons, ImmArray, Utf8}\n-import com.daml.lf.data.ScalazEqual._\n-import com.daml.lf.language.TypeOrdering\n-import com.daml.lf.speedy.SError.SErrorCrash\n-import com.daml.lf.speedy.SValue._\n-import com.daml.lf.value.Value.ContractId\n+import data.{Bytes, Utf8}\n+import language.TypeOrdering\n+import value.Value.ContractId\n \n-import scala.annotation.tailrec\n import scala.collection.JavaConverters._\n \n object Ordering extends scala.math.Ordering[SValue] {\n \n-  private def compareText(text1: String, text2: String): Int =\n-    Utf8.Ordering.compare(text1, text2)\n+  @throws[SError.SErrorCrash]\n+  // Ordering between two SValues of same type.\n+  // This follows the equality defined in the daml-lf spec.\n+  def compare(x: SValue, y: SValue): Int = {\n+    import SValue._\n \n-  private def compareCid(cid1: ContractId, cid2: ContractId): Int =\n+    var diff = 0\n+    var stackX = List(Iterator.single(x))\n+    var stackY = List(Iterator.single(y))\n+    // invariant: stackX.length == stackY.length\n+\n+    @inline\n+    def push(xs: Iterator[SValue], ys: Iterator[SValue]): Unit = {\n+      stackX = xs :: stackX\n+      stackY = ys :: stackY\n+    }\n+\n+    @inline\n+    def pop(): Unit = {\n+      stackX = stackX.tail\n+      stackY = stackY.tail\n+    }\n+\n+    @inline\n+    def step(tuple: (SValue, SValue)) =\n+      tuple match {\n+        case (SUnit, SUnit) =>\n+        case (SBool(x), SBool(y)) =>\n+          diff = x compareTo y\n+        case (SInt64(x), SInt64(y)) =>\n+          diff = x compareTo y\n+        case (SNumeric(x), SNumeric(y)) =>\n+          diff = x compareTo y\n+        case (SText(x), SText(y)) =>\n+          diff = Utf8.Ordering.compare(x, y)\n+        case (SDate(x), SDate(y)) =>\n+          diff = x compareTo y\n+        case (STimestamp(x), STimestamp(y)) =>\n+          diff = x compareTo y\n+        case (SParty(x), SParty(y)) =>\n+          // party are ASCII, so UTF16 comparison matches UTF8 comparison.\n+          diff = x compareTo y\n+        case (SContractId(x), SContractId(y)) =>\n+          diff = compareCid(x, y)\n+        case (SEnum(_, _, xRank), SEnum(_, _, yRank)) =>\n+          diff = xRank compareTo yRank\n+        case (SRecord(_, _, xs), SRecord(_, _, ys)) =>\n+          push(xs.iterator().asScala, ys.iterator().asScala)\n+        case (SVariant(_, _, xRank, x), SVariant(_, _, yRank, y)) =>\n+          push(Iterator.single(x), Iterator.single(y))\n+          diff = xRank compareTo yRank"
+  },
+  {
+    "id" : "19aa153f-b4e4-44a2-bfbf-cd31322e6f20",
+    "prId" : 7329,
+    "comments" : [
+      {
+        "id" : "9c504025-791b-43a5-9b3a-63a89ba9d079",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I assume `STextMap` is backed by an ordered tree map. Is that correct? If so, this gives us complexity `O(n log n)`. Is there a way to get an iterator over the key/value pairs in the order of the keys? This should leave us with complexity `O(n)` then.\r\n\r\nSame for generic map below.",
+        "createdAt" : "2020-09-08T11:30:10Z",
+        "updatedAt" : "2020-09-08T11:40:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1124e734-1abd-4ef6-868d-51091f24f889",
+        "parentId" : "9c504025-791b-43a5-9b3a-63a89ba9d079",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Inside Speedy, `STextMap` is based on HashMap, so there is no way to get linear complexity here.\r\nNote that #7334, replaces  `STextMap` by `SGenMap` (based on TreeMap) so we will get linear complexity. ",
+        "createdAt" : "2020-09-08T11:39:53Z",
+        "updatedAt" : "2020-09-08T11:41:19Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "50219b25-ad08-40e1-bd97-ab01250f1bb1",
+        "parentId" : "9c504025-791b-43a5-9b3a-63a89ba9d079",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That's good to know. Thanks a lot for the explanation.",
+        "createdAt" : "2020-09-08T14:01:26Z",
+        "updatedAt" : "2020-09-08T14:01:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "62fb32a4dcf13c3e6444a134bc27819bc6b990e3",
+    "line" : 82,
+    "diffHunk" : "@@ -5,22 +5,105 @@ package com.daml.lf\n package speedy\n package svalue\n \n-import com.daml.lf.data.{Bytes, FrontStack, FrontStackCons, ImmArray, Utf8}\n-import com.daml.lf.data.ScalazEqual._\n-import com.daml.lf.language.TypeOrdering\n-import com.daml.lf.speedy.SError.SErrorCrash\n-import com.daml.lf.speedy.SValue._\n-import com.daml.lf.value.Value.ContractId\n+import data.{Bytes, Utf8}\n+import language.TypeOrdering\n+import value.Value.ContractId\n \n-import scala.annotation.tailrec\n import scala.collection.JavaConverters._\n \n object Ordering extends scala.math.Ordering[SValue] {\n \n-  private def compareText(text1: String, text2: String): Int =\n-    Utf8.Ordering.compare(text1, text2)\n+  @throws[SError.SErrorCrash]\n+  // Ordering between two SValues of same type.\n+  // This follows the equality defined in the daml-lf spec.\n+  def compare(x: SValue, y: SValue): Int = {\n+    import SValue._\n \n-  private def compareCid(cid1: ContractId, cid2: ContractId): Int =\n+    var diff = 0\n+    var stackX = List(Iterator.single(x))\n+    var stackY = List(Iterator.single(y))\n+    // invariant: stackX.length == stackY.length\n+\n+    @inline\n+    def push(xs: Iterator[SValue], ys: Iterator[SValue]): Unit = {\n+      stackX = xs :: stackX\n+      stackY = ys :: stackY\n+    }\n+\n+    @inline\n+    def pop(): Unit = {\n+      stackX = stackX.tail\n+      stackY = stackY.tail\n+    }\n+\n+    @inline\n+    def step(tuple: (SValue, SValue)) =\n+      tuple match {\n+        case (SUnit, SUnit) =>\n+        case (SBool(x), SBool(y)) =>\n+          diff = x compareTo y\n+        case (SInt64(x), SInt64(y)) =>\n+          diff = x compareTo y\n+        case (SNumeric(x), SNumeric(y)) =>\n+          diff = x compareTo y\n+        case (SText(x), SText(y)) =>\n+          diff = Utf8.Ordering.compare(x, y)\n+        case (SDate(x), SDate(y)) =>\n+          diff = x compareTo y\n+        case (STimestamp(x), STimestamp(y)) =>\n+          diff = x compareTo y\n+        case (SParty(x), SParty(y)) =>\n+          // party are ASCII, so UTF16 comparison matches UTF8 comparison.\n+          diff = x compareTo y\n+        case (SContractId(x), SContractId(y)) =>\n+          diff = compareCid(x, y)\n+        case (SEnum(_, _, xRank), SEnum(_, _, yRank)) =>\n+          diff = xRank compareTo yRank\n+        case (SRecord(_, _, xs), SRecord(_, _, ys)) =>\n+          push(xs.iterator().asScala, ys.iterator().asScala)\n+        case (SVariant(_, _, xRank, x), SVariant(_, _, yRank, y)) =>\n+          push(Iterator.single(x), Iterator.single(y))\n+          diff = xRank compareTo yRank\n+        case (SList(xs), SList(ys)) =>\n+          push(xs.iterator, ys.iterator)\n+        case (SOptional(xOpt), SOptional(yOpt)) =>\n+          push(xOpt.iterator, yOpt.iterator)\n+        case (STextMap(xMap), STextMap(yMap)) =>\n+          val xKeys = xMap.keys.toSeq.sorted\n+          val yKeys = yMap.keys.toSeq.sorted\n+          push(\n+            new InterlacedIterator(xKeys.iterator.map(SText), xKeys.iterator.map(xMap)),"
+  },
+  {
+    "id" : "f2932ee4-7e8c-466c-a1a9-54f7105c68b5",
+    "prId" : 7329,
+    "comments" : [
+      {
+        "id" : "aaef0231-c736-4fb3-a7e4-84a74ecc0e16",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Just to reflect the actual order of comparison in code.\r\n```suggestion\r\n          diff = TypeOrdering.compare(xType, yType)\r\n          push(Iterator.single(x), Iterator.single(y))\r\n```",
+        "createdAt" : "2020-09-08T11:31:33Z",
+        "updatedAt" : "2020-09-08T11:40:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "62fb32a4dcf13c3e6444a134bc27819bc6b990e3",
+    "line" : null,
+    "diffHunk" : "@@ -5,22 +5,105 @@ package com.daml.lf\n package speedy\n package svalue\n \n-import com.daml.lf.data.{Bytes, FrontStack, FrontStackCons, ImmArray, Utf8}\n-import com.daml.lf.data.ScalazEqual._\n-import com.daml.lf.language.TypeOrdering\n-import com.daml.lf.speedy.SError.SErrorCrash\n-import com.daml.lf.speedy.SValue._\n-import com.daml.lf.value.Value.ContractId\n+import data.{Bytes, Utf8}\n+import language.TypeOrdering\n+import value.Value.ContractId\n \n-import scala.annotation.tailrec\n import scala.collection.JavaConverters._\n \n object Ordering extends scala.math.Ordering[SValue] {\n \n-  private def compareText(text1: String, text2: String): Int =\n-    Utf8.Ordering.compare(text1, text2)\n+  @throws[SError.SErrorCrash]\n+  // Ordering between two SValues of same type.\n+  // This follows the equality defined in the daml-lf spec.\n+  def compare(x: SValue, y: SValue): Int = {\n+    import SValue._\n \n-  private def compareCid(cid1: ContractId, cid2: ContractId): Int =\n+    var diff = 0\n+    var stackX = List(Iterator.single(x))\n+    var stackY = List(Iterator.single(y))\n+    // invariant: stackX.length == stackY.length\n+\n+    @inline\n+    def push(xs: Iterator[SValue], ys: Iterator[SValue]): Unit = {\n+      stackX = xs :: stackX\n+      stackY = ys :: stackY\n+    }\n+\n+    @inline\n+    def pop(): Unit = {\n+      stackX = stackX.tail\n+      stackY = stackY.tail\n+    }\n+\n+    @inline\n+    def step(tuple: (SValue, SValue)) =\n+      tuple match {\n+        case (SUnit, SUnit) =>\n+        case (SBool(x), SBool(y)) =>\n+          diff = x compareTo y\n+        case (SInt64(x), SInt64(y)) =>\n+          diff = x compareTo y\n+        case (SNumeric(x), SNumeric(y)) =>\n+          diff = x compareTo y\n+        case (SText(x), SText(y)) =>\n+          diff = Utf8.Ordering.compare(x, y)\n+        case (SDate(x), SDate(y)) =>\n+          diff = x compareTo y\n+        case (STimestamp(x), STimestamp(y)) =>\n+          diff = x compareTo y\n+        case (SParty(x), SParty(y)) =>\n+          // party are ASCII, so UTF16 comparison matches UTF8 comparison.\n+          diff = x compareTo y\n+        case (SContractId(x), SContractId(y)) =>\n+          diff = compareCid(x, y)\n+        case (SEnum(_, _, xRank), SEnum(_, _, yRank)) =>\n+          diff = xRank compareTo yRank\n+        case (SRecord(_, _, xs), SRecord(_, _, ys)) =>\n+          push(xs.iterator().asScala, ys.iterator().asScala)\n+        case (SVariant(_, _, xRank, x), SVariant(_, _, yRank, y)) =>\n+          push(Iterator.single(x), Iterator.single(y))\n+          diff = xRank compareTo yRank\n+        case (SList(xs), SList(ys)) =>\n+          push(xs.iterator, ys.iterator)\n+        case (SOptional(xOpt), SOptional(yOpt)) =>\n+          push(xOpt.iterator, yOpt.iterator)\n+        case (STextMap(xMap), STextMap(yMap)) =>\n+          val xKeys = xMap.keys.toSeq.sorted\n+          val yKeys = yMap.keys.toSeq.sorted\n+          push(\n+            new InterlacedIterator(xKeys.iterator.map(SText), xKeys.iterator.map(xMap)),\n+            new InterlacedIterator(yKeys.iterator.map(SText), yKeys.iterator.map(yMap)),\n+          )\n+        case (SGenMap(xMap), SGenMap(yMap)) =>\n+          push(\n+            new InterlacedIterator(xMap.keys.iterator, xMap.values.iterator),\n+            new InterlacedIterator(yMap.keys.iterator, yMap.values.iterator),\n+          )\n+        case (SStruct(_, xs), SStruct(_, ys)) =>\n+          push(xs.iterator().asScala, ys.iterator().asScala)\n+        case (SAny(xType, x), SAny(yType, y)) =>\n+          push(Iterator.single(x), Iterator.single(y))\n+          diff = TypeOrdering.compare(xType, yType)"
+  },
+  {
+    "id" : "f5539ec0-0a3e-4f39-be96-a0e7ac777abb",
+    "prId" : 7329,
+    "comments" : [
+      {
+        "id" : "0e54aadc-db0c-4965-a919-bb44a79962f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I would prefer something along the lines of the code below in order to separate behaviour that users can trigger from buggy behaviour of the interpreter.\r\n```suggestion\r\n        case (_: SPAP, _: SPAP) =>\r\n          throw SError.SErrorCrash(\"functions are not comparable\")\r\n        // We should never hit this case at runtime.\r\n        case _ =>\r\n          throw SError.SErrorCrash(\"BUG: comparison of incomparable values\")\r\n```",
+        "createdAt" : "2020-09-08T11:35:10Z",
+        "updatedAt" : "2020-09-08T11:40:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "62fb32a4dcf13c3e6444a134bc27819bc6b990e3",
+    "line" : null,
+    "diffHunk" : "@@ -5,22 +5,105 @@ package com.daml.lf\n package speedy\n package svalue\n \n-import com.daml.lf.data.{Bytes, FrontStack, FrontStackCons, ImmArray, Utf8}\n-import com.daml.lf.data.ScalazEqual._\n-import com.daml.lf.language.TypeOrdering\n-import com.daml.lf.speedy.SError.SErrorCrash\n-import com.daml.lf.speedy.SValue._\n-import com.daml.lf.value.Value.ContractId\n+import data.{Bytes, Utf8}\n+import language.TypeOrdering\n+import value.Value.ContractId\n \n-import scala.annotation.tailrec\n import scala.collection.JavaConverters._\n \n object Ordering extends scala.math.Ordering[SValue] {\n \n-  private def compareText(text1: String, text2: String): Int =\n-    Utf8.Ordering.compare(text1, text2)\n+  @throws[SError.SErrorCrash]\n+  // Ordering between two SValues of same type.\n+  // This follows the equality defined in the daml-lf spec.\n+  def compare(x: SValue, y: SValue): Int = {\n+    import SValue._\n \n-  private def compareCid(cid1: ContractId, cid2: ContractId): Int =\n+    var diff = 0\n+    var stackX = List(Iterator.single(x))\n+    var stackY = List(Iterator.single(y))\n+    // invariant: stackX.length == stackY.length\n+\n+    @inline\n+    def push(xs: Iterator[SValue], ys: Iterator[SValue]): Unit = {\n+      stackX = xs :: stackX\n+      stackY = ys :: stackY\n+    }\n+\n+    @inline\n+    def pop(): Unit = {\n+      stackX = stackX.tail\n+      stackY = stackY.tail\n+    }\n+\n+    @inline\n+    def step(tuple: (SValue, SValue)) =\n+      tuple match {\n+        case (SUnit, SUnit) =>\n+        case (SBool(x), SBool(y)) =>\n+          diff = x compareTo y\n+        case (SInt64(x), SInt64(y)) =>\n+          diff = x compareTo y\n+        case (SNumeric(x), SNumeric(y)) =>\n+          diff = x compareTo y\n+        case (SText(x), SText(y)) =>\n+          diff = Utf8.Ordering.compare(x, y)\n+        case (SDate(x), SDate(y)) =>\n+          diff = x compareTo y\n+        case (STimestamp(x), STimestamp(y)) =>\n+          diff = x compareTo y\n+        case (SParty(x), SParty(y)) =>\n+          // party are ASCII, so UTF16 comparison matches UTF8 comparison.\n+          diff = x compareTo y\n+        case (SContractId(x), SContractId(y)) =>\n+          diff = compareCid(x, y)\n+        case (SEnum(_, _, xRank), SEnum(_, _, yRank)) =>\n+          diff = xRank compareTo yRank\n+        case (SRecord(_, _, xs), SRecord(_, _, ys)) =>\n+          push(xs.iterator().asScala, ys.iterator().asScala)\n+        case (SVariant(_, _, xRank, x), SVariant(_, _, yRank, y)) =>\n+          push(Iterator.single(x), Iterator.single(y))\n+          diff = xRank compareTo yRank\n+        case (SList(xs), SList(ys)) =>\n+          push(xs.iterator, ys.iterator)\n+        case (SOptional(xOpt), SOptional(yOpt)) =>\n+          push(xOpt.iterator, yOpt.iterator)\n+        case (STextMap(xMap), STextMap(yMap)) =>\n+          val xKeys = xMap.keys.toSeq.sorted\n+          val yKeys = yMap.keys.toSeq.sorted\n+          push(\n+            new InterlacedIterator(xKeys.iterator.map(SText), xKeys.iterator.map(xMap)),\n+            new InterlacedIterator(yKeys.iterator.map(SText), yKeys.iterator.map(yMap)),\n+          )\n+        case (SGenMap(xMap), SGenMap(yMap)) =>\n+          push(\n+            new InterlacedIterator(xMap.keys.iterator, xMap.values.iterator),\n+            new InterlacedIterator(yMap.keys.iterator, yMap.values.iterator),\n+          )\n+        case (SStruct(_, xs), SStruct(_, ys)) =>\n+          push(xs.iterator().asScala, ys.iterator().asScala)\n+        case (SAny(xType, x), SAny(yType, y)) =>\n+          push(Iterator.single(x), Iterator.single(y))\n+          diff = TypeOrdering.compare(xType, yType)\n+        case (STypeRep(xType), STypeRep(yType)) =>\n+          diff = TypeOrdering.compare(xType, yType)\n+        case _ =>\n+          throw SError.SErrorCrash(\"functions are not comparable\")"
+  },
+  {
+    "id" : "321e1b26-db68-4848-b06b-74395eaa942c",
+    "prId" : 4990,
+    "comments" : [
+      {
+        "id" : "7e07f247-afa1-4ded-8f8a-abcc67d6902b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "`remy.log`",
+        "createdAt" : "2020-03-13T15:32:28Z",
+        "updatedAt" : "2020-03-16T12:18:41Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c553a8b4-a07c-46d6-bf43-52b8b827d88b",
+        "parentId" : "7e07f247-afa1-4ded-8f8a-abcc67d6902b",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-03-13T16:14:49Z",
+        "updatedAt" : "2020-03-16T12:18:41Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "388d7c03ab7235b2099abd7694f5a70a401bfdd4",
+    "line" : null,
+    "diffHunk" : "@@ -243,7 +243,10 @@ object Ordering extends scala.math.Ordering[SValue] {\n             case SPAP(_, _, _) =>\n               throw SErrorCrash(\"functions are not comparable\")\n           }\n-        }(fallback = throw SErrorCrash(\"try to compare unrelated type\"))\n+        }(fallback = {\n+          remy.log(tuple)"
+  },
+  {
+    "id" : "34f8729b-6c2f-4486-b0da-fd6e02ab86e4",
+    "prId" : 4893,
+    "comments" : [
+      {
+        "id" : "b7b129ce-b444-4234-8a6c-b9363ea85152",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "When are we planning to switch the default in sandbox to use absolute contract ids everywhere? I expect that having maps indexed by contract ids will be one of the major usecases for genmaps.",
+        "createdAt" : "2020-03-09T13:04:26Z",
+        "updatedAt" : "2020-03-13T08:47:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2c74885c-6a3b-43a4-b5d8-bfac8529c345",
+        "parentId" : "b7b129ce-b444-4234-8a6c-b9363ea85152",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I am not sure, I will change the default in the sandbox ever. \r\nIn kvutils (and then in next gen sandbox) it is already the only possible mode. \r\nDAML-LF 1.9 will require the new contract ids scheme to be enable. \r\nThe old scheme will simply die together the legacy sandbox.  ",
+        "createdAt" : "2020-03-12T10:05:25Z",
+        "updatedAt" : "2020-03-13T08:47:05Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5e034c77dcd97984f03bcd3890b2ea06272f908a",
+    "line" : 77,
+    "diffHunk" : "@@ -223,15 +224,15 @@ object Ordering extends scala.math.Ordering[SValue] {\n             case SAny(t2, v2) =>\n               compareType(t1, t2) -> ImmArray((v1, v2))\n           }\n-          case SContractId(_) => {\n-            case SContractId(_) =>\n-              throw new IllegalAccessException(\"Try to compare relative contract ids\")\n+          case SContractId(RelativeContractId(_)) => {"
+  },
+  {
+    "id" : "47b0b440-8137-4739-b4ac-89b685e31d72",
+    "prId" : 4893,
+    "comments" : [
+      {
+        "id" : "a8810f6d-32cd-4e4c-a5b0-70b0f268b2fe",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Maybe use `SErrorCrash` here as well?",
+        "createdAt" : "2020-03-09T15:37:25Z",
+        "updatedAt" : "2020-03-13T08:47:05Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "acc9ba7d-a493-4aea-93f1-95c5216fb527",
+        "parentId" : "a8810f6d-32cd-4e4c-a5b0-70b0f268b2fe",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "> The LF specification also still talks about insertion order.\r\n\r\nI will do it in parallel. ",
+        "createdAt" : "2020-03-12T10:13:06Z",
+        "updatedAt" : "2020-03-13T08:47:05Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5e034c77dcd97984f03bcd3890b2ea06272f908a",
+    "line" : null,
+    "diffHunk" : "@@ -223,15 +224,15 @@ object Ordering extends scala.math.Ordering[SValue] {\n             case SAny(t2, v2) =>\n               compareType(t1, t2) -> ImmArray((v1, v2))\n           }\n-          case SContractId(_) => {\n-            case SContractId(_) =>\n-              throw new IllegalAccessException(\"Try to compare relative contract ids\")\n+          case SContractId(RelativeContractId(_)) => {\n+            case SContractId(RelativeContractId(_)) =>\n+              throw SErrorCrash(\"relative contract id are not comparable\")\n           }\n           case SPAP(_, _, _) => {\n             case SPAP(_, _, _) =>\n-              throw new IllegalAccessException(\"Try to compare functions\")\n+              throw SErrorCrash(\"functions are not comparable\")\n           }\n-        }(fallback = throw new IllegalAccessException(\"Try to compare unrelated type\"))\n+        }(fallback = throw new IllegalAccessException(\"try to compare unrelated type\"))"
+  },
+  {
+    "id" : "501d5414-4c59-470f-89b9-7e9f3d2139c6",
+    "prId" : 4808,
+    "comments" : [
+      {
+        "id" : "f3c61342-885e-48b6-8194-6f793741adf3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Am I missing something here or are you comparing based on the constructor name? This doesn’t match the specification and it’s not an option since it would be inconsistent with the derived `Ord` instances you have in `DAML`.",
+        "createdAt" : "2020-03-04T16:51:36Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8fab61b2-d10a-4c2e-a17c-2e07bbabc055",
+        "parentId" : "f3c61342-885e-48b6-8194-6f793741adf3",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "The first implementation will order using constructor name. \r\nThis will allow to implement the rest of the stack (e.g. compiler) and start testing in parallel.   \r\n\r\nOrdering with respect the order the constructor appears in the definition, is way more complicated and will be implemented in a upcoming PR.  ",
+        "createdAt" : "2020-03-05T07:53:26Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "13afe03d-bc2a-4ded-b086-57c687156b22",
+        "parentId" : "f3c61342-885e-48b6-8194-6f793741adf3",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we please add a big fat TODO for this or even better, error out on variants for now instead of doing the wrong thing?",
+        "createdAt" : "2020-03-05T08:09:05Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3f7aff34-942b-4df3-ba54-7ce2c6324b30",
+        "parentId" : "f3c61342-885e-48b6-8194-6f793741adf3",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Good point. I added 2 TODOs",
+        "createdAt" : "2020-03-05T09:15:25Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5c04c19b740c0002bf5adf440310b440f2393af8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,197 @@\n+package com.digitalasset.daml.lf.speedy.svalue\n+\n+import com.digitalasset.daml.lf.data.{FrontStack, FrontStackCons, Ref, Utf8}\n+import com.digitalasset.daml.lf.language.Ast\n+import com.digitalasset.daml.lf.speedy.SValue\n+import com.digitalasset.daml.lf.speedy.SValue._\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+\n+import scala.annotation.tailrec\n+import scala.collection.JavaConverters._\n+\n+object Ordering extends scala.math.Ordering[SValue] {\n+\n+  private def zipAndPush[X, Y](\n+      xs: Seq[X],\n+      ys: Seq[Y],\n+      stack: FrontStack[(X, Y)],\n+  ): FrontStack[(X, Y)] =\n+    (xs.reverseIterator zip ys.reverseIterator).foldLeft(stack)(_.+:(_))\n+\n+  private def compareIdentifier(name1: Ref.TypeConName, name2: Ref.TypeConName): Int = {\n+    val c1 = name1.packageId compareTo name2.packageId\n+    lazy val c2 = name1.qualifiedName.module compareTo name2.qualifiedName.module\n+    def c3 = name1.qualifiedName.name compareTo name2.qualifiedName.name\n+    if (c1 != 0) c1 else if (c2 != 0) c2 else c3\n+  }\n+\n+  val builtinTypeIdx =\n+    List(\n+      Ast.BTUnit,\n+      Ast.BTBool,\n+      Ast.BTInt64,\n+      Ast.BTText,\n+      Ast.BTNumeric,\n+      Ast.BTTimestamp,\n+      Ast.BTDate,\n+      Ast.BTParty,\n+      Ast.BTContractId,\n+      Ast.BTArrow,\n+      Ast.BTOptional,\n+      Ast.BTList,\n+      Ast.BTTextMap,\n+      Ast.BTGenMap,\n+      Ast.BTAny,\n+      Ast.BTTypeRep,\n+      Ast.BTUpdate,\n+      Ast.BTScenario\n+    ).zipWithIndex.toMap\n+\n+  @tailrec\n+  // Any two ground types (types without variable nor quanitifiers) can be compared.\n+  private[this] def compareType(x: Int, stack0: => FrontStack[(Ast.Type, Ast.Type)]): Int =\n+    stack0 match {\n+      case FrontStack() =>\n+        x\n+      case FrontStackCons(tuple, stack) =>\n+        if (x != 0) x\n+        else\n+          tuple match {\n+            case (Ast.TBuiltin(b1), Ast.TBuiltin(b2)) =>\n+              compareType(builtinTypeIdx(b1) compareTo builtinTypeIdx(b2), stack)\n+            case (Ast.TBuiltin(_), _) =>\n+              -1\n+            case (_, Ast.TBuiltin(_)) =>\n+              +1\n+            case (Ast.TTyCon(con1), Ast.TTyCon(con2)) =>\n+              compareType(compareIdentifier(con1, con2), stack)\n+            case (Ast.TTyCon(_), _) =>\n+              -1\n+            case (_, Ast.TTyCon(_)) =>\n+              +1\n+            case (Ast.TNat(n1), Ast.TNat(n2)) =>\n+              compareType(n1 compareTo n2, stack)\n+            case (Ast.TNat(_), _) =>\n+              -1\n+            case (_, Ast.TNat(_)) =>\n+              +1\n+            case (Ast.TStruct(fields1), Ast.TStruct(fields2)) =>\n+              compareType(\n+                math.Ordering\n+                  .Iterable[String]\n+                  .compare(fields1.toSeq.map(_._1), fields2.toSeq.map(_._1)),\n+                zipAndPush(fields1.toSeq.map(_._2), fields2.toSeq.map(_._2), stack)\n+              )\n+            case (Ast.TStruct(_), _) =>\n+              -1\n+            case (_, Ast.TStruct(_)) =>\n+              +1\n+            case (Ast.TApp(t11, t12), Ast.TApp(t21, t22)) =>\n+              compareType(0, (t11, t21) +: (t12, t22) +: stack)\n+            case (Ast.TApp(_, _), _) =>\n+              -1\n+            case (_, Ast.TApp(_, _)) =>\n+              +1\n+            case (t1, t2) =>\n+              throw new IllegalArgumentException(\n+                s\"cannot compare types ${t1.pretty} and ${t2.pretty}\")\n+          }\n+    }\n+\n+  // undefined if `typ1` or `typ2` contains `TVar`, `TForAll`, or `TSynApp`.\n+  private def compareType(typ1: Ast.Type, typ2: Ast.Type): Int =\n+    compareType(0, FrontStack((typ1, typ2)))\n+\n+  private def compareText(text1: String, text2: String): Int =\n+    Utf8.Ordering.compare(text1, text2)\n+\n+  private def isHexa(s: String): Boolean =\n+    s.forall(x => '0' < x && x < '9' || 'a' < x && x < 'f')\n+\n+  @inline\n+  private val underlyingCidDiscriminatorLength = 65\n+\n+  private def compareCid(cid1: Ref.ContractIdString, cid2: Ref.ContractIdString): Int = {\n+    val lim = cid1.length min cid2.length\n+\n+    @tailrec\n+    def lp(i: Int): Int =\n+      if (i < lim) {\n+        val x = cid1(i)\n+        val y = cid2(i)\n+        if (x != y) x compareTo y else lp(i + 1)\n+      } else {\n+        if (lim == underlyingCidDiscriminatorLength && (//\n+          cid1.length != underlyingCidDiscriminatorLength && isHexa(cid2) || //\n+          cid2.length != underlyingCidDiscriminatorLength && isHexa(cid1)))\n+          throw new IllegalArgumentException(\n+            \"Try to a fresh contract id with  conflicting discriminators\")\n+        else\n+          cid1.length compareTo cid2.length\n+      }\n+\n+    lp(0)\n+  }\n+  @tailrec\n+  // Only value of the same type can be compared.\n+  private[this] def compareValue(x: Int, stack0: FrontStack[(SValue, SValue)]): Int =\n+    stack0 match {\n+      case FrontStack() =>\n+        x\n+      case FrontStackCons(tuple, stack) =>\n+        if (x != 0) x\n+        else\n+          tuple match {\n+            case (SUnit, SUnit) =>\n+              compareValue(0, stack)\n+            case (SBool(b1), SBool(b2)) =>\n+              compareValue(b1 compareTo b2, stack)\n+            case (SInt64(i1), SInt64(i2)) =>\n+              compareValue(i1 compareTo i2, stack)\n+            case (STimestamp(ts1), STimestamp(ts2)) =>\n+              compareValue(ts1.micros compareTo ts2.micros, stack)\n+            case (SDate(d1), SDate(d2)) =>\n+              compareValue(d1.days compareTo d2.days, stack)\n+            case (SNumeric(n1), SNumeric(n2)) =>\n+              compareValue(n1 compareTo n2, stack)\n+            case (SText(t1), SText(t2)) =>\n+              compareValue(compareText(t1, t2), stack)\n+            case (SParty(p1), SParty(p2)) =>\n+              compareValue(compareText(p1, p2), stack)\n+            case (SContractId(AbsoluteContractId(coid1)), SContractId(AbsoluteContractId(coid2))) =>\n+              compareValue(compareCid(coid1, coid2), stack)\n+            case (STypeRep(t1), STypeRep(t2)) =>\n+              compareValue(compareType(t1, t2), stack)\n+            case (SEnum(_, con1), SEnum(_, con2)) =>\n+              compareValue((con1 compareTo con2), stack)\n+            case (SRecord(_, _, args1), SRecord(_, _, args2)) =>\n+              compareValue(0, zipAndPush(args1.asScala, args2.asScala, stack))\n+            case (SVariant(_, con1, arg1), SVariant(_, con2, arg2)) =>"
+  },
+  {
+    "id" : "b859528b-2e97-40a3-9e7d-83221eaf5214",
+    "prId" : 4808,
+    "comments" : [
+      {
+        "id" : "76304947-ceb6-49c8-a15f-3a0f47778c11",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n    (xs.iterator zip ys.iterator).to[ImmArray] ++: stack\r\n```",
+        "createdAt" : "2020-03-05T15:34:49Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5c04c19b740c0002bf5adf440310b440f2393af8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,204 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.speedy.svalue\n+\n+import com.digitalasset.daml.lf.data.{FrontStack, FrontStackCons, Ref, Utf8}\n+import com.digitalasset.daml.lf.language.Ast\n+import com.digitalasset.daml.lf.speedy.SValue\n+import com.digitalasset.daml.lf.speedy.SValue._\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+\n+import scala.annotation.tailrec\n+import scala.collection.JavaConverters._\n+\n+object Ordering extends scala.math.Ordering[SValue] {\n+\n+  private def zipAndPush[X, Y](\n+      xs: Seq[X],\n+      ys: Seq[Y],\n+      stack: FrontStack[(X, Y)],\n+  ): FrontStack[(X, Y)] =\n+    (xs.reverseIterator zip ys.reverseIterator).foldLeft(stack)(_.+:(_))"
+  },
+  {
+    "id" : "59958ade-af0b-40c9-ad10-63fbecda7075",
+    "prId" : 4808,
+    "comments" : [
+      {
+        "id" : "eff731b6-7d89-4b1c-b026-60deb428a52f",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n          import data.ScalazEqual._\r\n          val (x1, stack1) = tuple.match2 {\r\n          ...\r\n          compareValue(x1, stack1)\r\n```\r\n\r\nDetails here:\r\n\r\nhttps://github.com/digital-asset/daml/blob/86362ee0bf4ce2d44fc658b36e134ff6e6999501/daml-lf/data/src/main/scala/com/digitalasset/daml/lf/data/ScalazEqual.scala#L34-L47\r\n\r\nThe caveat is that tailrec calls can't occur inside the body to `match2`, which is why I've moved it outside in the suggestion. I think the `case (SList(l1), SList(l2))` should be easily handled.",
+        "createdAt" : "2020-03-05T15:51:56Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "68acee8a-d3db-4b84-bd79-f17f95bf39d5",
+        "parentId" : "eff731b6-7d89-4b1c-b026-60deb428a52f",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I feel, it does not work so nicely with comparison where you have to treat explicitly the case \"bigers than\" (cases that returns `+1 -> stack` in the following). \r\n\r\n```scala\r\n  tuple.match2 {\r\n    case Ast.TBuiltin(b1) => {\r\n      case Ast.TBuiltin(b2) =>\r\n        ???\r\n    }\r\n    case Ast.TTyCon(con1) => {\r\n      case Ast.TBuiltin(_)  =>\r\n        +1 -> stack \r\n      case Ast.TTyCon(con2) =>\r\n        ???\r\n    }\r\n    case Ast.TNat(n1) => {\r\n      case Ast.TBuiltin(_) | Ast.TTyCon(_)  =>\r\n        +1 -> stack\r\n      case Ast.TNat(n2) =>\r\n        ???\r\n    }\r\n    case Ast.TStruct(fs1) => {\r\n      case Ast.TBuiltin(_) | Ast.TTyCon(_) | Ast.TNat(n2) =>\r\n        +1 -> stack\r\n      case Ast.TStruct(fs2) =>\r\n        ???\r\n    }\r\n    case Ast.TApp(tyfun1, arg1) => {\r\n      case Ast.TBuiltin(_) | Ast.TTyCon(_) | Ast.TNat(n2) | Ast.TStruct(_) =>\r\n        +1 -> stack\r\n      case Ast.TStruct(fs2) =>\r\n        ???\r\n    }\r\n    case _ => {\r\n      case _ => throw new IllegalArgumentException(???)\r\n    }\r\n  }(fallback = -1 -> stack)\r\n```\r\n\r\nI rewrite the matching in a way I think is more readable.  ",
+        "createdAt" : "2020-03-05T17:03:15Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b9861617-a921-4f16-a392-2a04d89bd9b5",
+        "parentId" : "eff731b6-7d89-4b1c-b026-60deb428a52f",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "That's a more radical reorganization than the one I'm suggesting; I don't suggest anything beyond restating the patterns you already have, which `match2` is perfectly suited to.\r\n\r\n```scala\r\ncase SUnit => { case SUnit => (0, stack) }\r\ncase SBool(b1) => { case SBool(b2) => (b1 compareTo b2, stack) }\r\n...\r\n}(fallback = throw new IllegalAccessException(\"Try to compare unrelated type\"))\r\n```\r\n\r\nYour present design doesn't incorporate patterns here for different data ctors; nor would the rewrite in `match2` terms.",
+        "createdAt" : "2020-03-05T17:20:08Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0ccdfad2-57a9-468c-abe7-831e388703b8",
+        "parentId" : "eff731b6-7d89-4b1c-b026-60deb428a52f",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "That's not to say there _aren't_ alternative ordering structures that wouldn't be suitable for dealing with different ctors. For example an `SValue => (Int, SValue PartialFunction T)` where `T` is the tuple of args to `compareValue` lends itself readily to handling different ctors cleanly while preserving exhaustiveness checking everywhere. It simply isn't as obvious a change as the `match2` rewrite of what you've already done.",
+        "createdAt" : "2020-03-05T17:24:21Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "83ae1e38-8de2-4c1f-adb6-30b3403461bd",
+        "parentId" : "eff731b6-7d89-4b1c-b026-60deb428a52f",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Sorry Stephen, I though you ask me to change the pattern matching over types. \r\nYour remark is completely justified for the pattern matching over values. \r\n\r\nI will integrate your changes Monday (I am off tomorrow) .\r\n\r\nThanks",
+        "createdAt" : "2020-03-05T19:38:15Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "06af21d1-9ad7-4507-bf7c-6217f89198c6",
+        "parentId" : "eff731b6-7d89-4b1c-b026-60deb428a52f",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "No worries; for the type matching you would indeed have to use the more radical approach I describe above, because match2 as-is would not be very helpful. If you're interested in that I can elaborate, but it's fine like it is if you're not worried about exhaustiveness checking.",
+        "createdAt" : "2020-03-05T19:55:41Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e1321db8-1a71-42af-81c4-e58dc290b9f3",
+        "parentId" : "eff731b6-7d89-4b1c-b026-60deb428a52f",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-03-09T10:19:12Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5c04c19b740c0002bf5adf440310b440f2393af8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,204 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.speedy.svalue\n+\n+import com.digitalasset.daml.lf.data.{FrontStack, FrontStackCons, Ref, Utf8}\n+import com.digitalasset.daml.lf.language.Ast\n+import com.digitalasset.daml.lf.speedy.SValue\n+import com.digitalasset.daml.lf.speedy.SValue._\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+\n+import scala.annotation.tailrec\n+import scala.collection.JavaConverters._\n+\n+object Ordering extends scala.math.Ordering[SValue] {\n+\n+  private def zipAndPush[X, Y](\n+      xs: Seq[X],\n+      ys: Seq[Y],\n+      stack: FrontStack[(X, Y)],\n+  ): FrontStack[(X, Y)] =\n+    (xs.reverseIterator zip ys.reverseIterator).foldLeft(stack)(_.+:(_))\n+\n+  private def compareIdentifier(name1: Ref.TypeConName, name2: Ref.TypeConName): Int = {\n+    val c1 = name1.packageId compareTo name2.packageId\n+    lazy val c2 = name1.qualifiedName.module compareTo name2.qualifiedName.module\n+    def c3 = name1.qualifiedName.name compareTo name2.qualifiedName.name\n+    if (c1 != 0) c1 else if (c2 != 0) c2 else c3\n+  }\n+\n+  val builtinTypeIdx =\n+    List(\n+      Ast.BTUnit,\n+      Ast.BTBool,\n+      Ast.BTInt64,\n+      Ast.BTText,\n+      Ast.BTNumeric,\n+      Ast.BTTimestamp,\n+      Ast.BTDate,\n+      Ast.BTParty,\n+      Ast.BTContractId,\n+      Ast.BTArrow,\n+      Ast.BTOptional,\n+      Ast.BTList,\n+      Ast.BTTextMap,\n+      Ast.BTGenMap,\n+      Ast.BTAny,\n+      Ast.BTTypeRep,\n+      Ast.BTUpdate,\n+      Ast.BTScenario\n+    ).zipWithIndex.toMap\n+\n+  @tailrec\n+  // Any two ground types (types without variable nor quantifiers) can be compared.\n+  private[this] def compareType(x: Int, stack0: => FrontStack[(Ast.Type, Ast.Type)]): Int =\n+    stack0 match {\n+      case FrontStack() =>\n+        x\n+      case FrontStackCons(tuple, stack) =>\n+        if (x != 0) x\n+        else\n+          tuple match {\n+            case (Ast.TBuiltin(b1), Ast.TBuiltin(b2)) =>\n+              compareType(builtinTypeIdx(b1) compareTo builtinTypeIdx(b2), stack)\n+            case (Ast.TBuiltin(_), _) =>\n+              -1\n+            case (_, Ast.TBuiltin(_)) =>\n+              +1\n+            case (Ast.TTyCon(con1), Ast.TTyCon(con2)) =>\n+              compareType(compareIdentifier(con1, con2), stack)\n+            case (Ast.TTyCon(_), _) =>\n+              -1\n+            case (_, Ast.TTyCon(_)) =>\n+              +1\n+            case (Ast.TNat(n1), Ast.TNat(n2)) =>\n+              compareType(n1 compareTo n2, stack)\n+            case (Ast.TNat(_), _) =>\n+              -1\n+            case (_, Ast.TNat(_)) =>\n+              +1\n+            case (Ast.TStruct(fields1), Ast.TStruct(fields2)) =>\n+              compareType(\n+                math.Ordering\n+                  .Iterable[String]\n+                  .compare(fields1.toSeq.map(_._1), fields2.toSeq.map(_._1)),\n+                zipAndPush(fields1.toSeq.map(_._2), fields2.toSeq.map(_._2), stack)\n+              )\n+            case (Ast.TStruct(_), _) =>\n+              -1\n+            case (_, Ast.TStruct(_)) =>\n+              +1\n+            case (Ast.TApp(t11, t12), Ast.TApp(t21, t22)) =>\n+              compareType(0, (t11, t21) +: (t12, t22) +: stack)\n+            case (Ast.TApp(_, _), _) =>\n+              -1\n+            case (_, Ast.TApp(_, _)) =>\n+              +1\n+            case (t1, t2) =>\n+              throw new IllegalArgumentException(\n+                s\"cannot compare types ${t1.pretty} and ${t2.pretty}\")\n+          }\n+    }\n+\n+  // undefined if `typ1` or `typ2` contains `TVar`, `TForAll`, or `TSynApp`.\n+  private def compareType(typ1: Ast.Type, typ2: Ast.Type): Int =\n+    compareType(0, FrontStack((typ1, typ2)))\n+\n+  private def compareText(text1: String, text2: String): Int =\n+    Utf8.Ordering.compare(text1, text2)\n+\n+  private def isHexa(s: String): Boolean =\n+    s.forall(x => '0' < x && x < '9' || 'a' < x && x < 'f')\n+\n+  @inline\n+  private val underlyingCidDiscriminatorLength = 65\n+\n+  private def compareCid(cid1: Ref.ContractIdString, cid2: Ref.ContractIdString): Int = {\n+    val lim = cid1.length min cid2.length\n+\n+    @tailrec\n+    def lp(i: Int): Int =\n+      if (i < lim) {\n+        val x = cid1(i)\n+        val y = cid2(i)\n+        if (x != y) x compareTo y else lp(i + 1)\n+      } else {\n+        if (lim == underlyingCidDiscriminatorLength && (//\n+          cid1.length != underlyingCidDiscriminatorLength && isHexa(cid2) || //\n+          cid2.length != underlyingCidDiscriminatorLength && isHexa(cid1)))\n+          throw new IllegalArgumentException(\n+            \"Try to a fresh contract id with  conflicting discriminators\")\n+        else\n+          cid1.length compareTo cid2.length\n+      }\n+\n+    lp(0)\n+  }\n+  @tailrec\n+  // Only value of the same type can be compared.\n+  private[this] def compareValue(x: Int, stack0: FrontStack[(SValue, SValue)]): Int =\n+    stack0 match {\n+      case FrontStack() =>\n+        x\n+      case FrontStackCons(tuple, stack) =>\n+        if (x != 0) x\n+        else\n+          tuple match {"
+  },
+  {
+    "id" : "e3ab32ab-7d03-4ece-9ba4-7d713fe44414",
+    "prId" : 4808,
+    "comments" : [
+      {
+        "id" : "7b4efb32-f14e-4960-bbda-6beceabcd930",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I think there are one or two missing words in this error message.",
+        "createdAt" : "2020-03-05T17:15:14Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "65a7af7a-3e7f-466b-bdfb-b0a05b9507d3",
+        "parentId" : "7b4efb32-f14e-4960-bbda-6beceabcd930",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed ",
+        "createdAt" : "2020-03-09T10:19:17Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5c04c19b740c0002bf5adf440310b440f2393af8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,195 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf\n+package speedy\n+package svalue\n+\n+import com.digitalasset.daml.lf.data.{FrontStack, FrontStackCons, ImmArray, Ref, Utf8}\n+import com.digitalasset.daml.lf.language.Ast\n+import com.digitalasset.daml.lf.speedy.SValue._\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+\n+import scala.annotation.tailrec\n+import scala.collection.JavaConverters._\n+\n+object Ordering extends scala.math.Ordering[SValue] {\n+\n+  private def zipAndPush[X, Y](\n+      xs: Iterator[X],\n+      ys: Iterator[Y],\n+      stack: FrontStack[(X, Y)],\n+  ): FrontStack[(X, Y)] =\n+    (xs zip ys).to[ImmArray] ++: stack\n+\n+  private def compareIdentifier(name1: Ref.TypeConName, name2: Ref.TypeConName): Int = {\n+    val c1 = name1.packageId compareTo name2.packageId\n+    lazy val c2 = name1.qualifiedName.module compareTo name2.qualifiedName.module\n+    def c3 = name1.qualifiedName.name compareTo name2.qualifiedName.name\n+    if (c1 != 0) c1 else if (c2 != 0) c2 else c3\n+  }\n+\n+  val builtinTypeIdx =\n+    List(\n+      Ast.BTUnit,\n+      Ast.BTBool,\n+      Ast.BTInt64,\n+      Ast.BTText,\n+      Ast.BTNumeric,\n+      Ast.BTTimestamp,\n+      Ast.BTDate,\n+      Ast.BTParty,\n+      Ast.BTContractId,\n+      Ast.BTArrow,\n+      Ast.BTOptional,\n+      Ast.BTList,\n+      Ast.BTTextMap,\n+      Ast.BTGenMap,\n+      Ast.BTAny,\n+      Ast.BTTypeRep,\n+      Ast.BTUpdate,\n+      Ast.BTScenario\n+    ).zipWithIndex.toMap\n+\n+  private def typeRank(typ: Ast.Type): Int =\n+    typ match {\n+      case Ast.TBuiltin(_) => 0\n+      case Ast.TTyCon(_) => 1\n+      case Ast.TNat(_) => 2\n+      case Ast.TStruct(_) => 3\n+      case Ast.TApp(_, _) => 4\n+      case Ast.TVar(_) | Ast.TForall(_, _) | Ast.TSynApp(_, _) =>\n+        throw new IllegalArgumentException(s\"cannot compare types $typ\")\n+    }\n+\n+  @tailrec\n+  // Any two ground types (types without variable nor quantifiers) can be compared.\n+  private[this] def compareType(x: Int, stack0: FrontStack[(Ast.Type, Ast.Type)]): Int =\n+    stack0 match {\n+      case FrontStack() =>\n+        x\n+      case FrontStackCons(tuple, stack) =>\n+        if (x != 0) x\n+        else\n+          tuple match {\n+            case (Ast.TBuiltin(b1), Ast.TBuiltin(b2)) =>\n+              compareType(builtinTypeIdx(b1) compareTo builtinTypeIdx(b2), stack)\n+            case (Ast.TTyCon(con1), Ast.TTyCon(con2)) =>\n+              compareType(compareIdentifier(con1, con2), stack)\n+            case (Ast.TNat(n1), Ast.TNat(n2)) =>\n+              compareType(n1 compareTo n2, stack)\n+            case (Ast.TStruct(fields1), Ast.TStruct(fields2)) =>\n+              compareType(\n+                math.Ordering\n+                  .Iterable[String]\n+                  .compare(fields1.toSeq.map(_._1), fields2.toSeq.map(_._1)),\n+                zipAndPush(fields1.iterator.map(_._2), fields2.iterator.map(_._2), stack)\n+              )\n+            case (Ast.TApp(t11, t12), Ast.TApp(t21, t22)) =>\n+              compareType(0, (t11, t21) +: (t12, t22) +: stack)\n+            case (t1, t2) =>\n+              typeRank(t1) compareTo typeRank(t2)\n+          }\n+    }\n+\n+  // undefined if `typ1` or `typ2` contains `TVar`, `TForAll`, or `TSynApp`.\n+  private def compareType(typ1: Ast.Type, typ2: Ast.Type): Int =\n+    compareType(0, FrontStack((typ1, typ2)))\n+\n+  private def compareText(text1: String, text2: String): Int =\n+    Utf8.Ordering.compare(text1, text2)\n+\n+  private def isHexa(s: String): Boolean =\n+    s.forall(x => '0' < x && x < '9' || 'a' < x && x < 'f')\n+\n+  @inline\n+  private val underlyingCidDiscriminatorLength = 65\n+\n+  private def compareCid(cid1: Ref.ContractIdString, cid2: Ref.ContractIdString): Int = {\n+    val lim = cid1.length min cid2.length\n+\n+    @tailrec\n+    def lp(i: Int): Int =\n+      if (i < lim) {\n+        val x = cid1(i)\n+        val y = cid2(i)\n+        if (x != y) x compareTo y else lp(i + 1)\n+      } else {\n+        if (lim == underlyingCidDiscriminatorLength && (//\n+          cid1.length != underlyingCidDiscriminatorLength && isHexa(cid2) || //\n+          cid2.length != underlyingCidDiscriminatorLength && isHexa(cid1)))\n+          throw new IllegalArgumentException(\n+            \"Try to a fresh contract id with  conflicting discriminators\")"
+  },
+  {
+    "id" : "b52046de-ca1e-49d0-9071-973b6f544a44",
+    "prId" : 4808,
+    "comments" : [
+      {
+        "id" : "420f2423-f731-4502-b6a7-78adc12eedd0",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Maybe it would be nice to have a comment here explaining that this case can only occurs when t1 and t2 have different type rank, so we don't need to compare the rest of the stack. (And I would maybe add an assertion that `typeRank(t1) != typeRank(t2)`, given that changes to `typeRank(..)` would break this comparison function without any warning from the type system.)",
+        "createdAt" : "2020-03-09T09:21:35Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "86f74491-15db-4cc5-bf6f-168377b48a6d",
+        "parentId" : "420f2423-f731-4502-b6a7-78adc12eedd0",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Good idea. added. Thanks ",
+        "createdAt" : "2020-03-09T10:19:34Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "de5a10ae-b91b-4b9f-92a3-21b4a61bba2d",
+        "parentId" : "420f2423-f731-4502-b6a7-78adc12eedd0",
+        "author" : null,
+        "body" : "Thanks! 👍 ",
+        "createdAt" : "2020-03-09T10:21:57Z",
+        "updatedAt" : "2020-03-09T11:33:56Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5c04c19b740c0002bf5adf440310b440f2393af8",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,195 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf\n+package speedy\n+package svalue\n+\n+import com.digitalasset.daml.lf.data.{FrontStack, FrontStackCons, ImmArray, Ref, Utf8}\n+import com.digitalasset.daml.lf.language.Ast\n+import com.digitalasset.daml.lf.speedy.SValue._\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+\n+import scala.annotation.tailrec\n+import scala.collection.JavaConverters._\n+\n+object Ordering extends scala.math.Ordering[SValue] {\n+\n+  private def zipAndPush[X, Y](\n+      xs: Iterator[X],\n+      ys: Iterator[Y],\n+      stack: FrontStack[(X, Y)],\n+  ): FrontStack[(X, Y)] =\n+    (xs zip ys).to[ImmArray] ++: stack\n+\n+  private def compareIdentifier(name1: Ref.TypeConName, name2: Ref.TypeConName): Int = {\n+    val c1 = name1.packageId compareTo name2.packageId\n+    lazy val c2 = name1.qualifiedName.module compareTo name2.qualifiedName.module\n+    def c3 = name1.qualifiedName.name compareTo name2.qualifiedName.name\n+    if (c1 != 0) c1 else if (c2 != 0) c2 else c3\n+  }\n+\n+  val builtinTypeIdx =\n+    List(\n+      Ast.BTUnit,\n+      Ast.BTBool,\n+      Ast.BTInt64,\n+      Ast.BTText,\n+      Ast.BTNumeric,\n+      Ast.BTTimestamp,\n+      Ast.BTDate,\n+      Ast.BTParty,\n+      Ast.BTContractId,\n+      Ast.BTArrow,\n+      Ast.BTOptional,\n+      Ast.BTList,\n+      Ast.BTTextMap,\n+      Ast.BTGenMap,\n+      Ast.BTAny,\n+      Ast.BTTypeRep,\n+      Ast.BTUpdate,\n+      Ast.BTScenario\n+    ).zipWithIndex.toMap\n+\n+  private def typeRank(typ: Ast.Type): Int =\n+    typ match {\n+      case Ast.TBuiltin(_) => 0\n+      case Ast.TTyCon(_) => 1\n+      case Ast.TNat(_) => 2\n+      case Ast.TStruct(_) => 3\n+      case Ast.TApp(_, _) => 4\n+      case Ast.TVar(_) | Ast.TForall(_, _) | Ast.TSynApp(_, _) =>\n+        throw new IllegalArgumentException(s\"cannot compare types $typ\")\n+    }\n+\n+  @tailrec\n+  // Any two ground types (types without variable nor quantifiers) can be compared.\n+  private[this] def compareType(x: Int, stack0: FrontStack[(Ast.Type, Ast.Type)]): Int =\n+    stack0 match {\n+      case FrontStack() =>\n+        x\n+      case FrontStackCons(tuple, stack) =>\n+        if (x != 0) x\n+        else\n+          tuple match {\n+            case (Ast.TBuiltin(b1), Ast.TBuiltin(b2)) =>\n+              compareType(builtinTypeIdx(b1) compareTo builtinTypeIdx(b2), stack)\n+            case (Ast.TTyCon(con1), Ast.TTyCon(con2)) =>\n+              compareType(compareIdentifier(con1, con2), stack)\n+            case (Ast.TNat(n1), Ast.TNat(n2)) =>\n+              compareType(n1 compareTo n2, stack)\n+            case (Ast.TStruct(fields1), Ast.TStruct(fields2)) =>\n+              compareType(\n+                math.Ordering\n+                  .Iterable[String]\n+                  .compare(fields1.toSeq.map(_._1), fields2.toSeq.map(_._1)),\n+                zipAndPush(fields1.iterator.map(_._2), fields2.iterator.map(_._2), stack)\n+              )\n+            case (Ast.TApp(t11, t12), Ast.TApp(t21, t22)) =>\n+              compareType(0, (t11, t21) +: (t12, t22) +: stack)\n+            case (t1, t2) =>\n+              typeRank(t1) compareTo typeRank(t2)"
+  }
+]

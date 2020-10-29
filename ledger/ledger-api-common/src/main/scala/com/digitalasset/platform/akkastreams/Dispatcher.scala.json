@@ -1,0 +1,143 @@
+[
+  {
+    "id" : "e6196210-37f6-45e0-81be-cd45f4639747",
+    "prId" : 611,
+    "comments" : [
+      {
+        "id" : "e16c3fc1-7cdc-4a7a-9173-5f99465d5f8c",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "@dajmaki FYI, we're gonna have this soon",
+        "createdAt" : "2019-04-18T15:40:34Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "80a155bf0253163f8e06e1fb42f82f22e3ae95fe",
+    "line" : 35,
+    "diffHunk" : "@@ -8,14 +8,41 @@ import java.util.concurrent.atomic.AtomicReference\n import akka.NotUsed\n import akka.stream.scaladsl.Source\n import com.digitalasset.platform.akkastreams.Dispatcher._\n+import com.digitalasset.platform.akkastreams.SteppingMode.{OneAfterAnother, RangeQuery}\n import com.digitalasset.platform.common.util.DirectExecutionContext\n-import org.slf4j.LoggerFactory\n import com.github.ghik.silencer.silent\n+import org.slf4j.LoggerFactory\n \n import scala.collection.immutable\n-\n import scala.concurrent.Future\n \n+/** Defines how the progress on the ledger should be mapped to look-up operations  */\n+sealed abstract class SteppingMode[Index: Ordering, T] extends Product with Serializable {}\n+\n+object SteppingMode {\n+\n+  /**\n+    * Useful when range queries are not possible. For instance streaming a linked-list from Cassandra\n+    *\n+    * @param readSuccessor extracts the next index\n+    * @param readElement   reads the element on the given index\n+    */\n+  final case class OneAfterAnother[Index: Ordering, T](\n+      readSuccessor: (Index, T) => Index,\n+      readElement: Index => Future[T])\n+      extends SteppingMode[Index, T]\n+\n+  /**\n+    * Applicable when the persistence layer supports efficient range queries.\n+    *\n+    * @param range (startInclusive, endExclusive) => Source[(Index, T), NotUsed]\n+    */\n+  final case class RangeQuery[Index: Ordering, T]("
+  },
+  {
+    "id" : "6c4d49a0-5a04-47e1-bc71-bea092864ed7",
+    "prId" : 611,
+    "comments" : [
+      {
+        "id" : "94df67c1-1c47-49a8-baa4-2499c83a72da",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "we were returning `(nextIndex, t)` which is wrong. The stream should emit the offset of the stored record, not the next one.",
+        "createdAt" : "2019-04-23T07:26:08Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0c72b7cc-b889-46f5-b450-1eae29bf8480",
+        "parentId" : "94df67c1-1c47-49a8-baa4-2499c83a72da",
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "have we added a test for this bug?",
+        "createdAt" : "2019-04-24T08:59:08Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "93b888c7-443d-4d48-ae33-135f3fef77ee",
+        "parentId" : "94df67c1-1c47-49a8-baa4-2499c83a72da",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "the wrong behaviour was tested so the test got adapted too. See `DispatcherSpec`.",
+        "createdAt" : "2019-04-24T09:06:54Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "80a155bf0253163f8e06e1fb42f82f22e3ae95fe",
+    "line" : 90,
+    "diffHunk" : "@@ -103,17 +135,21 @@ class Dispatcher[Index: Ordering, T] private (\n     * Gets all values from start, inclusive, to end, exclusive.\n     */\n   private def subsource(start: Index, end: Index): Source[(Index, T), NotUsed] =\n-    Source\n-      .unfoldAsync[Index, (Index, T)](start) { i =>\n-        if (i == end) {\n-          Future.successful(None)\n-        } else {\n-          readElement(i).map { t =>\n-            val nextIndex = readSuccessor(i, t)\n-            Some((nextIndex, (nextIndex, t)))"
+  },
+  {
+    "id" : "53ca5d7e-a7d2-4fb0-80d0-5cd87540e87f",
+    "prId" : 611,
+    "comments" : [
+      {
+        "id" : "83f694c3-4f9a-4e2f-9e79-09cdb34ffa91",
+        "parentId" : null,
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "as far as i can tell we never use this. is it even worth defining before we need it?",
+        "createdAt" : "2019-04-24T08:56:13Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a1a9f0c1-d942-47a9-b462-bd1cb00b65c9",
+        "parentId" : "83f694c3-4f9a-4e2f-9e79-09cdb34ffa91",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "well, we have been using it for a long time and it can still be handy in future situations. It's a well tested feature so I would keep it.",
+        "createdAt" : "2019-04-24T09:10:31Z",
+        "updatedAt" : "2019-04-24T10:54:57Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "80a155bf0253163f8e06e1fb42f82f22e3ae95fe",
+    "line" : 25,
+    "diffHunk" : "@@ -8,14 +8,41 @@ import java.util.concurrent.atomic.AtomicReference\n import akka.NotUsed\n import akka.stream.scaladsl.Source\n import com.digitalasset.platform.akkastreams.Dispatcher._\n+import com.digitalasset.platform.akkastreams.SteppingMode.{OneAfterAnother, RangeQuery}\n import com.digitalasset.platform.common.util.DirectExecutionContext\n-import org.slf4j.LoggerFactory\n import com.github.ghik.silencer.silent\n+import org.slf4j.LoggerFactory\n \n import scala.collection.immutable\n-\n import scala.concurrent.Future\n \n+/** Defines how the progress on the ledger should be mapped to look-up operations  */\n+sealed abstract class SteppingMode[Index: Ordering, T] extends Product with Serializable {}\n+\n+object SteppingMode {\n+\n+  /**\n+    * Useful when range queries are not possible. For instance streaming a linked-list from Cassandra\n+    *\n+    * @param readSuccessor extracts the next index\n+    * @param readElement   reads the element on the given index\n+    */\n+  final case class OneAfterAnother[Index: Ordering, T]("
+  }
+]

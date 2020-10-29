@@ -1,0 +1,369 @@
+[
+  {
+    "id" : "e03bdd47-5379-4950-9d23-810d3a1391fb",
+    "prId" : 2613,
+    "comments" : [
+      {
+        "id" : "a52d8497-042f-4f12-8fca-bc5e3b947eae",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n```",
+        "createdAt" : "2019-08-22T08:49:08Z",
+        "updatedAt" : "2019-08-22T09:26:46Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a3f3440e4af68af1880bec08325f0095ee5ab63",
+    "line" : null,
+    "diffHunk" : "@@ -13,22 +13,32 @@ def _client_server_test_impl(ctx):\n         content = \"\"\"#!/usr/bin/env bash\n set -eou pipefail\n \n-RUNNER=$(rlocation $TEST_WORKSPACE/{runner})\n-CLIENT=$(rlocation $TEST_WORKSPACE/{client})\n-SERVER=$(rlocation $TEST_WORKSPACE/{server})\n+runner=$(rlocation \"$TEST_WORKSPACE/{runner}\")\n+client=$(rlocation \"$TEST_WORKSPACE/{client}\")\n+server=$(rlocation \"$TEST_WORKSPACE/{server}\")\n+server_args=\"{server_args}\"\n+for file in {server_files}; do\n+    echo \"$(\"rlocation $TEST_WORKSPACE/$file\")\"  >> /tmp/log"
+  },
+  {
+    "id" : "d7ad6921-d5d0-4ae6-9891-ca6b86db1821",
+    "prId" : 2613,
+    "comments" : [
+      {
+        "id" : "ae5f89a2-2d16-42fc-bead-6382edb0f225",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n        client_args+=\" $(rlocation $TEST_WORKSPACE/$file)\"\r\n```\r\nShouldn't this be `client_args`?",
+        "createdAt" : "2019-08-22T08:50:51Z",
+        "updatedAt" : "2019-08-22T09:26:46Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a3f3440e4af68af1880bec08325f0095ee5ab63",
+    "line" : null,
+    "diffHunk" : "@@ -13,22 +13,32 @@ def _client_server_test_impl(ctx):\n         content = \"\"\"#!/usr/bin/env bash\n set -eou pipefail\n \n-RUNNER=$(rlocation $TEST_WORKSPACE/{runner})\n-CLIENT=$(rlocation $TEST_WORKSPACE/{client})\n-SERVER=$(rlocation $TEST_WORKSPACE/{server})\n+runner=$(rlocation \"$TEST_WORKSPACE/{runner}\")\n+client=$(rlocation \"$TEST_WORKSPACE/{client}\")\n+server=$(rlocation \"$TEST_WORKSPACE/{server}\")\n+server_args=\"{server_args}\"\n+for file in {server_files}; do\n+    echo \"$(\"rlocation $TEST_WORKSPACE/$file\")\"  >> /tmp/log\n+    server_args+=\" $(rlocation $TEST_WORKSPACE/$file)\"\n+done\n \n-CLIENT_ARGS=\"$@\"\n-if [ -z \"$CLIENT_ARGS\" ]; then\n-    CLIENT_ARGS=\"{client_args}\"\n+client_args=\"$@\"\n+if [ -z \"$client_args\" ]; then\n+    client_args=\"{client_args}\"\n+    for file in {client_files}; do\n+        server_args+=\" $(rlocation $TEST_WORKSPACE/$file)\""
+  },
+  {
+    "id" : "43b6d6c5-89c1-401a-bb3e-fa51733e2068",
+    "prId" : 2613,
+    "comments" : [
+      {
+        "id" : "4ffb7765-19cd-448a-bf39-c01072b41d6d",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n    client_files = [\"$(rootpath :file-for-client)\"]\r\n```\r\nBest, document how you would actually use it.",
+        "createdAt" : "2019-08-22T08:52:56Z",
+        "updatedAt" : "2019-08-22T09:26:46Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a3f3440e4af68af1880bec08325f0095ee5ab63",
+    "line" : null,
+    "diffHunk" : "@@ -81,14 +93,21 @@ The server process is killed after the client process exits.\n The client and server executables can be any Bazel target that\n is executable, e.g. scala_binary, sh_binary, etc.\n \n+The client and server files are runfiles paths of files that must be\n+fully resolved before being fed as argument to the client and server,\n+respectively. Those paths are typically obtained using rootpath(s) on\n+bazel targets.\n+\n Example:\n   ```bzl\n   client_server_test(\n     name = \"my_test\",\n     client = \":my_client\",\n     client_args = [\"--extra-argument\"],\n+    client_files = [\"file-for-client\"]"
+  },
+  {
+    "id" : "a1362043-3ac7-4046-97ce-cd3f037c5c7d",
+    "prId" : 2613,
+    "comments" : [
+      {
+        "id" : "28dcf738-7441-448f-a5d0-77d396ffb2cb",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n    client_files = [\"$(rootpath :file-for-client)\"]\r\n```\r\nBest, document how you would actually use it.",
+        "createdAt" : "2019-08-22T08:53:03Z",
+        "updatedAt" : "2019-08-22T09:26:46Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a3f3440e4af68af1880bec08325f0095ee5ab63",
+    "line" : null,
+    "diffHunk" : "@@ -81,14 +93,21 @@ The server process is killed after the client process exits.\n The client and server executables can be any Bazel target that\n is executable, e.g. scala_binary, sh_binary, etc.\n \n+The client and server files are runfiles paths of files that must be\n+fully resolved before being fed as argument to the client and server,\n+respectively. Those paths are typically obtained using rootpath(s) on\n+bazel targets.\n+\n Example:\n   ```bzl\n   client_server_test(\n     name = \"my_test\",\n     client = \":my_client\",\n     client_args = [\"--extra-argument\"],\n+    client_files = [\"file-for-client\"]"
+  },
+  {
+    "id" : "57378d16-411b-4853-bd33-dc4330473fbf",
+    "prId" : 2613,
+    "comments" : [
+      {
+        "id" : "a3fb5e01-9f7c-444b-8e66-516ddc839a99",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "same here",
+        "createdAt" : "2019-08-22T08:53:11Z",
+        "updatedAt" : "2019-08-22T09:26:46Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a3f3440e4af68af1880bec08325f0095ee5ab63",
+    "line" : null,
+    "diffHunk" : "@@ -81,14 +93,21 @@ The server process is killed after the client process exits.\n The client and server executables can be any Bazel target that\n is executable, e.g. scala_binary, sh_binary, etc.\n \n+The client and server files are runfiles paths of files that must be\n+fully resolved before being fed as argument to the client and server,\n+respectively. Those paths are typically obtained using rootpath(s) on\n+bazel targets.\n+\n Example:\n   ```bzl\n   client_server_test(\n     name = \"my_test\",\n     client = \":my_client\",\n     client_args = [\"--extra-argument\"],\n+    client_files = [\"file-for-client\"]\n     server = \":my_server\",\n     server_args = [\"--fast\"],\n+    server_files = [\"file-for-server\"]"
+  },
+  {
+    "id" : "fa0c005e-47ae-472b-b986-68d4e5f099c1",
+    "prId" : 2613,
+    "comments" : [
+      {
+        "id" : "774eaf47-07c3-4efb-8990-6d373db38937",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That sounds a bit misleading to me. They're not fully resolved, yet. As the last bit of resolution is done within the bash script using `rlocation`. Maybe phrase it as \"The client and server files must be valid arguments to `rlocation`, as can be obtained using `$(rootpaths)`\". With a link to https://docs.bazel.build/versions/master/be/make-variables.html#predefined_label_variables",
+        "createdAt" : "2019-08-22T08:57:54Z",
+        "updatedAt" : "2019-08-22T09:26:46Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a1f24294-0cb4-4d81-95cd-d546ebf221f4",
+        "parentId" : "774eaf47-07c3-4efb-8990-6d373db38937",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Thanks a lot for your comments.\r\n\r\n",
+        "createdAt" : "2019-08-22T11:32:01Z",
+        "updatedAt" : "2019-08-22T11:32:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a3f3440e4af68af1880bec08325f0095ee5ab63",
+    "line" : null,
+    "diffHunk" : "@@ -81,14 +93,21 @@ The server process is killed after the client process exits.\n The client and server executables can be any Bazel target that\n is executable, e.g. scala_binary, sh_binary, etc.\n \n+The client and server files are runfiles paths of files that must be"
+  },
+  {
+    "id" : "5f8db233-5ca5-471c-b12c-6864c78ad6b8",
+    "prId" : 365,
+    "comments" : [
+      {
+        "id" : "66edec9c-ee1e-4a51-b66c-ac243720decf",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n  return DefaultInfo(\r\n```\r\nWhy a `struct` (old-style provider) instead of a `DefaultInfo` provider? (https://docs.bazel.build/versions/master/skylark/lib/DefaultInfo.html#DefaultInfo)",
+        "createdAt" : "2019-04-11T08:42:33Z",
+        "updatedAt" : "2019-04-11T14:58:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b046680c-7408-4903-9e70-8e346c4a1707",
+        "parentId" : "66edec9c-ee1e-4a51-b66c-ac243720decf",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "thanks, fixed.",
+        "createdAt" : "2019-04-11T14:24:27Z",
+        "updatedAt" : "2019-04-11T14:58:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2828d0e19eee4c72312ec16af67e8721f214caae",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+# Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+def _client_server_test_impl(ctx):\n+\n+  # Construct wrapper to execute the runner, which in turn\n+  # will start the client and server.\n+  wrapper = ctx.actions.declare_file(ctx.label.name + \"_wrapper.sh\")\n+  ctx.actions.write(\n+    output = wrapper,\n+    content = \"\"\"#!/usr/bin/env bash\n+{runner} '{client}' '{server}'\n+\"\"\".format(\n+      runner = ctx.executable._runner.short_path,\n+      client = ctx.executable.client.short_path,\n+      client_args = \" \".join(ctx.attr.client_args),\n+      server = ctx.executable.server.short_path,\n+      server_args = \" \".join(ctx.attr.server_args),\n+    ),\n+    is_executable = True\n+  )\n+\n+  runfiles = ctx.runfiles(files = [wrapper])\n+  runfiles = runfiles.merge(ctx.attr._runner[DefaultInfo].default_runfiles)\n+  runfiles = runfiles.merge(ctx.attr.client[DefaultInfo].default_runfiles)\n+  runfiles = runfiles.merge(ctx.attr.server[DefaultInfo].default_runfiles)\n+\n+  return struct("
+  },
+  {
+    "id" : "36f8fa1b-18d7-46cc-9e7e-4417dd6b9696",
+    "prId" : 365,
+    "comments" : [
+      {
+        "id" : "1913143b-0fae-446d-9c78-d0788230142b",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "~Out of curiousity, why is the port passed to the server in a file, and to the client as an argument?~\r\n\r\nGot it, it's the server that writes its port into that file. The docstring is a bit ambiguous in this.",
+        "createdAt" : "2019-04-11T09:19:41Z",
+        "updatedAt" : "2019-04-11T14:58:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ae7aaeb6-ed50-408a-bb9b-aa9423112bf7",
+        "parentId" : "1913143b-0fae-446d-9c78-d0788230142b",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "fixed the comment.",
+        "createdAt" : "2019-04-11T14:24:36Z",
+        "updatedAt" : "2019-04-11T14:58:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2828d0e19eee4c72312ec16af67e8721f214caae",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+# Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+def _client_server_test_impl(ctx):\n+\n+  # Construct wrapper to execute the runner, which in turn\n+  # will start the client and server.\n+  wrapper = ctx.actions.declare_file(ctx.label.name + \"_wrapper.sh\")\n+  ctx.actions.write(\n+    output = wrapper,\n+    content = \"\"\"#!/usr/bin/env bash\n+{runner} '{client}' '{server}'\n+\"\"\".format(\n+      runner = ctx.executable._runner.short_path,\n+      client = ctx.executable.client.short_path,\n+      client_args = \" \".join(ctx.attr.client_args),\n+      server = ctx.executable.server.short_path,\n+      server_args = \" \".join(ctx.attr.server_args),\n+    ),\n+    is_executable = True\n+  )\n+\n+  runfiles = ctx.runfiles(files = [wrapper])\n+  runfiles = runfiles.merge(ctx.attr._runner[DefaultInfo].default_runfiles)\n+  runfiles = runfiles.merge(ctx.attr.client[DefaultInfo].default_runfiles)\n+  runfiles = runfiles.merge(ctx.attr.server[DefaultInfo].default_runfiles)\n+\n+  return struct(\n+    executable = wrapper,\n+    files = depset([wrapper]),\n+    runfiles = runfiles,\n+  )\n+\n+client_server_test = rule(\n+  implementation = _client_server_test_impl,\n+  test = True,\n+  executable = True,\n+  attrs = {\n+    \"_runner\": attr.label(\n+      cfg = \"host\",\n+      allow_single_file = True,\n+      executable = True,\n+      default = Label(\"@//bazel_tools/client_server_test/runner:runner\"),\n+    ),\n+    \"client\": attr.label(\n+      cfg = \"target\",\n+      executable = True,\n+    ),\n+    \"client_args\": attr.string_list(),\n+    \"server\": attr.label(\n+      cfg = \"target\",\n+      executable = True,\n+    ),\n+    \"server_args\": attr.string_list(),\n+  },\n+)\n+\"\"\"Create a client-server test.\n+\n+The rule takes a client and server executables and their\n+arguments as parameters. The server port is passed via a\n+temporary file, which is passed to the server executable via the\n+\"--port-file\" parameter. The client application receives the port"
+  },
+  {
+    "id" : "181efdb3-9558-46dc-b86f-bfd279dfeac6",
+    "prId" : 365,
+    "comments" : [
+      {
+        "id" : "9df711e1-7966-432e-b12a-d71dc1edb0d4",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Is this still used? `shell.quote` seems to be inlined in `_expand_args`.",
+        "createdAt" : "2019-04-11T09:51:52Z",
+        "updatedAt" : "2019-04-11T14:58:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fab847ab-e6bd-4091-a568-d20219b60070",
+        "parentId" : "9df711e1-7966-432e-b12a-d71dc1edb0d4",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "thx, removed.",
+        "createdAt" : "2019-04-11T14:24:06Z",
+        "updatedAt" : "2019-04-11T14:58:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2828d0e19eee4c72312ec16af67e8721f214caae",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,87 @@\n+# Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+load(\"@bazel_skylib//lib:shell.bzl\", \"shell\")"
+  }
+]

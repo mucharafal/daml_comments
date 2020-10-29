@@ -1,0 +1,325 @@
+[
+  {
+    "id" : "e148f18e-6f00-4e90-be39-e366640d6b67",
+    "prId" : 7571,
+    "comments" : [
+      {
+        "id" : "06fbb682-20fb-4569-80f8-4097875afa07",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "@S11001001 is there a two-parameter version of `unsubst`? I couldn’t figure out how to strip the tag on both parameters.",
+        "createdAt" : "2020-10-07T17:44:36Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1f64e44f-bd73-4e37-be08-884110337d67",
+        "parentId" : "06fbb682-20fb-4569-80f8-4097875afa07",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Er, I missed the context and responded up there https://github.com/digital-asset/daml/pull/7571/files#r501203465 , but the technique is the same. A conveniently inferrable subst or unsubst can be derived for any specific shape of type function, including \"first param of a 2-param type constructor\", or \"the l position of a `T[F[l, R]]`\".",
+        "createdAt" : "2020-10-07T17:57:34Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6489aaa0d5262d62016575dbcf3ca97582f3a81b",
+    "line" : null,
+    "diffHunk" : "@@ -36,40 +37,50 @@ object ContractDao {\n   def initialize(implicit log: LogHandler): ConnectionIO[Unit] =\n     Queries.dropAllTablesIfExist *> Queries.initDatabase\n \n-  def lastOffset(party: domain.Party, templateId: domain.TemplateId.RequiredPkg)(\n-      implicit log: LogHandler): ConnectionIO[Option[domain.Offset]] =\n+  def lastOffset(parties: OneAnd[Set, domain.Party], templateId: domain.TemplateId.RequiredPkg)(\n+      implicit log: LogHandler): ConnectionIO[Map[domain.Party, domain.Offset]] = {\n+    import doobie.postgres.implicits._\n     for {\n       tpId <- Queries.surrogateTemplateId(\n         templateId.packageId,\n         templateId.moduleName,\n         templateId.entityName)\n-      offset <- Queries.lastOffset(party.unwrap, tpId).map(_.map(domain.Offset(_)))\n+      offset <- Queries\n+        .lastOffset(domain.Party.unsubst(parties), tpId)\n+        .map(_.map { case (k, v) => (domain.Party(k), domain.Offset(v)) })\n     } yield offset\n+  }\n \n   def updateOffset(\n-      party: domain.Party,\n+      parties: OneAnd[Set, domain.Party],\n       templateId: domain.TemplateId.RequiredPkg,\n       newOffset: domain.Offset,\n-      lastOffset: Option[domain.Offset])(implicit log: LogHandler): ConnectionIO[Unit] =\n+      lastOffsets: Map[domain.Party, domain.Offset])(\n+      implicit log: LogHandler): ConnectionIO[Unit] = {\n+    import cats.implicits._\n+    import doobie.postgres.implicits._\n+    import scalaz.OneAnd._\n+    import scalaz.std.set._\n+    import scalaz.syntax.foldable._\n+    val partyVector = domain.Party.unsubst(parties.toVector)\n     for {\n       tpId <- Queries.surrogateTemplateId(\n         templateId.packageId,\n         templateId.moduleName,\n         templateId.entityName)\n-      rowCount <- Queries.updateOffset(\n-        party.unwrap,\n-        tpId,\n-        newOffset.unwrap,\n-        lastOffset.map(_.unwrap))\n-      _ <- if (rowCount == 1)\n+      rowCount <- Queries.updateOffset(partyVector, tpId, newOffset.unwrap, lastOffsets.map({"
+  },
+  {
+    "id" : "866c9503-7bb6-4109-85bb-7fd07e063b5b",
+    "prId" : 7571,
+    "comments" : [
+      {
+        "id" : "b186eead-816b-4bfe-b237-930cef173d59",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Given `Map[l, r]` where you want to subst in each type argument, the right one can be fully inferred, but for the left you must specify a type function. The right function, `[a] => Map[l, a]` is inferred.\r\n\r\nYou can equally subst into the l and r of `ConnectionIO[Map[l, r]]`, but must specify both type functions in that case, because the lambda over `r` cannot be inferred in this case.\r\n\r\n```suggestion\r\n      offset <- Queries\r\n        .lastOffset(domain.Party.unsubst(parties), tpId)\r\n    } yield {\r\n      type L[a] = Map[a, domain.Offset]\r\n      domain.Party.subst[L, String](domain.Offset.tag.subst(offset))\r\n    }\r\n```",
+        "createdAt" : "2020-10-07T17:55:36Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2f7cfc06-d625-4527-bf88-b94eaa1a1ce4",
+        "parentId" : "b186eead-816b-4bfe-b237-930cef173d59",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks!",
+        "createdAt" : "2020-10-07T18:01:10Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6489aaa0d5262d62016575dbcf3ca97582f3a81b",
+    "line" : null,
+    "diffHunk" : "@@ -36,40 +37,50 @@ object ContractDao {\n   def initialize(implicit log: LogHandler): ConnectionIO[Unit] =\n     Queries.dropAllTablesIfExist *> Queries.initDatabase\n \n-  def lastOffset(party: domain.Party, templateId: domain.TemplateId.RequiredPkg)(\n-      implicit log: LogHandler): ConnectionIO[Option[domain.Offset]] =\n+  def lastOffset(parties: OneAnd[Set, domain.Party], templateId: domain.TemplateId.RequiredPkg)(\n+      implicit log: LogHandler): ConnectionIO[Map[domain.Party, domain.Offset]] = {\n+    import doobie.postgres.implicits._\n     for {\n       tpId <- Queries.surrogateTemplateId(\n         templateId.packageId,\n         templateId.moduleName,\n         templateId.entityName)\n-      offset <- Queries.lastOffset(party.unwrap, tpId).map(_.map(domain.Offset(_)))\n+      offset <- Queries\n+        .lastOffset(domain.Party.unsubst(parties), tpId)\n+        .map(_.map { case (k, v) => (domain.Party(k), domain.Offset(v)) })\n     } yield offset"
+  },
+  {
+    "id" : "399614ce-c162-4ce8-9d32-6e115c7cbff5",
+    "prId" : 7571,
+    "comments" : [
+      {
+        "id" : "72eee4b1-603f-4859-9cdd-5efbcda697e0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "@S11001001 Why do I need type annotations on both for `unsubst` but not for `subst`? Doesn’t matter if I use kind projector or write the type lambda myself. I tried both options of removing either the one on the inner or the outer one but both result in a compile error.",
+        "createdAt" : "2020-10-07T19:04:33Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9d30a0f5-65f3-4e50-8c62-9fc58a9d8d16",
+        "parentId" : "72eee4b1-603f-4859-9cdd-5efbcda697e0",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "❓I just applied the following to 207e8e4ee5 , which built successfully, as I would expect:\r\n\r\n```diff\r\ndiff --git a/ledger-service/http-json/src/main/scala/com/digitalasset/http/dbbackend/ContractDao.scala b/ledger-service/http-json/src/main/scala/com/digitalasset/http/dbbackend/ContractDao.scala\r\nindex 3e2c4e01ce..7446504879 100644\r\n--- a/ledger-service/http-json/src/main/scala/com/digitalasset/http/dbbackend/ContractDao.scala\r\n+++ b/ledger-service/http-json/src/main/scala/com/digitalasset/http/dbbackend/ContractDao.scala\r\n@@ -66,7 +66,7 @@ object ContractDao {\r\n     import scalaz.syntax.foldable._\r\n     val partyVector = domain.Party.unsubst(parties.toVector)\r\n     val lastOffsetsStr: Map[String, String] = domain.Party.unsubst[Map[?, String], String](\r\n-      domain.Offset.tag.unsubst[Map[domain.Party, ?], String](lastOffsets))\r\n+      domain.Offset.tag.unsubst(lastOffsets))\r\n     for {\r\n       tpId <- Queries.surrogateTemplateId(\r\n         templateId.packageId,\r\n```",
+        "createdAt" : "2020-10-07T19:28:03Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "76d0306c-2dda-4781-b4df-eab8cbd0ecf8",
+        "parentId" : "72eee4b1-603f-4859-9cdd-5efbcda697e0",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "huh, not sure what I did was doing earlier. Works just fine for me now as well. Apologies for the noise.",
+        "createdAt" : "2020-10-07T19:30:51Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6489aaa0d5262d62016575dbcf3ca97582f3a81b",
+    "line" : null,
+    "diffHunk" : "@@ -36,40 +37,52 @@ object ContractDao {\n   def initialize(implicit log: LogHandler): ConnectionIO[Unit] =\n     Queries.dropAllTablesIfExist *> Queries.initDatabase\n \n-  def lastOffset(party: domain.Party, templateId: domain.TemplateId.RequiredPkg)(\n-      implicit log: LogHandler): ConnectionIO[Option[domain.Offset]] =\n+  def lastOffset(parties: OneAnd[Set, domain.Party], templateId: domain.TemplateId.RequiredPkg)(\n+      implicit log: LogHandler): ConnectionIO[Map[domain.Party, domain.Offset]] = {\n+    import doobie.postgres.implicits._\n     for {\n       tpId <- Queries.surrogateTemplateId(\n         templateId.packageId,\n         templateId.moduleName,\n         templateId.entityName)\n-      offset <- Queries.lastOffset(party.unwrap, tpId).map(_.map(domain.Offset(_)))\n-    } yield offset\n+      offset <- Queries\n+        .lastOffset(domain.Party.unsubst(parties), tpId)\n+    } yield {\n+      type L[a] = Map[a, domain.Offset]\n+      domain.Party.subst[L, String](domain.Offset.tag.subst(offset))\n+    }\n+  }\n \n   def updateOffset(\n-      party: domain.Party,\n+      parties: OneAnd[Set, domain.Party],\n       templateId: domain.TemplateId.RequiredPkg,\n       newOffset: domain.Offset,\n-      lastOffset: Option[domain.Offset])(implicit log: LogHandler): ConnectionIO[Unit] =\n+      lastOffsets: Map[domain.Party, domain.Offset])(\n+      implicit log: LogHandler): ConnectionIO[Unit] = {\n+    import cats.implicits._\n+    import doobie.postgres.implicits._\n+    import scalaz.OneAnd._\n+    import scalaz.std.set._\n+    import scalaz.syntax.foldable._\n+    val partyVector = domain.Party.unsubst(parties.toVector)\n+    val lastOffsetsStr: Map[String, String] = domain.Party.unsubst[Map[?, String], String]("
+  },
+  {
+    "id" : "4d5c98cc-55c3-47ab-b7fe-30e493a6d1fb",
+    "prId" : 3425,
+    "comments" : [
+      {
+        "id" : "2fd345e4-4be0-43d8-9adb-6abdf71ab685",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "We shouldn't reinvent all this locally; let's let the database do its job, perhaps with a well-placed `SELECT FOR UPDATE`.",
+        "createdAt" : "2019-11-11T22:55:22Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "108eb152-a47d-43c7-bf50-e424271038a3",
+        "parentId" : "2fd345e4-4be0-43d8-9adb-6abdf71ab685",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Ummmm...\r\n\r\n> FOR UPDATE/FOR SHARE Clause. FOR UPDATE causes the rows retrieved by the SELECT statement to be locked as though for update. This prevents them from being modified or deleted by other transactions until the current transaction ends.\r\n\r\nwhy do we want to lock them? With optimistic locking (which I thought we agreed we are doing), this problem is usually solved the way I did it, checking for the number or rows updated (usually with a version or timestamp, offset in our case is fine).\r\nWith optimistic locking whatever transaction commits first -- wins, the other should retry.",
+        "createdAt" : "2019-11-12T15:15:51Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dbc90ff5-8363-4139-a723-737d184833a0",
+        "parentId" : "2fd345e4-4be0-43d8-9adb-6abdf71ab685",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "in my experience, the less you mess with locking, the better. This is to avoid issues when deadlocked thread started a DB lock but never committed or rolled back the transaction.",
+        "createdAt" : "2019-11-12T15:20:49Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f05a2ab6-1994-4ac5-be3d-23bbbb3efe57",
+        "parentId" : "2fd345e4-4be0-43d8-9adb-6abdf71ab685",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "This isn't so different, as the `update` here also acquires a lock. (And it must, for the compare-and-swap check to be valid.)",
+        "createdAt" : "2019-11-12T18:30:02Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "74d5f1fc-8e2b-46e1-98cd-ac8cfb44f158",
+        "parentId" : "2fd345e4-4be0-43d8-9adb-6abdf71ab685",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "the duration of this compare-and-swap is as short as the duration of the regular update, It is implemented using atomic `UPDATE .... WHERE last_offset=$lastOffset`. We just check the number of rows updated by this query, which has to be 1, else we re-run the entire flow.\r\nI think this is the simplest and most performant implementation.",
+        "createdAt" : "2019-11-12T18:51:35Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "324374da-aa6b-4829-b851-dbc96ed28d72",
+        "parentId" : "2fd345e4-4be0-43d8-9adb-6abdf71ab685",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "plus we update offset as the last step in the flow, so any discrepancies would be caught at this point.",
+        "createdAt" : "2019-11-12T18:52:50Z",
+        "updatedAt" : "2019-11-12T18:57:26Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c0e277c2-6817-4b27-971e-24898f6008a0",
+        "parentId" : "2fd345e4-4be0-43d8-9adb-6abdf71ab685",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Yes, and that `update` acquires a lock which is released on commit.",
+        "createdAt" : "2019-11-12T19:35:56Z",
+        "updatedAt" : "2019-11-12T19:35:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9dc62b2aba0c9d4c197e1df63834edb315bfbe80",
+    "line" : 30,
+    "diffHunk" : "@@ -46,12 +46,35 @@ object ContractDao {\n   def updateOffset(\n       party: domain.Party,\n       templateId: domain.TemplateId.RequiredPkg,\n-      newOffset: domain.Offset)(implicit log: LogHandler): ConnectionIO[Unit] =\n+      newOffset: domain.Offset,\n+      lastOffset: Option[domain.Offset])(implicit log: LogHandler): ConnectionIO[Unit] =\n     for {\n       tpId <- Queries.surrogateTemplateId(\n         templateId.packageId,\n         templateId.moduleName,\n         templateId.entityName)\n-      _ <- Queries.updateOffset(party.unwrap, tpId, newOffset.unwrap)\n+      rowCount <- Queries.updateOffset(\n+        party.unwrap,\n+        tpId,\n+        newOffset.unwrap,\n+        lastOffset.map(_.unwrap))\n+      _ <- if (rowCount == 1)\n+        fconn.pure(())\n+      else\n+        fconn.raiseError(StaleOffsetException(party, templateId, newOffset, lastOffset))"
+  }
+]

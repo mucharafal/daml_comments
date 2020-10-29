@@ -1,0 +1,278 @@
+[
+  {
+    "id" : "6f6654c9-2453-40a8-aef8-da7d573ff704",
+    "prId" : 3403,
+    "comments" : [
+      {
+        "id" : "eaebc6ec-6895-4137-a83b-2c68e2f81a09",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Do you think the \"global token\" in the config is sufficiently \"broken\" to better not have it at all?",
+        "createdAt" : "2019-11-11T10:01:30Z",
+        "updatedAt" : "2019-11-11T13:22:51Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a122e142-d754-42f2-a8fe-34aa5529224c",
+        "parentId" : "eaebc6ec-6895-4137-a83b-2c68e2f81a09",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It's not necessary to have it, you can simply build a `Channel`, add credentials to it and pass it in. That's how I made `AuthorizationIT` work without appending credentials to each call. :slightly_smiling_face: The next contribution in this Yak shaving sequence will make the approach a bit more idiomatic using the client (by allowing to pass in a pre-configured builder).",
+        "createdAt" : "2019-11-11T10:14:29Z",
+        "updatedAt" : "2019-11-11T13:22:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7abf0381-9bcf-4521-9b2b-6afb1d0a1aae",
+        "parentId" : "eaebc6ec-6895-4137-a83b-2c68e2f81a09",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "But there the `CallCredentials` are also not attached to the channel, but to the stub, recreating the `LedgerContext` that now contains stubs initialized with those call credentials.",
+        "createdAt" : "2019-11-11T10:29:59Z",
+        "updatedAt" : "2019-11-11T13:22:51Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6ac14f56ff46eebe77ac114486a8fbe5e7116fc0",
+    "line" : 161,
+    "diffHunk" : "@@ -106,36 +125,18 @@ object LedgerClient {\n     forChannel(configuration, channel)\n   }\n \n-  private[this] val auth = Metadata.Key.of(\"Authorization\", Metadata.ASCII_STRING_MARSHALLER)\n-\n-  def callCredentials(token: String): CallCredentials =\n-    new CallCredentials {\n-      override def applyRequestMetadata(\n-          requestInfo: CallCredentials.RequestInfo,\n-          appExecutor: Executor,\n-          applier: CallCredentials.MetadataApplier): Unit = {\n-        val metadata = new Metadata\n-        metadata.put(auth, token)\n-        applier.apply(metadata)\n-      }\n-\n-      // Should be a noop but never called; tries to make it clearer to implementors that they may break in the future.\n-      override def thisUsesUnstableApi(): Unit = ()\n-    }\n-\n   def forChannel(configuration: LedgerClientConfiguration, channel: Channel)(\n       implicit ec: ExecutionContext,\n-      esf: ExecutionSequencerFactory): Future[LedgerClient] = {\n-    val creds = configuration.accessToken.map(callCredentials).orNull\n+      esf: ExecutionSequencerFactory): Future[LedgerClient] =\n     apply(\n-      LedgerIdentityServiceGrpc.stub(channel).withCallCredentials(creds),\n-      TransactionServiceGrpc.stub(channel).withCallCredentials(creds),\n-      ActiveContractsServiceGrpc.stub(channel).withCallCredentials(creds),\n-      CommandSubmissionServiceGrpc.stub(channel).withCallCredentials(creds),\n-      CommandCompletionServiceGrpc.stub(channel).withCallCredentials(creds),\n-      CommandServiceGrpc.stub(channel).withCallCredentials(creds),\n-      PackageServiceGrpc.stub(channel).withCallCredentials(creds),\n+      LedgerIdentityServiceGrpc.stub(channel),"
+  },
+  {
+    "id" : "49c1d0d3-d20b-490a-bab1-fa3625845a0d",
+    "prId" : 3138,
+    "comments" : [
+      {
+        "id" : "630f318f-8897-4934-8164-cddd26e57be7",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Should we provide a way to use tokens on insecure channels for development purposes?\r\n\r\nI like the strict check here, provided that we have an easy way of working with a local sandbox in SSL mode (easy meaning the user does not have to manually run SSL certificate generating commands).",
+        "createdAt" : "2019-10-09T09:59:42Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3e78f4b3-e213-430c-a4d7-0ca2e6facd15",
+        "parentId" : "630f318f-8897-4934-8164-cddd26e57be7",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I see you added some certificates in `navigator/backend/scenarios/rental/tls/` :+1:",
+        "createdAt" : "2019-10-09T10:07:36Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "58604005-4f95-4e5e-b1f3-1ac3a69201f8",
+        "parentId" : "630f318f-8897-4934-8164-cddd26e57be7",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "As @gerolf-da mentioned offline, we should probably not do it here. The thing I was mostly interested in was providing a clear error message to the user. I'll see what happens if I try to do it without any such protection. IIRC gRPC itself should complain, I'll try to see if it's possible to get back some meaningful error to return to the user.",
+        "createdAt" : "2019-10-09T11:52:48Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9db3bedd-9c6a-4fe1-a9a3-58c55385ed85",
+        "parentId" : "630f318f-8897-4934-8164-cddd26e57be7",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Removed the check.",
+        "createdAt" : "2019-10-18T08:55:28Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bb3817c9a66c72de085b1959aae0ac7ddc5f7a3d",
+    "line" : null,
+    "diffHunk" : "@@ -77,38 +80,73 @@ object LedgerClient {\n     }\n   }\n \n-  def singleHost(hostIp: String, port: Int, configuration: LedgerClientConfiguration)(\n-      implicit ec: ExecutionContext,\n-      esf: ExecutionSequencerFactory): Future[LedgerClient] = {\n-\n-    val builder: NettyChannelBuilder = NettyChannelBuilder\n-      .forAddress(hostIp, port)\n-\n+  /**\n+    * Constructs a [[Channel]], ensuring that the [[LedgerClientConfiguration]] is picked up and valid\n+    *\n+    * You'll generally want to use [[singleHost]], use this only if you need a higher level of control\n+    * over your [[Channel]].\n+    */\n+  def constructChannel(\n+      hostIp: String,\n+      port: Int,\n+      configuration: LedgerClientConfiguration): Try[Channel] = {\n+    val builder: NettyChannelBuilder = NettyChannelBuilder.forAddress(hostIp, port)\n     configuration.sslContext\n       .fold {\n-        builder.usePlaintext()\n+        if (configuration.accessToken.isDefined) {\n+          Failure(new IllegalArgumentException(\"Cannot send a token over an insecure channel\"))"
+  },
+  {
+    "id" : "eb96d4b7-252e-4948-9c3f-8cb63dfc50a1",
+    "prId" : 3138,
+    "comments" : [
+      {
+        "id" : "79fd720d-c5a8-4813-84c2-040f12c54121",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I assume `.withCallCredentials(null)` is a no-op?",
+        "createdAt" : "2019-10-09T10:01:59Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3c1d3a73-9f9d-4ce2-ba70-948fe5838f93",
+        "parentId" : "79fd720d-c5a8-4813-84c2-040f12c54121",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "It explicitly sets the `CallCredentials` to be `null`, so that they are not used.",
+        "createdAt" : "2019-10-09T11:17:03Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bb3817c9a66c72de085b1959aae0ac7ddc5f7a3d",
+    "line" : 93,
+    "diffHunk" : "@@ -77,38 +80,73 @@ object LedgerClient {\n     }\n   }\n \n-  def singleHost(hostIp: String, port: Int, configuration: LedgerClientConfiguration)(\n-      implicit ec: ExecutionContext,\n-      esf: ExecutionSequencerFactory): Future[LedgerClient] = {\n-\n-    val builder: NettyChannelBuilder = NettyChannelBuilder\n-      .forAddress(hostIp, port)\n-\n+  /**\n+    * Constructs a [[Channel]], ensuring that the [[LedgerClientConfiguration]] is picked up and valid\n+    *\n+    * You'll generally want to use [[singleHost]], use this only if you need a higher level of control\n+    * over your [[Channel]].\n+    */\n+  def constructChannel(\n+      hostIp: String,\n+      port: Int,\n+      configuration: LedgerClientConfiguration): Try[Channel] = {\n+    val builder: NettyChannelBuilder = NettyChannelBuilder.forAddress(hostIp, port)\n     configuration.sslContext\n       .fold {\n-        builder.usePlaintext()\n+        if (configuration.accessToken.isDefined) {\n+          Failure(new IllegalArgumentException(\"Cannot send a token over an insecure channel\"))\n+        } else {\n+          Success(builder.usePlaintext())\n+        }\n       } { sslContext =>\n-        builder.sslContext(sslContext).negotiationType(NegotiationType.TLS)\n+        Success(builder.sslContext(sslContext).negotiationType(NegotiationType.TLS))\n       }\n+      .map { builder =>\n+        val channel = builder.build()\n+        val _ = sys.addShutdownHook { val _ = channel.shutdownNow() }\n+        channel\n+      }\n+  }\n \n-    val channel = builder.build()\n-\n-    val _ = sys.addShutdownHook { val _ = channel.shutdownNow() }\n+  /**\n+    * A convenient shortcut to build a [[LedgerClient]]\n+    */\n+  def singleHost(hostIp: String, port: Int, configuration: LedgerClientConfiguration)(\n+      implicit ec: ExecutionContext,\n+      esf: ExecutionSequencerFactory): Future[LedgerClient] =\n+    Future\n+      .fromTry(constructChannel(hostIp, port, configuration))\n+      .flatMap(forChannel(configuration, _))\n+\n+  val auth = Metadata.Key.of(\"Authorization\", Metadata.ASCII_STRING_MARSHALLER)\n+\n+  def callCredentials(token: String): CallCredentials =\n+    new CallCredentials {\n+      override def applyRequestMetadata(\n+          requestInfo: CallCredentials.RequestInfo,\n+          appExecutor: Executor,\n+          applier: CallCredentials.MetadataApplier): Unit = {\n+        val metadata = new Metadata\n+        metadata.put(auth, token)\n+        applier.apply(metadata)\n+      }\n \n-    forChannel(configuration, channel)\n+      // Should be a noop but never called; tries to make it clearer to implementors that they may break in the future.\n+      override def thisUsesUnstableApi(): Unit = ()\n+    }\n \n-  }\n   def forChannel(configuration: LedgerClientConfiguration, channel: Channel)(\n       implicit ec: ExecutionContext,\n       esf: ExecutionSequencerFactory): Future[LedgerClient] = {\n+    val creds = configuration.accessToken.map(callCredentials).orNull\n     apply(\n-      LedgerIdentityServiceGrpc.stub(channel),\n-      TransactionServiceGrpc.stub(channel),\n-      ActiveContractsServiceGrpc.stub(channel),\n-      CommandSubmissionServiceGrpc.stub(channel),\n-      CommandCompletionServiceGrpc.stub(channel),\n-      CommandServiceGrpc.stub(channel),\n-      PackageServiceGrpc.stub(channel),\n+      LedgerIdentityServiceGrpc.stub(channel).withCallCredentials(creds),"
+  },
+  {
+    "id" : "c83e46b7-d5b7-49de-9985-a221b9093682",
+    "prId" : 3138,
+    "comments" : [
+      {
+        "id" : "b53189b5-21f0-468e-89d8-00b735c3bb2e",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Maybe add a comment that this uses the `Authentication: Bearer` schema.\r\n\r\nOr (which I would prefer), allow the caller to specify the schema. We known that the \"sandbox JWT\" authentication will use `Bearer`, but other `AuthService` implementations might use [other schemes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Authentication_schemes).",
+        "createdAt" : "2019-10-18T08:48:29Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "915da738-4f13-464d-8bcb-5efd458cc4d5",
+        "parentId" : "b53189b5-21f0-468e-89d8-00b735c3bb2e",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I'll make the `Bearer` part optional.",
+        "createdAt" : "2019-10-18T09:42:12Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "23aa3a70-d885-4cdd-89b7-f2245459f6ec",
+        "parentId" : "b53189b5-21f0-468e-89d8-00b735c3bb2e",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/3138/commits/827472c54d38756f8d14b02b0b7640fd5ad6b3cd",
+        "createdAt" : "2019-10-18T11:33:24Z",
+        "updatedAt" : "2019-10-18T13:12:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bb3817c9a66c72de085b1959aae0ac7ddc5f7a3d",
+    "line" : 60,
+    "diffHunk" : "@@ -77,38 +79,61 @@ object LedgerClient {\n     }\n   }\n \n+  /**\n+    * Constructs a [[Channel]], ensuring that the [[LedgerClientConfiguration]] is picked up and valid\n+    *\n+    * You'll generally want to use [[singleHost]], use this only if you need a higher level of control\n+    * over your [[Channel]].\n+    */\n+  def constructChannel(\n+      hostIp: String,\n+      port: Int,\n+      configuration: LedgerClientConfiguration): Channel = {\n+    val builder: NettyChannelBuilder = NettyChannelBuilder.forAddress(hostIp, port)\n+    configuration.sslContext.fold(builder.usePlaintext())(\n+      builder.sslContext(_).negotiationType(NegotiationType.TLS))\n+    val channel = builder.build()\n+    val _ = sys.addShutdownHook { val _ = channel.shutdownNow() }\n+    channel\n+  }\n+\n+  /**\n+    * A convenient shortcut to build a [[LedgerClient]]\n+    */\n   def singleHost(hostIp: String, port: Int, configuration: LedgerClientConfiguration)(\n       implicit ec: ExecutionContext,\n-      esf: ExecutionSequencerFactory): Future[LedgerClient] = {\n-\n-    val builder: NettyChannelBuilder = NettyChannelBuilder\n-      .forAddress(hostIp, port)\n-\n-    configuration.sslContext\n-      .fold {\n-        builder.usePlaintext()\n-      } { sslContext =>\n-        builder.sslContext(sslContext).negotiationType(NegotiationType.TLS)\n+      esf: ExecutionSequencerFactory): Future[LedgerClient] =\n+    forChannel(configuration, constructChannel(hostIp, port, configuration))\n+\n+  private[this] val auth = Metadata.Key.of(\"Authorization\", Metadata.ASCII_STRING_MARSHALLER)\n+\n+  def callCredentials(token: String): CallCredentials ="
+  }
+]

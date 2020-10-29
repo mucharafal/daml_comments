@@ -1,0 +1,134 @@
+[
+  {
+    "id" : "f6386c20-685d-400d-862a-f7427e2850fa",
+    "prId" : 404,
+    "comments" : [
+      {
+        "id" : "c35879e5-39af-4ef5-9795-57dfb8d7dcc3",
+        "parentId" : null,
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "Why not a `sed` to change the version? This seems like we’re asking for this to get out of sync with the release tarball.",
+        "createdAt" : "2019-04-11T14:30:05Z",
+        "updatedAt" : "2019-04-11T14:30:14Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4f73b06f-3f65-4956-904a-280136cc53ee",
+        "parentId" : "c35879e5-39af-4ef5-9795-57dfb8d7dcc3",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "That makes sense temporarily. This is one of the reasons I think it makes most sense for `daml new` to add `sdk-version` at run time, instead of having it be hardcoded.\r\n",
+        "createdAt" : "2019-04-11T14:32:52Z",
+        "updatedAt" : "2019-04-11T14:32:52Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5ad6a6c4619bd22d8bcb3e8045b9f0e8186c777c",
+    "line" : 25,
+    "diffHunk" : "@@ -139,3 +139,39 @@ EOF\n     \"\"\",\n     visibility = [\"//visibility:public\"],\n )\n+\n+# Same as the above, but with head version 0.0.0.\n+genrule(\n+    name = \"sdk-head-tarball\",\n+    srcs = [\n+        \":config.yaml.tmpl\",\n+        \":sdk-release-tarball.tar.gz\",\n+    ],\n+    outs = [\"sdk-head-tarball.tar.gz\"],\n+    cmd = \"\"\"\n+\n+      VERSION=0.0.0\n+      OUT=sdk-head\n+      mkdir -p $$OUT\n+      tar xf $(location sdk-release-tarball.tar.gz) --strip-components=1 -C $$OUT\n+\n+      cp $(location :config.yaml.tmpl) $$OUT/config.yaml\n+      sed -i \"s/__VERSION__/$$VERSION/\" $$OUT/config.yaml\n+\n+      rm $$OUT/templates/quickstart-java/daml.yaml\n+      cat > $$OUT/templates/quickstart-java/daml.yaml << EOF\n+sdk-version: $$VERSION"
+  },
+  {
+    "id" : "8a9307c4-f802-4627-bf7e-10e6460482e6",
+    "prId" : 337,
+    "comments" : [
+      {
+        "id" : "6e56f414-32bb-4288-8038-612bcea4eae4",
+        "parentId" : null,
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "I think this change might break things as the latest version will probably be the latest version that has the +100 bump.",
+        "createdAt" : "2019-04-10T06:52:38Z",
+        "updatedAt" : "2019-04-10T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "105578a7-4d68-43af-a97e-219cec3ffbe2",
+        "parentId" : "6e56f414-32bb-4288-8038-612bcea4eae4",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "The previous versions have \"nightly-\" which should make them get filtered out by the assistant's logic. Do you think this will mess things up with bintray? It's ok for the bintray version to still be +100 (we account for that in the URL logic above). It's also ok IMO for bintray downloads to break since we're moving to github releases with @garyverhaegen-da's help. ",
+        "createdAt" : "2019-04-10T07:50:23Z",
+        "updatedAt" : "2019-04-10T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0bb8eb60-1273-422e-a5ec-39eff9472eff",
+        "parentId" : "6e56f414-32bb-4288-8038-612bcea4eae4",
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "I am slightly worried that the `latest` URL will resolve to the `+100` version. If you are confident that this will not be a problem that’s fine :+1:",
+        "createdAt" : "2019-04-10T07:53:39Z",
+        "updatedAt" : "2019-04-10T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1d52ec51-c47d-4c51-9f52-0331a00dd16a",
+        "parentId" : "6e56f414-32bb-4288-8038-612bcea4eae4",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "It should resolve to the +100 version! I guess we'll find out if it breaks bintray downloads for daml-assistant ... oh well.",
+        "createdAt" : "2019-04-10T08:19:12Z",
+        "updatedAt" : "2019-04-10T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c63dc83e702244360b482149bc1bc3dfc388c2b4",
+    "line" : 5,
+    "diffHunk" : "@@ -75,7 +75,7 @@ genrule(\n     srcs = [\n         \":config.yaml.tmpl\",\n         \":install.sh\",\n-        \"//:component-version\",\n+        \"//:VERSION\","
+  }
+]

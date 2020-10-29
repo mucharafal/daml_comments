@@ -1,0 +1,93 @@
+[
+  {
+    "id" : "7c49f136-a2cc-44b3-ab20-91dd7e96d3e0",
+    "prId" : 5465,
+    "comments" : [
+      {
+        "id" : "90430cb9-de47-4129-95be-258793ba06d8",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Wording suggestion:\r\n\r\n```suggestion\r\nTriggers </triggers/index>`. Note that automation for upgrades is\r\nspecific to an individual application, just like the upgrade models.\r\nNevertheless, we have found that the pattern shown here\r\n```",
+        "createdAt" : "2020-04-07T11:38:46Z",
+        "updatedAt" : "2020-04-07T11:54:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c5f1bef846c892d973b57ae263c8bf183fa8baf6",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+.. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+.. _upgrade-automation:\n+\n+Automating the Upgrade Process\n+##############################\n+\n+In this section, we are going to automate the upgrade of our coin\n+process using :doc:`DAML Script</daml-script/index>` and :doc:`DAML\n+Triggers </triggers/index>`. Note that automation for upgrades just\n+like the upgrade models is specific to an individual\n+application. Nevertheless, we have found that the pattern shown here"
+  },
+  {
+    "id" : "325fae6b-d0ad-4783-b5b8-b25cd28234b6",
+    "prId" : 5465,
+    "comments" : [
+      {
+        "id" : "16f106f2-c73a-49f0-9c7b-b229e38ae2dc",
+        "parentId" : null,
+        "author" : null,
+        "body" : "```suggestion\r\n   for which there is a corresponding ``UpgradeCoinAgreement``.\r\n```",
+        "createdAt" : "2020-04-07T11:42:16Z",
+        "updatedAt" : "2020-04-07T11:54:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ab16be69-b993-413a-a541-eebe2804e552",
+        "parentId" : "16f106f2-c73a-49f0-9c7b-b229e38ae2dc",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It took me 3 times until I spotted the difference :slightly_smiling_face: ",
+        "createdAt" : "2020-04-07T11:53:56Z",
+        "updatedAt" : "2020-04-07T11:54:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c5f1bef846c892d973b57ae263c8bf183fa8baf6",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+.. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+.. _upgrade-automation:\n+\n+Automating the Upgrade Process\n+##############################\n+\n+In this section, we are going to automate the upgrade of our coin\n+process using :doc:`DAML Script</daml-script/index>` and :doc:`DAML\n+Triggers </triggers/index>`. Note that automation for upgrades just\n+like the upgrade models is specific to an individual\n+application. Nevertheless, we have found that the pattern shown here\n+occurs frequently.\n+\n+Structuring the Upgrade\n+=======================\n+\n+There are three kinds of actions performed during the upgrade:\n+\n+#. Alice creates ``UpgradeCoinProposal`` contracts. We assume here,\n+   that Alice wants to upgrade all ``Coin`` contracts she has\n+   issued. Since the ``UpgradeCoinProposal`` proposal is specific to\n+   each owner, Alice has to create one ``UpgradeCoinProposal`` per\n+   owner. There can be potentially many owners but this step only has\n+   to be performed once assuming Alice will not issue more ``Coin``\n+   contracts after this point.\n+#. Bob and other owners accept the ``UpgradeCoinProposal``. To keep\n+   this example simple, we assume that there are only coins issued by\n+   Alice. Therefore, each owner has to accept at most one proposal.\n+#. As owners accept upgrade proposals, Alice has to upgrade each\n+   coin. This means that she has to execute the upgrade choice once\n+   for each coin. Owners will not all accept the upgrade at the same\n+   time and some might never accept it. Therefore, this should be a\n+   long-running process that upgrades all coins of a given owner as\n+   soon as they accept the upgrade.\n+\n+Given those constraints, we are going to use the following tools for\n+the upgrade:\n+\n+#. A DAML script that will be executed once by Alice and creates an\n+   ``UpgradeCoinProposal`` contract for each owner.\n+#. Navigator to accept the ``UpgradeCoinProposal`` as Bob. While we\n+   could also use a DAML script to accept the proposal, this step will\n+   often be exposed as part of a web UI so doing it interactively in\n+   Navigator resembles that workflow more closely.\n+#. A long-running DAML trigger that upgrades all ``Coin`` contracts\n+   for which there is a corresponding ``UpgradeCoinAgreeement``."
+  },
+  {
+    "id" : "976fda89-952a-4e6a-87a6-45a147b3ba24",
+    "prId" : 5465,
+    "comments" : [
+      {
+        "id" : "3484fe4b-81ae-44f5-9256-d7bf80242a06",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Possible suggestion:\r\n\r\n```suggestion\r\nIn our DAML Script, we are first going to query the ACS (Active Contract Set) to find all\r\n```",
+        "createdAt" : "2020-04-07T11:43:53Z",
+        "updatedAt" : "2020-04-07T11:54:33Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c5f1bef846c892d973b57ae263c8bf183fa8baf6",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,167 @@\n+.. Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+.. SPDX-License-Identifier: Apache-2.0\n+\n+.. _upgrade-automation:\n+\n+Automating the Upgrade Process\n+##############################\n+\n+In this section, we are going to automate the upgrade of our coin\n+process using :doc:`DAML Script</daml-script/index>` and :doc:`DAML\n+Triggers </triggers/index>`. Note that automation for upgrades just\n+like the upgrade models is specific to an individual\n+application. Nevertheless, we have found that the pattern shown here\n+occurs frequently.\n+\n+Structuring the Upgrade\n+=======================\n+\n+There are three kinds of actions performed during the upgrade:\n+\n+#. Alice creates ``UpgradeCoinProposal`` contracts. We assume here,\n+   that Alice wants to upgrade all ``Coin`` contracts she has\n+   issued. Since the ``UpgradeCoinProposal`` proposal is specific to\n+   each owner, Alice has to create one ``UpgradeCoinProposal`` per\n+   owner. There can be potentially many owners but this step only has\n+   to be performed once assuming Alice will not issue more ``Coin``\n+   contracts after this point.\n+#. Bob and other owners accept the ``UpgradeCoinProposal``. To keep\n+   this example simple, we assume that there are only coins issued by\n+   Alice. Therefore, each owner has to accept at most one proposal.\n+#. As owners accept upgrade proposals, Alice has to upgrade each\n+   coin. This means that she has to execute the upgrade choice once\n+   for each coin. Owners will not all accept the upgrade at the same\n+   time and some might never accept it. Therefore, this should be a\n+   long-running process that upgrades all coins of a given owner as\n+   soon as they accept the upgrade.\n+\n+Given those constraints, we are going to use the following tools for\n+the upgrade:\n+\n+#. A DAML script that will be executed once by Alice and creates an\n+   ``UpgradeCoinProposal`` contract for each owner.\n+#. Navigator to accept the ``UpgradeCoinProposal`` as Bob. While we\n+   could also use a DAML script to accept the proposal, this step will\n+   often be exposed as part of a web UI so doing it interactively in\n+   Navigator resembles that workflow more closely.\n+#. A long-running DAML trigger that upgrades all ``Coin`` contracts\n+   for which there is a corresponding ``UpgradeCoinAgreeement``.\n+\n+Implementation of the DAML Script\n+=================================\n+\n+In our DAML Script, we are first going to query the ACS to find all"
+  }
+]

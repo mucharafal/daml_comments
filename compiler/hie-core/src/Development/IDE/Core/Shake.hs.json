@@ -1,0 +1,370 @@
+[
+  {
+    "id" : "f32f6f1b-1278-4d66-9941-4286b9e44a01",
+    "prId" : 2680,
+    "comments" : [
+      {
+        "id" : "52227a44-5ad9-44b1-9af2-942fa445caa3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ve rearranged this since I got confused when I saw the logging output in line 351 before this one and thought our synchronization was broken.",
+        "createdAt" : "2019-08-28T10:05:49Z",
+        "updatedAt" : "2019-08-28T10:05:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f125769f2448e61072cd6837ec35e976295f2518",
+    "line" : 11,
+    "diffHunk" : "@@ -352,13 +352,13 @@ shakeRun IdeState{shakeExtras=ShakeExtras{..}, ..} acts = modifyVar shakeAbort $\n     bar <- newBarrier\n     start <- offsetTime\n     thread <- forkFinally (shakeRunDatabaseProfile shakeProfileDir shakeDb acts) $ \\res -> do\n-        signalBarrier bar res\n         runTime <- start\n         let res' = case res of\n                 Left e -> \"exception: \" <> displayException e\n                 Right _ -> \"completed\"\n         logDebug logger $ T.pack $\n             \"Finishing shakeRun (took \" ++ showDuration runTime ++ \", \" ++ res' ++ \")\"\n+        signalBarrier bar res"
+  },
+  {
+    "id" : "4e09eda7-451a-4ab1-9dbe-82501309491c",
+    "prId" : 2281,
+    "comments" : [
+      {
+        "id" : "a6c18a36-e678-4e3d-8938-8ae7af2068f3",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "why not `displayException`?\r\n```suggestion\r\n                Left e -> \"exception: \" <> displayException e\r\n```",
+        "createdAt" : "2019-07-25T09:32:29Z",
+        "updatedAt" : "2019-07-25T09:34:05Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a3a506b7d487a92b145822044c77ed808396068b",
+    "line" : null,
+    "diffHunk" : "@@ -340,8 +339,11 @@ shakeRun IdeState{shakeExtras=ShakeExtras{..}, ..} acts = modifyVar shakeAbort $\n     thread <- forkFinally (shakeRunDatabaseProfile shakeDb acts) $ \\res -> do\n         signalBarrier bar res\n         runTime <- start\n+        let res' = case res of\n+                Left e -> \"exception: \" <> show e"
+  },
+  {
+    "id" : "4d9a9897-b0c1-4c80-8ca5-3fc7993e758d",
+    "prId" : 2257,
+    "comments" : [
+      {
+        "id" : "cf0fd1e3-2a43-494d-9ad6-a5e9d0328f85",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Just to be clear: I am not sure why we had the ByteString here before either so my confusion is not caused by this PR :slightly_smiling_face: ",
+        "createdAt" : "2019-07-23T08:57:23Z",
+        "updatedAt" : "2019-07-23T12:16:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0a507defa99383adda7779ab3da3c31a1db28779",
+    "line" : 153,
+    "diffHunk" : "@@ -382,7 +423,9 @@ instance Show k => Show (Q k) where\n \n -- | Invariant: the 'v' must be in normal form (fully evaluated).\n --   Otherwise we keep repeatedly 'rnf'ing values taken from the Shake database\n-data A v = A (Value v) (Maybe BS.ByteString)\n+-- Note (MK) I am not sure why we need the ShakeValue here, maybe we"
+  },
+  {
+    "id" : "96ad2536-3589-4dbd-ac0b-b82e04b08063",
+    "prId" : 2257,
+    "comments" : [
+      {
+        "id" : "3f3781d8-6719-47c8-8184-e8cfc82d7a93",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        positionMapping <- newVar Map.empty\r\n```",
+        "createdAt" : "2019-07-23T12:12:54Z",
+        "updatedAt" : "2019-07-23T12:16:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a507defa99383adda7779ab3da3c31a1db28779",
+    "line" : null,
+    "diffHunk" : "@@ -245,6 +276,7 @@ shakeOpen eventer logger opts rules = do\n         diagnostics <- newVar mempty\n         publishedDiagnostics <- newVar mempty\n         debouncer <- newDebouncer\n+        positionMapping <- newVar mempty"
+  },
+  {
+    "id" : "8cda2ea3-b2a0-4576-8cfb-8d242c51b899",
+    "prId" : 2237,
+    "comments" : [
+      {
+        "id" : "4ae2fa68-ab58-4b5c-886c-cd5fd6a241a6",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I suppose the plan is to add a third alternative here for stale values?",
+        "createdAt" : "2019-07-22T08:28:39Z",
+        "updatedAt" : "2019-07-22T08:31:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f2a747ba-b17d-44e0-974f-5adaefa1c8fa",
+        "parentId" : "4ae2fa68-ab58-4b5c-886c-cd5fd6a241a6",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Exactly.",
+        "createdAt" : "2019-07-22T08:32:24Z",
+        "updatedAt" : "2019-07-22T08:32:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b8531c5b59a20ff8b6d1a483d6ffcdab7b385ce9",
+    "line" : 33,
+    "diffHunk" : "@@ -154,6 +151,25 @@ instance Hashable Key where\n --   not propagate diagnostic errors through multiple phases.\n type IdeResult v = ([FileDiagnostic], Maybe v)\n \n+data Value v\n+    = Succeeded v\n+    | Failed"
+  },
+  {
+    "id" : "2a9a93ba-3d51-4e57-a6bc-b9ebd314d563",
+    "prId" : 2237,
+    "comments" : [
+      {
+        "id" : "8139680c-42d8-4434-8583-5dbbbee2a2ab",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Somebody's throwing around `$`s. :D",
+        "createdAt" : "2019-07-22T08:31:02Z",
+        "updatedAt" : "2019-07-22T08:31:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a14a3495-558d-4cc3-b336-1a21acadd1df",
+        "parentId" : "8139680c-42d8-4434-8583-5dbbbee2a2ab",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":money_mouth_face: ",
+        "createdAt" : "2019-07-22T08:33:39Z",
+        "updatedAt" : "2019-07-22T08:33:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b8531c5b59a20ff8b6d1a483d6ffcdab7b385ce9",
+    "line" : 110,
+    "diffHunk" : "@@ -408,8 +414,9 @@ defineEarlyCutoff op = addBuiltinRule noLint noIdentity $ \\(Q (key, file)) old m\n         Just res -> return res\n         Nothing -> do\n             (bs, (diags, res)) <- actionCatch\n-                (do v <- op key file; liftIO $ evaluate $ force v) $\n+                (do v <- op key file; liftIO $ evaluate $ force $ v) $"
+  },
+  {
+    "id" : "fce84945-aa79-45a9-bd95-ba474e87ce26",
+    "prId" : 2004,
+    "comments" : [
+      {
+        "id" : "b52474cc-4e2c-49e1-871a-18490a00eb63",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        -- Note that we need to emit this unconditionally even if the\r\n```",
+        "createdAt" : "2019-07-04T11:20:13Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "47d8a9a1-59fc-4600-8e53-38cbb6cc5b70",
+        "parentId" : "b52474cc-4e2c-49e1-871a-18490a00eb63",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks, fixed!",
+        "createdAt" : "2019-07-04T11:30:38Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "54d6d583f4fec01a2e40f80c1bec3d0962e66f68",
+    "line" : null,
+    "diffHunk" : "@@ -395,9 +395,13 @@ updateFileDiagnostics fp k ShakeExtras{diagnostics, state, debouncer, eventer} c\n             let newDiags = getFileDiagnostics fp newDiagsStore\n             pure (newDiagsStore, (newDiags, oldDiags))\n         let uri = fromNormalizedUri $ filePathToUri' fp\n-        when (newDiags /= oldDiags) $ do\n-            let delay = if null newDiags then 0.1 else 0\n-            registerEvent debouncer delay uri $ eventer $ publishDiagnosticsNotification uri newDiags\n+        -- Note that we need to emit this unconditionally event if the"
+  },
+  {
+    "id" : "e5443a02-31bf-46c8-9162-e6a1a3d3b315",
+    "prId" : 2004,
+    "comments" : [
+      {
+        "id" : "795eab1b-b7a3-42f6-9462-a9a0d3f37c5c",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Yes, it rate limits them, but I suspect we are sending a notification for every file on every change, limited to 0.1 per second. We could still do duplicate suppressing, if we move the check after the debouncer. That said, I assume VS Code does duplicate suppression on its side, and can deal with huge number of events, so it might not be worth it.",
+        "createdAt" : "2019-07-04T11:24:51Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "357c7a26-9e02-4462-966b-2cdca52adb05",
+        "parentId" : "795eab1b-b7a3-42f6-9462-a9a0d3f37c5c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah for now, I don’t think it’s worth it. I’ve added a comment on how we could reintroduce it.",
+        "createdAt" : "2019-07-04T11:30:26Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "eb28383f-69b4-4b94-a293-7e1a66bcac5f",
+        "parentId" : "795eab1b-b7a3-42f6-9462-a9a0d3f37c5c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Since it ended up breaking other assumptions made by some test suites, I’ve reintroduced deduplication.",
+        "createdAt" : "2019-07-04T11:49:05Z",
+        "updatedAt" : "2019-07-04T11:52:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "54d6d583f4fec01a2e40f80c1bec3d0962e66f68",
+    "line" : null,
+    "diffHunk" : "@@ -395,9 +395,13 @@ updateFileDiagnostics fp k ShakeExtras{diagnostics, state, debouncer, eventer} c\n             let newDiags = getFileDiagnostics fp newDiagsStore\n             pure (newDiagsStore, (newDiags, oldDiags))\n         let uri = fromNormalizedUri $ filePathToUri' fp\n-        when (newDiags /= oldDiags) $ do\n-            let delay = if null newDiags then 0.1 else 0\n-            registerEvent debouncer delay uri $ eventer $ publishDiagnosticsNotification uri newDiags\n+        -- Note that we need to emit this unconditionally event if the\n+        -- set of diagnostics has not changed since the last event\n+        -- that had this set of diagnostics might have been killed by the\n+        -- debouncer. Given that the debouncer effectively functions\n+        -- as a rate limit this is fine."
+  },
+  {
+    "id" : "710122f0-d8ab-4cfb-bb3d-14e0f1cc9a38",
+    "prId" : 1991,
+    "comments" : [
+      {
+        "id" : "c4c892c8-366f-4842-9707-34b8bc1c3783",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Thanks!",
+        "createdAt" : "2019-07-03T15:10:05Z",
+        "updatedAt" : "2019-07-03T16:50:14Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6f441ff7fc8861ebde15ab3c043a96f0776a007c",
+    "line" : 41,
+    "diffHunk" : "@@ -391,14 +394,16 @@ updateFileDiagnostics fp k ShakeExtras{diagnostics, state, eventer} current = li\n             let newDiagsStore = setStageDiagnostics fp (vfsVersion =<< modTime) (T.pack $ show k) current old\n             let newDiags = getFileDiagnostics fp newDiagsStore\n             pure (newDiagsStore, (newDiags, oldDiags))\n-        when (newDiags /= oldDiags) $\n-            eventer $ publishDiagnosticsNotification fp newDiags\n+        let uri = fromNormalizedUri $ filePathToUri' fp\n+        when (newDiags /= oldDiags) $ do\n+            let delay = if null newDiags then 0.1 else 0"
+  }
+]

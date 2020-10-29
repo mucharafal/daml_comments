@@ -1,0 +1,480 @@
+[
+  {
+    "id" : "05fd427c-ee11-4791-9efa-6d2fff2ce6db",
+    "prId" : 1525,
+    "comments" : [
+      {
+        "id" : "b46211c0-c9e0-4a7b-88fa-9daf30cdc246",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Do we need huge chunks of whitespace?",
+        "createdAt" : "2019-06-05T17:37:49Z",
+        "updatedAt" : "2019-06-05T17:39:49Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b5722eb2cc3d1f0ecf4f5f8819cd2ebb1d0b4370",
+    "line" : 51,
+    "diffHunk" : "@@ -234,6 +239,9 @@ fileModeMask = foldl1 unionFileModes\n     , otherExecuteMode\n     ]\n \n+\n+\n+"
+  },
+  {
+    "id" : "ec85ddd0-698c-4f13-bd2f-caee11fe69ee",
+    "prId" : 770,
+    "comments" : [
+      {
+        "id" : "bbad16d3-7334-418e-bdfd-91682cb2644d",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "This probably belongs at the same place as copyDirectory.",
+        "createdAt" : "2019-04-29T16:24:38Z",
+        "updatedAt" : "2019-04-30T08:53:59Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9e6ef69c48f92b40eb0fdb6a818fab0a0de73496",
+    "line" : null,
+    "diffHunk" : "@@ -138,13 +141,24 @@ installExtracted env@InstallEnv{..} sourcePath =\n                 -- Always removePathForcibly to uniformize renameDirectory behavior\n                 -- between windows and unices.\n             requiredIO \"Failed to move extracted SDK release to final location.\" $\n-                renameDirectory (unwrapSdkPath sourcePath) (unwrapSdkPath targetPath)\n+                moveDirectory (unwrapSdkPath sourcePath) (unwrapSdkPath targetPath)\n \n         requiredIO \"Failed to set file mode of installed SDK directory.\" $\n             setSdkFileMode (unwrapSdkPath targetPath)\n \n         whenActivate env $ activateDaml env targetPath\n \n+moveDirectory :: FilePath -> FilePath -> IO ()"
+  },
+  {
+    "id" : "268b2a15-a804-4dec-92d7-afee737e5bdc",
+    "prId" : 757,
+    "comments" : [
+      {
+        "id" : "60b1515c-36b6-4f4a-983a-e1c35c461d46",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Nice refactoring :+1: ",
+        "createdAt" : "2019-04-29T10:23:45Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b3c703a2cdcf26b94b1ff0e621bf7f944497f05",
+    "line" : null,
+    "diffHunk" : "@@ -173,10 +184,44 @@ activateDaml env@InstallEnv{..} targetPath = do\n                      ]\n             else createSymbolicLink damlBinarySourcePath damlBinaryTargetPath\n \n-    unlessQuiet env $ do -- Ask user to add .daml/bin to PATH if it is absent.\n-        searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n-        when (damlBinaryTargetDir `notElem` searchPaths) $ do\n-            output (\"Please add \" <> damlBinaryTargetDir <> \" to your PATH.\")\n+    updatePath env damlBinaryTargetDir"
+  },
+  {
+    "id" : "eb640554-09b4-4291-acbb-4c951dc9d6ff",
+    "prId" : 757,
+    "comments" : [
+      {
+        "id" : "b42f5b87-2c24-4f23-ba6c-47a1a0e323cc",
+        "parentId" : null,
+        "author" : null,
+        "body" : "I would be happier if updatePath just had an `| isWindows` check as we do elsewhere in this module, and call a separate module to manage the windows PATH (`DAML.Assistant.Install.Win32`) with all the conditional compilation there.",
+        "createdAt" : "2019-04-29T10:25:22Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c08bfca9-c355-4b28-8ed5-b7b78c081a19",
+        "parentId" : "b42f5b87-2c24-4f23-ba6c-47a1a0e323cc",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ll move it to `DAML.Assistant.Install.Path`. Having a module called `Win32` that also contains the logic used outside of Windows seems weird.",
+        "createdAt" : "2019-04-29T11:12:07Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b3c703a2cdcf26b94b1ff0e621bf7f944497f05",
+    "line" : null,
+    "diffHunk" : "@@ -173,10 +184,44 @@ activateDaml env@InstallEnv{..} targetPath = do\n                      ]\n             else createSymbolicLink damlBinarySourcePath damlBinaryTargetPath\n \n-    unlessQuiet env $ do -- Ask user to add .daml/bin to PATH if it is absent.\n-        searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n-        when (damlBinaryTargetDir `notElem` searchPaths) $ do\n-            output (\"Please add \" <> damlBinaryTargetDir <> \" to your PATH.\")\n+    updatePath env damlBinaryTargetDir\n+\n+updatePath :: InstallEnv -> FilePath -> IO ()\n+#ifdef mingw32_HOST_OS"
+  },
+  {
+    "id" : "7571836b-729b-433d-bed4-d2a3989985a3",
+    "prId" : 757,
+    "comments" : [
+      {
+        "id" : "10520734-a58b-4171-9282-b406299d7f42",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "In the (very) corner case of having no Path you end up with a redundant trailing `;`. Could we append to the list then intercalate at the end?",
+        "createdAt" : "2019-04-29T10:41:46Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "254890d0-a5ae-4401-a986-e1a646b0dad2",
+        "parentId" : "10520734-a58b-4171-9282-b406299d7f42",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good catch, fixed",
+        "createdAt" : "2019-04-29T11:10:46Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b3c703a2cdcf26b94b1ff0e621bf7f944497f05",
+    "line" : null,
+    "diffHunk" : "@@ -173,10 +184,44 @@ activateDaml env@InstallEnv{..} targetPath = do\n                      ]\n             else createSymbolicLink damlBinarySourcePath damlBinaryTargetPath\n \n-    unlessQuiet env $ do -- Ask user to add .daml/bin to PATH if it is absent.\n-        searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n-        when (damlBinaryTargetDir `notElem` searchPaths) $ do\n-            output (\"Please add \" <> damlBinaryTargetDir <> \" to your PATH.\")\n+    updatePath env damlBinaryTargetDir\n+\n+updatePath :: InstallEnv -> FilePath -> IO ()\n+#ifdef mingw32_HOST_OS\n+updatePath env@InstallEnv{..} targetPath = do\n+    -- Updating PATH on Windows is annoying so we do it automatically.\n+    bracket (regOpenKeyEx hKEY_CURRENT_USER \"Environment\" kEY_ALL_ACCESS) regCloseKey $ \\envKey -> do\n+        path <- regQueryValueEx envKey \"Path\"\n+        let newPath = targetPath <> \";\" <> remove targetPath path"
+  },
+  {
+    "id" : "8ac2433e-8ada-4d2b-b84d-56cbe8a42514",
+    "prId" : 757,
+    "comments" : [
+      {
+        "id" : "5df4d84e-e86c-4b8e-bab3-161e995c1a75",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "I'd suggest this gets a different name, rather than shadow the annoying one.",
+        "createdAt" : "2019-04-29T10:42:24Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "00f49b68-ee38-4268-b8ec-68b2c564a39d",
+        "parentId" : "5df4d84e-e86c-4b8e-bab3-161e995c1a75",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Renamed to `regQueryStringValue` to match `regSetStringValue`.",
+        "createdAt" : "2019-04-29T11:10:40Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b3c703a2cdcf26b94b1ff0e621bf7f944497f05",
+    "line" : null,
+    "diffHunk" : "@@ -173,10 +184,44 @@ activateDaml env@InstallEnv{..} targetPath = do\n                      ]\n             else createSymbolicLink damlBinarySourcePath damlBinaryTargetPath\n \n-    unlessQuiet env $ do -- Ask user to add .daml/bin to PATH if it is absent.\n-        searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n-        when (damlBinaryTargetDir `notElem` searchPaths) $ do\n-            output (\"Please add \" <> damlBinaryTargetDir <> \" to your PATH.\")\n+    updatePath env damlBinaryTargetDir\n+\n+updatePath :: InstallEnv -> FilePath -> IO ()\n+#ifdef mingw32_HOST_OS\n+updatePath env@InstallEnv{..} targetPath = do\n+    -- Updating PATH on Windows is annoying so we do it automatically.\n+    bracket (regOpenKeyEx hKEY_CURRENT_USER \"Environment\" kEY_ALL_ACCESS) regCloseKey $ \\envKey -> do\n+        path <- regQueryValueEx envKey \"Path\"\n+        let newPath = targetPath <> \";\" <> remove targetPath path\n+        regSetStringValue envKey \"Path\" newPath\n+    unlessQuiet env $\n+        output (targetPath <> \" has been added to your PATH. Reboot for the changes to take effect.\")\n+    where\n+        -- Given a comma separated string, remove any occurences of a given string.\n+        remove :: String -> String -> String\n+        remove x = intercalate \";\" . filter (/= x) . split (== ';')\n+\n+-- | Win32 does expose function of the same name but it requires you to know the\n+-- size of the value in advance which makes it quite annoying to use.\n+regQueryValueEx :: HKEY -> String -> IO String"
+  },
+  {
+    "id" : "2c671288-a46f-4480-ba00-c3dc9bb1f2cb",
+    "prId" : 757,
+    "comments" : [
+      {
+        "id" : "3a8fcd42-5674-4d6d-839b-c041e9326ada",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Could we have this check on both branches? If the user has rejigged their path to put DAML at the end for some reason, its impolite to move it to the start.",
+        "createdAt" : "2019-04-29T10:43:29Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c2965b09-0af0-476c-904a-b1e9fa66e3df",
+        "parentId" : "3a8fcd42-5674-4d6d-839b-c041e9326ada",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2019-04-29T11:05:01Z",
+        "updatedAt" : "2019-04-29T12:58:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9b3c703a2cdcf26b94b1ff0e621bf7f944497f05",
+    "line" : null,
+    "diffHunk" : "@@ -173,10 +184,44 @@ activateDaml env@InstallEnv{..} targetPath = do\n                      ]\n             else createSymbolicLink damlBinarySourcePath damlBinaryTargetPath\n \n-    unlessQuiet env $ do -- Ask user to add .daml/bin to PATH if it is absent.\n-        searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n-        when (damlBinaryTargetDir `notElem` searchPaths) $ do\n-            output (\"Please add \" <> damlBinaryTargetDir <> \" to your PATH.\")\n+    updatePath env damlBinaryTargetDir\n+\n+updatePath :: InstallEnv -> FilePath -> IO ()\n+#ifdef mingw32_HOST_OS\n+updatePath env@InstallEnv{..} targetPath = do\n+    -- Updating PATH on Windows is annoying so we do it automatically.\n+    bracket (regOpenKeyEx hKEY_CURRENT_USER \"Environment\" kEY_ALL_ACCESS) regCloseKey $ \\envKey -> do\n+        path <- regQueryValueEx envKey \"Path\"\n+        let newPath = targetPath <> \";\" <> remove targetPath path\n+        regSetStringValue envKey \"Path\" newPath\n+    unlessQuiet env $\n+        output (targetPath <> \" has been added to your PATH. Reboot for the changes to take effect.\")\n+    where\n+        -- Given a comma separated string, remove any occurences of a given string.\n+        remove :: String -> String -> String\n+        remove x = intercalate \";\" . filter (/= x) . split (== ';')\n+\n+-- | Win32 does expose function of the same name but it requires you to know the\n+-- size of the value in advance which makes it quite annoying to use.\n+regQueryValueEx :: HKEY -> String -> IO String\n+regQueryValueEx key valueName =\n+    withForeignPtr key $ \\p_key ->\n+    withTString valueName $ \\c_valueName ->\n+    alloca $ \\p_valueLen -> do\n+        failUnlessSuccess \"regQueryDefaultValue\" $\n+            c_RegQueryValueEx p_key c_valueName nullPtr nullPtr nullPtr p_valueLen\n+        valueLen <- peek p_valueLen\n+        allocaArray0 (fromIntegral valueLen) $ \\ c_value -> do\n+            failUnlessSuccess \"regQueryDefaultValue\" $\n+                c_RegQueryValueEx p_key c_valueName nullPtr nullPtr c_value p_valueLen\n+            peekTString (castPtr c_value)\n+#else\n+updatePath env@InstallEnv{..} targetPath = unlessQuiet env $ do\n+    -- Ask user to add .daml/bin to PATH if it is absent.\n+    searchPaths <- map dropTrailingPathSeparator <$> getSearchPath\n+    when (targetPath `notElem` searchPaths) $ do"
+  },
+  {
+    "id" : "1c6f9353-d583-472b-89f9-222baea9981d",
+    "prId" : 692,
+    "comments" : [
+      {
+        "id" : "0c9ae837-548c-46d1-ac2d-6f863581f67e",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Why not `output :: (String -> IO ())`? Restricting it to a handle is still pretty restrictive.",
+        "createdAt" : "2019-04-25T11:46:03Z",
+        "updatedAt" : "2019-04-25T15:15:29Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1aa169a0-ef1a-4589-b423-1800e12161bc",
+        "parentId" : "0c9ae837-548c-46d1-ac2d-6f863581f67e",
+        "author" : null,
+        "body" : ":+1:\r\n",
+        "createdAt" : "2019-04-25T12:32:19Z",
+        "updatedAt" : "2019-04-25T15:15:29Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b0e47fc50478453b402b5094af058fe8b6e60409",
+    "line" : null,
+    "diffHunk" : "@@ -57,6 +59,7 @@ data InstallEnv = InstallEnv\n     , targetVersionM :: Maybe SdkVersion\n     , damlPath :: DamlPath\n     , projectPathM :: Maybe ProjectPath\n+    , out :: Handle"
+  },
+  {
+    "id" : "00992078-cae3-415a-9d39-8070f262b2e1",
+    "prId" : 379,
+    "comments" : [
+      {
+        "id" : "dbb2afc1-6aca-46bb-8873-75473e2b451a",
+        "parentId" : null,
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "Should we first remove the directory if we are doing a force install? It seems unintuitive to keep files from a previous installation if they do not exist in the new installation.",
+        "createdAt" : "2019-04-11T10:35:09Z",
+        "updatedAt" : "2019-04-11T11:15:56Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "599647b1-6d48-470d-9fb4-5265cedb9614",
+        "parentId" : "dbb2afc1-6aca-46bb-8873-75473e2b451a",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "They are removed a bit further down.",
+        "createdAt" : "2019-04-11T10:49:42Z",
+        "updatedAt" : "2019-04-11T11:15:56Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c16696d7d467730a2a48b7bd00604d106c72fc91",
+    "line" : 118,
+    "diffHunk" : "@@ -183,19 +161,35 @@ installExtracted env@InstallEnv{..} sourcePath =\n                 , walkOnDirectoryPost = \\path ->\n                     when (path /= addTrailingPathSeparator (unwrapSdkPath sourcePath)) $\n                         setSdkFileMode path\n-                , walkOnDirectoryPre = \\_ -> pure ()\n+                , walkOnDirectoryPre = const (pure ())\n                 }\n \n+        setupDamlPath damlPath\n+\n         let targetPath = defaultSdkPath damlPath sourceVersion\n+\n+        whenM (doesDirectoryExist (unwrapSdkPath targetPath)) $ do\n+            unlessForce env $ do\n+                throwIO $ assistantErrorBecause\n+                    (\"SDK version \" <> versionToText sourceVersion <> \" already installed. Use --force to overwrite.\")"
+  },
+  {
+    "id" : "cd132645-0b46-4dbd-a0c3-a7be7138c337",
+    "prId" : 337,
+    "comments" : [
+      {
+        "id" : "0569aa44-23f2-437e-97cc-09f2ee7e732b",
+        "parentId" : null,
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "```suggestion\r\n    InstallChannel ch@(Custom _) -> \"channel \" <> pack (show ch)\r\n```\r\nWorh being explicit imho so we get a warning if we add more constructors (you could also consider changing the formatting but that’s probably not important).",
+        "createdAt" : "2019-04-10T06:50:44Z",
+        "updatedAt" : "2019-04-10T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0a6ce332-5997-4889-a648-99402789973e",
+        "parentId" : "0569aa44-23f2-437e-97cc-09f2ee7e732b",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2019-04-10T07:45:12Z",
+        "updatedAt" : "2019-04-10T08:58:45Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c63dc83e702244360b482149bc1bc3dfc388c2b4",
+    "line" : null,
+    "diffHunk" : "@@ -39,16 +33,20 @@ import System.Posix.Files -- forget windows for now\n import qualified System.Info\n import qualified Data.Text as T\n import Data.Maybe\n+import qualified Data.SemVer as V\n+import qualified Lens.Micro as L\n \n displayInstallTarget :: InstallTarget -> Text\n displayInstallTarget = \\case\n-    InstallChannel (SdkChannel c) -> \"channel \" <> c\n-    InstallVersion (SdkVersion v) -> \"version \" <> v\n+    InstallChannel Stable -> \"channel stable\"\n+    InstallChannel Unstable -> \"channel unstable\"\n+    InstallChannel ch -> \"channel \" <> pack (show ch)"
+  },
+  {
+    "id" : "fba3d111-c937-4b8e-9907-6353416b1bb6",
+    "prId" : 314,
+    "comments" : [
+      {
+        "id" : "9f7e556b-8ffb-466e-a613-b8166a3cda20",
+        "parentId" : null,
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "I wonder if we should have a check that the symlink is relative.",
+        "createdAt" : "2019-04-09T11:11:46Z",
+        "updatedAt" : "2019-04-09T11:11:46Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "51d419bb-4356-43fb-aec3-7db34312a565",
+        "parentId" : "9f7e556b-8ffb-466e-a613-b8166a3cda20",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "I'll add a check in a separate PR, thanks :)",
+        "createdAt" : "2019-04-09T11:12:50Z",
+        "updatedAt" : "2019-04-09T11:12:50Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b8f11a0ac98fe2cb3651aca3abff2a633f2528ef",
+    "line" : 13,
+    "diffHunk" : "@@ -290,6 +291,9 @@ extractAndInstall env source =\n                         liftIO $ setFileMode targetPath (Tar.fileMode info)\n                     Tar.FTDirectory -> do\n                         liftIO $ createDirectoryIfMissing True targetPath\n+                    Tar.FTSymbolicLink bs -> do\n+                        liftIO $ createDirectoryIfMissing True parentPath"
+  }
+]

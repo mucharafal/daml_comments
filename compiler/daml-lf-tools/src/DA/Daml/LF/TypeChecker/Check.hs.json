@@ -1,0 +1,998 @@
+[
+  {
+    "id" : "071e4289-ca78-4278-a9c5-874af663b6fc",
+    "prId" : 7548,
+    "comments" : [
+      {
+        "id" : "cade13c1-a7db-4e92-b755-c36bad153ea0",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We need to check here if the target DAML-LF version actually supports choice observers. We'll need to introduce a new feature flag in `Version.hs` for this purpose. For the actual check here, there's a utility function `_checkFeature` towards the bottom of this file.",
+        "createdAt" : "2020-10-14T10:51:23Z",
+        "updatedAt" : "2020-10-21T08:55:23Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1968095863437d26708412e9478b8d076d85897c",
+    "line" : null,
+    "diffHunk" : "@@ -643,10 +643,11 @@ checkDefValue (DefValue _loc (_, typ) _noParties (IsTest isTest) expr) = do\n       _ -> throwWithContext (EExpectedScenarioType typ)\n \n checkTemplateChoice :: MonadGamma m => Qualified TypeConName -> TemplateChoice -> m ()\n-checkTemplateChoice tpl (TemplateChoice _loc _ _ actors selfBinder (param, paramType) retType upd) = do\n+checkTemplateChoice tpl (TemplateChoice _loc _ _ controllers observers selfBinder (param, paramType) retType upd) = do"
+  },
+  {
+    "id" : "2d325174-95e9-4389-847d-9010005b3820",
+    "prId" : 7548,
+    "comments" : [
+      {
+        "id" : "d0029f9a-1af5-43ed-aea5-4fe1c8722fb7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Rename `observers` above to `mbObservers` and\r\n```suggestion\r\n  introExprVar param paramType $ do\r\n    checkExpr controllers (TList TParty)\r\n    whenJust mbObservers $ \\observers -> do\r\n      -- check version is recent enough here\r\n      checkExpr observers (TList TParty)\r\n```\r\nand drop `checkOptionalChoiceObservers` below.",
+        "createdAt" : "2020-10-15T11:49:30Z",
+        "updatedAt" : "2020-10-21T08:55:23Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1968095863437d26708412e9478b8d076d85897c",
+    "line" : null,
+    "diffHunk" : "@@ -656,13 +656,19 @@ checkDefValue (DefValue _loc (_, typ) _noParties (IsTest isTest) expr) = do\n       _ -> throwWithContext (EExpectedScenarioType typ)\n \n checkTemplateChoice :: MonadGamma m => Qualified TypeConName -> TemplateChoice -> m ()\n-checkTemplateChoice tpl (TemplateChoice _loc _ _ actors selfBinder (param, paramType) retType upd) = do\n+checkTemplateChoice tpl (TemplateChoice _loc _ _ controllers observers selfBinder (param, paramType) retType upd) = do\n   checkType paramType KStar\n   checkType retType KStar\n-  introExprVar param paramType $ checkExpr actors (TList TParty)\n+  introExprVar param paramType $ checkExpr controllers (TList TParty)\n+  introExprVar param paramType $ checkOptionalChoiceObservers observers"
+  },
+  {
+    "id" : "98046504-bfad-4f96-bf9b-0a414418b954",
+    "prId" : 3959,
+    "comments" : [
+      {
+        "id" : "f5b59048-292e-4b28-9b1c-c5d33fefc0f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Happy to do this in two steps and not handle type synonyms with parameters as part of this PR but then let’s error out if there are parameters instead of silently doing the wrong thing.",
+        "createdAt" : "2020-01-07T12:21:22Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3f3575d0-d73a-4593-8644-99d6e48ab577",
+        "parentId" : "f5b59048-292e-4b28-9b1c-c5d33fefc0f4",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "As discussed, we are adding support for parameterized type synonyms to this PR.",
+        "createdAt" : "2020-01-09T19:00:07Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6a9feaae0a6921e3c04c93a65e754eca04cc83df",
+    "line" : null,
+    "diffHunk" : "@@ -145,6 +148,27 @@ kindOf = \\case\n   TStruct recordType -> checkRecordType recordType $> KStar\n   TNat _ -> pure KNat\n \n+expandTypeSynonyms :: MonadGamma m => Type -> m Type\n+expandTypeSynonyms = expand where\n+  expand = \\case\n+    TVar v -> return $ TVar v\n+    TSyn tsyn -> do\n+      DefTypeSyn{synType} <- inWorld (lookupTypeSyn tsyn)"
+  },
+  {
+    "id" : "e7a0cc68-6904-445f-9728-7dcc0562e6d6",
+    "prId" : 3959,
+    "comments" : [
+      {
+        "id" : "5761b966-94e8-4002-8c5d-e71f3a0dc053",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Given that we have the fully applied type synonym in the protobuf why don’t we preserve this in the Haskell AST and have a constructor of the form `TSynApp TypeSynName [Type]`. That makes it easier to check if it’s correctly applied.",
+        "createdAt" : "2020-01-07T12:25:35Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a607c1aa-745e-4614-8180-772f1b6c027a",
+        "parentId" : "5761b966-94e8-4002-8c5d-e71f3a0dc053",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Yes. This is much nicer. Done",
+        "createdAt" : "2020-01-09T19:00:31Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6a9feaae0a6921e3c04c93a65e754eca04cc83df",
+    "line" : null,
+    "diffHunk" : "@@ -145,6 +148,27 @@ kindOf = \\case\n   TStruct recordType -> checkRecordType recordType $> KStar\n   TNat _ -> pure KNat\n \n+expandTypeSynonyms :: MonadGamma m => Type -> m Type\n+expandTypeSynonyms = expand where\n+  expand = \\case\n+    TVar v -> return $ TVar v\n+    TSyn tsyn -> do"
+  },
+  {
+    "id" : "ea9a820a-d68c-4dd3-9c6d-c520a0f1c728",
+    "prId" : 3959,
+    "comments" : [
+      {
+        "id" : "530801e2-8175-4999-9226-842535e9d310",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Note that `v` can be used as a parameter to a type synonym in `T1` so you might end up having to track variables that are in scope when you add substitution.",
+        "createdAt" : "2020-01-07T12:30:53Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8872cc4b-fb0d-43ec-822b-25349c471155",
+        "parentId" : "530801e2-8175-4999-9226-842535e9d310",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I'm pretty sure that because there are no free vars in the body of the type-syn definition, then we should be fine to just use `substitute`",
+        "createdAt" : "2020-01-09T19:02:17Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0c4c8c1a-6832-4f6f-b09f-2e7b6945c430",
+        "parentId" : "530801e2-8175-4999-9226-842535e9d310",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2020-01-09T19:26:24Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8b383e29-f202-40db-9bb2-ba98d06893dc",
+        "parentId" : "530801e2-8175-4999-9226-842535e9d310",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Turns out we did need to track the variable `v` !",
+        "createdAt" : "2020-01-10T15:14:24Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6a9feaae0a6921e3c04c93a65e754eca04cc83df",
+    "line" : null,
+    "diffHunk" : "@@ -145,6 +148,27 @@ kindOf = \\case\n   TStruct recordType -> checkRecordType recordType $> KStar\n   TNat _ -> pure KNat\n \n+expandTypeSynonyms :: MonadGamma m => Type -> m Type\n+expandTypeSynonyms = expand where\n+  expand = \\case\n+    TVar v -> return $ TVar v\n+    TSyn tsyn -> do\n+      DefTypeSyn{synType} <- inWorld (lookupTypeSyn tsyn)\n+      expandTypeSynonyms synType\n+    TCon tcon -> return $ TCon tcon\n+    TApp tfun targ -> do\n+      tfun' <- expand tfun\n+      targ' <- expand targ\n+      return $ TApp tfun' targ'\n+    TBuiltin btype -> return $ TBuiltin btype\n+    TForall (v, k) t1 -> do\n+      t1' <- expand t1"
+  },
+  {
+    "id" : "9557f012-a9e0-412b-b617-564c053c5d54",
+    "prId" : 3959,
+    "comments" : [
+      {
+        "id" : "fa693dc2-9d12-4b74-b3da-e4a7205dcba5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This doesn’t look correct, you are neither verifying that the synonym name exists nor that the arguments have the right kind.",
+        "createdAt" : "2020-01-09T19:23:49Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ca44590c-5d7f-4a60-82f8-a08e92087f20",
+        "parentId" : "fa693dc2-9d12-4b74-b3da-e4a7205dcba5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "This check will occur in `expandTypeSynonyms`, which is called when an expresion is checked against the type. Is it really possible that this can't happen?\r\n",
+        "createdAt" : "2020-01-10T09:07:01Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "330ff021-e11b-4248-aa12-122dd24d03e2",
+        "parentId" : "fa693dc2-9d12-4b74-b3da-e4a7205dcba5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You are assuming that there is such an expression. We should check that the type synonym definition is well-kinded even if there is no expression of that type.",
+        "createdAt" : "2020-01-10T09:07:53Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2b63ef4c-5426-418f-883d-7244a12da10a",
+        "parentId" : "fa693dc2-9d12-4b74-b3da-e4a7205dcba5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "We do check the synonym definition - but that's unrelated to this issue.\r\n\r\nThis code is computing the kind of a type-expression, which take the form of a syn-application.\r\n\r\nYou are suggesting that LF may contain a type-expression for which we never check the type of an expression against.\r\n\r\n",
+        "createdAt" : "2020-01-10T09:36:32Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "61743243-a8fb-4ef6-974f-cd88dd0541de",
+        "parentId" : "fa693dc2-9d12-4b74-b3da-e4a7205dcba5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I can't imagine how this could happen. But I will repeat the well-formed check on the syn-application anyway.",
+        "createdAt" : "2020-01-10T09:38:51Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7f67bbf3-06d9-4006-a2f2-013584b2458e",
+        "parentId" : "fa693dc2-9d12-4b74-b3da-e4a7205dcba5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ve pushed a test case that demonstrates this problem. `checkDefTypeSyn` calls `checkType` which in turns just calls `kindOf` so that has to do the check.",
+        "createdAt" : "2020-01-10T09:46:46Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d597165b-3e4a-48ef-a14d-4c53bc095b08",
+        "parentId" : "fa693dc2-9d12-4b74-b3da-e4a7205dcba5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "thanks. nice catch.\r\nfixed now.",
+        "createdAt" : "2020-01-10T10:05:49Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6a9feaae0a6921e3c04c93a65e754eca04cc83df",
+    "line" : null,
+    "diffHunk" : "@@ -127,8 +127,8 @@ kindOfBuiltin = \\case\n kindOf :: MonadGamma m => Type -> m Kind\n kindOf = \\case\n   TVar v -> lookupTypeVar v\n-  TSyn{} -> error \"TODO: kindOf, expand type synonym\" -- TODO #3616\n   TCon tcon -> kindOfDataType <$> inWorld (lookupDataType tcon)\n+  TSynApp{} -> return KStar"
+  },
+  {
+    "id" : "8a2acb0d-5a01-4fbe-a032-d68bc078f0aa",
+    "prId" : 3959,
+    "comments" : [
+      {
+        "id" : "fe6e99fb-bb46-4439-94d2-86aacb21ad8f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is still missing the check for cyclic type synonyms. Let’s leave that for a separate PR but please add a TODO.",
+        "createdAt" : "2020-01-09T19:24:45Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cfde0ae3-74f5-4fed-96ea-cec6e8142f90",
+        "parentId" : "fe6e99fb-bb46-4439-94d2-86aacb21ad8f",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "we have this TODO already... In `checkModule` :\r\n```-- TODO #3616: check type synonyms for cycles```\r\n",
+        "createdAt" : "2020-01-10T09:07:45Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9bdadcf3-a0df-4a64-9507-632ec971a9c9",
+        "parentId" : "fe6e99fb-bb46-4439-94d2-86aacb21ad8f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2020-01-10T09:34:41Z",
+        "updatedAt" : "2020-01-10T16:41:51Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6a9feaae0a6921e3c04c93a65e754eca04cc83df",
+    "line" : 90,
+    "diffHunk" : "@@ -554,13 +582,23 @@ checkGroundType ty = do\n checkExpr' :: MonadGamma m => Expr -> Type -> m Type\n checkExpr' expr typ = do\n   exprType <- typeOf expr\n-  unless (alphaEquiv exprType typ) $\n+  exprTypeX <- expandTypeSynonyms exprType\n+  typX <- expandTypeSynonyms typ\n+  unless (alphaEquiv exprTypeX typX) $\n     throwWithContext ETypeMismatch{foundType = exprType, expectedType = typ, expr = Just expr}\n   pure exprType\n \n checkExpr :: MonadGamma m => Expr -> Type -> m ()\n checkExpr expr typ = void (checkExpr' expr typ)\n \n+-- | Check that a type synonym definition is well-formed."
+  },
+  {
+    "id" : "cd10d418-b9aa-407f-a572-42b71a204b41",
+    "prId" : 3703,
+    "comments" : [
+      {
+        "id" : "d5ce5ea4-5e67-4e1c-9473-7a1d8a6e5aee",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Where is the case where we are checking the type of an expression against a type synonym?",
+        "createdAt" : "2019-12-03T08:09:09Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6e053c51-33ed-4b99-9623-0823ad271a7d",
+        "parentId" : "d5ce5ea4-5e67-4e1c-9473-7a1d8a6e5aee",
+        "author" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "body" : "Not there yet. This PR doesn't extend the haskell type checker.\r\nMy idea is that type synonyms will be handled (expanded) by `lookupDataType`.\r\nBut there might be a better place. We shall see in the following PR! ",
+        "createdAt" : "2019-12-03T12:28:47Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "Nick-Chapman",
+          "name" : "Nick Chapman",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/7867928?u=69447afebf94adceb0dce70221641775915bedea&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e10f3d85f2547f8c6f1968d814c0ffeba77445b",
+    "line" : 4,
+    "diffHunk" : "@@ -563,6 +563,8 @@ checkDefDataType (DefDataType _loc _name _serializable params dataCons) = do\n       DataEnum names -> do\n         unless (null params) $ throwWithContext EEnumTypeWithParams\n         checkUnique EDuplicateConstructor names\n+      DataSynonym typ -> do -- TODO(NICK): check for cycles"
+  },
+  {
+    "id" : "15d4727a-d63e-48f5-8af3-4dd8f1f82d84",
+    "prId" : 3437,
+    "comments" : [
+      {
+        "id" : "3f80cc01-4c2c-4025-95ec-111b1eb634f0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Perhaps that is nitpicking but I would find this easier to read if we called the type variables `k` and `v` or `key` and `value`.",
+        "createdAt" : "2019-11-13T07:42:23Z",
+        "updatedAt" : "2019-11-13T10:15:23Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2687a7b32b981b95bbe4f511bdbce97d15c432ca",
+    "line" : 12,
+    "diffHunk" : "@@ -211,6 +212,14 @@ typeOfBuiltin = \\case\n   BEMapDelete -> pure $ TForall (alpha, KStar) $ TText :-> TMap tAlpha :-> TMap tAlpha\n   BEMapToList -> pure $ TForall (alpha, KStar) $ TMap tAlpha :-> TList (TMapEntry tAlpha)\n   BEMapSize   -> pure $ TForall (alpha, KStar) $ TMap tAlpha :-> TInt64\n+  BEGenMapEmpty -> pure $ TForall (alpha, KStar) $ TForall (beta, KStar) $ TGenMap tAlpha tBeta"
+  },
+  {
+    "id" : "8f0648d4-da2e-4900-8d97-c1facdf352b2",
+    "prId" : 3326,
+    "comments" : [
+      {
+        "id" : "360fe8c5-c052-4351-8163-94064a80ebc0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\ncheckGroundType :: MonadGamma m => Type -> m ()\r\n```",
+        "createdAt" : "2019-11-04T13:00:33Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "609c22d98f12f9cd4dc89a8e0d9f1cf0af882a2d",
+    "line" : null,
+    "diffHunk" : "@@ -502,24 +503,23 @@ typeOf = \\case\n   ESome bodyType bodyExpr -> checkSome bodyType bodyExpr $> TOptional bodyType\n   ENone bodyType -> checkType bodyType KStar $> TOptional bodyType\n   EToAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty\n     checkExpr bodyExpr ty\n     pure $ TBuiltin BTAny\n   EFromAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty\n     checkExpr bodyExpr (TBuiltin BTAny)\n     pure $ TOptional ty\n-  EToTextTypeConName tycon -> do\n-    -- Ensure that the type is known.\n-    _ <- inWorld (lookupDataType tycon)\n-    pure $ TBuiltin BTText\n+  ETypeRep ty -> do\n+    checkSimpleType ty\n+    pure $ TBuiltin BTTypeRep\n   EUpdate upd -> typeOfUpdate upd\n   EScenario scen -> typeOfScenario scen\n   ELocation _ expr -> typeOf expr\n \n -- Check that the type contains no type variables or quantifiers\n-checkAnyType :: MonadGamma m => Type -> m ()\n-checkAnyType ty =\n+checkSimpleType :: MonadGamma m => Type -> m ()"
+  },
+  {
+    "id" : "c2f803e0-1cae-4532-a5b0-a4cdbcc2bffc",
+    "prId" : 3326,
+    "comments" : [
+      {
+        "id" : "e24e2800-e038-4b19-8955-003b350cfe87",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\ncheckGroundType ty =\r\n```",
+        "createdAt" : "2019-11-04T13:00:45Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "609c22d98f12f9cd4dc89a8e0d9f1cf0af882a2d",
+    "line" : null,
+    "diffHunk" : "@@ -502,24 +503,23 @@ typeOf = \\case\n   ESome bodyType bodyExpr -> checkSome bodyType bodyExpr $> TOptional bodyType\n   ENone bodyType -> checkType bodyType KStar $> TOptional bodyType\n   EToAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty\n     checkExpr bodyExpr ty\n     pure $ TBuiltin BTAny\n   EFromAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty\n     checkExpr bodyExpr (TBuiltin BTAny)\n     pure $ TOptional ty\n-  EToTextTypeConName tycon -> do\n-    -- Ensure that the type is known.\n-    _ <- inWorld (lookupDataType tycon)\n-    pure $ TBuiltin BTText\n+  ETypeRep ty -> do\n+    checkSimpleType ty\n+    pure $ TBuiltin BTTypeRep\n   EUpdate upd -> typeOfUpdate upd\n   EScenario scen -> typeOfScenario scen\n   ELocation _ expr -> typeOf expr\n \n -- Check that the type contains no type variables or quantifiers\n-checkAnyType :: MonadGamma m => Type -> m ()\n-checkAnyType ty =\n+checkSimpleType :: MonadGamma m => Type -> m ()\n+checkSimpleType ty ="
+  },
+  {
+    "id" : "a463dcb9-dcac-4992-93e6-a6191d256a06",
+    "prId" : 3326,
+    "comments" : [
+      {
+        "id" : "b2ea709e-adb9-42f6-9754-4eb0abe42b92",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    checkGroundType ty\r\n```",
+        "createdAt" : "2019-11-04T13:00:56Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "609c22d98f12f9cd4dc89a8e0d9f1cf0af882a2d",
+    "line" : null,
+    "diffHunk" : "@@ -502,24 +503,23 @@ typeOf = \\case\n   ESome bodyType bodyExpr -> checkSome bodyType bodyExpr $> TOptional bodyType\n   ENone bodyType -> checkType bodyType KStar $> TOptional bodyType\n   EToAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty"
+  },
+  {
+    "id" : "003a6edc-9b7b-4f64-9aea-42440579faaf",
+    "prId" : 3326,
+    "comments" : [
+      {
+        "id" : "d67c30d9-bf64-456b-9a87-77fbed1e6ac1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    checkGroundType ty\r\n```",
+        "createdAt" : "2019-11-04T13:01:07Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "609c22d98f12f9cd4dc89a8e0d9f1cf0af882a2d",
+    "line" : null,
+    "diffHunk" : "@@ -502,24 +503,23 @@ typeOf = \\case\n   ESome bodyType bodyExpr -> checkSome bodyType bodyExpr $> TOptional bodyType\n   ENone bodyType -> checkType bodyType KStar $> TOptional bodyType\n   EToAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty\n     checkExpr bodyExpr ty\n     pure $ TBuiltin BTAny\n   EFromAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty"
+  },
+  {
+    "id" : "6305968f-233c-41b8-9a39-29586b6d9255",
+    "prId" : 3326,
+    "comments" : [
+      {
+        "id" : "6e2289fd-0331-473f-b330-3b71bf218e5f",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n    checkGroundType ty\r\n```\r\nFollowing https://github.com/digital-asset/daml/pull/3326/files#r342036544",
+        "createdAt" : "2019-11-04T14:52:01Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "71ef3a1f-d8da-40a4-b972-5d781aed032a",
+        "parentId" : "6e2289fd-0331-473f-b330-3b71bf218e5f",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed. ",
+        "createdAt" : "2019-11-04T15:15:20Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "609c22d98f12f9cd4dc89a8e0d9f1cf0af882a2d",
+    "line" : null,
+    "diffHunk" : "@@ -502,24 +503,23 @@ typeOf = \\case\n   ESome bodyType bodyExpr -> checkSome bodyType bodyExpr $> TOptional bodyType\n   ENone bodyType -> checkType bodyType KStar $> TOptional bodyType\n   EToAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty\n     checkExpr bodyExpr ty\n     pure $ TBuiltin BTAny\n   EFromAny ty bodyExpr -> do\n-    checkAnyType ty\n+    checkSimpleType ty\n     checkExpr bodyExpr (TBuiltin BTAny)\n     pure $ TOptional ty\n-  EToTextTypeConName tycon -> do\n-    -- Ensure that the type is known.\n-    _ <- inWorld (lookupDataType tycon)\n-    pure $ TBuiltin BTText\n+  ETypeRep ty -> do\n+    checkSimpleType ty"
+  },
+  {
+    "id" : "e983efde-91e9-4f76-96ce-704aaab0f502",
+    "prId" : 3293,
+    "comments" : [
+      {
+        "id" : "f1b0ed10-9061-4099-9512-3286ef109998",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Rename to `typeCon` or `tyC` or whichever shortest possible abbreviations we use in haskell ;)",
+        "createdAt" : "2019-10-30T14:29:38Z",
+        "updatedAt" : "2019-10-30T14:54:14Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bf620c55-9160-4d34-824e-a595ee959f58",
+        "parentId" : "f1b0ed10-9061-4099-9512-3286ef109998",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-10-30T14:50:19Z",
+        "updatedAt" : "2019-10-30T14:54:14Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "21966e0332a605efb87463491d305a573f02db43",
+    "line" : null,
+    "diffHunk" : "@@ -509,9 +509,9 @@ typeOf = \\case\n     checkAnyType ty\n     checkExpr bodyExpr (TBuiltin BTAny)\n     pure $ TOptional ty\n-  EToTextTemplateId tpl -> do\n-    -- Ensure that the type is known and a template type.\n-    _ :: Template <- inWorld (lookupTemplate tpl)\n+  EToTextTypeConName tpl -> do"
+  },
+  {
+    "id" : "9fe54e25-22a8-40bd-83be-c10a818b3f27",
+    "prId" : 3141,
+    "comments" : [
+      {
+        "id" : "44055e5e-eee8-4024-bfa3-2d2d5ff87f19",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Won't this produce very confusing compiler errors if a type has free type variables?",
+        "createdAt" : "2019-10-09T12:59:27Z",
+        "updatedAt" : "2019-10-10T04:59:02Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "55fb4f9e-7a86-47c8-a18d-ebefea28c3b4",
+        "parentId" : "44055e5e-eee8-4024-bfa3-2d2d5ff87f19",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That’s a fair point but given that DAML users should never see this check I don’t think we need to aim for a good error message here.",
+        "createdAt" : "2019-10-09T13:08:32Z",
+        "updatedAt" : "2019-10-10T04:59:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9f33ac4e3d1ffe96883e634244b43469966c6fd2",
+    "line" : 23,
+    "diffHunk" : "@@ -500,14 +500,16 @@ typeOf = \\case\n   ECons elemType headExpr tailExpr -> checkCons elemType headExpr tailExpr $> TList elemType\n   ESome bodyType bodyExpr -> checkSome bodyType bodyExpr $> TOptional bodyType\n   ENone bodyType -> checkType bodyType KStar $> TOptional bodyType\n-  EToAnyTemplate tpl bodyExpr -> do\n-    _ :: Template <- inWorld (lookupTemplate tpl)\n-    checkExpr bodyExpr (TCon tpl)\n-    pure $ TBuiltin BTAnyTemplate\n-  EFromAnyTemplate tpl bodyExpr -> do\n-    _ :: Template <- inWorld (lookupTemplate tpl)\n-    checkExpr bodyExpr (TBuiltin BTAnyTemplate)\n-    pure $ TOptional (TCon tpl)\n+  EToAny ty bodyExpr -> do\n+    -- We clear the environment to make sure that there are no free type variables in ty\n+    clearTypeVars $ checkType ty KStar"
+  },
+  {
+    "id" : "f47b2381-e9c1-44ee-8ef5-8600a4de2dfb",
+    "prId" : 3118,
+    "comments" : [
+      {
+        "id" : "4f5731a0-b748-4ffe-908c-3c7f588f6102",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "... and a template type. :)",
+        "createdAt" : "2019-10-09T08:45:30Z",
+        "updatedAt" : "2019-10-09T08:46:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c8cea9b36628653cfe6827ff1ff5d531151c27b0",
+    "line" : 5,
+    "diffHunk" : "@@ -508,6 +508,10 @@ typeOf = \\case\n     _ :: Template <- inWorld (lookupTemplate tpl)\n     checkExpr bodyExpr (TBuiltin BTAnyTemplate)\n     pure $ TOptional (TCon tpl)\n+  EToTextTemplateId tpl -> do\n+    -- Ensure that the type is known."
+  },
+  {
+    "id" : "8f8ac029-4eb5-497c-92d0-b0ddf12701dc",
+    "prId" : 663,
+    "comments" : [
+      {
+        "id" : "24ed972a-5581-4529-ae55-0ec732c0f1ea",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It looks like the changes here result in a call to `error` rather than a call to `throwWithContext`. It isn’t immediately obvious to me that this will be handled the same way and if not, what exactly this implies.",
+        "createdAt" : "2019-04-24T11:50:57Z",
+        "updatedAt" : "2019-04-25T10:40:16Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dbdc634d-2826-4a73-b702-d864647b0236",
+        "parentId" : "24ed972a-5581-4529-ae55-0ec732c0f1ea",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Nope, this calls a different checkFeature which does call throwWithContext - so all good.",
+        "createdAt" : "2019-04-24T12:40:27Z",
+        "updatedAt" : "2019-04-25T10:40:16Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0c6a253f4205edcddd905fb7a7812b140b113c8d",
+    "line" : 18,
+    "diffHunk" : "@@ -388,7 +386,7 @@ checkFetch tpl cid = do\n -- returns the contract id and contract type\n checkRetrieveByKey :: MonadGamma m => RetrieveByKey -> m (Type, Type)\n checkRetrieveByKey RetrieveByKey{..} = do\n-  checkSupportsContractKeys\n+  checkFeature featureContractKeys"
+  },
+  {
+    "id" : "f48f60fd-629b-47d0-8018-6c25db9619fb",
+    "prId" : 639,
+    "comments" : [
+      {
+        "id" : "1bdaaef8-b4ed-48eb-9480-2526ba66adf3",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Surprised there isn't a generate `checkSupported` which takes the predicate an error message and hides the magic.",
+        "createdAt" : "2019-04-23T16:18:32Z",
+        "updatedAt" : "2019-04-24T08:38:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e91f8d34bc3cd39588ceb7348f9adb4e0a46b8c6",
+    "line" : 42,
+    "diffHunk" : "@@ -544,9 +546,15 @@ checkValidProjectionsKey = \\case\n   expr ->\n     throwWithContext (EInvalidKeyExpression expr)\n \n-checkTemplateKey :: MonadGamma m => ExprVarName -> Qualified TypeConName -> Maybe TemplateKey -> m ()\n-checkTemplateKey param tcon mbKey =\n-  for_ mbKey $ \\TemplateKey{..} -> do\n+checkSupportsContractKeys :: MonadGamma m => m ()\n+checkSupportsContractKeys = do"
+  },
+  {
+    "id" : "f77fca74-308b-4ef4-9eff-c9e1e0faff48",
+    "prId" : 639,
+    "comments" : [
+      {
+        "id" : "1531e315-9ed7-40bf-8c11-2ac3e78911f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Not such a fan that `supportsContractKeys` is a nicely abstracted predicate, and then the error message repeats the version miles away from it",
+        "createdAt" : "2019-04-23T16:19:22Z",
+        "updatedAt" : "2019-04-24T08:38:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a339450d-4636-474c-9a88-e0e80d8d9d7f",
+        "parentId" : "1531e315-9ed7-40bf-8c11-2ac3e78911f4",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I totally agree. I'll clean that up in a followup PR for all features that depend on the DAML-LF version. Same for the other remark.",
+        "createdAt" : "2019-04-23T16:23:24Z",
+        "updatedAt" : "2019-04-24T08:38:01Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e91f8d34bc3cd39588ceb7348f9adb4e0a46b8c6",
+    "line" : 45,
+    "diffHunk" : "@@ -544,9 +546,15 @@ checkValidProjectionsKey = \\case\n   expr ->\n     throwWithContext (EInvalidKeyExpression expr)\n \n-checkTemplateKey :: MonadGamma m => ExprVarName -> Qualified TypeConName -> Maybe TemplateKey -> m ()\n-checkTemplateKey param tcon mbKey =\n-  for_ mbKey $ \\TemplateKey{..} -> do\n+checkSupportsContractKeys :: MonadGamma m => m ()\n+checkSupportsContractKeys = do\n+    v <- view lfVersion\n+    unless (supportsContractKeys v) $\n+        throwWithContext $ EUnsupportedFeature \"Contract keys\" version1_3"
+  }
+]

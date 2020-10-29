@@ -1,0 +1,87 @@
+[
+  {
+    "id" : "4ab1526f-447f-48eb-a806-738c0b0f72a4",
+    "prId" : 6941,
+    "comments" : [
+      {
+        "id" : "2a244390-373f-48c4-93b9-f9d198e66e81",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "To ease things for other reviewers: These two methods are also called by `locked.unlock`. We are just inlining the part of that here that is required if `lock` is null.",
+        "createdAt" : "2020-07-30T20:04:25Z",
+        "updatedAt" : "2020-07-30T20:07:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0d5dbe50-3845-4ba3-a45c-3a8dafa2c29b",
+        "parentId" : "2a244390-373f-48c4-93b9-f9d198e66e81",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "BTW `java.nio.channels.FileChannel#tryLock()` can throw:\r\n```\r\n     * @throws  ClosedChannelException\r\n     * ...\r\n     * @throws  OverlappingFileLockException\r\n     * ...\r\n     * @throws  IOException\r\n     *          If some other I/O error occurs\r\n```\r\nWe are NOT closing `channel` and `file` on `IOException`.",
+        "createdAt" : "2020-07-30T21:22:45Z",
+        "updatedAt" : "2020-07-30T21:30:45Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b702f0a6-baf2-418b-934e-479a86a6049f",
+        "parentId" : "2a244390-373f-48c4-93b9-f9d198e66e81",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "That's a good point too.",
+        "createdAt" : "2020-07-31T07:22:45Z",
+        "updatedAt" : "2020-07-31T07:22:45Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f7a81d06-d071-4b49-99d1-2783c47823c7",
+        "parentId" : "2a244390-373f-48c4-93b9-f9d198e66e81",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Handled in #6926. https://github.com/digital-asset/daml/pull/6926/files#diff-9d9bd06164de62daf31e8b86e3daa175R50-R53",
+        "createdAt" : "2020-08-04T00:42:53Z",
+        "updatedAt" : "2020-08-04T00:42:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7351cf0069822a3d9b0737db780130d05e3a7735",
+    "line" : 16,
+    "diffHunk" : "@@ -33,14 +33,13 @@ object PortLock {\n     val file = new RandomAccessFile(portLockFile.toFile, \"rw\")\n     val channel = file.getChannel\n     try {\n-      val lock = channel.tryLock()\n-      val locked = new Locked(port, lock, channel, file)\n-      if (lock != null) {\n-        Right(locked)\n-      } else {\n-        locked.unlock()\n-        Left(FailedToLock(port))\n-      }\n+      Option(channel.tryLock())\n+        .map(lock => new Locked(port, lock, channel, file))\n+        .toRight {\n+          channel.close()\n+          file.close()"
+  }
+]

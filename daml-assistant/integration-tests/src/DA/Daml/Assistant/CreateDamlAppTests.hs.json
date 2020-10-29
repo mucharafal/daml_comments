@@ -1,0 +1,133 @@
+[
+  {
+    "id" : "4de81eab-d4c4-4da1-8b44-e4c6b33d8d40",
+    "prId" : 7222,
+    "comments" : [
+      {
+        "id" : "32a829dc-4f41-4553-89d1-4ac13a12b55f",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        -- Run end to end testing for the app.\r\n```",
+        "createdAt" : "2020-09-08T09:22:56Z",
+        "updatedAt" : "2020-09-08T09:50:39Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "05a1d035c2e74f50ac256733c38d9f9a607b65d5",
+    "line" : null,
+    "diffHunk" : "@@ -98,45 +105,85 @@ tests =\n             assertFileExists (\"ui\" </> \"src\" </> \"components\" </> messageComponent <.> \"tsx\")\n           step \"Build the new DAML model\"\n           callCommandSilent \"daml build\"\n-          step \"Set up TypeScript libraries and Yarn workspaces for codegen again\"\n-          setupYarnEnv tmpDir (Workspaces [projectName <> \"/daml.js\"]) [DamlTypes, DamlLedger]\n           step \"Run JavaScript codegen for new DAML model\"\n-          callCommandSilent $ \"daml codegen js -o daml.js .daml/dist/\" <> projectName <> \"-0.1.0.dar\"\n-        withCurrentDirectory (cdaDir </> \"ui\") $ do\n-          step \"Set up libraries and workspaces again for UI build\"\n-          setupYarnEnv tmpDir (Workspaces [projectName <> \"/ui\"]) allTsLibraries\n+          callCommandSilent $ \"daml codegen js -o ui/daml.js .daml/dist/\" <> projectName <> \"-0.1.0.dar\"\n+          genFiles <- listFilesRecursive \"ui/daml.js\"\n+          forM_ [file | file <- genFiles, takeFileName file == \"package.json\"] (patchTsDependencies uiDir)\n+        withCurrentDirectory uiDir $ do\n+          patchTsDependencies uiDir \"package.json\"\n           step \"Install UI dependencies again, forcing rebuild of generated code\"\n-          callCommandSilent \"yarn install --force --frozen-lockfile\"\n+          callCommandSilent \"npm-cli.js install --force --frozen-lockfile\"\n           step \"Run linter again\"\n-          callCommandSilent \"yarn lint --max-warnings 0\"\n+          callCommandSilent \"npm-cli.js run-script lint -- --max-warnings 0\"\n           step \"Build the new UI\"\n-          callCommandSilent \"yarn build\"\n+          callCommandSilent \"npm-cli.js run-script build\"\n \n-        -- Run end to end testing for the app.\n+        -- -- Run end to end testing for the app."
+  },
+  {
+    "id" : "8d7bcfa8-0696-4d80-8bbc-58f79a8a5cf2",
+    "prId" : 6694,
+    "comments" : [
+      {
+        "id" : "f37df392-6612-46ad-9e32-8bb6ff71137f",
+        "parentId" : null,
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Is that meant to stay in there?",
+        "createdAt" : "2020-07-13T15:03:03Z",
+        "updatedAt" : "2020-07-13T15:06:00Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "de31e393-0888-4c47-baa0-49a4484c374f",
+        "parentId" : "f37df392-6612-46ad-9e32-8bb6ff71137f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good catch, removed!",
+        "createdAt" : "2020-07-13T15:06:16Z",
+        "updatedAt" : "2020-07-13T15:06:16Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7d1bc6e5ded79fed5ef11c9c2b1b45a4063e2222",
+    "line" : null,
+    "diffHunk" : "@@ -9,58 +9,76 @@ import Data.Aeson.Extra.Merge\n import qualified Data.ByteString.Lazy as BSL\n import qualified Data.ByteString as BS\n import Data.List.Extra\n+import Data.Proxy (Proxy (..))\n+import Data.Tagged (Tagged (..))\n+import qualified Data.Text.Extended as T\n import System.Directory.Extra\n import System.Environment.Blank\n import System.FilePath\n import System.IO.Extra\n import System.Info.Extra\n import Test.Tasty\n import Test.Tasty.HUnit\n+import Test.Tasty.Options\n \n import DA.Bazel.Runfiles\n import DA.Daml.Assistant.IntegrationTestUtils\n import DA.Test.Daml2jsUtils\n import DA.Test.Process (callCommandSilent)\n import DA.Test.Util\n \n+newtype ProjectName = ProjectName String\n+\n+instance IsOption ProjectName where\n+    defaultValue = ProjectName \"create-daml-app\"\n+    parseValue = Just . ProjectName\n+    optionName = Tagged \"project-name\"\n+    optionHelp = Tagged \"name of the project\"\n+\n main :: IO ()\n main = withTempDir $ \\yarnCache -> do\n     setEnv \"YARN_CACHE_FOLDER\" yarnCache True\n     yarn : args <- getArgs\n     javaPath <- locateRunfiles \"local_jdk/bin\"\n     oldPath <- getSearchPath\n     yarnPath <- takeDirectory <$> locateRunfiles (mainWorkspace </> yarn)\n+    let ingredients = defaultIngredients ++ [includingOptions [Option @ProjectName Proxy]]\n     withArgs args (withEnv\n         [ (\"PATH\", Just $ intercalate [searchPathSeparator] (javaPath : yarnPath : oldPath))\n         , (\"TASTY_NUM_THREADS\", Just \"1\")\n-        ] $ defaultMain tests)\n+        ] $ defaultMainWithIngredients ingredients tests)\n \n tests :: TestTree\n-tests = withSdkResource $ \\_ -> testGroup \"Create DAML App tests\" [gettingStartedGuideTest | not isWindows]\n+tests =\n+    withSdkResource $ \\_ ->\n+    askOption $ \\(ProjectName projectName) -> do\n+    testGroup \"Create DAML App tests\" [gettingStartedGuideTest projectName | not isWindows]\n   where\n-    gettingStartedGuideTest = testCaseSteps \"Getting Started Guide\" $ \\step ->\n+    gettingStartedGuideTest projectName = testCaseSteps \"Getting Started Guide\" $ \\step ->\n       withTempDir $ \\tmpDir -> do\n         step \"Create app from template\"\n         withCurrentDirectory tmpDir $ do\n-          callCommandSilent \"daml new create-daml-app create-daml-app\"\n-        let cdaDir = tmpDir </> \"create-daml-app\"\n+          callCommandSilent $ \"daml new \" <> projectName <> \" create-daml-app\"\n+        let cdaDir = tmpDir </> projectName\n+\n+        hPutStrLn stderr cdaDir"
+  },
+  {
+    "id" : "2fc5b19f-2c7d-4099-9e2b-fd5f7a60013a",
+    "prId" : 5540,
+    "comments" : [
+      {
+        "id" : "a6bb9b78-4dc1-4e7e-a3e6-b8dbfa5f3994",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "`lodashMerge`? Nice find!",
+        "createdAt" : "2020-04-16T15:34:34Z",
+        "updatedAt" : "2020-04-17T16:24:22Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9f938c86-08a0-45b6-b8ad-6be2e65da96b",
+        "parentId" : "a6bb9b78-4dc1-4e7e-a3e6-b8dbfa5f3994",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Yeah, saved me having to use jq ;)",
+        "createdAt" : "2020-04-16T15:44:08Z",
+        "updatedAt" : "2020-04-17T16:24:22Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "022f7a09b19657608748dce2c6402328ae375078",
+    "line" : 111,
+    "diffHunk" : "@@ -0,0 +1,120 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+module DA.Daml.Assistant.CreateDamlAppTests (main) where\n+\n+import Control.Exception.Extra\n+import Control.Monad\n+import Data.Aeson\n+import Data.Aeson.Extra.Merge\n+import qualified Data.ByteString.Lazy as BSL\n+import qualified Data.ByteString as BS\n+import Data.List.Extra\n+import System.Directory.Extra\n+import System.Environment.Blank\n+import System.FilePath\n+import System.IO.Extra\n+import System.Info.Extra\n+import Test.Tasty\n+import Test.Tasty.HUnit\n+\n+import DA.Bazel.Runfiles\n+import DA.Daml.Assistant.IntegrationTestUtils\n+import DA.Test.Daml2jsUtils\n+import DA.Test.Process (callCommandSilent)\n+import DA.Test.Util\n+\n+main :: IO ()\n+main = do\n+    yarn : args <- getArgs\n+    javaPath <- locateRunfiles \"local_jdk/bin\"\n+    oldPath <- getSearchPath\n+    yarnPath <- takeDirectory <$> locateRunfiles (mainWorkspace </> yarn)\n+    withArgs args (withEnv\n+        [ (\"PATH\", Just $ intercalate [searchPathSeparator] (javaPath : yarnPath : oldPath))\n+        , (\"TASTY_NUM_THREADS\", Just \"1\")\n+        ] $ defaultMain tests)\n+\n+tests :: TestTree\n+tests = withSdkResource $ \\_ -> testGroup \"Create DAML App tests\" [gettingStartedGuideTest | not isWindows]\n+  where\n+    gettingStartedGuideTest = testCaseSteps \"Getting Started Guide\" $ \\step ->\n+      withTempDir $ \\tmpDir -> do\n+        step \"Create app from template\"\n+        withCurrentDirectory tmpDir $ do\n+          callCommandSilent \"daml new create-daml-app create-daml-app\"\n+        let cdaDir = tmpDir </> \"create-daml-app\"\n+\n+        -- First test the base application (without the user-added feature).\n+        withCurrentDirectory cdaDir $ do\n+          step \"Build DAML model for base application\"\n+          callCommandSilent \"daml build\"\n+          step \"Set up TypeScript libraries and Yarn workspaces for codegen\"\n+          setupYarnEnv tmpDir (Workspaces [\"create-daml-app/daml.js\"]) [DamlTypes, DamlLedger]\n+          step \"Run JavaScript codegen\"\n+          callCommandSilent \"daml codegen js -o daml.js .daml/dist/create-daml-app-0.1.0.dar\"\n+        assertFileDoesNotExist (cdaDir </> \"ui\" </> \"build\" </> \"index.html\")\n+        withCurrentDirectory (cdaDir </> \"ui\") $ do\n+          -- NOTE(MH): We set up the yarn env again to avoid having all the\n+          -- dependencies of the UI already in scope when `daml2js` runs\n+          -- `yarn install`. Some of the UI dependencies are a bit flaky to\n+          -- install and might need some retries.\n+          step \"Set up libraries and workspaces again for UI build\"\n+          setupYarnEnv tmpDir (Workspaces [\"create-daml-app/ui\"]) allTsLibraries\n+          step \"Install dependencies for UI\"\n+          retry 3 (callCommandSilent \"yarn install\")\n+          step \"Run linter\"\n+          callCommandSilent \"yarn lint --max-warnings 0\"\n+          step \"Build the application UI\"\n+          callCommandSilent \"yarn build\"\n+        assertFileExists (cdaDir </> \"ui\" </> \"build\" </> \"index.html\")\n+\n+        -- Now test that the messaging feature works by applying the necessary\n+        -- changes and testing in the same way as above.\n+        step \"Patch the application code with messaging feature\"\n+        messagingPatch <- locateRunfiles (mainWorkspace </> \"templates\" </> \"create-daml-app-test-resources\" </> \"messaging.patch\")\n+        patchTool <- locateRunfiles \"patch_dev_env/bin/patch\"\n+        withCurrentDirectory cdaDir $ do\n+          callCommandSilent $ unwords [patchTool, \"-s\", \"-p2\", \"<\", messagingPatch]\n+          forM_ [\"MessageEdit\", \"MessageList\"] $ \\messageComponent ->\n+            assertFileExists (\"ui\" </> \"src\" </> \"components\" </> messageComponent <.> \"tsx\")\n+          step \"Build the new DAML model\"\n+          callCommandSilent \"daml build\"\n+          step \"Set up TypeScript libraries and Yarn workspaces for codegen again\"\n+          setupYarnEnv tmpDir (Workspaces [\"create-daml-app/daml.js\"]) [DamlTypes, DamlLedger]\n+          step \"Run JavaScript codegen for new DAML model\"\n+          callCommandSilent \"daml codegen js -o daml.js .daml/dist/create-daml-app-0.1.0.dar\"\n+        withCurrentDirectory (cdaDir </> \"ui\") $ do\n+          step \"Set up libraries and workspaces again for UI build\"\n+          setupYarnEnv tmpDir (Workspaces [\"create-daml-app/ui\"]) allTsLibraries\n+          step \"Install UI dependencies again, forcing rebuild of generated code\"\n+          callCommandSilent \"yarn install --force --frozen-lockfile\"\n+          step \"Run linter again\"\n+          callCommandSilent \"yarn lint --max-warnings 0\"\n+          step \"Build the new UI\"\n+          callCommandSilent \"yarn build\"\n+\n+        -- Run end to end testing for the app.\n+        withCurrentDirectory (cdaDir </> \"ui\") $ do\n+          step \"Install Jest, Puppeteer and other dependencies\"\n+          extraDepsFile <- locateRunfiles (mainWorkspace </> \"templates\" </> \"create-daml-app-test-resources\" </> \"testDeps.json\")\n+          addTestDependencies (cdaDir </> \"ui\" </> \"package.json\") extraDepsFile\n+          retry 3 (callCommandSilent \"yarn install\")\n+          step \"Run Puppeteer end-to-end tests\"\n+          testFile <- locateRunfiles (mainWorkspace </> \"templates\" </> \"create-daml-app-test-resources\" </> \"index.test.ts\")\n+          copyFile testFile (cdaDir </> \"ui\" </> \"src\" </> \"index.test.ts\")\n+          callCommandSilent \"CI=yes yarn run test --ci --all\"\n+\n+addTestDependencies :: FilePath -> FilePath -> IO ()\n+addTestDependencies packageJsonFile extraDepsFile = do\n+    packageJson <- readJsonFile packageJsonFile\n+    extraDeps <- readJsonFile extraDepsFile\n+    let newPackageJson = lodashMerge packageJson extraDeps"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id" : "b41a2332-b3d7-4f05-9c38-bc880e0db37a",
+    "prId" : 5172,
+    "comments" : [
+      {
+        "id" : "b3b47fc5-c3d6-49af-94e9-7a5e8091f288",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "We should probably check `seconds`. `nanos` will be empty if you simply select `30.seconds`.",
+        "createdAt" : "2020-03-25T09:16:46Z",
+        "updatedAt" : "2020-03-25T14:06:52Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2087ede1-3578-47e0-b48e-09dbefc17452",
+        "parentId" : "b3b47fc5-c3d6-49af-94e9-7a5e8091f288",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "As far as I understood this test, it used the LET as a kind of index (retry number `i` had `LET=i`). I have switched to using `deduplicationTime` instead, and to using nanos instead of seconds in order to not create large timeouts.\r\n\r\nThe deduplication time is initialized with `com.google.protobuf.duration.Duration.of(120, 0)`",
+        "createdAt" : "2020-03-25T13:18:13Z",
+        "updatedAt" : "2020-03-25T14:06:52Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b71c1250aa1753ee4cc4181a639eb4e99b47e872",
+    "line" : 14,
+    "diffHunk" : "@@ -34,7 +34,7 @@ class CommandRetryFlowUT extends AsyncWordSpec with Matchers with AkkaTest {\n     Flow[In[RetryInfo[Status]]]\n       .map {\n         case Ctx(context @ RetryInfo(_, _, _, status), SubmitRequest(Some(commands), tc)) =>\n-          if (commands.ledgerEffectiveTime.get.seconds == 0) {\n+          if (commands.deduplicationTime.get.nanos == 0) {"
+  },
+  {
+    "id" : "2596b740-ca56-4b7e-ba12-c78d210d093e",
+    "prId" : 5036,
+    "comments" : [
+      {
+        "id" : "9062e1e2-a128-49de-962a-a462891693ff",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Since we're ignoring so many fields, we can probably just bind `Commands` to a variable and access it in the following block.",
+        "createdAt" : "2020-03-17T08:54:03Z",
+        "updatedAt" : "2020-03-18T06:30:03Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1195986ea378639b5c1e0607a82041bc790f4cdf",
+    "line" : null,
+    "diffHunk" : "@@ -35,7 +35,7 @@ class CommandRetryFlowUT extends AsyncWordSpec with Matchers with AkkaTest {\n       .map {\n         case Ctx(\n             context @ RetryInfo(_, _, _, status),\n-            SubmitRequest(Some(Commands(_, _, _, commandId, _, let, _, _, _)), tc)) =>\n+            SubmitRequest(Some(Commands(_, _, _, commandId, _, let, _, _, _, _)), tc)) =>"
+  }
+]

@@ -1,0 +1,146 @@
+[
+  {
+    "id" : "6a2f2f40-9014-45f9-b905-07d77e0c2373",
+    "prId" : 7678,
+    "comments" : [
+      {
+        "id" : "2bdc5de6-3d1d-4376-86d1-b6631218d7d4",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Can you double check that this change is ok? I believe it's ok because I guess `dataSource.use` wraps the `Future` so that the `Throwable` is caught correctly, but it's difficult to say from GitHub. Same for the two following analogous changes.",
+        "createdAt" : "2020-10-14T12:15:54Z",
+        "updatedAt" : "2020-10-19T09:32:37Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d413f2bd-99b1-4201-ae21-942e8d91bb06",
+        "parentId" : "2bdc5de6-3d1d-4376-86d1-b6631218d7d4",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "It is, because `use` calls the behavior inside a `flatMap`. There's a unit test for it.",
+        "createdAt" : "2020-10-14T12:37:18Z",
+        "updatedAt" : "2020-10-19T09:32:37Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "674bae11cc5a88ac1ab207b4a337c1c39eb07a5a",
+    "line" : 28,
+    "diffHunk" : "@@ -3,27 +3,27 @@\n \n package com.daml.platform.store\n \n+import com.daml.ledger.resources.{ResourceContext, ResourceOwner}\n import com.daml.logging.{ContextualizedLogger, LoggingContext}\n import com.daml.platform.configuration.ServerRole\n import com.daml.platform.store.FlywayMigrations._\n import com.daml.platform.store.dao.HikariConnection\n-import com.daml.resources.ResourceOwner\n import com.zaxxer.hikari.HikariDataSource\n import org.flywaydb.core.Flyway\n import org.flywaydb.core.api.MigrationVersion\n import org.flywaydb.core.api.configuration.FluentConfiguration\n \n+import scala.concurrent.Future\n import scala.concurrent.duration.DurationInt\n-import scala.concurrent.{ExecutionContext, Future}\n \n private[platform] class FlywayMigrations(jdbcUrl: String)(implicit loggingContext: LoggingContext) {\n   private val logger = ContextualizedLogger.get(this.getClass)\n \n   private val dbType = DbType.jdbcType(jdbcUrl)\n \n-  def validate()(implicit executionContext: ExecutionContext): Future[Unit] =\n+  def validate()(implicit resourceContext: ResourceContext): Future[Unit] =\n     dataSource.use { ds =>\n-      Future {\n+      Future.successful {"
+  },
+  {
+    "id" : "6315a218-e707-4cd3-877c-49c829245b01",
+    "prId" : 6800,
+    "comments" : [
+      {
+        "id" : "873aa492-98d0-416f-b56f-c3cb5f3ffe2b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I guess this classpath location is for both the scala and the sql migrations?\r\nIf we want to keep omitting the `com/daml` prefix we could move them to `platform/db/migration` (or keep them at `db/migration`) and add a second location element here.",
+        "createdAt" : "2020-07-21T07:06:04Z",
+        "updatedAt" : "2020-07-21T07:50:10Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "611a7e3b-2783-4bb5-a15f-852c3c89d576",
+        "parentId" : "873aa492-98d0-416f-b56f-c3cb5f3ffe2b",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can we move migrations? I thought they had to stay put.\r\n\r\n@rautenrieth-da, did you test that you can re-run the migrations on an already-existing database created with `master`?",
+        "createdAt" : "2020-07-21T08:13:07Z",
+        "updatedAt" : "2020-07-21T08:13:07Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1d678717-de1f-4736-b8d0-bbc3b0638745",
+        "parentId" : "873aa492-98d0-416f-b56f-c3cb5f3ffe2b",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I have checked manually that I can run daml-on-sql from master, add some data to it, then run daml-on-sql from this branch against the same postgres index DB.\r\n\r\nIt's a very good point though, so I looked further into this:\r\nHere's an excerpt from the `flyway_schema_history` table. \r\n```\r\nversion | type |                         script                         |  checksum   \r\n---------+------+--------------------------------------------------------+-------------\r\n 1       | SQL  | V1__Init.sql                                           |   -72965523\r\n 2.0     | SQL  | V2_0__Contract_divulgence.sql                          |  1461208192\r\n 2.1     | JDBC | db.migration.postgres.V2_1__Rebuild_Acs                |            \r\n 3       | JDBC | db.migration.postgres.V3__Recompute_Key_Hash           |            \r\n 4.0     | SQL  | V4_0__Add_parties.sql                                  |  2091746815\r\n 4.1     | JDBC | db.migration.postgres.V4_1__Collect_Parties            |            \r\n 5       | SQL  | V5__Add_packages.sql                                   |  1089030748\r\n 6       | SQL  | V6__External_Ledger_Offset.sql                         |  1642074148\r\n 7       | SQL  | V7__Command_deduplication.sql                          |   478192496\r\n 8       | SQL  | V8__Contract_Divulgence.sql                            | -1984400579\r\n 9       | SQL  | V9__Contract_Divulgence.sql                            |   -39708021\r\n 10.0    | SQL  | V10_0__Extract_Event_Data.sql                          |  1741793687\r\n 10.1    | JDBC | db.migration.postgres.V10_1__Populate_Event_Data       |            \r\n 10.2    | SQL  | V10_2__Extract_Event_Data.sql                          | -1727099174\r\n```\r\n\r\nManually changing the \"script\" column doesn't affect anything. Manually changing the checksum or the version however breaks the database.",
+        "createdAt" : "2020-07-21T12:36:32Z",
+        "updatedAt" : "2020-07-21T12:36:33Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0f5a59cc-da11-4609-a61d-3e3e1c4f5e84",
+        "parentId" : "873aa492-98d0-416f-b56f-c3cb5f3ffe2b",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Great. Thanks for checking. 🙂 ",
+        "createdAt" : "2020-07-21T12:41:35Z",
+        "updatedAt" : "2020-07-21T12:41:35Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f0ae1e9523418929b94adeb9b5c2ac5bffb03927",
+    "line" : null,
+    "diffHunk" : "@@ -70,5 +70,5 @@ class FlywayMigrations(jdbcUrl: String)(implicit logCtx: LoggingContext) {\n \n object FlywayMigrations {\n   def configurationBase(dbType: DbType): FluentConfiguration =\n-    Flyway.configure().locations(\"classpath:db/migration/\" + dbType.name)\n+    Flyway.configure().locations(\"classpath:com/daml/platform/db/migration/\" + dbType.name)"
+  }
+]

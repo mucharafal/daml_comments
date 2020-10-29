@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "44ca2fd4-ab75-4354-b142-a1e11a7f4cfb",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "47383c6c-8484-46cb-9ad4-5957e3bdc19f",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I like newlines.\r\n\r\n```suggestion\r\n  private val AllTemplates = Iterator.single(\"all-templates\")\r\n\r\n```",
+        "createdAt" : "2020-07-31T09:23:01Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -26,33 +28,46 @@ private[apiserver] final class ApiActiveContractsService private (\n     implicit executionContext: ExecutionContext,\n     protected val mat: Materializer,\n     protected val esf: ExecutionSequencerFactory,\n-    logCtx: LoggingContext,\n+    loggingContext: LoggingContext,\n ) extends ActiveContractsServiceAkkaGrpc\n     with GrpcApiService {\n \n   private val logger = ContextualizedLogger.get(this.getClass)\n \n+  import ApiActiveContractsService.filters\n   override protected def getActiveContractsSource(\n-      request: GetActiveContractsRequest): Source[GetActiveContractsResponse, NotUsed] = {\n-    logger.trace(\"Serving an Active Contracts request...\")\n-\n-    TransactionFilterValidator\n-      .validate(request.getFilter, \"filter\")\n-      .fold(Source.failed, backend.getActiveContracts(_, request.verbose))\n-      .via(logger.logErrorsOnStream)\n-  }\n+      request: GetActiveContractsRequest,\n+  ): Source[GetActiveContractsResponse, NotUsed] =\n+    withEnrichedLoggingContext(filters(request.getFilter.filtersByParty)) {\n+      implicit loggingContext: LoggingContext =>\n+        logger.trace(\"Serving an Active Contracts request...\")\n+        TransactionFilterValidator\n+          .validate(request.getFilter, \"filter\")\n+          .fold(Source.failed, backend.getActiveContracts(_, request.verbose))\n+          .via(logger.logErrorsOnStream)\n+    }\n \n   override def bindService(): ServerServiceDefinition =\n     ActiveContractsServiceGrpc.bindService(this, DirectExecutionContext)\n }\n \n private[apiserver] object ApiActiveContractsService {\n \n+  private val AllTemplates = Iterator.single(\"all-templates\")"
+  },
+  {
+    "id" : "9524bfed-bdff-47ea-8ac6-42ef3293ddc5",
+    "prId" : 6924,
+    "comments" : [
+      {
+        "id" : "663075d4-e16c-4f17-9a2a-a9e2cd6886c1",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I'd prefer the import at the top of the scope.\r\n\r\n```suggestion\r\n  import ApiActiveContractsService.filters\r\n\r\n  private val logger = ContextualizedLogger.get(this.getClass)\r\n\r\n```",
+        "createdAt" : "2020-07-31T09:33:47Z",
+        "updatedAt" : "2020-07-31T11:58:54Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "865574590cb0a7ba8a61b4b5c4f66bdee74d6153",
+    "line" : null,
+    "diffHunk" : "@@ -26,33 +28,46 @@ private[apiserver] final class ApiActiveContractsService private (\n     implicit executionContext: ExecutionContext,\n     protected val mat: Materializer,\n     protected val esf: ExecutionSequencerFactory,\n-    logCtx: LoggingContext,\n+    loggingContext: LoggingContext,\n ) extends ActiveContractsServiceAkkaGrpc\n     with GrpcApiService {\n \n   private val logger = ContextualizedLogger.get(this.getClass)\n \n+  import ApiActiveContractsService.filters"
+  }
+]

@@ -1,0 +1,262 @@
+[
+  {
+    "id" : "2a9fc227-2ac1-4858-a8e9-6df2675f65c5",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "f5bf98f4-a6e1-44cc-bb7d-d0eab6d43688",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "An experiment with using phantoms to clarify use of these non-typeclassy implicits that Scala libraries tend to have, like `ExecutionContext`. If successful in this PR, we may expand to those other implicits, like `Connection` or indeed `ExecutionContext`.\r\n\r\nThis also demonstrates why I don't think one-size-fits-all tagging \"libraries\" are super helpful. Having a simple version like `scalaz.Tag` covering many common scenarios is fine, but there are often places where you wish to precisely control the resulting semantics, such as this one.\r\n\r\nThe type parameter could be added directly to `LoggingContext`, but I think it is more interesting here to demonstrate how you could add these phantom controls to implicit designs that you don't otherwise control.\r\n\r\n/cc @SamirTalwar @leo-da ",
+        "createdAt" : "2020-08-21T21:50:30Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d48bdc52-469c-4ead-a77f-ae0551b0775a",
+        "parentId" : "f5bf98f4-a6e1-44cc-bb7d-d0eab6d43688",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Seems like a smart idea. Where are you using it?",
+        "createdAt" : "2020-08-24T07:44:01Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fcc76f3a-ebd6-4b68-b7fb-40345f3998c9",
+        "parentId" : "f5bf98f4-a6e1-44cc-bb7d-d0eab6d43688",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "@SamirTalwar-DA In this PR, you can see\r\n\r\n1. where `Runner` now demands a `LoggingContextOf[Trigger]`,\r\n2. in its diff history, where `TriggerRunner` started demanding a `LoggingContextOf[Config]`, and\r\n3. where the first demand propagated outward into where the second was already satisfied, so it became `LoggingContextOf[Config with Trigger]`, which satisfies both.",
+        "createdAt" : "2020-09-02T21:20:59Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9845c5a3-42f6-45dc-a68a-262aadc3e319",
+        "parentId" : "f5bf98f4-a6e1-44cc-bb7d-d0eab6d43688",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I see it now. No complaints; seems like the API itself requires very little heavy lifting.\r\n\r\nI like this logic a lot, and I'd definitely support using this kind of thing for execution contexts too.",
+        "createdAt" : "2020-09-03T13:15:42Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 33,
+    "diffHunk" : "@@ -0,0 +1,76 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.logging\n+\n+import scala.language.{higherKinds, implicitConversions}\n+\n+/** [[LoggingContext]] with a phantom type parameter representing what kind of\n+  * details are in it.  If a function that accepts a LoggingContext is supposed\n+  * to trust that the caller has already embedded all the relevant data that\n+  * would be passed as arguments into the context, then you could say a function\n+  * that accepts a [[LoggingContextOf]] will \"trust, but verify\" instead.\n+  *\n+  * You can pick a tag to represent each kind of data you want to appear in a\n+  * context.  The use of `+` means the tag language in `LoggingContextOf[Tag]`\n+  * reflects the subtyping relation built into Scala, and `Any` and `with` form\n+  * the zero and append of a commutative monoid of tags.\n+  *\n+  * A few, but not all, type-level implications of this:\n+  *\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Foo]`\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Bar]`\n+  *  - `LoggingContextOf[Elephant]` is-a `LoggingContextOf[Animal]`\n+  *  - `LoggingContext` is-a `LoggingContextOf[Any]`\n+  *\n+  * A context with a more specific scope will always be preferred in implicit\n+  * resolution.  So if you call a function demanding a `LoggingContextOf[Foo]`\n+  * and you have two implicits in scope, a `LoggingContextOf[Foo]` and a\n+  * `LoggingContextOf[Foo with Bar]` then the latter will be chosen, in\n+  * accordance with SLS §7.2, §6.26.3.  This fits well the \"more context =\n+  * better than\" overall philosophy of the contextualized-logging library."
+  },
+  {
+    "id" : "39a1b131-6ee6-4f68-8f98-f93c6bd691a8",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "966b7f6b-6b82-44e5-b18a-c389d98c4214",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is it common to have lower-case class names? I think I’ve only seen uppercase names so far in Scala.",
+        "createdAt" : "2020-09-03T09:46:41Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2bdbefb7-89bd-4ee6-9800-7c5c86b1f9b8",
+        "parentId" : "966b7f6b-6b82-44e5-b18a-c389d98c4214",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "I don't know whether it's common; I don't see a need to pollute the namespace over providing the simple affordance \"I need to make a `label` so will use the `label` function\".",
+        "createdAt" : "2020-09-03T14:07:14Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.logging\n+\n+import com.github.ghik.silencer.silent\n+\n+import scala.language.{higherKinds, implicitConversions}\n+\n+/** [[LoggingContext]] with a phantom type parameter representing what kind of\n+  * details are in it.  If a function that accepts a LoggingContext is supposed\n+  * to trust that the caller has already embedded all the relevant data that\n+  * would be passed as arguments into the context, then you could say a function\n+  * that accepts a [[LoggingContextOf]] will \"trust, but verify\" instead.\n+  *\n+  * You can pick a tag to represent each kind of data you want to appear in a\n+  * context.  The use of `+` means the tag language in `LoggingContextOf[Tag]`\n+  * reflects the subtyping relation built into Scala, and `Any` and `with` form\n+  * the zero and append of a commutative monoid of tags.\n+  *\n+  * A few, but not all, type-level implications of this:\n+  *\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Foo]`\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Bar]`\n+  *  - `LoggingContextOf[Elephant]` is-a `LoggingContextOf[Animal]`\n+  *  - `LoggingContext` is-a `LoggingContextOf[Any]`\n+  *\n+  * A context with a more specific scope will always be preferred in implicit\n+  * resolution.  So if you call a function demanding a `LoggingContextOf[Foo]`\n+  * and you have two implicits in scope, a `LoggingContextOf[Foo]` and a\n+  * `LoggingContextOf[Foo with Bar]` then the latter will be chosen, in\n+  * accordance with SLS §7.2, §6.26.3.  This fits well the \"more context =\n+  * better than\" overall philosophy of the contextualized-logging library.\n+  */\n+object LoggingContextOf {\n+\n+  def label[P]: label[P] = new label(0)\n+  final class label[P] private[LoggingContextOf] (private val ignored: Int) extends AnyVal"
+  },
+  {
+    "id" : "c18ad274-e834-4f1c-a12c-d0474ed7f689",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "ecc02e23-532f-423a-af05-0787d86ce464",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What do we need the integer for?",
+        "createdAt" : "2020-09-03T10:37:59Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "438c86c2-8bec-414d-a8a4-87a44ad45bd4",
+        "parentId" : "ecc02e23-532f-423a-af05-0787d86ce464",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "You need one field for an `AnyVal` subclass. I forget whether `Unit` is supposed to work now, or still crashes scalac or runtime…",
+        "createdAt" : "2020-09-03T13:04:18Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "082baff4-0966-4fa7-9c14-76640796aa36",
+        "parentId" : "ecc02e23-532f-423a-af05-0787d86ce464",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It was scala/bug#9240, thankfully fixed now. f5d5af3d74",
+        "createdAt" : "2020-09-03T15:40:55Z",
+        "updatedAt" : "2020-09-03T15:40:55Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.logging\n+\n+import com.github.ghik.silencer.silent\n+\n+import scala.language.{higherKinds, implicitConversions}\n+\n+/** [[LoggingContext]] with a phantom type parameter representing what kind of\n+  * details are in it.  If a function that accepts a LoggingContext is supposed\n+  * to trust that the caller has already embedded all the relevant data that\n+  * would be passed as arguments into the context, then you could say a function\n+  * that accepts a [[LoggingContextOf]] will \"trust, but verify\" instead.\n+  *\n+  * You can pick a tag to represent each kind of data you want to appear in a\n+  * context.  The use of `+` means the tag language in `LoggingContextOf[Tag]`\n+  * reflects the subtyping relation built into Scala, and `Any` and `with` form\n+  * the zero and append of a commutative monoid of tags.\n+  *\n+  * A few, but not all, type-level implications of this:\n+  *\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Foo]`\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Bar]`\n+  *  - `LoggingContextOf[Elephant]` is-a `LoggingContextOf[Animal]`\n+  *  - `LoggingContext` is-a `LoggingContextOf[Any]`\n+  *\n+  * A context with a more specific scope will always be preferred in implicit\n+  * resolution.  So if you call a function demanding a `LoggingContextOf[Foo]`\n+  * and you have two implicits in scope, a `LoggingContextOf[Foo]` and a\n+  * `LoggingContextOf[Foo with Bar]` then the latter will be chosen, in\n+  * accordance with SLS §7.2, §6.26.3.  This fits well the \"more context =\n+  * better than\" overall philosophy of the contextualized-logging library.\n+  */\n+object LoggingContextOf {\n+\n+  def label[P]: label[P] = new label(0)"
+  },
+  {
+    "id" : "f21beef9-c63f-453b-82db-dfe1efca6826",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "a39d613f-3493-4980-b6a6-41d267e74f53",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do I see it correctly that we do not use this yet? Perfectly fine, just wanted to make sure I didn’t miss it.",
+        "createdAt" : "2020-09-03T10:39:13Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fbc1569b-6226-4ff7-ab27-168346ade896",
+        "parentId" : "a39d613f-3493-4980-b6a6-41d267e74f53",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Indeed.",
+        "createdAt" : "2020-09-03T13:02:36Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 46,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.logging\n+\n+import com.github.ghik.silencer.silent\n+\n+import scala.language.{higherKinds, implicitConversions}\n+\n+/** [[LoggingContext]] with a phantom type parameter representing what kind of\n+  * details are in it.  If a function that accepts a LoggingContext is supposed\n+  * to trust that the caller has already embedded all the relevant data that\n+  * would be passed as arguments into the context, then you could say a function\n+  * that accepts a [[LoggingContextOf]] will \"trust, but verify\" instead.\n+  *\n+  * You can pick a tag to represent each kind of data you want to appear in a\n+  * context.  The use of `+` means the tag language in `LoggingContextOf[Tag]`\n+  * reflects the subtyping relation built into Scala, and `Any` and `with` form\n+  * the zero and append of a commutative monoid of tags.\n+  *\n+  * A few, but not all, type-level implications of this:\n+  *\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Foo]`\n+  *  - `LoggingContextOf[Foo with Bar]` is-a `LoggingContextOf[Bar]`\n+  *  - `LoggingContextOf[Elephant]` is-a `LoggingContextOf[Animal]`\n+  *  - `LoggingContext` is-a `LoggingContextOf[Any]`\n+  *\n+  * A context with a more specific scope will always be preferred in implicit\n+  * resolution.  So if you call a function demanding a `LoggingContextOf[Foo]`\n+  * and you have two implicits in scope, a `LoggingContextOf[Foo]` and a\n+  * `LoggingContextOf[Foo with Bar]` then the latter will be chosen, in\n+  * accordance with SLS §7.2, §6.26.3.  This fits well the \"more context =\n+  * better than\" overall philosophy of the contextualized-logging library.\n+  */\n+object LoggingContextOf {\n+\n+  def label[P]: label[P] = new label(0)\n+  final class label[P] private[LoggingContextOf] (private val ignored: Int) extends AnyVal\n+\n+  @silent(\" label .* is never used\") // Proxy only\n+  def newLoggingContext[P, Z](label: label[P], kvs: Map[String, String])(\n+      f: LoggingContextOf[P] => Z): Z =\n+    LoggingContext.newLoggingContext(kvs)(lc => f((lc: LoggingContextOf[Any]).extend[P]))\n+\n+  @silent(\" label .* is never used\") // Proxy only\n+  def withEnrichedLoggingContext[P, A](label: label[P], kvs: Map[String, String])("
+  }
+]

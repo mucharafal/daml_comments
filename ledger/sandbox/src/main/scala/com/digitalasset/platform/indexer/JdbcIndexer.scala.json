@@ -1,0 +1,211 @@
+[
+  {
+    "id" : "fd77c650-c8e9-4885-add8-eef812b13d00",
+    "prId" : 5096,
+    "comments" : [
+      {
+        "id" : "5612a897-edeb-437f-b8f5-904a072d4acc",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Probably worth adding a first set of (empty) parameters to make sure we're calling something that has an effect.",
+        "createdAt" : "2020-03-19T20:15:36Z",
+        "updatedAt" : "2020-03-20T08:22:31Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7576e3f8-0e3d-44c7-9f00-0aa0b0ea33d4",
+        "parentId" : "5612a897-edeb-437f-b8f5-904a072d4acc",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-03-20T08:37:28Z",
+        "updatedAt" : "2020-03-20T08:37:28Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "28563b2c332b5f03687664e8e97890b6c1469d78",
+    "line" : null,
+    "diffHunk" : "@@ -26,76 +26,78 @@ import com.digitalasset.platform.metrics.timedFuture\n import com.digitalasset.platform.store.dao.{JdbcLedgerDao, LedgerDao}\n import com.digitalasset.platform.store.entries.{LedgerEntry, PackageLedgerEntry, PartyLedgerEntry}\n import com.digitalasset.platform.store.{FlywayMigrations, PersistenceEntry}\n+import com.digitalasset.resources.akka.AkkaResourceOwner\n import com.digitalasset.resources.{Resource, ResourceOwner}\n \n import scala.concurrent.{ExecutionContext, Future}\n import scala.util.control.NonFatal\n \n final class JdbcIndexerFactory(\n+    participantId: ParticipantId,\n     jdbcUrl: String,\n+    actorSystem: ActorSystem,\n+    readService: ReadService,\n     metrics: MetricRegistry,\n )(implicit logCtx: LoggingContext) {\n+\n+  private val logger = ContextualizedLogger.get(this.getClass)\n+\n   def validateSchema()(\n       implicit executionContext: ExecutionContext\n-  ): Future[InitializedJdbcIndexerFactory] =\n+  ): Future[ResourceOwner[JdbcIndexer]] =\n     new FlywayMigrations(jdbcUrl)\n       .validate()\n-      .map(_ => new InitializedJdbcIndexerFactory(jdbcUrl, metrics))\n+      .map(_ => initialized)\n \n   def migrateSchema(allowExistingSchema: Boolean)(\n       implicit executionContext: ExecutionContext\n-  ): Future[InitializedJdbcIndexerFactory] =\n+  ): Future[ResourceOwner[JdbcIndexer]] =\n     new FlywayMigrations(jdbcUrl)\n       .migrate(allowExistingSchema)\n-      .map(_ => new InitializedJdbcIndexerFactory(jdbcUrl, metrics))\n-}\n-\n-class InitializedJdbcIndexerFactory private[indexer] (\n-    jdbcUrl: String,\n-    metrics: MetricRegistry,\n-)(implicit executionContext: ExecutionContext, logCtx: LoggingContext) {\n-  private val logger = ContextualizedLogger.get(this.getClass)\n-\n-  def owner(\n-      participantId: ParticipantId,\n-      actorSystem: ActorSystem,\n-      readService: ReadService,\n-      jdbcUrl: String,\n-  ): ResourceOwner[JdbcIndexer] = {\n-    val materializer: Materializer = Materializer(actorSystem)\n-\n-    def fetchInitialState(dao: LedgerDao): Future[Option[Offset]] =\n-      for {\n-        initialConditions <- readService\n-          .getLedgerInitialConditions()\n-          .runWith(Sink.head)(materializer)\n-        existingLedgerId <- dao.lookupLedgerId()\n-        providedLedgerId = domain.LedgerId(initialConditions.ledgerId)\n-        _ <- initializeLedger(existingLedgerId, providedLedgerId, dao)\n-        initialLedgerEnd <- dao.lookupInitialLedgerEnd()\n-      } yield initialLedgerEnd\n+      .map(_ => initialized)\n \n+  private def initialized(implicit executionContext: ExecutionContext): ResourceOwner[JdbcIndexer] ="
+  },
+  {
+    "id" : "f45448a1-7f5b-4c96-ac04-644bc784c9c7",
+    "prId" : 5096,
+    "comments" : [
+      {
+        "id" : "caba30eb-d0c4-441b-94e3-7f3ab5879681",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yes, thanks for not nesting this. :slightly_smiling_face: ",
+        "createdAt" : "2020-03-19T20:16:22Z",
+        "updatedAt" : "2020-03-20T08:22:31Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28563b2c332b5f03687664e8e97890b6c1469d78",
+    "line" : 74,
+    "diffHunk" : "@@ -26,76 +26,78 @@ import com.digitalasset.platform.metrics.timedFuture\n import com.digitalasset.platform.store.dao.{JdbcLedgerDao, LedgerDao}\n import com.digitalasset.platform.store.entries.{LedgerEntry, PackageLedgerEntry, PartyLedgerEntry}\n import com.digitalasset.platform.store.{FlywayMigrations, PersistenceEntry}\n+import com.digitalasset.resources.akka.AkkaResourceOwner\n import com.digitalasset.resources.{Resource, ResourceOwner}\n \n import scala.concurrent.{ExecutionContext, Future}\n import scala.util.control.NonFatal\n \n final class JdbcIndexerFactory(\n+    participantId: ParticipantId,\n     jdbcUrl: String,\n+    actorSystem: ActorSystem,\n+    readService: ReadService,\n     metrics: MetricRegistry,\n )(implicit logCtx: LoggingContext) {\n+\n+  private val logger = ContextualizedLogger.get(this.getClass)\n+\n   def validateSchema()(\n       implicit executionContext: ExecutionContext\n-  ): Future[InitializedJdbcIndexerFactory] =\n+  ): Future[ResourceOwner[JdbcIndexer]] =\n     new FlywayMigrations(jdbcUrl)\n       .validate()\n-      .map(_ => new InitializedJdbcIndexerFactory(jdbcUrl, metrics))\n+      .map(_ => initialized)\n \n   def migrateSchema(allowExistingSchema: Boolean)(\n       implicit executionContext: ExecutionContext\n-  ): Future[InitializedJdbcIndexerFactory] =\n+  ): Future[ResourceOwner[JdbcIndexer]] =\n     new FlywayMigrations(jdbcUrl)\n       .migrate(allowExistingSchema)\n-      .map(_ => new InitializedJdbcIndexerFactory(jdbcUrl, metrics))\n-}\n-\n-class InitializedJdbcIndexerFactory private[indexer] (\n-    jdbcUrl: String,\n-    metrics: MetricRegistry,\n-)(implicit executionContext: ExecutionContext, logCtx: LoggingContext) {\n-  private val logger = ContextualizedLogger.get(this.getClass)\n-\n-  def owner(\n-      participantId: ParticipantId,\n-      actorSystem: ActorSystem,\n-      readService: ReadService,\n-      jdbcUrl: String,\n-  ): ResourceOwner[JdbcIndexer] = {\n-    val materializer: Materializer = Materializer(actorSystem)\n-\n-    def fetchInitialState(dao: LedgerDao): Future[Option[Offset]] =\n-      for {\n-        initialConditions <- readService\n-          .getLedgerInitialConditions()\n-          .runWith(Sink.head)(materializer)\n-        existingLedgerId <- dao.lookupLedgerId()\n-        providedLedgerId = domain.LedgerId(initialConditions.ledgerId)\n-        _ <- initializeLedger(existingLedgerId, providedLedgerId, dao)\n-        initialLedgerEnd <- dao.lookupInitialLedgerEnd()\n-      } yield initialLedgerEnd\n+      .map(_ => initialized)\n \n+  private def initialized(implicit executionContext: ExecutionContext): ResourceOwner[JdbcIndexer] =\n     for {\n+      materializer <- AkkaResourceOwner.forMaterializer(() => Materializer(actorSystem))\n       ledgerDao <- JdbcLedgerDao.owner(jdbcUrl, metrics, actorSystem.dispatcher)\n-      initialLedgerEnd <- ResourceOwner.forFuture(() => fetchInitialState(ledgerDao))\n-    } yield new JdbcIndexer(initialLedgerEnd, participantId, ledgerDao, metrics)(materializer)\n-  }\n+      initialLedgerEnd <- ResourceOwner.forFuture(() =>\n+        initializeLedger(ledgerDao)(materializer, executionContext))"
+  },
+  {
+    "id" : "853fe17f-255b-4ee1-90b5-c50d43c3161b",
+    "prId" : 5023,
+    "comments" : [
+      {
+        "id" : "1ac31508-f8a9-430b-939f-5eede12f2de9",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n    case _: RejectionReason.InvalidLedgerTime =>\r\n```\r\n@S11001001 Would this prevent an unnecessary `withFilter`?",
+        "createdAt" : "2020-03-16T15:38:09Z",
+        "updatedAt" : "2020-03-17T12:07:46Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9fc478d8-bc7f-4ce3-bbd9-3937210a86cf",
+        "parentId" : "1ac31508-f8a9-430b-939f-5eede12f2de9",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "No, you're not in a `for`.",
+        "createdAt" : "2020-03-16T18:10:16Z",
+        "updatedAt" : "2020-03-17T12:07:46Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "89832a788482cb4316af912ba73c5abcbae963aa",
+    "line" : null,
+    "diffHunk" : "@@ -348,6 +348,8 @@ class JdbcIndexer private[indexer] (\n     case RejectionReason.Disputed(_) => domain.RejectionReason.Disputed(state.description)\n     case RejectionReason.MaximumRecordTimeExceeded =>\n       domain.RejectionReason.TimedOut(state.description)\n+    case RejectionReason.InvalidLedgerTime(_) =>"
+  },
+  {
+    "id" : "4b015e3c-1331-4660-8635-af0277791393",
+    "prId" : 4953,
+    "comments" : [
+      {
+        "id" : "e8b795e7-8c2e-4d2c-aaaa-20f6b856548e",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "You can do this once, in the caller, rather than everywhere.",
+        "createdAt" : "2020-03-16T15:22:54Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "924a17cd-e63e-41ac-88c1-3a56d60d0fd2",
+        "parentId" : "e8b795e7-8c2e-4d2c-aaaa-20f6b856548e",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "With `in the caller` you mean change the return type of `LedgerDao#storeLedgerEntry` to `Future[Unit]`?\r\nWe indeed only use the result in tests to verify the behavior, but never in production code.",
+        "createdAt" : "2020-03-16T16:57:07Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1dd9c486-ccfa-414d-b9f2-b73070d97ebe",
+        "parentId" : "e8b795e7-8c2e-4d2c-aaaa-20f6b856548e",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I mean that this function can return `Future[PersistenceResponse]` and its caller, `SubscriptionResourceOwner#acquire`, can do the `.map(_ => ())` business.",
+        "createdAt" : "2020-03-16T17:00:06Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8c9c3ccf491dcebc26c083911d9714d2fa5d032f",
+    "line" : null,
+    "diffHunk" : "@@ -166,19 +159,18 @@ class JdbcIndexer private[indexer] (\n     new SubscriptionResourceOwner(readService)\n \n   private def handleStateUpdate(offset: Offset, update: Update): Future[Unit] = {\n-    lastReceivedOffset = offset.toLedgerString\n+    lastReceivedOffset = offset\n     lastReceivedRecordTime = update.recordTime.toInstant\n \n-    val externalOffset = Some(offset.toLedgerString)\n+    val externalOffset = offset\n     update match {\n       case Heartbeat(recordTime) =>\n         ledgerDao\n           .storeLedgerEntry(\n-            headRef,\n-            headRef + 1,\n             externalOffset,\n-            PersistenceEntry.Checkpoint(LedgerEntry.Checkpoint(recordTime.toInstant)))\n-          .map(_ => headRef = headRef + 1)(DEC)\n+            PersistenceEntry.Checkpoint(LedgerEntry.Checkpoint(recordTime.toInstant))\n+          )\n+          .map(_ => ())(DEC)"
+  }
+]

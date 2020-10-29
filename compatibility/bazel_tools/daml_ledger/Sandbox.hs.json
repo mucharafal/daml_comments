@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "6b37670b-257a-477d-91c3-a67f4341f711",
+    "prId" : 5791,
+    "comments" : [
+      {
+        "id" : "8e6dc390-6934-4cc4-bceb-72fc33b0ee45",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I tried `-Xss2m` at first (which is the default in `@daml//bazel_tools:scala.bzl`). But, I observed issues with the sandbox startup on my machine that went away with 4M.",
+        "createdAt" : "2020-04-30T10:15:03Z",
+        "updatedAt" : "2020-04-30T10:15:03Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "daeb03a477071a70b21b06544668670b7f2279d3",
+    "line" : 35,
+    "diffHunk" : "@@ -74,16 +75,20 @@ getSandboxProc SandboxConfig{..} portFile = do\n                 , \"--crt\", sandboxCertificates </> \"server.crt\"\n                 ]\n         else pure []\n-    pure $ proc sandboxBinary $ concat\n-        [ sandboxArgs\n-        , [ \"--port=0\", \"--port-file\", portFile ]\n-        , tlsArgs\n-        , [ timeArg ]\n-        , [ \"--client-auth=\" <> clientAuthArg auth | Just auth <- [mbClientAuth] ]\n-        , [ \"--auth-jwt-hs256-unsafe=\" <> secret | Just secret <- [mbSharedSecret] ]\n-        , [ \"--ledgerid=\" <> ledgerId | Just ledgerId <- [mbLedgerId] ]\n-        , dars\n-        ]\n+    let args = concat\n+          [ sandboxArgs\n+          , [ \"--port=0\", \"--port-file\", portFile ]\n+          , tlsArgs\n+          , [ timeArg ]\n+          , [ \"--client-auth=\" <> clientAuthArg auth | Just auth <- [mbClientAuth] ]\n+          , [ \"--auth-jwt-hs256-unsafe=\" <> secret | Just secret <- [mbSharedSecret] ]\n+          , [ \"--ledgerid=\" <> ledgerId | Just ledgerId <- [mbLedgerId] ]\n+          , dars\n+          ]\n+    env <- getEnvironment\n+    pure $ (proc sandboxBinary args)\n+      -- Reducing memory consumption to allow multiple parallel test executions.\n+      { env = Just $ (\"_JAVA_OPTIONS\", \"-Xss4m -Xms128m -Xmx1g\") : env }"
+  }
+]

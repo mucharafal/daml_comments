@@ -1,0 +1,1859 @@
+[
+  {
+    "id" : "7559b6d8-7629-4ead-8d13-60e74fed0d13",
+    "prId" : 6929,
+    "comments" : [
+      {
+        "id" : "96fc7c7f-9a34-4c39-ad94-a352fb025d3b",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n        let runScenarioActions = [runScenarios f | shouldRunScenarios, f <- files]\r\n```",
+        "createdAt" : "2020-08-05T08:56:14Z",
+        "updatedAt" : "2020-08-05T09:33:27Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d7136081cbd5f48ac1469018460abf8cbcb69dda",
+    "line" : null,
+    "diffHunk" : "@@ -937,7 +976,7 @@ ofInterestRule opts = do\n         let files = HashSet.toList scenarioFiles\n         let dalfActions = [notifyOpenVrsOnGetDalfError f | f <- files]\n         let dlintActions = [use_ GetDlintDiagnostics f | dlintEnabled, f <- files]\n-        let runScenarioActions = [runScenarios f | shouldRunScenarios, f <- files]\n+        let runScenarioActions = [runScenarios f  | shouldRunScenarios, f <- files]"
+  },
+  {
+    "id" : "3df27007-8c5a-4755-bd69-a78ede57a41c",
+    "prId" : 5517,
+    "comments" : [
+      {
+        "id" : "75d18c1b-7b7a-4dee-8acb-ba33b0b24daa",
+        "parentId" : null,
+        "author" : null,
+        "body" : "suggestion:\r\n\r\n```suggestion\r\n        packages <- if getInferDependentPackages optInferDependantPackages\r\n            then fmap (base ++) . liftIO $ dependentUnitsFromDamlYaml optDamlLfVersion (fromNormalizedFilePath projectRoot)\r\n            else pure base   \r\n        let optPackageImports = map mkPackageFlag packages ++ optPackageImports\r\n```",
+        "createdAt" : "2020-04-09T11:26:23Z",
+        "updatedAt" : "2020-04-09T14:29:05Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5743023d-3b96-45e8-92b6-1042506dd92c",
+        "parentId" : "75d18c1b-7b7a-4dee-8acb-ba33b0b24daa",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Sorry this is still a draft PR, mostly just testing CI. A bunch of stuff is going to change and needs cleanup :slightly_smiling_face:  I’ll ping you once it’s ready",
+        "createdAt" : "2020-04-09T11:31:09Z",
+        "updatedAt" : "2020-04-09T14:29:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8d921e4e-3f77-4457-a56f-04b254a4ba65",
+        "parentId" : "75d18c1b-7b7a-4dee-8acb-ba33b0b24daa",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Addressed is as part of cleanup, thanks for the suggestion!",
+        "createdAt" : "2020-04-09T13:58:19Z",
+        "updatedAt" : "2020-04-09T14:29:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9afa4d67baa1d57af2efddc1edfae9c3faf9597a",
+    "line" : null,
+    "diffHunk" : "@@ -516,6 +516,25 @@ generatePackageMapRule opts = do\n         let hash = BS.concat $ map (T.encodeUtf8 . LF.unPackageId . LF.dalfPackageId) $ Map.elems res\n         return (Just hash, ([], Just res))\n \n+damlGhcSessionRule :: Options -> Rules ()\n+damlGhcSessionRule opts@Options{..} = do\n+    defineEarlyCutoff $ \\DamlGhcSession projectRoot -> do\n+        let base = mkBaseUnits (optUnitId opts)\n+        optPackageImports <-\n+          if getInferDependantPackages optInferDependantPackages\n+          then do\n+            more <- liftIO $ dependantUnitsFromDamlYaml optDamlLfVersion (fromNormalizedFilePath projectRoot)\n+            pure $ map mkPackageFlag (base ++ more) ++ optPackageImports\n+          else\n+            pure $ map mkPackageFlag base ++ optPackageImports"
+  },
+  {
+    "id" : "586abc22-a703-47a6-a7d9-30b44f7d4c34",
+    "prId" : 5349,
+    "comments" : [
+      {
+        "id" : "515e72b0-a06e-413f-a28c-004d519a5b1a",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "IIRC there were some issues around `mask` vs. `uninterruptibleMask` with GRPC. What's the reasoning for `mask` instead of `uninterruptibleMask` here?",
+        "createdAt" : "2020-04-02T08:32:58Z",
+        "updatedAt" : "2020-04-02T08:34:02Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "95d397b6-d059-4298-a60e-2c0edba7e927",
+        "parentId" : "515e72b0-a06e-413f-a28c-004d519a5b1a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I somewhat wondered about this as well. For the other grpc issue, we ended up refactoring it to be save even if `mask` is interrupted instead of using `uninterruptibleMask` (which seems a bit fishy for a network request). I believe that is the case here as well. If we don’t end up GCing we will restore the set of context roots to the old roots so at worst we will GC again.",
+        "createdAt" : "2020-04-02T08:49:54Z",
+        "updatedAt" : "2020-04-02T08:49:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ff6cdc35-75b8-403b-85d3-a9d0ce74228d",
+        "parentId" : "515e72b0-a06e-413f-a28c-004d519a5b1a",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "That seems reasonable. Thanks for explaining.",
+        "createdAt" : "2020-04-02T16:35:25Z",
+        "updatedAt" : "2020-04-02T16:35:25Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d2e4350736cfb42406b65d22767a71cb1f77643c",
+    "line" : 18,
+    "diffHunk" : "@@ -912,11 +912,44 @@ ofInterestRule opts = do\n             garbageCollect (`HashSet.member` reachableFiles)\n           DamlEnv{..} <- getDamlServiceEnv\n           liftIO $ whenJust envScenarioService $ \\scenarioService -> do\n-              ctxRoots <- modifyVar envScenarioContexts $ \\ctxs -> do\n-                  let gcdCtxs = HashMap.filterWithKey (\\k _ -> k `HashSet.member` roots) ctxs\n-                  pure (gcdCtxs, HashMap.elems gcdCtxs)\n-              prevCtxRoots <- modifyVar envPreviousScenarioContexts $ \\prevCtxs -> pure (ctxRoots, prevCtxs)\n-              when (prevCtxRoots /= ctxRoots) $ void $ SS.gcCtxs scenarioService ctxRoots\n+              mask $ \\restore -> do"
+  },
+  {
+    "id" : "55458e8f-082a-4756-b052-24b3c64102bc",
+    "prId" : 4667,
+    "comments" : [
+      {
+        "id" : "f5400579-950f-4327-af6e-6d6b0058915b",
+        "parentId" : null,
+        "author" : null,
+        "body" : "This is a bit tough to parse, but it might also just be because of GitHub's (lack of) syntax highlighting in diffs. Or it's due to the `case` being so far from the patterns/guards. Perhaps it could some refactoring to make it clearer.",
+        "createdAt" : "2020-02-24T15:33:05Z",
+        "updatedAt" : "2020-02-24T16:10:48Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "73a3c9d2-1759-4df7-a00a-c4299fe1adbb",
+        "parentId" : "f5400579-950f-4327-af6e-6d6b0058915b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I completely agree! Didn’t seem quite so bad when writing it but looking at it now, this looks completely unreadable. I’ve moved `getUnitId` to a `where`-clause and moved the comment above the logic which is hopefully easier to parse.",
+        "createdAt" : "2020-02-24T16:12:05Z",
+        "updatedAt" : "2020-02-24T16:12:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3ca16649213b3d91f9e034bf450be0d47d956019",
+    "line" : null,
+    "diffHunk" : "@@ -460,17 +459,17 @@ generatePackageMap version mbProjRoot userPkgDbs = do\n             let dalfs = filter ((== \".dalf\") . takeExtension) allFiles\n             forM dalfs $ \\dalf -> do\n                 dalfPkgOrErr <- readDalfPackage dalf\n-                let baseName = takeBaseName dalf\n-                let getUnitId pkg\n-                -- If we use data-dependencies we can end up with multiple DALFs for daml-prim/daml-stdlib\n-                -- one per version. The one shipped with the SDK is called daml-prim.dalf and daml-stdlib-$VERSION.dalf\n-                -- and have the same unit ids, so we do not need to strip package ids.\n-                -- The one coming from daml-prim will be called daml-prim-$PKGID.dalf daml-stdlib-$PKGID.dalf\n-                -- To avoid collisions, we include this hash in the unit id so we also don’t want to strip\n-                -- package ids here.\n-                        | \"daml-prim\" `isPrefixOf` baseName = (stringToUnitId baseName, pkg)\n-                        | \"daml-stdlib\" `isPrefixOf` baseName = (stringToUnitId baseName, pkg)\n-                        | otherwise = ( stringToUnitId $ parseUnitId baseName $ LF.dalfPackageId pkg, pkg)\n+                let getUnitId pkg = case LF.packageMetadataFromFile dalf (LF.extPackagePkg $ LF.dalfPackagePkg pkg) (LF.dalfPackageId pkg) of"
+  },
+  {
+    "id" : "268b41e7-1c0b-4d76-aaa7-ed21041b2fbd",
+    "prId" : 4421,
+    "comments" : [
+      {
+        "id" : "77ef7320-e4d2-46fb-bc04-3cf0aa38abe2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Should we include the the package ids in the error? Seems potentially useful for debugging.",
+        "createdAt" : "2020-02-06T12:14:29Z",
+        "updatedAt" : "2020-02-06T14:11:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "348959e4-d345-441e-9566-d62f3c0ad2e3",
+        "parentId" : "77ef7320-e4d2-46fb-bc04-3cf0aa38abe2",
+        "author" : null,
+        "body" : "Sounds good, added",
+        "createdAt" : "2020-02-06T12:27:01Z",
+        "updatedAt" : "2020-02-06T14:11:54Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ded024d96b658daf9adac370050f78ba296dd20d",
+    "line" : null,
+    "diffHunk" : "@@ -450,27 +450,35 @@ generateDocTestModuleRule =\n generatePackageMap ::\n      LF.Version -> [FilePath] -> IO ([FileDiagnostic], Map.Map UnitId LF.DalfPackage)\n generatePackageMap version userPkgDbs = do\n-  versionedPackageDbs <- getPackageDbs version userPkgDbs\n-  (diags, pkgs) <-\n-    fmap (partitionEithers . concat) $\n-    forM versionedPackageDbs $ \\pkgDb -> do\n-      allFiles <- listFilesRecursive pkgDb\n-      let dalfs = filter ((== \".dalf\") . takeExtension) allFiles\n-      forM dalfs $ \\dalf -> do\n-          dalfPkgOrErr <- readDalfPackage dalf\n-          let baseName = takeBaseName dalf\n-          let getUnitId pkg\n-          -- If we use data-dependencies we can end up with multiple DALFs for daml-prim/daml-stdlib\n-          -- one per version. The one shipped with the SDK is called daml-prim.dalf and daml-stdlib-$VERSION.dalf\n-          -- and have the same unit ids, so we do not need to strip package ids.\n-          -- The one coming from daml-prim will be called daml-prim-$PKGID.dalf daml-stdlib-$PKGID.dalf\n-          -- To avoid collisions, we include this hash in the unit id so we also don’t want to strip\n-          -- package ids here.\n-                  | \"daml-prim\" `isPrefixOf` baseName = (stringToUnitId baseName, pkg)\n-                  | \"daml-stdlib\" `isPrefixOf` baseName = (stringToUnitId baseName, pkg)\n-                  | otherwise = ( stringToUnitId $ parseUnitId baseName $ LF.dalfPackageId pkg, pkg)\n-          pure (fmap getUnitId dalfPkgOrErr)\n-  return (diags, Map.fromList pkgs)\n+    versionedPackageDbs <- getPackageDbs version userPkgDbs\n+    (diags, pkgs) <-\n+        fmap (partitionEithers . concat) $\n+        forM versionedPackageDbs $ \\pkgDb -> do\n+            allFiles <- listFilesRecursive pkgDb\n+            let dalfs = filter ((== \".dalf\") . takeExtension) allFiles\n+            forM dalfs $ \\dalf -> do\n+                dalfPkgOrErr <- readDalfPackage dalf\n+                let baseName = takeBaseName dalf\n+                let getUnitId pkg\n+                -- If we use data-dependencies we can end up with multiple DALFs for daml-prim/daml-stdlib\n+                -- one per version. The one shipped with the SDK is called daml-prim.dalf and daml-stdlib-$VERSION.dalf\n+                -- and have the same unit ids, so we do not need to strip package ids.\n+                -- The one coming from daml-prim will be called daml-prim-$PKGID.dalf daml-stdlib-$PKGID.dalf\n+                -- To avoid collisions, we include this hash in the unit id so we also don’t want to strip\n+                -- package ids here.\n+                        | \"daml-prim\" `isPrefixOf` baseName = (stringToUnitId baseName, pkg)\n+                        | \"daml-stdlib\" `isPrefixOf` baseName = (stringToUnitId baseName, pkg)\n+                        | otherwise = ( stringToUnitId $ parseUnitId baseName $ LF.dalfPackageId pkg, pkg)\n+                pure (fmap getUnitId dalfPkgOrErr)\n+\n+    let unitIdConflicts = Map.filter ((>=2) . Set.size) . Map.fromListWith Set.union $\n+            [ (unitId, Set.singleton (LF.dalfPackageId dalfPkg))\n+            | (unitId, dalfPkg) <- pkgs ]\n+    when (not $ Map.null unitIdConflicts) $ do\n+        fail $ \"Transitive dependencies with same unit id but conflicting package ids: \"\n+            ++ intercalate \", \" (map show $ Map.keys unitIdConflicts)"
+  },
+  {
+    "id" : "694a9e30-3567-4d59-bb4a-35e40d14e668",
+    "prId" : 3890,
+    "comments" : [
+      {
+        "id" : "d055961d-d215-4159-b6e8-8c4e37d36636",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Maybe it's good to clarify that changing the LF version would change the hash. For me, that's the main reason why having stable packages per LF version doesn't make sense.",
+        "createdAt" : "2019-12-18T14:03:52Z",
+        "updatedAt" : "2019-12-18T22:38:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e358fb86-0be0-4727-a46c-6d8a71a3afbd",
+        "parentId" : "d055961d-d215-4159-b6e8-8c4e37d36636",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good idea, I’ve added a comment.",
+        "createdAt" : "2019-12-18T14:08:42Z",
+        "updatedAt" : "2019-12-18T22:38:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "be5cb52ebf63ecf5b37e8b2f1587f6acf7a33ee4",
+    "line" : null,
+    "diffHunk" : "@@ -485,23 +486,30 @@ generatePackageMapRule opts =\n         let hash = BS.concat $ map (T.encodeUtf8 . LF.unPackageId . LF.dalfPackageId) $ Map.elems res\n         return (Just hash, ([], Just res))\n \n-generateStablePackages :: FilePath -> IO ([FileDiagnostic], Map.Map (UnitId, LF.ModuleName) LF.DalfPackage)\n-generateStablePackages fp = do\n+generateStablePackages :: LF.Version -> FilePath -> IO ([FileDiagnostic], Map.Map (UnitId, LF.ModuleName) LF.DalfPackage)\n+generateStablePackages lfVersion fp = do\n     (diags, pkgs) <- fmap partitionEithers $ do\n         allFiles <- listFilesRecursive fp\n         let dalfs = filter ((== \".dalf\") . takeExtension) allFiles\n         forM dalfs $ \\dalf -> do\n-            let unitId = stringToUnitId $ takeFileName $ takeDirectory dalf\n+            let packagePath = takeFileName $ takeDirectory dalf\n+            let unitId = stringToUnitId $ if packagePath == \"daml-stdlib\"\n+                    then damlStdlib -- We patch this to add the version number\n+                    else packagePath\n             let moduleName = LF.ModuleName (NonEmpty.toList $ T.splitOn \"-\" $ T.pack $ dropExtension $ takeFileName dalf)\n             dalfPkgOrErr <- readDalfPackage dalf\n             pure (fmap ((unitId, moduleName),) dalfPkgOrErr)\n-    pure (diags, Map.fromList pkgs)\n+    -- We filter out stable packages for newer LF versions, e.g., the stable packages for wrappers around Any.\n+    -- It might seem tempting to make stable packages per LF version but this makes no sense at all.\n+    -- Packages should remain stable as we move to newer LF versions."
+  },
+  {
+    "id" : "0e020365-bc58-4cdf-937f-dc2735ec1815",
+    "prId" : 3696,
+    "comments" : [
+      {
+        "id" : "2c9447c0-00d3-4907-a8cd-e34cb410cb5b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        fmap (Map.mapKeys stableUnitId) $\r\n```",
+        "createdAt" : "2019-12-02T19:42:19Z",
+        "updatedAt" : "2019-12-04T14:02:25Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fba4eebb-b753-4039-938c-b29ec073ca96",
+        "parentId" : "2c9447c0-00d3-4907-a8cd-e34cb410cb5b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I clearly need more sleep … Thanks! :slightly_smiling_face: ",
+        "createdAt" : "2019-12-02T20:06:16Z",
+        "updatedAt" : "2019-12-04T14:02:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "72ee178dfa935c138612161f3bdfb610910e1412",
+    "line" : null,
+    "diffHunk" : "@@ -177,7 +178,15 @@ getDalfDependencies :: [NormalizedFilePath] -> MaybeT Action (Map.Map UnitId LF.\n getDalfDependencies files = do\n     unitIds <- concatMap transitivePkgDeps <$> usesE GetDependencies files\n     pkgMap <- useNoFileE GeneratePackageMap\n-    pure $ Map.restrictKeys pkgMap (Set.fromList $ map (DefiniteUnitId . DefUnitId) unitIds)\n+    let actualDeps = Map.restrictKeys pkgMap (Set.fromList $ map (DefiniteUnitId . DefUnitId) unitIds)\n+    -- For now, we unconditionally include all stable packages.\n+    -- Given that they are quite small and it is pretty much impossible to not depend on them\n+    -- this is fine. We might want to try being more clever here in the future.\n+    stablePackages <-\n+        fmap (Map.fromList . map (first stableUnitId) . Map.toList) $"
+  },
+  {
+    "id" : "6c86f619-0184-4472-9bf6-7fbcd0cb0014",
+    "prId" : 3378,
+    "comments" : [
+      {
+        "id" : "6d95b501-9373-49ec-bcf3-7d47787afb2c",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "What does `ifrs` stand for? ",
+        "createdAt" : "2019-11-07T15:47:29Z",
+        "updatedAt" : "2019-11-07T16:14:28Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1087cb34-8f00-4799-b453-b4ff16c20fd9",
+        "parentId" : "6d95b501-9373-49ec-bcf3-7d47787afb2c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`installedFindResults`, given that I’ve had to look this up myself (this code is derived from `ghcide`) I’ve now spelld it out :slightly_smiling_face: ",
+        "createdAt" : "2019-11-07T16:12:37Z",
+        "updatedAt" : "2019-11-07T16:14:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "80969d60-e6b9-431c-934f-1da18cd7299e",
+        "parentId" : "6d95b501-9373-49ec-bcf3-7d47787afb2c",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Thanks! Much clearer :slightly_smiling_face: ",
+        "createdAt" : "2019-11-07T16:13:57Z",
+        "updatedAt" : "2019-11-07T16:14:28Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "986c493508c08e31858a8f4399960646547f674a",
+    "line" : null,
+    "diffHunk" : "@@ -204,6 +227,164 @@ generateDalfRule =\n             mapLeft liftError $ LF.checkModule world lfVersion dalf\n             pure dalf\n \n+-- TODO Share code with typecheckModule in ghcide. The environment needs to be setup\n+-- slightly differently but we can probably factor out shared code here.\n+ondiskTypeCheck :: HscEnv -> [(ModSummary, ModIface)] -> ParsedModule -> IO ([FileDiagnostic], Maybe TcModuleResult)\n+ondiskTypeCheck hsc deps pm = do\n+    fmap (either (, Nothing) (second Just)) $\n+      runGhcEnv hsc $\n+      catchSrcErrors \"typecheck\" $ do\n+        let mss = map fst deps\n+        session <- getSession\n+        setSession session { hsc_mod_graph = mkModuleGraph mss }\n+        let ims  = map (GHC.InstalledModule (thisInstalledUnitId $ hsc_dflags session) . moduleName . ms_mod) mss\n+            ifrs = zipWith (\\ms im -> InstalledFound (ms_location ms) im) mss ims"
+  },
+  {
+    "id" : "40b78c49-3fcf-4e7a-ab19-81769013275c",
+    "prId" : 3378,
+    "comments" : [
+      {
+        "id" : "631aaf2d-63b5-471b-bb07-968410833076",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Why can't more fine-grained rules serialize their respective output?",
+        "createdAt" : "2019-11-07T16:04:11Z",
+        "updatedAt" : "2019-11-07T16:14:28Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "63d1e0db-a39f-466b-a6d7-8d4044555ba6",
+        "parentId" : "631aaf2d-63b5-471b-bb07-968410833076",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Because GHC does not provide a way to serialize `TypeCheckedModule` or `CoreModule`. It would probably also not help from a performance standpoint to make this too fine-grained. I’ve added a comment.",
+        "createdAt" : "2019-11-07T16:12:07Z",
+        "updatedAt" : "2019-11-07T16:14:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bab31387-9b6e-432e-83d4-9fdc4f311d6b",
+        "parentId" : "631aaf2d-63b5-471b-bb07-968410833076",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : ":+1: Thanks for explaining and adding the comment.",
+        "createdAt" : "2019-11-07T16:14:30Z",
+        "updatedAt" : "2019-11-07T16:14:30Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "986c493508c08e31858a8f4399960646547f674a",
+    "line" : null,
+    "diffHunk" : "@@ -204,6 +227,164 @@ generateDalfRule =\n             mapLeft liftError $ LF.checkModule world lfVersion dalf\n             pure dalf\n \n+-- TODO Share code with typecheckModule in ghcide. The environment needs to be setup\n+-- slightly differently but we can probably factor out shared code here.\n+ondiskTypeCheck :: HscEnv -> [(ModSummary, ModIface)] -> ParsedModule -> IO ([FileDiagnostic], Maybe TcModuleResult)\n+ondiskTypeCheck hsc deps pm = do\n+    fmap (either (, Nothing) (second Just)) $\n+      runGhcEnv hsc $\n+      catchSrcErrors \"typecheck\" $ do\n+        let mss = map fst deps\n+        session <- getSession\n+        setSession session { hsc_mod_graph = mkModuleGraph mss }\n+        let ims  = map (GHC.InstalledModule (thisInstalledUnitId $ hsc_dflags session) . moduleName . ms_mod) mss\n+            ifrs = zipWith (\\ms im -> InstalledFound (ms_location ms) im) mss ims\n+        -- We have to create a new IORef here instead of modifying the existing IORef as\n+        -- it is shared between concurrent compilations.\n+        prevFinderCache <- liftIO $ readIORef $ hsc_FC session\n+        let newFinderCache =\n+                foldl'\n+                    (\\fc (im, ifr) -> GHC.extendInstalledModuleEnv fc im ifr) prevFinderCache\n+                    $ zip ims ifrs\n+        newFinderCacheVar <- liftIO $ newIORef $! newFinderCache\n+        modifySession $ \\s -> s { hsc_FC = newFinderCacheVar }\n+        -- Currently GetDependencies returns things in topological order so A comes before B if A imports B.\n+        -- We need to reverse this as GHC gets very unhappy otherwise and complains about broken interfaces.\n+        -- Long-term we might just want to change the order returned by GetDependencies\n+        mapM_ (uncurry loadDepModule) (reverse deps)\n+        (warnings, tcm) <- withWarnings \"typecheck\" $ \\tweak ->\n+            GHC.typecheckModule pm { pm_mod_summary = tweak (pm_mod_summary pm) }\n+        tcm <- mkTcModuleResult tcm\n+        pure (map snd warnings, tcm)\n+\n+loadDepModule :: GhcMonad m => ModSummary -> ModIface -> m ()\n+loadDepModule ms iface = do\n+    hsc <- getSession\n+    -- The fixIO here is crucial and matches what GHC does. Otherwise GHC will fail\n+    -- to find identifiers in the interface and explode.\n+    -- For more details, look at hscIncrementalCompile and Note [Knot-tying typecheckIface] in GHC.\n+    details <- liftIO $ fixIO $ \\details -> do\n+        let hsc' = hsc { hsc_HPT = addToHpt (hsc_HPT hsc) (moduleName mod) (HomeModInfo iface details Nothing) }\n+        initIfaceLoad hsc' (typecheckIface iface)\n+    let mod_info = HomeModInfo iface details Nothing\n+    modifySession $ \\e ->\n+        e { hsc_HPT = addToHpt (hsc_HPT e) (moduleName mod) mod_info }\n+    where mod = ms_mod ms\n+\n+-- TODO Share code with compileModule in ghcide. Given that this is fairly mechanical, this is not critical\n+-- but still worth doing in the long-term.\n+ondiskDesugar :: HscEnv -> TypecheckedModule -> IO ([FileDiagnostic], Maybe CoreModule)\n+ondiskDesugar hsc tm =\n+    fmap (either (, Nothing) (second Just)) $\n+    runGhcEnv hsc $\n+        catchSrcErrors \"compile\" $ do\n+            session <- getSession\n+            (warnings, desugar) <- withWarnings \"compile\" $ \\tweak -> do\n+                let pm = tm_parsed_module tm\n+                let pm' = pm{pm_mod_summary = tweak $ pm_mod_summary pm}\n+                let tm' = tm{tm_parsed_module  = pm'}\n+                GHC.dm_core_module <$> GHC.desugarModule tm'\n+            -- give variables unique OccNames\n+            (tidy, details) <- liftIO $ tidyProgram session desugar\n+\n+            let core = CoreModule\n+                         (cg_module tidy)\n+                         (md_types details)\n+                         (cg_binds tidy)\n+                         (mg_safe_haskell desugar)\n+\n+            return (map snd warnings, core)\n+\n+-- This rule is for on-disk incremental builds. We cannot use the fine-grained rules that we have for\n+-- in-memory builds since we need to be able to serialize intermediate results."
+  },
+  {
+    "id" : "b2f656e7-06ce-4c71-94ef-37815313f707",
+    "prId" : 3003,
+    "comments" : [
+      {
+        "id" : "4a3b4026-0dfa-4e6c-8cd9-d0edfd50b9fe",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We should either rename both types or neither. Having the type here still called be `LightValidation` is confusing.",
+        "createdAt" : "2019-09-24T14:51:02Z",
+        "updatedAt" : "2019-09-25T08:01:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3fb68825c3c5aa62891a92ec08a49980aca9758f",
+    "line" : null,
+    "diffHunk" : "@@ -286,9 +286,9 @@ contextForFile file = do\n         { ctxModules = Map.fromList encodedModules\n         , ctxPackages = [(dalfPackageId pkg, dalfPackageBytes pkg) | pkg <- Map.elems pkgMap]\n         , ctxDamlLfVersion = lfVersion\n-        , ctxLightValidation = case envScenarioValidation of\n-              ScenarioValidationFull -> SS.LightValidation False\n-              ScenarioValidationLight -> SS.LightValidation True\n+        , ctxNoValidation = case envScenarioValidation of\n+              ScenarioValidationEnable -> SS.LightValidation False"
+  },
+  {
+    "id" : "604db369-2c55-4ab5-a901-607542f9afd6",
+    "prId" : 3003,
+    "comments" : [
+      {
+        "id" : "96226744-5e02-4386-8acb-d5af974de4eb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Having `ScenarioValidation True` map to `SkipValidation False` is extremely confusing. I would just use the same newtype for both or at least have the same boolean flags underneath instead of inverting them.",
+        "createdAt" : "2019-09-25T07:35:30Z",
+        "updatedAt" : "2019-09-25T08:01:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3fb68825c3c5aa62891a92ec08a49980aca9758f",
+    "line" : null,
+    "diffHunk" : "@@ -286,9 +286,9 @@ contextForFile file = do\n         { ctxModules = Map.fromList encodedModules\n         , ctxPackages = [(dalfPackageId pkg, dalfPackageBytes pkg) | pkg <- Map.elems pkgMap]\n         , ctxDamlLfVersion = lfVersion\n-        , ctxLightValidation = case envScenarioValidation of\n-              ScenarioValidationFull -> SS.LightValidation False\n-              ScenarioValidationLight -> SS.LightValidation True\n+        , ctxSkipValidation = case envScenarioValidation of\n+            ScenarioValidation True -> SS.SkipValidation False"
+  },
+  {
+    "id" : "41a51edb-ba47-46ed-9d69-02c65142ec1e",
+    "prId" : 3003,
+    "comments" : [
+      {
+        "id" : "cb830477-eb1e-44dd-9fdf-bdb2bf5262d2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    if getSkipScenarioValidation envScenarioSkipValidation then\r\n```",
+        "createdAt" : "2019-09-25T07:46:40Z",
+        "updatedAt" : "2019-09-25T08:01:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3fb68825c3c5aa62891a92ec08a49980aca9758f",
+    "line" : null,
+    "diffHunk" : "@@ -328,9 +326,10 @@ createScenarioContextRule =\n dalfForScenario :: NormalizedFilePath -> Action LF.Module\n dalfForScenario file = do\n     DamlEnv{..} <- getDamlServiceEnv\n-    case envScenarioValidation of\n-        ScenarioValidationLight -> use_ GenerateRawDalf file\n-        ScenarioValidationFull -> use_ GenerateDalf file\n+    if getFlag envScenarioSkipValidation then"
+  },
+  {
+    "id" : "de6e0111-8e04-4d80-a76c-dfcf98b6a008",
+    "prId" : 2597,
+    "comments" : [
+      {
+        "id" : "eeddb67b-e87e-40fa-ad34-f5be27c9456f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t think adding a rule for visualization is a good idea:\r\n\r\nAdding more rules is the usual memory vs time tradeoff. If you put it in a rule, you get caching so you don’t have to recompute it if nothing has changed. On the other hand you have to keep it in memory which increases memory usage.\r\n\r\nIn this case caching is quite poor: As soon as any file in the dependency tree of `file` has changed you will rerun the whole visualization. That means that the only case where we benefit from caching is if the user reruns the visualization without making any changes. That does not seem like a very common case that we should be optimizing for. Compare that to a rule like typechecking that reuses the typechecked modules so you gain a lot more from caching since while the user might have modified the current file at least some of the dependencies will not have changed so caching is crucial to give fast feedback on incremental changes.",
+        "createdAt" : "2019-08-21T07:10:45Z",
+        "updatedAt" : "2019-08-26T14:36:04Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "96d9ff8f-1763-49db-8803-73b643bea0f7",
+        "parentId" : "eeddb67b-e87e-40fa-ad34-f5be27c9456f",
+        "author" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "body" : "Ah ok that makes sense, I did not think it about memory consumption.",
+        "createdAt" : "2019-08-21T16:14:05Z",
+        "updatedAt" : "2019-08-26T14:36:05Z",
+        "lastEditedBy" : {
+          "login" : "akalburgi",
+          "name" : "Anup Kalburgi",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/42743833?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1b1fd2cb67bf8f3d8e5f6fa576f088fc36bd49fc",
+    "line" : null,
+    "diffHunk" : "@@ -248,6 +249,18 @@ generatePackageRule =\n         dalf <- use_ GenerateDalf file\n         return ([], Just $ WhnfPackage $ deps{LF.packageModules = NM.insert dalf (LF.packageModules deps)})\n \n+generateVisualizationRule :: Rules ()"
+  },
+  {
+    "id" : "779e699c-409d-4306-aa73-7a245661565b",
+    "prId" : 2145,
+    "comments" : [
+      {
+        "id" : "56963391-a981-4f27-87c7-cde6351415f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n        let hlintEnabled = case optHlintUsage opts of\r\n                HlintEnabled _ -> True\r\n                HlintDisabled -> False\r\n```",
+        "createdAt" : "2019-07-15T14:15:25Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5ac4a293-96ab-4537-9b88-edd6378178e1",
+        "parentId" : "56963391-a981-4f27-87c7-cde6351415f5",
+        "author" : null,
+        "body" : "Ok",
+        "createdAt" : "2019-07-15T14:24:52Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27a88c270469e4521741825484d5b2c79aa5bdce",
+    "line" : null,
+    "diffHunk" : "@@ -441,7 +441,7 @@ ofInterestRule opts = do\n         -- We don’t always have a scenario service (e.g., damlc compile)\n         -- so only run scenarios if we have one.\n         let shouldRunScenarios = isJust envScenarioService\n-        let hlintEnabled = case optHlintUsage opts of Just (HlintEnabled _) -> True ; _ -> False\n+        let hlintEnabled = case optHlintUsage opts of HlintEnabled _ -> True ; HlintDisabled -> False"
+  },
+  {
+    "id" : "798c92cd-c0c2-4be7-8ec5-45e61ca22a8e",
+    "prId" : 2145,
+    "comments" : [
+      {
+        "id" : "f8ec7f6e-359d-4f5b-af28-45d930358d19",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is this code actually reachable?",
+        "createdAt" : "2019-07-15T14:16:27Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "41084399-6259-4344-a994-e8b4b6b6e9db",
+        "parentId" : "f8ec7f6e-359d-4f5b-af28-45d930358d19",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It is reachable if you request it the rule explicitly e.g. in a test.",
+        "createdAt" : "2019-07-15T14:17:48Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f4d5bcaa-4e3e-4c78-a06f-7e820bd838d4",
+        "parentId" : "f8ec7f6e-359d-4f5b-af28-45d930358d19",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Would it make sense to push the pattern match into the caller of this rule?",
+        "createdAt" : "2019-07-15T14:20:49Z",
+        "updatedAt" : "2019-07-15T14:33:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e654c891-18b0-4336-8768-a8bbbb3bb34e",
+        "parentId" : "f8ec7f6e-359d-4f5b-af28-45d930358d19",
+        "author" : null,
+        "body" : "Let me know what you want to do.",
+        "createdAt" : "2019-07-15T14:42:40Z",
+        "updatedAt" : "2019-07-15T14:44:22Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "88dcdc17-61d0-49d0-9c38-d9bfd22b8242",
+        "parentId" : "f8ec7f6e-359d-4f5b-af28-45d930358d19",
+        "author" : null,
+        "body" : "^ I'm inclined to land this. Will raise a new PR if @martin-drhu-da  deems changes desirable.",
+        "createdAt" : "2019-07-15T15:11:31Z",
+        "updatedAt" : "2019-07-15T15:11:31Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6c1a997d-a601-4cab-a090-faaad5268b5b",
+        "parentId" : "f8ec7f6e-359d-4f5b-af28-45d930358d19",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I had another look. I misunderstood it the previous time. I'm happy to leave it as is. Thanks.",
+        "createdAt" : "2019-07-15T15:36:24Z",
+        "updatedAt" : "2019-07-15T15:36:24Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27a88c270469e4521741825484d5b2c79aa5bdce",
+    "line" : 23,
+    "diffHunk" : "@@ -529,12 +529,12 @@ hlintSettings hlintDataDir = do\n     findSettings (unmask . readSettingsFile (Just hlintDataDir)) Nothing\n   return (classify, hints)\n \n-getHlintSettingsRule :: Maybe HlintUsage -> Rules ()\n+getHlintSettingsRule :: HlintUsage -> Rules ()\n getHlintSettingsRule usage =\n     defineNoFile $ \\GetHlintSettings ->\n       liftIO $ case usage of\n-          Just (HlintEnabled dir) -> hlintSettings dir\n-          _ -> fail \"linter configuration unspecified\"\n+          HlintEnabled dir -> hlintSettings dir\n+          HlintDisabled -> fail \"linter configuration unspecified\""
+  },
+  {
+    "id" : "99162d26-9992-45c1-ab45-000b35ffef15",
+    "prId" : 2141,
+    "comments" : [
+      {
+        "id" : "fe3295fe-76c2-4e74-970c-5f72ef46d5bb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Probably not a huge deal but turning this into a `Map NormalizedFilePath [VirtualResource]` would be both faster and imho clearer, e.g., `openVRsByFile = Map.fromList (map (\\vr -> (vrScenarioFile vr, vr)) openVRs)`.",
+        "createdAt" : "2019-07-15T11:22:47Z",
+        "updatedAt" : "2019-07-22T07:54:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "64f48411-3e92-41f4-8318-5c454673aae2",
+        "parentId" : "fe3295fe-76c2-4e74-970c-5f72ef46d5bb",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "Thanks!",
+        "createdAt" : "2019-07-15T14:55:40Z",
+        "updatedAt" : "2019-07-22T07:54:41Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0daa7be342dc63694da9cd5a53a357e8c4fbb3af",
+    "line" : null,
+    "diffHunk" : "@@ -428,6 +456,7 @@ ofInterestRule opts = do\n         -- updated.\n         let scenarioFiles = files `Set.union` vrFiles\n         gc scenarioFiles\n+        let openVRsForFile file = Set.filter (\\vr -> vrScenarioFile vr == file) openVRs"
+  },
+  {
+    "id" : "4020b2c9-a07f-4954-b98e-2fb2d196cbbf",
+    "prId" : 2141,
+    "comments" : [
+      {
+        "id" : "b9252d9c-984a-402e-a4d3-28100b455719",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`when (isNothing mbDalf)` should work nicely here. I would also change this to not return the `mbDalf` since you are immediately throwing it away via `void`.",
+        "createdAt" : "2019-07-15T11:26:27Z",
+        "updatedAt" : "2019-07-22T07:54:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cc701f4c-b49f-44ee-9922-4ee45548fabe",
+        "parentId" : "b9252d9c-984a-402e-a4d3-28100b455719",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "Thanks!",
+        "createdAt" : "2019-07-15T14:55:52Z",
+        "updatedAt" : "2019-07-22T07:54:41Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0daa7be342dc63694da9cd5a53a357e8c4fbb3af",
+    "line" : null,
+    "diffHunk" : "@@ -436,13 +465,28 @@ ofInterestRule opts = do\n                     let doc = formatScenarioResult world res\n                     when (vr `Set.member` openVRs) $\n                         sendEvent $ vrChangedNotification vr doc\n+                let vrScenarioNames = Set.fromList $ fmap (vrScenarioName . fst) (concat $ maybeToList mbVrs)\n+                forM_ (openVRsForFile file) $ \\ovr -> do\n+                    when (not $ vrScenarioName ovr `Set.member` vrScenarioNames) $\n+                        sendEvent $ vrNoteSetNotification ovr $ LF.scenarioNotInFileNote $\n+                        T.pack $ fromNormalizedFilePath file\n \n         -- We don’t always have a scenario service (e.g., damlc compile)\n         -- so only run scenarios if we have one.\n         let shouldRunScenarios = isJust envScenarioService\n+\n+        let getDalfOrNotifyOpenVrs file = do\n+            mbDalf <- getDalf file\n+            _ <- if isNothing mbDalf"
+  },
+  {
+    "id" : "ecc16816-e65b-4f45-bf84-7d180d18945d",
+    "prId" : 2139,
+    "comments" : [
+      {
+        "id" : "bc1df7b8-86f7-4329-ae64-3ea5ed6f05cc",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is not quite correct afaict (and the test seems to confirm this). LSP locations are zero-based both for lines and columns while it looks like `HSE` locations are 1-based so you need to subtract 1.",
+        "createdAt" : "2019-07-15T06:59:02Z",
+        "updatedAt" : "2019-07-15T09:46:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d63e799a-77e4-47ef-9ba0-0e4bb2372763",
+        "parentId" : "bc1df7b8-86f7-4329-ae64-3ea5ed6f05cc",
+        "author" : null,
+        "body" : "Thank-you for point this out. Will fix!",
+        "createdAt" : "2019-07-15T09:14:16Z",
+        "updatedAt" : "2019-07-15T09:46:54Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "08f7624d9ca99a0bff1f321559e5ab15937691ef",
+    "line" : null,
+    "diffHunk" : "@@ -543,17 +544,26 @@ getHlintDiagnosticsRule =\n         let modu = pm_parsed_source pm\n         (classify, hint) <- useNoFile_ GetHlintSettings\n         let ideas = applyHints classify hint [createModuleEx anns modu]\n-        return ([toDiagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n+        return ([diagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n     where\n-      -- To-do : Improve this.\n-      toDiagnostic file i = ideHintText file (T.pack $ show i)\n-      ideHintText fp msg = (fp, LSP.Diagnostic {\n-         _range = noRange,\n-         _severity = Just LSP.DsInfo,\n-         _code = Nothing,\n-         _source = Just \"linter\",\n-         _message = msg,\n-         _relatedInformation = Nothing\n+      srcSpanToRange :: HSE.SrcSpan -> LSP.Range\n+      srcSpanToRange span = Range {\n+          _start = LSP.Position {\n+                _line = HSE.srcSpanStartLine span"
+  },
+  {
+    "id" : "c3bb4243-e4d0-436e-949f-3ccf8813d863",
+    "prId" : 2139,
+    "comments" : [
+      {
+        "id" : "ba4e638d-ca00-4ce8-b0d6-e07b566fc05c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I wonder if `Info` is the correct priority here or if we should make it a warning. Probably a good idea to check what linters for other languages do. (But no need to address this as part of this PR).",
+        "createdAt" : "2019-07-15T07:01:01Z",
+        "updatedAt" : "2019-07-15T09:46:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08f7624d9ca99a0bff1f321559e5ab15937691ef",
+    "line" : 37,
+    "diffHunk" : "@@ -543,17 +544,26 @@ getHlintDiagnosticsRule =\n         let modu = pm_parsed_source pm\n         (classify, hint) <- useNoFile_ GetHlintSettings\n         let ideas = applyHints classify hint [createModuleEx anns modu]\n-        return ([toDiagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n+        return ([diagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n     where\n-      -- To-do : Improve this.\n-      toDiagnostic file i = ideHintText file (T.pack $ show i)\n-      ideHintText fp msg = (fp, LSP.Diagnostic {\n-         _range = noRange,\n-         _severity = Just LSP.DsInfo,\n-         _code = Nothing,\n-         _source = Just \"linter\",\n-         _message = msg,\n-         _relatedInformation = Nothing\n+      srcSpanToRange :: HSE.SrcSpan -> LSP.Range\n+      srcSpanToRange span = Range {\n+          _start = LSP.Position {\n+                _line = HSE.srcSpanStartLine span\n+              , _character  = HSE.srcSpanStartColumn span }\n+        , _end   = LSP.Position {\n+                _line = HSE.srcSpanEndLine span\n+             , _character = HSE.srcSpanEndColumn span }\n+        }\n+      diagnostic :: NormalizedFilePath -> Idea -> FileDiagnostic\n+      diagnostic file i =\n+        (file, LSP.Diagnostic {\n+              _range = srcSpanToRange $ ideaSpan i\n+            , _severity = Just LSP.DsInfo"
+  },
+  {
+    "id" : "95910b8c-7f18-455f-9c54-c78af1cffe51",
+    "prId" : 2139,
+    "comments" : [
+      {
+        "id" : "83875a42-c0de-450a-a7dc-6698a5b82d59",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I would guess we already have this function somewhere else. I don't know where though.",
+        "createdAt" : "2019-07-15T14:05:06Z",
+        "updatedAt" : "2019-07-15T14:05:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1dc27245-635a-4f21-9567-8dbc7e6a5dca",
+        "parentId" : "83875a42-c0de-450a-a7dc-6698a5b82d59",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We don’t. There are multiple things called `SrcSpan`. This is the one from `haskell-src-exts` which is new.",
+        "createdAt" : "2019-07-15T14:07:22Z",
+        "updatedAt" : "2019-07-15T14:07:22Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08f7624d9ca99a0bff1f321559e5ab15937691ef",
+    "line" : 24,
+    "diffHunk" : "@@ -543,17 +544,26 @@ getHlintDiagnosticsRule =\n         let modu = pm_parsed_source pm\n         (classify, hint) <- useNoFile_ GetHlintSettings\n         let ideas = applyHints classify hint [createModuleEx anns modu]\n-        return ([toDiagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n+        return ([diagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n     where\n-      -- To-do : Improve this.\n-      toDiagnostic file i = ideHintText file (T.pack $ show i)\n-      ideHintText fp msg = (fp, LSP.Diagnostic {\n-         _range = noRange,\n-         _severity = Just LSP.DsInfo,\n-         _code = Nothing,\n-         _source = Just \"linter\",\n-         _message = msg,\n-         _relatedInformation = Nothing\n+      srcSpanToRange :: HSE.SrcSpan -> LSP.Range"
+  },
+  {
+    "id" : "d3087e1c-bcbf-4540-ad3d-3b2dbc546253",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "10559a71-56ac-47f1-b703-2f0aadbb3c94",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n                    when (vr `Set.member` openVRs) $\r\n```",
+        "createdAt" : "2019-07-12T08:10:13Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -432,14 +437,17 @@ ofInterestRule = do\n                 mbVrs <- use RunScenarios file\n                 forM_ (fromMaybe [] mbVrs) $ \\(vr, res) -> do\n                     let doc = formatScenarioResult world res\n-                    when (vr `Set.member` openVRs) $\n+                    when  (vr `Set.member` openVRs) $"
+  },
+  {
+    "id" : "5f7bc967-0bd2-40d1-87df-7e39aa3ed646",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "dcda0aa8-ce03-4b37-9315-78563e7dffd4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not sure splitting up the command name over two lines makes it easier to read.",
+        "createdAt" : "2019-07-12T08:10:44Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "df216ba3-305b-40b7-99f8-8dd1c479453a",
+        "parentId" : "dcda0aa8-ce03-4b37-9315-78563e7dffd4",
+        "author" : null,
+        "body" : "You're referring to lines 445 - 450 here? You don't like it?",
+        "createdAt" : "2019-07-12T09:36:06Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cd9762e7-aca2-4efd-9bf1-f1d97ede9992",
+        "parentId" : "dcda0aa8-ce03-4b37-9315-78563e7dffd4",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "No just changing the comment in line `437-438`. I found the previous layout easier to read (and apart from that, changing it in this PR is just noise).",
+        "createdAt" : "2019-07-12T09:38:43Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b4dc27f7-59ed-4a0b-8adb-37389e75a8bd",
+        "parentId" : "dcda0aa8-ce03-4b37-9315-78563e7dffd4",
+        "author" : null,
+        "body" : "Oh ok. It's the result of emacs `M-q` (fill-paragraph). I'll restore it.",
+        "createdAt" : "2019-07-12T09:52:48Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -432,14 +437,17 @@ ofInterestRule = do\n                 mbVrs <- use RunScenarios file\n                 forM_ (fromMaybe [] mbVrs) $ \\(vr, res) -> do\n                     let doc = formatScenarioResult world res\n-                    when (vr `Set.member` openVRs) $\n+                    when  (vr `Set.member` openVRs) $\n                         sendEvent $ vrChangedNotification vr doc\n-        -- We don’t always have a scenario service (e.g., damlc compile)\n-        -- so only run scenarios if we have one.\n+\n+        -- We don’t always have a scenario service (e.g., damlc"
+  },
+  {
+    "id" : "17375ae8-5676-48db-969e-bdd5c463b1a5",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "65b8bb1a-0d9a-4755-8269-483dd11e8b70",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That looks wrong. Those files are located next to each other. Why do you try to find `prod` in `compiler/damlc/daml-ide-core/daml-ide-core`.",
+        "createdAt" : "2019-07-12T08:12:47Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "612aee01-9bc9-424d-8fef-fbe02422a25a",
+        "parentId" : "65b8bb1a-0d9a-4755-8269-483dd11e8b70",
+        "author" : null,
+        "body" : "Trust me, it took me and Andreas more than an hour or two to work it out. This is what `package_app` does : it puts the prod version in `daml-ide-core/resources/data/daml-ide-core/data/prod` whereas when going for the test version in the unit tests, it's found in just `data/test`. Go figure.",
+        "createdAt" : "2019-07-12T09:38:56Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3cbff803-f2d1-4269-a439-01a0e086dcc7",
+        "parentId" : "65b8bb1a-0d9a-4755-8269-483dd11e8b70",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "If it does that, then we should fix `package_app` not hack around here. This is almost certainly not going to work when you get it via Bazel runfiles.",
+        "createdAt" : "2019-07-12T09:39:58Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "db73362a-c02f-4e22-92bd-9010085c4b2a",
+        "parentId" : "65b8bb1a-0d9a-4755-8269-483dd11e8b70",
+        "author" : null,
+        "body" : "Well, suppose we fix `package_app` so that its then found via `data/prod`. If we keep this mechanism (and it looks like not one way or the other), then we'd need a different way of sniffing out if we are running in test or prod mode.",
+        "createdAt" : "2019-07-12T09:54:10Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a282f87e-18df-49da-b2e1-01b2c3c2bdfa",
+        "parentId" : "65b8bb1a-0d9a-4755-8269-483dd11e8b70",
+        "author" : null,
+        "body" : "> not going to work when you get it via Bazel runfiles.\r\nNot sure what you mean here. We are using runfiles aren't we? That is, this is working (or at least some of the time) isn't it?",
+        "createdAt" : "2019-07-12T09:54:48Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  root <- locateRunfiles $\n+    mainWorkspace </> \"compiler/damlc/daml-ide-core\"\n+  let test = root </> \"data/test\"\n+      prod = root </> \"daml-ide-core/data/prod\""
+  },
+  {
+    "id" : "ccc6a15f-1a35-4d0c-9c3c-ab10bbf2a382",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "e4b4af01-1e1b-4fd1-a62c-12d93f816e0f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "If there are good reasons, mention them in the comment!",
+        "createdAt" : "2019-07-12T08:14:41Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "116fea21-9db2-4f84-8921-52f15badc8fb",
+        "parentId" : "e4b4af01-1e1b-4fd1-a62c-12d93f816e0f",
+        "author" : null,
+        "body" : "I started to but it was getting wordy so I gave up :) Explained in responses in the ticket. We either change this or I have another go.",
+        "createdAt" : "2019-07-12T09:36:50Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code"
+  },
+  {
+    "id" : "1eb8f433-8b3a-425d-b78e-c90d969b286c",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "654c9b92-8a58-46af-a552-8785124252cb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not particularly fond of this logic. Presumably the reason for why you want different config files is that we do not care about hlint in our tests? If so, I would suggest that we just add an explicit option to disable hlint completely in `DA.Daml.Options.Types` instead of handling it implicitly based on whether a file is present or not. This would also allow us to switch it on and off for individual tests without having to make a completely separate test with different runfiles.",
+        "createdAt" : "2019-07-12T08:16:46Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5230ad9f-da83-465c-900b-2b09a1e24038",
+        "parentId" : "654c9b92-8a58-46af-a552-8785124252cb",
+        "author" : null,
+        "body" : "I really like the idea of being able to turn it on or off. It's not the whole story though. There's still the issue of wanting to enable it but having a different \"global\" config in testing vs. the IDE. ",
+        "createdAt" : "2019-07-12T09:40:45Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f99a3727-9f61-415b-a3ec-05854cd29a12",
+        "parentId" : "654c9b92-8a58-46af-a552-8785124252cb",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Couldn’t we just have only a 1 global config for now and once we add support for allowing users to change the config, we use that to also specify a different config in tests?",
+        "createdAt" : "2019-07-12T09:42:37Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b8895b5e-0649-45f4-a9cb-67eb91780f9a",
+        "parentId" : "654c9b92-8a58-46af-a552-8785124252cb",
+        "author" : null,
+        "body" : "This is basically what we have now. A \"poor mans way\" of allowing users to change the config -  the directory given to hlint (which contains a hlint.yaml) file.",
+        "createdAt" : "2019-07-12T10:06:47Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  root <- locateRunfiles $\n+    mainWorkspace </> \"compiler/damlc/daml-ide-core\"\n+  let test = root </> \"data/test\"\n+      prod = root </> \"daml-ide-core/data/prod\"\n+  useProd <- System.Directory.doesDirectoryExist prod"
+  },
+  {
+    "id" : "305c1794-a824-43de-a677-be305ad44343",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "d252ea40-3cb1-4563-bb61-8ee53adc36e7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t think it is reasonable to ship damlc with always on hlint that cannot be configured by users. At the very least we need an option to turn it off completely before we ship this.",
+        "createdAt" : "2019-07-12T08:18:55Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2b5c3999-9980-4b39-961b-f8ae621c2de1",
+        "parentId" : "d252ea40-3cb1-4563-bb61-8ee53adc36e7",
+        "author" : null,
+        "body" : "Agree. I think I would rather invest time at this point in being able to turn the feature on/off than writing the logic for per-project `.hlint.yaml` files (although we do have to implement that before long). I think time is better spent right now on converting rules in hlint to ghc-lib-parser.",
+        "createdAt" : "2019-07-12T09:42:02Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5cd1c4e3-066a-4771-bada-19276c6b7c3b",
+        "parentId" : "d252ea40-3cb1-4563-bb61-8ee53adc36e7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah just implementing an on/off switch for now is totally fine.",
+        "createdAt" : "2019-07-12T09:43:10Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  root <- locateRunfiles $\n+    mainWorkspace </> \"compiler/damlc/daml-ide-core\"\n+  let test = root </> \"data/test\"\n+      prod = root </> \"daml-ide-core/data/prod\"\n+  useProd <- System.Directory.doesDirectoryExist prod\n+  return $ if useProd then prod else test\n+\n+-- This next function harvests hlint settings using 'hlint.yaml'. What\n+-- we don't have at this time but I will follow up with in a later\n+-- update, is the ability to augment the settings via per-project\n+-- overrides from user provided '.hlint.yaml' files (found by by"
+  },
+  {
+    "id" : "b5760bdf-6bcb-45fc-8bdf-1d7b92147170",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "2af23d41-b8b8-4f44-b3ed-cec650e1cb10",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do you have an idea of how expensive this is? We probably want to cache this based on whether the config files have changed.",
+        "createdAt" : "2019-07-12T08:20:22Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bdf117e6-86d5-4146-ad06-0bee5b0e0d75",
+        "parentId" : "2af23d41-b8b8-4f44-b3ed-cec650e1cb10",
+        "author" : null,
+        "body" : "I can do that. I don't think it's expensive but let's just do it right in any case. I'll add a rule. Shouldn't be too hard.",
+        "createdAt" : "2019-07-12T09:42:49Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7615a016-2e73-4bbf-a737-69bd74c0cbcc",
+        "parentId" : "2af23d41-b8b8-4f44-b3ed-cec650e1cb10",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Once you take user configs into account it gets a bit tricky but yeah for now, caching it should be easy.",
+        "createdAt" : "2019-07-12T09:44:08Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  root <- locateRunfiles $\n+    mainWorkspace </> \"compiler/damlc/daml-ide-core\"\n+  let test = root </> \"data/test\"\n+      prod = root </> \"daml-ide-core/data/prod\"\n+  useProd <- System.Directory.doesDirectoryExist prod\n+  return $ if useProd then prod else test\n+\n+-- This next function harvests hlint settings using 'hlint.yaml'. What\n+-- we don't have at this time but I will follow up with in a later\n+-- update, is the ability to augment the settings via per-project\n+-- overrides from user provided '.hlint.yaml' files (found by by\n+-- searching the directory from which 'daml studio' is invoked [and\n+-- possibly its ancestors]). It's in anticpation of users updating\n+-- these '.hlint.yaml' files that we read settings on every\n+-- invocation.\n+hlintSettings :: IO (ParseFlags, [Classify], Hint)\n+hlintSettings = do"
+  },
+  {
+    "id" : "c47111b6-320e-41dd-a6c1-bc7a4c3f4618",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "0d2fe917-8713-47a2-95f4-d45b90dbe8bb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do you expect, that we will have to use the parse flags at some point? If not, I would just change `hlintSettings` to not return them.",
+        "createdAt" : "2019-07-12T08:21:26Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "38c535a6-8c2e-468d-a8df-8f02e1ee050c",
+        "parentId" : "0d2fe917-8713-47a2-95f4-d45b90dbe8bb",
+        "author" : null,
+        "body" : "Good idea.",
+        "createdAt" : "2019-07-12T09:43:00Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  root <- locateRunfiles $\n+    mainWorkspace </> \"compiler/damlc/daml-ide-core\"\n+  let test = root </> \"data/test\"\n+      prod = root </> \"daml-ide-core/data/prod\"\n+  useProd <- System.Directory.doesDirectoryExist prod\n+  return $ if useProd then prod else test\n+\n+-- This next function harvests hlint settings using 'hlint.yaml'. What\n+-- we don't have at this time but I will follow up with in a later\n+-- update, is the ability to augment the settings via per-project\n+-- overrides from user provided '.hlint.yaml' files (found by by\n+-- searching the directory from which 'daml studio' is invoked [and\n+-- possibly its ancestors]). It's in anticpation of users updating\n+-- these '.hlint.yaml' files that we read settings on every\n+-- invocation.\n+hlintSettings :: IO (ParseFlags, [Classify], Hint)\n+hlintSettings = do\n+  hlintDataDir <- getHlintDataDir\n+  (fixities, classify, hints) <-\n+    findSettings (readSettingsFile (Just hlintDataDir)) Nothing\n+  return (parseFlagsAddFixities fixities defaultParseFlags, classify, hints)\n+\n+-- The 'getHlintDiagnosticsRule' reads settings, runs hlint on a\n+-- parsed module and returns its ideas on how to make it better as\n+-- diagnostics.\n+getHlintDiagnosticsRule :: Rules ()\n+getHlintDiagnosticsRule =\n+    define $ \\GetHlintDiagnostics file -> do\n+        pm <- use_ GetParsedModule file\n+        let anns = pm_annotations pm\n+        let modu = pm_parsed_source pm\n+        (_, classify, hint) <- liftIO hlintSettings"
+  },
+  {
+    "id" : "10bcb8ee-ff8d-47e7-ac82-785211393fbe",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "a6333da9-0e94-4ee0-b413-80850b4b89eb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This might look nicer if you only make it return a `Diagnostic` and you then call `(file, toDiagnostic file i)` above.",
+        "createdAt" : "2019-07-12T08:22:26Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2534b51c-7cea-4d90-ab00-6e88f241230c",
+        "parentId" : "a6333da9-0e94-4ee0-b413-80850b4b89eb",
+        "author" : null,
+        "body" : "This piece isn't finished. Will come back to it.",
+        "createdAt" : "2019-07-12T09:43:17Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : 92,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  root <- locateRunfiles $\n+    mainWorkspace </> \"compiler/damlc/daml-ide-core\"\n+  let test = root </> \"data/test\"\n+      prod = root </> \"daml-ide-core/data/prod\"\n+  useProd <- System.Directory.doesDirectoryExist prod\n+  return $ if useProd then prod else test\n+\n+-- This next function harvests hlint settings using 'hlint.yaml'. What\n+-- we don't have at this time but I will follow up with in a later\n+-- update, is the ability to augment the settings via per-project\n+-- overrides from user provided '.hlint.yaml' files (found by by\n+-- searching the directory from which 'daml studio' is invoked [and\n+-- possibly its ancestors]). It's in anticpation of users updating\n+-- these '.hlint.yaml' files that we read settings on every\n+-- invocation.\n+hlintSettings :: IO (ParseFlags, [Classify], Hint)\n+hlintSettings = do\n+  hlintDataDir <- getHlintDataDir\n+  (fixities, classify, hints) <-\n+    findSettings (readSettingsFile (Just hlintDataDir)) Nothing\n+  return (parseFlagsAddFixities fixities defaultParseFlags, classify, hints)\n+\n+-- The 'getHlintDiagnosticsRule' reads settings, runs hlint on a\n+-- parsed module and returns its ideas on how to make it better as\n+-- diagnostics.\n+getHlintDiagnosticsRule :: Rules ()\n+getHlintDiagnosticsRule =\n+    define $ \\GetHlintDiagnostics file -> do\n+        pm <- use_ GetParsedModule file\n+        let anns = pm_annotations pm\n+        let modu = pm_parsed_source pm\n+        (_, classify, hint) <- liftIO hlintSettings\n+        let ideas = applyHints classify hint [createModuleEx anns modu]\n+        return ([toDiagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n+    where\n+      -- To-do : Improve this.\n+      toDiagnostic file i = ideHintText file (T.pack $ show i)\n+      ideHintText fp msg = (fp, LSP.Diagnostic {"
+  },
+  {
+    "id" : "3a50bf63-7d69-42f0-aacf-5544224e6582",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "222b1c70-21ed-420a-ad45-8726087182ba",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I would just inline `ideHintText` into `toDiagnostic`.",
+        "createdAt" : "2019-07-12T08:25:05Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c7601564-4350-42f2-9eac-836c4264ac51",
+        "parentId" : "222b1c70-21ed-420a-ad45-8726087182ba",
+        "author" : null,
+        "body" : "Again, not finished. It's a placeholder. Work in progress.",
+        "createdAt" : "2019-07-12T09:43:39Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : 91,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do\n+  root <- locateRunfiles $\n+    mainWorkspace </> \"compiler/damlc/daml-ide-core\"\n+  let test = root </> \"data/test\"\n+      prod = root </> \"daml-ide-core/data/prod\"\n+  useProd <- System.Directory.doesDirectoryExist prod\n+  return $ if useProd then prod else test\n+\n+-- This next function harvests hlint settings using 'hlint.yaml'. What\n+-- we don't have at this time but I will follow up with in a later\n+-- update, is the ability to augment the settings via per-project\n+-- overrides from user provided '.hlint.yaml' files (found by by\n+-- searching the directory from which 'daml studio' is invoked [and\n+-- possibly its ancestors]). It's in anticpation of users updating\n+-- these '.hlint.yaml' files that we read settings on every\n+-- invocation.\n+hlintSettings :: IO (ParseFlags, [Classify], Hint)\n+hlintSettings = do\n+  hlintDataDir <- getHlintDataDir\n+  (fixities, classify, hints) <-\n+    findSettings (readSettingsFile (Just hlintDataDir)) Nothing\n+  return (parseFlagsAddFixities fixities defaultParseFlags, classify, hints)\n+\n+-- The 'getHlintDiagnosticsRule' reads settings, runs hlint on a\n+-- parsed module and returns its ideas on how to make it better as\n+-- diagnostics.\n+getHlintDiagnosticsRule :: Rules ()\n+getHlintDiagnosticsRule =\n+    define $ \\GetHlintDiagnostics file -> do\n+        pm <- use_ GetParsedModule file\n+        let anns = pm_annotations pm\n+        let modu = pm_parsed_source pm\n+        (_, classify, hint) <- liftIO hlintSettings\n+        let ideas = applyHints classify hint [createModuleEx anns modu]\n+        return ([toDiagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n+    where\n+      -- To-do : Improve this.\n+      toDiagnostic file i = ideHintText file (T.pack $ show i)"
+  },
+  {
+    "id" : "3f6265e3-4acc-44db-84d6-0978c7797aa4",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "c0d4a8ca-a486-461d-8aea-04a9c9e029a9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We probably want to do this once on startup similar to how we handle the default package db instead of doing it everytime we run HLint.",
+        "createdAt" : "2019-07-12T08:30:38Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "197e8b73-4265-4446-bcd1-ca3325845d0c",
+        "parentId" : "c0d4a8ca-a486-461d-8aea-04a9c9e029a9",
+        "author" : null,
+        "body" : "Ok. So two rules? One for the data dir the second for the settings?",
+        "createdAt" : "2019-07-12T09:45:05Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a96f7fd3-e220-4348-9bd8-bb8ad18e74ce",
+        "parentId" : "c0d4a8ca-a486-461d-8aea-04a9c9e029a9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I probably wouldn’t put this into a rule. Instead add a field for the HLint data dir in the options and set it somewhere on startup, e.g., in `mkOptions`. Seehttps://github.com/digital-asset/daml/blob/13253d82d1d36d3e9fe66fc6359474f58080a428/compiler/damlc/daml-opts/daml-opts-types/DA/Daml/Options/Types.hs#L88 for how we handle this in the package db.",
+        "createdAt" : "2019-07-12T09:48:00Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0a1dc214-dcc3-4c77-8ca4-1a768655c4c4",
+        "parentId" : "c0d4a8ca-a486-461d-8aea-04a9c9e029a9",
+        "author" : null,
+        "body" : "Thanks. Will get on this.",
+        "createdAt" : "2019-07-12T10:08:22Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +517,64 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+-- We need to provide hlint the path to the directory of a file\n+-- containing a base configuration file called 'hlint.yaml'.\n+-- We test with one version of 'hlint.yaml' and deploy with another\n+-- (at the current time, there are good reasons for this). The code\n+-- below (which relies on the behavior of `package_app` deploying to\n+-- '~/.daml/sdk/x.x.x/damlc/resources/daml-ide-core/data') selects one\n+-- or the other depending on context.\n+getHlintDataDir :: IO FilePath\n+getHlintDataDir = do"
+  },
+  {
+    "id" : "33dc048d-8e56-4480-858c-f4c75066412d",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "a8fbacde-9c4d-45e2-b254-df9b1c8dd8d2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I would put the switch as to whether we enable hlint or not here similar to `shouldRunScenarios`. That has the nice side effect that it only controls the checks that we run by default and you can still trigger the HLint rule manually and you will get diagnostics.",
+        "createdAt" : "2019-07-12T12:03:12Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -434,12 +436,15 @@ ofInterestRule = do\n                     let doc = formatScenarioResult world res\n                     when (vr `Set.member` openVRs) $\n                         sendEvent $ vrChangedNotification vr doc\n+\n         -- We don’t always have a scenario service (e.g., damlc compile)\n         -- so only run scenarios if we have one.\n         let shouldRunScenarios = isJust envScenarioService\n-        _ <- parallel $\n-            map (void . getDalf) (Set.toList scenarioFiles) <>\n-            [runScenarios file | shouldRunScenarios, file <- Set.toList scenarioFiles]\n+        let files = Set.toList scenarioFiles\n+        let dalfActions = [(void . getDalf) f | f <- files]\n+        let hlintActions = [use_ GetHlintDiagnostics f | f <- files]"
+  },
+  {
+    "id" : "fbdbf693-e167-4ca0-94ca-bf822388c0ef",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "40fe9e1a-c601-4786-b109-17efee77eb97",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "So then you can remove it here.",
+        "createdAt" : "2019-07-12T12:03:25Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +514,49 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+hlintSettings :: FilePath -> IO ([Classify], Hint)\n+hlintSettings hlintDataDir = do\n+  -- `findSettings` ends up calling `readFilesConfig` which in turn\n+  -- calls `readFileConfigYaml` which finally calls `decodeFileEither`\n+  -- from the `yaml` library.  Annoyingly that function catches async\n+  -- exceptions in particular it ends up catching `ThreadKilled` so we\n+  -- have to mask to stop it from doing that.\n+  (_, classify, hints) <- mask $ \\unmask ->\n+    findSettings (unmask . readSettingsFile (Just hlintDataDir)) Nothing\n+  return (classify, hints)\n+\n+getHlintDiagnosticsRule :: Options -> Rules ()\n+getHlintDiagnosticsRule opts =\n+    define $ \\GetHlintDiagnostics file -> do\n+        pm <- use_ GetParsedModule file\n+        let anns = pm_annotations pm\n+        let modu = pm_parsed_source pm\n+        case optHlintDataDir opts of"
+  },
+  {
+    "id" : "d583339d-b95d-4772-906a-f49fafc35f86",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "e4419069-fe00-44ac-bc5f-d82aa8bb0ff7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This should just call `fail` and not emit a log message.",
+        "createdAt" : "2019-07-12T14:44:59Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "59bc9dd4-b722-4b14-9d07-1080ec8d375e",
+        "parentId" : "e4419069-fe00-44ac-bc5f-d82aa8bb0ff7",
+        "author" : null,
+        "body" : "Pushed caching logic just now. No longer logs, just fails.",
+        "createdAt" : "2019-07-12T14:47:05Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +515,49 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+hlintSettings :: FilePath -> IO ([Classify], Hint)\n+hlintSettings hlintDataDir = do\n+  -- `findSettings` ends up calling `readFilesConfig` which in turn\n+  -- calls `readFileConfigYaml` which finally calls `decodeFileEither`\n+  -- from the `yaml` library.  Annoyingly that function catches async\n+  -- exceptions and in particular, it ends up catching `ThreadKilled`.\n+  -- So, we have to mask to stop it from doing that.\n+  (_, classify, hints) <- mask $ \\unmask ->\n+    findSettings (unmask . readSettingsFile (Just hlintDataDir)) Nothing\n+  return (classify, hints)\n+\n+getHlintDiagnosticsRule :: Options -> Rules ()\n+getHlintDiagnosticsRule opts =\n+    define $ \\GetHlintDiagnostics file -> do\n+        pm <- use_ GetParsedModule file\n+        let anns = pm_annotations pm\n+        let modu = pm_parsed_source pm\n+        case optHlintDataDir opts of\n+          Just dir -> do\n+            (classify, hint) <- liftIO $ hlintSettings dir\n+            let ideas = applyHints classify hint [createModuleEx anns modu]\n+            return ([toDiagnostic file i | i <- ideas, ideaSeverity i /= Ignore], Just ())\n+          Nothing -> do\n+            logger <- actionLogger\n+            liftIO $ logError logger $ T.pack $"
+  },
+  {
+    "id" : "b72cff07-8483-4a44-96be-ff0fe7842ec5",
+    "prId" : 2115,
+    "comments" : [
+      {
+        "id" : "c56bb7d3-a91b-4c45-a2e6-57a8a9df7d25",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Probably makes sense to pull `liftIO` out of these branches.",
+        "createdAt" : "2019-07-12T14:55:13Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a550f55f-c26d-464e-8042-23d4d99bfc5a",
+        "parentId" : "c56bb7d3-a91b-4c45-a2e6-57a8a9df7d25",
+        "author" : null,
+        "body" : "✔️ \r\n",
+        "createdAt" : "2019-07-12T14:59:23Z",
+        "updatedAt" : "2019-07-12T15:42:21Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70dbda3a4e6f6e2c8b607e944eb807553787c2c2",
+    "line" : null,
+    "diffHunk" : "@@ -509,6 +515,48 @@ encodeModuleRule =\n         let (hash, bs) = SS.encodeModule lfVersion m\n         return ([], Just (mconcat $ hash : map fst encodedDeps, bs))\n \n+-- hlint\n+\n+hlintSettings :: FilePath -> IO ([Classify], Hint)\n+hlintSettings hlintDataDir = do\n+  -- `findSettings` ends up calling `readFilesConfig` which in turn\n+  -- calls `readFileConfigYaml` which finally calls `decodeFileEither`\n+  -- from the `yaml` library.  Annoyingly that function catches async\n+  -- exceptions and in particular, it ends up catching `ThreadKilled`.\n+  -- So, we have to mask to stop it from doing that.\n+  (_, classify, hints) <- mask $ \\unmask ->\n+    findSettings (unmask . readSettingsFile (Just hlintDataDir)) Nothing\n+  return (classify, hints)\n+\n+getHlintSettingsRule :: Maybe FilePath -> Rules ()\n+getHlintSettingsRule dir =\n+    defineNoFile $ \\GetHlintSettings -> do\n+      case dir of\n+        Just dir -> liftIO $ hlintSettings dir"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "id" : "9409a83a-8db0-4fe3-ba85-b1695da840b4",
+    "prId" : 896,
+    "comments" : [
+      {
+        "id" : "7bc0a460-0f51-46f1-8a94-883495d97789",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n            root_packages.append(tag[len(\"javadoc_root_packages=\"):])\r\n```\r\nDid you mean to append to this list?",
+        "createdAt" : "2019-05-06T07:38:30Z",
+        "updatedAt" : "2019-05-14T06:54:38Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "eccdb78f-80c5-45c0-8c55-87ff2b1757af",
+        "parentId" : "7bc0a460-0f51-46f1-8a94-883495d97789",
+        "author" : {
+          "login" : "nicholassmith-da",
+          "name" : "Nick Smith",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/47316213?v=4"
+        },
+        "body" : "I've now changed this to split on the tag element to generate the list.",
+        "createdAt" : "2019-05-09T11:19:14Z",
+        "updatedAt" : "2019-05-14T06:54:38Z",
+        "lastEditedBy" : {
+          "login" : "nicholassmith-da",
+          "name" : "Nick Smith",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/47316213?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8f9a7516d3e532b11409f0f5658409221907eade",
+    "line" : null,
+    "diffHunk" : "@@ -29,10 +30,35 @@ java_home_runtime = repository_rule(\n def _wrap_rule(rule, name = \"\", **kwargs):\n     rule(name = name, **kwargs)\n \n-def da_java_library(name, **kwargs):\n-    _wrap_rule(native.java_library, name, **kwargs)\n+def da_java_library(name, deps, srcs, data = [], resources = [], resource_jars = [], resource_strip_prefix = None,\n+                    tags = [], visibility = None, exports = []):\n+\n+    root_packages = None\n+    for tag in tags:\n+       if tag.startswith(\"javadoc_root_packages=\"):\n+            root_packages = [ tag[len(\"javadoc_root_packages=\"):] ]"
+  },
+  {
+    "id" : "1251b76d-ad96-44ab-9b33-ec6aa739f7f0",
+    "prId" : 896,
+    "comments" : [
+      {
+        "id" : "494a80f9-6276-4dcc-b57f-c28ae0d4493b",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n        **kwargs\r\n    )\r\n```\r\n`java_library` supports [additional attributes](https://docs.bazel.build/versions/master/be/java.html#java_library). Currently, users of `da_java_library` are prevented from using them. ",
+        "createdAt" : "2019-05-09T12:27:08Z",
+        "updatedAt" : "2019-05-14T06:54:38Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8f9a7516d3e532b11409f0f5658409221907eade",
+    "line" : 44,
+    "diffHunk" : "@@ -29,13 +30,47 @@ java_home_runtime = repository_rule(\n def _wrap_rule(rule, name = \"\", **kwargs):\n     rule(name = name, **kwargs)\n \n-def da_java_library(name, **kwargs):\n-    _wrap_rule(native.java_library, name, **kwargs)\n+def da_java_library(\n+        name,\n+        deps,\n+        srcs,\n+        data = [],\n+        resources = [],\n+        resource_jars = [],\n+        resource_strip_prefix = None,\n+        tags = [],\n+        visibility = None,\n+        exports = []):\n+    root_packages = None\n+    for tag in tags:\n+        if tag.startswith(\"javadoc_root_packages=\"):\n+            root_packages = tag[len(\"javadoc_root_packages=\"):].split(\":\")\n+\n+    native.java_library(\n+        name = name,\n+        deps = deps,\n+        srcs = srcs,\n+        data = data,\n+        resources = resources,\n+        resource_jars = resource_jars,\n+        resource_strip_prefix = resource_strip_prefix,\n+        tags = tags,\n+        visibility = visibility,\n+        exports = exports,\n+    )"
+  },
+  {
+    "id" : "3f4c3f9f-360b-4116-bb5d-ba26df98d4d4",
+    "prId" : 896,
+    "comments" : [
+      {
+        "id" : "97c7803e-01dc-4811-a59e-707e613ece36",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n        exports = [],\r\n        **kwargs):\r\n```",
+        "createdAt" : "2019-05-09T12:27:29Z",
+        "updatedAt" : "2019-05-14T06:54:38Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8f9a7516d3e532b11409f0f5658409221907eade",
+    "line" : null,
+    "diffHunk" : "@@ -29,13 +30,47 @@ java_home_runtime = repository_rule(\n def _wrap_rule(rule, name = \"\", **kwargs):\n     rule(name = name, **kwargs)\n \n-def da_java_library(name, **kwargs):\n-    _wrap_rule(native.java_library, name, **kwargs)\n+def da_java_library(\n+        name,\n+        deps,\n+        srcs,\n+        data = [],\n+        resources = [],\n+        resource_jars = [],\n+        resource_strip_prefix = None,\n+        tags = [],\n+        visibility = None,\n+        exports = []):"
+  }
+]

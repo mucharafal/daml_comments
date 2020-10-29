@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "dc654beb-af0c-45ea-af8f-5e6f973e7288",
+    "prId" : 4097,
+    "comments" : [
+      {
+        "id" : "e2015430-7fa3-4bb3-878c-e47b012c55af",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I was a bit confused why `logger` is used to construct `logging` and then both are used later on.\r\nMaybe instead of wrapping the `Source` and calling `mapError` on that, the behavior in `PassThroughLogger` can be defined in terms of a flow and then passed here as a regular stream processor with `via`.\r\n\r\n```\r\nobject PassThroughLogger {\r\n  def logErrors[Out, Mat](logger: ContextualizedLogger) = Flow[Out].mapError({ ... })\r\n}\r\n\r\n// later on\r\ntransactionService.getTransactions(...).via(PassThroughLogger.logErrors(logger))\r\n\r\n```\r\n\r\nEdit: I later saw that we already do this with `ContextualizedLog`. Should we use the same way of adding logging for `PassThroughLogger` as well?",
+        "createdAt" : "2020-01-20T16:54:55Z",
+        "updatedAt" : "2020-01-21T09:13:27Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "04831472-83b8-486e-bc60-a72abbb6cca6",
+        "parentId" : "e2015430-7fa3-4bb3-878c-e47b012c55af",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/4097/commits/1e76c99940784fb98458497380e78268216068ab",
+        "createdAt" : "2020-01-20T18:44:06Z",
+        "updatedAt" : "2020-01-21T09:13:27Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "86dd6902-4e46-463a-bfb7-ff501d9fb0d4",
+        "parentId" : "e2015430-7fa3-4bb3-878c-e47b012c55af",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "As agreed offline:\r\n- I removed `ContextualizedLog`, which was a porting to the new system of the now superflous `Slf4jLog` flow\r\n- All services log using utility methods on `ContextualizedLogger` that either run on single or streaming calls\r\nThis should also make the diff way more readable.",
+        "createdAt" : "2020-01-20T18:45:54Z",
+        "updatedAt" : "2020-01-21T09:13:27Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "80ef9a78495c345ca3a7442bc7c2397f4901c132",
+    "line" : null,
+    "diffHunk" : "@@ -17,76 +17,78 @@ import com.digitalasset.ledger.api.v1.active_contracts_service._\n import com.digitalasset.ledger.api.v1.event.CreatedEvent\n import com.digitalasset.ledger.api.validation.TransactionFilterValidator\n import com.digitalasset.platform.api.grpc.GrpcApiService\n-import com.digitalasset.platform.common.logging.NamedLoggerFactory\n import com.digitalasset.dec.DirectExecutionContext\n+import com.digitalasset.platform.logging.{ContextualizedLogger, LoggingContext, PassThroughLogger}\n import com.digitalasset.platform.participant.util.LfEngineToApi\n import com.digitalasset.platform.server.api.validation.ActiveContractsServiceValidation\n import io.grpc.{BindableService, ServerServiceDefinition}\n import scalaz.syntax.tag._\n \n import scala.concurrent.ExecutionContext\n \n-class ApiActiveContractsService private (\n+final class ApiActiveContractsService private (\n     backend: ACSBackend,\n-    parallelism: Int = Runtime.getRuntime.availableProcessors,\n-    loggerFactory: NamedLoggerFactory)(\n+    parallelism: Int = Runtime.getRuntime.availableProcessors)(\n     implicit executionContext: ExecutionContext,\n     protected val mat: Materializer,\n-    protected val esf: ExecutionSequencerFactory)\n+    protected val esf: ExecutionSequencerFactory,\n+    logCtx: LoggingContext)\n     extends ActiveContractsServiceAkkaGrpc\n     with GrpcApiService {\n \n-  private val logger = loggerFactory.getLogger(this.getClass)\n+  private val logger = ContextualizedLogger.get[this.type]\n+  private val logging = PassThroughLogger.wrap(logger)"
+  }
+]

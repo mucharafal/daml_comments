@@ -1,0 +1,406 @@
+[
+  {
+    "id" : "86fbe08f-4173-42a7-abfa-50cf60318d04",
+    "prId" : 1303,
+    "comments" : [
+      {
+        "id" : "b3a65b3a-274e-4780-9a98-c572b0d9d75e",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "What is rootPathDir doesn't start with rootModDir? I guess the alternative is adding nothing to the import path, so adding something wrong probably won't be harmful...",
+        "createdAt" : "2019-05-22T09:57:20Z",
+        "updatedAt" : "2019-05-22T09:57:23Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3e7bafea-85fd-4437-8042-f5f4a45af0f9",
+        "parentId" : "b3a65b3a-274e-4780-9a98-c572b0d9d75e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yeah I don’t think it should cause issues. The whole area around file paths and include dirs deserves some refactoring and cleanup once the LSP side is done so I’ll leave it for that.",
+        "createdAt" : "2019-05-22T11:48:56Z",
+        "updatedAt" : "2019-05-22T11:48:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "92c95f629b4710b154ba40cf84c46845cf7e1c44",
+    "line" : 10,
+    "diffHunk" : "@@ -233,7 +233,12 @@ runGhcSession IdeOptions{..} modu env act = runGhcEnv env $ do\n moduleImportPaths :: GHC.ParsedModule -> Maybe FilePath\n moduleImportPaths pm\n   | rootModDir == \".\" = Just rootPathDir\n-  | otherwise = dropTrailingPathSeparator <$> stripSuffix rootModDir rootPathDir\n+  | otherwise =\n+    -- TODO (MK) stripSuffix (normalise rootModDir) (normalise rootPathDir)\n+    -- would be a better choice but at the moment we do not consistently\n+    -- normalize file paths in the Shake graph so we can end up with the\n+    -- same module being represented twice in the Shake graph.\n+    Just $ dropTrailingPathSeparator $ dropEnd (length rootModDir) rootPathDir"
+  },
+  {
+    "id" : "7399c9a2-04f9-4692-b12f-45355e9b0c9c",
+    "prId" : 1188,
+    "comments" : [
+      {
+        "id" : "26200f63-a7cf-4c4f-9d19-5da91e704699",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        {importPaths = nubOrd $ maybeToList (moduleImportPaths =<< modU) ++ importPaths x}\r\n```\r\ncodegolf at this point but it took me a while to decypher the types here so maybe this helps.",
+        "createdAt" : "2019-05-16T13:14:31Z",
+        "updatedAt" : "2019-05-16T13:20:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bc261b47-b768-4166-9801-8516f6df794e",
+        "parentId" : "26200f63-a7cf-4c4f-9d19-5da91e704699",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Applied minus the typo - thanks!",
+        "createdAt" : "2019-05-16T13:21:02Z",
+        "updatedAt" : "2019-05-16T13:21:03Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9a22139677d2404ae37e3fc85fe3400e86ded761",
+    "line" : null,
+    "diffHunk" : "@@ -241,22 +241,21 @@ runGhcSession\n     -> Ghc a\n     -> IO a\n runGhcSession IdeOptions{..} modu env act = runGhcEnv env $ do\n-    modifyDynFlags $ \\x -> x{importPaths = maybe [] moduleImportPaths modu ++ importPaths x}\n+    modifyDynFlags $ \\x -> x\n+        {importPaths = nubOrd $ maybe [] (maybeToList . moduleImportPaths) modu ++ importPaths x}"
+  },
+  {
+    "id" : "37c5c3d6-d727-4362-a64e-7fe9830163b6",
+    "prId" : 1188,
+    "comments" : [
+      {
+        "id" : "1c176695-459d-4b39-9883-5fca1a76bbce",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "```suggestion\r\n        {importPaths = nubOrd $ maybeToList (moduleImportPaths =<< modu) ++ importPaths x}\r\n```",
+        "createdAt" : "2019-05-16T13:20:30Z",
+        "updatedAt" : "2019-05-16T13:20:42Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9a22139677d2404ae37e3fc85fe3400e86ded761",
+    "line" : null,
+    "diffHunk" : "@@ -241,22 +241,21 @@ runGhcSession\n     -> Ghc a\n     -> IO a\n runGhcSession IdeOptions{..} modu env act = runGhcEnv env $ do\n-    modifyDynFlags $ \\x -> x{importPaths = maybe [] moduleImportPaths modu ++ importPaths x}\n+    modifyDynFlags $ \\x -> x\n+        {importPaths = nubOrd $ maybe [] (maybeToList . moduleImportPaths) modu ++ importPaths x}"
+  },
+  {
+    "id" : "1716ce33-6661-4d18-9535-a5406089d847",
+    "prId" : 1179,
+    "comments" : [
+      {
+        "id" : "6e2381a5-0d9a-4e68-a8a8-11b3d4648724",
+        "parentId" : null,
+        "author" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "body" : "Should the paths be de-duplicated? \r\n(Previously the paths were added in the same way but probably forgotten afterwards)",
+        "createdAt" : "2019-05-16T10:32:16Z",
+        "updatedAt" : "2019-05-16T10:32:17Z",
+        "lastEditedBy" : {
+          "login" : "jberthold-da",
+          "name" : "Jost Berthold",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/28879196?u=41dee6fb7ab2761a566b324e2f4e5ad9b577ae0e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "eaeb2c60-3031-4914-9bd9-7dcf9341ed87",
+        "parentId" : "6e2381a5-0d9a-4e68-a8a8-11b3d4648724",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "I don't think repeating them is harmful, so inclined to not bother. Can you think of a potential problem if they aren't dedupe'd?",
+        "createdAt" : "2019-05-16T10:35:43Z",
+        "updatedAt" : "2019-05-16T10:35:43Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f2377f93-a706-4344-8676-bf2baf14e77b",
+        "parentId" : "6e2381a5-0d9a-4e68-a8a8-11b3d4648724",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Note that these don't accumulate in the same HscEnv, since we create a newIORef for each session, so they won't get worse over time.",
+        "createdAt" : "2019-05-16T10:49:18Z",
+        "updatedAt" : "2019-05-16T10:49:19Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f5373cf9-c624-43de-9c51-91ad584ad635",
+        "parentId" : "6e2381a5-0d9a-4e68-a8a8-11b3d4648724",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’d prefer deduplicating. Even if this is fine now, it is easy to accidentally change something later which causes us to repeatedly add the same list over and over until we run out of memory.",
+        "createdAt" : "2019-05-16T11:41:05Z",
+        "updatedAt" : "2019-05-16T12:03:31Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "39ceae21-2888-486c-ab0a-6db83d51bf57",
+        "parentId" : "6e2381a5-0d9a-4e68-a8a8-11b3d4648724",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "I'll put it in a future commit.",
+        "createdAt" : "2019-05-16T12:16:20Z",
+        "updatedAt" : "2019-05-16T12:16:20Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5080e12c4afa1a7e1767d5034aa3ccc1e740f2ec",
+    "line" : 88,
+    "diffHunk" : "@@ -222,25 +222,42 @@ compileModule opt mod packageState uniqSupply deps pkgs tmr =\n runGhcSessionExcept\n     :: IdeOptions\n     -> Maybe ParsedModule\n-    -> PackageDynFlags\n+    -> HscEnv\n     -> Ex.ExceptT e Ghc a\n     -> Ex.ExceptT e IO a\n runGhcSessionExcept opts mbMod pkg m =\n     Ex.ExceptT $ runGhcSession opts mbMod pkg $ Ex.runExceptT m\n \n \n-getGhcDynFlags :: IdeOptions -> ParsedModule -> PackageDynFlags -> IO DynFlags\n+getGhcDynFlags :: IdeOptions -> ParsedModule -> HscEnv -> IO DynFlags\n getGhcDynFlags opts mod pkg = runGhcSession opts (Just mod) pkg getSessionDynFlags\n \n -- | Evaluate a GHC session using a new environment constructed with\n -- the supplied options.\n runGhcSession\n     :: IdeOptions\n     -> Maybe ParsedModule\n-    -> PackageDynFlags\n+    -> HscEnv\n     -> Ghc a\n     -> IO a\n-runGhcSession IdeOptions{..} = optRunGhcSession\n+runGhcSession IdeOptions{..} modu env act = runGhcEnv env $ do\n+    modifyDynFlags $ \\x -> x{importPaths = maybe [] moduleImportPaths modu ++ importPaths x}"
+  },
+  {
+    "id" : "3172252b-eb3f-424e-993e-f3e59255181a",
+    "prId" : 1179,
+    "comments" : [
+      {
+        "id" : "7f38436f-8b94-4332-92b7-1f759e36d539",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    maybeToList mbModuleRoot\r\n```",
+        "createdAt" : "2019-05-16T11:19:40Z",
+        "updatedAt" : "2019-05-16T11:28:34Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6e630fc4-a758-4b74-abe9-ebbe5740331d",
+        "parentId" : "7f38436f-8b94-4332-92b7-1f759e36d539",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Deliberately not doing that change in this PR, but yet.",
+        "createdAt" : "2019-05-16T12:15:52Z",
+        "updatedAt" : "2019-05-16T12:15:52Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5080e12c4afa1a7e1767d5034aa3ccc1e740f2ec",
+    "line" : 94,
+    "diffHunk" : "@@ -222,25 +222,42 @@ compileModule opt mod packageState uniqSupply deps pkgs tmr =\n runGhcSessionExcept\n     :: IdeOptions\n     -> Maybe ParsedModule\n-    -> PackageDynFlags\n+    -> HscEnv\n     -> Ex.ExceptT e Ghc a\n     -> Ex.ExceptT e IO a\n runGhcSessionExcept opts mbMod pkg m =\n     Ex.ExceptT $ runGhcSession opts mbMod pkg $ Ex.runExceptT m\n \n \n-getGhcDynFlags :: IdeOptions -> ParsedModule -> PackageDynFlags -> IO DynFlags\n+getGhcDynFlags :: IdeOptions -> ParsedModule -> HscEnv -> IO DynFlags\n getGhcDynFlags opts mod pkg = runGhcSession opts (Just mod) pkg getSessionDynFlags\n \n -- | Evaluate a GHC session using a new environment constructed with\n -- the supplied options.\n runGhcSession\n     :: IdeOptions\n     -> Maybe ParsedModule\n-    -> PackageDynFlags\n+    -> HscEnv\n     -> Ghc a\n     -> IO a\n-runGhcSession IdeOptions{..} = optRunGhcSession\n+runGhcSession IdeOptions{..} modu env act = runGhcEnv env $ do\n+    modifyDynFlags $ \\x -> x{importPaths = maybe [] moduleImportPaths modu ++ importPaths x}\n+    act\n+\n+\n+moduleImportPaths :: GHC.ParsedModule -> [FilePath]\n+moduleImportPaths pm =\n+    maybe [] (\\modRoot -> [modRoot]) mbModuleRoot"
+  },
+  {
+    "id" : "d90cefbb-c17b-42b0-8b77-55da7e45059d",
+    "prId" : 1179,
+    "comments" : [
+      {
+        "id" : "cbeded54-aa20-451d-841d-3e64a515d04c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can this ever be `Nothing`? If not, we should probably change the type of the function to `ParsedModule -> FilePath`.",
+        "createdAt" : "2019-05-16T11:25:42Z",
+        "updatedAt" : "2019-05-16T11:28:35Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8f244e18-4e00-4baa-bb23-cd32985b16e4",
+        "parentId" : "cbeded54-aa20-451d-841d-3e64a515d04c",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Yep, its always Nothing at most, and I'm not very happy about stripSuffix either - that looks like a bug. But I'm deliberately not changing this code in this go.",
+        "createdAt" : "2019-05-16T12:16:44Z",
+        "updatedAt" : "2019-05-16T12:16:45Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5080e12c4afa1a7e1767d5034aa3ccc1e740f2ec",
+    "line" : 103,
+    "diffHunk" : "@@ -222,25 +222,42 @@ compileModule opt mod packageState uniqSupply deps pkgs tmr =\n runGhcSessionExcept\n     :: IdeOptions\n     -> Maybe ParsedModule\n-    -> PackageDynFlags\n+    -> HscEnv\n     -> Ex.ExceptT e Ghc a\n     -> Ex.ExceptT e IO a\n runGhcSessionExcept opts mbMod pkg m =\n     Ex.ExceptT $ runGhcSession opts mbMod pkg $ Ex.runExceptT m\n \n \n-getGhcDynFlags :: IdeOptions -> ParsedModule -> PackageDynFlags -> IO DynFlags\n+getGhcDynFlags :: IdeOptions -> ParsedModule -> HscEnv -> IO DynFlags\n getGhcDynFlags opts mod pkg = runGhcSession opts (Just mod) pkg getSessionDynFlags\n \n -- | Evaluate a GHC session using a new environment constructed with\n -- the supplied options.\n runGhcSession\n     :: IdeOptions\n     -> Maybe ParsedModule\n-    -> PackageDynFlags\n+    -> HscEnv\n     -> Ghc a\n     -> IO a\n-runGhcSession IdeOptions{..} = optRunGhcSession\n+runGhcSession IdeOptions{..} modu env act = runGhcEnv env $ do\n+    modifyDynFlags $ \\x -> x{importPaths = maybe [] moduleImportPaths modu ++ importPaths x}\n+    act\n+\n+\n+moduleImportPaths :: GHC.ParsedModule -> [FilePath]\n+moduleImportPaths pm =\n+    maybe [] (\\modRoot -> [modRoot]) mbModuleRoot\n+  where\n+    ms   = GHC.pm_mod_summary pm\n+    file = GHC.ms_hspp_file ms\n+    mod'  = GHC.ms_mod ms\n+    rootPathDir  = takeDirectory file\n+    rootModDir   = takeDirectory . moduleNameSlashes . GHC.moduleName $ mod'\n+    mbModuleRoot\n+        | rootModDir == \".\" = Just rootPathDir\n+        | otherwise = dropTrailingPathSeparator <$> stripSuffix rootModDir rootPathDir"
+  },
+  {
+    "id" : "d92ae4f3-50df-4491-8d22-1490479d8135",
+    "prId" : 961,
+    "comments" : [
+      {
+        "id" : "91175227-1e97-4b93-a5ac-2a212830ee8a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2019-05-07T08:29:15Z",
+        "updatedAt" : "2019-05-07T08:32:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c2fb835c1fb3781af2a846f7a29e34b649d3ada1",
+    "line" : 32,
+    "diffHunk" : "@@ -61,24 +60,6 @@ import           Development.IDE.Types.SpanInfo\n import GHC.Generics (Generic)\n import           System.FilePath\n \n--- TODO (MK) Move to a separate Options module"
+  },
+  {
+    "id" : "4892fb4c-93d5-4074-a1f1-29e50e494cea",
+    "prId" : 955,
+    "comments" : [
+      {
+        "id" : "bffd7656-dfac-4426-8fcd-faf4ac8111a2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is this a `ghc` vs `ghc-lib` or an `8.6` vs `8.8` thing? What do we think is the default backend, `ghc` or `ghc-lib`? I think we should make the default backend work without any pragma.",
+        "createdAt" : "2019-05-06T20:11:50Z",
+        "updatedAt" : "2019-05-06T20:11:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a1afdfb1-f489-4c2a-a4a3-9f8f1d27bb8a",
+        "parentId" : "bffd7656-dfac-4426-8fcd-faf4ac8111a2",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "It's more an 8.6 vs 8.8 thing. We do need to figure out which is the default, and probably want to use the Cabal package-ghc version macro at some point. For the moment, I tried to change as little in our code, but assuming one day this goes into a separate repo, then it probably wants to be the other way around.",
+        "createdAt" : "2019-05-06T20:29:11Z",
+        "updatedAt" : "2019-05-06T20:29:11Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d3ee095bc2210a4728c40fbc69602e5941956786",
+    "line" : 12,
+    "diffHunk" : "@@ -414,7 +415,9 @@ getModSummaryFromBuffer fp (contents, fileDate) dflags parsed = do\n           { ml_hs_file  = Just fp\n           , ml_hi_file  = replaceExtension fp \"hi\"\n           , ml_obj_file = replaceExtension fp \"o\"\n+#ifndef USE_GHC"
+  }
+]

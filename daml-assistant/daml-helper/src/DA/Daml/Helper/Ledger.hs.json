@@ -1,0 +1,699 @@
+[
+  {
+    "id" : "04e1b10a-33ad-4aa5-a193-dc6ff50fce5c",
+    "prId" : 7777,
+    "comments" : [
+      {
+        "id" : "5d3b9e2a-e633-4d53-b136-0d9a95d5f9ed",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "There would have been a tiny bit less code in\r\n```suggestion\r\nlistParties args =\r\n  case api args of\r\n```\r\nbut I don't really mind. 😃",
+        "createdAt" : "2020-10-22T13:45:21Z",
+        "updatedAt" : "2020-10-22T14:47:03Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9beba81036c277a388fcb2d86a847f54a3ae64b8",
+    "line" : null,
+    "diffHunk" : "@@ -114,101 +199,120 @@ runLedgerListParties flags (JsonFlag json) = do\n     else\n         mapM_ print xs\n \n--- | Allocate parties on ledger. If list of parties is empty,\n--- defaults to the project parties.\n-runLedgerAllocateParties :: LedgerFlags -> [String] -> IO ()\n-runLedgerAllocateParties flags partiesArg = do\n-    parties <- if notNull partiesArg\n-        then pure partiesArg\n-        else getProjectParties\n-    hp <- getHostAndPortDefaults flags\n-    putStrLn $ \"Checking party allocation at \" <> show hp\n-    mapM_ (allocatePartyIfRequired hp) parties\n-\n--- | Allocate a party if it doesn't already exist (by display name).\n-allocatePartyIfRequired :: LedgerArgs -> String -> IO ()\n-allocatePartyIfRequired hp name = do\n-    partyM <- lookupParty hp name\n-    party <- flip fromMaybeM partyM $ do\n-        putStrLn $ \"Allocating party for '\" <> name <> \"' at \" <> show hp\n-        allocateParty hp name\n-    putStrLn $ \"Allocated \" <> show party <> \" for '\" <> name <> \"' at \" <> show hp\n-\n--- | Give better help to the user if the upload-dar commands fails\n-data ExceptionDuringUploadDar = ExceptionDuringUploadDar SomeException\n-instance Exception ExceptionDuringUploadDar\n-\n-instance Show ExceptionDuringUploadDar where\n-  show (ExceptionDuringUploadDar e) =\n-    unlines [ \"An exception was thrown when during the upload-dar command\"\n-            , \"- \" <> show e\n-            , \"One reason for this to occur is if the size of DAR file being uploaded exceeds the gRPC maximum message size. The default value for this is 4Mb, but it may be increased when the ledger is (re)started. Please check with your ledger operator.\"\n-            ]\n--- | Upload a DAR file to the ledger. (Defaults to project DAR)\n-runLedgerUploadDar :: LedgerFlags -> Maybe FilePath -> IO ()\n-runLedgerUploadDar flags darPathM = do\n-    hp <- getHostAndPortDefaults flags\n-    darPath <- flip fromMaybeM darPathM $ do\n-        doBuild\n-        getDarPath\n-    putStrLn $ \"Uploading \" <> darPath <> \" to \" <> show hp\n-    bytes <- BS.readFile darPath\n-    uploadDarFile hp bytes `catch` \\e -> throw (ExceptionDuringUploadDar e)\n-    putStrLn \"DAR upload succeeded.\"\n-\n -- | Fetch the packages reachable from a main package-id, and reconstruct a DAR file.\n runLedgerFetchDar :: LedgerFlags -> String -> FilePath -> IO ()\n runLedgerFetchDar flags pidString saveAs = do\n+    args <- getDefaultArgs flags\n     let pid = LF.PackageId $ T.pack pidString\n-    hp <- getHostAndPortDefaults flags\n-    putStrLn $ \"Fetching \" <> show (LF.unPackageId pid) <> \" from \" <> show hp <> \" into \" <> saveAs\n-    n <- fetchDar hp pid saveAs\n+    putStrLn $\n+      \"Fetching \" <> show (LF.unPackageId pid) <> \" from \" <> showHostAndPort args <>\n+      \" into \" <>\n+      saveAs\n+    n <- fetchDar args pid saveAs\n     putStrLn $ \"DAR fetch succeeded; contains \" <> show n <> \" packages.\"\n \n-run :: LedgerArgs -> LedgerService a -> IO a\n-run = runWithLedgerArgs\n+-- | Reconstruct a DAR file by downloading packages from a ledger. Returns how many packages fetched.\n+fetchDar :: LedgerArgs -> LF.PackageId -> FilePath -> IO Int\n+fetchDar args rootPid saveAs = do\n+  xs <- downloadAllReachablePackages args rootPid\n+  [pkg] <- pure [ pkg | (pid,pkg) <- xs, pid == rootPid ]\n+  let (dalf,pkgId) = LFArchive.encodeArchiveAndHash pkg\n+  let dalfDependencies :: [(T.Text,BS.ByteString,LF.PackageId)] =\n+        [ (txt,bs,pkgId)\n+        | (pid,pkg) <- xs, pid /= rootPid\n+        , let txt = recoverPackageName pkg (\"dep\",pid)\n+        , let (bsl,pkgId) = LFArchive.encodeArchiveAndHash pkg\n+        , let bs = BSL.toStrict bsl\n+        ]\n+  let (pName,pVersion) = do\n+        let LF.Package {packageMetadata} = pkg\n+        case packageMetadata of\n+          Nothing -> (LF.PackageName $ T.pack \"reconstructed\",Nothing)\n+          Just LF.PackageMetadata{packageName,packageVersion} -> (packageName,Just packageVersion)\n+  let pSdkVersion = PackageSdkVersion SdkVersion.sdkVersion\n+  let srcRoot = error \"unexpected use of srcRoot when there are no sources\"\n+  let za = createArchive pName pVersion pSdkVersion pkgId dalf dalfDependencies srcRoot [] [] []\n+  createDarFile saveAs za\n+  return $ length xs\n+\n+recoverPackageName :: LF.Package -> (String,LF.PackageId) -> T.Text\n+recoverPackageName pkg (tag,pid)= do\n+  let LF.Package {packageMetadata} = pkg\n+  case packageMetadata of\n+    Just LF.PackageMetadata{packageName} -> LF.unPackageName packageName\n+    -- fallback, manufacture a name from the pid\n+    Nothing -> T.pack (tag <> \"-\" <> T.unpack (LF.unPackageId pid))\n+\n+-- | Download all Packages reachable from a PackageId; fail if any don't exist or can't be decoded.\n+downloadAllReachablePackages :: LedgerArgs -> LF.PackageId -> IO [(LF.PackageId,LF.Package)]\n+downloadAllReachablePackages args pid = loop [] [pid]\n+  where\n+    loop :: [(LF.PackageId,LF.Package)] -> [LF.PackageId] -> IO [(LF.PackageId,LF.Package)]\n+    loop acc = \\case\n+      [] -> return acc\n+      pid:morePids ->\n+        if pid `elem` [ pid | (pid,_) <- acc ]\n+        then loop acc morePids\n+        else do\n+          pkg <- downloadPackage args pid\n+          loop ((pid,pkg):acc) (packageRefs pkg ++ morePids)\n+\n+    packageRefs pkg = nubSort [ pid | LF.PRImport pid <- toListOf LF.packageRefs pkg ]\n+\n+-- | Download the Package identified by a PackageId; fail if it doesn't exist or can't be decoded.\n+downloadPackage :: LedgerArgs -> LF.PackageId -> IO LF.Package\n+downloadPackage args pid = do\n+  let ls :: L.LedgerService (Maybe L.Package) = do\n+        lid <- L.getLedgerIdentity\n+        L.getPackage lid $ convPid pid\n+  runWithLedgerArgs args ls >>= \\case\n+    Nothing -> fail $ \"Unable to download package with identity: \" <> show pid\n+    Just (L.Package bs) -> do\n+      let mode = LFArchive.DecodeAsMain\n+      case LFArchive.decodePackage mode pid bs of\n+        Left err -> fail $ show err\n+        Right pkg -> return pkg\n+  where\n+    convPid :: LF.PackageId -> L.PackageId\n+    convPid (LF.PackageId text) = L.PackageId $ TL.fromStrict text\n \n-listParties :: LedgerApi -> LedgerArgs -> IO [PartyDetails]\n-listParties api la =\n+listParties :: LedgerArgs -> IO [PartyDetails]\n+listParties args@LedgerArgs {api} =\n   case api of"
+  },
+  {
+    "id" : "7795e830-c2d1-470f-9c6f-a3a766e32290",
+    "prId" : 7777,
+    "comments" : [
+      {
+        "id" : "69b21222-b187-48bc-a3f3-6a44cab52dcc",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We're calling the `LedgerFlags` constructor without listing the field names somewhere below. That's not the best idea in terms of maintainability. When I tried to suggest naming the arguments, I noticed I'm pretty much defining a default value for `LedgerFlags`. Well, let's do this properly then:\r\n```suggestion\r\n\r\ndefaultLedgerFlags :: LedgerApi -> LedgerFlags\r\ndefaultLedgerFlags api = LedgerFlags\r\n  { fApi = api\r\n  , fSslConfigM = Nothing\r\n  , fTimeout = 10\r\n  , fHostM = Nothing\r\n  , fPortM = Nothing\r\n  , fTokFileM = Nothing\r\n  }\r\n\r\n```",
+        "createdAt" : "2020-10-22T13:55:03Z",
+        "updatedAt" : "2020-10-22T14:47:03Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9beba81036c277a388fcb2d86a847f54a3ae64b8",
+    "line" : 70,
+    "diffHunk" : "@@ -42,27 +43,72 @@ import System.FilePath\n import System.IO.Extra\n import System.Process.Typed\n \n-import qualified DA.Daml.LF.Ast as LF\n-import DA.Daml.Compiler.Fetch (LedgerArgs(..),runWithLedgerArgs,fetchDar)\n-\n+import DA.Daml.Compiler.Dar (createArchive, createDarFile)\n import DA.Daml.Helper.Util\n+import qualified DA.Daml.LF.Ast as LF\n+import qualified DA.Daml.LF.Ast.Optics as LF (packageRefs)\n+import qualified DA.Daml.LF.Proto3.Archive as LFArchive\n+import DA.Daml.Package.Config (PackageSdkVersion(..))\n import DA.Daml.Project.Util (fromMaybeM)\n+import qualified DA.Ledger as L\n+import DA.Ledger (Party(..), PartyDetails(..))\n+import qualified SdkVersion\n \n data LedgerApi\n   = Grpc\n   | HttpJson\n   deriving (Show, Eq)\n \n data LedgerFlags = LedgerFlags\n+  { fApi :: LedgerApi\n+  , fSslConfigM :: Maybe L.ClientSSLConfig\n+  , fTimeout :: L.TimeoutSeconds\n+  -----------------------------------------\n+  -- The following values get defaults by\n+  -- running `getDefaultArgs`\n+  , fHostM :: Maybe String\n+  , fPortM :: Maybe Int\n+  , fTokFileM :: Maybe FilePath\n+  }\n+"
+  },
+  {
+    "id" : "88f1f4bb-5b9b-4897-a537-2ae611c888ef",
+    "prId" : 7700,
+    "comments" : [
+      {
+        "id" : "a936c36f-4d61-43be-8d1b-279ad1027eec",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why not define a `FromJSON` instance for `PartyDetails` or a newtype thereof? The `lens-aeson` stuff doesn’t seem all that benefitial here.",
+        "createdAt" : "2020-10-16T07:22:25Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ff20103e-790a-44d5-8cdf-fe7e01e5892e",
+        "parentId" : "a936c36f-4d61-43be-8d1b-279ad1027eec",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I think that would be way nicer. But that would result in an orphan instance, unless I write the instance into the hs bindings. What's your preference here?",
+        "createdAt" : "2020-10-16T09:46:17Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a1f47be7-3e8c-4b43-a963-ea0c505c18f8",
+        "parentId" : "a936c36f-4d61-43be-8d1b-279ad1027eec",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t particularly mind orphan instances in applications. They’re bad in libraries but we don’t distribute our code. You could also newtype it. I don’t have anything against putting it in the HS bindings either. Whatever is easiest.",
+        "createdAt" : "2020-10-16T09:50:17Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b23e97ac-873c-4742-823a-6624fed7fee3",
+        "parentId" : "a936c36f-4d61-43be-8d1b-279ad1027eec",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "Ok, I added them to hs bindings.",
+        "createdAt" : "2020-10-16T09:59:22Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a8eedbfa7487539c8c7d7f663d13ec5fef4dda3a",
+    "line" : null,
+    "diffHunk" : "@@ -216,3 +236,79 @@ runLedgerNavigator flags remainingArguments = do\n           ]\n         , [\"  }\"]\n         ]\n+\n+----------------\n+-- HTTP JSON API\n+----------------\n+\n+newtype Method = Method\n+  { unMethod :: BS.ByteString\n+  } deriving IsString\n+\n+newtype Path = Path\n+  { unPath :: BS.ByteString\n+  } deriving IsString\n+\n+-- | Run a request against the HTTP JSON API.\n+httpJsonRequest :: LedgerArgs -> Method -> Path -> IO (Response A.Value)\n+httpJsonRequest LedgerArgs {..} method path = do\n+  resp <-\n+    httpJSON $\n+    setRequestPort port $\n+    setRequestHost (BSC.pack host) $\n+    setRequestMethod (unMethod method) $\n+    setRequestPath (unPath path) $\n+    setRequestHeader\n+      \"authorization\"\n+      [BSC.pack $ sanitizeToken tok | Just (L.Token tok) <- [tokM]]\n+      defaultRequest\n+  let status = getResponseStatusCode resp\n+  unless (status == 200) $\n+    fail $ \"Request failed with error code \" <> show status\n+  pure resp\n+\n+-- This matches how the com.daml.ledger.api.auth.client.LedgerCallCredentials\n+-- behaves.\n+sanitizeToken :: String -> String\n+sanitizeToken tok\n+  | \"Bearer \" `isPrefixOf` tok = tok\n+  | otherwise = \"Bearer \" <> tok\n+\n+listPartiesJson :: LedgerArgs -> IO [PartyDetails]\n+listPartiesJson args = do\n+  body <- getResponseBody <$> httpJsonRequest args \"GET\" \"/v1/parties\"\n+  either (fail . show) return $ do\n+    ps <- getObject A._Array \"result\" body\n+    traverse getPartyDetails $ Vector.toList ps\n+\n+getPartyDetails :: A.Value -> Perhaps PartyDetails"
+  },
+  {
+    "id" : "e29461f1-c05e-46c1-9819-d88a93aff789",
+    "prId" : 7700,
+    "comments" : [
+      {
+        "id" : "5ddcfb49-7f85-4f5e-b132-058222835b29",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  = Grpc\r\n```\r\nSeems more consistent with HttpJson",
+        "createdAt" : "2020-10-16T07:24:40Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "79d3b33c-164a-4f40-a213-5c942b9ab3b3",
+        "parentId" : "5ddcfb49-7f85-4f5e-b132-058222835b29",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "Changed it. I was coming from 'gRPC', but no big fan of too much upper case either.",
+        "createdAt" : "2020-10-16T09:04:45Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a8eedbfa7487539c8c7d7f663d13ec5fef4dda3a",
+    "line" : null,
+    "diffHunk" : "@@ -11,34 +15,47 @@ module DA.Daml.Helper.Ledger (\n     runLedgerAllocateParties,\n     runLedgerUploadDar,\n     runLedgerFetchDar,\n-    runLedgerNavigator\n+    runLedgerNavigator,\n     ) where\n \n-import Control.Exception.Safe (SomeException,Exception,catch,throw)\n+import Control.Exception.Safe (Exception, SomeException, catch, throw)\n+import Control.Lens (Prism', preview)\n import Control.Monad.Extra hiding (fromMaybeM)\n-import DA.Ledger (LedgerService,PartyDetails(..),Party(..),Token)\n-import Data.Aeson\n-import Data.Aeson.Text\n-import Data.List.Extra as List\n+import DA.Ledger (LedgerService, Party(..), PartyDetails(..), Token)\n import qualified DA.Ledger as L\n+import Data.Aeson ((.=))\n+import qualified Data.Aeson as A\n+import qualified Data.Aeson.Lens as A\n+import Data.Aeson.Text\n import qualified Data.ByteString as BS\n+import qualified Data.ByteString.Char8 as BSC\n+import Data.List.Extra as List\n+import Data.String (IsString)\n import qualified Data.Text as T\n import qualified Data.Text.Lazy as TL\n import qualified Data.Text.Lazy.IO as TL\n+import qualified Data.Vector as Vector\n+import Network.HTTP.Simple\n import System.Environment\n import System.Exit\n import System.FilePath\n import System.IO.Extra\n import System.Process.Typed\n \n import qualified DA.Daml.LF.Ast as LF\n-import DA.Daml.Compiler.Fetch (LedgerArgs(..),runWithLedgerArgs, fetchDar)\n+import DA.Daml.Compiler.Fetch (LedgerArgs(..), runWithLedgerArgs, fetchDar)\n \n import DA.Daml.Helper.Util\n import DA.Daml.Project.Util (fromMaybeM)\n \n+data LedgerApi\n+  = GRPC"
+  },
+  {
+    "id" : "6b7abec1-2ea2-4aff-b0f8-e7b7e4aae88e",
+    "prId" : 7700,
+    "comments" : [
+      {
+        "id" : "c39642c9-2870-404d-9e10-16b51fb59c6b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "There are also HTTP APIs with more types like `req`. Maybe worth considering to use one if you care about this.",
+        "createdAt" : "2020-10-16T07:26:25Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f516d32b-015e-40a2-8670-aab7a34f24eb",
+        "parentId" : "c39642c9-2870-404d-9e10-16b51fb59c6b",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "@cocreature could you point me to one?",
+        "createdAt" : "2020-10-19T16:26:37Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fd00109b-332b-4a9a-81dd-f1f089463b30",
+        "parentId" : "c39642c9-2870-404d-9e10-16b51fb59c6b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It’s literally called [req](https://hackage.haskell.org/package/req)",
+        "createdAt" : "2020-10-19T16:30:31Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "26cecabf-f4ef-4673-a238-ab46a586553f",
+        "parentId" : "c39642c9-2870-404d-9e10-16b51fb59c6b",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "Ah, was getting your comment wrong. I think for this simple use case using plain http-client-simple should be good enough.",
+        "createdAt" : "2020-10-19T17:49:50Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "404094d3-8f45-4fb4-8a37-43dd84979d90",
+        "parentId" : "c39642c9-2870-404d-9e10-16b51fb59c6b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "agreed",
+        "createdAt" : "2020-10-19T17:52:11Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a8eedbfa7487539c8c7d7f663d13ec5fef4dda3a",
+    "line" : 125,
+    "diffHunk" : "@@ -216,3 +236,79 @@ runLedgerNavigator flags remainingArguments = do\n           ]\n         , [\"  }\"]\n         ]\n+\n+----------------\n+-- HTTP JSON API\n+----------------\n+\n+newtype Method = Method\n+  { unMethod :: BS.ByteString\n+  } deriving IsString\n+\n+newtype Path = Path\n+  { unPath :: BS.ByteString\n+  } deriving IsString"
+  },
+  {
+    "id" : "afa2ed2d-7921-45fa-aaba-0c8dc515b06b",
+    "prId" : 7700,
+    "comments" : [
+      {
+        "id" : "48c7b5fc-3164-486e-8632-9ed79a86c5bc",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The logic here only works if the JSON API is hosted at `/` and not a subpath. I believe we have this limitation in other places (e.g., DAML Script) so not a big issue but worth keeping in mind.",
+        "createdAt" : "2020-10-16T07:27:26Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ee52a301-6980-4a93-b8c7-9502e1bdacfd",
+        "parentId" : "48c7b5fc-3164-486e-8632-9ed79a86c5bc",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Does that work with DABL?",
+        "createdAt" : "2020-10-16T07:48:13Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "80919b3c-5470-4333-910a-ede68aa064bf",
+        "parentId" : "48c7b5fc-3164-486e-8632-9ed79a86c5bc",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not quite sure where dabl hosts the API but afaik they don’t expose the admin endpoints anyway.",
+        "createdAt" : "2020-10-16T10:30:16Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a8eedbfa7487539c8c7d7f663d13ec5fef4dda3a",
+    "line" : 137,
+    "diffHunk" : "@@ -216,3 +236,79 @@ runLedgerNavigator flags remainingArguments = do\n           ]\n         , [\"  }\"]\n         ]\n+\n+----------------\n+-- HTTP JSON API\n+----------------\n+\n+newtype Method = Method\n+  { unMethod :: BS.ByteString\n+  } deriving IsString\n+\n+newtype Path = Path\n+  { unPath :: BS.ByteString\n+  } deriving IsString\n+\n+-- | Run a request against the HTTP JSON API.\n+httpJsonRequest :: LedgerArgs -> Method -> Path -> IO (Response A.Value)\n+httpJsonRequest LedgerArgs {..} method path = do\n+  resp <-\n+    httpJSON $\n+    setRequestPort port $\n+    setRequestHost (BSC.pack host) $\n+    setRequestMethod (unMethod method) $\n+    setRequestPath (unPath path) $"
+  },
+  {
+    "id" : "e8ff119a-ced5-43d5-8717-98a697ffa3ef",
+    "prId" : 7700,
+    "comments" : [
+      {
+        "id" : "703353cd-78dc-42f1-bf1c-503912e8d0e8",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Do you know why we have this and `LedgerArgs`? That seems a bit redundant. It's also strange that import the compiler here. This is completely unrelated but might need some cleanup in the future. In the meantime, I think it would make sense to add the `api` field also do `LedgerArgs` instead of passing it around individually.",
+        "createdAt" : "2020-10-20T16:16:29Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "67ee2a61-f0c8-4f25-940d-04544ebf8135",
+        "parentId" : "703353cd-78dc-42f1-bf1c-503912e8d0e8",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I think the `LedgerArgs/LedgerFlags` and how the gRPC api is called would need some cleanup, it seems unnecessarily complicated to me.",
+        "createdAt" : "2020-10-20T17:06:58Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7e7c2409-c205-418d-aac4-098429b31a73",
+        "parentId" : "703353cd-78dc-42f1-bf1c-503912e8d0e8",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "Looking at it, I think the module `Compiler.Fetch` should move to the helper, and the `LedgerArgs` should become `LedgerFlags` or vice versa. I'd rather not add an unused field to `LedgerArgs` and clean this up in the near future.",
+        "createdAt" : "2020-10-21T11:48:15Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a8eedbfa7487539c8c7d7f663d13ec5fef4dda3a",
+    "line" : 61,
+    "diffHunk" : "@@ -11,34 +15,46 @@ module DA.Daml.Helper.Ledger (\n     runLedgerAllocateParties,\n     runLedgerUploadDar,\n     runLedgerFetchDar,\n-    runLedgerNavigator\n+    runLedgerNavigator,\n     ) where\n \n-import Control.Exception.Safe (SomeException,Exception,catch,throw)\n+import Control.Exception.Safe (Exception,SomeException,catch,throw)\n import Control.Monad.Extra hiding (fromMaybeM)\n-import DA.Ledger (LedgerService,PartyDetails(..),Party(..),Token)\n-import Data.Aeson\n-import Data.Aeson.Text\n-import Data.List.Extra as List\n+import DA.Ledger (LedgerService,Party(..),PartyDetails(..),Token)\n import qualified DA.Ledger as L\n+import Data.Aeson ((.=))\n+import qualified Data.Aeson as A\n+import Data.Aeson.Text\n import qualified Data.ByteString as BS\n+import qualified Data.ByteString.Char8 as BSC\n+import Data.List.Extra as List\n+import Data.String (IsString)\n import qualified Data.Text as T\n import qualified Data.Text.Lazy as TL\n import qualified Data.Text.Lazy.IO as TL\n+import Data.Maybe\n+import GHC.Generics\n+import Network.HTTP.Simple\n import System.Environment\n import System.Exit\n import System.FilePath\n import System.IO.Extra\n import System.Process.Typed\n \n import qualified DA.Daml.LF.Ast as LF\n-import DA.Daml.Compiler.Fetch (LedgerArgs(..),runWithLedgerArgs, fetchDar)\n+import DA.Daml.Compiler.Fetch (LedgerArgs(..),runWithLedgerArgs,fetchDar)\n \n import DA.Daml.Helper.Util\n import DA.Daml.Project.Util (fromMaybeM)\n \n+data LedgerApi\n+  = Grpc\n+  | HttpJson\n+  deriving (Show, Eq)\n+\n data LedgerFlags = LedgerFlags"
+  },
+  {
+    "id" : "9c075358-1b6e-4086-845b-c406b55e3735",
+    "prId" : 7700,
+    "comments" : [
+      {
+        "id" : "3fd236fc-db38-41e3-8906-9ed6c837446c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is there some form of error message we get from the JSON APU we could print here in case of a failure? It might also be better to `putStrLn` all the information we have and call `exitFailure`.",
+        "createdAt" : "2020-10-20T16:21:04Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dfc57c46-bdec-4bc4-b3d7-4cdfecf93d40",
+        "parentId" : "3fd236fc-db38-41e3-8906-9ed6c837446c",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "We now print the full status containing the error.",
+        "createdAt" : "2020-10-21T13:25:06Z",
+        "updatedAt" : "2020-10-21T14:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a8eedbfa7487539c8c7d7f663d13ec5fef4dda3a",
+    "line" : 144,
+    "diffHunk" : "@@ -216,3 +235,54 @@ runLedgerNavigator flags remainingArguments = do\n           ]\n         , [\"  }\"]\n         ]\n+\n+----------------\n+-- HTTP JSON API\n+----------------\n+\n+newtype Method = Method\n+  { unMethod :: BS.ByteString\n+  } deriving IsString\n+\n+newtype Path = Path\n+  { unPath :: BS.ByteString\n+  } deriving IsString\n+\n+-- | Run a request against the HTTP JSON API.\n+httpJsonRequest :: A.FromJSON a => LedgerArgs -> Method -> Path -> IO (Response a)\n+httpJsonRequest LedgerArgs {sslConfigM,tokM,port,host} method path = do\n+  when (isJust sslConfigM) $\n+    fail \"The HTTP JSON API doesn't support TLS requests, but a TLS flag was set.\"\n+  resp <-\n+    httpJSON $\n+    setRequestPort port $\n+    setRequestHost (BSC.pack host) $\n+    setRequestMethod (unMethod method) $\n+    setRequestPath (unPath path) $\n+    setRequestHeader\n+      \"authorization\"\n+      [BSC.pack $ sanitizeToken tok | Just (L.Token tok) <- [tokM]]\n+      defaultRequest\n+  let status = getResponseStatusCode resp\n+  unless (status == 200) $\n+    fail $ \"Request failed with error code \" <> show status"
+  },
+  {
+    "id" : "f7367327-1a66-4325-b357-88e2743fc074",
+    "prId" : 7510,
+    "comments" : [
+      {
+        "id" : "72d25d64-f8ec-4360-8157-1591258ab3e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Please use `catch` from `safe-exceptions` or even better `catchIO`. You don’t want to catch asynchronous exceptions here.",
+        "createdAt" : "2020-09-29T09:00:11Z",
+        "updatedAt" : "2020-09-29T13:45:29Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fd37c45f-4f94-4d8a-8d43-091867dd6d49",
+        "parentId" : "72d25d64-f8ec-4360-8157-1591258ab3e9",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I switch to safe-exceptions.\r\nI couldn't use `catchIO` as this does not catch `GRPCIOTimeout` which is the one I really care about.",
+        "createdAt" : "2020-09-29T13:48:19Z",
+        "updatedAt" : "2020-09-29T13:48:19Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "aa973cef1f3fd7914d95629eb069b1268c7d93ac",
+    "line" : 30,
+    "diffHunk" : "@@ -125,7 +136,7 @@ runLedgerUploadDar flags darPathM = do\n         getDarPath\n     putStrLn $ \"Uploading \" <> darPath <> \" to \" <> show hp\n     bytes <- BS.readFile darPath\n-    uploadDarFile hp bytes\n+    uploadDarFile hp bytes `catch` \\e -> throw (ExceptionDuringUploadDar e)"
+  },
+  {
+    "id" : "1e890fbe-26d9-4da7-bcec-6f2f0045bba7",
+    "prId" : 7510,
+    "comments" : [
+      {
+        "id" : "2682fa41-d114-4535-96d9-12b615137114",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "```suggestion\r\nimport Control.Exception.Safe (SomeException,Exception,catch,throw)\r\n```",
+        "createdAt" : "2020-09-29T10:28:27Z",
+        "updatedAt" : "2020-09-29T13:45:29Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "998ac9e7-7899-4104-a319-e2a3eaa564a5",
+        "parentId" : "2682fa41-d114-4535-96d9-12b615137114",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "did this",
+        "createdAt" : "2020-09-29T13:48:25Z",
+        "updatedAt" : "2020-09-29T13:48:25Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "aa973cef1f3fd7914d95629eb069b1268c7d93ac",
+    "line" : null,
+    "diffHunk" : "@@ -14,6 +14,7 @@ module DA.Daml.Helper.Ledger (\n     runLedgerNavigator\n     ) where\n \n+import Control.Exception (SomeException,Exception,catch,throw)"
+  },
+  {
+    "id" : "34e42039-ccfb-4bbb-b184-8898b9763c54",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "2f3a60fc-0e61-4ac0-8eed-3ef0cffa01e6",
+        "parentId" : null,
+        "author" : null,
+        "body" : "I like the separate module :-) \r\n\r\nI'd also be happy if all of the related logic for running the commands was in this module as well (the `runDeploy`, `runAllocateParty`, `runListParty`, etc). But happy to leave this refactoring for another PR. DamlHelper sure needs it at this point.",
+        "createdAt" : "2019-08-02T17:58:24Z",
+        "updatedAt" : "2019-08-02T17:58:24Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : 3,
+    "diffHunk" : "@@ -0,0 +1,51 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+module DA.Daml.Helper.Ledger ("
+  },
+  {
+    "id" : "8d35f293-11f4-4395-bb3e-ae708362819e",
+    "prId" : 2384,
+    "comments" : [
+      {
+        "id" : "3a6c0526-eaac-4c93-92a2-08f05f6ca501",
+        "parentId" : null,
+        "author" : {
+          "login" : "soren-da",
+          "name" : "Soren Bleikertz",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/21557885?u=b740c5c93513e52897b197a1c8ba54af8774f2d5&v=4"
+        },
+        "body" : "Yes we should set the party name as a hint. Sandbox can take it as is and in Canton we would get more readable party ids.",
+        "createdAt" : "2019-08-05T09:46:35Z",
+        "updatedAt" : "2019-08-05T09:46:36Z",
+        "lastEditedBy" : {
+          "login" : "soren-da",
+          "name" : "Soren Bleikertz",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/21557885?u=b740c5c93513e52897b197a1c8ba54af8774f2d5&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ba38a82b-1e18-496d-963f-95adb00fe503",
+        "parentId" : "3a6c0526-eaac-4c93-92a2-08f05f6ca501",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Why do we even care that party names are readable?",
+        "createdAt" : "2019-08-05T12:14:13Z",
+        "updatedAt" : "2019-08-05T12:14:14Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c4fc3241-bca5-46d7-a412-70f1cbdffa28",
+        "parentId" : "3a6c0526-eaac-4c93-92a2-08f05f6ca501",
+        "author" : {
+          "login" : "soren-da",
+          "name" : "Soren Bleikertz",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/21557885?u=b740c5c93513e52897b197a1c8ba54af8774f2d5&v=4"
+        },
+        "body" : "It makes debugging easier if the party ids are readable to some degree. I'd appreciate if we set the hint based on the name.",
+        "createdAt" : "2019-08-05T12:47:29Z",
+        "updatedAt" : "2019-08-05T12:47:29Z",
+        "lastEditedBy" : {
+          "login" : "soren-da",
+          "name" : "Soren Bleikertz",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/21557885?u=b740c5c93513e52897b197a1c8ba54af8774f2d5&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5031749e-2751-4393-8ef6-02e9c42a21eb",
+        "parentId" : "3a6c0526-eaac-4c93-92a2-08f05f6ca501",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done.. next PR",
+        "createdAt" : "2019-08-05T14:51:44Z",
+        "updatedAt" : "2019-08-05T14:51:44Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f8e94fef0071b44e845610dfb85f98680256ad50",
+    "line" : 37,
+    "diffHunk" : "@@ -0,0 +1,51 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+module DA.Daml.Helper.Ledger (\n+    HostAndPort(..),\n+    listParties, PartyDetails(..), Party(..),\n+    lookupParty,\n+    allocateParty,\n+    uploadDarFile,\n+    ) where\n+\n+import DA.Ledger(LedgerService,PartyDetails(..),Party(..))\n+import Data.List.Extra as List\n+import Data.String(fromString)\n+import qualified DA.Ledger as L\n+import qualified Data.ByteString as BS\n+import qualified Data.Text.Lazy as Text(pack)\n+\n+data HostAndPort = HostAndPort { host :: String, port :: Int }\n+\n+instance Show HostAndPort where\n+    show HostAndPort{host,port} = host <> \":\" <> show port\n+\n+listParties :: HostAndPort -> IO [PartyDetails]\n+listParties hp = run hp L.listKnownParties\n+\n+lookupParty :: HostAndPort -> String -> IO (Maybe Party)\n+lookupParty hp name = do\n+    xs <- listParties hp\n+    let text = Text.pack name\n+    let pred PartyDetails{displayName,party} = if text == displayName then Just party else Nothing\n+    return $ List.firstJust pred xs\n+\n+allocateParty :: HostAndPort -> String -> IO Party\n+allocateParty hp name = run hp $ do\n+    let text = Text.pack name\n+    let request = L.AllocatePartyRequest\n+            { partyIdHint = \"\" -- text -- ???"
+  }
+]

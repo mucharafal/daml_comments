@@ -1,0 +1,1004 @@
+[
+  {
+    "id" : "b0b18520-c614-4fa7-b645-85216bd0f1d7",
+    "prId" : 7404,
+    "comments" : [
+      {
+        "id" : "3fe5453d-f972-4caa-bce1-deba545b3488",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we need to bump the timeout here?",
+        "createdAt" : "2020-09-16T08:55:20Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ed9213b8-ee6f-49ea-8f90-f81068590721",
+        "parentId" : "3fe5453d-f972-4caa-bce1-deba545b3488",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "We don't _need_ to, I suppose: I've not seen this fail yet. Call it ~paranoia~ prudence: sleep instructions are always a bit fuzzy in their guarantees, so I prefer to sleep \"significantly\" longer than a timeout I'm testing for. These are milliseconds and we have like 4 lines of code here so it's cutting it really close otherwise. ",
+        "createdAt" : "2020-09-16T09:44:24Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0b4318b65d3ff40751a756b838044db7b29d2aa",
+    "line" : 24,
+    "diffHunk" : "@@ -171,14 +175,14 @@ describe(\"streamSubmit\", () => {\n     expect(mockChange).not.toHaveBeenCalled();\n   });\n \n-  test(\"reconnect on close\", async () => {\n+  test(\"reconnect on server close\", async () => {\n     const reconnectThreshold = 200;\n     const ledger = new Ledger({...mockOptions, reconnectThreshold: reconnectThreshold});\n     const stream = ledger.streamQuery(Foo);\n     stream.on(\"live\", mockLive);\n     stream.on(\"close\", mockClose);\n     mockInstance.serverSend({events: [], offset: '3'});\n-    await new Promise(resolve => setTimeout(resolve, reconnectThreshold));\n+    await new Promise(resolve => setTimeout(resolve, reconnectThreshold * 2));"
+  },
+  {
+    "id" : "b613b886-cb9c-4b9c-8cb9-66321ac85421",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "61e6f071-9dd2-4894-b1e6-159c5bfa4845",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why the name change? We still seem to call `streamQuery`.",
+        "createdAt" : "2020-08-12T07:42:56Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "74dd0929-8850-4844-bf7b-74acfeaf682e",
+        "parentId" : "61e6f071-9dd2-4894-b1e6-159c5bfa4845",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "These tests are really testing the underlying stream mechanism: what we do if the result is not in the proper format or if the websocket connection drops. They are not specific to any of the public query methods. I suppose replicating those tests for `streamQuery` and `streamFetchByKey` was an acceptable shortcut when there were only two of them, but now that there are four it seemed really pointless to keep testing the same stuff over and over.",
+        "createdAt" : "2020-08-14T17:41:14Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1e1cfa1a-20bb-4360-85f8-3bd576da285f",
+        "parentId" : "61e6f071-9dd2-4894-b1e6-159c5bfa4845",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense, thanks for the explanation!",
+        "createdAt" : "2020-08-14T18:31:27Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : 39,
+    "diffHunk" : "@@ -111,7 +112,7 @@ beforeEach(() => {\n   mockFunctions.forEach(f => f.mockClear());\n });\n \n-describe(\"streamQuery\", () => {\n+describe(\"streamSubmit\", () => {"
+  },
+  {
+    "id" : "6b7f6660-b3f0-4a7e-b381-e8227ddf039f",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "0f524ee4-832e-45f5-ba5b-8fa62146ec24",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  test(\"stop listening to a stream\", () => {\r\n```",
+        "createdAt" : "2020-08-12T07:59:14Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c4badd20-18cd-4adf-a2e8-8f469eb1c6a2",
+        "parentId" : "0f524ee4-832e-45f5-ba5b-8fa62146ec24",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-14T17:46:56Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -205,6 +194,36 @@ describe(\"streamQuery\", () => {\n     expect(mockChange).toHaveBeenCalledTimes(0);\n   });\n \n+  test(\"stop lisetning to a stream\", () => {"
+  },
+  {
+    "id" : "db3b784b-bee1-4b5d-a505-5d57e1cae9e6",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "7236afb3-f397-4f14-8cc3-3b93d2ed0942",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why did you change this?",
+        "createdAt" : "2020-08-12T08:00:59Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "60175a02-5642-412b-a41c-548e8e71a070",
+        "parentId" : "7236afb3-f397-4f14-8cc3-3b93d2ed0942",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Because this is testing the code in the underlying `streamSubmit` function, so the external function we call doesn't matter here, and I wanted to make that explicit, rather than just redo the exact same test with each of the four public methods, all targeted specifically to testing the exact same behaviour of the underlying private method.",
+        "createdAt" : "2020-08-14T17:42:59Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : 69,
+    "diffHunk" : "@@ -133,36 +134,24 @@ describe(\"streamQuery\", () => {\n \n   test(\"receive warnings\", () => {\n     const ledger = new Ledger(mockOptions);\n-    const stream = ledger.streamQuery(Foo);\n+    const stream = ledger.streamQueries(Foo, []);\n     stream.on(\"change\", mockChange);\n     const restoreConsole = mockConsole();\n     mockInstance.serverSend({ warnings: [\"oh oh\"] });\n-    expect(console.warn).toHaveBeenCalledWith(\"Ledger.streamQuery warnings\", {\"warnings\": [\"oh oh\"]});\n+    expect(console.warn).toHaveBeenCalledWith(\"Ledger.streamQueries warnings\", {\"warnings\": [\"oh oh\"]});\n     restoreConsole();\n   });\n \n   test(\"receive errors\", () => {\n     const ledger = new Ledger(mockOptions);\n-    const stream = ledger.streamQuery(Foo);\n+    const stream = ledger.streamFetchByKey(Foo, fooKey);"
+  },
+  {
+    "id" : "74b94d26-2e50-4d8c-a118-8b5114d6ef66",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "a919673b-2fd9-40bc-b9ca-68d0390351b4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can we please use an actual threshold here, maybe 500 millis, and add a sleep statement in the test?",
+        "createdAt" : "2020-04-14T09:41:27Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9f9ea0b4-3b46-4747-adc2-3a884c93e12c",
+        "parentId" : "a919673b-2fd9-40bc-b9ca-68d0390351b4",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "added a 500 millisecond sleep in the tests.",
+        "createdAt" : "2020-04-14T10:02:15Z",
+        "updatedAt" : "2020-04-14T10:02:15Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -162,6 +163,26 @@ describe(\"streamQuery\", () => {\n     expect(mockChange).toHaveBeenLastCalledWith([fooCreateEvent(1)])\n   });\n \n+  test(\"reconnect on close\", () => {\n+    const ledger = new Ledger({...mockOptions, reconnectThreshold: 0} );"
+  },
+  {
+    "id" : "d37d5b8f-6441-4b29-8aa4-ae179e9d10b5",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "f402a7d6-8d3f-4e4f-83e0-a0d72778f0e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Quotes around field names are not necessary when they are valid identifiers _in JavaScript_. (In JSON, everything is wrapped in quotes however.) Same below.\r\n```suggestion\r\n    expect(mockSend).toHaveBeenNthCalledWith(1, {offset: \"3\"});\r\n```",
+        "createdAt" : "2020-04-14T09:42:32Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -162,6 +163,26 @@ describe(\"streamQuery\", () => {\n     expect(mockChange).toHaveBeenLastCalledWith([fooCreateEvent(1)])\n   });\n \n+  test(\"reconnect on close\", () => {\n+    const ledger = new Ledger({...mockOptions, reconnectThreshold: 0} );\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"live\", mockLive);\n+    stream.on(\"close\", mockClose);\n+    mockInstance.serverSend({events: [], offset: '3'});\n+    mockConstructor.mockClear();\n+    mockInstance.serverClose({code: 1, reason: 'test close'});\n+    expect(mockConstructor).toHaveBeenCalled();\n+    mockInstance.serverOpen();\n+    expect(mockSend).toHaveBeenNthCalledWith(1, {\"offset\": \"3\"});"
+  },
+  {
+    "id" : "d48cf52c-f77f-42b5-8422-e4a48f7c0cee",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "2086c661-323e-425b-bd26-f530be3c2c8a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can you please leave a hint why we are not reconnecting?",
+        "createdAt" : "2020-04-14T09:43:03Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cd540b5a-b1c6-40f7-9e31-174fb1f2dbf5",
+        "parentId" : "2086c661-323e-425b-bd26-f530be3c2c8a",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "added a hint.",
+        "createdAt" : "2020-04-14T09:55:02Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 33,
+    "diffHunk" : "@@ -162,6 +163,26 @@ describe(\"streamQuery\", () => {\n     expect(mockChange).toHaveBeenLastCalledWith([fooCreateEvent(1)])\n   });\n \n+  test(\"reconnect on close\", () => {\n+    const ledger = new Ledger({...mockOptions, reconnectThreshold: 0} );\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"live\", mockLive);\n+    stream.on(\"close\", mockClose);\n+    mockInstance.serverSend({events: [], offset: '3'});\n+    mockConstructor.mockClear();\n+    mockInstance.serverClose({code: 1, reason: 'test close'});\n+    expect(mockConstructor).toHaveBeenCalled();\n+    mockInstance.serverOpen();\n+    expect(mockSend).toHaveBeenNthCalledWith(1, {\"offset\": \"3\"});\n+    expect(mockSend).toHaveBeenNthCalledWith(2, [{\"templateIds\": [\"foo-id\"]}]);\n+    mockSend.mockClear();\n+    mockConstructor.mockClear();\n+\n+    // check that the client doesn't try to reconnect again.\n+    mockInstance.serverClose({code: 1, reason: 'test close'});"
+  },
+  {
+    "id" : "f2c088b7-000f-4890-bf4e-663c0c82b2b7",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "41051ab9-3be4-4695-9293-b7d080232da2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  | { events: Event<Foo>[], offset?: string }\r\n```",
+        "createdAt" : "2020-04-01T10:45:06Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : null,
+    "diffHunk" : "@@ -17,7 +17,7 @@ type Foo = {key: string};\n const fooKey = 'fooKey';\n \n type Message =\n-  | { events: Event<Foo>[] }\n+  | { events: Event<Foo>[], offset?: number }"
+  },
+  {
+    "id" : "aad407f6-576a-4d4c-98e0-de33e134542c",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "4d19fec6-01ed-4de4-88df-0b1c3b896fb7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why? The changes below don't need this.",
+        "createdAt" : "2020-04-02T09:26:25Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "60034f38-8c39-4c53-9c66-35acee763b54",
+        "parentId" : "4d19fec6-01ed-4de4-88df-0b1c3b896fb7",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "that was just for me when debugging. somehow my IDE doesn't like this. I'll change it back when ready.",
+        "createdAt" : "2020-04-02T09:40:09Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : null,
+    "diffHunk" : "@@ -5,19 +5,20 @@ import { Template, Choice, ContractId } from \"@daml/types\";\n import Ledger, {CreateEvent} from \"./index\";\n import { Event } from \"./index\";\n import * as jtv from \"@mojotech/json-type-validation\";\n-import type { EventEmitter } from 'events';\n+import { EventEmitter } from 'events';"
+  },
+  {
+    "id" : "29ba19cc-697d-4c91-9fa9-c3ddc23d8338",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "ce48419b-b2f1-4d83-bb2d-655b9badb53d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The TS compiler is happy without the parentheses:\r\n```suggestion\r\n  Archive: {} as unknown as Choice<Foo, {}, {}, undefined>,\r\n```",
+        "createdAt" : "2020-03-25T15:46:06Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,243 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, ContractId, Choice } from \"@daml/types\";\n+import WS from \"jest-websocket-mock\";\n+import Ledger from \"./index\";\n+import { Event, CreateEvent } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+\n+type Foo = {};\n+\n+const Foo: Template<Foo, undefined, \"foo-id\"> = {\n+  templateId: \"foo-id\",\n+  keyDecoder: () => jtv.constant(undefined),\n+  decoder: () => jtv.object({}),\n+  Archive: ({} as unknown) as Choice<Foo, {}, {}, undefined>,"
+  },
+  {
+    "id" : "4b43c791-6553-421a-864b-05d510a0845c",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "6287da36-071e-439f-8508-c8927a00ab32",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why would we remove the handlers before anything has happened?\r\n```suggestion\r\n```\r\nThese two lines can go everywhere else too.",
+        "createdAt" : "2020-03-25T15:49:19Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,243 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, ContractId, Choice } from \"@daml/types\";\n+import WS from \"jest-websocket-mock\";\n+import Ledger from \"./index\";\n+import { Event, CreateEvent } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+\n+type Foo = {};\n+\n+const Foo: Template<Foo, undefined, \"foo-id\"> = {\n+  templateId: \"foo-id\",\n+  keyDecoder: () => jtv.constant(undefined),\n+  decoder: () => jtv.object({}),\n+  Archive: ({} as unknown) as Choice<Foo, {}, {}, undefined>,\n+};\n+\n+const fooEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return { created: fooCreateEvent(coid) };\n+};\n+\n+const fooCreateEvent = (\n+  coid: number\n+): CreateEvent<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    templateId: \"foo-id\",\n+    contractId: coid.toString() as ContractId<object>,\n+    signatories: [],\n+    observers: [],\n+    agreementText: \"fooAgreement\",\n+    key: undefined,\n+    payload: {},\n+  };\n+};\n+\n+const fooArchiveEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    archived: {\n+      templateId: \"foo-id\",\n+      contractId: coid.toString() as ContractId<object>,\n+    },\n+  };\n+};\n+\n+const mockOptions = {\n+  token: \"dummyToken\",\n+  httpBaseUrl: \"http://localhost:5000/\",\n+  wsBaseUrl: \"ws://localhost:4000/\",\n+};\n+\n+afterEach(() => {\n+  WS.clean();\n+});\n+\n+describe(\"streamQuery\", () => {\n+  // we only check that nothing crashes.\n+  test(\"receive unknown message\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));"
+  },
+  {
+    "id" : "243aeb6a-0551-4d2e-96d9-bc44b7a2d661",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "5875bfd1-ae0c-47a8-a083-e3a5f84adb57",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Could we mock `console.error` and see that we actually got the error message we expected? Same for `console.warn` below.",
+        "createdAt" : "2020-03-25T15:52:17Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "05d16aa7-4f2e-40d7-bc37-00bb8a33ad5c",
+        "parentId" : "5875bfd1-ae0c-47a8-a083-e3a5f84adb57",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "found a nice library to do that.",
+        "createdAt" : "2020-03-25T16:48:08Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,244 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, ContractId, Choice } from \"@daml/types\";\n+import WS from \"jest-websocket-mock\";\n+import Ledger from \"./index\";\n+import { Event, CreateEvent } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+\n+type Foo = {};\n+\n+const Foo: Template<Foo, undefined, \"foo-id\"> = {\n+  templateId: \"foo-id\",\n+  keyDecoder: () => jtv.constant(undefined),\n+  decoder: () => jtv.object({}),\n+  Archive: ({} as unknown) as Choice<Foo, {}, {}, undefined>,\n+};\n+\n+const fooCreateEvent = (\n+  coid: number\n+): CreateEvent<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    templateId: \"foo-id\",\n+    contractId: coid.toString() as ContractId<object>,\n+    signatories: [],\n+    observers: [],\n+    agreementText: \"fooAgreement\",\n+    key: undefined,\n+    payload: {},\n+  };\n+};\n+\n+const fooEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return { created: fooCreateEvent(coid) };\n+};\n+\n+\n+const fooArchiveEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    archived: {\n+      templateId: \"foo-id\",\n+      contractId: coid.toString() as ContractId<object>,\n+    },\n+  };\n+};\n+\n+const mockOptions = {\n+  token: \"dummyToken\",\n+  httpBaseUrl: \"http://localhost:5000/\",\n+  wsBaseUrl: \"ws://localhost:4000/\",\n+};\n+\n+afterEach(() => {\n+  WS.clean();\n+});\n+\n+describe(\"streamQuery\", () => {\n+  // we only check that nothing crashes.\n+  test(\"receive unknown message\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send(\"mickey mouse\");"
+  },
+  {
+    "id" : "854099db-3023-4527-b714-0378d1f8ece8",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "052f48ec-344a-4e73-aaa2-783440f9e9e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Wouldn't it make sense to use `jest.fn` here and check that it gets called the way expect it to be called?",
+        "createdAt" : "2020-03-25T15:53:14Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "436f743f-a324-4866-9ddb-dc8ed98655b5",
+        "parentId" : "052f48ec-344a-4e73-aaa2-783440f9e9e5",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "both work, I changed it to the a mock function.",
+        "createdAt" : "2020-03-25T18:46:19Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,244 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, ContractId, Choice } from \"@daml/types\";\n+import WS from \"jest-websocket-mock\";\n+import Ledger from \"./index\";\n+import { Event, CreateEvent } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+\n+type Foo = {};\n+\n+const Foo: Template<Foo, undefined, \"foo-id\"> = {\n+  templateId: \"foo-id\",\n+  keyDecoder: () => jtv.constant(undefined),\n+  decoder: () => jtv.object({}),\n+  Archive: ({} as unknown) as Choice<Foo, {}, {}, undefined>,\n+};\n+\n+const fooCreateEvent = (\n+  coid: number\n+): CreateEvent<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    templateId: \"foo-id\",\n+    contractId: coid.toString() as ContractId<object>,\n+    signatories: [],\n+    observers: [],\n+    agreementText: \"fooAgreement\",\n+    key: undefined,\n+    payload: {},\n+  };\n+};\n+\n+const fooEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return { created: fooCreateEvent(coid) };\n+};\n+\n+\n+const fooArchiveEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    archived: {\n+      templateId: \"foo-id\",\n+      contractId: coid.toString() as ContractId<object>,\n+    },\n+  };\n+};\n+\n+const mockOptions = {\n+  token: \"dummyToken\",\n+  httpBaseUrl: \"http://localhost:5000/\",\n+  wsBaseUrl: \"ws://localhost:4000/\",\n+};\n+\n+afterEach(() => {\n+  WS.clean();\n+});\n+\n+describe(\"streamQuery\", () => {\n+  // we only check that nothing crashes.\n+  test(\"receive unknown message\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send(\"mickey mouse\");\n+  });\n+\n+  // we only check that nothing crashes.\n+  test(\"receive warnings\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ warnings: [\"oh oh\"] });\n+  });\n+\n+  // we only check that nothing crashes.\n+  test(\"receive errors\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ errors: [\"not good!\"] });\n+  });\n+\n+  test(\"receive empty events\", async () => {\n+    let receivedEvents: object[] = [];\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => (receivedEvents = [...evs]));"
+  },
+  {
+    "id" : "75b96fbb-e4a1-452e-8f7b-62c1e24788e1",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "2a5f2591-7b82-48f1-b7cc-1db14d420e5a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The JSON API will never send us `create` and `archive` events for the same contract id within one `events` message. We should spread this over two separate messages.",
+        "createdAt" : "2020-03-25T15:55:07Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e23591ac-181f-4c8c-acd9-199bca2cd5de",
+        "parentId" : "2a5f2591-7b82-48f1-b7cc-1db14d420e5a",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "the server now sends create/archive events in two separate messages.",
+        "createdAt" : "2020-03-25T18:58:25Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,244 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, ContractId, Choice } from \"@daml/types\";\n+import WS from \"jest-websocket-mock\";\n+import Ledger from \"./index\";\n+import { Event, CreateEvent } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+\n+type Foo = {};\n+\n+const Foo: Template<Foo, undefined, \"foo-id\"> = {\n+  templateId: \"foo-id\",\n+  keyDecoder: () => jtv.constant(undefined),\n+  decoder: () => jtv.object({}),\n+  Archive: ({} as unknown) as Choice<Foo, {}, {}, undefined>,\n+};\n+\n+const fooCreateEvent = (\n+  coid: number\n+): CreateEvent<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    templateId: \"foo-id\",\n+    contractId: coid.toString() as ContractId<object>,\n+    signatories: [],\n+    observers: [],\n+    agreementText: \"fooAgreement\",\n+    key: undefined,\n+    payload: {},\n+  };\n+};\n+\n+const fooEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return { created: fooCreateEvent(coid) };\n+};\n+\n+\n+const fooArchiveEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    archived: {\n+      templateId: \"foo-id\",\n+      contractId: coid.toString() as ContractId<object>,\n+    },\n+  };\n+};\n+\n+const mockOptions = {\n+  token: \"dummyToken\",\n+  httpBaseUrl: \"http://localhost:5000/\",\n+  wsBaseUrl: \"ws://localhost:4000/\",\n+};\n+\n+afterEach(() => {\n+  WS.clean();\n+});\n+\n+describe(\"streamQuery\", () => {\n+  // we only check that nothing crashes.\n+  test(\"receive unknown message\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send(\"mickey mouse\");\n+  });\n+\n+  // we only check that nothing crashes.\n+  test(\"receive warnings\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ warnings: [\"oh oh\"] });\n+  });\n+\n+  // we only check that nothing crashes.\n+  test(\"receive errors\", async () => {\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => console.log(evs));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ errors: [\"not good!\"] });\n+  });\n+\n+  test(\"receive empty events\", async () => {\n+    let receivedEvents: object[] = [];\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => (receivedEvents = [...evs]));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ events: [] });\n+    expect(receivedEvents).toEqual([]);\n+  });\n+\n+  test(\"receive one event\", async () => {\n+    let receivedEvents: object[] = [];\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => (receivedEvents = [...evs]));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ events: [fooEvent(1)] });\n+    expect(receivedEvents).toEqual([fooCreateEvent(1)]);\n+  });\n+\n+  test(\"receive several events\", async () => {\n+    let receivedEvents: object[] = [];\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => (receivedEvents = [...evs]));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ events: [1, 2, 3].map(fooEvent) });\n+    expect(receivedEvents).toEqual([1, 2, 3].map(fooCreateEvent));\n+  });\n+\n+  test(\"drop matching created and archived events\", async () => {\n+    let receivedEvents: object[] = [];\n+    const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n+      jsonProtocol: true,\n+    });\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    await server.connected;\n+    console.log(\"connected\");\n+    stream.on(\"change\", (evs) => (receivedEvents = [...evs]));\n+    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.off(\"change\", (evs) => console.log(evs));\n+    stream.off(\"close\", (ev) => console.log(ev));\n+    server.send({ events: [fooEvent(1), fooEvent(2), fooArchiveEvent(1)] });"
+  },
+  {
+    "id" : "b5983321-e4f2-4dc8-8c69-674843828a67",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "b1bcc175-c2fc-4196-b3dc-225b1493f50a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "To which console does this go now? I suppose this helped you during writing the tests. Maybe we can just remove it now?",
+        "createdAt" : "2020-03-26T08:30:46Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b4d85bd6-2b8b-4642-882e-6524e9eb40f8",
+        "parentId" : "b1bcc175-c2fc-4196-b3dc-225b1493f50a",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "no, I think this is a clean up function that is called at the end of the test block, so that other errors go back to the normal console. actually, it would be better to call this just around the `server.send` block.",
+        "createdAt" : "2020-03-26T10:25:44Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e0e8aac3-811e-46c5-8fc8-8966eae17fa9",
+        "parentId" : "b1bcc175-c2fc-4196-b3dc-225b1493f50a",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "moved the mockConsole call around the server.send call.",
+        "createdAt" : "2020-03-26T10:34:47Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -57,48 +59,57 @@ afterEach(() => {\n describe(\"streamQuery\", () => {\n   // we only check that nothing crashes.\n   test(\"receive unknown message\", async () => {\n+    const restoreConsole = mockConsole();\n     const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n       jsonProtocol: true,\n     });\n     const ledger = new Ledger(mockOptions);\n     const stream = ledger.streamQuery(Foo);\n     await server.connected;\n     console.log(\"connected\");"
+  },
+  {
+    "id" : "cbe87057-5f31-43ac-ba47-57b5b8497fe7",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "db060279-5a26-4f61-90e7-b43df4decc98",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What are you trying to achieve here? `stream.off` is used to deregister event handlers, which we definitely don't want to do here. Even if we would want to do it, this wouldn't do it since functions are tested for equality by reference and the lambdas in the `off` calls are newly allocated function objects with different references than those in the `on` calls.\r\n\r\nIf I'm not mistaken, we don't want to call the `off` method of `Stream` anywhere in this test.",
+        "createdAt" : "2020-03-26T08:34:09Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1b631d52-65f6-4cc5-8568-688f45999e8b",
+        "parentId" : "db060279-5a26-4f61-90e7-b43df4decc98",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "yes exactly, so I reroute them to the console such that I would see if they were mistakenly called by anything.",
+        "createdAt" : "2020-03-26T10:27:25Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d7bfbcd0-75bc-44af-aee7-487151ab321d",
+        "parentId" : "db060279-5a26-4f61-90e7-b43df4decc98",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I make them fail now explicitly.",
+        "createdAt" : "2020-03-26T10:34:09Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2687185e-0110-42fd-adee-cf566c31d2e7",
+        "parentId" : "db060279-5a26-4f61-90e7-b43df4decc98",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "looks like `off` and `on 'close'` is called maybe during teardown of the ledger class, so I can't make it fail.",
+        "createdAt" : "2020-03-26T10:39:17Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3539c3b8-2428-4e39-9b93-ccfec22973af",
+        "parentId" : "db060279-5a26-4f61-90e7-b43df4decc98",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The `on` function is used to register an event handler and the `off` function is used to de-register handlers. I don't think we want to de-register handlers here since that would make the events go nowhere afterwards.\r\n\r\nJust FYI, the pattern to register and de-register handlers goes like\r\n```typescript\r\nconst onChange = event => { ... };\r\nstream.on(\"change\", onChange);\r\n...\r\n// Later, when we dont' want to learn about \"change\" events anymore\r\nstream.off(\"chage\", onChange);\r\n```\r\nIt is really important to bind the handler to a name, `onChange` here, so that you can use the same reference in the `on` and `off` calls. Otherwise, the `off` call will simply do nothing. Does that make sense?",
+        "createdAt" : "2020-03-26T17:46:39Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d4338a89-bbb9-4045-835b-4d7752eb7054",
+        "parentId" : "db060279-5a26-4f61-90e7-b43df4decc98",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "ah ok, my assumption was that the `off` registers a handler for cleanup. I removed those additional lines.",
+        "createdAt" : "2020-03-26T19:12:45Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -57,48 +59,57 @@ afterEach(() => {\n describe(\"streamQuery\", () => {\n   // we only check that nothing crashes.\n   test(\"receive unknown message\", async () => {\n+    const restoreConsole = mockConsole();\n     const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n       jsonProtocol: true,\n     });\n     const ledger = new Ledger(mockOptions);\n     const stream = ledger.streamQuery(Foo);\n     await server.connected;\n     console.log(\"connected\");\n-    stream.on(\"change\", (evs) => console.log(evs));\n-    stream.on(\"close\", (ev) => console.log(ev));\n+    stream.on(\"change\", evs => console.log(evs));\n+    stream.on(\"close\", ev => console.log(ev));\n     server.send(\"mickey mouse\");\n+    expect(console.error).toHaveBeenCalledWith(\"Ledger.streamQuery unknown message\", \"mickey mouse\");\n+    restoreConsole();\n   });\n \n   // we only check that nothing crashes.\n   test(\"receive warnings\", async () => {\n+    const restoreConsole = mockConsole();\n     const server = new WS(\"ws://localhost:4000/v1/stream/query\", {\n       jsonProtocol: true,\n     });\n     const ledger = new Ledger(mockOptions);\n     const stream = ledger.streamQuery(Foo);\n     await server.connected;\n     console.log(\"connected\");\n-    stream.on(\"change\", (evs) => console.log(evs));\n-    stream.on(\"close\", (ev) => console.log(ev));\n-    stream.off(\"change\", (evs) => console.log(evs));\n-    stream.off(\"close\", (ev) => console.log(ev));\n+    stream.on(\"change\", evs => console.log(evs));\n+    stream.on(\"close\", ev => console.log(ev));\n+    stream.off(\"change\", evs => console.log(evs));\n+    stream.off(\"close\", ev => console.log(ev));"
+  },
+  {
+    "id" : "63d106d3-4e3f-4c32-92f8-db32283bbb0a",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "c6937494-3b03-48f4-85cc-3abcbc1aac4a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Jest seems to have mocks for everything. Good find!",
+        "createdAt" : "2020-03-26T08:36:57Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : 9,
+    "diffHunk" : "@@ -6,6 +6,8 @@ import WS from \"jest-websocket-mock\";\n import Ledger from \"./index\";\n import { Event, CreateEvent } from \"./index\";\n import * as jtv from \"@mojotech/json-type-validation\";\n+import mockConsole from \"jest-mock-console\";"
+  },
+  {
+    "id" : "2ca746de-4c76-498d-9805-d34839da0d08",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "32e0e031-a21f-434a-8f5f-7025963a7597",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We only use the types from this package and import the values further down using `require`. Let's make that explicit.\r\n```suggestion\r\nimport type { EventEmitter } from 'events';\r\n```",
+        "createdAt" : "2020-03-31T15:04:25Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,232 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, Choice, ContractId } from \"@daml/types\";\n+import Ledger, {CreateEvent} from \"./index\";\n+import { Event } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+import { EventEmitter } from 'events';"
+  },
+  {
+    "id" : "4e0e0412-ac8a-4671-aa6d-dde70bf67a13",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "ccb4c4b4-9d1b-4601-a01c-a3a530b14828",
+        "parentId" : null,
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "```suggestion\r\n  | { warnings: string[] }\r\n  | { errors: string[] }\r\n```",
+        "createdAt" : "2020-03-31T15:05:45Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,232 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, Choice, ContractId } from \"@daml/types\";\n+import Ledger, {CreateEvent} from \"./index\";\n+import { Event } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+import { EventEmitter } from 'events';\n+import mockConsole from \"jest-mock-console\";\n+\n+const mockChange = jest.fn();\n+const mockConstructor = jest.fn();\n+const mockSend = jest.fn();\n+const mockFunctions = [mockChange, mockConstructor, mockSend];\n+\n+type Foo = {};\n+\n+type Message =\n+  | { events: Event<Foo>[] }\n+  | { warnings: string[]}\n+  | { errors: string[]}"
+  },
+  {
+    "id" : "73d00c8e-9d1f-45f1-851f-eb117dd45e14",
+    "prId" : 5180,
+    "comments" : [
+      {
+        "id" : "d6a2de07-6b09-4c68-8a4f-8231d6f61244",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Testing `streamFetchByKey` on a template without a key type doesn't really make sense. Let's fix the in a followup PR.",
+        "createdAt" : "2020-03-31T15:09:53Z",
+        "updatedAt" : "2020-03-31T15:39:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "da335abc-d31b-4edb-848d-bd2508a6abed",
+        "parentId" : "d6a2de07-6b09-4c68-8a4f-8231d6f61244",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I added a key.",
+        "createdAt" : "2020-03-31T15:24:26Z",
+        "updatedAt" : "2020-03-31T15:39:03Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d1750ad64940421aef165938f3ec54231c3b408e",
+    "line" : 193,
+    "diffHunk" : "@@ -0,0 +1,232 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+import { Template, Choice, ContractId } from \"@daml/types\";\n+import Ledger, {CreateEvent} from \"./index\";\n+import { Event } from \"./index\";\n+import * as jtv from \"@mojotech/json-type-validation\";\n+import { EventEmitter } from 'events';\n+import mockConsole from \"jest-mock-console\";\n+\n+const mockChange = jest.fn();\n+const mockConstructor = jest.fn();\n+const mockSend = jest.fn();\n+const mockFunctions = [mockChange, mockConstructor, mockSend];\n+\n+type Foo = {};\n+\n+type Message =\n+  | { events: Event<Foo>[] }\n+  | { warnings: string[]}\n+  | { errors: string[]}\n+  | string //for unexpected messages\n+\n+interface MockWebSocket {\n+  serverOpen(): void;\n+  serverSend(message: Message): void;\n+  serverClose(event: {code: number; reason: string}): void;\n+}\n+\n+let mockInstance = undefined as unknown as MockWebSocket;\n+\n+jest.mock('isomorphic-ws', () => class {\n+  private eventEmitter: EventEmitter;\n+\n+  constructor(...args: unknown[]) {\n+    mockConstructor(...args);\n+    mockInstance = this;\n+    // eslint-disable-next-line @typescript-eslint/no-var-requires\n+    const {EventEmitter} = require('events');\n+    this.eventEmitter = new EventEmitter();\n+  }\n+\n+  addEventListener(event: string, handler: (...args: unknown[]) => void) {\n+    this.eventEmitter.on(event, handler);\n+  }\n+\n+  send(message: string) {\n+    mockSend(JSON.parse(message));\n+  }\n+\n+  serverOpen() {\n+    this.eventEmitter.emit('open');\n+  }\n+\n+  serverSend(message: Message) {\n+    this.eventEmitter.emit('message', {data: JSON.stringify(message)});\n+  }\n+\n+  serverClose(event: {code: number; reason: string}) {\n+    this.eventEmitter.emit('close', event);\n+  }\n+});\n+\n+\n+\n+const Foo: Template<Foo, undefined, \"foo-id\"> = {\n+  templateId: \"foo-id\",\n+  keyDecoder: () => jtv.constant(undefined),\n+  decoder: () => jtv.object({}),\n+  Archive: {} as unknown as Choice<Foo, {}, {}, undefined>,\n+};\n+\n+const fooCreateEvent = (\n+  coid: number\n+): CreateEvent<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    templateId: \"foo-id\",\n+    contractId: coid.toString() as ContractId<object>,\n+    signatories: [],\n+    observers: [],\n+    agreementText: \"fooAgreement\",\n+    key: undefined,\n+    payload: {},\n+  };\n+};\n+\n+const fooEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return { created: fooCreateEvent(coid) };\n+};\n+\n+\n+const fooArchiveEvent = (coid: number): Event<Foo, undefined, \"foo-id\"> => {\n+  return {\n+    archived: {\n+      templateId: \"foo-id\",\n+      contractId: coid.toString() as ContractId<object>,\n+    },\n+  };\n+};\n+\n+const mockOptions = {\n+  token: \"dummyToken\",\n+  httpBaseUrl: \"http://localhost:5000/\",\n+  wsBaseUrl: \"ws://localhost:4000/\",\n+};\n+\n+beforeEach(() => {\n+  mockFunctions.forEach(f => f.mockClear());\n+});\n+\n+describe(\"streamQuery\", () => {\n+  test(\"receive unknown message\", () => {\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    expect(mockConstructor).toHaveBeenCalledTimes(1);\n+    expect(mockConstructor).toHaveBeenLastCalledWith(\n+      'ws://localhost:4000/v1/stream/query',\n+      ['jwt.token.dummyToken', 'daml.ws.auth'],\n+    );\n+    stream.on(\"change\", mockChange);\n+\n+    mockInstance.serverOpen();\n+    expect(mockSend).toHaveBeenCalledTimes(1);\n+    expect(mockSend).toHaveBeenLastCalledWith({templateIds: [Foo.templateId]});\n+    const restoreConsole = mockConsole();\n+    mockInstance.serverSend('mickey mouse');\n+    expect(console.error).toHaveBeenCalledWith(\"Ledger.streamQuery unknown message\", \"mickey mouse\");\n+    restoreConsole();\n+  });\n+\n+  test(\"receive warnings\", () => {\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"change\", mockChange);\n+    const restoreConsole = mockConsole();\n+    mockInstance.serverSend({ warnings: [\"oh oh\"] });\n+    expect(console.warn).toHaveBeenCalledWith(\"Ledger.streamQuery warnings\", {\"warnings\": [\"oh oh\"]});\n+    restoreConsole();\n+  });\n+\n+  test(\"receive errors\", () => {\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"change\", mockChange);\n+    const restoreConsole = mockConsole();\n+    mockInstance.serverSend({ errors: [\"not good!\"] });\n+    expect(console.error).toHaveBeenCalledWith(\"Ledger.streamQuery errors\", { errors: [\"not good!\"] });\n+    restoreConsole();\n+  });\n+\n+  test(\"receive empty events\", () => {\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"change\", state => mockChange(state));\n+    mockInstance.serverSend({ events: [] });\n+    expect(mockChange).toHaveBeenCalledTimes(1);\n+    expect(mockChange).toHaveBeenLastCalledWith([]);\n+  });\n+\n+  test(\"receive one event\", () => {\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"change\", state => mockChange(state));\n+    mockInstance.serverSend({ events: [fooEvent(1)] });\n+    expect(mockChange).toHaveBeenCalledTimes(1);\n+    expect(mockChange).toHaveBeenLastCalledWith([fooCreateEvent(1)]);\n+  });\n+\n+  test(\"receive several events\", () => {\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"change\", state => mockChange(state));\n+    mockInstance.serverSend({ events: [1, 2, 3].map(fooEvent) });\n+    expect(mockChange).toHaveBeenCalledTimes(1);\n+    expect(mockChange).toHaveBeenCalledWith([1, 2, 3].map(fooCreateEvent));\n+  });\n+\n+  test(\"drop matching created and archived events\", () => {\n+    const ledger = new Ledger(mockOptions);\n+    const stream = ledger.streamQuery(Foo);\n+    stream.on(\"change\", state => mockChange(state));\n+    mockInstance.serverSend({ events: [fooEvent(1), fooEvent(2)] });\n+    expect(mockChange).toHaveBeenCalledTimes(1);\n+    expect(mockChange).toHaveBeenCalledWith([fooCreateEvent(1), fooCreateEvent(2)]);\n+    mockChange.mockClear();\n+    mockInstance.serverSend({ events: [fooArchiveEvent(1)]});\n+    expect(mockChange).toHaveBeenCalledTimes(1);\n+    expect(mockChange).toHaveBeenCalledWith([fooCreateEvent(2)]);\n+  });\n+});\n+\n+describe(\"streamFetchByKey\", () => {"
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "4518192c-2381-4396-b362-40e2b56b2596",
+    "prId" : 7213,
+    "comments" : [
+      {
+        "id" : "fe4f3b44-2677-4d02-942f-d85dadde7d96",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Perhaps use `.failed` here and below?\r\n\r\n```suggestion\r\n    runner.use(_ => Future.unit).failed.map(_ => succeed)\r\n```",
+        "createdAt" : "2020-08-24T19:26:54Z",
+        "updatedAt" : "2020-08-25T07:03:50Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "52fead93-dc1d-411d-885c-d4b3fd8a5fb9",
+        "parentId" : "fe4f3b44-2677-4d02-942f-d85dadde7d96",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/7213/commits/6e8283ff951a96f6b60752a9b86dbc47ec948e39",
+        "createdAt" : "2020-08-25T07:04:28Z",
+        "updatedAt" : "2020-08-25T07:04:29Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b157bb878277d49a3f0921b6958f5867d9395897",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,58 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.app\n+\n+import com.daml.testing.postgresql.{PostgresAround, PostgresAroundAll}\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.MockitoSugar._\n+import org.scalatest.{AsyncFlatSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.util.control.NonFatal\n+\n+final class RunnerSpec\n+    extends AsyncFlatSpec\n+    with Matchers\n+    with PostgresAround\n+    with PostgresAroundAll {\n+\n+  private val MockedLedgerFactory = mock[LedgerFactory[ReadWriteService, Unit]]\n+  when(MockedLedgerFactory.defaultExtraConfig).thenReturn(())\n+  when(MockedLedgerFactory.manipulateConfig(any[Config[Unit]])).thenAnswer[Config[Unit]](identity)\n+\n+  private val DumpIndexMetadataCommand = \"dump-index-metadata\"\n+\n+  behavior of \"Runner\"\n+\n+  it should \"fail if a participant is not provided in run mode\" in {\n+\n+    val runner = new Runner(\"Test\", MockedLedgerFactory).owner(Seq.empty)\n+    runner.use(_ => Future.unit).map(_ => fail).recover { case NonFatal(_) => succeed }"
+  },
+  {
+    "id" : "b7d79017-6ae9-4eab-9501-230aac22b48b",
+    "prId" : 7213,
+    "comments" : [
+      {
+        "id" : "ee4ab076-5cf8-4814-b3ca-18c0b003952a",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "This feels like a very high level to test this behavior. Why not add it to the `CliSpec`?",
+        "createdAt" : "2020-08-24T19:34:42Z",
+        "updatedAt" : "2020-08-25T07:03:50Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3172e77e-fd75-4568-a726-5fd53e3ee8d3",
+        "parentId" : "ee4ab076-5cf8-4814-b3ca-18c0b003952a",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/7213/commits/b157bb878277d49a3f0921b6958f5867d9395897",
+        "createdAt" : "2020-08-25T07:04:37Z",
+        "updatedAt" : "2020-08-25T07:04:37Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b157bb878277d49a3f0921b6958f5867d9395897",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,58 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.app\n+\n+import com.daml.testing.postgresql.{PostgresAround, PostgresAroundAll}\n+import org.mockito.ArgumentMatchers._\n+import org.mockito.MockitoSugar._\n+import org.scalatest.{AsyncFlatSpec, Matchers}\n+\n+import scala.concurrent.Future\n+import scala.util.control.NonFatal\n+\n+final class RunnerSpec\n+    extends AsyncFlatSpec\n+    with Matchers\n+    with PostgresAround\n+    with PostgresAroundAll {\n+\n+  private val MockedLedgerFactory = mock[LedgerFactory[ReadWriteService, Unit]]\n+  when(MockedLedgerFactory.defaultExtraConfig).thenReturn(())\n+  when(MockedLedgerFactory.manipulateConfig(any[Config[Unit]])).thenAnswer[Config[Unit]](identity)\n+\n+  private val DumpIndexMetadataCommand = \"dump-index-metadata\"\n+\n+  behavior of \"Runner\"\n+\n+  it should \"fail if a participant is not provided in run mode\" in {\n+\n+    val runner = new Runner(\"Test\", MockedLedgerFactory).owner(Seq.empty)"
+  }
+]

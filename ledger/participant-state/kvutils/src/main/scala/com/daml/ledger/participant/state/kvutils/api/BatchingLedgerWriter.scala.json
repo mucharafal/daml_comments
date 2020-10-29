@@ -1,0 +1,714 @@
+[
+  {
+    "id" : "c99697e5-0155-493e-a9a0-2bf93c58077f",
+    "prId" : 6515,
+    "comments" : [
+      {
+        "id" : "df4b375c-9e4e-4428-901b-b0dbed7dd873",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n      metadata: CommitMetadata,\r\n    ): Future[SubmissionResult] =\r\n```",
+        "createdAt" : "2020-06-29T07:38:17Z",
+        "updatedAt" : "2020-06-30T08:52:03Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5b5d17d48af638f059d785c2d530c2f7d89eec0e",
+    "line" : 8,
+    "diffHunk" : "@@ -37,12 +37,16 @@ class BatchingLedgerWriter(val queue: BatchingQueue, val writer: LedgerWriter)(\n   private val logger = ContextualizedLogger.get(getClass)\n   private val queueHandle = queue.run(commitBatch)\n \n-  override def commit(correlationId: String, envelope: kvutils.Bytes): Future[SubmissionResult] =\n+  override def commit(\n+      correlationId: String,\n+      envelope: kvutils.Bytes,\n+      metadata: CommitMetadata): Future[SubmissionResult] ="
+  },
+  {
+    "id" : "f43555dd-62b5-4bab-b44f-008f5d7eb1bc",
+    "prId" : 6186,
+    "comments" : [
+      {
+        "id" : "858dcf57-c513-42f7-bac6-eaa8275b7f52",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n  * @param writer underlying ledger writer that will commit batches\r\n```",
+        "createdAt" : "2020-06-02T10:51:13Z",
+        "updatedAt" : "2020-06-03T09:37:09Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "54fa77cf2c950cdc36630aa964677462b028d52a",
+    "line" : null,
+    "diffHunk" : "@@ -16,13 +16,16 @@ import com.daml.logging.LoggingContext.newLoggingContext\n import com.daml.logging.{ContextualizedLogger, LoggingContext}\n \n import scala.collection.JavaConverters._\n+import scala.concurrent.duration.{Duration, MILLISECONDS}\n import scala.concurrent.{ExecutionContext, Future}\n \n /** A batching ledger writer that collects submissions into a batch and commits\n-  * the batch once a set time and byte limit has been reached.\n+  * the batch once a set time or byte limit has been reached.\n+  * Use `apply()` from the companion object to construct an instance from a [[BatchingLedgerWriterConfig]] and a\n+  * [[LedgerWriter]] delegate instance.\n   *\n-  * @param queue The batching queue implementation\n-  * @param writer The underlying ledger writer to use to commit the batch\n+  * @param queue batching queue implementation\n+  * @param writer underlying ledger writer to use to commit batches"
+  },
+  {
+    "id" : "d351d5e7-9f7a-4808-8418-9f58ffa16047",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "468e8d4f-71d2-434d-a5c9-841a47b05269",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I'd also assert them to be all the same or consider de-duplicating it somehow",
+        "createdAt" : "2020-03-12T17:13:32Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "209825ab-251f-43c5-a803-f57d4b12c286",
+        "parentId" : "468e8d4f-71d2-434d-a5c9-841a47b05269",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Maybe generate a new correlation ID and log all the ones in this batch? These correlation IDs shouldn't be the same as the application will be generating new ones for each request.",
+        "createdAt" : "2020-03-16T09:49:13Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e106bc75-23bd-4009-9dcd-8c3dee11a438",
+        "parentId" : "468e8d4f-71d2-434d-a5c9-841a47b05269",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Changed it back to generating a new ID and logging the submissions' correlation ids.",
+        "createdAt" : "2020-03-23T13:02:30Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e09fe561-52ac-4d1a-ba6f-ac709cc697e8",
+        "parentId" : "468e8d4f-71d2-434d-a5c9-841a47b05269",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Looks good.",
+        "createdAt" : "2020-03-25T18:21:17Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,107 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class BatchingLedgerWriter(\n+    val writer: LedgerWriter,\n+    val maxQueueSize: Int,\n+    val maxBatchSizeBytes: Long,\n+    val maxWaitDuration: FiniteDuration,\n+    val maxParallelism: Int)(\n+    implicit val materializer: Materializer,\n+    implicit val logCtx: LoggingContext)\n+    extends LedgerWriter {\n+\n+  implicit val executionContext: ExecutionContext = materializer.executionContext\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  /** Flag to mark whether the submission queue has been completed or not. Used for health status. */\n+  private var queueAlive = true\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) /* Keep.left */\n+  private val queue: SourceQueueWithComplete[DamlSubmissionBatch.CorrelatedSubmission] = {\n+    // Sink to commit batches coming from the queue. We use foreachAsync to commit them in parallel.\n+    // TODO(JM): Verify that foreachAsync actually works correctly and that we use sensible executionContext!\n+    val commitSink: Sink[Seq[DamlSubmissionBatch.CorrelatedSubmission], _] =\n+      Sink.foreachAsync(maxParallelism)(commitBatch)\n+\n+    val queue = Source\n+      .queue(maxQueueSize, OverflowStrategy.dropNew)\n+      .groupedWeightedWithin(maxBatchSizeBytes, maxWaitDuration)(\n+        (cs: DamlSubmissionBatch.CorrelatedSubmission) => cs.getSubmission.size.toLong)\n+      .toMat(commitSink)(Keep.left)\n+      .run\n+\n+    // Watch for completion of the queue to mark the writer as unhealthy, so that upper layers can\n+    // handle restarting.\n+    // TODO(JM): Is there a neater way to accomplish this?\n+    queue.watchCompletion.foreach { _ =>\n+      queueAlive = false\n+    }\n+\n+    queue\n+  }\n+\n+  private def commitBatch(\n+      submissions: Seq[DamlSubmissionBatch.CorrelatedSubmission]): Future[Unit] = {\n+    assert(submissions.nonEmpty) // Empty batches should never happen\n+\n+    // Use the first submission's correlation id for the batch. This is potentially confusing\n+    // so we might want to revisit this.\n+    val correlationId = submissions.head.getCorrelationId"
+  },
+  {
+    "id" : "f70bd6d5-e496-4081-aad2-2f3a568c0f32",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "4b3bba1a-0a96-41c1-96f5-506de9daa2f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Why do you suspect `foreachAsync` doesn't work correctly? How do you plan to check it? What is a sensible `executionContext` and who should make sure it is, the `materializer` provider?",
+        "createdAt" : "2020-03-12T17:21:28Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "54026ab9-548a-4657-9e0d-c452fe0f1859",
+        "parentId" : "4b3bba1a-0a96-41c1-96f5-506de9daa2f4",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Mostly wasn't sure what materializer's execution context does. It seems reasonable so removed the comment.",
+        "createdAt" : "2020-03-23T13:03:17Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,106 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class BatchingLedgerWriter(\n+    val writer: LedgerWriter,\n+    val maxQueueSize: Int,\n+    val maxBatchSizeBytes: Long,\n+    val maxWaitDuration: FiniteDuration,\n+    val maxParallelism: Int)(\n+    implicit val materializer: Materializer,\n+    implicit val logCtx: LoggingContext)\n+    extends LedgerWriter {\n+\n+  implicit val executionContext: ExecutionContext = materializer.executionContext\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  /** Flag to mark whether the submission queue has been completed or not. Used for health status. */\n+  private var queueAlive = true\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) /* Keep.left */\n+  private val queue: SourceQueueWithComplete[DamlSubmissionBatch.CorrelatedSubmission] = {\n+    // Sink to commit batches coming from the queue. We use foreachAsync to commit them in parallel.\n+    // TODO(JM): Verify that foreachAsync actually works correctly and that we use sensible executionContext!"
+  },
+  {
+    "id" : "871c4688-45be-475b-9533-407a6fbdf0dc",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "fd5b5f42-2a4f-4ade-86df-16af636bbcf4",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Can't think of any",
+        "createdAt" : "2020-03-12T17:22:07Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ab2f9315-66e5-4ffb-9e7f-965e0f6751e1",
+        "parentId" : "fd5b5f42-2a4f-4ade-86df-16af636bbcf4",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Use a semaphore to signal if the source has been completed.",
+        "createdAt" : "2020-03-16T10:22:06Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dfd4452f-960b-4128-b59d-1ad0229e5631",
+        "parentId" : "fd5b5f42-2a4f-4ade-86df-16af636bbcf4",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Switched to using AtomicBoolean. I don't see how semaphore would help.",
+        "createdAt" : "2020-03-23T13:02:54Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7f1fe87f-f121-450d-931f-90609979dd27",
+        "parentId" : "fd5b5f42-2a4f-4ade-86df-16af636bbcf4",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "AtomicBoolean is a good enough simple solution.",
+        "createdAt" : "2020-03-25T18:20:36Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,106 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class BatchingLedgerWriter(\n+    val writer: LedgerWriter,\n+    val maxQueueSize: Int,\n+    val maxBatchSizeBytes: Long,\n+    val maxWaitDuration: FiniteDuration,\n+    val maxParallelism: Int)(\n+    implicit val materializer: Materializer,\n+    implicit val logCtx: LoggingContext)\n+    extends LedgerWriter {\n+\n+  implicit val executionContext: ExecutionContext = materializer.executionContext\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  /** Flag to mark whether the submission queue has been completed or not. Used for health status. */\n+  private var queueAlive = true\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) /* Keep.left */\n+  private val queue: SourceQueueWithComplete[DamlSubmissionBatch.CorrelatedSubmission] = {\n+    // Sink to commit batches coming from the queue. We use foreachAsync to commit them in parallel.\n+    // TODO(JM): Verify that foreachAsync actually works correctly and that we use sensible executionContext!\n+    val commitSink: Sink[Seq[DamlSubmissionBatch.CorrelatedSubmission], _] =\n+      Sink.foreachAsync(maxParallelism)(commitBatch)\n+\n+    val queue = Source\n+      .queue(maxQueueSize, OverflowStrategy.dropNew)\n+      .groupedWeightedWithin(maxBatchSizeBytes, maxWaitDuration)(\n+        (cs: DamlSubmissionBatch.CorrelatedSubmission) => cs.getSubmission.size.toLong)\n+      .toMat(commitSink)(Keep.left)\n+      .run\n+\n+    // Watch for completion of the queue to mark the writer as unhealthy, so that upper layers can\n+    // handle restarting.\n+    // TODO(JM): Is there a neater way to accomplish this?"
+  },
+  {
+    "id" : "86e36d06-4618-4bf9-ab12-bda6b7324c7c",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "117a7d29-aeb9-4137-9278-dededf09f51d",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I think internal errors should be logger as errors or fatals though, as they are probably bugs, aren't they? What are the consequences of dropping a batch for the application?",
+        "createdAt" : "2020-03-12T17:36:57Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d3bc0b25-b170-4d57-9451-9942e269b915",
+        "parentId" : "117a7d29-aeb9-4137-9278-dededf09f51d",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Yes, this should be rather logged as an error. In case we drop a batch the application will retry.\r\nWouldn't a `SubmissionResult.InternalError` be more appropriate?",
+        "createdAt" : "2020-03-16T09:30:21Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "35b5b541-2286-4a5c-a7ea-50b303949502",
+        "parentId" : "117a7d29-aeb9-4137-9278-dededf09f51d",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "We cannot return errors here as we're decoupled from the caller by the queue, so we can only log and drop.",
+        "createdAt" : "2020-03-23T09:50:11Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "64c30397-b5a0-4c0f-8c8f-3bb45a6d499b",
+        "parentId" : "117a7d29-aeb9-4137-9278-dededf09f51d",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Makes sense.",
+        "createdAt" : "2020-03-26T13:25:37Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,106 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class BatchingLedgerWriter(\n+    val writer: LedgerWriter,\n+    val maxQueueSize: Int,\n+    val maxBatchSizeBytes: Long,\n+    val maxWaitDuration: FiniteDuration,\n+    val maxParallelism: Int)(\n+    implicit val materializer: Materializer,\n+    implicit val logCtx: LoggingContext)\n+    extends LedgerWriter {\n+\n+  implicit val executionContext: ExecutionContext = materializer.executionContext\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  /** Flag to mark whether the submission queue has been completed or not. Used for health status. */\n+  private var queueAlive = true\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) /* Keep.left */\n+  private val queue: SourceQueueWithComplete[DamlSubmissionBatch.CorrelatedSubmission] = {\n+    // Sink to commit batches coming from the queue. We use foreachAsync to commit them in parallel.\n+    // TODO(JM): Verify that foreachAsync actually works correctly and that we use sensible executionContext!\n+    val commitSink: Sink[Seq[DamlSubmissionBatch.CorrelatedSubmission], _] =\n+      Sink.foreachAsync(maxParallelism)(commitBatch)\n+\n+    val queue = Source\n+      .queue(maxQueueSize, OverflowStrategy.dropNew)\n+      .groupedWeightedWithin(maxBatchSizeBytes, maxWaitDuration)(\n+        (cs: DamlSubmissionBatch.CorrelatedSubmission) => cs.getSubmission.size.toLong)\n+      .toMat(commitSink)(Keep.left)\n+      .run\n+\n+    // Watch for completion of the queue to mark the writer as unhealthy, so that upper layers can\n+    // handle restarting.\n+    // TODO(JM): Is there a neater way to accomplish this?\n+    queue.watchCompletion.foreach { _ =>\n+      queueAlive = false\n+    }\n+\n+    queue\n+  }\n+\n+  private def commitBatch(\n+      submissions: Seq[DamlSubmissionBatch.CorrelatedSubmission]): Future[Unit] = {\n+    assert(submissions.nonEmpty) // Empty batches should never happen\n+\n+    // Use the first submission's correlation id for the batch. This is potentially confusing\n+    // so we might want to revisit this.\n+    val correlationId = submissions.head.getCorrelationId\n+\n+    val batch = DamlSubmissionBatch.newBuilder\n+      .addAllSubmissions(submissions.asJava)\n+      .build\n+    val envelope = Envelope.enclose(batch)\n+    writer\n+      .commit(correlationId, envelope.toByteArray)\n+      .map {\n+        case SubmissionResult.Acknowledged => ()\n+        case other =>\n+          // TODO(JM): What are our options here? We cannot signal the applications directly about the outcome\n+          // as we've already acknowledged towards them. We can do a RestartSink, but it feels like that should\n+          // be the underlying LedgerWriter's decision. Dropping seems reasonable.\n+          logger.warn(s\"commitBatch($correlationId): Batch dropped as commit failed: $other\")"
+  },
+  {
+    "id" : "2dd9a20e-5a49-4a32-9e3d-a8e85cefcb5c",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "1729efbf-2921-469b-b0f7-c550b7e510b6",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "To make maintenance/testing simpler, I'd suggest wrapping all these configuration parameters into a case class with sensible defaults.",
+        "createdAt" : "2020-03-16T09:23:57Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1853f722-68c7-403e-8d89-d56ba96080f3",
+        "parentId" : "1729efbf-2921-469b-b0f7-c550b7e510b6",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Done.. in a way. Can you check the current approach with the `DefaultBatchingQueue`?",
+        "createdAt" : "2020-03-23T13:03:36Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a5e5b908-e3b9-453d-a77e-c53cac314f1b",
+        "parentId" : "1729efbf-2921-469b-b0f7-c550b7e510b6",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "It's a great improvement!",
+        "createdAt" : "2020-03-25T18:17:06Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,106 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class BatchingLedgerWriter(\n+    val writer: LedgerWriter,\n+    val maxQueueSize: Int,"
+  },
+  {
+    "id" : "ae406da9-3efa-430f-948b-539c716966fa",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "f8d6b68a-ea92-4070-a095-822b6a58a7fa",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "For easier testability I'd suggest injecting the queue into `BatchingLedgerWriter`. This way you could focus on testing the actual logic that you implemented (i.e., `commitBatch` and `commit`) instead of testing it together with akka-streams. I.e., you could simply move out the creation of the queue into a factory method. You may want to keep a very few integration test cases that use a fully configured source/sink.",
+        "createdAt" : "2020-03-16T10:19:55Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f1ba1503-dee0-47fe-8025-cedfca7aeb4d",
+        "parentId" : "f8d6b68a-ea92-4070-a095-822b6a58a7fa",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "The main functionality is the akka-streams stuff, but I guess you're right that it'd be easier to test the other pieces if we can inject the queue. I'll think about it.",
+        "createdAt" : "2020-03-23T09:35:11Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "36407eae-f761-428f-912a-18abb72a3ed1",
+        "parentId" : "f8d6b68a-ea92-4070-a095-822b6a58a7fa",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "The solution you've come up with looks good, i.e., it supports better composability.",
+        "createdAt" : "2020-03-25T18:18:14Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,106 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class BatchingLedgerWriter(\n+    val writer: LedgerWriter,\n+    val maxQueueSize: Int,\n+    val maxBatchSizeBytes: Long,\n+    val maxWaitDuration: FiniteDuration,\n+    val maxParallelism: Int)(\n+    implicit val materializer: Materializer,\n+    implicit val logCtx: LoggingContext)\n+    extends LedgerWriter {\n+\n+  implicit val executionContext: ExecutionContext = materializer.executionContext\n+  private val logger = ContextualizedLogger.get(getClass)\n+\n+  /** Flag to mark whether the submission queue has been completed or not. Used for health status. */\n+  private var queueAlive = true\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) /* Keep.left */\n+  private val queue: SourceQueueWithComplete[DamlSubmissionBatch.CorrelatedSubmission] = {\n+    // Sink to commit batches coming from the queue. We use foreachAsync to commit them in parallel.\n+    // TODO(JM): Verify that foreachAsync actually works correctly and that we use sensible executionContext!\n+    val commitSink: Sink[Seq[DamlSubmissionBatch.CorrelatedSubmission], _] =\n+      Sink.foreachAsync(maxParallelism)(commitBatch)\n+\n+    val queue = Source"
+  },
+  {
+    "id" : "faab0da7-639a-49a5-8edf-dc0e0e5d2cac",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "e80a78e1-0534-4250-937d-77fdcef9a510",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Do we need to complete() this separately and make `DefaultBatchingQueue` implement `Closable` ?",
+        "createdAt" : "2020-03-25T13:34:07Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4aa1ef26-d4df-42ba-874a-c7b689f8d04d",
+        "parentId" : "e80a78e1-0534-4250-937d-77fdcef9a510",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Yeah, you probably do, unfortunately.",
+        "createdAt" : "2020-03-25T14:14:13Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,144 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import java.util.UUID\n+import java.util.concurrent.atomic.AtomicBoolean\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.LoggingContext.newLoggingContext\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+trait BatchingQueue {\n+  def run(commitBatch: Seq[DamlSubmissionBatch.CorrelatedSubmission] => Future[Unit])(\n+      implicit materializer: Materializer): BatchingQueueHandle\n+}\n+\n+trait BatchingQueueHandle {\n+  def alive: Boolean\n+  def offer(submission: DamlSubmissionBatch.CorrelatedSubmission): Future[SubmissionResult]\n+}\n+\n+/** Default batching queue implementation for the batching ledger writer.\n+  *\n+  * @param maxQueueSize The maximum number of submissions to queue for batching. On overflow new submissions are dropped.\n+  * @param maxBatchSizeBytes Maximum size for the batch. A batch is emitted if adding a submission would exceed this limit.\n+  * @param maxWaitDuration The maximum time to wait before a batch is forcefully emitted.\n+  * @param maxConcurrentCommits The maximum number of concurrent calls to make to [[LedgerWriter.commit]].\n+  */\n+case class DefaultBatchingQueue(\n+    maxQueueSize: Int,\n+    maxBatchSizeBytes: Long,\n+    maxWaitDuration: FiniteDuration,\n+    maxConcurrentCommits: Int\n+) extends BatchingQueue {\n+  private val queue: Source[\n+    Seq[DamlSubmissionBatch.CorrelatedSubmission],\n+    SourceQueueWithComplete[DamlSubmissionBatch.CorrelatedSubmission]] =\n+    Source\n+      .queue(maxQueueSize, OverflowStrategy.dropNew)\n+      .groupedWeightedWithin(maxBatchSizeBytes, maxWaitDuration)(\n+        (cs: DamlSubmissionBatch.CorrelatedSubmission) => cs.getSubmission.size.toLong)\n+\n+  @SuppressWarnings(Array(\"org.wartremover.warts.Any\")) /* Keep.left */\n+  def run(commitBatch: Seq[DamlSubmissionBatch.CorrelatedSubmission] => Future[Unit])(\n+      implicit materializer: Materializer): BatchingQueueHandle = {\n+    val commitSink: Sink[Seq[DamlSubmissionBatch.CorrelatedSubmission], _] =\n+      Sink.foreachAsync(maxConcurrentCommits)(commitBatch)\n+\n+    val materializedQueue = queue"
+  },
+  {
+    "id" : "d16addb5-2dce-4a19-8bdd-763deeab0165",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "c3dbef3f-d5c6-403b-94c0-722c26354647",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please move this into a separate file along with the above trait definitions or move the traits into a separate file as well. This file should only contain the `BatchingLedgerWriter`.",
+        "createdAt" : "2020-03-25T17:42:04Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "36779b2a-7da8-4819-ae26-d9a78006559b",
+        "parentId" : "c3dbef3f-d5c6-403b-94c0-722c26354647",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-03-26T13:15:38Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,144 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import java.util.UUID\n+import java.util.concurrent.atomic.AtomicBoolean\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.LoggingContext.newLoggingContext\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+trait BatchingQueue {\n+  def run(commitBatch: Seq[DamlSubmissionBatch.CorrelatedSubmission] => Future[Unit])(\n+      implicit materializer: Materializer): BatchingQueueHandle\n+}\n+\n+trait BatchingQueueHandle {\n+  def alive: Boolean\n+  def offer(submission: DamlSubmissionBatch.CorrelatedSubmission): Future[SubmissionResult]\n+}\n+\n+/** Default batching queue implementation for the batching ledger writer.\n+  *\n+  * @param maxQueueSize The maximum number of submissions to queue for batching. On overflow new submissions are dropped.\n+  * @param maxBatchSizeBytes Maximum size for the batch. A batch is emitted if adding a submission would exceed this limit.\n+  * @param maxWaitDuration The maximum time to wait before a batch is forcefully emitted.\n+  * @param maxConcurrentCommits The maximum number of concurrent calls to make to [[LedgerWriter.commit]].\n+  */\n+case class DefaultBatchingQueue("
+  },
+  {
+    "id" : "8cfa5238-53dd-46fc-aed4-eb08410799da",
+    "prId" : 4964,
+    "comments" : [
+      {
+        "id" : "eab1d517-c311-48dd-a93b-e897129b54bb",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Maybe rename it to `RunningBatchingQueueHandle` or `BatchingQueueRunHandle` or similar? The current name implies that this is in itself a batching queue, which is defined by the above trait.",
+        "createdAt" : "2020-03-25T17:44:16Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "024a99ab-9830-430a-a976-b056eb7b7360",
+        "parentId" : "eab1d517-c311-48dd-a93b-e897129b54bb",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Yep, that's a better name. Renamed.",
+        "createdAt" : "2020-03-26T13:15:26Z",
+        "updatedAt" : "2020-03-26T15:34:58Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2e1d5cd7fd70ebf4c50cfbce8cda42b260c81dd5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,144 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.api\n+\n+import java.util.UUID\n+import java.util.concurrent.atomic.AtomicBoolean\n+\n+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}\n+import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}\n+import com.daml.ledger.participant.state.kvutils\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.DamlSubmissionBatch\n+import com.daml.ledger.participant.state.kvutils.Envelope\n+import com.daml.ledger.participant.state.v1.{ParticipantId, SubmissionResult}\n+import com.digitalasset.ledger.api.health.HealthStatus\n+import com.digitalasset.logging.LoggingContext.newLoggingContext\n+import com.digitalasset.logging.{ContextualizedLogger, LoggingContext}\n+\n+import scala.collection.JavaConverters._\n+import scala.concurrent.duration._\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+trait BatchingQueue {\n+  def run(commitBatch: Seq[DamlSubmissionBatch.CorrelatedSubmission] => Future[Unit])(\n+      implicit materializer: Materializer): BatchingQueueHandle\n+}\n+\n+trait BatchingQueueHandle {"
+  }
+]

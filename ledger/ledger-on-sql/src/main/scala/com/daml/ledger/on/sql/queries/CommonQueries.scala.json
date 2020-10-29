@@ -1,0 +1,261 @@
+[
+  {
+    "id" : "5459b3de-b10f-4e6b-965a-32db8516fe96",
+    "prId" : 4984,
+    "comments" : [
+      {
+        "id" : "c62c6d81-6793-4815-97dd-638f4bd4d735",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "You can make anorm understand `ByteString` directly to avoid cluttering up the query. See https://github.com/digital-asset/daml/pull/4953/files#diff-902c217ea8879e2c95e2294eb8a4113aR111-R119",
+        "createdAt" : "2020-03-13T15:21:24Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "691cf59f-e46c-4d59-8632-df2762a824ad",
+        "parentId" : "c62c6d81-6793-4815-97dd-638f4bd4d735",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "OK -- will add an implicit conversion in `Conversions`.",
+        "createdAt" : "2020-03-13T16:48:31Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4f451425-b220-4249-af6a-18eaf733dece",
+        "parentId" : "c62c6d81-6793-4815-97dd-638f4bd4d735",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-03-13T17:04:38Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8049c9ebb4015c70e4b3db0344c1e0bdf85699ec",
+    "line" : null,
+    "diffHunk" : "@@ -58,16 +57,21 @@ trait CommonQueries extends Queries {\n \n   override final def selectStateValuesByKeys(keys: Seq[Key]): Try[immutable.Seq[Option[Value]]] =\n     Try {\n-      val results = SQL\"SELECT key, value FROM #$StateTable WHERE key IN ($keys)\"\n-        .fold(Map.newBuilder[ByteString, Array[Byte]], ColumnAliaser.empty)((builder, row) =>\n-          builder += ByteString.readFrom(row[InputStream](\"key\")) -> row[Value](\"value\"))\n-        .fold(exceptions => throw exceptions.head, _.result())\n-      keys.map(key => results.get(ByteString.copyFrom(key)))(breakOut)\n+      val results =\n+        SQL\"SELECT key, value FROM #$StateTable WHERE key IN (${keys.map(_.toByteArray)})\""
+  },
+  {
+    "id" : "d915169b-a625-48dd-b972-1964b60e8fcf",
+    "prId" : 4984,
+    "comments" : [
+      {
+        "id" : "21cc494a-6488-435d-8365-36d4086b5b40",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Does @gerolf-da's comment apply here too?",
+        "createdAt" : "2020-03-13T15:55:56Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fc95a167-8f08-4fa5-921d-962039e4d06b",
+        "parentId" : "21cc494a-6488-435d-8365-36d4086b5b40",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Of course.",
+        "createdAt" : "2020-03-13T17:04:49Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8049c9ebb4015c70e4b3db0344c1e0bdf85699ec",
+    "line" : null,
+    "diffHunk" : "@@ -58,16 +57,21 @@ trait CommonQueries extends Queries {\n \n   override final def selectStateValuesByKeys(keys: Seq[Key]): Try[immutable.Seq[Option[Value]]] =\n     Try {\n-      val results = SQL\"SELECT key, value FROM #$StateTable WHERE key IN ($keys)\"\n-        .fold(Map.newBuilder[ByteString, Array[Byte]], ColumnAliaser.empty)((builder, row) =>\n-          builder += ByteString.readFrom(row[InputStream](\"key\")) -> row[Value](\"value\"))\n-        .fold(exceptions => throw exceptions.head, _.result())\n-      keys.map(key => results.get(ByteString.copyFrom(key)))(breakOut)\n+      val results =\n+        SQL\"SELECT key, value FROM #$StateTable WHERE key IN (${keys.map(_.toByteArray)})\"\n+          .fold(Map.newBuilder[Key, Value], ColumnAliaser.empty) { (builder, row) =>\n+            val key = ByteString.readFrom(row[InputStream](\"key\"))\n+            val value = ByteString.readFrom(row[InputStream](\"value\"))\n+            builder += key -> value\n+          }\n+          .fold(exceptions => throw exceptions.head, _.result())\n+      keys.map(results.get)(breakOut)\n     }\n \n   override final def updateState(stateUpdates: Seq[(Key, Value)]): Try[Unit] = Try {\n     executeBatchSql(updateStateQuery, stateUpdates.map {\n-      case (key, value) => Seq[NamedParameter](\"key\" -> key, \"value\" -> value)\n+      case (key, value) =>\n+        Seq[NamedParameter](\"key\" -> key.toByteArray, \"value\" -> value.toByteArray)"
+  },
+  {
+    "id" : "d6ecd4c5-0d95-4302-84b0-385f452f2e9b",
+    "prId" : 4984,
+    "comments" : [
+      {
+        "id" : "e14f4bb4-a6a2-4b48-8cd2-52ae2b4ce87c",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I really like the use of `implicit def byteStringToStatement`. Can we do a similar thing for this (and the code in `selectStateValuesByKeys`)?",
+        "createdAt" : "2020-03-16T08:30:27Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c8bdeb41-ae9d-4dd7-8bab-793e62b6fb73",
+        "parentId" : "e14f4bb4-a6a2-4b48-8cd2-52ae2b4ce87c",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Sure, made that change.",
+        "createdAt" : "2020-03-16T12:05:27Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8049c9ebb4015c70e4b3db0344c1e0bdf85699ec",
+    "line" : null,
+    "diffHunk" : "@@ -37,13 +36,13 @@ trait CommonQueries extends Queries {\n       .as(\n         (long(\"sequence_no\")\n           ~ get[Option[InputStream]](\"entry_id\")\n-          ~ get[Option[Array[Byte]]](\"envelope\")\n+          ~ get[Option[InputStream]](\"envelope\")\n           ~ get[Option[Long]](\"heartbeat_timestamp\")).map {\n           case index ~ Some(entryId) ~ Some(envelope) ~ None =>\n             index -> LedgerEntry.LedgerRecord(\n               Offset(Array(index)),\n-              DamlLogEntryId.parseFrom(entryId),\n-              envelope,\n+              ByteString.readFrom(entryId),\n+              ByteString.readFrom(envelope),"
+  },
+  {
+    "id" : "de9f8543-3637-4cdd-85e5-731d3124fd28",
+    "prId" : 4984,
+    "comments" : [
+      {
+        "id" : "fb8d7857-669c-4d1d-8799-6ff773a167c3",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "We can probably inline these again; I only pulled them out because they were really long.",
+        "createdAt" : "2020-03-16T14:50:55Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "434a4fa2-47fd-49cc-9126-7f559ef444bf",
+        "parentId" : "fb8d7857-669c-4d1d-8799-6ff773a167c3",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-03-16T14:56:06Z",
+        "updatedAt" : "2020-03-16T14:56:06Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8049c9ebb4015c70e4b3db0344c1e0bdf85699ec",
+    "line" : null,
+    "diffHunk" : "@@ -58,16 +55,21 @@ trait CommonQueries extends Queries {\n \n   override final def selectStateValuesByKeys(keys: Seq[Key]): Try[immutable.Seq[Option[Value]]] =\n     Try {\n-      val results = SQL\"SELECT key, value FROM #$StateTable WHERE key IN ($keys)\"\n-        .fold(Map.newBuilder[ByteString, Array[Byte]], ColumnAliaser.empty)((builder, row) =>\n-          builder += ByteString.readFrom(row[InputStream](\"key\")) -> row[Value](\"value\"))\n-        .fold(exceptions => throw exceptions.head, _.result())\n-      keys.map(key => results.get(ByteString.copyFrom(key)))(breakOut)\n+      val results =\n+        SQL\"SELECT key, value FROM #$StateTable WHERE key IN ($keys)\"\n+          .fold(Map.newBuilder[Key, Value], ColumnAliaser.empty) { (builder, row) =>\n+            val key = row(\"key\")\n+            val value = row(\"value\")"
+  },
+  {
+    "id" : "0979e1e3-36a8-429e-a587-212ed1fd3a8b",
+    "prId" : 4532,
+    "comments" : [
+      {
+        "id" : "0103f4ff-0dde-4b23-ae21-c6c940c3a2d2",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "I've made a note to change `LedgerRecord` to hide serialization aspects (i.e., to just ask for the bytes that have been written via `appendToLog` so you won't have to take care of parsing the log entry's key).",
+        "createdAt" : "2020-02-14T16:38:05Z",
+        "updatedAt" : "2020-02-15T15:45:04Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "68d515d40507c5874ecc55d80ce5abcafc53a013",
+    "line" : 42,
+    "diffHunk" : "@@ -32,38 +30,28 @@ trait CommonQueries extends Queries {\n   )(implicit connection: Connection): immutable.Seq[(Index, LedgerRecord)] =\n     SQL\"SELECT sequence_no, entry_id, envelope FROM #$LogTable WHERE sequence_no >= $start AND sequence_no < $end\"\n       .as(\n-        (long(\"sequence_no\") ~ byteArray(\"entry_id\") ~ byteArray(\"envelope\")).map {\n+        (long(\"sequence_no\") ~ binaryStream(\"entry_id\") ~ byteArray(\"envelope\")).map {\n           case index ~ entryId ~ envelope =>\n-            index -> LedgerRecord(\n-              Offset(Array(index)),\n-              DamlLogEntryId\n-                .newBuilder()\n-                .setEntryId(ByteString.copyFrom(entryId))\n-                .build(),\n-              envelope,\n-            )\n+            index -> LedgerRecord(Offset(Array(index)), DamlLogEntryId.parseFrom(entryId), envelope)"
+  }
+]

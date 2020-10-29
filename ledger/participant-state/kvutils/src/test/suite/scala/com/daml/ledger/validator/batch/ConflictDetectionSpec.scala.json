@@ -1,0 +1,360 @@
+[
+  {
+    "id" : "d7296d2a-8d4e-4808-a7b8-378593b3a57d",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "6d9997fb-99f7-489d-851c-a40b13acd176",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Shouldn't it be equal?",
+        "createdAt" : "2020-05-22T16:49:54Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)"
+  },
+  {
+    "id" : "111fdf20-8b7f-43a3-8754-7107dfb8346a",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "5fb84194-c7c1-401b-8532-7fc6a7db2acd",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Isn't this test included in the next one?",
+        "createdAt" : "2020-05-22T16:50:57Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2cd9132f-de2a-4dde-a656-890535620dd9",
+        "parentId" : "5fb84194-c7c1-401b-8532-7fc6a7db2acd",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "No, because this case does not have an input state defined whereas the next one has.",
+        "createdAt" : "2020-05-25T10:35:13Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : 57,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {"
+  },
+  {
+    "id" : "05688cd0-8e01-4a72-a4ba-43dadbf9c2cb",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "31cdebc9-af1b-4a67-8102-f0e8c02a888a",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Should actually be empty, shouldn't it?",
+        "createdAt" : "2020-05-22T16:54:11Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3aab8b62-fce2-4709-896b-d84c6a2e361b",
+        "parentId" : "31cdebc9-af1b-4a67-8102-f0e8c02a888a",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Yes, but this way the test is easier to read.",
+        "createdAt" : "2020-05-25T10:34:00Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : 174,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set(aliceKey),\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+    }\n+\n+    \"drop conflicting party allocation\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val invalidatedKeys = Set(aliceKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount + 1\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = Map(aliceKey -> None),\n+          logEntry = logEntry,\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"drop conflicting package upload\" in {\n+      val logEntry = DamlLogEntry.newBuilder\n+        .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+        .build\n+      val packageUploadKey = DamlStateKey.newBuilder\n+        .setPackageId(\"aPackageId\")\n+        .build\n+      val invalidatedKeys = Set(packageUploadKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = invalidatedKeys.map(_ -> None).toMap,\n+          logEntry = logEntry,\n+          outputState = Map.empty\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"recover transaction conflicting on contract id\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setContractId(\"foo\").build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Conflict on contract foo\")\n+    }\n+\n+    \"recover transaction conflicting on contract key\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder\n+          .setContractKey(\n+            DamlContractKey.newBuilder\n+              .setHash(ByteString.copyFromUtf8(\"somehash\"))\n+              .setTemplateId(\n+                ValueOuterClass.Identifier.newBuilder\n+                  .addName(\"Foo\")\n+                  .addModuleName(\"Bar\")\n+                  .setPackageId(\"Baz\"))\n+          )\n+          .build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\n+        \"Contract key conflicts in contract template Baz:Bar:Foo\")\n+    }\n+\n+    \"recover transaction conflicting on configuration\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setConfiguration(com.google.protobuf.Empty.getDefaultInstance).build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Ledger configuration has changed\")\n+    }\n+\n+    \"remove unaltered input key from invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val aStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> aStateValue)\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedTransientCount = conflictDetectionMetrics.removedTransientKey.getCount + 1\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> Some(aStateValue)),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should not contain aliceKey"
+  },
+  {
+    "id" : "14132a92-0d1a-4a85-9ca7-db94d57ba8c7",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "1b0f0258-0b2b-4a1c-8ccc-82db761fb34f",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "These should be 0",
+        "createdAt" : "2020-05-22T16:54:38Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b5057075-e395-44ab-affb-a0d46784e0ea",
+        "parentId" : "1b0f0258-0b2b-4a1c-8ccc-82db761fb34f",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "I'll remove these types of expectations as they are no longer required. I.e., earlier we couldn't assume that the metrics are re-created from fresh and hence counters would start from 0.",
+        "createdAt" : "2020-05-25T10:36:23Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : 162,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set(aliceKey),\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+    }\n+\n+    \"drop conflicting party allocation\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val invalidatedKeys = Set(aliceKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount + 1\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = Map(aliceKey -> None),\n+          logEntry = logEntry,\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"drop conflicting package upload\" in {\n+      val logEntry = DamlLogEntry.newBuilder\n+        .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+        .build\n+      val packageUploadKey = DamlStateKey.newBuilder\n+        .setPackageId(\"aPackageId\")\n+        .build\n+      val invalidatedKeys = Set(packageUploadKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = invalidatedKeys.map(_ -> None).toMap,\n+          logEntry = logEntry,\n+          outputState = Map.empty\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"recover transaction conflicting on contract id\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setContractId(\"foo\").build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Conflict on contract foo\")\n+    }\n+\n+    \"recover transaction conflicting on contract key\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder\n+          .setContractKey(\n+            DamlContractKey.newBuilder\n+              .setHash(ByteString.copyFromUtf8(\"somehash\"))\n+              .setTemplateId(\n+                ValueOuterClass.Identifier.newBuilder\n+                  .addName(\"Foo\")\n+                  .addModuleName(\"Bar\")\n+                  .setPackageId(\"Baz\"))\n+          )\n+          .build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\n+        \"Contract key conflicts in contract template Baz:Bar:Foo\")\n+    }\n+\n+    \"recover transaction conflicting on configuration\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setConfiguration(com.google.protobuf.Empty.getDefaultInstance).build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Ledger configuration has changed\")\n+    }\n+\n+    \"remove unaltered input key from invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val aStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> aStateValue)\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedTransientCount = conflictDetectionMetrics.removedTransientKey.getCount + 1\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount\n+"
+  },
+  {
+    "id" : "693a9d9d-b132-42af-8804-dcbc110b3484",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "d3078c20-b8d4-4da3-a0c8-0992408ac66c",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Should be 1",
+        "createdAt" : "2020-05-22T16:55:21Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set(aliceKey),\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+    }\n+\n+    \"drop conflicting party allocation\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val invalidatedKeys = Set(aliceKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount + 1\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = Map(aliceKey -> None),\n+          logEntry = logEntry,\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"drop conflicting package upload\" in {\n+      val logEntry = DamlLogEntry.newBuilder\n+        .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+        .build\n+      val packageUploadKey = DamlStateKey.newBuilder\n+        .setPackageId(\"aPackageId\")\n+        .build\n+      val invalidatedKeys = Set(packageUploadKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = invalidatedKeys.map(_ -> None).toMap,\n+          logEntry = logEntry,\n+          outputState = Map.empty\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"recover transaction conflicting on contract id\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setContractId(\"foo\").build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Conflict on contract foo\")\n+    }\n+\n+    \"recover transaction conflicting on contract key\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder\n+          .setContractKey(\n+            DamlContractKey.newBuilder\n+              .setHash(ByteString.copyFromUtf8(\"somehash\"))\n+              .setTemplateId(\n+                ValueOuterClass.Identifier.newBuilder\n+                  .addName(\"Foo\")\n+                  .addModuleName(\"Bar\")\n+                  .setPackageId(\"Baz\"))\n+          )\n+          .build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\n+        \"Contract key conflicts in contract template Baz:Bar:Foo\")\n+    }\n+\n+    \"recover transaction conflicting on configuration\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setConfiguration(com.google.protobuf.Empty.getDefaultInstance).build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Ledger configuration has changed\")\n+    }\n+\n+    \"remove unaltered input key from invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val aStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> aStateValue)\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedTransientCount = conflictDetectionMetrics.removedTransientKey.getCount + 1\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> Some(aStateValue)),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should not contain aliceKey\n+      conflictDetectionMetrics.removedTransientKey.getCount should be(\n+        expectedConflictedTransientCount)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"return altered input key in invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val inputStateValue = DamlStateValue.newBuilder\n+        .setParty(\n+          DamlPartyAllocation.newBuilder.setDisplayName(\"not alice\")\n+        )\n+        .build\n+      val outputStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> outputStateValue)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1"
+  },
+  {
+    "id" : "08c2c55b-aa46-4de8-8bbb-c8448756ae79",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "063c7193-45cf-4029-895d-4ebbef9cf54d",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "These should be 1",
+        "createdAt" : "2020-05-22T16:55:41Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set(aliceKey),\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+    }\n+\n+    \"drop conflicting party allocation\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val invalidatedKeys = Set(aliceKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount + 1\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1"
+  },
+  {
+    "id" : "841d9a3c-f290-422d-9de1-454a7fbf0368",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "15b8cdd2-cf19-471b-acd8-dff787016be0",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "This should be 1",
+        "createdAt" : "2020-05-22T16:55:51Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1"
+  },
+  {
+    "id" : "801ceb8a-f431-4be1-9f00-1da7a744e164",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "d554e90c-8158-4655-94da-49b953b27dd2",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "This should be 1",
+        "createdAt" : "2020-05-22T16:56:09Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set(aliceKey),\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+    }\n+\n+    \"drop conflicting party allocation\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val invalidatedKeys = Set(aliceKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount + 1\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = Map(aliceKey -> None),\n+          logEntry = logEntry,\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"drop conflicting package upload\" in {\n+      val logEntry = DamlLogEntry.newBuilder\n+        .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+        .build\n+      val packageUploadKey = DamlStateKey.newBuilder\n+        .setPackageId(\"aPackageId\")\n+        .build\n+      val invalidatedKeys = Set(packageUploadKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1"
+  },
+  {
+    "id" : "42cbc147-7129-44f9-aa18-432b3e4c0d2e",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "71c70b2f-21dd-49a2-a759-bad170d6f70c",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Should be =",
+        "createdAt" : "2020-05-22T16:57:41Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set(aliceKey),\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+    }\n+\n+    \"drop conflicting party allocation\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val invalidatedKeys = Set(aliceKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount + 1\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = Map(aliceKey -> None),\n+          logEntry = logEntry,\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"drop conflicting package upload\" in {\n+      val logEntry = DamlLogEntry.newBuilder\n+        .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+        .build\n+      val packageUploadKey = DamlStateKey.newBuilder\n+        .setPackageId(\"aPackageId\")\n+        .build\n+      val invalidatedKeys = Set(packageUploadKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = invalidatedKeys.map(_ -> None).toMap,\n+          logEntry = logEntry,\n+          outputState = Map.empty\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"recover transaction conflicting on contract id\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setContractId(\"foo\").build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Conflict on contract foo\")\n+    }\n+\n+    \"recover transaction conflicting on contract key\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder\n+          .setContractKey(\n+            DamlContractKey.newBuilder\n+              .setHash(ByteString.copyFromUtf8(\"somehash\"))\n+              .setTemplateId(\n+                ValueOuterClass.Identifier.newBuilder\n+                  .addName(\"Foo\")\n+                  .addModuleName(\"Bar\")\n+                  .setPackageId(\"Baz\"))\n+          )\n+          .build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\n+        \"Contract key conflicts in contract template Baz:Bar:Foo\")\n+    }\n+\n+    \"recover transaction conflicting on configuration\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setConfiguration(com.google.protobuf.Empty.getDefaultInstance).build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Ledger configuration has changed\")\n+    }\n+\n+    \"remove unaltered input key from invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val aStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> aStateValue)\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedTransientCount = conflictDetectionMetrics.removedTransientKey.getCount + 1\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> Some(aStateValue)),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should not contain aliceKey\n+      conflictDetectionMetrics.removedTransientKey.getCount should be(\n+        expectedConflictedTransientCount)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"return altered input key in invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val inputStateValue = DamlStateValue.newBuilder\n+        .setParty(\n+          DamlPartyAllocation.newBuilder.setDisplayName(\"not alice\")\n+        )\n+        .build\n+      val outputStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> outputStateValue)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> Some(inputStateValue)),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)"
+  },
+  {
+    "id" : "e0693ed1-a418-4e06-a4c5-4984442d5606",
+    "prId" : 6004,
+    "comments" : [
+      {
+        "id" : "17151291-b123-4306-951a-049b36e0a509",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Should be 1",
+        "createdAt" : "2020-05-22T16:58:06Z",
+        "updatedAt" : "2020-05-25T16:06:53Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f5039a2c00da681659f3cc8423f9ddfc9d993996",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.batch\n+\n+import com.codahale.metrics.MetricRegistry\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n+import com.daml.lf.value.ValueOuterClass\n+import com.daml.logging.LoggingContext\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+class ConflictDetectionSpec extends AsyncWordSpec with Matchers with Inside with MockitoSugar {\n+  \"conflictDetectAndRecover\" should {\n+    \"return output keys as invalidated and unchanged input in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> None),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+\n+    \"return new output key as invalidated in case of no conflicts\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val Some((actualInvalidatedKeys, _)) = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set.empty,\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      actualInvalidatedKeys should contain(aliceKey)\n+    }\n+\n+    \"report conflict for new output key also part of input invalidated key set\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val conflictDetection = new ConflictDetection(metrics())\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = Set(aliceKey),\n+          inputState = Map.empty,\n+          logEntry = aPartyLogEntry(\"Alice\"),\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+    }\n+\n+    \"drop conflicting party allocation\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val outputState = Map(aliceKey -> DamlStateValue.getDefaultInstance)\n+      val invalidatedKeys = Set(aliceKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount + 1\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = Map(aliceKey -> None),\n+          logEntry = logEntry,\n+          outputState = outputState\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"drop conflicting package upload\" in {\n+      val logEntry = DamlLogEntry.newBuilder\n+        .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+        .build\n+      val packageUploadKey = DamlStateKey.newBuilder\n+        .setPackageId(\"aPackageId\")\n+        .build\n+      val invalidatedKeys = Set(packageUploadKey)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount + 1\n+\n+      val result = LoggingContext.newLoggingContext { implicit logCtx =>\n+        conflictDetection.detectConflictsAndRecover(\n+          invalidatedKeys = invalidatedKeys,\n+          inputState = invalidatedKeys.map(_ -> None).toMap,\n+          logEntry = logEntry,\n+          outputState = Map.empty\n+        )\n+      }\n+\n+      result should be(None)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"recover transaction conflicting on contract id\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setContractId(\"foo\").build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Conflict on contract foo\")\n+    }\n+\n+    \"recover transaction conflicting on contract key\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder\n+          .setContractKey(\n+            DamlContractKey.newBuilder\n+              .setHash(ByteString.copyFromUtf8(\"somehash\"))\n+              .setTemplateId(\n+                ValueOuterClass.Identifier.newBuilder\n+                  .addName(\"Foo\")\n+                  .addModuleName(\"Bar\")\n+                  .setPackageId(\"Baz\"))\n+          )\n+          .build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\n+        \"Contract key conflicts in contract template Baz:Bar:Foo\")\n+    }\n+\n+    \"recover transaction conflicting on configuration\" in {\n+      val txRejectionEntry = conflictingTransactionTest(\n+        DamlStateKey.newBuilder.setConfiguration(com.google.protobuf.Empty.getDefaultInstance).build\n+      )\n+      txRejectionEntry.getInconsistent.getDetails should be(\"Ledger configuration has changed\")\n+    }\n+\n+    \"remove unaltered input key from invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val aStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> aStateValue)\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedConflictedTransientCount = conflictDetectionMetrics.removedTransientKey.getCount + 1\n+      val expectedConflictedCount = conflictDetectionMetrics.conflicted.getCount\n+      val expectedDroppedCount = conflictDetectionMetrics.dropped.getCount\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> Some(aStateValue)),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should not contain aliceKey\n+      conflictDetectionMetrics.removedTransientKey.getCount should be(\n+        expectedConflictedTransientCount)\n+      conflictDetectionMetrics.conflicted.getCount should be(expectedConflictedCount)\n+      conflictDetectionMetrics.dropped.getCount should be(expectedDroppedCount)\n+    }\n+\n+    \"return altered input key in invalidated keys\" in {\n+      val aliceKey = DamlStateKey.newBuilder.setParty(\"Alice\").build\n+      val logEntry = aPartyLogEntry(\"Alice\")\n+      val inputStateValue = DamlStateValue.newBuilder\n+        .setParty(\n+          DamlPartyAllocation.newBuilder.setDisplayName(\"not alice\")\n+        )\n+        .build\n+      val outputStateValue = DamlStateValue.getDefaultInstance\n+      val outputState = Map(aliceKey -> outputStateValue)\n+      val damlMetrics = metrics()\n+      val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+      val conflictDetection = new ConflictDetection(damlMetrics)\n+      val expectedAcceptedCount = conflictDetectionMetrics.accepted.getCount + 1\n+\n+      val Some((actualInvalidatedKeys, result)) = LoggingContext.newLoggingContext {\n+        implicit logCtx =>\n+          conflictDetection.detectConflictsAndRecover(\n+            invalidatedKeys = Set.empty,\n+            inputState = Map(aliceKey -> Some(inputStateValue)),\n+            logEntry = logEntry,\n+            outputState = outputState\n+          )\n+      }\n+\n+      result should be(logEntry -> outputState)\n+      actualInvalidatedKeys should contain(aliceKey)\n+      conflictDetectionMetrics.accepted.getCount should be(expectedAcceptedCount)\n+    }\n+  }\n+\n+  private def conflictingTransactionTest(key: DamlStateKey): DamlTransactionRejectionEntry = {\n+    val damlMetrics = metrics()\n+    val conflictDetectionMetrics = damlMetrics.daml.kvutils.ConflictDetection\n+    val conflictDetection = new ConflictDetection(damlMetrics)\n+    val outputState = Map(key -> DamlStateValue.getDefaultInstance)\n+    val invalidatedKeys = Set(key)\n+    val expectedRecoveredCount = conflictDetectionMetrics.recovered.getCount + 1"
+  }
+]

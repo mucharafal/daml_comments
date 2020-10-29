@@ -1,0 +1,152 @@
+[
+  {
+    "id" : "dd631869-9d36-4494-8ae3-829656f708cd",
+    "prId" : 6828,
+    "comments" : [
+      {
+        "id" : "7f970084-ed57-4760-b73d-58c18fa655a1",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "By the usage in `object Repl`, one attempting to assemble sensible arguments to  could be easily misled into thinking that versions < 6 are not \"supported stable versions\", and so remove the \"unsupported\" versions as mentioned in my overview. Likewise one could make the same assumption from the definition of `EngineConfig.Stable` regarding transaction versions < 10.\r\n\r\nIt should be clearer that this is not the case. In other words, practically speaking, how deep does one have to dig to access \"really supported stable input versions\"?",
+        "createdAt" : "2020-08-06T00:18:34Z",
+        "updatedAt" : "2020-08-13T18:22:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b0a8ac29dc0000fb043ddb635bc6d6a3895606ba",
+    "line" : null,
+    "diffHunk" : "@@ -30,11 +30,15 @@ private[lf] object ValueVersions\n   private[value] val minContractIdV1 = ValueVersion(\"7\")\n \n   // Older versions are deprecated https://github.com/digital-asset/daml/issues/5220\n-  // We force output of recent version, but keep reading older version as long as\n-  // Sandbox is alive.\n-  val SupportedStableVersions = VersionRange(ValueVersion(\"6\"), ValueVersion(\"6\"))\n+  val SupportedStableVersions: VersionRange[ValueVersion] =\n+    VersionRange(ValueVersion(\"6\"), ValueVersion(\"6\"))"
+  },
+  {
+    "id" : "4cd1549e-5c40-4044-9fa3-4494b0843f58",
+    "prId" : 4460,
+    "comments" : [
+      {
+        "id" : "5c27c23d-0264-447b-b361-1bd6a6af9226",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "We only seem to be using this from tests and only this particular instance of the class `VersionCid`. Is it worth having this extra machinery when we don't use it? Or am I missing something?",
+        "createdAt" : "2020-02-13T09:35:46Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f93078a7-0175-4ed8-ae2b-8d7d90717e8c",
+        "parentId" : "5c27c23d-0264-447b-b361-1bd6a6af9226",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "In the current state, canton needs one. ",
+        "createdAt" : "2020-02-13T12:22:05Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bb87ed98-9f64-4a93-8044-3cdeca2f4b40",
+        "parentId" : "5c27c23d-0264-447b-b361-1bd6a6af9226",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I see. thanks.",
+        "createdAt" : "2020-02-13T15:00:52Z",
+        "updatedAt" : "2020-02-13T15:22:25Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "59b8325563e5f1d36534e27674434e055016d4ba",
+    "line" : 18,
+    "diffHunk" : "@@ -29,7 +29,23 @@ object ValueVersions\n   private[value] val minGenMap = ValueVersion(\"7\")\n   private[value] val minContractIdV1 = ValueVersion(\"7\")\n \n-  def assignVersion[Cid](v0: Value[Cid]): Either[String, ValueVersion] = {\n+  abstract class VersionCid[-Cid] private[lf] {\n+    private[lf] def assignVersion(cid: Cid): ValueVersion\n+  }\n+\n+  object VersionCid extends VersionCid[ContractId] {"
+  },
+  {
+    "id" : "b240326a-9ebf-4d3e-9a4d-434bd337b59f",
+    "prId" : 1529,
+    "comments" : [
+      {
+        "id" : "d8165fe9-de14-496b-a260-13380affea4d",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Don't delete this comment.",
+        "createdAt" : "2019-06-06T15:50:55Z",
+        "updatedAt" : "2019-06-06T15:52:39Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "62e40276-aa22-40ce-aa7e-8a857b71c492",
+        "parentId" : "d8165fe9-de14-496b-a260-13380affea4d",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-06-06T15:55:55Z",
+        "updatedAt" : "2019-06-06T15:55:55Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "181ced0b995bc7875f05cc8260012e8f7fd9d6aa",
+    "line" : null,
+    "diffHunk" : "@@ -52,8 +51,8 @@ object ValueVersions\n               case ValueMap(map) =>\n                 go(maxVV(minMap, currentVersion), map.values ++: values)\n               case ValueEnum(_, _) =>\n-                go(maxVV(minEnum, currentVersion), values)\n-              // tuples are a no-no"
+  }
+]

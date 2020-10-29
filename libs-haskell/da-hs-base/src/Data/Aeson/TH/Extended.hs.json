@@ -1,0 +1,83 @@
+[
+  {
+    "id" : "8d288dc8-b08c-44ea-b9a5-f496d762c38f",
+    "prId" : 919,
+    "comments" : [
+      {
+        "id" : "2cfa0032-2e0c-4e54-b716-2892b368c1d2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not convinced this module is the right place for this function. I think we can remove this module once we use`haskell-lsp`. Why not leave this function where it was before, that is, inlined at its only use site?",
+        "createdAt" : "2019-05-05T19:19:06Z",
+        "updatedAt" : "2019-05-05T20:06:37Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5a69c91d-f3cc-4d58-a662-cbff25b27f9c",
+        "parentId" : "2cfa0032-2e0c-4e54-b716-2892b368c1d2",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "OK, I dropped this change from the patch. Still feels odd where it is, but let's deal with that another time.",
+        "createdAt" : "2019-05-05T19:26:36Z",
+        "updatedAt" : "2019-05-05T20:06:37Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9fe4ce08e9887f24d7ee0b513dc2e6e98b32abd0",
+    "line" : null,
+    "diffHunk" : "@@ -42,27 +40,24 @@ daAesonEncodingOptions prefix = defaultOptions\n         (x:xs) -> toLower x : xs\n         []     -> []\n \n-deriveDAJSON :: String -> TH.Name -> TH.Q [TH.Dec]\n-deriveDAJSON prefix = deriveJSON $ daAesonEncodingOptions prefix\n-\n deriveDAToJSON :: String -> TH.Name -> TH.Q [TH.Dec]\n deriveDAToJSON = deriveToJSON . daAesonEncodingOptions\n \n deriveDAFromJSON :: String -> TH.Name -> TH.Q [TH.Dec]\n deriveDAFromJSON = deriveFromJSON . daAesonEncodingOptions\n \n--- | Like 'daAesonEncodingOptions', but will strip and make lowercase\n--- also constructor tags, on top of field modifiers.\n-daAesonEncodingOptionsTagged :: String -> Options\n-daAesonEncodingOptionsTagged prefix = (daAesonEncodingOptions prefix)\n-    { constructorTagModifier = \\label ->\n-        maybe label lowerHead $ stripPrefix prefix label\n-    }\n-  where\n-    lowerHead = \\case\n-        (x:xs) -> toLower x : xs\n-        []     -> []\n \n--- | Like 'deriveDAToJSON', but uses 'daAesonEncodingOptionsTagged'\n-deriveDAToJSONTagged :: String -> TH.Name -> TH.Q [TH.Dec]\n-deriveDAToJSONTagged = deriveToJSON . daAesonEncodingOptionsTagged\n+-- | Generate a lens for every field in a record. The name of the lens is the\n+-- name of the field prefixed by an underscore. For instance, for\n+--\n+-- > data Foo = Foo{bar :: Int, _baz :: Bool}\n+--\n+-- it will generate\n+--\n+-- > _bar :: Lens' Foo Int\n+-- > __baz :: Lens' Foo Bool\n+makeUnderscoreLenses :: TH.Name -> TH.DecsQ"
+  },
+  {
+    "id" : "f80e6469-9288-4885-9c64-260b2813afb5",
+    "prId" : 911,
+    "comments" : [
+      {
+        "id" : "94fa2186-f0eb-47c9-808b-559868f57e93",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This module is very high up on my lsit of things that should go. I think it's possible once we've switched to `haskell-lsp`.",
+        "createdAt" : "2019-05-04T11:13:29Z",
+        "updatedAt" : "2019-05-04T11:56:28Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "edec31482ee6f8617904d713aabce923a5056d23",
+    "line" : 8,
+    "diffHunk" : "@@ -1,8 +1,6 @@\n -- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n -- SPDX-License-Identifier: Apache-2.0\n \n-{-# LANGUAGE NoImplicitPrelude #-}\n-\n -- | An extended version of \"Data.Aeson.TH\", which provides our own\n -- 'daAesonEncodingOptions' and the corresponding 'deriveDAJSON'.\n module Data.Aeson.TH.Extended"
+  }
+]

@@ -1,0 +1,421 @@
+[
+  {
+    "id" : "0c597357-2d63-488a-a0b5-92053ddf5899",
+    "prId" : 526,
+    "comments" : [
+      {
+        "id" : "e046f6ab-e579-4d50-b6c7-7a031673345b",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "All this beautiful documentation, gone...",
+        "createdAt" : "2019-04-16T11:35:03Z",
+        "updatedAt" : "2019-04-16T12:45:45Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "404647aa-55ea-4cf0-b754-402d124b2440",
+        "parentId" : "e046f6ab-e579-4d50-b6c7-7a031673345b",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "it's dead",
+        "createdAt" : "2019-04-16T12:27:54Z",
+        "updatedAt" : "2019-04-16T12:45:45Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d8494ea0fb69a440869cd809712800d732e6028e",
+    "line" : 31,
+    "diffHunk" : "@@ -5,67 +5,26 @@\n \n -- | Discover releases from the digital-asset/daml github.\n module DAML.Assistant.Install.Github\n-    ( latestURL\n-    , versionURL\n+    ( versionURL\n+    , getLatestVersion\n     ) where\n \n import DAML.Assistant.Types\n import DAML.Assistant.Util\n import Data.Aeson\n import Network.HTTP.Simple\n+import Network.HTTP.Client ( redirectCount )\n import Control.Exception.Safe\n import Control.Monad\n-import Data.List\n import Data.Either.Extra\n import qualified System.Info\n import qualified Data.Text as T\n+import qualified Data.Text.Encoding as T\n \n -- | General git tag. We only care about the tags of the form \"v<VERSION>\"\n -- where <VERSION> is an SDK version. For example, \"v0.11.1\".\n newtype Tag = Tag { unTag :: Text } deriving (Eq, Show, FromJSON)\n \n--- | Name of github release artifact. We only care about artifacts\n--- with the name \"daml-sdk-<VERSION>-<OS>.tar.gz\" where <VERSION>\n--- is an SDK version and <OS> is \"linux\", \"macos\", or \"win\". For\n--- example, \"daml-sdk-0.11.1-linux.tar.gz\"."
+  },
+  {
+    "id" : "ffb5cb68-099c-44d2-9479-52843b573b0f",
+    "prId" : 526,
+    "comments" : [
+      {
+        "id" : "66ba94a1-861a-4d7a-9365-833c14826092",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Can we make this message a bit clearer, it would confuse the hell out of me if I got it. Expected url <insert url here> to return response code 302, but returned something else. Or similar.",
+        "createdAt" : "2019-04-16T11:36:24Z",
+        "updatedAt" : "2019-04-16T12:45:45Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d8494ea0fb69a440869cd809712800d732e6028e",
+    "line" : null,
+    "diffHunk" : "@@ -83,41 +42,42 @@ tagToVersion (Tag t) =\n         else\n             Left \"Tag must start with v followed by semantic version.\"\n \n--- | Make a request to the Github API. There is an unauthenticated user rate limit\n--- of 60 requests per hour, so we should limit requests. (One way for the user to\n--- avoid API requests is to give the version directly.)\n-makeAPIRequest :: FromJSON t => Text -> IO t\n-makeAPIRequest path = do\n-    request <- parseRequest (unpack (\"GET https://api.github.com/repos/digital-asset/daml\" <> path))\n-    response <- httpJSON (setRequestHeader \"User-Agent\" [\"daml\"] request)\n-    when (getResponseStatusCode response /= 200) $\n-        throwString . show $ getResponseStatus response\n-    pure (getResponseBody response)\n+-- | Get the version of the latest stable (i.e. non-prerelease) release.\n+-- We avoid the Github API because of very low rate limits. As such, we\n+-- discover the latest version by parsing an HTTP redirect. We make a\n+-- request to:\n+--\n+--     https://github.com/digital-asset/daml/releases/latest\n+--\n+-- Which always redirects to the latest stable release, for example:\n+--\n+--     https://github.com/digital-asset/daml/releases/tag/v0.12.3\n+--\n+-- So we take that URL to get the tag, and from there the version of\n+-- the latest stable release.\n+getLatestVersion :: IO SdkVersion\n+getLatestVersion = do\n+    request <- parseRequest \"GET https://github.com/digital-asset/daml/releases/latest\"\n+    response <- httpNoBody request { redirectCount = 0 }\n+\n+    when (getResponseStatusCode response /= 302) $\n+        failed \"Expected response status 302.\"  response"
+  },
+  {
+    "id" : "5985ab69-8d8c-4f4c-9111-231b9c3d5650",
+    "prId" : 526,
+    "comments" : [
+      {
+        "id" : "941b5fe3-5ec2-4276-94ae-1a08d4410392",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Again, what did you expect.",
+        "createdAt" : "2019-04-16T11:36:57Z",
+        "updatedAt" : "2019-04-16T12:45:45Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d8494ea0fb69a440869cd809712800d732e6028e",
+    "line" : null,
+    "diffHunk" : "@@ -83,41 +42,42 @@ tagToVersion (Tag t) =\n         else\n             Left \"Tag must start with v followed by semantic version.\"\n \n--- | Make a request to the Github API. There is an unauthenticated user rate limit\n--- of 60 requests per hour, so we should limit requests. (One way for the user to\n--- avoid API requests is to give the version directly.)\n-makeAPIRequest :: FromJSON t => Text -> IO t\n-makeAPIRequest path = do\n-    request <- parseRequest (unpack (\"GET https://api.github.com/repos/digital-asset/daml\" <> path))\n-    response <- httpJSON (setRequestHeader \"User-Agent\" [\"daml\"] request)\n-    when (getResponseStatusCode response /= 200) $\n-        throwString . show $ getResponseStatus response\n-    pure (getResponseBody response)\n+-- | Get the version of the latest stable (i.e. non-prerelease) release.\n+-- We avoid the Github API because of very low rate limits. As such, we\n+-- discover the latest version by parsing an HTTP redirect. We make a\n+-- request to:\n+--\n+--     https://github.com/digital-asset/daml/releases/latest\n+--\n+-- Which always redirects to the latest stable release, for example:\n+--\n+--     https://github.com/digital-asset/daml/releases/tag/v0.12.3\n+--\n+-- So we take that URL to get the tag, and from there the version of\n+-- the latest stable release.\n+getLatestVersion :: IO SdkVersion\n+getLatestVersion = do\n+    request <- parseRequest \"GET https://github.com/digital-asset/daml/releases/latest\"\n+    response <- httpNoBody request { redirectCount = 0 }\n+\n+    when (getResponseStatusCode response /= 302) $\n+        failed \"Expected response status 302.\"  response\n \n--- | Get the latest stable (i.e. non-prerelease) release.\n-getLatestRelease :: IO Release\n-getLatestRelease =\n-    requiredIO \"Failed to get latest SDK release from github.\" $\n-        makeAPIRequest \"/releases/latest\"\n+    case getResponseHeader \"Location\" response of\n+        [loc] ->\n+            let (path, tag) = T.breakOnEnd \"/\" (T.decodeUtf8 loc) in\n+            if path /= \"https://github.com/digital-asset/daml/releases/tag/\"\n+                then failed \"Unexpected redirect location.\" response"
+  },
+  {
+    "id" : "5ad7426b-51c0-4206-ab30-1c14668742c7",
+    "prId" : 526,
+    "comments" : [
+      {
+        "id" : "8179af31-d960-40b9-b5d2-f3dfe70514db",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Honestly, not sure this is worth bothering with. If we did a huge number of performance sensitive requests then yes. As it is, I suspect it's irrelevant time wise and harms compositionality.",
+        "createdAt" : "2019-04-16T12:45:52Z",
+        "updatedAt" : "2019-04-16T12:47:17Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "81344ab1-48ff-4806-b1e7-7feba23ab3d0",
+        "parentId" : "8179af31-d960-40b9-b5d2-f3dfe70514db",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "Noted!",
+        "createdAt" : "2019-04-16T13:25:50Z",
+        "updatedAt" : "2019-04-16T13:25:50Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d8494ea0fb69a440869cd809712800d732e6028e",
+    "line" : 103,
+    "diffHunk" : "@@ -83,41 +42,38 @@ tagToVersion (Tag t) =\n         else\n             Left \"Tag must start with v followed by semantic version.\"\n \n--- | Make a request to the Github API. There is an unauthenticated user rate limit\n--- of 60 requests per hour, so we should limit requests. (One way for the user to\n--- avoid API requests is to give the version directly.)\n-makeAPIRequest :: FromJSON t => Text -> IO t\n-makeAPIRequest path = do\n-    request <- parseRequest (unpack (\"GET https://api.github.com/repos/digital-asset/daml\" <> path))\n-    response <- httpJSON (setRequestHeader \"User-Agent\" [\"daml\"] request)\n-    when (getResponseStatusCode response /= 200) $\n-        throwString . show $ getResponseStatus response\n-    pure (getResponseBody response)\n+-- | Get the version of the latest stable (i.e. non-prerelease) release.\n+-- We avoid the Github API because of very low rate limits. As such, we\n+-- discover the latest version by parsing an HTTP redirect. We make a\n+-- request to:\n+--\n+--     https://github.com/digital-asset/daml/releases/latest\n+--\n+-- Which always redirects to the latest stable release, for example:\n+--\n+--     https://github.com/digital-asset/daml/releases/tag/v0.12.3\n+--\n+-- So we take that URL to get the tag, and from there the version of\n+-- the latest stable release.\n+getLatestVersion ::  IO SdkVersion\n+getLatestVersion = do\n+\n+    manager <- newTlsManager -- TODO: share a single manager throughout the daml install process."
+  },
+  {
+    "id" : "6a83122e-7e57-46cf-8576-65cae7ac426d",
+    "prId" : 526,
+    "comments" : [
+      {
+        "id" : "1ca1efb2-a083-4a52-9eef-d0c013f3c819",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "No way to avoid parsing HEAD from a string? A bit sad, but I see from the docs it's recommended...",
+        "createdAt" : "2019-04-16T12:47:08Z",
+        "updatedAt" : "2019-04-16T12:47:17Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d8494ea0fb69a440869cd809712800d732e6028e",
+    "line" : 104,
+    "diffHunk" : "@@ -83,41 +42,38 @@ tagToVersion (Tag t) =\n         else\n             Left \"Tag must start with v followed by semantic version.\"\n \n--- | Make a request to the Github API. There is an unauthenticated user rate limit\n--- of 60 requests per hour, so we should limit requests. (One way for the user to\n--- avoid API requests is to give the version directly.)\n-makeAPIRequest :: FromJSON t => Text -> IO t\n-makeAPIRequest path = do\n-    request <- parseRequest (unpack (\"GET https://api.github.com/repos/digital-asset/daml\" <> path))\n-    response <- httpJSON (setRequestHeader \"User-Agent\" [\"daml\"] request)\n-    when (getResponseStatusCode response /= 200) $\n-        throwString . show $ getResponseStatus response\n-    pure (getResponseBody response)\n+-- | Get the version of the latest stable (i.e. non-prerelease) release.\n+-- We avoid the Github API because of very low rate limits. As such, we\n+-- discover the latest version by parsing an HTTP redirect. We make a\n+-- request to:\n+--\n+--     https://github.com/digital-asset/daml/releases/latest\n+--\n+-- Which always redirects to the latest stable release, for example:\n+--\n+--     https://github.com/digital-asset/daml/releases/tag/v0.12.3\n+--\n+-- So we take that URL to get the tag, and from there the version of\n+-- the latest stable release.\n+getLatestVersion ::  IO SdkVersion\n+getLatestVersion = do\n+\n+    manager <- newTlsManager -- TODO: share a single manager throughout the daml install process.\n+    request <- parseRequest \"HEAD https://github.com/digital-asset/daml/releases/latest\""
+  },
+  {
+    "id" : "10d3a368-9c6c-415d-9a4d-483532c1b640",
+    "prId" : 459,
+    "comments" : [
+      {
+        "id" : "0a351a63-7259-4f5a-82b3-ca08f6f34a30",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Export list please",
+        "createdAt" : "2019-04-13T10:43:31Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b061e612-236b-4973-9276-52d91085f765",
+        "parentId" : "0a351a63-7259-4f5a-82b3-ca08f6f34a30",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2019-04-15T08:47:47Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08a9f895c1edb3d261aac6210ae51e2c8349833b",
+    "line" : 7,
+    "diffHunk" : "@@ -0,0 +1,112 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+-- | Discover releases from the digital-asset/daml github.\n+module DAML.Assistant.Install.Github"
+  },
+  {
+    "id" : "dea2aebe-1910-4196-97f3-323ce5b3bd0f",
+    "prId" : 459,
+    "comments" : [
+      {
+        "id" : "910856cf-e06d-4c1d-9f9f-23b821ca34f7",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Can we have an example asset name as documentation? e.g. is Gold a valid asset?",
+        "createdAt" : "2019-04-13T10:43:50Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ae8b06f2-3903-4b6f-8f72-b9f8302386ad",
+        "parentId" : "910856cf-e06d-4c1d-9f9f-23b821ca34f7",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2019-04-15T08:47:55Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08a9f895c1edb3d261aac6210ae51e2c8349833b",
+    "line" : 31,
+    "diffHunk" : "@@ -0,0 +1,112 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+-- | Discover releases from the digital-asset/daml github.\n+module DAML.Assistant.Install.Github\n+    where\n+\n+import DAML.Assistant.Types\n+import DAML.Assistant.Util\n+import Data.Aeson\n+import Network.HTTP.Simple\n+import Control.Exception.Safe\n+import Control.Monad\n+import Data.List\n+import Data.Either.Extra\n+import qualified System.Info\n+import qualified Data.Text as T\n+\n+newtype Tag = Tag Text deriving (Eq, Show, FromJSON)\n+newtype AssetName = AssetName { unAssetName :: Text } deriving (Eq, Show, FromJSON)"
+  },
+  {
+    "id" : "f6a5c7a5-269e-4160-92f0-4ac188a5719a",
+    "prId" : 459,
+    "comments" : [
+      {
+        "id" : "20cd1354-f593-4f1d-9371-2a5029b52a3d",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Can we have an example tag name as document. Is it v1.0, 1.0, or is tag something totally different?",
+        "createdAt" : "2019-04-13T10:44:09Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7d0215cf-06ba-46a8-9077-f4f6853bf874",
+        "parentId" : "20cd1354-f593-4f1d-9371-2a5029b52a3d",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : ":+1:",
+        "createdAt" : "2019-04-15T08:49:00Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08a9f895c1edb3d261aac6210ae51e2c8349833b",
+    "line" : 25,
+    "diffHunk" : "@@ -0,0 +1,112 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+-- | Discover releases from the digital-asset/daml github.\n+module DAML.Assistant.Install.Github\n+    where\n+\n+import DAML.Assistant.Types\n+import DAML.Assistant.Util\n+import Data.Aeson\n+import Network.HTTP.Simple\n+import Control.Exception.Safe\n+import Control.Monad\n+import Data.List\n+import Data.Either.Extra\n+import qualified System.Info\n+import qualified Data.Text as T\n+\n+newtype Tag = Tag Text deriving (Eq, Show, FromJSON)"
+  },
+  {
+    "id" : "e3072377-f697-4d9e-860a-aab84a4d9d64",
+    "prId" : 459,
+    "comments" : [
+      {
+        "id" : "d13dcf34-76df-424b-bec3-82fa41cafbf2",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "If Tag must be isomorphic to SdkVersion, why define Tag at all? Why not just pass around SdkVersion?",
+        "createdAt" : "2019-04-13T10:44:57Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "86f8fdd9-5615-4a26-af92-68ad2644b14e",
+        "parentId" : "d13dcf34-76df-424b-bec3-82fa41cafbf2",
+        "author" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "body" : "They aren't isomorphic. Tag represents git tags, only some of which represent valid versions.",
+        "createdAt" : "2019-04-15T08:42:08Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "fmota-da",
+          "name" : "Fran",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/45589443?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08a9f895c1edb3d261aac6210ae51e2c8349833b",
+    "line" : 57,
+    "diffHunk" : "@@ -0,0 +1,112 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+-- | Discover releases from the digital-asset/daml github.\n+module DAML.Assistant.Install.Github\n+    where\n+\n+import DAML.Assistant.Types\n+import DAML.Assistant.Util\n+import Data.Aeson\n+import Network.HTTP.Simple\n+import Control.Exception.Safe\n+import Control.Monad\n+import Data.List\n+import Data.Either.Extra\n+import qualified System.Info\n+import qualified Data.Text as T\n+\n+newtype Tag = Tag Text deriving (Eq, Show, FromJSON)\n+newtype AssetName = AssetName { unAssetName :: Text } deriving (Eq, Show, FromJSON)\n+\n+data Release = Release\n+    { releaseTag          :: Tag\n+    , releaseIsPrerelease :: Bool\n+    , releaseAssets       :: [Asset]\n+    } deriving (Eq, Show)\n+\n+instance FromJSON Release where\n+    parseJSON = withObject \"Release\" $ \\r ->\n+        Release\n+        <$> r .: \"tag_name\"\n+        <*> r .: \"prerelease\"\n+        <*> r .: \"assets\"\n+\n+data Asset = Asset\n+    { assetName :: AssetName\n+    , assetDownloadURL :: InstallURL\n+    } deriving (Eq, Show)\n+\n+instance FromJSON Asset where\n+    parseJSON = withObject \"Asset\" $ \\r ->\n+        Asset\n+        <$> r .: \"name\"\n+        <*> r .: \"browser_download_url\"\n+\n+versionToTag :: SdkVersion -> Tag"
+  },
+  {
+    "id" : "fb8055cd-af67-403f-9d7a-e5b5436a4716",
+    "prId" : 459,
+    "comments" : [
+      {
+        "id" : "b68820f4-80e8-4ad4-b295-a712efc900d2",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "GitHub has an API limit. How many simultaneous SDK users do we need to break it? Note that the HLint CI script has been known to break the GitHub API limit and thus start failing, so it isn't that high. If we're as popular as a relatively recent and less common feature of HLint we'll fail. I suspect this is an unworkable approach... (as in you'd have to mirror it, cache it, create a github token or something)",
+        "createdAt" : "2019-04-13T10:46:27Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "78c719eb-fee4-47fd-a711-104c7436d5d6",
+        "parentId" : "b68820f4-80e8-4ad4-b295-a712efc900d2",
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "Repeating what we discussed on slack: Github has a limit of 60 requests per hour per IP for unauthenticated requests. An individual user is unlikely to hit this but we risk hitting this when IPs are shared, e.g., on Travis or if lots of people sit behind the same NAT. For now, it is probably fine. It should be easy to setup a mirror if we run into this.",
+        "createdAt" : "2019-04-15T06:55:19Z",
+        "updatedAt" : "2019-04-15T10:02:01Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "08a9f895c1edb3d261aac6210ae51e2c8349833b",
+    "line" : 71,
+    "diffHunk" : "@@ -0,0 +1,112 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+-- | Discover releases from the digital-asset/daml github.\n+module DAML.Assistant.Install.Github\n+    where\n+\n+import DAML.Assistant.Types\n+import DAML.Assistant.Util\n+import Data.Aeson\n+import Network.HTTP.Simple\n+import Control.Exception.Safe\n+import Control.Monad\n+import Data.List\n+import Data.Either.Extra\n+import qualified System.Info\n+import qualified Data.Text as T\n+\n+newtype Tag = Tag Text deriving (Eq, Show, FromJSON)\n+newtype AssetName = AssetName { unAssetName :: Text } deriving (Eq, Show, FromJSON)\n+\n+data Release = Release\n+    { releaseTag          :: Tag\n+    , releaseIsPrerelease :: Bool\n+    , releaseAssets       :: [Asset]\n+    } deriving (Eq, Show)\n+\n+instance FromJSON Release where\n+    parseJSON = withObject \"Release\" $ \\r ->\n+        Release\n+        <$> r .: \"tag_name\"\n+        <*> r .: \"prerelease\"\n+        <*> r .: \"assets\"\n+\n+data Asset = Asset\n+    { assetName :: AssetName\n+    , assetDownloadURL :: InstallURL\n+    } deriving (Eq, Show)\n+\n+instance FromJSON Asset where\n+    parseJSON = withObject \"Asset\" $ \\r ->\n+        Asset\n+        <$> r .: \"name\"\n+        <*> r .: \"browser_download_url\"\n+\n+versionToTag :: SdkVersion -> Tag\n+versionToTag v = Tag (\"v\" <> versionToText v)\n+\n+tagToVersion :: Tag -> Either AssistantError SdkVersion\n+tagToVersion (Tag t) =\n+    mapLeft (assistantErrorBecause (\"Tag \" <> t <> \"does not represent a valid SDK version.\")) $\n+        if T.take 1 t == \"v\" then\n+            mapLeft (pack . displayException) $ parseVersion (T.drop 1 t)\n+        else\n+            Left \"Tag must start with v followed by semantic version.\"\n+\n+\n+makeAPIRequest :: FromJSON t => Text -> IO t\n+makeAPIRequest path = do\n+    request <- parseRequest (unpack (\"GET https://api.github.com/repos/digital-asset/daml\" <> path))"
+  }
+]

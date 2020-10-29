@@ -1,0 +1,89 @@
+[
+  {
+    "id" : "c98bb89c-dc48-4b35-acde-2981df23efbe",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "359ed39c-064a-4888-908e-db777da76dd3",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "This doesn't seem to follow Scala naming guidelines:\r\nhttps://docs.scala-lang.org/style/naming-conventions.html#constants-values-variable-and-methods",
+        "createdAt" : "2020-03-25T11:09:33Z",
+        "updatedAt" : "2020-03-25T11:28:28Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : 42,
+    "diffHunk" : "@@ -70,6 +71,21 @@ private[commands] class CommandTracker[Context]\n \n     val logic: TimerGraphStageLogic = new TimerGraphStageLogic(shape) {\n \n+      val timeout_detection = \"timeout-detection\""
+  },
+  {
+    "id" : "b5d57bb0-afc4-4869-8617-f3aa7ae091bd",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "9b983cac-98e9-48d5-b6a8-946caf3dd4e3",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Is this still relevant? Every class should have unit tests in general so I don't find this comment particularly useful.",
+        "createdAt" : "2020-03-25T11:11:28Z",
+        "updatedAt" : "2020-03-25T11:28:29Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : 32,
+    "diffHunk" : "@@ -45,7 +46,7 @@ import scala.util.{Failure, Success, Try}\n   *\n   */\n // TODO(mthvedt): This should have unit tests."
+  },
+  {
+    "id" : "41d5bdb4-f360-40ff-8a69-20fa263061a2",
+    "prId" : 3344,
+    "comments" : [
+      {
+        "id" : "cef91deb-15d6-4476-8ccc-62aac4358a3b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Looks like `Nil` (or rather `Seq.empty`, which is the same thing) is the default value for the `details` parameter and can be omitted.\r\n\r\n```suggestion\r\n                Status(code.value(), description.getOrElse(\"\")))\r\n```",
+        "createdAt" : "2019-11-06T09:00:02Z",
+        "updatedAt" : "2019-11-06T13:58:32Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "dd528c9396bbfa0726510d93ad1c5197fc6af7fe",
+    "line" : null,
+    "diffHunk" : "@@ -161,19 +161,16 @@ private[commands] class CommandTracker[Context]\n         }\n       }\n \n+      import CommandTracker.nonTerminalCodes\n+\n       private def handleSubmitResponse(submitResponse: Ctx[(Context, String), Try[Empty]]) = {\n         val commandId = submitResponse.context._2\n         submitResponse.value.fold(\n           {\n-            case GrpcStatusError(status)\n-                if !CommandTracker.nonTerminalCodes.contains(status.getCode) =>\n+            case GrpcException(GrpcStatus(code, description), _) if !nonTerminalCodes(code) =>\n               val output = getOutputForTerminalStatusCode(\n                 commandId,\n-                Status(\n-                  status.getCode.value(),\n-                  if (status.getDescription == null) \"\"\n-                  else status.getDescription,\n-                  Nil))\n+                Status(code.value(), description.getOrElse(\"\"), Nil))"
+  }
+]

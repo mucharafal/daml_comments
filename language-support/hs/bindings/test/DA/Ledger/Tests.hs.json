@@ -1,0 +1,607 @@
+[
+  {
+    "id" : "81134a10-876a-4349-aa19-fc37dc8d33e2",
+    "prId" : 4986,
+    "comments" : [
+      {
+        "id" : "f333ea4f-3c92-4661-831a-562aa26c053e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I just killed the non-shared part from the tests here. We haven’t used it for ages and I have absolutely no intention of bringing it back.",
+        "createdAt" : "2020-03-13T13:33:14Z",
+        "updatedAt" : "2020-03-13T13:36:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "dd753b062ca084c5db9ed44259af1cf7d44f2f11",
+    "line" : 138,
+    "diffHunk" : "@@ -697,71 +700,34 @@ assertTextContains text frag =\n     unless (frag `isInfixOf` text) (assertFailure msg)\n     where msg = \"expected frag: \" ++ frag ++ \"\\n contained in: \" ++ text\n \n-----------------------------------------------------------------------\n--- test with/out shared sandboxes...\n-\n darPath :: FilePath\n darPath = mainWorkspace </> \"language-support/hs/bindings/for-tests.dar\"\n \n-createSpec :: Maybe AuthSpec -> IO SandboxSpec\n-createSpec maybeAuth = do\n-    dar <- locateRunfiles darPath\n-    return SandboxSpec {dar, maybeAuth}\n-\n-data ShareSandbox = ShareSandbox Bool (Maybe AuthSpec)\n-\n-testGroupWithSandbox :: ShareSandbox -> TestName -> [WithSandbox -> TestTree] -> TestTree\n-testGroupWithSandbox (ShareSandbox enableSharing maybeAuth) name tests = do\n-    if enableSharing\n-    then\n-        -- waits to run in the one shared sandbox\n-        withResource (acquireShared maybeAuth) releaseShared $ \\resource -> do\n-        testGroup name $ map (\\f -> f (withShared maybeAuth resource)) tests\n-    else do\n-        -- runs in it's own freshly (and very slowly!) spun-up sandbox\n-        let withSandbox' f = do\n-                spec <- createSpec maybeAuth\n-                darMetadata <- getDarMetadata spec\n-                withSandbox spec $ \\sandbox -> f sandbox maybeAuth darMetadata (TestId 0)\n-        testGroup name $ map (\\f -> f withSandbox') tests\n-\n-getDarMetadata :: SandboxSpec -> IO DarMetadata\n-getDarMetadata SandboxSpec{dar} = do\n+testGroupWithSandbox :: FilePath -> Maybe Secret -> TestName -> [WithSandbox -> TestTree] -> TestTree"
+  },
+  {
+    "id" : "3715857b-2881-4f35-b4e3-2ca4587866a7",
+    "prId" : 3736,
+    "comments" : [
+      {
+        "id" : "758f7ac0-e41d-406c-b121-750d46cd31c3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Here you are also inconsistent with the type synonym. You get back `String` from this function and the only use site is `setToken` which expects `Tok`.",
+        "createdAt" : "2019-12-04T18:32:51Z",
+        "updatedAt" : "2019-12-05T08:44:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d36c29e380cb356866501127c22a4dccd552d51a",
+    "line" : 21,
+    "diffHunk" : "@@ -668,7 +667,7 @@ runWithSandbox Sandbox{port} maybeAuth tid ls = runLedgerService ls' timeout (co\n             Nothing -> ls\n             Just authSpec -> setToken (makeSignedJwt authSpec tid) ls\n \n-makeSignedJwt :: AuthSpec -> TestId -> Jwt\n+makeSignedJwt :: AuthSpec -> TestId -> String"
+  },
+  {
+    "id" : "e849ca33-a5c4-4918-a4c3-5b49d846f814",
+    "prId" : 3736,
+    "comments" : [
+      {
+        "id" : "d36e1399-62b8-4baf-8a26-3da05a463ddd",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You now have two functions called `makeSignedJwt`, one here and one in the integration tests. The one here prepends `Bearer` whereas the other one doesn’t which is confusing. It would probably be nice to factor this out into a function in the ledger bindings. At the very least the two should be made consistent but it might also be a good idea to factor this out into a function in the ledger bindings:\r\n\r\n```\r\ndata SandboxJwtPayload = SandboxJwtPayload\r\n  { admin :: Bool\r\n  , actAs :: [Text]\r\n  -- There are more fields here, see https://github.com/digital-asset/daml/blob/f50424253fdab43920b35d24c37009d2edbec265/docs/source/tools/sandbox.rst but at least for this PR I would leave it at these.\r\n  }\r\nmakeSandboxJwt :: SandboxJwtPayload -> Signer -> String\r\nmakeSandboxJwt = …\r\n```",
+        "createdAt" : "2019-12-04T18:41:16Z",
+        "updatedAt" : "2019-12-05T08:44:42Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d36c29e380cb356866501127c22a4dccd552d51a",
+    "line" : 22,
+    "diffHunk" : "@@ -668,7 +667,7 @@ runWithSandbox Sandbox{port} maybeAuth tid ls = runLedgerService ls' timeout (co\n             Nothing -> ls\n             Just authSpec -> setToken (makeSignedJwt authSpec tid) ls\n \n-makeSignedJwt :: AuthSpec -> TestId -> Jwt\n+makeSignedJwt :: AuthSpec -> TestId -> String\n makeSignedJwt AuthSpec{sharedSecret} tid = do"
+  },
+  {
+    "id" : "5796c0f0-2103-4948-9a50-544ea5a68d3e",
+    "prId" : 3561,
+    "comments" : [
+      {
+        "id" : "067ac14a-e4b5-404c-aedb-0eecb5e87642",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        , authenticatingSandboxTests\r\n```",
+        "createdAt" : "2019-11-21T08:27:03Z",
+        "updatedAt" : "2019-11-21T14:35:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5921cf2292c982f7e588e3d1c6fc9f284d4537ea",
+    "line" : null,
+    "diffHunk" : "@@ -23,28 +24,31 @@ import Test.Tasty as Tasty (TestName,TestTree,testGroup,withResource,defaultMain\n import Test.Tasty.HUnit as Tasty(assertFailure,assertBool,assertEqual,testCase)\n import qualified Codec.Archive.Zip as Zip\n import qualified DA.Daml.LF.Ast as LF\n+import qualified DA.Ledger.Jwt as Jwt\n+import qualified Data.Aeson.Types as Aeson\n import qualified Data.ByteString as BS (readFile)\n import qualified Data.ByteString.Lazy as BSL (readFile,toStrict)\n import qualified Data.ByteString.UTF8 as BS (ByteString,fromString)\n import qualified Data.Map as Map\n import qualified Data.Set as Set\n-import qualified Data.Text.Lazy as Text(pack,unpack,fromStrict)\n+import qualified Data.Text as DT(pack,unpack)\n+import qualified Data.Text.Lazy as Text(Text,pack,unpack,fromStrict)\n import qualified Data.UUID as UUID (toString)\n-\n-import DA.Ledger.Sandbox as Sandbox\n-import DA.Ledger as Ledger\n+import qualified Data.Vector as Vector\n+import qualified Web.JWT as JWT\n \n main :: IO ()\n main = do\n     setEnv \"TASTY_NUM_THREADS\" \"1\" True\n     Tasty.defaultMain $ testGroup \"Ledger bindings\"\n         [ sharedSandboxTests\n+        , authenticingSandboxTests"
+  },
+  {
+    "id" : "19e454dc-f706-4da2-8b2c-4492ec8bc509",
+    "prId" : 3561,
+    "comments" : [
+      {
+        "id" : "004c66ce-7ab3-43aa-84cb-5aa298e1c545",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Importing `Data.Text as DT` and `Data.Text.Lazy as Text` is a bit confusing. I would recommend that you either go with `Data.Text as T` and `Data.Text.Lazy as TL` which we use elsewhere or if you don’t like the short forms `Text` and `Text.Lazy`.",
+        "createdAt" : "2019-11-21T08:28:40Z",
+        "updatedAt" : "2019-11-21T14:35:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5921cf2292c982f7e588e3d1c6fc9f284d4537ea",
+    "line" : null,
+    "diffHunk" : "@@ -23,28 +24,31 @@ import Test.Tasty as Tasty (TestName,TestTree,testGroup,withResource,defaultMain\n import Test.Tasty.HUnit as Tasty(assertFailure,assertBool,assertEqual,testCase)\n import qualified Codec.Archive.Zip as Zip\n import qualified DA.Daml.LF.Ast as LF\n+import qualified DA.Ledger.Jwt as Jwt\n+import qualified Data.Aeson.Types as Aeson\n import qualified Data.ByteString as BS (readFile)\n import qualified Data.ByteString.Lazy as BSL (readFile,toStrict)\n import qualified Data.ByteString.UTF8 as BS (ByteString,fromString)\n import qualified Data.Map as Map\n import qualified Data.Set as Set\n-import qualified Data.Text.Lazy as Text(pack,unpack,fromStrict)\n+import qualified Data.Text as DT(pack,unpack)"
+  },
+  {
+    "id" : "0bcf67d7-a67f-4939-800c-fcf1cfc63bfe",
+    "prId" : 2440,
+    "comments" : [
+      {
+        "id" : "d8963f05-9b2d-423f-a7b2-25397bb4e6bf",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Does this work?\r\n```suggestion\r\n    , RecordField \"decimal\" $ VDecimal 123.456\r\n```",
+        "createdAt" : "2019-08-07T10:56:31Z",
+        "updatedAt" : "2019-08-07T10:56:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "84a9f876-8961-46fe-8ca6-4dcce7a288e6",
+        "parentId" : "d8963f05-9b2d-423f-a7b2-25397bb4e6bf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "no, it didn't. - that why I added `read`\r\nshould it?\r\nwould it need a `FromString` instance for `Fixed` or something?\r\n\r\nremember, I don't know the details. I just let the compiler errors guide me :)\r\n",
+        "createdAt" : "2019-08-07T11:10:39Z",
+        "updatedAt" : "2019-08-07T11:10:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "553d3832-7ee8-4627-94ef-7a62d975c293",
+        "parentId" : "d8963f05-9b2d-423f-a7b2-25397bb4e6bf",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Note that @hurryabit proposed `VDecimal 123.456` not `VDecimal \"123.456\"`. That definitely does not need an `IsString` instance and if it doesn’t work, I’d be interested in the error.",
+        "createdAt" : "2019-08-07T11:28:39Z",
+        "updatedAt" : "2019-08-07T11:28:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8cc7027a-1a3d-40e5-95eb-d795e53ce3e9",
+        "parentId" : "d8963f05-9b2d-423f-a7b2-25397bb4e6bf",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "For my proposal we need a `Fractional` instance, which `Fixed E10` should have.",
+        "createdAt" : "2019-08-07T11:37:24Z",
+        "updatedAt" : "2019-08-07T11:37:24Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9500dab3-5d0d-4706-8941-60bff1df2529",
+        "parentId" : "d8963f05-9b2d-423f-a7b2-25397bb4e6bf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "AH, sorry I should have read your proposal more closely.\r\n`VDecimal 123.456` works like a charm\r\n\r\nFrom `VDecimal \"123.456\"`, we get the following error as expected:\r\n```\r\nlanguage-support/hs/bindings/test/DA/Ledger/Tests.hs:519:40-48: error:\r\n    * No instance for (Data.String.IsString (Data.Fixed.Fixed LF.E10))\r\n        arising from the literal `\"123.456\"'\r\n    * In the first argument of `VDecimal', namely `\"123.456\"'\r\n      In the second argument of `($)', namely `VDecimal \"123.456\"'\r\n      In the expression: RecordField \"decimal\" $ VDecimal \"123.456\"\r\n    |\r\n519 |     , RecordField \"decimal\" $ VDecimal \"123.456\"\r\n    |                                        ^^^^^^^^^\r\n```\r\n",
+        "createdAt" : "2019-08-08T07:09:10Z",
+        "updatedAt" : "2019-08-08T07:09:10Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eabad75dbc08b599fb34c3aa1143453e577fd92b",
+    "line" : 5,
+    "diffHunk" : "@@ -516,7 +516,7 @@ bucket = VRecord $ Record Nothing\n     , RecordField \"contract\"$ VContract (ContractId \"xxxxx\")\n     , RecordField \"list\"    $ VList []\n     , RecordField \"int\"     $ VInt 42\n-    , RecordField \"decimal\" $ VDecimal \"123.456\"\n+    , RecordField \"decimal\" $ VDecimal (read \"123.456\")"
+  },
+  {
+    "id" : "c5fa3117-8d3f-447f-914b-d6b9120768b6",
+    "prId" : 2368,
+    "comments" : [
+      {
+        "id" : "1e69c411-b966-4c6f-8ed9-84a133bb9eba",
+        "parentId" : null,
+        "author" : null,
+        "body" : "Instead of having a catch-all case, I would prefer this to be an explicit list of all cases to ensure the compiler catches it when new value constructors are added. But this is test code so maybe it's fine.",
+        "createdAt" : "2019-08-01T12:30:15Z",
+        "updatedAt" : "2019-08-01T12:37:16Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a50b81c3-150c-4d2f-9260-4c9c66e7789a",
+        "parentId" : "1e69c411-b966-4c6f-8ed9-84a133bb9eba",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Agreed.",
+        "createdAt" : "2019-08-05T11:50:36Z",
+        "updatedAt" : "2019-08-05T11:51:20Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "063ae41c-bd1f-44d4-9d05-28c69ca2f539",
+        "parentId" : "1e69c411-b966-4c6f-8ed9-84a133bb9eba",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I'm agreeing with 2nd half of Fran's comment - it would be overkill for test code.",
+        "createdAt" : "2019-08-05T15:36:09Z",
+        "updatedAt" : "2019-08-05T15:36:09Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f819135b9015a28811f8fa4cb7540952ddb7a3c7",
+    "line" : 107,
+    "diffHunk" : "@@ -499,6 +502,75 @@ tAllocateParty withSandbox = testCase \"tAllocateParty\" $ run withSandbox $ \\_pid\n     list <- listKnownParties\n     liftIO $ assertEqual \"list\" [expected] list\n \n+\n+bucket :: Value\n+bucket = VRecord $ Record Nothing\n+    [ RecordField \"record\" $ VRecord $ Record Nothing\n+        [ RecordField \"foo\" $ VBool False\n+        , RecordField \"bar\" $ VText \"sheep\"\n+        ]\n+    , RecordField \"variants\" $ VList\n+        [ VVariant $ Variant Nothing (ConstructorId \"B\") (VBool True)\n+        , VVariant $ Variant Nothing (ConstructorId \"I\") (VInt 99)\n+        ]\n+    , RecordField \"contract\"$ VContract (ContractId \"xxxxx\")\n+    , RecordField \"list\"    $ VList []\n+    , RecordField \"int\"     $ VInt 42\n+    , RecordField \"decimal\" $ VDecimal \"123.456\"\n+    , RecordField \"text\"    $ VText \"OMG lol\"\n+    , RecordField \"time\"    $ VTime (MicroSecondsSinceEpoch $ 1000 * 1000 * 60 * 60 * 24 * 365 * 50)\n+    , RecordField \"party\"   $ VParty $ Party \"good time\"\n+    , RecordField \"bool\"    $ VBool False\n+    , RecordField \"unit\"      VUnit\n+    , RecordField \"date\"    $ VDate $ DaysSinceEpoch 123\n+    , RecordField \"opts\"    $ VList\n+        [ VOpt Nothing\n+        , VOpt $ Just $ VText \"something\"\n+        ]\n+    , RecordField \"map\"     $ VMap $ Map.fromList [(\"one\",VInt 1),(\"two\",VInt 2),(\"three\",VInt 3)]\n+    , RecordField \"enum\"    $ VEnum $ Enum Nothing (ConstructorId \"Green\")\n+\n+    ]\n+\n+tValueConversion :: SandboxTest\n+tValueConversion withSandbox = testCase \"tValueConversion\" $ run withSandbox $ \\pid -> do\n+    let owner = alice\n+    let mod = ModuleName \"Valuepedia\"\n+    let tid = TemplateId (Identifier pid mod $ EntityName \"HasBucket\")\n+    let args = Record Nothing [ RecordField \"owner\" (VParty owner), RecordField \"bucket\" bucket ]\n+    let command = CreateCommand {tid,args}\n+    lid <- getLedgerIdentity\n+    _::CommandId <- submitCommand lid alice command >>= either (liftIO . assertFailure) return\n+    withGetAllTransactions lid alice (Verbosity True) $ \\txs -> do\n+    Just elem <- liftIO $ timeout 1 (takeStream txs)\n+    trList <- either (liftIO . assertFailure . show) return elem\n+    [Transaction{events=[CreatedEvent{createArgs=Record{fields}}]}] <- return trList\n+    [RecordField{label=\"owner\"},RecordField{label=\"bucket\",fieldValue=bucketReturned}] <- return fields\n+    liftIO $ assertEqual \"bucket\" bucket (detag bucketReturned)\n+\n+-- Strip the rid,vid,eid tags recusively from record, variant and enum values\n+detag :: Value -> Value\n+detag = \\case\n+    VRecord r -> VRecord $ detagRecord r\n+    VVariant v -> VVariant $ detagVariant v\n+    VEnum e -> VEnum $ detagEnum e\n+    VList xs -> VList $ fmap detag xs\n+    VOpt opt -> VOpt $ fmap detag opt\n+    VMap m -> VMap $ fmap detag m\n+    v -> v"
+  },
+  {
+    "id" : "5332f6ac-0195-4641-8dcf-c9ddddc73853",
+    "prId" : 2305,
+    "comments" : [
+      {
+        "id" : "e4851402-9de7-4ae5-af75-9801048b576a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I always have a hard time wrapping my head around double negation. I suggest to use `when (lid1 == lid2) $ ...`.",
+        "createdAt" : "2019-07-29T09:26:12Z",
+        "updatedAt" : "2019-07-29T09:26:20Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6b98de02223d8b1abee6ca5cac26c8076294aca7",
+    "line" : 5,
+    "diffHunk" : "@@ -582,6 +582,8 @@ resetSandbox :: Sandbox-> IO ()\n resetSandbox sandbox = runWithSandbox sandbox $ do\n     lid <- getLedgerIdentity\n     Ledger.reset lid\n+    lid2 <- getLedgerIdentity\n+    unless (lid /= lid2) $ fail \"resetSandbox: reset did not change the ledger-id\""
+  },
+  {
+    "id" : "c35b13db-31d7-4bdf-a62f-497bc12ec37d",
+    "prId" : 2247,
+    "comments" : [
+      {
+        "id" : "c2077a1f-e887-4389-97f5-d3a51b9c82c4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Did you mean?\r\n```suggestion\r\n    liftIO $ assertEqual \"time1\" t00 time -- initially the time is 0.0\r\n```\r\nIf so, same below.",
+        "createdAt" : "2019-07-22T15:05:43Z",
+        "updatedAt" : "2019-07-22T15:06:09Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "209bca18d216a336e7cf23b4df124642400f16f9",
+    "line" : 34,
+    "diffHunk" : "@@ -360,6 +362,41 @@ uploadDarFileGetPid lid bytes = do\n             [newPid] <- return (after \\\\ before) -- see what new pid appears\n             return $ Right newPid\n \n+\n+tGetTime :: SandboxTest\n+tGetTime withSandbox = testCase \"tGetTime\" $ run withSandbox $ \\_ -> do\n+    lid <- getLedgerIdentity\n+    xs <- Ledger.getTime lid\n+    Just (Right time1) <- liftIO $ timeout 1 (takeStream xs)\n+    let expect1 = Timestamp {seconds = 0, nanos = 0}\n+    liftIO $  assertEqual \"time1\" expect1 time1\n+\n+\n+tSetTime :: SandboxTest\n+tSetTime withSandbox = testCase \"tSetTime\" $ run withSandbox $ \\_ -> do\n+    lid <- getLedgerIdentity\n+    xs <- Ledger.getTime lid\n+\n+    let t00 = Timestamp {seconds = 0, nanos = 0}\n+    let t11 = Timestamp {seconds = 1, nanos = 1}\n+    let t22 = Timestamp {seconds = 2, nanos = 2}\n+    let t33 = Timestamp {seconds = 3, nanos = 3}\n+\n+    Just (Right time) <- liftIO $ timeout 1 (takeStream xs)\n+    liftIO $ assertEqual \"time1\" t00 time -- initially the time is 0,0"
+  },
+  {
+    "id" : "115eb8ea-4a3f-4367-a77f-976191f637b7",
+    "prId" : 2185,
+    "comments" : [
+      {
+        "id" : "786f9dc8-acca-48e1-97ae-d01427170ecf",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is there any expected result here we could test for? Or are we just happy if all of this runs through without any error?",
+        "createdAt" : "2019-07-17T11:06:21Z",
+        "updatedAt" : "2019-07-17T12:21:52Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2ca3af51-f40e-4199-88db-bea88a9084d9",
+        "parentId" : "786f9dc8-acca-48e1-97ae-d01427170ecf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I like tests too. And I am happy for this test to be added.\r\n\r\nBut I just wanted to make it clear, and hope we all agree :\r\n\r\n- This new test is not really a test of the haskell ledger bindings.\r\n- It's not really even an integration test of the sandbox ledger and the haskell bindings.\r\n- What it is, is a stress test of the sandbox ledger, making use of the haskell ledger bindings.\r\n\r\n",
+        "createdAt" : "2019-07-17T11:37:06Z",
+        "updatedAt" : "2019-07-17T12:21:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "80ce5da8-4a91-4f79-a076-450cb16b9cbe",
+        "parentId" : "786f9dc8-acca-48e1-97ae-d01427170ecf",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "@hurryabit We're happy if it runs without an error, but I extended it to verify uniqueness of received ledger IDs as we have these at hand anyway.\r\n\r\n@nickchapman-da I'd say it actually is an integration test - we use gRPC for integration and this test starts failing after gRPC upgrade on Windows, while it works ok on current master. It might be caused by sth. specific to sandbox part, but not necessarily.",
+        "createdAt" : "2019-07-17T12:31:22Z",
+        "updatedAt" : "2019-07-17T12:31:22Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "84d180333eb68f1038078284e2ce3e2b0fab6024",
+    "line" : 34,
+    "diffHunk" : "@@ -82,6 +83,12 @@ tReset withSandbox = testCase \"reset\" $ run withSandbox $ \\_ -> do\n     lid2 <- getLedgerIdentity\n     liftIO $ assertBool \"lid1 /= lid2\" (lid1 /= lid2)\n \n+tMultipleResets :: SandboxTest\n+tMultipleResets withSandbox = testCase \"multipleResets\" $ run withSandbox $ \\_pid -> do\n+    forM_ [1 .. 20 :: Integer] $ \\_ -> do\n+        lid <- getLedgerIdentity\n+        Ledger.reset lid"
+  },
+  {
+    "id" : "fe81d85f-7276-4e6e-af1d-acf1cf347a7f",
+    "prId" : 2075,
+    "comments" : [
+      {
+        "id" : "790f9dc6-5fc5-4e9a-9ffa-cd1f8f5ec3db",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Leftover from debugging?",
+        "createdAt" : "2019-07-09T17:35:32Z",
+        "updatedAt" : "2019-07-10T09:45:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "884e82fa5eddc9e555fa8468edfda5a3e5394f6c",
+    "line" : null,
+    "diffHunk" : "@@ -300,6 +301,15 @@ tGetActiveContracts withSandbox = testCase \"tGetActiveContracts\" $ run withSandb\n         assertEqual \"active\" ev' active\n         -- assertEqual \"active\" ev active -- TODO: enable if this should be true & we get a fix\n \n+tGetLedgerConfiguration :: SandboxTest\n+tGetLedgerConfiguration withSandbox = testCase \"tGetLedgerConfiguration\" $ run withSandbox $ \\_pid -> do\n+    lid <- getLedgerIdentity\n+    xs <- getLedgerConfiguration lid\n+    Just(Right x) <- liftIO $ timeout 1 (takeStream xs)\n+    liftIO $ do\n+        --print x"
+  },
+  {
+    "id" : "776826dd-99be-4956-8eba-364201ef59d2",
+    "prId" : 2075,
+    "comments" : [
+      {
+        "id" : "ae64ecf7-fd33-4302-bef8-70ca8d122ec5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Can we come up with a more useful thing to test here? If you really just want to test that no fields are bottom, I would go for `evaluate $ force x` (you will need to add a `NFData` instance). to at least make the intent clearer than comparing a value to itself.",
+        "createdAt" : "2019-07-09T17:40:11Z",
+        "updatedAt" : "2019-07-10T09:45:19Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "884e82fa5eddc9e555fa8468edfda5a3e5394f6c",
+    "line" : null,
+    "diffHunk" : "@@ -300,6 +301,15 @@ tGetActiveContracts withSandbox = testCase \"tGetActiveContracts\" $ run withSandb\n         assertEqual \"active\" ev' active\n         -- assertEqual \"active\" ev active -- TODO: enable if this should be true & we get a fix\n \n+tGetLedgerConfiguration :: SandboxTest\n+tGetLedgerConfiguration withSandbox = testCase \"tGetLedgerConfiguration\" $ run withSandbox $ \\_pid -> do\n+    lid <- getLedgerIdentity\n+    xs <- getLedgerConfiguration lid\n+    Just(Right x) <- liftIO $ timeout 1 (takeStream xs)\n+    liftIO $ do\n+        --print x\n+        assertEqual \"defined\" x x -- check nothing is undefined"
+  },
+  {
+    "id" : "459af854-5b27-44d1-bda9-feb23293f14a",
+    "prId" : 2067,
+    "comments" : [
+      {
+        "id" : "605da7a9-93f6-4c21-937c-556c55931bba",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Are we sure we need this?",
+        "createdAt" : "2019-07-15T11:35:37Z",
+        "updatedAt" : "2019-07-15T11:36:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6d4d1c92-14a0-4e58-8640-f2a29e106c00",
+        "parentId" : "605da7a9-93f6-4c21-937c-556c55931bba",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "yes, for the `signatories` field label",
+        "createdAt" : "2019-07-15T13:03:16Z",
+        "updatedAt" : "2019-07-15T13:03:17Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "db14f1a6e0a6eb3965e0abef2a70c66c0b63aece",
+    "line" : 4,
+    "diffHunk" : "@@ -2,6 +2,7 @@\n -- SPDX-License-Identifier: Apache-2.0\n \n {-# LANGUAGE OverloadedStrings #-}\n+{-# LANGUAGE DuplicateRecordFields #-}"
+  },
+  {
+    "id" : "fcd48b7d-d679-45db-a4c6-758b51c90998",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "ae530c59-1cb0-47b1-8907-f5550d94e196",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe make a newtype for the verbosity?",
+        "createdAt" : "2019-07-05T16:14:23Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "be59944b-56c1-40b5-af82-674c56fcaa7c",
+        "parentId" : "ae530c59-1cb0-47b1-8907-f5550d94e196",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok",
+        "createdAt" : "2019-07-08T10:29:27Z",
+        "updatedAt" : "2019-07-08T10:29:27Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bbf6ee01-64c2-4db6-a883-5b794785fd94",
+        "parentId" : "ae530c59-1cb0-47b1-8907-f5550d94e196",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "yeah, it's better",
+        "createdAt" : "2019-07-08T10:29:45Z",
+        "updatedAt" : "2019-07-08T10:29:45Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 28,
+    "diffHunk" : "@@ -167,7 +174,8 @@ tCreateWithKey withSandbox = testCase \"createWithKey\" $ run withSandbox $ \\pid -\n tCreateWithoutKey :: SandboxTest\n tCreateWithoutKey withSandbox = testCase \"createWithoutKey\" $ run withSandbox $ \\pid -> do\n     lid <- getLedgerIdentity\n-    txs <- getAllTransactions lid alice\n+    let verbose = False"
+  }
+]

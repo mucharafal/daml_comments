@@ -1,0 +1,2109 @@
+[
+  {
+    "id" : "3d5ac5e3-6d3b-4c03-85f6-586038819c6e",
+    "prId" : 7404,
+    "comments" : [
+      {
+        "id" : "2a4724e4-c89a-496b-9ac2-d90e9d6e1e7e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is this synchronous, i.e., do the listeners actually receive the event before they are removed?",
+        "createdAt" : "2020-09-16T08:57:48Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6d34094b-10b3-4efa-80fa-f2d2c427b61d",
+        "parentId" : "2a4724e4-c89a-496b-9ac2-d90e9d6e1e7e",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Yes.",
+        "createdAt" : "2020-09-16T09:41:39Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0b4318b65d3ff40751a756b838044db7b29d2aa",
+    "line" : 39,
+    "diffHunk" : "@@ -552,33 +553,53 @@ class Ledger {\n         console.error(`Ledger.${callerName} unknown message`, json);\n       }\n     };\n-    const onClose = ({ code, reason }: { code: number; reason: string }): void => {\n-      emitter.emit('close', {code, reason});\n-      const now = new Date().getTime();\n-      // we try to reconnect if we could connect previously and we were live for at least\n-      // 'reconnectThreshold'.\n-      if (lastOffset !== undefined && isLiveSince !== undefined && now - isLiveSince >= this.reconnectThreshold) {\n-        isLiveSince = undefined;\n-        isReconnecting = true;\n-        ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n-        ws.addEventListener('open', onOpen);\n-        ws.addEventListener('message', onMessage);\n-        ws.addEventListener('close', onClose);\n-      }\n+    const closeStream = (status: { code: number; reason: string }): void => {\n+      streamClosed = true;\n+      emitter.emit('close', status);"
+  },
+  {
+    "id" : "1e22b845-5f09-4c38-88fb-54e9c81e0a69",
+    "prId" : 7404,
+    "comments" : [
+      {
+        "id" : "6e451060-ab10-4901-9691-80323ef9c390",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is there a reason why you chose 4001 and 4000 or are those somewhat arbitrary choices?",
+        "createdAt" : "2020-09-16T09:01:12Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f6985810-0066-4e03-86af-3901f83e026b",
+        "parentId" : "6e451060-ab10-4901-9691-80323ef9c390",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Somewhat arbitrary, but <4000 is reserved for the protocol, 4000+ is for applications.",
+        "createdAt" : "2020-09-16T09:40:21Z",
+        "updatedAt" : "2020-09-16T09:56:20Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d0b4318b65d3ff40751a756b838044db7b29d2aa",
+    "line" : 56,
+    "diffHunk" : "@@ -552,33 +553,53 @@ class Ledger {\n         console.error(`Ledger.${callerName} unknown message`, json);\n       }\n     };\n-    const onClose = ({ code, reason }: { code: number; reason: string }): void => {\n-      emitter.emit('close', {code, reason});\n-      const now = new Date().getTime();\n-      // we try to reconnect if we could connect previously and we were live for at least\n-      // 'reconnectThreshold'.\n-      if (lastOffset !== undefined && isLiveSince !== undefined && now - isLiveSince >= this.reconnectThreshold) {\n-        isLiveSince = undefined;\n-        isReconnecting = true;\n-        ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n-        ws.addEventListener('open', onOpen);\n-        ws.addEventListener('message', onMessage);\n-        ws.addEventListener('close', onClose);\n-      }\n+    const closeStream = (status: { code: number; reason: string }): void => {\n+      streamClosed = true;\n+      emitter.emit('close', status);\n+      emitter.removeAllListeners();\n+    };\n+    const onWsClose = (): void => {\n+      if (streamClosed === false) {\n+        const now = new Date().getTime();\n+        // we want to try and keep the stream open, so we try to reconnect\n+        // the underlying ws\n+        if (lastOffset !== undefined && isLiveSince !== undefined && now - isLiveSince >= this.reconnectThreshold) {\n+          isLiveSince = undefined;\n+          isReconnecting = true;\n+          ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n+          ws.addEventListener('open', onWsOpen);\n+          ws.addEventListener('message', onWsMessage);\n+          ws.addEventListener('close', onWsClose);\n+        } else {\n+          // ws has closed too quickly / never managed to connect: we give up\n+          closeStream({code: 4001, reason: 'ws connection failed'});"
+  },
+  {
+    "id" : "aafc1617-d0d6-4f16-98ca-90bdee95a0d6",
+    "prId" : 7084,
+    "comments" : [
+      {
+        "id" : "21ead10e-1032-410d-9b05-ba001bf7950c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You need to change how we handle reconnects. The JSON API can return a `null` offset when it was ledger begin but it only accepts strings. The only way to get a null offset is if there were literally no transactions, so we basically reset and treat this as the initial connect with no event. If you want to be safe, reset `state` to `init` although afaict this isn’t necessary since the list of events will have been empty so we never called `change`.",
+        "createdAt" : "2020-08-11T11:52:34Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3e95deba-df1e-49c5-b977-6fe5675f6afc",
+        "parentId" : "21ead10e-1032-410d-9b05-ba001bf7950c",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Sorry not up to date on this issue. Is that considered correct behaviour from the JSON API? It seems really weird it would produce values it cannot consume, especially for a parameter that is specifically meant as \"this is an opaque thing you need to give back to me later on\".",
+        "createdAt" : "2020-08-11T12:30:27Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0a5a023c-e447-45f4-9e9c-b3ca11a1a455",
+        "parentId" : "21ead10e-1032-410d-9b05-ba001bf7950c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It’s at least documented behavior. It seems reasonable to allow this but I would consider this a separate issue. Given that we can fix this only in the typescript libraries, I would fix it here for now.\r\n\r\nThere is also a bug in the JSON API where it returns `null` when it shouldn’t but that’s a separate issue. The issue addressed here cannot be hit on Sandbox since it will never return ledger begin on the ACS (but other ledgers might).",
+        "createdAt" : "2020-08-11T12:42:46Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "620d1e8f-2be0-4343-b7f2-30b3ad4107ac",
+        "parentId" : "21ead10e-1032-410d-9b05-ba001bf7950c",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "So now we don't send the `offset` message when our last offset is `null`. My understanding is that this will start the stream from the very beginning of transactions which is correct here.",
+        "createdAt" : "2020-08-11T13:16:12Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28338100f26fe98c42cd5c9b26169151d0e5fbac",
+    "line" : 8,
+    "diffHunk" : "@@ -502,7 +502,7 @@ class Ledger {\n     const protocols = ['jwt.token.' + this.token, 'daml.ws.auth'];\n     let ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n     let isLiveSince: undefined | number = undefined;\n-    let lastOffset: undefined | string = undefined;\n+    let lastOffset: undefined | null | string = undefined;\n     let state = init;\n     let isReconnecting: boolean = false;\n     const emitter = new EventEmitter();"
+  },
+  {
+    "id" : "1ce332e7-0ca0-42f0-9d4d-4947e1cb5705",
+    "prId" : 7084,
+    "comments" : [
+      {
+        "id" : "118e1678-37ec-4cca-8fe3-bf0dd7bcc100",
+        "parentId" : null,
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Do we have any case for distinguishing between undefined and null here? If not, could we simplify the type and not allow undefined, and start with `null` as the initial value?",
+        "createdAt" : "2020-08-11T12:33:20Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "03575be9-cdee-4e8a-af45-5d4c3099d748",
+        "parentId" : "118e1678-37ec-4cca-8fe3-bf0dd7bcc100",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Quoting the comment from the source:\r\n```\r\n      // we try to reconnect if we could connect previously and we were live for at least\r\n      // 'reconnectThreshold'.\r\n```\r\nSo there is a difference, we will reconnect with `null` but not with `undefined`. The distinction here seems meaningful so I would argue for keeping it.",
+        "createdAt" : "2020-08-11T12:47:12Z",
+        "updatedAt" : "2020-08-11T13:16:33Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28338100f26fe98c42cd5c9b26169151d0e5fbac",
+    "line" : 5,
+    "diffHunk" : "@@ -502,7 +502,7 @@ class Ledger {\n     const protocols = ['jwt.token.' + this.token, 'daml.ws.auth'];\n     let ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n     let isLiveSince: undefined | number = undefined;\n-    let lastOffset: undefined | string = undefined;\n+    let lastOffset: undefined | null | string = undefined;"
+  },
+  {
+    "id" : "185adf60-475b-4da3-b347-967367dd76eb",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "fdb2d5ac-bfb3-456c-9ad1-9ebca3cd1b3b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  // This code is deprecated and only kept to guarantee backwards\r\n```",
+        "createdAt" : "2020-08-10T07:14:52Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -584,13 +584,63 @@ class Ledger {\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n+   * @deprecated since 1.5; use [[streamQueries]] instead\n    */\n+  // This code is deprecated and only kept to guarantee backwardss"
+  },
+  {
+    "id" : "845a163d-fd00-4237-81e8-6ab7691152d5",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "b621a719-30de-431d-b77f-44907ef010ec",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  // This code is deprecated and only kept to guarantee backwards\r\n```",
+        "createdAt" : "2020-08-10T07:19:44Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -616,19 +666,58 @@ class Ledger {\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n+   * @deprecated since 1.5; use [[streamFetchByKeys]] instead\n    */\n+  // This code is deprecated and only kept to guarantee backwardss"
+  },
+  {
+    "id" : "ba02fd45-bb36-4dff-a767-2503568b814c",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "As far as I can tell, this is fully backwards compatible with `streamQuery`, i.e., any valid invocation of `streamQuery` is a valid invocation of `streamQueries` and will behave identical (in terms of performance, the request made to the JSON API and also the result returned to the user). Assuming that is correct, I’m leaning towards extending `streamQuery` instead of adding `streamQueries` and annoying our users with a deprecation cycle.\r\nWhat do you think?",
+        "createdAt" : "2020-08-10T07:30:06Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6bdd543b-88bb-4735-bd42-592799f22089",
+        "parentId" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "That was also my impression at first. Based on the existing signature of `streamQuery`, I assumed existing invocations would look like either\r\n```typescript\r\nstreamQuery(templateId)\r\n```\r\nor\r\n```typescript\r\nstreamQuery(templateId, query)\r\n```\r\nand it felt like it would be very natural (and backwards compatible) to extend it to also support\r\n```typescript\r\nstreamQuery(templateId, query1, query2)\r\n```\r\nUnfortunately, the current signature also allows\r\n```typescript\r\nstreamQuery(templateId, undefined)\r\n```\r\nwhich means a backwards-compatible signature would have to look like\r\n```typescript\r\nstreamQuery<T extends object, K, I extends string>(\r\n     template: Template<T, K, I>,\r\n     query?: Query<T>,\r\n     ...queries: Query<T>[]\r\n): ...\r\n```\r\nwhich in turn would force the resulting code to handle the case of\r\n```typescript\r\nstreamQuery(templateId, undefined, query1, query2)\r\n```\r\nwhich just seemed wrong. So when I reached that point I decided deprecation was a better approach. I believe we are still at a stage where it is more important to have a nice API for new users than to not bother existing users, especially when there is a way to make the change through a backwards-compatible deprecation cycle. And I kinda like the new name better, for the new feature set.\r\n\r\nThat said, my knowledge of TypeScript is still very sparse at the moment, so I'm very open to the idea that there may be a way to preserve backwards compatibility _and_ get sane semantics for the new version and I'm just not aware of it.",
+        "createdAt" : "2020-08-10T10:14:17Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "338945fd-04d4-497f-8282-e51f4a33624a",
+        "parentId" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point! I forgot that in JS passing fewer parameters is basically equivalent to passing `undefined` (not entirely, you can differentiate them but almost nobody does). I see the following options:\r\n\r\n1. Break the behavior on `streamQuery(templateId, undefined)` immediately. Technically a breaking change but I expect nobody to run into this and the fix is trivial.\r\n2. Filter out `undefined` for the first query parameter or maybe even all query parameters. Should be easy to implement and makes this non-breaking.\r\n3. 2 but simultaneously deprecate passing `undefined` (in that case, we should only filter it out from the first query). You can define multiple type signatures for one function in typescript. It might be possible to only deprecate one of them to get nice deprecation warnings. Alternatively, just throw a `console.log` at it.\r\n4. The solution proposed in this PR.\r\n\r\nI’m leaning towards 3 as probably the safest option (I expect nobody will actually have to change anything) and we can get rid of the wart later. But I’m happy to be convinced here.",
+        "createdAt" : "2020-08-10T12:16:23Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "116eb450-9b42-4f6a-89a1-b1373b85ee82",
+        "parentId" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "> But I’m happy to be convinced here.\r\n\r\nWell then, allow me to try 🙂\r\n\r\nI suspect \"nobody\" is actually using the raw `streamQuery`, instead of going through the [react bindings](https://github.com/digital-asset/daml/blob/master/language-support/ts/daml-react/createLedgerContext.ts#L122), which, by the way, do explicitly pass `undefined`. But it's still part of our public API so let's assume breaking it is a bad thing.\r\n\r\nI believe option 1 is strictly inferior to this PR because it's a breaking change with no upgrade path: your code will just not compile if you try to upgrade. That seems bad. In comparison, this PR adds a new name and leaves the existing one completely unchanged. You can upgrade to the next version, then have some time to fix all the deprecation warnings while your app keeps working.\r\n\r\nOptions 2 and 3 seem very messy, and with the kind of mess that sticks. We'd be committing to an API with a singular name accepting a list of things that, according to their type, can be undefined, but with documentation saying they shouldn't be, and an implementation that makes them harmless for now. If we can indeed deprecate just one signature, we don't gain anything over this PR; if we can't, we'll end up with the downsides of 1 again later on. Or we'll live with the mess forever.\r\n\r\nI don't quite understand why we'd shy away from a clean deprecation cycle, especially for a source-based language. However, there is another option you have not mentioned: keep `streamQuery` and `streamFetchByKey` exactly as they are right now, and add the two new functions with no deprecation. I believe that leaves our API overall a little bit confusing and clearly overlapping, but if you don't like deprecations I think that's the best approach.",
+        "createdAt" : "2020-08-10T14:54:42Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "086c9f8e-a7c3-48c4-8630-f40a6e700049",
+        "parentId" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m not really worried about the deprecation cycle. That seems very reasonable. What I am slightly worried about is what seems like a fairly redundant name change. In this case, it somewhat makes sense but it still feels pretty arbitrary (the endpoint name is singular as well). Consider the case where we didn’t want to add more queries and just deprecate explicitly passing `undefined`. I have no idea what a sensible name would be there.\r\n\r\nAs for 3, we do gain something for the case where you explicitly pass a single query or don’t pass a query both of which need changing in this PR but not if we can only deprecate passing `undefined` explicitly.",
+        "createdAt" : "2020-08-10T15:17:09Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "835da3ac-0dca-4438-9527-1f03e137a7b5",
+        "parentId" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That said, your point that most people do not use this directly is pretty convincing. It does raise the question of what we do with the hooks though.",
+        "createdAt" : "2020-08-10T15:23:24Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7bda0f24-1a14-4660-8c65-b17878e66a8b",
+        "parentId" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I personally think changing the name is a good thing, as that is what allows us to have a clean deprecation cycle where both versions can be present in parallel and consumers of the API can very easily spot which places need to be updated. I agree a good second name would be harder to find if you just wanted to remove the `undefined` option, but even then I would argue for a new `streamQuery2` method over changing the existing one. Maybe I'm weird, though.\r\n\r\nI think not having to change your code when the underlying behaviour has changed is actually a bad thing, so in my mind that counts against option 3.\r\n\r\nI'll take a look at the react bindings. Agree they probably need some sort of similar update.",
+        "createdAt" : "2020-08-10T16:24:37Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a52fca8e-bd3c-4d49-895f-f2d9424b9bce",
+        "parentId" : "39f38f09-1425-4c49-9eb1-3cef149c23f3",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Alright then let’s go with the new name here. I don’t mind tackling the react bindings in a separate PR.",
+        "createdAt" : "2020-08-10T16:28:06Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : 115,
+    "diffHunk" : "@@ -584,13 +584,63 @@ class Ledger {\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n+   * @deprecated since 1.5; use [[streamQueries]] instead\n    */\n+  // This code is deprecated and only kept to guarantee backwardss\n+  // compatibility. Do not change until removal.\n   streamQuery<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     query?: Query<T>,\n   ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n     const request = {templateIds: [template.templateId], query};\n     const reconnectRequest = (): object[] => [request];\n+    const change = (contracts: readonly CreateEvent<T, K, I>[], events: readonly Event<T, K, I>[]): CreateEvent<T, K, I>[] => {\n+      const archiveEvents: Set<ContractId<T>> = new Set();\n+      const createEvents: CreateEvent<T, K, I>[] = [];\n+      for (const event of events) {\n+        if ('created' in event) {\n+          createEvents.push(event.created);\n+        } else {\n+          archiveEvents.add(event.archived.contractId);\n+        }\n+      }\n+      return contracts\n+        .concat(createEvents)\n+        .filter(contract => !archiveEvents.has(contract.contractId));\n+    };\n+    return this.streamSubmit(template, 'v1/stream/query', request, reconnectRequest, [], change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a given template and queries.\n+   *\n+   * The accumulated state is the current set of active contracts matching the\n+   * queries.\n+   *\n+   * When no `queries` argument is given, all events visible to the submitting\n+   * party are returned.\n+   *\n+   * When one or more `queries` arguments are given, only those create events\n+   * matching at least one of the queries are returned.\n+   *\n+   * See https://docs.daml.com/json-api/search-query-language.html for a\n+   * description of the query language.\n+   *\n+   * @param template The contract template to match contracts against.\n+   * @param query A query to match contracts against.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamQueries<T extends object, K, I extends string>("
+  },
+  {
+    "id" : "90f13bb5-6812-421c-a99f-06e76d66cac7",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "56f68e9d-e791-40d8-b74a-a9e3b3774ee6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t think this implementation works. You are only tracking a single contract key but you are querying for multiple contract keys. Here there is actually a meaningful difference between the singular and the plural version:\r\n1. For the singular version you are tracking the state of of the unique contract currently associated with the key.\r\n2. For the plural version you are tracking the evolution of multiple contracts. I see two possible APIs here (but there are definitely more):\r\n    1. The API provided by `useStreamQueries`. This basically means that you’re ignoring uniqueness of contract keys in the API and just use it as a special kind of query. Users could of course still track the current contract associated with each key.\r\n    2. Stream an array of `CreatedEvent<T,K,I>| null` of length `n` where `n` is the number of keys you specified.\r\n\r\nI feel like `2` is probably what people want. Consider, a UI where you want to track two contract keys you would just end up building 2 on top of 1 if the API does not provide you with it.",
+        "createdAt" : "2020-08-10T08:00:12Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "42cac9c0-9934-4572-8938-1cd0b6e1c437",
+        "parentId" : "56f68e9d-e791-40d8-b74a-a9e3b3774ee6",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "You're right. When first opening this PR, I was too focused on whether deprecation & single-template were the right approaches and did not look at the actual behaviour enough.\r\n\r\nI agree 2.ii is also what I would expect here; I'll change it to match that.",
+        "createdAt" : "2020-08-10T10:28:31Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -616,19 +666,58 @@ class Ledger {\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n+   * @deprecated since 1.5; use [[streamFetchByKeys]] instead\n    */\n+  // This code is deprecated and only kept to guarantee backwardss\n+  // compatibility. Do not change until removal.\n   streamFetchByKey<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n     let lastContractId: ContractId<T> | null = null;\n     const request = [{templateId: template.templateId, key}];\n     const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n+    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n+      for (const event of events) {\n+        if ('created' in event) {\n+          contract = event.created;\n+        } else {\n+          if (contract && contract.contractId === event.archived.contractId) {\n+            contract = null;\n+          }\n+        }\n+      }\n+      lastContractId = contract ? contract.contractId : null\n+      return contract;\n+    }\n+    return this.streamSubmit(template, 'v1/stream/fetch', request, reconnectRequest, null, change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a given template and contract key.\n+   *\n+   * Same as [[streamQuery]], but instead of a query, match contracts by\n+   * contract key. If multiple keys are given, returns a consolidated stream of\n+   * all events for all given keys.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamFetchByKeys<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    key: K,\n+    ...keys: K[]\n+  ): Stream<T, K, I, CreateEvent<T, K, I> | null> {"
+  },
+  {
+    "id" : "3b3248a5-1e59-4d6e-abe3-e7abf2ad3188",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "ea80aab6-0fd5-4035-aa23-ab39b7790641",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "nit: I prefer indentation that does not depend on identifier length so aline break after `?`.",
+        "createdAt" : "2020-08-12T08:24:11Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "824f9860-ff79-4fdb-9aed-fb97736f0d13",
+        "parentId" : "ea80aab6-0fd5-4035-aa23-ab39b7790641",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Fair point, I'll update that.",
+        "createdAt" : "2020-08-14T17:43:21Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -587,13 +589,31 @@ class Ledger {\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n    */\n   streamQuery<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     query?: Query<T>,\n   ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n-    const request = {templateIds: [template.templateId], query};\n-    const reconnectRequest = (): object[] => [request];\n+    if (query === undefined) {\n+      return this.streamQueryCommon(template, [], \"streamQuery\");\n+    } else {\n+      return this.streamQueryCommon(template, [query], \"streamQuery\");\n+    }\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   */\n+  streamQueryCommon<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    queries: Query<T>[],\n+    name: string,\n+  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n+    const request = queries.length == 0 ? [{templateIds: [template.templateId]}]"
+  },
+  {
+    "id" : "7c3b10bc-6264-4a2a-8bdc-8e044e06a10c",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "848fe61a-bd18-4bfe-8c62-a068b62e1bd3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Side note for myself: I briefly wondered if we should require >= 1 keys. However, that makes things harder if the list of keys is dynamic so I prefer the implementation here.",
+        "createdAt" : "2020-08-12T08:27:47Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "647fe0d5-9e38-42df-b0bb-e4fdd7faceb7",
+        "parentId" : "848fe61a-bd18-4bfe-8c62-a068b62e1bd3",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "That was also my reasoning for adding support for 0 keys. Maybe I should add a comment to that effect.",
+        "createdAt" : "2020-08-14T17:43:43Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -608,44 +628,147 @@ class Ledger {\n         .concat(createEvents)\n         .filter(contract => !archiveEvents.has(contract.contractId));\n     };\n-    return this.streamSubmit(template, 'v1/stream/query', request, reconnectRequest, [], change);\n+    return this.streamSubmit(name, template, 'v1/stream/query', request, reconnectRequest, [], change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a given template and queries.\n+   *\n+   * If the given list is empty, the accumulated state is the set of all active\n+   * contracts for the given template. Otherwise, the accumulated state is the\n+   * set of all contracts that match at least one of the given queries.\n+   *\n+   * See https://docs.daml.com/json-api/search-query-language.html for a\n+   * description of the query language.\n+   *\n+   * @param template The contract template to match contracts against.\n+   * @param query A query to match contracts against.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamQueries<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    queries: Query<T>[],\n+  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n+    return this.streamQueryCommon(template, queries, \"streamQueries\");\n   }\n \n   /**\n    * Retrieve a consolidated stream of events for a given template and contract key.\n    *\n-   * Same as [[streamQuery]], but instead of a query, match contracts by contract key.\n+   * The accumulated state is either the current active contract for the given\n+   * key, or null if there is no active contract for the given key.\n    *\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n    */\n   streamFetchByKey<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n-    let lastContractId: ContractId<T> | null = null;\n-    const request = [{templateId: template.templateId, key}];\n-    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n-    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n-      // NOTE(MH, #4564): We're very lenient here. We should not see a create\n-      // event when `contract` is currently not null. We should also only see\n-      // archive events when `contract` is currently not null and the contract\n-      // ids match. However, the JSON API does not provied these guarantees yet\n-      // but we're working on them.\n+    return this.streamFetchByKeyCommon(template, [key], \"streamFetchByKey\", (cs) => cs[0], (c) => [c]);\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   * Returns the same API as [[streamSubmit]] but does not, in fact, establish\n+   * any socket connection. Instead, this is a stream that always has the given\n+   * value as its accumulated state.\n+   */\n+  constantStream<T extends object, K, I extends string, V>(\n+    value: V,\n+  ): Stream<T, K, I, V> {\n+    function on(t: 'live', l: (v: V) => void): void;\n+    function on(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function on(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    function on(type: any, listener: any): any {\n+        if (type === 'live') {\n+          listener(value);\n+        }\n+        if (type === 'change') {\n+          listener(value, []);\n+        }\n+    }\n+    function off(t: 'live', l: (v: V) => void): void;\n+    function off(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function off(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function\n+    function off(_t: any, _l: any): any {}\n+    // eslint-disable-next-line @typescript-eslint/no-empty-function\n+    return { on, off, close: (): void => {} };\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   */\n+  streamFetchByKeyCommon<T extends object, K, I extends string, S>(\n+    template: Template<T, K, I>,\n+    keys: K[], // non-zero length\n+    name: string,\n+    to: (contracts: (CreateEvent<T, K, I> | null)[]) => S,\n+    from: (state: S) => (CreateEvent<T, K, I> | null)[],\n+  ): Stream<T, K, I, S> {\n+    const lastContractIds: (ContractId<T> | null)[] = Array(keys.length).fill(null);\n+    const keysCopy = Array.from(keys);\n+    const initState: (CreateEvent<T, K, I> | null)[] = Array(keys.length).fill(null);\n+    const request = keys.map(k => ({templateId: template.templateId, key: k}));\n+    const reconnectRequest = (): object[] => request.map((r, idx) => ({...r, 'contractIdAtOffset': lastContractIds[idx]}))\n+    const change = (state: S, events: readonly Event<T, K, I>[]): S => {\n+      const contracts = from(state);\n+      const newState: (CreateEvent<T, K, I> | null)[] = Array.from(contracts);\n       for (const event of events) {\n         if ('created' in event) {\n-          contract = event.created;\n+          const k = event.created.key;\n+          keysCopy.forEach((requestKey, idx) => {\n+            if (deepEqual(requestKey, k, {strict: true})) {\n+              newState[idx] = event.created;\n+            }\n+          });\n         } else { // i.e. 'archived' in event\n-          if (contract && contract.contractId === event.archived.contractId) {\n-            contract = null;\n-          }\n+          const id: ContractId<T> = event.archived.contractId;\n+          newState.forEach((contract, idx) => {\n+            if (contract && contract.contractId === id) {\n+              newState[idx] = null;\n+            }\n+          });\n         }\n       }\n-      lastContractId = contract ? contract.contractId : null\n-      return contract;\n+      newState.forEach((c, idx) => {\n+        lastContractIds[idx] = c ? c.contractId : null;\n+      });\n+      return to(newState);\n+    }\n+    return this.streamSubmit(name, template, 'v1/stream/fetch', request, reconnectRequest, to(initState), change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a list of keys and a single\n+   * template.\n+   *\n+   * The accumulated state is an array of the same length as the given list of\n+   * keys, with positional correspondence. Each element in the array represents\n+   * the current contract for the given key, or is explicitly null if there is\n+   * currently no active contract matching that key.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamFetchByKeys<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    keys: K[],\n+  ): Stream<T, K, I, (CreateEvent<T, K, I> | null)[]> {\n+    if (keys.length == 0) {"
+  },
+  {
+    "id" : "b3e1fba1-3c4a-43eb-bf01-94e5973f3217",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "68ad8bf2-a8cb-471e-a0ad-e095730199b0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Are the underscores not sufficient to silence `no-unused-vars`?",
+        "createdAt" : "2020-08-12T08:31:14Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3c0f0de5-e036-4f58-a03c-17b0d6e8a4af",
+        "parentId" : "68ad8bf2-a8cb-471e-a0ad-e095730199b0",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Looks like they are, yes. I've removed the silencer for that one.",
+        "createdAt" : "2020-08-14T17:50:44Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "10a9fb51-1e1e-4517-802d-0bea411f5163",
+        "parentId" : "68ad8bf2-a8cb-471e-a0ad-e095730199b0",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Ah, no, they are not. Sorry, had forgotten linting is part of test, not build.",
+        "createdAt" : "2020-08-14T17:51:26Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8b7d5748-2445-4813-a967-67fd889aacc9",
+        "parentId" : "68ad8bf2-a8cb-471e-a0ad-e095730199b0",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks for checking! I guess I was too used to this from Haskell. It looks like you can configure ignore patterns but that’s definitely something for a different PR if we want to do this at all.",
+        "createdAt" : "2020-08-14T18:32:46Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : 194,
+    "diffHunk" : "@@ -608,44 +628,147 @@ class Ledger {\n         .concat(createEvents)\n         .filter(contract => !archiveEvents.has(contract.contractId));\n     };\n-    return this.streamSubmit(template, 'v1/stream/query', request, reconnectRequest, [], change);\n+    return this.streamSubmit(name, template, 'v1/stream/query', request, reconnectRequest, [], change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a given template and queries.\n+   *\n+   * If the given list is empty, the accumulated state is the set of all active\n+   * contracts for the given template. Otherwise, the accumulated state is the\n+   * set of all contracts that match at least one of the given queries.\n+   *\n+   * See https://docs.daml.com/json-api/search-query-language.html for a\n+   * description of the query language.\n+   *\n+   * @param template The contract template to match contracts against.\n+   * @param query A query to match contracts against.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamQueries<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    queries: Query<T>[],\n+  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n+    return this.streamQueryCommon(template, queries, \"streamQueries\");\n   }\n \n   /**\n    * Retrieve a consolidated stream of events for a given template and contract key.\n    *\n-   * Same as [[streamQuery]], but instead of a query, match contracts by contract key.\n+   * The accumulated state is either the current active contract for the given\n+   * key, or null if there is no active contract for the given key.\n    *\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n    */\n   streamFetchByKey<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n-    let lastContractId: ContractId<T> | null = null;\n-    const request = [{templateId: template.templateId, key}];\n-    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n-    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n-      // NOTE(MH, #4564): We're very lenient here. We should not see a create\n-      // event when `contract` is currently not null. We should also only see\n-      // archive events when `contract` is currently not null and the contract\n-      // ids match. However, the JSON API does not provied these guarantees yet\n-      // but we're working on them.\n+    return this.streamFetchByKeyCommon(template, [key], \"streamFetchByKey\", (cs) => cs[0], (c) => [c]);\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   * Returns the same API as [[streamSubmit]] but does not, in fact, establish\n+   * any socket connection. Instead, this is a stream that always has the given\n+   * value as its accumulated state.\n+   */\n+  constantStream<T extends object, K, I extends string, V>(\n+    value: V,\n+  ): Stream<T, K, I, V> {\n+    function on(t: 'live', l: (v: V) => void): void;\n+    function on(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function on(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    function on(type: any, listener: any): any {\n+        if (type === 'live') {\n+          listener(value);\n+        }\n+        if (type === 'change') {\n+          listener(value, []);\n+        }\n+    }\n+    function off(t: 'live', l: (v: V) => void): void;\n+    function off(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function off(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function"
+  },
+  {
+    "id" : "7cb83b1c-f166-4437-97db-55afe1dd680f",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "37e1e8d4-c2d8-4dfd-9a8a-980955f440ee",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Worth adding a `console.assert` for?",
+        "createdAt" : "2020-08-12T08:35:37Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "449cfbc7-0ca0-4b62-a58d-b6d7882d20e4",
+        "parentId" : "37e1e8d4-c2d8-4dfd-9a8a-980955f440ee",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I don't think so. This is a private method se we're in control of all of its two call sites.\r\n\r\nI guess it would be even more private if I added the `private` keyword, though.",
+        "createdAt" : "2020-08-14T17:45:18Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4c1c1dee-8220-49b3-ab40-57361b018b47",
+        "parentId" : "37e1e8d4-c2d8-4dfd-9a8a-980955f440ee",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Might be a difference in how we use assertions. Personally, I tend to use assertions for internal invariants, i.e., things that should always hold but could be broken accidentally by a refactoring so it doesn’t really matter if it’s private or not.",
+        "createdAt" : "2020-08-14T18:33:53Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2e674572-e457-43a1-b34b-66bed0480a1b",
+        "parentId" : "37e1e8d4-c2d8-4dfd-9a8a-980955f440ee",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t feel strongly about this so happy to let you make the decision.",
+        "createdAt" : "2020-08-14T18:35:14Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -608,44 +628,147 @@ class Ledger {\n         .concat(createEvents)\n         .filter(contract => !archiveEvents.has(contract.contractId));\n     };\n-    return this.streamSubmit(template, 'v1/stream/query', request, reconnectRequest, [], change);\n+    return this.streamSubmit(name, template, 'v1/stream/query', request, reconnectRequest, [], change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a given template and queries.\n+   *\n+   * If the given list is empty, the accumulated state is the set of all active\n+   * contracts for the given template. Otherwise, the accumulated state is the\n+   * set of all contracts that match at least one of the given queries.\n+   *\n+   * See https://docs.daml.com/json-api/search-query-language.html for a\n+   * description of the query language.\n+   *\n+   * @param template The contract template to match contracts against.\n+   * @param query A query to match contracts against.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamQueries<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    queries: Query<T>[],\n+  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n+    return this.streamQueryCommon(template, queries, \"streamQueries\");\n   }\n \n   /**\n    * Retrieve a consolidated stream of events for a given template and contract key.\n    *\n-   * Same as [[streamQuery]], but instead of a query, match contracts by contract key.\n+   * The accumulated state is either the current active contract for the given\n+   * key, or null if there is no active contract for the given key.\n    *\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n    */\n   streamFetchByKey<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n-    let lastContractId: ContractId<T> | null = null;\n-    const request = [{templateId: template.templateId, key}];\n-    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n-    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n-      // NOTE(MH, #4564): We're very lenient here. We should not see a create\n-      // event when `contract` is currently not null. We should also only see\n-      // archive events when `contract` is currently not null and the contract\n-      // ids match. However, the JSON API does not provied these guarantees yet\n-      // but we're working on them.\n+    return this.streamFetchByKeyCommon(template, [key], \"streamFetchByKey\", (cs) => cs[0], (c) => [c]);\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   * Returns the same API as [[streamSubmit]] but does not, in fact, establish\n+   * any socket connection. Instead, this is a stream that always has the given\n+   * value as its accumulated state.\n+   */\n+  constantStream<T extends object, K, I extends string, V>(\n+    value: V,\n+  ): Stream<T, K, I, V> {\n+    function on(t: 'live', l: (v: V) => void): void;\n+    function on(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function on(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    function on(type: any, listener: any): any {\n+        if (type === 'live') {\n+          listener(value);\n+        }\n+        if (type === 'change') {\n+          listener(value, []);\n+        }\n+    }\n+    function off(t: 'live', l: (v: V) => void): void;\n+    function off(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function off(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function\n+    function off(_t: any, _l: any): any {}\n+    // eslint-disable-next-line @typescript-eslint/no-empty-function\n+    return { on, off, close: (): void => {} };\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   */\n+  streamFetchByKeyCommon<T extends object, K, I extends string, S>(\n+    template: Template<T, K, I>,\n+    keys: K[], // non-zero length"
+  },
+  {
+    "id" : "020eeb22-c8c9-42de-bdc0-8d12dcc83488",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe worth factoring this out into a helper function that compares LF values for equality? It’s probably also worth pointing out that the JSON representation accepted by the JSON API is not unique (e.g. records can also be represented as an array). The reason this works anyway is that the typescript type system enforces that users use the same representation when creating a query that will be returned by the JSON API.",
+        "createdAt" : "2020-08-12T08:40:59Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "42b2eb86-f9f0-4b25-acda-b2c998ed96c7",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I'm not quite sure what you want me to do here. It seems pointless to extract the method if it's just to write `keyEqual = (k1, k2) => deepEqual(k1, k2, {strict: true}` and then use it only once.\r\n\r\nI could see a point in extracting it if we were using it in multiple places, or if we wanted to support more specifically LF equality across representations, but if the type system is enforcing a common one, what's the value in that?",
+        "createdAt" : "2020-08-14T18:00:13Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e4fdc92f-ded2-4af2-a928-0e8c4029bb55",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This was mostly just an idle thought. I briefly wondered if `deepEqual` was wrong and we need to worry about non-unique representation allowed by the JSON API. If this was just `lfValueEqual` or something like that, the reader doesn’t have to wonder if `deepEqual` is sufficient and we could add a comment to `lfValueEqual` (or whatever you want to call that) explaining why `deepEqual` is the right implementation.\r\n\r\nFeel free to ignore my suggestion and follow your preference here.",
+        "createdAt" : "2020-08-14T18:38:53Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f10def06-55a8-4dd5-8075-1718b2c5d014",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I do not know how to translate the JSON representation equivalence rules in a generic context. So I went for documenting that the given keys must be in \"output\" format instead, as that one is unique.",
+        "createdAt" : "2020-08-24T10:58:30Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8c168885-b07a-46c3-af0a-d515bf936c57",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Actually with the current implementation this is a breaking change for the `streamFetchByKey` function. So I'll revert that to its original form.",
+        "createdAt" : "2020-08-24T11:01:30Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0134ca85-e44a-43ac-94b8-7e403d0d54dc",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You mean when called from JS where you can use a different format? I don’t think we should support a JS API that would produce type errors in typescript. It might work occasionally by accident but at least half of our code relies heavily on the assumption that you use the format dictated by the typescript code.",
+        "createdAt" : "2020-08-24T11:10:13Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dff92caf-2613-459b-b048-6f43b227657d",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I disagree. We advertize these bindings as JS bindings, not TS ones. We document the LF to JSON conversion as supporting multiple JSON formats for the same LF. Therefore existing JS code that uses a valid input encoding that differs from the output one is valid, and breaking that code is a breaking change.\r\n\r\nPlus the cost of keeping that code working is really low here.",
+        "createdAt" : "2020-08-24T17:55:19Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cc59108b-948d-4e7b-9823-6f646d6afb52",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense here. In general, I’m a bit hesitant to make that guarantee since we don’t test this anywhere and I wouldn’t be surprised if in various places, we do make assumptions about the format.",
+        "createdAt" : "2020-08-26T07:25:13Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "490b8bf4-0082-47eb-a00c-d7c42b0355ee",
+        "parentId" : "d9bc62f9-10ee-4d40-a9b8-f634468cc45a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Yes; this is why I firmly believe the right way to offer backwards compatibility is to not change existing code.",
+        "createdAt" : "2020-09-08T11:49:13Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -608,44 +628,147 @@ class Ledger {\n         .concat(createEvents)\n         .filter(contract => !archiveEvents.has(contract.contractId));\n     };\n-    return this.streamSubmit(template, 'v1/stream/query', request, reconnectRequest, [], change);\n+    return this.streamSubmit(name, template, 'v1/stream/query', request, reconnectRequest, [], change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a given template and queries.\n+   *\n+   * If the given list is empty, the accumulated state is the set of all active\n+   * contracts for the given template. Otherwise, the accumulated state is the\n+   * set of all contracts that match at least one of the given queries.\n+   *\n+   * See https://docs.daml.com/json-api/search-query-language.html for a\n+   * description of the query language.\n+   *\n+   * @param template The contract template to match contracts against.\n+   * @param query A query to match contracts against.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamQueries<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    queries: Query<T>[],\n+  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n+    return this.streamQueryCommon(template, queries, \"streamQueries\");\n   }\n \n   /**\n    * Retrieve a consolidated stream of events for a given template and contract key.\n    *\n-   * Same as [[streamQuery]], but instead of a query, match contracts by contract key.\n+   * The accumulated state is either the current active contract for the given\n+   * key, or null if there is no active contract for the given key.\n    *\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n    */\n   streamFetchByKey<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n-    let lastContractId: ContractId<T> | null = null;\n-    const request = [{templateId: template.templateId, key}];\n-    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n-    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n-      // NOTE(MH, #4564): We're very lenient here. We should not see a create\n-      // event when `contract` is currently not null. We should also only see\n-      // archive events when `contract` is currently not null and the contract\n-      // ids match. However, the JSON API does not provied these guarantees yet\n-      // but we're working on them.\n+    return this.streamFetchByKeyCommon(template, [key], \"streamFetchByKey\", (cs) => cs[0], (c) => [c]);\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   * Returns the same API as [[streamSubmit]] but does not, in fact, establish\n+   * any socket connection. Instead, this is a stream that always has the given\n+   * value as its accumulated state.\n+   */\n+  constantStream<T extends object, K, I extends string, V>(\n+    value: V,\n+  ): Stream<T, K, I, V> {\n+    function on(t: 'live', l: (v: V) => void): void;\n+    function on(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function on(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    function on(type: any, listener: any): any {\n+        if (type === 'live') {\n+          listener(value);\n+        }\n+        if (type === 'change') {\n+          listener(value, []);\n+        }\n+    }\n+    function off(t: 'live', l: (v: V) => void): void;\n+    function off(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function off(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function\n+    function off(_t: any, _l: any): any {}\n+    // eslint-disable-next-line @typescript-eslint/no-empty-function\n+    return { on, off, close: (): void => {} };\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   */\n+  streamFetchByKeyCommon<T extends object, K, I extends string, S>(\n+    template: Template<T, K, I>,\n+    keys: K[], // non-zero length\n+    name: string,\n+    to: (contracts: (CreateEvent<T, K, I> | null)[]) => S,\n+    from: (state: S) => (CreateEvent<T, K, I> | null)[],\n+  ): Stream<T, K, I, S> {\n+    const lastContractIds: (ContractId<T> | null)[] = Array(keys.length).fill(null);\n+    const keysCopy = Array.from(keys);\n+    const initState: (CreateEvent<T, K, I> | null)[] = Array(keys.length).fill(null);\n+    const request = keys.map(k => ({templateId: template.templateId, key: k}));\n+    const reconnectRequest = (): object[] => request.map((r, idx) => ({...r, 'contractIdAtOffset': lastContractIds[idx]}))\n+    const change = (state: S, events: readonly Event<T, K, I>[]): S => {\n+      const contracts = from(state);\n+      const newState: (CreateEvent<T, K, I> | null)[] = Array.from(contracts);\n       for (const event of events) {\n         if ('created' in event) {\n-          contract = event.created;\n+          const k = event.created.key;\n+          keysCopy.forEach((requestKey, idx) => {\n+            if (deepEqual(requestKey, k, {strict: true})) {"
+  },
+  {
+    "id" : "c9cf3b78-49c8-4040-95ca-f696673c0477",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "a1a8fe27-2734-4bde-962f-5fbefefc838a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Perhaps worth mentioning in a comment that this currently does a linear search over the contract keys. We could think about optimizing it but I expect the number of keys to be quite small so I wouldn’t worry about this for now.",
+        "createdAt" : "2020-08-12T08:42:25Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bda60ace-8786-4fe1-91d6-47681a300a8e",
+        "parentId" : "a1a8fe27-2734-4bde-962f-5fbefefc838a",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I had actually started with an optimized version, using a map of key to index. but then I thought back to the dynamic list that justified the 0-length version, and I saw no reason to force users to give us a set of keys, rather than just a list. If they want to pin the same key multiple times, I have no issue giving them the same contract multiple times. That's why there is no escape to the loop.\r\n\r\nWe could still try to optimize this, say with a map of key to `number[]`, I suppose.",
+        "createdAt" : "2020-08-14T17:57:19Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f824b4aa-28d1-4abb-abe2-8dfb0739cdc8",
+        "parentId" : "a1a8fe27-2734-4bde-962f-5fbefefc838a",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point, I do agree with giving them the same contract multiple times.",
+        "createdAt" : "2020-08-14T18:39:22Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -608,44 +628,147 @@ class Ledger {\n         .concat(createEvents)\n         .filter(contract => !archiveEvents.has(contract.contractId));\n     };\n-    return this.streamSubmit(template, 'v1/stream/query', request, reconnectRequest, [], change);\n+    return this.streamSubmit(name, template, 'v1/stream/query', request, reconnectRequest, [], change);\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a given template and queries.\n+   *\n+   * If the given list is empty, the accumulated state is the set of all active\n+   * contracts for the given template. Otherwise, the accumulated state is the\n+   * set of all contracts that match at least one of the given queries.\n+   *\n+   * See https://docs.daml.com/json-api/search-query-language.html for a\n+   * description of the query language.\n+   *\n+   * @param template The contract template to match contracts against.\n+   * @param query A query to match contracts against.\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamQueries<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    queries: Query<T>[],\n+  ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n+    return this.streamQueryCommon(template, queries, \"streamQueries\");\n   }\n \n   /**\n    * Retrieve a consolidated stream of events for a given template and contract key.\n    *\n-   * Same as [[streamQuery]], but instead of a query, match contracts by contract key.\n+   * The accumulated state is either the current active contract for the given\n+   * key, or null if there is no active contract for the given key.\n    *\n    * @typeparam T The contract template type.\n    * @typeparam K The contract key type.\n    * @typeparam I The contract id type.\n+   *\n    */\n   streamFetchByKey<T extends object, K, I extends string>(\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n-    let lastContractId: ContractId<T> | null = null;\n-    const request = [{templateId: template.templateId, key}];\n-    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]\n-    const change = (contract: CreateEvent<T, K, I> | null, events: readonly Event<T, K, I>[]): CreateEvent<T, K, I> | null => {\n-      // NOTE(MH, #4564): We're very lenient here. We should not see a create\n-      // event when `contract` is currently not null. We should also only see\n-      // archive events when `contract` is currently not null and the contract\n-      // ids match. However, the JSON API does not provied these guarantees yet\n-      // but we're working on them.\n+    return this.streamFetchByKeyCommon(template, [key], \"streamFetchByKey\", (cs) => cs[0], (c) => [c]);\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   * Returns the same API as [[streamSubmit]] but does not, in fact, establish\n+   * any socket connection. Instead, this is a stream that always has the given\n+   * value as its accumulated state.\n+   */\n+  constantStream<T extends object, K, I extends string, V>(\n+    value: V,\n+  ): Stream<T, K, I, V> {\n+    function on(t: 'live', l: (v: V) => void): void;\n+    function on(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function on(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    function on(type: any, listener: any): any {\n+        if (type === 'live') {\n+          listener(value);\n+        }\n+        if (type === 'change') {\n+          listener(value, []);\n+        }\n+    }\n+    function off(t: 'live', l: (v: V) => void): void;\n+    function off(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function off(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function\n+    function off(_t: any, _l: any): any {}\n+    // eslint-disable-next-line @typescript-eslint/no-empty-function\n+    return { on, off, close: (): void => {} };\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   */\n+  streamFetchByKeyCommon<T extends object, K, I extends string, S>(\n+    template: Template<T, K, I>,\n+    keys: K[], // non-zero length\n+    name: string,\n+    to: (contracts: (CreateEvent<T, K, I> | null)[]) => S,\n+    from: (state: S) => (CreateEvent<T, K, I> | null)[],\n+  ): Stream<T, K, I, S> {\n+    const lastContractIds: (ContractId<T> | null)[] = Array(keys.length).fill(null);\n+    const keysCopy = Array.from(keys);\n+    const initState: (CreateEvent<T, K, I> | null)[] = Array(keys.length).fill(null);\n+    const request = keys.map(k => ({templateId: template.templateId, key: k}));\n+    const reconnectRequest = (): object[] => request.map((r, idx) => ({...r, 'contractIdAtOffset': lastContractIds[idx]}))\n+    const change = (state: S, events: readonly Event<T, K, I>[]): S => {\n+      const contracts = from(state);"
+  },
+  {
+    "id" : "40c33f8d-94ac-43c6-9a10-784c230671a6",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "753dea81-9bb5-4ba4-b6a3-0dfdcdcf2e3f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we need to create a copy here? Just to protect against the caller mutating the keys object? If so what makes this parameter special? Any object is passed by reference and can be mutated so we would need to do this for a lot of stuff and I’m not sure if that’s particularly idiomatic for JS.",
+        "createdAt" : "2020-08-26T07:30:51Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d7cd7851-673e-43a6-8e6b-9bdafd50f9ff",
+        "parentId" : "753dea81-9bb5-4ba4-b6a3-0dfdcdcf2e3f",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "> Makes sense here. In general, I’m a bit hesitant to make that guarantee since we don’t test this anywhere and I wouldn’t be surprised if in various places, we do make assumptions about the format.\r\n\r\nI'm not sure I understand what \"guarantee\" this is talking about. I have added to the documentation that users need to provide the key in the documented \"output\" format of the JSON API, but this is more like a requirement than a guarantee.\r\n\r\n> Why do we need to create a copy here? Just to protect against the caller mutating the keys object? If so what makes this parameter special? Any object is passed by reference and can be mutated so we would need to do this for a lot of stuff and I’m not sure if that’s particularly idiomatic for JS.\r\n\r\nAs far as I'm aware it is idiomatic (and, more importantly, correct), though it's been a while since I last participated in the JS community.\r\n\r\nWhat makes this parameter special, and thus worth copying, is that we keep it around for later reference through asynchronous callbacks. With JS not having threads, composite objects captured by closures are the only case where you need to be mindful of mutability, which is a bit less burdensome (if not less error-prone) than all arguments all the time. At least in this PR and barring an error on my side, this is the only closed-over composite.",
+        "createdAt" : "2020-09-02T15:22:19Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dc7dbc8f-2743-464b-8618-7437e966b5ad",
+        "parentId" : "753dea81-9bb5-4ba4-b6a3-0dfdcdcf2e3f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "> I'm not sure I understand what \"guarantee\" this is talking about.\r\n\r\nI was coming from your statement that we advertise this as JS bindings and should support inputs even if they do not pass the TS typechecker unless documented differently (this being the guarantee). That just seems hard to keep up without testing this or even knowing where it works by accident (and what exactly works) and where it fails. The documentation on the new methods and the behavior there is perfectly fine and I fully agree with that.\r\n\r\nYour explanation on this parameter being special makes sense so happy to keep it.",
+        "createdAt" : "2020-09-02T15:32:26Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -645,7 +719,98 @@ class Ledger {\n       lastContractId = contract ? contract.contractId : null\n       return contract;\n     }\n-    return this.streamSubmit(template, 'v1/stream/fetch', request, reconnectRequest, null, change);\n+    return this.streamSubmit(\"streamFetchByKey\", template, 'v1/stream/fetch', request, reconnectRequest, null, change);\n+  }\n+\n+  /**\n+   * @internal\n+   *\n+   * Returns the same API as [[streamSubmit]] but does not, in fact, establish\n+   * any socket connection. Instead, this is a stream that always has the given\n+   * value as its accumulated state.\n+   */\n+  private constantStream<T extends object, K, I extends string, V>(\n+    value: V,\n+  ): Stream<T, K, I, V> {\n+    function on(t: 'live', l: (v: V) => void): void;\n+    function on(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function on(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    function on(type: any, listener: any): any {\n+        if (type === 'live') {\n+          listener(value);\n+        }\n+        if (type === 'change') {\n+          listener(value, []);\n+        }\n+    }\n+    function off(t: 'live', l: (v: V) => void): void;\n+    function off(t: 'change', l: (v: V, events: readonly Event<T, K, I>[]) => void): void;\n+    function off(t: 'close', l: (e: StreamCloseEvent) => void): void;\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function\n+    function off(_t: any, _l: any): any {}\n+    // eslint-disable-next-line @typescript-eslint/no-empty-function\n+    return { on, off, close: (): void => {} };\n+  }\n+\n+  /**\n+   * Retrieve a consolidated stream of events for a list of keys and a single\n+   * template.\n+   *\n+   * The accumulated state is an array of the same length as the given list of\n+   * keys, with positional correspondence. Each element in the array represents\n+   * the current contract for the given key, or is explicitly null if there is\n+   * currently no active contract matching that key.\n+   *\n+   * Note: the given `key` objects will be compared for (deep) equality with\n+   * the values returned by the API. As such, they have to be given in the\n+   * \"output\" format of the API, including the values of\n+   * `encodeDecimalAsString` and `encodeInt64AsString`. See [the JSON API docs\n+   * for details](https://docs.daml.com/json-api/lf-value-specification.html).\n+   *\n+   * @typeparam T The contract template type.\n+   * @typeparam K The contract key type.\n+   * @typeparam I The contract id type.\n+   */\n+  streamFetchByKeys<T extends object, K, I extends string>(\n+    template: Template<T, K, I>,\n+    keys: K[],\n+  ): Stream<T, K, I, (CreateEvent<T, K, I> | null)[]> {\n+    // We support zero-length key so clients can more easily manage a dynamic\n+    // list, without having to special-case 0-length on their side.\n+    if (keys.length == 0) {\n+      return this.constantStream([]);\n+    }\n+    const lastContractIds: (ContractId<T> | null)[] = Array(keys.length).fill(null);\n+    const keysCopy = deepCopy(keys);"
+  },
+  {
+    "id" : "8ee97903-37f6-47e4-acff-4fe91a805e98",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "41546a7b-6197-4260-8798-add436900ef7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is this a bugfix? If so what exactly is it fixing, we already seem to emit something very similar in `onClose`.",
+        "createdAt" : "2020-08-26T07:35:52Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "74da2c57-1e62-4ea7-95bf-a6fd2668463a",
+        "parentId" : "41546a7b-6197-4260-8798-add436900ef7",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "This may be worth exploring as a separate PR. The notion of `close` on `Stream` seems a bit confused at the moment. As the code stands (without this PR), if you register a listener for `'close'` events, you get notified when the underlying WebSocket closes (even though the stream will then try to open a new one and, if it manages to reconnect, will keep sending `'change'` events), and you do not get notified when the stream itself gets closed (by calling `.close()` on it), because the code in `.close()` removes the listeners before closing the WebSocket connection (and trying to send a message to `'close'` listeners). Further, calling `.close()` also does not really close the stream: while it does remove all the listeners and close the WebSocket connection, it also immediately creates a new WebSocket connection to replace the closed one, as it does not remove the `onClose` listener on the WebSocket itself.\r\n\r\nI believe the following would be a better interface, but am a bit unsure about how to change this without breaking backwards compatibility:\r\n- WebSocket connection closing is an internal detail and should not leak out (assuming we do manage to reconnect).\r\n- Listeners for `'close'` events should trigger when the stream will no longer emit events: either `.close()` has been called, or the WebSocket connection has failed beyond the code's willingness to try reconnecting.\r\n- When `.close()` is called, the WebSocket connection should be properly terminated (i.e. no reconnection).\r\n- Calling `.close()` on an already closed stream can be defined as either an error or a no-op, depending on how forgiving we want to be (I'd prefer an error).\r\n\r\nAs of this PR, `'close'` listeners get called when `.close()` is called, but none of the other issues are addressed. Consequently, the `'close'` event is still in the WebSocket `'close'` event format. I chose the \"normal termination\" code of 1000 as it seemed semantically correct here (described as \"the connection has reached its natural end after fulfilling its purpose\").",
+        "createdAt" : "2020-09-02T16:25:48Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b1dcd1b2-3bf3-47a7-9bca-94a75b8bc918",
+        "parentId" : "41546a7b-6197-4260-8798-add436900ef7",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "I have removed this change and will open a separate PR for this. This on is big enough as it stands.",
+        "createdAt" : "2020-09-08T14:24:14Z",
+        "updatedAt" : "2020-09-08T14:24:15Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -566,6 +591,7 @@ class Ledger {\n     // eslint-disable-next-line @typescript-eslint/no-explicit-any\n     const off = (type: string, listener: any): void => void emitter.off(type, listener);\n     const close = (): void => {\n+      emitter.emit('close', {code: 1000, reason: 'Stream.close() was called'});"
+  },
+  {
+    "id" : "8a8df5f9-acc6-4d09-8923-a1008745c256",
+    "prId" : 7066,
+    "comments" : [
+      {
+        "id" : "0a7607d2-a612-418a-96fc-6e01e442b882",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I believe we already depend on `lodash` transitively which provides https://lodash.com/docs#cloneDeep",
+        "createdAt" : "2020-08-26T07:38:24Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3a011df5-614a-4952-9f43-a05ef9b67920",
+        "parentId" : "0a7607d2-a612-418a-96fc-6e01e442b882",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Updated to use `lodash` for `_.cloneDeep` instead of custom `deepCopy`, and since `lodash` is there I've also removed `deep-equal` and used `_.isEqual` instead of `deepEqual`.",
+        "createdAt" : "2020-09-08T13:28:24Z",
+        "updatedAt" : "2020-09-08T14:23:47Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0ef0422dc9dbfe8749fff1b56b9a06706cecc569",
+    "line" : null,
+    "diffHunk" : "@@ -124,6 +125,29 @@ function isRecordWith<Field extends string>(field: Field, x: unknown): x is Reco\n   return typeof x === 'object' && x !== null && field in x;\n }\n \n+/** @internal\n+ * exported for testing only\n+ */\n+export function assert(b: boolean, m: string): void {\n+  if (!b) {\n+    throw m;\n+  }\n+}\n+\n+/** @internal\n+ * exported for testing only\n+ */\n+export function deepCopy<T>(input: T): T {"
+  },
+  {
+    "id" : "9559f59c-4ea5-4fc7-bafc-b12b0f565fc8",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "c6fead2b-125d-479b-9f28-5bcd23a1bdd5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What do you think about `reconnectThreshold` as the name for this?",
+        "createdAt" : "2020-04-06T14:29:51Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "76b83eb2-15a1-4b72-9107-f5b1f95e64e0",
+        "parentId" : "c6fead2b-125d-479b-9f28-5bcd23a1bdd5",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "that sounds fine to me. I'll change it.",
+        "createdAt" : "2020-04-06T15:27:41Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -220,6 +220,12 @@ type LedgerOptions = {\n    * as it is the case with the development server of `create-react-app`.\n    */\n   wsBaseUrl?: string;\n+  /**\n+   * Optional number of milliseconds a connection has to be live to be considered healthy. If the\n+   * connection is closed after being live for at least this amount of time, the `Ledger` tries to\n+   * reconnect, else not.\n+   */\n+  wsMinLiveTime?: number;"
+  },
+  {
+    "id" : "0b2aaf0d-9149-467c-a9c2-8632ba9c6846",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "44f242f5-bd5f-478b-b653-2a77b76c4b85",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Does this actually work? I think it has to come as two consecutive messages.",
+        "createdAt" : "2020-04-06T14:37:15Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cfc2416f-562b-4272-9e26-4456e542c5fe",
+        "parentId" : "44f242f5-bd5f-478b-b653-2a77b76c4b85",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I interpreted the documentation around this like this. But now that you asked, I'm not sure. Is there a  way to trigger a connection close in the JSON API server?",
+        "createdAt" : "2020-04-06T15:39:31Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "07eb1637-4803-4d87-aa1e-0d273fb66649",
+        "parentId" : "44f242f5-bd5f-478b-b653-2a77b76c4b85",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I checked back with the runtime team. Apparently, it needs to be two messages. I changed it accordingly.",
+        "createdAt" : "2020-04-06T17:39:43Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -586,7 +607,9 @@ class Ledger {\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n+    let lastContractId: ContractId<T> | null = null;\n     const request = [{templateId: template.templateId, key}];\n+    const reconnectRequest = (offset: string): object[] => [{'offset': offset}, {...request[0], 'contractIdAtOffset': lastContractId}]"
+  },
+  {
+    "id" : "60481d09-9174-4663-a98c-b448960919ae",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "152d77ba-8e5b-4486-9ccc-740a2ff9a176",
+        "parentId" : null,
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "@hurryabit I'm a bit confused why this has to be lazy. I tried to define `reconnectRequest` as a variable or a function of the contractId, but it wouldn't change the `contractIdAtOffset` field.",
+        "createdAt" : "2020-04-06T17:43:37Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ebee3a54-e788-4ca1-ae64-d3fc97815023",
+        "parentId" : "152d77ba-8e5b-4486-9ccc-740a2ff9a176",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This can't be a variable since that would mean that you always use `null` for `lastContractId`, which is the value when we execute this line. What do you mean by \"a function of the contract id\" in this context?",
+        "createdAt" : "2020-04-07T10:56:35Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "46dccf38-f8ce-4461-8ca4-817ff310bc3b",
+        "parentId" : "152d77ba-8e5b-4486-9ccc-740a2ff9a176",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "a function of type `contractId -> lastContractId`",
+        "createdAt" : "2020-04-07T11:02:53Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 141,
+    "diffHunk" : "@@ -586,7 +608,9 @@ class Ledger {\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n+    let lastContractId: ContractId<T> | null = null;\n     const request = [{templateId: template.templateId, key}];\n+    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]"
+  },
+  {
+    "id" : "14c09763-8fd7-486d-8656-d4f28ccf5281",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "3ce82b93-3c1f-4120-9f53-1bd6f34e15ee",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm a big fan of always adding curly braces to simply rule out a big class of potential mistakes, particularly when people start adding code.\r\n```suggestion\r\n      } else {\r\n        ws.send(JSON.stringify(request));\r\n      }\r\n```",
+        "createdAt" : "2020-04-14T09:02:30Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -487,28 +495,39 @@ class Ledger {\n     template: Template<T, K, I>,\n     endpoint: string,\n     request: unknown,\n+    reconnectRequest: () => unknown,\n     init: State,\n     change: (state: State, events: readonly Event<T, K, I>[]) => State,\n   ): Stream<T, K, I, State> {\n     const protocols = ['jwt.token.' + this.token, 'daml.ws.auth'];\n-    const ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n-    let isLive = false;\n+    let ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n+    let isLiveSince: undefined | number = undefined;\n+    let lastOffset: undefined | string = undefined;\n     let state = init;\n+    let isReconnecting: boolean = false;\n     const emitter = new EventEmitter();\n-    ws.addEventListener('open', () => {\n-      ws.send(JSON.stringify(request));\n-    });\n-    ws.addEventListener('message', event => {\n+    const onOpen = (): void => {\n+      if (isReconnecting) {\n+          ws.send(JSON.stringify({ 'offset': lastOffset }));\n+          ws.send(JSON.stringify(reconnectRequest()));\n+      } else\n+        ws.send(JSON.stringify(request));"
+  },
+  {
+    "id" : "649fb3e6-3309-49d1-92f0-1d015f515747",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "593fb38c-2032-4eba-a615-8fa6fe1e1094",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    const onMessage = (event: { data: any } ): void => {\r\n```",
+        "createdAt" : "2020-04-14T09:12:11Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -487,28 +495,39 @@ class Ledger {\n     template: Template<T, K, I>,\n     endpoint: string,\n     request: unknown,\n+    reconnectRequest: () => unknown,\n     init: State,\n     change: (state: State, events: readonly Event<T, K, I>[]) => State,\n   ): Stream<T, K, I, State> {\n     const protocols = ['jwt.token.' + this.token, 'daml.ws.auth'];\n-    const ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n-    let isLive = false;\n+    let ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n+    let isLiveSince: undefined | number = undefined;\n+    let lastOffset: undefined | string = undefined;\n     let state = init;\n+    let isReconnecting: boolean = false;\n     const emitter = new EventEmitter();\n-    ws.addEventListener('open', () => {\n-      ws.send(JSON.stringify(request));\n-    });\n-    ws.addEventListener('message', event => {\n+    const onOpen = (): void => {\n+      if (isReconnecting) {\n+          ws.send(JSON.stringify({ 'offset': lastOffset }));\n+          ws.send(JSON.stringify(reconnectRequest()));\n+      } else\n+        ws.send(JSON.stringify(request));\n+    };\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    const onMessage = (event: { data: any; type: string; target: WebSocket } ): void => {"
+  },
+  {
+    "id" : "908a8320-cb86-4563-bcfc-83e485ecd8c3",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "b6dd297c-69f9-4058-8e84-177f7b05fabe",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Let's be more explicit:\r\n```suggestion\r\n          if (isLiveSince === undefined) {\r\n            isLiveSince = Date.now();\r\n            if (!isReconnecting) {\r\n              emitter.emit('live', state);\r\n            }\r\n          }\r\n```\r\n`Date.now()` should appear somewhere further down too.",
+        "createdAt" : "2020-04-14T09:23:43Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -487,28 +495,39 @@ class Ledger {\n     template: Template<T, K, I>,\n     endpoint: string,\n     request: unknown,\n+    reconnectRequest: () => unknown,\n     init: State,\n     change: (state: State, events: readonly Event<T, K, I>[]) => State,\n   ): Stream<T, K, I, State> {\n     const protocols = ['jwt.token.' + this.token, 'daml.ws.auth'];\n-    const ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n-    let isLive = false;\n+    let ws = new WebSocket(this.wsBaseUrl + endpoint, protocols);\n+    let isLiveSince: undefined | number = undefined;\n+    let lastOffset: undefined | string = undefined;\n     let state = init;\n+    let isReconnecting: boolean = false;\n     const emitter = new EventEmitter();\n-    ws.addEventListener('open', () => {\n-      ws.send(JSON.stringify(request));\n-    });\n-    ws.addEventListener('message', event => {\n+    const onOpen = (): void => {\n+      if (isReconnecting) {\n+          ws.send(JSON.stringify({ 'offset': lastOffset }));\n+          ws.send(JSON.stringify(reconnectRequest()));\n+      } else\n+        ws.send(JSON.stringify(request));\n+    };\n+    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n+    const onMessage = (event: { data: any; type: string; target: WebSocket } ): void => {\n       const json: unknown = JSON.parse(event.data.toString());\n       if (isRecordWith('events', json)) {\n         const events = jtv.Result.withException(jtv.array(decodeEvent(template)).run(json.events));\n         if (events.length > 0) {\n           state = change(state, events);\n           emitter.emit('change', state, events);\n         }\n-        if (isRecordWith('offset', json) && !isLive) {\n-          isLive = true;\n-          emitter.emit('live', state);\n+        if (isRecordWith('offset', json)) {\n+          lastOffset = jtv.Result.withException(jtv.string().run(json.offset));\n+          if (!isLiveSince) {\n+            isLiveSince = new Date().getTime();\n+            if (!isReconnecting) emitter.emit('live', state);\n+          }"
+  },
+  {
+    "id" : "f341d3b2-beda-4b17-bac1-c0bad22f546e",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "f195d706-f5d5-4043-802e-6c3acee3c3e7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We shouldn't have this in prod code. If you think it's useful, please use `console.debug` and add a more descriptive message that tells you which websocket is reconnecting.\r\n```suggestion\r\n```",
+        "createdAt" : "2020-04-14T09:26:29Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -517,12 +536,30 @@ class Ledger {\n       } else {\n         console.error('Ledger.streamQuery unknown message', json);\n       }\n-    });\n+    };\n+    const onClose = ({ code, reason }: {\n+        wasClean: boolean; code: number;\n+        reason: string; target: WebSocket;\n+    }): void => {\n+      emitter.emit('close', {code, reason});\n+      const now = new Date().getTime();\n+      // we try to reconnect if we could connect previously and we were live for at least\n+      // 'reconnectThreshold'.\n+      if (lastOffset && isLiveSince && now - isLiveSince >= this.reconnectThreshold) {\n+        console.log('reconnecting WebSocket');"
+  },
+  {
+    "id" : "680e89fe-d6c2-4304-82c3-579e03a08832",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "6bb27979-9113-4832-8834-c46cff3d5b10",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n      if (lastOffset !== undefined && isLiveSince !== undefined && now - isLiveSince >= this.reconnectThreshold) {\r\n```",
+        "createdAt" : "2020-04-14T09:26:45Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -517,12 +536,30 @@ class Ledger {\n       } else {\n         console.error('Ledger.streamQuery unknown message', json);\n       }\n-    });\n+    };\n+    const onClose = ({ code, reason }: {\n+        wasClean: boolean; code: number;\n+        reason: string; target: WebSocket;\n+    }): void => {\n+      emitter.emit('close', {code, reason});\n+      const now = new Date().getTime();\n+      // we try to reconnect if we could connect previously and we were live for at least\n+      // 'reconnectThreshold'.\n+      if (lastOffset && isLiveSince && now - isLiveSince >= this.reconnectThreshold) {"
+  },
+  {
+    "id" : "7b4f5710-dabc-46dc-a3ea-cf2f148cecb3",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "81dd4810-b211-4497-b535-fa86328cb81c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I thought a bit more about this. I don't think we want to have been live for at least X seconds but rather have been connected for X seconds. Imagine your load balancer kills all connections after 1 minute and you set this threshold to 30 seconds. If it takes 40 seconds to go live because there's quite a lot of data coming from the ACS, we would not reconnect. But I would definitely consider a situation worthy of reconnecting.\r\n\r\nSince this is a non-breaking improvement, let's do it in a follow-up PR though.",
+        "createdAt" : "2020-04-14T09:29:01Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 97,
+    "diffHunk" : "@@ -517,12 +536,30 @@ class Ledger {\n       } else {\n         console.error('Ledger.streamQuery unknown message', json);\n       }\n-    });\n+    };\n+    const onClose = ({ code, reason }: {\n+        wasClean: boolean; code: number;\n+        reason: string; target: WebSocket;\n+    }): void => {\n+      emitter.emit('close', {code, reason});\n+      const now = new Date().getTime();\n+      // we try to reconnect if we could connect previously and we were live for at least\n+      // 'reconnectThreshold'."
+  },
+  {
+    "id" : "dbfa6882-7c74-4cf3-be1e-9de5e168ba4a",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "b14e6702-b311-441c-b18f-a9f0612dc47a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Let's better be safe than sorry:\r\n```suggestion\r\n        isReconnecting = true;\r\n        ws.removeEventListener('open', onOpen);\r\n        ws.removeEventListener('message', onMessage);\r\n        ws.removeEventListener('close', onClose);\r\n```",
+        "createdAt" : "2020-04-14T09:31:25Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 100,
+    "diffHunk" : "@@ -517,12 +536,30 @@ class Ledger {\n       } else {\n         console.error('Ledger.streamQuery unknown message', json);\n       }\n-    });\n+    };\n+    const onClose = ({ code, reason }: {\n+        wasClean: boolean; code: number;\n+        reason: string; target: WebSocket;\n+    }): void => {\n+      emitter.emit('close', {code, reason});\n+      const now = new Date().getTime();\n+      // we try to reconnect if we could connect previously and we were live for at least\n+      // 'reconnectThreshold'.\n+      if (lastOffset && isLiveSince && now - isLiveSince >= this.reconnectThreshold) {\n+        console.log('reconnecting WebSocket');\n+        isLiveSince = undefined;\n+        isReconnecting = true;"
+  },
+  {
+    "id" : "22204b6a-c4fa-4a85-bf2a-750b49b4eefb",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "08354334-f5b7-4a81-924c-154bc99926dc",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}];\r\n```",
+        "createdAt" : "2020-04-14T09:36:40Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 141,
+    "diffHunk" : "@@ -586,7 +624,9 @@ class Ledger {\n     template: Template<T, K, I>,\n     key: K,\n   ): Stream<T, K, I, CreateEvent<T, K, I> | null> {\n+    let lastContractId: ContractId<T> | null = null;\n     const request = [{templateId: template.templateId, key}];\n+    const reconnectRequest = (): object[] => [{...request[0], 'contractIdAtOffset': lastContractId}]"
+  },
+  {
+    "id" : "baeeddf2-e0a6-4dea-a958-9548f0637e1c",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "94081698-571a-4425-a73c-5066b47d728e",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I know I'm guilty of this myself... But I'm also still learning, particularly through reading code.\r\n```suggestion\r\n      lastContractId = contract !== null ? contract.contractId : null\r\n```",
+        "createdAt" : "2020-04-14T09:37:52Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 149,
+    "diffHunk" : "@@ -602,10 +642,12 @@ class Ledger {\n           }\n         }\n       }\n+      lastContractId = contract ? contract.contractId : null"
+  },
+  {
+    "id" : "7fad8a08-b71b-438c-b0e5-3893183c3920",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "a03c34c3-171b-4b91-9fbe-220923165446",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why is this an array when `request` is not?",
+        "createdAt" : "2020-04-14T09:38:10Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : 122,
+    "diffHunk" : "@@ -556,6 +593,7 @@ class Ledger {\n     query?: Query<T>,\n   ): Stream<T, K, I, readonly CreateEvent<T, K, I>[]> {\n     const request = {templateIds: [template.templateId], query};\n+    const reconnectRequest = (): object[] => [request];"
+  },
+  {
+    "id" : "86e84c8b-857a-4f14-ae26-0de801b8e2d0",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "d3393d36-2a47-4ba7-b6ed-befc10815a40",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n```",
+        "createdAt" : "2020-04-14T09:38:41Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -602,10 +642,12 @@ class Ledger {\n           }\n         }\n       }\n+      lastContractId = contract ? contract.contractId : null\n       return contract;\n     }\n-    return this.streamSubmit(template, 'v1/stream/fetch', request, null, change);\n+    return this.streamSubmit(template, 'v1/stream/fetch', request, reconnectRequest, null, change);\n   }\n+"
+  },
+  {
+    "id" : "fd60ed2e-39ee-4ab6-8329-f6e39b3d8881",
+    "prId" : 5416,
+    "comments" : [
+      {
+        "id" : "cfe98c67-1ea4-42d2-a91a-104be6169307",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "There's no need to mention `wasClean` and `target` if we don't use them.\r\n```suggestion\r\n    const onClose = ({ code, reason }: { code: number; reason: string }): void => {\r\n```",
+        "createdAt" : "2020-04-14T09:45:20Z",
+        "updatedAt" : "2020-04-14T10:01:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "66ada6cd985bbd0ed3e23a2cc8ac9b3c1ff91066",
+    "line" : null,
+    "diffHunk" : "@@ -517,12 +536,30 @@ class Ledger {\n       } else {\n         console.error('Ledger.streamQuery unknown message', json);\n       }\n-    });\n+    };\n+    const onClose = ({ code, reason }: {\n+        wasClean: boolean; code: number;\n+        reason: string; target: WebSocket;\n+    }): void => {"
+  },
+  {
+    "id" : "59a88470-0c23-4ea5-8604-e04fa076e0dd",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "6e77f9b8-208d-443a-961d-8c9a9c17af66",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We need an `off` function to deregister the handler for the `live` event as well.",
+        "createdAt" : "2020-04-01T10:46:47Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "588cb915-b7ea-41c0-95a9-72253b5b2eb4",
+        "parentId" : "6e77f9b8-208d-443a-961d-8c9a9c17af66",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "added.",
+        "createdAt" : "2020-04-01T11:28:06Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : 4,
+    "diffHunk" : "@@ -192,6 +192,7 @@ export type StreamCloseEvent = {\n  * @typeparam State The accumulated state.\n  */\n export interface Stream<T extends object, K, I extends string, State> {\n+  on(type: 'live', listener: (state: State) => void): void;"
+  },
+  {
+    "id" : "32fe6ccb-f56d-422e-b9ae-cefb8917cdf0",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "1803053c-da84-4cb6-8e3e-fc641254c12e",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We should rename this variable to `isLive` or something similar. Set it initially to `false` and change to `true` once we see the first `offset`. At that time we should also emit the `live` event. We should do that regardless of whether the list of `events` is empty or not. If there are actually events, we should apply them to the state and emit a `change` event as well.\r\n\r\nWhen we need to emit both a `live` and a `change` event, the `live` event should come last. My reasoning for that is as follows: users might not listen to the `change` event initially and only start doing so once they have seen the `live` event. Such users will most likely make use of the state shipped with the `live` event. If we send the corresponding `change` event afterward, they will already have started listening to the `change` event and see the same state twice. We can avoid this by shipping the `change` event before the `live` event.\r\n\r\nOne could think that we could avoid that duplication by not emitting a `change` event when we emit a `live` event, however, that would mean that the `change` events have one odd gap. In particular, we would lose the events that happened when we switched to live and these should definitely not be sent with the `live` event as that would make zero sense.",
+        "createdAt" : "2020-04-01T10:55:00Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2ebe9b78-fb74-4972-ae0e-c07cf3db433a",
+        "parentId" : "1803053c-da84-4cb6-8e3e-fc641254c12e",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I changed the `streamSubmit` method accordingly.",
+        "createdAt" : "2020-04-01T12:46:18Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : null,
+    "diffHunk" : "@@ -502,12 +503,8 @@ class Ledger {\n         const events = jtv.Result.withException(jtv.array(decodeEvent(template)).run(json.events));\n         if (events.length == 0 && isRecordWith('offset', json)) {\n           if (!haveSeenEvents) {\n-            // NOTE(MH): If we receive the marker indicating that we are switching\n-            // from the ACS to the live stream and we haven't received any events\n-            // yet, we signal this by pretending we received an empty list of\n-            // events. This never does any harm.\n             haveSeenEvents = true;"
+  },
+  {
+    "id" : "539defe2-bd33-42b7-bf0d-1d286c918529",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "8f937ab8-af34-4963-8a07-b75720757205",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That is exactly what I had in mind. Awesome!",
+        "createdAt" : "2020-04-02T09:30:16Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : 43,
+    "diffHunk" : "@@ -500,21 +502,11 @@ class Ledger {\n       const json: unknown = JSON.parse(event.data.toString());\n       if (isRecordWith('events', json)) {\n         const events = jtv.Result.withException(jtv.array(decodeEvent(template)).run(json.events));\n-        if (events.length == 0 && isRecordWith('offset', json)) {\n-          if (!haveSeenEvents) {\n-            // NOTE(MH): If we receive the marker indicating that we are switching\n-            // from the ACS to the live stream and we haven't received any events\n-            // yet, we signal this by pretending we received an empty list of\n-            // events. This never does any harm.\n-            haveSeenEvents = true;\n-            emitter.emit('change', state, []);\n-          }\n-        } else {\n-          state = change(state, events);\n-          if (isRecordWith('offset', json)) {\n-            haveSeenEvents = true;\n-          }\n-          emitter.emit('change', state, events);\n+        state = change(state, events);\n+        emitter.emit('change', state, events);\n+        if (isRecordWith('offset', json) && !isLive) {\n+          isLive = true;\n+          emitter.emit('live', state);"
+  },
+  {
+    "id" : "132f80f7-3123-4607-8849-997b7effcee0",
+    "prId" : 5329,
+    "comments" : [
+      {
+        "id" : "7c2f754a-779b-466e-acd7-8e9d149b92ec",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We don't want to trigger any changes if there were no events. This happens as part of heart beating and informing about new ledger offsets.\r\n```suggestion\r\n        if (events.length > 0) {\r\n          state = change(state, events);\r\n          emitter.emit('change', state, events);\r\n        }\r\n```",
+        "createdAt" : "2020-04-02T09:38:56Z",
+        "updatedAt" : "2020-04-02T14:58:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf712410e31ad7eed2645e4c306c4276b901b965",
+    "line" : null,
+    "diffHunk" : "@@ -500,21 +502,11 @@ class Ledger {\n       const json: unknown = JSON.parse(event.data.toString());\n       if (isRecordWith('events', json)) {\n         const events = jtv.Result.withException(jtv.array(decodeEvent(template)).run(json.events));\n-        if (events.length == 0 && isRecordWith('offset', json)) {\n-          if (!haveSeenEvents) {\n-            // NOTE(MH): If we receive the marker indicating that we are switching\n-            // from the ACS to the live stream and we haven't received any events\n-            // yet, we signal this by pretending we received an empty list of\n-            // events. This never does any harm.\n-            haveSeenEvents = true;\n-            emitter.emit('change', state, []);\n-          }\n-        } else {\n-          state = change(state, events);\n-          if (isRecordWith('offset', json)) {\n-            haveSeenEvents = true;\n-          }\n-          emitter.emit('change', state, events);\n+        state = change(state, events);\n+        emitter.emit('change', state, events);"
+  },
+  {
+    "id" : "3f6c60d3-6ad2-4fb5-a6a9-70d2a54448c6",
+    "prId" : 4993,
+    "comments" : [
+      {
+        "id" : "208c151f-0f40-4679-a503-df3705e7a5ac",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This function is not exported. Does it show up in the generated docs or do we need to do something to hide it explicitly? Same in many places below.",
+        "createdAt" : "2020-03-16T10:05:54Z",
+        "updatedAt" : "2020-03-16T10:08:19Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eb03a2fb12ffffc05a50686e27c9b62dc48c2bc5",
+    "line" : 43,
+    "diffHunk" : "@@ -16,15 +24,31 @@ export type CreateEvent<T extends object, K = unknown, I extends string = string\n   payload: T;\n }\n \n+/**\n+ * An archived contract.\n+ *\n+ * @typeparam T The contract template type.\n+ * @typeparam I The contract id type.\n+ */\n export type ArchiveEvent<T extends object, I extends string = string> = {\n   templateId: I;\n   contractId: ContractId<T>;\n }\n \n+/**\n+ * An event is either the creation or archival of a contract.\n+ *\n+ * @typeparam T The contract template type.\n+ * @typeparam K The contract key type.\n+ * @typeparam I The contract id type.\n+ */\n export type Event<T extends object, K = unknown, I extends string = string> =\n   | { created: CreateEvent<T, K, I> }\n   | { archived: ArchiveEvent<T, I> }\n \n+/**\n+ * Decoder for a [[CreateEvent]].\n+ */"
+  },
+  {
+    "id" : "a7d3e385-0f3c-4a15-b357-6a6ffd8822d5",
+    "prId" : 4192,
+    "comments" : [
+      {
+        "id" : "0676b403-212a-412f-82c2-249f18830e7e",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n  async create<T extends object, K>(template: Template<T, K>, payload: T): Promise<CreateEvent<T, K>> {\r\n```\r\n\r\nSeems more in the spirit of the change, no?",
+        "createdAt" : "2020-01-23T21:21:23Z",
+        "updatedAt" : "2020-01-23T21:21:58Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "57506288ad990fb12d56912dc7cd7978b9406ec5",
+    "line" : 6,
+    "diffHunk" : "@@ -154,12 +154,12 @@ class Ledger {\n   /**\n    * Create a contract for a given template.\n    */\n-  async create<T extends object, K>(template: Template<T, K>, argument: T): Promise<CreateEvent<T, K>> {\n-    const payload = {\n+  async create<T extends object, K>(template: Template<T, K>, contractPayload: T): Promise<CreateEvent<T, K>> {"
+  },
+  {
+    "id" : "2144a903-81de-4f88-a64f-5e5712216f1e",
+    "prId" : 4192,
+    "comments" : [
+      {
+        "id" : "2e91c1d7-5c68-4d36-9a42-19938e0e607f",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n      payload,\r\n```",
+        "createdAt" : "2020-01-23T21:21:33Z",
+        "updatedAt" : "2020-01-23T21:21:59Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "eb2ab1fe-da4a-4d0d-aabd-a65835d06e80",
+        "parentId" : "2e91c1d7-5c68-4d36-9a42-19938e0e607f",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I guess, it is just in a few other places, @hurryabit refers to the entire command as a payload.",
+        "createdAt" : "2020-01-23T21:47:24Z",
+        "updatedAt" : "2020-01-23T21:47:25Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "10acbcfa-bc15-4ec3-9f10-2115075767b8",
+        "parentId" : "2e91c1d7-5c68-4d36-9a42-19938e0e607f",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Fair, well, whatever you think is best.",
+        "createdAt" : "2020-01-23T21:48:22Z",
+        "updatedAt" : "2020-01-23T21:48:22Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "57506288ad990fb12d56912dc7cd7978b9406ec5",
+    "line" : 10,
+    "diffHunk" : "@@ -154,12 +154,12 @@ class Ledger {\n   /**\n    * Create a contract for a given template.\n    */\n-  async create<T extends object, K>(template: Template<T, K>, argument: T): Promise<CreateEvent<T, K>> {\n-    const payload = {\n+  async create<T extends object, K>(template: Template<T, K>, contractPayload: T): Promise<CreateEvent<T, K>> {\n+    const command = {\n       templateId: template.templateId,\n-      argument,\n+      payload: contractPayload,"
+  }
+]

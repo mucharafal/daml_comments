@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "f37715de-a2b3-482f-adf1-bef41063eabd",
+    "prId" : 1481,
+    "comments" : [
+      {
+        "id" : "9a7ec664-06e7-4e90-af90-183abe36b956",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Don't test this; instead, test _antisymmetry_ of the ordering: for all a, b: TemplateConfig, consider compare(a, b) and compare(b, a): the only acceptable patterns are\r\n\r\n1. positive, negative,\r\n2. negative, positive,\r\n3. zero, zero\r\n\r\nanything else fails. (Use the `signum` method on `Int` to make this test easier.)\r\n\r\nThis precisely implies the property you're trying to test without burying it so that it doesn't really get covered.\r\n\r\nAlternatively, you can just empty out this file and use Scalaz:\r\n\r\n```scala\r\n  // checkLaws is defined in ImmArrayTest; just copy-paste for now\r\n  checkLaws(ScalazProperties.order.laws[TemplateConfig])\r\n```",
+        "createdAt" : "2019-05-31T19:53:25Z",
+        "updatedAt" : "2019-06-03T14:49:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bcc6834c-65aa-431f-89de-1b11ad1d5b9c",
+        "parentId" : "9a7ec664-06e7-4e90-af90-183abe36b956",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "I don't have `scalaz.Order` instance for `TemplateConfig` and `Ordering` is also gone...\r\nso if I define `scalaz.Order` I won't be testing the `Ordered` that I implemented for `TemplateConfig`",
+        "createdAt" : "2019-05-31T20:16:01Z",
+        "updatedAt" : "2019-06-03T14:49:56Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8fab0f74-3897-4978-a6b9-71d0d038338e",
+        "parentId" : "9a7ec664-06e7-4e90-af90-183abe36b956",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Use `scalaz.Order.fromScalaOrdering[TemplateConfig]` (let implicit resolution do its thing); that will use what you've defined, even though you deleted the by-hand `Ordering` instance.",
+        "createdAt" : "2019-05-31T20:21:44Z",
+        "updatedAt" : "2019-06-03T14:49:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "15f2c5b1464e628ace830961aeced4e45bbcccac",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,28 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.extractor.config\n+\n+import com.digitalasset.extractor.config.Generators.genTemplateConfig\n+import org.scalacheck.Gen\n+import org.scalatest.prop.GeneratorDrivenPropertyChecks\n+import org.scalatest.{FlatSpec, Matchers}\n+\n+class TemplateConfigSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {\n+\n+  behavior of TemplateConfig.getClass.getSimpleName\n+\n+  it should \"be sortable\" in forAll(Gen.nonEmptyListOf(genTemplateConfig)) { templateConfigs =>\n+    whenever(templateConfigs.size > 1) {\n+      val sorted = templateConfigs.sorted\n+      sorted.sliding(2).forall {\n+        case List(x, y) => x.compareTo(y) <= 0\n+      } should ===(true)\n+    }\n+  }\n+\n+  it should \"have deterministic sort\" in forAll(Gen.nonEmptyListOf(genTemplateConfig)) { as =>"
+  },
+  {
+    "id" : "af68a9fc-8333-4406-b9f2-19bee98fa0ed",
+    "prId" : 1481,
+    "comments" : [
+      {
+        "id" : "eb9d4bf6-5f95-4cab-b245-cad88b6ba62b",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Delete this test; you're not verifying anything beyond the stdlib's behavior.",
+        "createdAt" : "2019-05-31T19:53:41Z",
+        "updatedAt" : "2019-06-03T14:49:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "15f2c5b1464e628ace830961aeced4e45bbcccac",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,28 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.extractor.config\n+\n+import com.digitalasset.extractor.config.Generators.genTemplateConfig\n+import org.scalacheck.Gen\n+import org.scalatest.prop.GeneratorDrivenPropertyChecks\n+import org.scalatest.{FlatSpec, Matchers}\n+\n+class TemplateConfigSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {\n+\n+  behavior of TemplateConfig.getClass.getSimpleName\n+\n+  it should \"be sortable\" in forAll(Gen.nonEmptyListOf(genTemplateConfig)) { templateConfigs =>\n+    whenever(templateConfigs.size > 1) {\n+      val sorted = templateConfigs.sorted\n+      sorted.sliding(2).forall {\n+        case List(x, y) => x.compareTo(y) <= 0\n+      } should ===(true)"
+  }
+]

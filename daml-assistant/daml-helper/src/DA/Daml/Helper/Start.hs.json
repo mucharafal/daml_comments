@@ -1,0 +1,395 @@
+[
+  {
+    "id" : "eadf298b-5186-4d7e-9a27-4de280e29cd9",
+    "prId" : 7777,
+    "comments" : [
+      {
+        "id" : "285e072e-c53e-426a-973d-09b562355410",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n          runLedgerUploadDar (defaultLedgerFlags Grpc) Nothing\r\n```",
+        "createdAt" : "2020-10-22T13:50:02Z",
+        "updatedAt" : "2020-10-22T14:47:03Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9beba81036c277a388fcb2d86a847f54a3ae64b8",
+    "line" : null,
+    "diffHunk" : "@@ -275,7 +275,7 @@ runStart\n             whenJust mbOutputPath $ \\_outputPath -> do\n               runCodegen lang []\n         doUploadDar =\n-          runLedgerUploadDar (LedgerFlags Grpc Nothing Nothing Nothing Nothing 10) Nothing\n+          runLedgerUploadDar (LedgerFlags Grpc Nothing 10 Nothing Nothing Nothing) Nothing"
+  },
+  {
+    "id" : "fe6ef692-d998-4c9b-9433-dffb47d71ab6",
+    "prId" : 7562,
+    "comments" : [
+      {
+        "id" : "a6fc8421-0b48-40df-8f0a-cead2e89bbf7",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Might want to check for `'R'` as well ... who knows, they might have caps lock on.\r\n\r\n```suggestion\r\n                when (c `elem` \"rR\") $ rebuild projectConfig\r\n```",
+        "createdAt" : "2020-10-05T12:54:39Z",
+        "updatedAt" : "2020-10-08T14:49:02Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "077a11c1-2477-49e2-b1cb-46daacf160d3",
+        "parentId" : "a6fc8421-0b48-40df-8f0a-cead2e89bbf7",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "I like it! Thanks!",
+        "createdAt" : "2020-10-05T13:38:08Z",
+        "updatedAt" : "2020-10-08T14:49:02Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4213067e41cc7905f8e45c9041367cb28233c69a",
+    "line" : null,
+    "diffHunk" : "@@ -267,6 +265,45 @@ runStart\n             case mbJsonApiPort of\n                 Nothing -> f sandboxPh\n                 Just jsonApiPort -> withJsonApi sandboxPort jsonApiPort args f\n+        doCodegen doClean projectConfig =\n+          forM_ [minBound :: Lang .. maxBound :: Lang] $ \\lang -> do\n+            mbOutputPath :: Maybe String <-\n+              requiredE (\"Failed to parse codegen entry for \" <> showLang lang) $\n+              queryProjectConfig\n+                [\"codegen\", showLang lang, \"output-directory\"]\n+                projectConfig\n+            whenJust mbOutputPath $ \\outputPath -> do\n+              when doClean $ removeDirectoryRecursive outputPath\n+              runCodegen lang []\n+        doUploadDar =\n+          runLedgerUploadDar (LedgerFlags Nothing Nothing Nothing Nothing 10) Nothing\n+        listenForKeyPress projectConfig = do\n+          hSetBuffering stdin NoBuffering\n+          void $\n+            forkIO $\n+             do\n+              threadDelay 20000000\n+              -- give sandbox 20 secs to startup before printing rebuild instructions\n+              forever $ do\n+                printRebuildInstructions\n+                c <- getChar\n+                when (c == 'r') $ rebuild projectConfig"
+  },
+  {
+    "id" : "584e37f9-f348-4aed-b1b1-696bc5855ccc",
+    "prId" : 7562,
+    "comments" : [
+      {
+        "id" : "9a3f85f5-8138-4dc8-8ddb-4ac3fc20572d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The supposedly more compact code ended up longer because of string overloading. Funny.\r\n```suggestion\r\n                when (c == 'r' || c == 'R') $ rebuild projectConfig\r\n```",
+        "createdAt" : "2020-10-07T17:46:31Z",
+        "updatedAt" : "2020-10-08T14:49:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4213067e41cc7905f8e45c9041367cb28233c69a",
+    "line" : null,
+    "diffHunk" : "@@ -267,6 +264,42 @@ runStart\n             case mbJsonApiPort of\n                 Nothing -> f sandboxPh\n                 Just jsonApiPort -> withJsonApi sandboxPort jsonApiPort args f\n+        doCodegen projectConfig =\n+          forM_ [minBound :: Lang .. maxBound :: Lang] $ \\lang -> do\n+            mbOutputPath :: Maybe String <-\n+              requiredE (\"Failed to parse codegen entry for \" <> showLang lang) $\n+              queryProjectConfig\n+                [\"codegen\", showLang lang, \"output-directory\"]\n+                projectConfig\n+            whenJust mbOutputPath $ \\_outputPath -> do\n+              runCodegen lang []\n+        doUploadDar =\n+          runLedgerUploadDar (LedgerFlags Nothing Nothing Nothing Nothing 10) Nothing\n+        listenForKeyPress projectConfig = do\n+          hSetBuffering stdin NoBuffering\n+          void $\n+            forkIO $\n+             do\n+              threadDelay 20000000\n+              -- give sandbox 20 secs to startup before printing rebuild instructions\n+              forever $ do\n+                printRebuildInstructions\n+                c <- getChar\n+                when (c `elem` (\"rR\" :: String)) $ rebuild projectConfig"
+  },
+  {
+    "id" : "83d8c821-0345-4372-b46a-27224647fc55",
+    "prId" : 7516,
+    "comments" : [
+      {
+        "id" : "9b331d78-c1aa-4fbf-811a-6cb52549f096",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I think the `js` codegen is the only one that you need to pass arguments from `daml.yaml` explicitly for now. AFAIK the java and scala codegens pick up options from daml.yaml automatically (I don't know when).\r\n\r\nSee for example the codegen option that's in the `daml.yaml` for the quickstart-java template:\r\n\r\n```\r\ncodegen:\r\n  java:\r\n    package-prefix: com.daml.quickstart.model\r\n    output-directory: target/generated-sources/iou\r\n    decoderClass: com.daml.quickstart.iou.TemplateDecoder\r\n```\r\n\r\nAnd for the quickstart-scala template:\r\n\r\n```\r\ncodegen:\r\n  scala:\r\n    package-prefix: com.daml.quickstart.iou.model\r\n    output-directory: scala-codegen/src/main/scala\r\n    verbosity: 2\r\n```\r\n\r\n(Probably the right thing to do, as Moritz said, is to fix the js codegen so it can pick up arguments from daml.yaml automatically... But I think that can be done separately.)",
+        "createdAt" : "2020-10-01T12:49:16Z",
+        "updatedAt" : "2020-10-02T13:24:54Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a402e0ca-4525-4f0f-bf3e-76ce1b1fad19",
+        "parentId" : "9b331d78-c1aa-4fbf-811a-6cb52549f096",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "yes that's true, I just changed it when I discovered it in the codegen docs.",
+        "createdAt" : "2020-10-01T13:45:18Z",
+        "updatedAt" : "2020-10-02T13:24:54Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f519d770116ce3ec6cb36f801850b6e96231cc90",
+    "line" : null,
+    "diffHunk" : "@@ -228,7 +232,12 @@ runStart\n     jsonApiOpts <- withOptsFromProjectConfig \"json-api-options\" jsonApiOpts projectConfig\n     scriptOpts <- withOptsFromProjectConfig \"script-options\" scriptOpts projectConfig\n     doBuild\n-    when generateJsCode $ doJsCodegen [darPath, \"-o\", \"ui/daml.js\"]\n+    forM_ [minBound :: Lang .. maxBound :: Lang] $ \\lang -> do\n+      mbOutputPath :: Maybe String <-\n+        requiredE (\"Failed to parse codegen entry for \" <> showLang lang) $\n+        queryProjectConfig [\"codegen\", showLang lang] projectConfig"
+  },
+  {
+    "id" : "c5f98dae-84e0-4332-af0c-b10860852d28",
+    "prId" : 7516,
+    "comments" : [
+      {
+        "id" : "3b299f19-366b-4540-84e8-54e8338e4ce2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Do we actually use this type anywhere? I can't find a use site.",
+        "createdAt" : "2020-10-02T09:26:45Z",
+        "updatedAt" : "2020-10-02T13:24:54Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7f77812d-0a73-4250-8aba-94acd36fd2b9",
+        "parentId" : "3b299f19-366b-4540-84e8-54e8338e4ce2",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "That's a left-over, I'll remove it. I still need to have another cleanup pass over the PR.",
+        "createdAt" : "2020-10-02T09:40:58Z",
+        "updatedAt" : "2020-10-02T13:24:54Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f519d770116ce3ec6cb36f801850b6e96231cc90",
+    "line" : null,
+    "diffHunk" : "@@ -165,6 +167,13 @@ newtype JsonApiOptions = JsonApiOptions [String]\n newtype ScriptOptions = ScriptOptions [String]\n newtype SandboxClassic = SandboxClassic { unSandboxClassic :: Bool }\n \n+data CodegenConfig = CodegenConfig"
+  },
+  {
+    "id" : "fe7ff39d-a667-43fb-9964-51e6b9db063e",
+    "prId" : 7401,
+    "comments" : [
+      {
+        "id" : "d725cb11-1fb1-407b-b6d9-c10bc73d50d4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is there a reason why we do the defaulting here rather than in `optparse-applicative`? I guess the same applies to the sandbox port as well which is probably my doing but I don’t remember why we handled it this way.",
+        "createdAt" : "2020-09-15T10:36:27Z",
+        "updatedAt" : "2020-09-15T10:58:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "92abca7f-2fa8-4d2d-a4f7-1e32182b82b8",
+        "parentId" : "d725cb11-1fb1-407b-b6d9-c10bc73d50d4",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I don't think there's a good reason. I'll move this default over.",
+        "createdAt" : "2020-09-15T10:51:28Z",
+        "updatedAt" : "2020-09-15T10:58:52Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5b3459841d27bc5a795b01b73cd6fff6030c37fb",
+    "line" : null,
+    "diffHunk" : "@@ -248,7 +250,7 @@ runStart\n                   void $ waitAnyCancel =<< mapM (async . waitExitCode) [navigatorPh,sandboxPh,jsonApiPh]\n \n     where\n-        navigatorPort = NavigatorPort 7500\n+        navigatorPort = fromMaybe (NavigatorPort 7500) navigatorPortM"
+  },
+  {
+    "id" : "5eec0241-ba25-4ddf-a42d-27ce608ffb6b",
+    "prId" : 6736,
+    "comments" : [
+      {
+        "id" : "c1be55cf-3342-401c-b721-872822fa80d8",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "From this documentation it sounds like `DAML_PLATFORM_VERSION` is only checked if `daml.yaml` contains a `platform-version` field, but the `getPlatformVersion` doc (& code) reveals that `DAML_PLATFORM_VERSION` is always checked, whether or not `platform-version` is set in `daml.yaml`. I suggest rewording the comment to make this clear. ",
+        "createdAt" : "2020-07-15T10:55:45Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "12320627-53e0-4c49-ac5c-41f294b583a3",
+        "parentId" : "c1be55cf-3342-401c-b721-872822fa80d8",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Good point, I’ve tried to rephrase it.",
+        "createdAt" : "2020-07-15T11:29:22Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2f53428025130f41ac072e3ffe5471a3febc1495",
+    "line" : null,
+    "diffHunk" : "@@ -45,6 +48,32 @@ import Data.Aeson\n import DA.Daml.Helper.Util\n import DA.Daml.Project.Config\n import DA.Daml.Project.Consts\n+import DA.Daml.Project.Types\n+\n+-- [Note] The `platform-version` field:\n+--\n+-- If `daml.yaml` contains a `platform-version` field platform commands"
+  },
+  {
+    "id" : "e6403993-e9a3-42ae-b09e-a672379e49b0",
+    "prId" : 6736,
+    "comments" : [
+      {
+        "id" : "ab53ba04-33e0-4eed-ba6c-fe6ed647ad83",
+        "parentId" : null,
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Does this use the logback config from the current SDK to run the platform version JAR, or, does this use the current SDK config to determine the location of the logback config in the platform version's SDK? Both of these seem bad, but the latter seems worse IMO.\r\n\r\nI don't know a way around this other than re-invoking daml-assistant for the necessary component with a modified DAML_SDK_VERSION, in the cases where the platform version /= SDK version. I.e. we shouldn't be invoking jars across SDK versions directly.\r\n\r\nIf the former, how often do logback configs change? Does running an SDK component with a different logback config affect our ability to hit compatibility targets? My guess is no...\r\n\r\nWe should try really hard to avoid getting into a situation that makes it difficult to change the SDK / platform in the future.",
+        "createdAt" : "2020-07-15T11:04:52Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "aba58ce7-7b0f-4526-8f69-0c969794a78f",
+        "parentId" : "ab53ba04-33e0-4eed-ba6c-fe6ed647ad83",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The logback arg is only used in the second argument to `withPlatformProcess` which is only used if we are running a component from the current SDK. If we run a component from the platform version we go via the assistant and don’t pass the logback config.\r\n\r\nAt least that’s what I intended to do, am I missing something?",
+        "createdAt" : "2020-07-15T11:25:10Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e6f09bf7-9364-48a3-928f-99c320db295f",
+        "parentId" : "ab53ba04-33e0-4eed-ba6c-fe6ed647ad83",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "Ah, I'm silly. Sorry, of course, you're doing the right thing, but I got worried prematurely and then got distracted and didn't read all the way down to `withPlatformProcess`. Oops, sorry.",
+        "createdAt" : "2020-07-15T11:38:04Z",
+        "updatedAt" : "2020-07-15T13:28:39Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2f53428025130f41ac072e3ffe5471a3febc1495",
+    "line" : 136,
+    "diffHunk" : "@@ -225,3 +260,68 @@ runStart\n             case mbJsonApiPort of\n                 Nothing -> f sandboxPh\n                 Just jsonApiPort -> withJsonApi sandboxPort jsonApiPort args f\n+\n+platformVersionEnvVar :: String\n+platformVersionEnvVar = \"DAML_PLATFORM_VERSION\"\n+\n+-- | Returns the platform version determined as follows:\n+--\n+-- 1. If DAML_PLATFORM_VERSION is set return that.\n+-- 2. If DAML_PROJECT is set and non-empty and `daml.yaml`\n+--    has a `platform-version` field return that.\n+-- 3. If `DAML_SDK_VERSION` is set return that.\n+-- 4. Else we are invoked outside of the assistant and we throw an exception.\n+getPlatformVersion :: IO String\n+getPlatformVersion = do\n+  mbPlatformVersion <- lookupEnv platformVersionEnvVar\n+  case mbPlatformVersion of\n+    Just platformVersion -> pure platformVersion\n+    Nothing -> do\n+      mbProjPath <- getProjectPath\n+      case mbProjPath of\n+        Just projPath -> do\n+          project <- readProjectConfig (ProjectPath projPath)\n+          case queryProjectConfig [\"platform-version\"] project of\n+            Left err -> throwIO err\n+            Right (Just ver) -> pure ver\n+            Right Nothing -> getSdkVersion\n+        Nothing -> getSdkVersion\n+\n+-- Convenience-wrapper around `withPlatformProcess` for commands that call the SDK\n+-- JAR `daml-sdk.jar`.\n+withPlatformJar\n+    :: [String]\n+    -- ^ Commands passed to the assistant and the platform JAR.\n+    -> FilePath\n+    -- ^ File name of the logback config.\n+    -> (Process () () () -> IO a)\n+    -> IO a\n+withPlatformJar args logbackConf f = do\n+    logbackArg <- getLogbackArg (damlSdkJarFolder </> logbackConf)"
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "c208855c-2e03-43e4-934c-cc9dfe6efc41",
+    "prId" : 7476,
+    "comments" : [
+      {
+        "id" : "6d9c82f5-7215-45f8-a1c4-9d537ba32fc8",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    abort \"t1 finished with no authorization failure\"\r\n```\r\nand similarly below.",
+        "createdAt" : "2020-09-24T08:56:12Z",
+        "updatedAt" : "2020-09-24T09:15:17Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1f9b2fbed1558d5abfeec1f9f6445b184206b1ac",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,76 @@\n+-- Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.\n+-- All rights reserved.\n+\n+module AuthEvalOrder where\n+\n+template TheContract\n+  with\n+    party : Party\n+  where\n+    signatory party\n+\n+-- t1/t2 are a pair of similar tests, except t2 is badly authorized.\n+-- In the well-authorized t1, execution reaches the `error` function\n+-- In the badly-authorized t2, the auth failure prevent the error from being reached.\n+\n+-- @ERROR Aborted: t1 finished with no authorization failure\n+t1 : Scenario ()\n+t1 = scenario do\n+  ivy <- getParty \"Ivy-t1\"\n+  submit ivy $ do\n+    create (TheContract with party = ivy)\n+    let x = error \"t1 finished with no authorization failure\"\n+    return ()"
+  },
+  {
+    "id" : "f1ce0e04-acd9-43cd-a323-722de00a721e",
+    "prId" : 7476,
+    "comments" : [
+      {
+        "id" : "c8627e82-95d9-4478-8857-edc8b7ee28f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The `observer` clause is unnecessary when you use the old `controller ... can` syntax, which adds the controllers to the observers automatically.",
+        "createdAt" : "2020-09-24T08:58:02Z",
+        "updatedAt" : "2020-09-24T09:15:17Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1f9b2fbed1558d5abfeec1f9f6445b184206b1ac",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,76 @@\n+-- Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.\n+-- All rights reserved.\n+\n+module AuthEvalOrder where\n+\n+template TheContract\n+  with\n+    party : Party\n+  where\n+    signatory party\n+\n+-- t1/t2 are a pair of similar tests, except t2 is badly authorized.\n+-- In the well-authorized t1, execution reaches the `error` function\n+-- In the badly-authorized t2, the auth failure prevent the error from being reached.\n+\n+-- @ERROR Aborted: t1 finished with no authorization failure\n+t1 : Scenario ()\n+t1 = scenario do\n+  ivy <- getParty \"Ivy-t1\"\n+  submit ivy $ do\n+    create (TheContract with party = ivy)\n+    let x = error \"t1 finished with no authorization failure\"\n+    return ()\n+\n+-- @ERROR failed due to a missing authorization from 'Ivy-t2'\n+t2 : Scenario ()\n+t2 = scenario do\n+  mach <- getParty \"Mach-t1\"\n+  ivy <- getParty \"Ivy-t2\"\n+  submit mach $ do\n+    create (TheContract with party = ivy)\n+    let x = error \"t2 Finished\"\n+    return ()\n+\n+template TheContractBuilder\n+  with\n+    p1 : Party\n+    p2 : Party\n+  where\n+    signatory p1\n+    observer p2"
+  }
+]

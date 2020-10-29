@@ -1,0 +1,379 @@
+[
+  {
+    "id" : "754db334-4185-45b0-9398-e997b5ead7b3",
+    "prId" : 2893,
+    "comments" : [
+      {
+        "id" : "2d41709c-b97d-4868-90bb-4f7e46c0fac2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I totally agree with this instance. It doesn't necessarily work when you add the new field _not_ as the last field of the record, right? I suppose that is intended.",
+        "createdAt" : "2019-09-13T11:54:33Z",
+        "updatedAt" : "2019-09-14T10:33:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e74600d5-31c6-4ce3-93f8-9d044b25fc3b",
+        "parentId" : "2d41709c-b97d-4868-90bb-4f7e46c0fac2",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "yes, that's intended.",
+        "createdAt" : "2019-09-13T14:12:41Z",
+        "updatedAt" : "2019-09-14T10:33:43Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9d44fa2cd4eb78e8a4fc41cf48858dbe93d4a882",
+    "line" : 5,
+    "diffHunk" : "@@ -88,6 +88,14 @@ instance (MetaEquiv c1 c2, GenConvertible f1 f2) => GenConvertible (M1 i1 c1 f1)\n instance (GenConvertible a1 a2, GenConvertible b1 b2) => GenConvertible (a1 :*: b1) (a2 :*: b2) where\n   cv ~(P1 a b) = P1 (cv a) (cv b)\n \n+-- product embeddings\n+instance (GenConvertible a1 a2) => GenConvertible a1 (a2 :*: Opt b s) where"
+  },
+  {
+    "id" : "f5277edb-b3c2-4006-993e-a22600ee84ff",
+    "prId" : 2893,
+    "comments" : [
+      {
+        "id" : "f4be6f53-df00-4bef-9af8-61cb3d02400f",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not convinced by this instance. As it stands right now, you can remove a field from a record and then the value get's dropped during an upgrade. That doesn't sound too nice to me. Instead, it should only work if the value we drop is `None` and fail if we're trying to drop a `Some _`.",
+        "createdAt" : "2019-09-13T11:56:43Z",
+        "updatedAt" : "2019-09-14T10:33:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5c9883da-19ec-4487-bce2-80446b7c22d4",
+        "parentId" : "f4be6f53-df00-4bef-9af8-61cb3d02400f",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "Not sure, that would mean it's impossible to drop fields even if you wanted to. On the other side, it is, of course, dangerous if fields just get dropped unintentionally.  I'll change it for now and we'll have to see how that plays out in practice.",
+        "createdAt" : "2019-09-13T14:17:52Z",
+        "updatedAt" : "2019-09-14T10:33:43Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1383fbaa-40b1-47b9-9900-7fe591c72bf3",
+        "parentId" : "f4be6f53-df00-4bef-9af8-61cb3d02400f",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "actually not sure if we can do this without having a partial pattern match, because whether it's `None`, `Some _ ` is not at the type-level.",
+        "createdAt" : "2019-09-13T15:12:31Z",
+        "updatedAt" : "2019-09-14T10:33:43Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "aa11437a-ce69-4d30-ad44-49f2f7d0183a",
+        "parentId" : "f4be6f53-df00-4bef-9af8-61cb3d02400f",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We could make it fail at runtime if it’s a `Some`. Right now I would probably just remove the instance. ",
+        "createdAt" : "2019-09-13T16:22:19Z",
+        "updatedAt" : "2019-09-14T10:33:43Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "20793360-a945-4588-929b-34bd9eded07c",
+        "parentId" : "f4be6f53-df00-4bef-9af8-61cb3d02400f",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "removing the instance makes rollbacks of previously embedded data impossible, so that's not an option. I changed it to fail at runtime. But I think this is really wrong. If a user removes a field of a contract then the only thing that can possibly happen, is that the field gets deleted. We shouldn't prevent a user from doing that.",
+        "createdAt" : "2019-09-14T10:06:47Z",
+        "updatedAt" : "2019-09-14T10:33:43Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5f8d69ee-a02d-4d1a-a4f8-daf293b66898",
+        "parentId" : "f4be6f53-df00-4bef-9af8-61cb3d02400f",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We're not preventing people from doing that. We're just forcing them to write it down explicitly when they want to do that. I think that's fine.",
+        "createdAt" : "2019-09-18T12:02:15Z",
+        "updatedAt" : "2019-09-18T12:02:45Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9d44fa2cd4eb78e8a4fc41cf48858dbe93d4a882",
+    "line" : 9,
+    "diffHunk" : "@@ -88,6 +88,14 @@ instance (MetaEquiv c1 c2, GenConvertible f1 f2) => GenConvertible (M1 i1 c1 f1)\n instance (GenConvertible a1 a2, GenConvertible b1 b2) => GenConvertible (a1 :*: b1) (a2 :*: b2) where\n   cv ~(P1 a b) = P1 (cv a) (cv b)\n \n+-- product embeddings\n+instance (GenConvertible a1 a2) => GenConvertible a1 (a2 :*: Opt b s) where\n+  cv a = P1 (cv a) genNone\n+\n+-- product projections\n+instance GenConvertible a1 a2 => GenConvertible (a1 :*: Opt b1 s) a2 where"
+  },
+  {
+    "id" : "7c4130ce-ffcd-4e60-89a5-bd3517618cfa",
+    "prId" : 2893,
+    "comments" : [
+      {
+        "id" : "e06c5b14-bdc7-402c-a8f8-7119fcf9b3b6",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Should this really be commented out?",
+        "createdAt" : "2019-09-18T12:02:29Z",
+        "updatedAt" : "2019-09-18T12:02:45Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9d44fa2cd4eb78e8a4fc41cf48858dbe93d4a882",
+    "line" : 11,
+    "diffHunk" : "@@ -88,6 +88,15 @@ instance (MetaEquiv c1 c2, GenConvertible f1 f2) => GenConvertible (M1 i1 c1 f1)\n instance (GenConvertible a1 a2, GenConvertible b1 b2) => GenConvertible (a1 :*: b1) (a2 :*: b2) where\n   cv ~(P1 a b) = P1 (cv a) (cv b)\n \n+-- product embeddings\n+instance (GenConvertible a1 a2) => GenConvertible a1 (a2 :*: Opt b s) where\n+  cv a = P1 (cv a) genNone\n+\n+-- product projections\n+instance GenConvertible a1 a2 => GenConvertible (a1 :*: Opt b1 s) a2 where\n+  cv ~(P1 a (M1 (K1 {unK1 = None}))) = cv a\n+  -- cv ~(P1 a (M1 (K1 {unK1 = Some _b}))) = error \"This conversion would have introduced data loss\""
+  },
+  {
+    "id" : "6a9914a5-7228-4373-aac1-eba34bb268ec",
+    "prId" : 2884,
+    "comments" : [
+      {
+        "id" : "6449155c-cc72-418d-886b-b6423a5c521d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Another fun example for @hurryabit where we leak the `*Instance` classes :slightly_smiling_face: ",
+        "createdAt" : "2019-09-11T13:14:54Z",
+        "updatedAt" : "2019-09-11T13:15:20Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3e6f5451fffaf6994c322999fe6012b0e159c9df",
+    "line" : 4,
+    "diffHunk" : "@@ -12,6 +12,8 @@ module DA.Upgrade\n   , Convertible(..)\n   , GenConvertible\n   , Upgrade(..)\n+  , UpgradeInstance(..)"
+  },
+  {
+    "id" : "b458dae6-e18b-4581-86e5-6d2e7c88d262",
+    "prId" : 2605,
+    "comments" : [
+      {
+        "id" : "d5fafc46-8d3d-4f88-8498-f83c89633ea1",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nclass GenConvertible a b where\r\n```\r\nand everywhere else...",
+        "createdAt" : "2019-08-20T13:03:16Z",
+        "updatedAt" : "2019-08-26T11:49:47Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4911a484-cce9-4216-9803-2fc75d54d19d",
+        "parentId" : "d5fafc46-8d3d-4f88-8498-f83c89633ea1",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "fixed.",
+        "createdAt" : "2019-08-20T13:20:14Z",
+        "updatedAt" : "2019-08-26T11:49:47Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6f9ffdf4547903e867fbc570ace6269e1b9295b7",
+    "line" : null,
+    "diffHunk" : "@@ -10,41 +10,88 @@ daml 1.2\n module DA.Upgrade\n   ( conv\n   , iso\n+  , Convertable(..)\n+  , GenConvertable\n+  , Upgrade(..)\n+  , Rollback(..)\n   )\n   where\n \n import DA.Generics\n-\n--- | Convert data types that are isomorphic and have the same meta-data up to package id.\n-conv : (Generic a repA, Generic b repB, Conv repA repB) => a -> b\n+import DA.Next.Set\n+\n+----------------------------------------------------------------------------------------------------\n+-- Upgrade templates\n+----------------------------------------------------------------------------------------------------\n+\n+template (Template i, Template o, Convertable i o) => Upgrade i o\n+    with\n+        op : Party\n+    where\n+        signatory op\n+        nonconsuming choice DoUpgrade: ContractId o\n+            with\n+                inC : ContractId i\n+                sigs : [Party]\n+            controller sigs\n+                do\n+                    d <- fetch inC\n+                    assert $ fromList sigs == fromList (signatory d)\n+                    create $ convert d\n+\n+template (Template i, Template o, Convertable o i) => Rollback i o\n+    with\n+        op : Party\n+    where\n+        signatory op\n+        nonconsuming choice DoRollback: ContractId i\n+            with\n+                inC : ContractId o\n+                sigs : [Party]\n+            controller sigs\n+                do\n+                    d <- fetch inC\n+                    assert $ fromList sigs == fromList (signatory d)\n+                    create $ convert d\n+\n+----------------------------------------------------------------------------------------------------\n+-- Data type conversion\n+----------------------------------------------------------------------------------------------------\n+\n+-- | Types, for which there exists a conversion.\n+class Convertable a b where\n+  convert : a -> b\n+\n+-- | GenConvertable data types that are isomorphic and have the same meta-data up to package id.\n+conv : (Generic a repA, Generic b repB, GenConvertable repA repB) => a -> b\n conv = to . cv . from\n \n -- | Generic representations that are isomorphic and have the same meta-data up to package id.\n-class Conv a b where\n+class GenConvertable a b where"
+  },
+  {
+    "id" : "14e59764-7852-400e-a1d7-76cc27b3b705",
+    "prId" : 2605,
+    "comments" : [
+      {
+        "id" : "a8ca2428-b834-4bac-90d1-4f1ebe4530b9",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nclass Convertible a b where\r\n```",
+        "createdAt" : "2019-08-20T13:03:34Z",
+        "updatedAt" : "2019-08-26T11:49:47Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6f9ffdf4547903e867fbc570ace6269e1b9295b7",
+    "line" : null,
+    "diffHunk" : "@@ -10,41 +10,88 @@ daml 1.2\n module DA.Upgrade\n   ( conv\n   , iso\n+  , Convertable(..)\n+  , GenConvertable\n+  , Upgrade(..)\n+  , Rollback(..)\n   )\n   where\n \n import DA.Generics\n-\n--- | Convert data types that are isomorphic and have the same meta-data up to package id.\n-conv : (Generic a repA, Generic b repB, Conv repA repB) => a -> b\n+import DA.Next.Set\n+\n+----------------------------------------------------------------------------------------------------\n+-- Upgrade templates\n+----------------------------------------------------------------------------------------------------\n+\n+template (Template i, Template o, Convertable i o) => Upgrade i o\n+    with\n+        op : Party\n+    where\n+        signatory op\n+        nonconsuming choice DoUpgrade: ContractId o\n+            with\n+                inC : ContractId i\n+                sigs : [Party]\n+            controller sigs\n+                do\n+                    d <- fetch inC\n+                    assert $ fromList sigs == fromList (signatory d)\n+                    create $ convert d\n+\n+template (Template i, Template o, Convertable o i) => Rollback i o\n+    with\n+        op : Party\n+    where\n+        signatory op\n+        nonconsuming choice DoRollback: ContractId i\n+            with\n+                inC : ContractId o\n+                sigs : [Party]\n+            controller sigs\n+                do\n+                    d <- fetch inC\n+                    assert $ fromList sigs == fromList (signatory d)\n+                    create $ convert d\n+\n+----------------------------------------------------------------------------------------------------\n+-- Data type conversion\n+----------------------------------------------------------------------------------------------------\n+\n+-- | Types, for which there exists a conversion.\n+class Convertable a b where"
+  },
+  {
+    "id" : "b16a9eb9-d748-40fa-b7a5-d4646e1c2ec1",
+    "prId" : 2605,
+    "comments" : [
+      {
+        "id" : "1b8e28ee-e89d-4f80-a209-96a862cf3a5c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can we add a default implementation as in\r\nhttps://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#default-method-signatures\r\nfor this? This would have the advantage, that we can just dump a\r\n```haskell\r\ninstance Convertible Old.X New.X\r\n```\r\ninto the auto generated code and it passes if the conversion via generic works and fails with a \"method missing\" error otherwise.\r\nIf that works, we can remove the `conv` function. If not, we should probably rename it to `genConvert`.",
+        "createdAt" : "2019-08-20T13:05:19Z",
+        "updatedAt" : "2019-08-26T11:49:47Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7ded2658-d4a6-4390-9b05-a9632b920b72",
+        "parentId" : "1b8e28ee-e89d-4f80-a209-96a862cf3a5c",
+        "author" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "body" : "that would be cool, I'll give it a try",
+        "createdAt" : "2019-08-20T13:20:25Z",
+        "updatedAt" : "2019-08-26T11:49:47Z",
+        "lastEditedBy" : {
+          "login" : "robin-da",
+          "name" : "Robin Krom",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/14074936?u=1b47fdbdfd82ea534219fc1b94d646873c56a7d7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6f9ffdf4547903e867fbc570ace6269e1b9295b7",
+    "line" : 61,
+    "diffHunk" : "@@ -10,41 +10,88 @@ daml 1.2\n module DA.Upgrade\n   ( conv\n   , iso\n+  , Convertable(..)\n+  , GenConvertable\n+  , Upgrade(..)\n+  , Rollback(..)\n   )\n   where\n \n import DA.Generics\n-\n--- | Convert data types that are isomorphic and have the same meta-data up to package id.\n-conv : (Generic a repA, Generic b repB, Conv repA repB) => a -> b\n+import DA.Next.Set\n+\n+----------------------------------------------------------------------------------------------------\n+-- Upgrade templates\n+----------------------------------------------------------------------------------------------------\n+\n+template (Template i, Template o, Convertable i o) => Upgrade i o\n+    with\n+        op : Party\n+    where\n+        signatory op\n+        nonconsuming choice DoUpgrade: ContractId o\n+            with\n+                inC : ContractId i\n+                sigs : [Party]\n+            controller sigs\n+                do\n+                    d <- fetch inC\n+                    assert $ fromList sigs == fromList (signatory d)\n+                    create $ convert d\n+\n+template (Template i, Template o, Convertable o i) => Rollback i o\n+    with\n+        op : Party\n+    where\n+        signatory op\n+        nonconsuming choice DoRollback: ContractId i\n+            with\n+                inC : ContractId o\n+                sigs : [Party]\n+            controller sigs\n+                do\n+                    d <- fetch inC\n+                    assert $ fromList sigs == fromList (signatory d)\n+                    create $ convert d\n+\n+----------------------------------------------------------------------------------------------------\n+-- Data type conversion\n+----------------------------------------------------------------------------------------------------\n+\n+-- | Types, for which there exists a conversion.\n+class Convertable a b where\n+  convert : a -> b"
+  },
+  {
+    "id" : "abb55508-7b72-4612-a2b7-99ca8696667a",
+    "prId" : 2605,
+    "comments" : [
+      {
+        "id" : "9bbf79c4-2f61-437e-81d1-c48a6590374e",
+        "parentId" : null,
+        "author" : null,
+        "body" : "This workaround can be removed now that #2667 has been merged.",
+        "createdAt" : "2019-08-27T17:53:31Z",
+        "updatedAt" : "2019-08-27T17:53:31Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6f9ffdf4547903e867fbc570ace6269e1b9295b7",
+    "line" : 62,
+    "diffHunk" : "@@ -60,6 +60,7 @@ template (Template i, Template o, Convertible o i) => Rollback i o\n -- | Types, for which there exists a conversion.\n class Convertible a b where\n   convert : a -> b\n+  -- | HIDE"
+  }
+]

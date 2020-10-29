@@ -1,0 +1,202 @@
+[
+  {
+    "id" : "797a5d01-e63e-4544-bb64-dcc63f69239d",
+    "prId" : 3121,
+    "comments" : [
+      {
+        "id" : "a16a6349-7c1a-4128-ad47-277e9c30d34f",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Interesting macro interaction: if you set `compileTimeOnly` on these, you get the associated error below on multiTableState*coders' `derive*coder` calls, but if you set `private` on these and `-Ywarn-unused`, you get an unused warning. I hypothesize this is because the private implicit, while perfectly visible to a normal inductive implicit resolution, is invisible to [`resolveInstance` as used in the derive*coder calls](https://github.com/circe/circe/blob/v0.10.0/modules/generic/shared/src/main/scala/io/circe/generic/util/macros/DerivationMacros.scala#L271), so then a default implicit takes precedence, illustrating once again the dangers of incoherent typeclass instances.\r\n\r\nBy contrast, `idEncoder`, `idDecoder`, &c fail the `compileTimeOnly` test, so they are removed in this PR.",
+        "createdAt" : "2019-10-08T16:24:28Z",
+        "updatedAt" : "2019-10-10T11:43:34Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "52a470129873a3be85c9b40a992b70fabb5cfb74",
+    "line" : 117,
+    "diffHunk" : "@@ -3,92 +3,59 @@\n \n package com.digitalasset.extractor.json\n \n-import com.digitalasset.daml.lf.data.{\n-  FrontStack,\n-  ImmArray,\n-  Ref,\n-  SortedLookupList,\n-  Time,\n-  Numeric => LfNumeric\n-}\n+import com.digitalasset.daml.lf.data.SortedLookupList\n import com.digitalasset.daml.lf.value.{Value => V}\n+import com.digitalasset.daml.lf.value.json.ApiCodecCompressed\n import com.digitalasset.extractor.ledger.types.{Identifier, LedgerValue}\n import com.digitalasset.extractor.ledger.types.LedgerValue._\n import com.digitalasset.extractor.writers.postgresql.DataFormatState.MultiTableState\n import io.circe._\n import io.circe.generic.auto._\n import io.circe.generic.semiauto._\n import io.circe.syntax._\n-import scalaz.@@\n \n object JsonConverters {\n-  def toJsonString[A: Encoder](a: A): String = {\n-    a.asJson.noSpaces\n+  private[this] object LfValueSprayEnc\n+      extends ApiCodecCompressed[String](\n+        encodeDecimalAsString = true,\n+        encodeInt64AsString = false\n+      ) {\n+    import spray.json._, ApiCodecCompressed.JsonImplicits.StringJsonFormat\n+    override protected[this] def apiContractIdToJsValue(v: String): JsValue = JsString(v)\n+    override protected[this] def jsValueToApiContractId(value: JsValue): String =\n+      value.convertTo[String]\n   }\n \n-  implicit val recordEncoder: Encoder[OfCid[V.ValueRecord]] = record =>\n-    if (record.fields.toSeq.forall(_._1.isDefined))\n-      JsonObject(\n-        record.fields.toSeq\n-          .collect {\n-            case (Some(label), value) =>\n-              label -> value.asJson\n-          }: _*\n-      ).asJson\n-    else record.fields.toSeq.map(_.asJson).asJson\n-\n-  private val emptyRecord = V.ValueRecord(None, ImmArray.empty).asJson\n+  private[this] def sprayToCirce(s: spray.json.JsValue): Json = {\n+    import spray.{json => sj}\n+    s match {\n+      case sj.JsString(v) => Json fromString v\n+      case sj.JsNumber(v) => Json fromBigDecimal v\n+      case sj.JsBoolean(v) => Json fromBoolean v\n+      case sj.JsObject(v) => Json fromFields (v transform ((_, e) => sprayToCirce(e)))\n+      case sj.JsArray(v) => Json fromValues (v map sprayToCirce)\n+      case sj.JsNull => Json.Null\n+    }\n+  }\n \n-  // TODO it might be much more performant if exploded into separate vals\n-  implicit def valueEncoder[T <: LedgerValue]: Encoder[T] = {\n-    case r @ V.ValueRecord(_, _) => r.asJson\n-    case v @ V.ValueVariant(_, _, _) => v.asJson\n-    case V.ValueEnum(_, constructor) => constructor.asJson\n-    case V.ValueList(value) => value.asJson\n-    case V.ValueOptional(value) => value.asJson\n-    case V.ValueMap(value) => value.asJson\n-    case V.ValueBool(value) => value.asJson\n-    case V.ValueContractId(value) => value.asJson\n-    case V.ValueInt64(value) => value.asJson\n-    case V.ValueNumeric(value) => LfNumeric.toUnscaledString(value).asJson\n-    case V.ValueText(value) => value.asJson\n-    case V.ValueTimestamp(value) => value.asJson\n-    case V.ValueParty(value) => value.asJson\n-    case V.ValueDate(value) => value.asJson\n-    case V.ValueUnit => emptyRecord\n+  def toJsonString[A: Encoder](a: A): String = {\n+    a.asJson.noSpaces\n   }\n \n-  implicit def frontStackEncoder[A: Encoder]: Encoder[FrontStack[A]] =\n-    _.toImmArray.map(_.asJson).toSeq.asJson\n+  implicit val recordEncoder: Encoder[OfCid[V.ValueRecord]] = valueEncoder\n \n-  implicit val variantEncoder: Encoder[OfCid[V.ValueVariant]] = {\n-    case V.ValueVariant(tycon @ _, ctor, value) =>\n-      JsonObject(\n-        ctor -> value.asJson\n-      ).asJson\n-  }\n+  implicit def valueEncoder[T <: LedgerValue]: Encoder[T] =\n+    t => sprayToCirce(LfValueSprayEnc.apiValueToJsValue(t))\n \n-  implicit val scalaOptionEncoder: Encoder[Option[LedgerValue]] = _ match {\n-    case None =>\n-      JsonObject(\"None\" -> emptyRecord).asJson\n-    case Some(value) =>\n-      JsonObject(\"Some\" -> value.asJson).asJson\n-  }\n+  implicit val variantEncoder: Encoder[OfCid[V.ValueVariant]] = valueEncoder\n \n-  implicit val mapEncoder: Encoder[SortedLookupList[LedgerValue]] = m =>\n-    JsonObject(\n-      \"Map\" ->\n-        JsonObject\n-          .fromIterable(m.toImmArray.map { case (k, v) => k -> v.asJson }.toSeq)\n-          .asJson).asJson\n+  implicit val mapEncoder: Encoder[SortedLookupList[LedgerValue]] =\n+    valueEncoder.contramap(V.ValueMap(_))\n \n   implicit val idKeyEncoder: KeyEncoder[Identifier] = id => s\"${id.packageId}@${id.name}\"\n   implicit val idKeyDecoder: KeyDecoder[Identifier] = StringEncodedIdentifier.unapply\n \n-  implicit val idEncoder: Encoder[Identifier] = deriveEncoder[Identifier]\n-  implicit val idDecoder: Decoder[Identifier] = deriveDecoder[Identifier]"
+  },
+  {
+    "id" : "3e36f9aa-c4cb-464d-88de-e5bc617afeb9",
+    "prId" : 3121,
+    "comments" : [
+      {
+        "id" : "2fc9679c-4f6b-43b8-b44a-36867f9b1d69",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "shouldn't both be set to `true` by default? or is it set this way for backward compatibility? Do we really care about backward compatibility here?",
+        "createdAt" : "2019-10-09T17:33:52Z",
+        "updatedAt" : "2019-10-10T11:43:34Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "b1c8e009-2ae0-4e3a-9892-9b10b2ef0e29",
+        "parentId" : "2fc9679c-4f6b-43b8-b44a-36867f9b1d69",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "> shouldn't both be set to `true` by default?\r\n\r\nNo; the reasons true is good in other contexts are bad reasons here; in fact it would be better to make them both false here.\r\n\r\n> is it set this way for backward compatibility?\r\n\r\nYes. \r\n\r\n> Do we really care about backward compatibility here?\r\n\r\nYes.\r\n\r\nI don't know what queries have been written against extractor, so I'm minimizing the change while still accomplishing our goal of encoding unification.",
+        "createdAt" : "2019-10-09T22:05:39Z",
+        "updatedAt" : "2019-10-10T11:43:34Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "52a470129873a3be85c9b40a992b70fabb5cfb74",
+    "line" : 30,
+    "diffHunk" : "@@ -3,92 +3,59 @@\n \n package com.digitalasset.extractor.json\n \n-import com.digitalasset.daml.lf.data.{\n-  FrontStack,\n-  ImmArray,\n-  Ref,\n-  SortedLookupList,\n-  Time,\n-  Numeric => LfNumeric\n-}\n+import com.digitalasset.daml.lf.data.SortedLookupList\n import com.digitalasset.daml.lf.value.{Value => V}\n+import com.digitalasset.daml.lf.value.json.ApiCodecCompressed\n import com.digitalasset.extractor.ledger.types.{Identifier, LedgerValue}\n import com.digitalasset.extractor.ledger.types.LedgerValue._\n import com.digitalasset.extractor.writers.postgresql.DataFormatState.MultiTableState\n import io.circe._\n import io.circe.generic.auto._\n import io.circe.generic.semiauto._\n import io.circe.syntax._\n-import scalaz.@@\n \n object JsonConverters {\n-  def toJsonString[A: Encoder](a: A): String = {\n-    a.asJson.noSpaces\n+  private[this] object LfValueSprayEnc\n+      extends ApiCodecCompressed[String](\n+        encodeDecimalAsString = true,\n+        encodeInt64AsString = false"
+  },
+  {
+    "id" : "96fe9372-ebbc-4bd1-8b48-bb12c23f5bd3",
+    "prId" : 1117,
+    "comments" : [
+      {
+        "id" : "95fbadc9-0364-4e6e-80e4-482488f5d83f",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "cc @bitonic @remyhaemmerle-da @leo-da for JSON-pinions",
+        "createdAt" : "2019-05-14T22:38:03Z",
+        "updatedAt" : "2019-05-15T22:56:55Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "15a652a7-cf0e-47bf-8bc5-ae5503cd3a5a",
+        "parentId" : "95fbadc9-0364-4e6e-80e4-482488f5d83f",
+        "author" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "body" : "Yes, i think we should change this to use string representations, as we did with the old JSON-through-LfTypeEncoding. Feel free to change this in the next PR though.",
+        "createdAt" : "2019-05-15T10:03:19Z",
+        "updatedAt" : "2019-05-15T22:56:55Z",
+        "lastEditedBy" : {
+          "login" : "bitonic",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/556090?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a933c9948d4fd9990fc99ba78d4a2703561922c0",
+    "line" : 132,
+    "diffHunk" : "@@ -89,10 +96,22 @@ object JsonConverters {\n     }\n   }\n \n-  implicit def taggedEncoder[A: Encoder, T]: Encoder[scalaz.@@[A, T]] =\n-    Encoder[A].contramap(scalaz.Tag.unwrap)\n-  implicit def taggedDecoder[A: Decoder, T]: Decoder[scalaz.@@[A, T]] =\n-    Decoder[A].map(scalaz.Tag.apply)\n+  implicit def taggedEncoder[A: Encoder, T]: Encoder[A @@ T] =\n+    scalaz.Tag.subst(Encoder[A])\n+  implicit def taggedDecoder[A: Decoder, T]: Decoder[A @@ T] =\n+    scalaz.Tag.subst(Decoder[A])\n+\n+  implicit val nameEncoder: Encoder[Ref.Name] =\n+    Encoder[String].contramap(identity)\n+  implicit val partyEncoder: Encoder[Ref.Party] =\n+    Encoder[String].contramap(identity)\n+\n+  // TODO SC this matches the prior behavior of JSON-ing the dates and timestamps\n+  // as days-since and micros-since epoch, but maybe we'd like something else?"
+  },
+  {
+    "id" : "e07a00a5-0a9c-4194-85a4-4ff5bbaafafc",
+    "prId" : 1117,
+    "comments" : [
+      {
+        "id" : "cb73a108-0193-4821-b14b-8b433623b71d",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "we convert `record.fields` to sequence twice for no reason, no matter which if/else branch we go... could reuse the value returned by the 1st `toSeq` call.\r\n\r\nI hope we have a test case for a record with one label present `Some(x)`, and one absent `None`. Not sure if `record.fields.toSeq.map(_.asJson).asJson` will do the right thing.",
+        "createdAt" : "2019-05-15T16:55:24Z",
+        "updatedAt" : "2019-05-15T22:56:55Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7150651c-fbba-4fef-96fb-63b1201b10db",
+        "parentId" : "cb73a108-0193-4821-b14b-8b433623b71d",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "> we convert `record.fields` to sequence twice for no reason, no matter which if/else branch we go... could reuse the value returned by the 1st `toSeq` call.\r\n\r\n`toSeq` is ridiculously cheap, little value in combining.\r\n\r\n> I hope we have a test case for a record with one label present `Some(x)`, and one absent `None`.\r\n\r\nNope! I'll add one.",
+        "createdAt" : "2019-05-15T17:08:32Z",
+        "updatedAt" : "2019-05-15T22:56:55Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a933c9948d4fd9990fc99ba78d4a2703561922c0",
+    "line" : 37,
+    "diffHunk" : "@@ -3,58 +3,68 @@\n \n package com.digitalasset.extractor.json\n \n-import com.digitalasset.daml.lf.data.SortedLookupList\n+import com.digitalasset.daml.lf.data.{\n+  Decimal => LfDecimal,\n+  FrontStack,\n+  ImmArray,\n+  Ref,\n+  SortedLookupList,\n+  Time\n+}\n+import com.digitalasset.daml.lf.value.{Value => V}\n import com.digitalasset.extractor.ledger.types.{Identifier, LedgerValue}\n import com.digitalasset.extractor.ledger.types.LedgerValue._\n import com.digitalasset.extractor.writers.postgresql.DataFormatState.MultiTableState\n import io.circe._\n import io.circe.generic.auto._\n import io.circe.generic.semiauto._\n import io.circe.syntax._\n+import scalaz.@@\n \n object JsonConverters {\n   def toJsonString[A: Encoder](a: A): String = {\n     a.asJson.noSpaces\n   }\n \n-  implicit val recordEncoder: Encoder[Record] = record => {\n-    record.fields\n-      .foldLeft(JsonObject.empty) {\n-        case (acc, field) =>\n-          acc.+:(field.label -> field.value.asJson)\n-      }\n-      .asJson\n-  }\n+  implicit val recordEncoder: Encoder[OfCid[V.ValueRecord]] = record =>\n+    if (record.fields.toSeq.forall(_._1.isDefined))"
+  },
+  {
+    "id" : "45ec86db-deb0-485c-b9e2-7007f1e74f29",
+    "prId" : 204,
+    "comments" : [
+      {
+        "id" : "cbb3d917-519a-4eb8-bd5c-0f1e99bd927c",
+        "parentId" : null,
+        "author" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "body" : "as discussed, please make it a \"proper\" JSON object, and enforce the DAML-LF map values to have string keys in protobuf",
+        "createdAt" : "2019-04-08T16:19:01Z",
+        "updatedAt" : "2019-04-10T15:57:15Z",
+        "lastEditedBy" : {
+          "login" : "francesco-da",
+          "name" : "Francesco Mazzoli",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25149700?u=1141981d6c61003d54f8e8cd8a3cbd67cbbc1e77&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5dfaaa695898670824b20acf017518eda840e671",
+    "line" : null,
+    "diffHunk" : "@@ -63,6 +66,15 @@ object JsonConverters {\n       JsonObject(\"Some\" -> value.asJson).asJson\n   }\n \n+  implicit val mapEncoder: Encoder[HashMap[String, LedgerValue]] = m => {"
+  }
+]

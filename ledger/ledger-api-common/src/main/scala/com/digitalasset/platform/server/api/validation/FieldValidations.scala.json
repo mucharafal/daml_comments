@@ -1,0 +1,61 @@
+[
+  {
+    "id" : "ce848a03-45a4-4ad1-a5c1-c2557d2d8b1f",
+    "prId" : 5669,
+    "comments" : [
+      {
+        "id" : "f1610844-d14d-4d83-b107-a377b1fb7099",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "You may want to rewrite this to use `.map` and `.getOrElse`.",
+        "createdAt" : "2020-04-29T15:38:37Z",
+        "updatedAt" : "2020-05-06T07:31:30Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d727159f8b35003f5e8fc75af2a53edb62b2b8fc",
+    "line" : 23,
+    "diffHunk" : "@@ -92,21 +92,24 @@ trait FieldValidations {\n \n   def validateDeduplicationTime(\n       durationO: Option[com.google.protobuf.duration.Duration],\n-      maxDeduplicationTime: Duration,\n-      fieldName: String): Either[StatusRuntimeException, Duration] = durationO match {\n-    case None =>\n-      Right(maxDeduplicationTime)\n-    case Some(duration) =>\n-      val result = Duration.ofSeconds(duration.seconds, duration.nanos.toLong)\n-      if (result.isNegative)\n-        Left(invalidField(fieldName, \"Duration must be positive\"))\n-      else if (result.compareTo(maxDeduplicationTime) > 0)\n-        Left(invalidField(\n-          fieldName,\n-          s\"The given deduplication time of $result exceeds the maximum deduplication time of $maxDeduplicationTime\"))\n-      else\n-        Right(result)\n-  }\n+      maxDeduplicationTimeO: Option[Duration],\n+      fieldName: String): Either[StatusRuntimeException, Duration] =\n+    maxDeduplicationTimeO.fold[Either[StatusRuntimeException, Duration]](\n+      Left(missingLedgerConfig()))(maxDeduplicationTime =>\n+      durationO match {"
+  },
+  {
+    "id" : "ec3f0796-9be8-49c4-910a-5cd6946f607a",
+    "prId" : 4722,
+    "comments" : [
+      {
+        "id" : "007dcbfa-cda3-4af0-909f-22f04828fb94",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Nice catch; wouldn't have thought of this.",
+        "createdAt" : "2020-02-27T13:10:12Z",
+        "updatedAt" : "2020-03-09T16:23:44Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ecd5f47ac6267722864002b678eeaa67142ff5cd",
+    "line" : null,
+    "diffHunk" : "@@ -83,17 +82,22 @@ trait FieldValidations {\n   def requirePresence[T](option: Option[T], fieldName: String): Either[StatusRuntimeException, T] =\n     option.fold[Either[StatusRuntimeException, T]](Left(missingField(fieldName)))(Right(_))\n \n-  def requirePositiveDuration(\n+  def validateTtl(\n       durationO: Option[com.google.protobuf.duration.Duration],\n-      fieldName: String): Either[StatusRuntimeException, Option[FiniteDuration]] =\n-    durationO.fold[Either[StatusRuntimeException, Option[FiniteDuration]]](Right(None))(\n-      duration =>\n-        if (duration.seconds > 0 | duration.nanos > 0)\n-          Right(\n-            Some(FiniteDuration(duration.seconds, TimeUnit.SECONDS)\n-              .plus(FiniteDuration(duration.nanos.toLong, TimeUnit.NANOSECONDS))))\n-        else\n-          Left(invalidField(fieldName, \"Duration must be positive\")))\n+      maxTtl: Duration,\n+      fieldName: String): Either[StatusRuntimeException, Duration] = durationO match {\n+    case None =>\n+      Right(maxTtl)\n+    case Some(duration) =>\n+      val result = Duration.ofSeconds(duration.seconds, duration.nanos.toLong)\n+      if (result.isNegative)\n+        Left(invalidField(fieldName, \"Duration must be positive\"))"
+  }
+]

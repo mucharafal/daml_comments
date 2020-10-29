@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "3b5de0cc-389c-4fbc-aa31-fe0607318ae7",
+    "prId" : 2257,
+    "comments" : [
+      {
+        "id" : "19f3cc39-06de-4563-a855-2bb52875bf56",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Should we swap the order of the arguments to make it more Haskell idiomatic?",
+        "createdAt" : "2019-07-23T09:44:46Z",
+        "updatedAt" : "2019-07-23T12:16:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fa8514cc-6566-41de-9c7d-57d5abdfcd4e",
+        "parentId" : "19f3cc39-06de-4563-a855-2bb52875bf56",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I actually had the swapped order first but it turns out the only usesite is a `foldl'` so this order is more convenient.",
+        "createdAt" : "2019-07-23T12:15:23Z",
+        "updatedAt" : "2019-07-23T12:16:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0a507defa99383adda7779ab3da3c31a1db28779",
+    "line" : 35,
+    "diffHunk" : "@@ -0,0 +1,85 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+{-# LANGUAGE OverloadedStrings #-}\n+module Development.IDE.Core.PositionMapping\n+  ( PositionMapping(..)\n+  , toCurrentRange\n+  , fromCurrentRange\n+  , applyChange\n+  , idMapping\n+  -- toCurrent and fromCurrent are mainly exposed for testing\n+  , toCurrent\n+  , fromCurrent\n+  ) where\n+\n+import Control.Monad\n+import qualified Data.Text as T\n+import Language.Haskell.LSP.Types\n+\n+data PositionMapping = PositionMapping\n+  { toCurrentPosition :: !(Position -> Maybe Position)\n+  , fromCurrentPosition :: !(Position -> Maybe Position)\n+  }\n+\n+toCurrentRange :: PositionMapping -> Range -> Maybe Range\n+toCurrentRange mapping (Range a b) =\n+    Range <$> toCurrentPosition mapping a <*> toCurrentPosition mapping b\n+\n+fromCurrentRange :: PositionMapping -> Range -> Maybe Range\n+fromCurrentRange mapping (Range a b) =\n+    Range <$> fromCurrentPosition mapping a <*> fromCurrentPosition mapping b\n+\n+idMapping :: PositionMapping\n+idMapping = PositionMapping Just Just\n+\n+applyChange :: PositionMapping -> TextDocumentContentChangeEvent -> PositionMapping"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "id" : "e978683b-915b-46e3-bfc1-16f2ee4be5c9",
+    "prId" : 254,
+    "comments" : [
+      {
+        "id" : "281d0fb4-4d37-439a-a390-1e08a2fca2b3",
+        "parentId" : null,
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "This looks like something that might be useful in multiple places. Should we move it into its own function?",
+        "createdAt" : "2019-04-05T15:27:18Z",
+        "updatedAt" : "2019-04-05T15:42:02Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "eb5acd84-9337-46bb-80e8-d2bb6d900d82",
+        "parentId" : "281d0fb4-4d37-439a-a390-1e08a2fca2b3",
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "I’ll do so when we use it somewhere else.",
+        "createdAt" : "2019-04-05T15:42:43Z",
+        "updatedAt" : "2019-04-05T15:42:44Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8c2fb897ec8d22849934a51f72bd0e03962d75e3",
+    "line" : 140,
+    "diffHunk" : "@@ -103,6 +132,58 @@ runListTemplates = do\n           \"The following templates are available:\" :\n           map (\\dir -> \"  \" <> takeFileName dir) templates\n \n+\n+newtype SandboxPort = SandboxPort Int\n+newtype NavigatorPort = NavigatorPort Int\n+\n+sandboxPortReader :: ReadM SandboxPort\n+sandboxPortReader = SandboxPort <$> auto\n+\n+withSandbox :: SandboxPort -> [String] -> (ProcessHandle -> IO a) -> IO a\n+withSandbox (SandboxPort port) args a = do\n+    withJar sandboxPath ([\"--port\", show port] ++ args) $ \\ph -> do\n+        putStrLn \"Waiting for sandbox to start: \"\n+        -- TODO We need to figure out what a sane timeout for this step.\n+        waitForConnectionOnPort (putStr \".\" *> threadDelay 500000) port\n+        a ph\n+\n+withNavigator :: SandboxPort -> NavigatorPort -> FilePath -> [String] -> (ProcessHandle-> IO a) -> IO a\n+withNavigator (SandboxPort sandboxPort) (NavigatorPort navigatorPort) config args a = do\n+    withJar navigatorPath ([\"server\", \"-c\", config, \"localhost\", show sandboxPort, \"--port\", show navigatorPort] <> args) $ \\ph -> do\n+        putStrLn \"Waiting for navigator to start: \"\n+        -- TODO We need to figure out a sane timeout for this step.\n+        waitForHttpServer (putStr \".\" *> threadDelay 500000) (\"http://localhost:\" <> show navigatorPort)\n+        a ph\n+\n+runSandbox :: SandboxPort -> [String] -> IO ()\n+runSandbox port args = do\n+    exitCode <- withSandbox port args waitForProcess\n+    exitWith exitCode\n+\n+runStart :: FilePath -> IO ()\n+runStart darPath = do\n+    withSandbox sandboxPort [darPath] $ \\sandboxPh -> do\n+        parties <- getProjectParties\n+        withTempDir $ \\confDir -> do\n+            -- Navigator determines the file format based on the extension so we need a .json file.\n+            let navigatorConfPath = confDir </> \"navigator-config.json\"\n+            writeFileUTF8 navigatorConfPath (T.unpack $ navigatorConfig parties)\n+            withNavigator sandboxPort navigatorPort navigatorConfPath [] $ \\navigatorPh ->\n+                void $ race (waitForProcess navigatorPh) (waitForProcess sandboxPh)\n+    where sandboxPort = SandboxPort 6865\n+          navigatorPort = NavigatorPort 7500\n+\n+getProjectParties :: IO [T.Text]\n+getProjectParties = do\n+    projectPath <- required \"Must be called from within a project\" =<< getProjectPath"
+  },
+  {
+    "id" : "04b1dbeb-fc98-4f3a-bc9a-955481776232",
+    "prId" : 254,
+    "comments" : [
+      {
+        "id" : "1185c2dc-ec94-4a27-900e-8f947e4a1222",
+        "parentId" : null,
+        "author" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "body" : "This is almost unintelligible. Can we please use a `case` expression. :D",
+        "createdAt" : "2019-04-05T15:30:26Z",
+        "updatedAt" : "2019-04-05T15:42:02Z",
+        "lastEditedBy" : {
+          "login" : "martin-drhu-da",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/31696042?u=5fec5d8a968715bab332fcb4be485319b66a7892&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7c9e413a-311f-450c-986e-3aa6e0eb0d68",
+        "parentId" : "1185c2dc-ec94-4a27-900e-8f947e4a1222",
+        "author" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "body" : "Changed",
+        "createdAt" : "2019-04-05T15:42:10Z",
+        "updatedAt" : "2019-04-05T15:42:10Z",
+        "lastEditedBy" : {
+          "login" : "moritzkiefer-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/45630097?u=88b1986f5b2d192d97f54101aaa165147493ebdc&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "8c2fb897ec8d22849934a51f72bd0e03962d75e3",
+    "line" : null,
+    "diffHunk" : "@@ -121,3 +202,39 @@ installExtension src target =\n          -- but medium term it probably makes more sense to add the extension to the marketplace\n          -- and make it backwards compatible\n          const $ pure ())\n+\n+-- | `waitForConnectionOnPort sleep port` keeps trying to establish a TCP connection on the given port.\n+-- Between each connection request it calls `sleep`.\n+waitForConnectionOnPort :: IO () -> Int -> IO ()\n+waitForConnectionOnPort sleep port = do\n+    let hints = defaultHints { addrFlags = [AI_NUMERICHOST, AI_NUMERICSERV], addrSocketType = Stream }\n+    addr : _ <- getAddrInfo (Just hints) (Just \"127.0.0.1\") (Just $ show port)\n+    untilJust $ do\n+        r <- tryIO $ checkConnection addr\n+        either (const $ Nothing <$ sleep) (const $ pure $ Just ()) r"
+  }
+]

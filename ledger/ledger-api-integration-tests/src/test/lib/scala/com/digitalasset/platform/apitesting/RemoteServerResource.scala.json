@@ -1,0 +1,158 @@
+[
+  {
+    "id" : "5723ff2d-a2a5-4c5c-a20d-27eda3e83e8f",
+    "prId" : 1171,
+    "comments" : [
+      {
+        "id" : "c80e1891-87c4-40cb-ad1e-5470ebdd620f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "👍 ",
+        "createdAt" : "2019-05-20T15:27:22Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0375ea95bfb713575e4b4fa54cb2011cbc90f244",
+    "line" : 5,
+    "diffHunk" : "@@ -49,16 +49,21 @@ class RemoteServerResource(host: String, port: Int, tlsConfig: Option[TlsConfigu\n \n   }\n \n-  def createEventLoopGroup(threadPoolName: String): NioEventLoopGroup = {\n+  private def createEventLoopGroup(threadPoolName: String): NioEventLoopGroup = {"
+  },
+  {
+    "id" : "b0b85bac-d23f-4f17-af59-2fccf7a2d800",
+    "prId" : 1171,
+    "comments" : [
+      {
+        "id" : "d16fbce9-f209-4263-8b12-30d4ca5f9adf",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "see this PR coming: https://github.com/digital-asset/daml/pull/1255",
+        "createdAt" : "2019-05-20T15:28:23Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e790d4ff-bf48-45c7-aa69-53e1d206f8c0",
+        "parentId" : "d16fbce9-f209-4263-8b12-30d4ca5f9adf",
+        "author" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "body" : "Dropped this patch in favor of your fix.",
+        "createdAt" : "2019-05-22T08:49:14Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0375ea95bfb713575e4b4fa54cb2011cbc90f244",
+    "line" : null,
+    "diffHunk" : "@@ -49,16 +49,21 @@ class RemoteServerResource(host: String, port: Int, tlsConfig: Option[TlsConfigu\n \n   }\n \n-  def createEventLoopGroup(threadPoolName: String): NioEventLoopGroup = {\n+  private def createEventLoopGroup(threadPoolName: String): NioEventLoopGroup = {\n     val threadFactory = new DefaultThreadFactory(s\"$threadPoolName-grpc-eventloop\", true)\n     val parallelism = Runtime.getRuntime.availableProcessors\n     new NioEventLoopGroup(parallelism, threadFactory)\n   }\n \n   override def close(): Unit = {\n     channel.shutdownNow()\n-    channel.awaitTermination(1L, TimeUnit.SECONDS)\n-    eventLoopGroup.shutdownGracefully().await(1L, TimeUnit.SECONDS)\n+    if (!channel.awaitTermination(10L, TimeUnit.SECONDS)) {\n+      throw new RuntimeException(\n+        \"Unable to shutdown the grpc channel to remote Ledger API endpoint on time\")\n+    }\n+    if (!eventLoopGroup.shutdownGracefully().await(10L, TimeUnit.SECONDS)) {"
+  },
+  {
+    "id" : "adf2c63f-b2d6-440b-b69b-2f0230b2f1fd",
+    "prId" : 1171,
+    "comments" : [
+      {
+        "id" : "412e0365-63cf-4f87-8701-2901b52bec9b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "use `sys.error` instead.",
+        "createdAt" : "2019-05-20T15:35:06Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cda3356c-ea41-4151-92d6-2933990d10b9",
+        "parentId" : "412e0365-63cf-4f87-8701-2901b52bec9b",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "note, that with throwing exceptions you shortcut the program logic and will miss closing further resources, possibly making an even bigger problem to what you already have. I suggest either using `try` / `finally` semantics, or simply just log the problem as an `error`.",
+        "createdAt" : "2019-05-21T07:38:44Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2c325935-d9ae-40b3-af40-aaf9ec426857",
+        "parentId" : "412e0365-63cf-4f87-8701-2901b52bec9b",
+        "author" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "body" : "I'll use `sys.error` to make it fail fast as these are tests.",
+        "createdAt" : "2019-05-22T08:50:15Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gleber-da",
+          "name" : "gleber",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/34243031?u=682c8d513afbef14cd3f71d93040a37500b5b2d0&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0375ea95bfb713575e4b4fa54cb2011cbc90f244",
+    "line" : null,
+    "diffHunk" : "@@ -49,16 +49,21 @@ class RemoteServerResource(host: String, port: Int, tlsConfig: Option[TlsConfigu\n \n   }\n \n-  def createEventLoopGroup(threadPoolName: String): NioEventLoopGroup = {\n+  private def createEventLoopGroup(threadPoolName: String): NioEventLoopGroup = {\n     val threadFactory = new DefaultThreadFactory(s\"$threadPoolName-grpc-eventloop\", true)\n     val parallelism = Runtime.getRuntime.availableProcessors\n     new NioEventLoopGroup(parallelism, threadFactory)\n   }\n \n   override def close(): Unit = {\n     channel.shutdownNow()\n-    channel.awaitTermination(1L, TimeUnit.SECONDS)\n-    eventLoopGroup.shutdownGracefully().await(1L, TimeUnit.SECONDS)\n+    if (!channel.awaitTermination(10L, TimeUnit.SECONDS)) {\n+      throw new RuntimeException("
+  }
+]

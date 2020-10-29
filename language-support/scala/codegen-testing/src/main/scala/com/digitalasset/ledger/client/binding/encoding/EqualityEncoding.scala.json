@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "ede7667a-e603-4f2e-802a-95be9baf925b",
+    "prId" : 3522,
+    "comments" : [
+      {
+        "id" : "c07dd118-3fb1-4cd1-a7f0-04471ccee483",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Not sure what I should do here. \r\nWhat to do with hashCode ?",
+        "createdAt" : "2019-11-19T10:33:15Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c44b7e48-9ca4-46c2-b402-f903f60a180e",
+        "parentId" : "c07dd118-3fb1-4cd1-a7f0-04471ccee483",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Probably fine under the constraints I describe at length in previous comment.",
+        "createdAt" : "2019-11-19T17:26:32Z",
+        "updatedAt" : "2019-12-11T08:37:31Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "16fc9a85aea14851e9ec58117022ef66e1aee8ab",
+    "line" : null,
+    "diffHunk" : "@@ -103,11 +103,18 @@ object EqualityEncoding extends EqualityEncoding {\n       case _ => false\n     }\n \n-    override implicit def valueMap[A: Fn]: Fn[P.Map[A]] = (a1, a2) => {\n+    override implicit def valueMap[A: Fn]: Fn[P.Map[A]] = { (a1, a2) =>\n       val ev = implicitly[Fn[A]]\n       a1.keys == a2.keys && a1.keys.forall(k => ev(a1(k), a2(k)))\n     }\n \n+    override implicit def valueGenMap[K: Fn, V: Fn]: Fn[P.GenMap[K, V]] = { (a1, a2) =>\n+      // FIXME #2256"
+  },
+  {
+    "id" : "3b150175-dff0-4bae-a7cc-230195089aec",
+    "prId" : 1833,
+    "comments" : [
+      {
+        "id" : "2000ee2d-b97b-4eca-b881-cfa26ee0ddbb",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Don't use `==`; see above about `select`.",
+        "createdAt" : "2019-06-24T12:42:43Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1eb5f59e-6fb3-4438-bac8-ff952776f82a",
+        "parentId" : "2000ee2d-b97b-4eca-b881-cfa26ee0ddbb",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-06-25T09:28:28Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0024f1caa606682717407339870b82441a5a448c",
+    "line" : null,
+    "diffHunk" : "@@ -28,6 +30,11 @@ abstract class EqualityEncoding extends LfTypeEncoding {\n \n   override def fields[A](fi: Field[A]): RecordFields[A] = fi\n \n+  def enum[A](enumId: Identifier, cases: EnumCases[A]): Out[A] = cases\n+\n+  override def enumCase[A](caseName: String)(a: A): EnumCases[A] =\n+    (a1: A, a2: A) => a == a1 && a == a2"
+  }
+]

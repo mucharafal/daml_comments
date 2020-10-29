@@ -1,0 +1,98 @@
+[
+  {
+    "id" : "699fa351-52a7-4a0d-9215-2338e0033e6d",
+    "prId" : 4104,
+    "comments" : [
+      {
+        "id" : "c3d072a7-32ad-4a0a-8272-4f198cd7b706",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Does this test reliably fail without this change? It seems that [\"Zip entry timestamps are recorded only to two 2 second precision\"](https://www.mindprod.com/jgloss/zip.html). If not, maybe we could use something like `faketime` to make this test reliably fail if the timestamp is not deterministic?",
+        "createdAt" : "2020-01-20T09:53:33Z",
+        "updatedAt" : "2020-01-20T09:54:50Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "66c493c9-d702-426e-a69f-75d4369b1b6d",
+        "parentId" : "c3d072a7-32ad-4a0a-8272-4f198cd7b706",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It sadly doesn’t fail reliably on a single-run but if you run it a couple of times, it fails reliably. I took a brief look at `libfaketime` last week but it didn’t seem worth the complexity for now.",
+        "createdAt" : "2020-01-20T10:00:05Z",
+        "updatedAt" : "2020-01-20T10:00:05Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3885ef42-df3b-4e3b-90f5-5a588d17bbc9",
+        "parentId" : "c3d072a7-32ad-4a0a-8272-4f198cd7b706",
+        "author" : null,
+        "body" : "You could add a `sleep 10` in between the first and second build to make it fail more reliably.\r\n\r\n(Plus, any code with `sleep` must be the good code.)",
+        "createdAt" : "2020-01-20T10:42:45Z",
+        "updatedAt" : "2020-01-20T10:42:45Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c6e9cc22-035e-4142-8706-3befe62612ad",
+        "parentId" : "c3d072a7-32ad-4a0a-8272-4f198cd7b706",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This is a terrible idea, I love it :heart: ",
+        "createdAt" : "2020-01-20T11:44:48Z",
+        "updatedAt" : "2020-01-20T11:44:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a8f7be3e-0fa8-4d16-a7cf-6755d85ed8b5",
+        "parentId" : "c3d072a7-32ad-4a0a-8272-4f198cd7b706",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "> It sadly doesn’t fail reliably on a single-run but if you run it a couple of times, it fails reliably. I took a brief look at `libfaketime` last week but it didn’t seem worth the complexity for now.\r\n\r\nThat's fair.\r\n\r\n> You could add a sleep 10 in between the first and second build to make it fail more reliably.\r\n\r\nYeah, let's try not to make CI intentionally slower.",
+        "createdAt" : "2020-01-20T11:50:57Z",
+        "updatedAt" : "2020-01-20T11:50:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3cdd961b732a95f15d739dde089c9b113ef25373",
+    "line" : 37,
+    "diffHunk" : "@@ -62,3 +63,32 @@ $protoc --decode_raw < \"$TMP_OUT/out_proj_2\" > \"$TMP_OUT/decoded_out_proj_2\"\n $diff -u \"$TMP_OUT/decoded_out_proj_1\" \"$TMP_OUT/decoded_out_proj_2\"\n $diff -u \"$TMP_OUT/out_proj_1\" \"$TMP_OUT/out_proj_2\"\n \n+# Check that daml build is deterministic.\n+# This includes things like the ZIP timestamps\n+# in a DAR instead of just the package id.\n+\n+cat <<EOF > \"$PROJDIR/daml.yaml\"\n+sdk-version: 0.0.0\n+name: proj\n+version: 0.0.1\n+source: .\n+dependencies: [daml-prim, daml-stdlib]\n+EOF\n+\n+cat <<EOF > \"$PROJDIR/A.daml\"\n+daml 1.2\n+module A where\n+EOF\n+\n+$damlc build --project-root \"$PROJDIR\" -o \"$PROJDIR/out.dar\"\n+FIRST_SHA=$(sha256sum $PROJDIR/out.dar)\n+\n+$damlc build --project-root \"$PROJDIR\" -o \"$PROJDIR/out.dar\"\n+SECOND_SHA=$(sha256sum $PROJDIR/out.dar)"
+  }
+]

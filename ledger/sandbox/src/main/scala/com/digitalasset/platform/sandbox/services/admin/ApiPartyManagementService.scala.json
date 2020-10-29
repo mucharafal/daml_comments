@@ -1,0 +1,526 @@
+[
+  {
+    "id" : "690ddd8c-bd48-4b41-92bd-1f595b5974e5",
+    "prId" : 3744,
+    "comments" : [
+      {
+        "id" : "d19eb501-8964-4942-83c1-2d028318e326",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Is it safe to delete `PollingUtils` now?",
+        "createdAt" : "2019-12-05T10:59:45Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "65bd094d-5e9d-4919-adb3-0b9cee64920a",
+        "parentId" : "d19eb501-8964-4942-83c1-2d028318e326",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "If it's not, I'd be keen on making it more generic and moving it to `//libs-scala/timer-utils` (unless `timer-utils` already provides the generic abstraction, in which case we can simply use that). Not a matter for this PR though, if it's more than simply deleting `PollingUtils`.",
+        "createdAt" : "2019-12-05T11:00:59Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "84e2585c-549d-4288-ac10-45a679d9770f",
+        "parentId" : "d19eb501-8964-4942-83c1-2d028318e326",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Still being used in the synchronous package upload. But can probably be removed after doing async package upload.",
+        "createdAt" : "2019-12-05T12:09:04Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d8204b7c377ce994002fb11ce1227c245747b3d0",
+    "line" : null,
+    "diffHunk" : "@@ -57,55 +65,53 @@ class ApiPartyManagementService private (\n     *\n     * Checks invariants and forwards the original result after the party is found to be persisted.\n     *\n-    * @param result The result of the party allocation\n     * @return The result of the party allocation received originally, wrapped in a [[Future]]\n     */\n-  private def pollUntilPersisted(result: AllocatePartyResponse): Future[AllocatePartyResponse] = {\n-    require(result.partyDetails.isDefined, \"Party allocation response must have the party details\")\n-    val newParty = result.partyDetails.get.party\n-    val description = s\"party $newParty\"\n-\n-    PollingUtils\n-      .pollUntilPersisted(partyManagementService.listParties _)(\n-        _.exists(_.party == newParty),\n-        description,\n-        50.milliseconds,\n-        500.milliseconds,\n-        d => d * 2,\n-        scheduler,\n-        loggerFactory)\n-      .map { numberOfAttempts =>\n-        logger.debug(s\"Party $newParty available, read after $numberOfAttempts attempt(s)\")\n-        result\n-      }(DE)\n+  private def pollUntilPersisted(submissionId: SubmissionId): Future[PartyEntry] = {"
+  },
+  {
+    "id" : "37576fba-cdec-485c-9296-0a3e739bc8d4",
+    "prId" : 3744,
+    "comments" : [
+      {
+        "id" : "de734b9a-a5e7-4828-b410-18eafaba76ae",
+        "parentId" : null,
+        "author" : {
+          "login" : "dasormeter",
+          "name" : "Brian Healey",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25179017?u=80e3160e2447461bd5847fe928a3e6fa9f6793fc&v=4"
+        },
+        "body" : "@gerolf-da this is gonna poll through the entire set of parties looking for the matching submissionID, potentially 10s of thousands of entries in real world / ASX case.  we had previously changed the query to just get back by matching submissionId, i guess you went with this approach because it is closer to Source stream done for ledger entries?",
+        "createdAt" : "2019-12-05T15:07:30Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "dasormeter",
+          "name" : "Brian Healey",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/25179017?u=80e3160e2447461bd5847fe928a3e6fa9f6793fc&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bc59bba5-5e21-405a-8104-52a345f8ee88",
+        "parentId" : "de734b9a-a5e7-4828-b410-18eafaba76ae",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "one option is to poll starting from the offset at submission time. I'm trying that out for the config admin service.",
+        "createdAt" : "2019-12-05T15:48:40Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0cbe45d1-cb4d-4fb6-bd49-2f8dd52c100a",
+        "parentId" : "de734b9a-a5e7-4828-b410-18eafaba76ae",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Good point. I pushed a change that only streams the party entries from the ledger end before the party allocation request is made.",
+        "createdAt" : "2019-12-05T15:57:05Z",
+        "updatedAt" : "2019-12-05T15:57:05Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d8204b7c377ce994002fb11ce1227c245747b3d0",
+    "line" : null,
+    "diffHunk" : "@@ -57,55 +65,53 @@ class ApiPartyManagementService private (\n     *\n     * Checks invariants and forwards the original result after the party is found to be persisted.\n     *\n-    * @param result The result of the party allocation\n     * @return The result of the party allocation received originally, wrapped in a [[Future]]\n     */\n-  private def pollUntilPersisted(result: AllocatePartyResponse): Future[AllocatePartyResponse] = {\n-    require(result.partyDetails.isDefined, \"Party allocation response must have the party details\")\n-    val newParty = result.partyDetails.get.party\n-    val description = s\"party $newParty\"\n-\n-    PollingUtils\n-      .pollUntilPersisted(partyManagementService.listParties _)(\n-        _.exists(_.party == newParty),\n-        description,\n-        50.milliseconds,\n-        500.milliseconds,\n-        d => d * 2,\n-        scheduler,\n-        loggerFactory)\n-      .map { numberOfAttempts =>\n-        logger.debug(s\"Party $newParty available, read after $numberOfAttempts attempt(s)\")\n-        result\n-      }(DE)\n+  private def pollUntilPersisted(submissionId: SubmissionId): Future[PartyEntry] = {\n+    partyManagementService\n+      .partyEntries()"
+  },
+  {
+    "id" : "81c79122-dfd5-4f93-8581-425ad0d90473",
+    "prId" : 3524,
+    "comments" : [
+      {
+        "id" : "cebed631-598f-4126-b6c3-9ca67e60176d",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n        case PartyAllocationResult.Overloaded =>\r\n```\r\nLooks unused as well.",
+        "createdAt" : "2019-11-20T09:55:56Z",
+        "updatedAt" : "2019-11-20T12:51:07Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "02760b2d9223fbfc9c776e4b3edac71864bcd5f9",
+    "line" : 4,
+    "diffHunk" : "@@ -90,8 +90,12 @@ class ApiPartyManagementService private (\n       .flatMap {\n         case PartyAllocationResult.Ok(details) =>\n           Future.successful(AllocatePartyResponse(Some(mapPartyDetails(details))))\n+        case r @ PartyAllocationResult.Overloaded =>"
+  },
+  {
+    "id" : "64c02cae-4d22-4caf-80e9-e3534645dfce",
+    "prId" : 2194,
+    "comments" : [
+      {
+        "id" : "070d163c-e51c-4727-ad64-18d6acb45ff1",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n      .pollUntilPersisted(partyManagementService.listParties _)(\r\n```\r\nI guess it's a matter of taste, use your discretion.",
+        "createdAt" : "2019-07-17T13:23:17Z",
+        "updatedAt" : "2019-07-18T04:20:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "848717af9c07474e7fae355da54c904ec52b1295",
+    "line" : null,
+    "diffHunk" : "@@ -106,11 +64,19 @@ class ApiPartyManagementService private (\n       maxWait: FiniteDuration,\n       iteration: FiniteDuration => FiniteDuration): Future[AllocatePartyResponse] = {\n     require(result.partyDetails.isDefined, \"Party allocation response must have the party details\")\n-    pollUntilPersisted(result.partyDetails.get.party, minWait, maxWait, iteration).map {\n-      numberOfAttempts =>\n-        logger.debug(s\"Party available, read after $numberOfAttempts attempt(s)\")\n+    val newParty = result.partyDetails.get.party\n+    PollingUtils\n+      .pollUntilPersisted(() => partyManagementService.listParties())("
+  },
+  {
+    "id" : "954c83cf-0b24-4471-825e-af86f5d95fa2",
+    "prId" : 2194,
+    "comments" : [
+      {
+        "id" : "0c79fd8c-76ae-4238-91f5-ce3b53084d24",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Would it make sense to move this to the helper function itself somehow? Would that be possible?",
+        "createdAt" : "2019-07-17T13:29:27Z",
+        "updatedAt" : "2019-07-18T04:20:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "848717af9c07474e7fae355da54c904ec52b1295",
+    "line" : 92,
+    "diffHunk" : "@@ -106,11 +64,19 @@ class ApiPartyManagementService private (\n       maxWait: FiniteDuration,\n       iteration: FiniteDuration => FiniteDuration): Future[AllocatePartyResponse] = {\n     require(result.partyDetails.isDefined, \"Party allocation response must have the party details\")\n-    pollUntilPersisted(result.partyDetails.get.party, minWait, maxWait, iteration).map {\n-      numberOfAttempts =>\n-        logger.debug(s\"Party available, read after $numberOfAttempts attempt(s)\")\n+    val newParty = result.partyDetails.get.party\n+    PollingUtils\n+      .pollUntilPersisted(() => partyManagementService.listParties())(\n+        _.exists(_.party == newParty),\n+        s\"party $newParty\",\n+        minWait,\n+        maxWait,\n+        iteration,\n+        scheduler)\n+      .map { numberOfAttempts =>\n+        logger.debug(s\"Party $newParty available, read after $numberOfAttempts attempt(s)\")"
+  },
+  {
+    "id" : "4048c5b5-4e5e-4845-afa5-7b6bb5c3298d",
+    "prId" : 2040,
+    "comments" : [
+      {
+        "id" : "c47c7a02-8b62-49c2-b2ca-36902121309c",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "That's not quite true. Using the direct execution context means the action runs on the same thread that the future anyway is already running on. Using `Await.result` here means that we are blocking in the grpc thread until the work on the database thread is complete.",
+        "createdAt" : "2019-07-09T07:43:28Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "779132ea-f79a-4115-8a8e-321d039aa2ff",
+        "parentId" : "c47c7a02-8b62-49c2-b2ca-36902121309c",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I got it wrong, thank you for the explanation.",
+        "createdAt" : "2019-07-09T09:09:43Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0f1390e92212a18c776376045f349f93a4b1e4a7",
+    "line" : null,
+    "diffHunk" : "@@ -47,24 +48,57 @@ class ApiPartyManagementService private (\n       .listParties()\n       .map(ps => ListKnownPartiesResponse(ps.map(mapPartyDetails)))(DE)\n \n+  /**\n+    * Continuously polls tha party management service to check if a party has been persisted.\n+    *\n+    * Blocking.\n+    *\n+    * @param party The party whose persistence we're waiting for\n+    * @return The number of attempts before the party was found\n+    */\n+  private def pollUntilPersisted(party: String): Int =\n+    Iterator\n+      .from(1)\n+      .find { attempt =>\n+        logger.debug(s\"Waiting for party '$party' to be persisted (attempt #$attempt)...\")\n+        Await.result(\n+          partyManagementService\n+            .listParties()\n+            .map {\n+              case persisted if persisted.exists(_.party == party) => true\n+              case _ => false\n+            }(DE),\n+          Duration.Inf)\n+      }\n+      .get\n+\n   override def allocateParty(request: AllocatePartyRequest): Future[AllocatePartyResponse] = {\n     val party = if (request.partyIdHint.isEmpty) None else Some(request.partyIdHint)\n     val displayName = if (request.displayName.isEmpty) None else Some(request.displayName)\n \n-    FutureConverters\n-      .toScala(\n-        writeService\n-          .allocateParty(party, displayName))\n-      .flatMap {\n-        case PartyAllocationResult.Ok(details) =>\n-          Future.successful(AllocatePartyResponse(Some(mapPartyDetails(details))))\n-        case r @ PartyAllocationResult.AlreadyExists =>\n-          Future.failed(ErrorFactories.invalidArgument(r.description))\n-        case r @ PartyAllocationResult.InvalidName(_) =>\n-          Future.failed(ErrorFactories.invalidArgument(r.description))\n-        case r @ PartyAllocationResult.ParticipantNotAuthorized =>\n-          Future.failed(ErrorFactories.permissionDenied(r.description))\n-      }(DE)\n+    val response =\n+      FutureConverters\n+        .toScala(\n+          writeService\n+            .allocateParty(party, displayName))\n+        .flatMap {\n+          case PartyAllocationResult.Ok(details) =>\n+            Future.successful(AllocatePartyResponse(Some(mapPartyDetails(details))))\n+          case r @ PartyAllocationResult.AlreadyExists =>\n+            Future.failed(ErrorFactories.invalidArgument(r.description))\n+          case r @ PartyAllocationResult.InvalidName(_) =>\n+            Future.failed(ErrorFactories.invalidArgument(r.description))\n+          case r @ PartyAllocationResult.ParticipantNotAuthorized =>\n+            Future.failed(ErrorFactories.permissionDenied(r.description))\n+        }(DE)\n+\n+    // Since we are using the direct execution context above, the future is actually already available here"
+  },
+  {
+    "id" : "48438699-8c5d-4247-b088-e175f9cced04",
+    "prId" : 2040,
+    "comments" : [
+      {
+        "id" : "383e87be-b632-412a-8fad-6a5b201df49e",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "`pollUntilPersisted` shoud probably just return the `Future` (and not use `Await.result`) if we anyway are going to put it into a `Future` again.",
+        "createdAt" : "2019-07-09T07:49:49Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b5c188b3-7ff4-4632-be97-5abdab0c025a",
+        "parentId" : "383e87be-b632-412a-8fad-6a5b201df49e",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by 621652d5e",
+        "createdAt" : "2019-07-09T09:22:50Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0f1390e92212a18c776376045f349f93a4b1e4a7",
+    "line" : null,
+    "diffHunk" : "@@ -47,14 +48,51 @@ class ApiPartyManagementService private (\n       .listParties()\n       .map(ps => ListKnownPartiesResponse(ps.map(mapPartyDetails)))(DE)\n \n+  /**\n+    * Continuously polls tha party management service to check if a party has been persisted.\n+    *\n+    * Blocking.\n+    *\n+    * @param party The party whose persistence we're waiting for\n+    * @return The number of attempts before the party was found\n+    */\n+  private def pollUntilPersisted(party: String): Int =\n+    Iterator\n+      .from(1)\n+      .find { attempt =>\n+        logger.debug(s\"Waiting for party '$party' to be persisted (attempt #$attempt)...\")\n+        partyManagementService\n+          .listParties()\n+          .map {\n+            case persisted if persisted.exists(_.party == party) => true\n+            case _ => false\n+          }(DE)\n+        Await.result(\n+          partyManagementService\n+            .listParties()\n+            .map {\n+              case persisted if persisted.exists(_.party == party) => true\n+              case _ => false\n+            }(DE),\n+          Duration.Inf)\n+      }\n+      .get\n+\n+  private def pollUntilPersisted(result: AllocatePartyResponse): Future[AllocatePartyResponse] = {\n+    require(result.partyDetails.isDefined, \"Party allocation response must have the party details\")\n+    Future(pollUntilPersisted(result.partyDetails.get.party))(DE).map { numberOfAttempts =>"
+  },
+  {
+    "id" : "ff70ae1d-34d7-4dd4-8afc-48e8f305951d",
+    "prId" : 2040,
+    "comments" : [
+      {
+        "id" : "7414900a-84e8-418a-b0f7-d582822e6285",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "```suggestion\r\n    * Continuously polls the party management service to check if a party has been persisted.\r\n```",
+        "createdAt" : "2019-07-09T09:02:58Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "597ac204-893d-4d7a-8efe-c2d5c3a0abe9",
+        "parentId" : "7414900a-84e8-418a-b0f7-d582822e6285",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/2040/commits/c3b5f5276b0d4208f2a6d210a63b9f0f7f9eb2e7",
+        "createdAt" : "2019-07-09T13:17:24Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0f1390e92212a18c776376045f349f93a4b1e4a7",
+    "line" : null,
+    "diffHunk" : "@@ -47,14 +48,51 @@ class ApiPartyManagementService private (\n       .listParties()\n       .map(ps => ListKnownPartiesResponse(ps.map(mapPartyDetails)))(DE)\n \n+  /**\n+    * Continuously polls tha party management service to check if a party has been persisted."
+  },
+  {
+    "id" : "71aeedf9-686f-4a9e-b1bb-8bfe5e0c703d",
+    "prId" : 2040,
+    "comments" : [
+      {
+        "id" : "f2ddef44-3578-4670-a3f8-c568a2a4262e",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Should this function have exponential backoff and a maximum wait time? ",
+        "createdAt" : "2019-07-09T13:29:11Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ede86238-4d2c-4394-94f4-aa6a3d6494c6",
+        "parentId" : "f2ddef44-3578-4670-a3f8-c568a2a4262e",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Regarding maximum wait time, I'm not entirely sure. The polling here is done to ensure that the data is available to be read, but this depends on the indexer rather then the underlying service, so failing to read back from the indexer storage would result in a \"failed write\" even though the data at this point should definitely have been persisted on the participant. I would agree on this point but we'd have to make sure that we make party allocation idempotent. Would this be possible?\r\n\r\nOn the back-off strategy I agree, but what would you think would be reasonable values? Should we somehow make this configurable?\r\n\r\n@gerolf-da we could probably benefit if you could share your thoughts.",
+        "createdAt" : "2019-07-09T13:41:33Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b4d134d0-b6d0-4f98-99b8-2eafa8ae2ea2",
+        "parentId" : "f2ddef44-3578-4670-a3f8-c568a2a4262e",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Exponential back-off addressed by https://github.com/digital-asset/daml/pull/2040/commits/b185bea83b76e7e3f6528b98c0d6941d0f3be4ac",
+        "createdAt" : "2019-07-09T14:44:12Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "05034096-3770-4d88-92f8-e7400b666b83",
+        "parentId" : "f2ddef44-3578-4670-a3f8-c568a2a4262e",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I would leave maximum waiting time out for now but it's definitely worth discussing this, otherwise this is still error prone. We must have a clear idea of the write semantics. If we can pursue the idempotent strategy it would probably be the simplest course of action.",
+        "createdAt" : "2019-07-09T14:45:47Z",
+        "updatedAt" : "2019-07-09T16:08:02Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0f1390e92212a18c776376045f349f93a4b1e4a7",
+    "line" : null,
+    "diffHunk" : "@@ -47,14 +47,50 @@ class ApiPartyManagementService private (\n       .listParties()\n       .map(ps => ListKnownPartiesResponse(ps.map(mapPartyDetails)))(DE)\n \n+  /**\n+    * Continuously polls the party management service to check if a party has been persisted.\n+    *\n+    * Despite the `go` inner function not being stack-safe per se, only one stack frame will be on\n+    * the stack at any given time since the \"recursive\" invocation happens on a different thread.\n+    *\n+    * @param party The party whose persistence we're waiting for\n+    * @return The number of attempts before the party was found wrapped in a [[Future]]\n+    */\n+  private def pollUntilPersisted(party: String): Future[Int] = {"
+  },
+  {
+    "id" : "1dad9c29-6e1a-434b-ab84-5fe6aca93230",
+    "prId" : 1452,
+    "comments" : [
+      {
+        "id" : "f798c044-1e1b-460c-9573-06a3ea9f6179",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This is not necessarily a read backend. In other services we called this like the service, e.g. `transactionService: IndexTransactionService`.",
+        "createdAt" : "2019-06-07T11:14:50Z",
+        "updatedAt" : "2019-06-07T21:22:35Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "21be6910a5debd0672b0db0815d8993c33b21e53",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,80 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.admin\n+\n+import akka.stream.Materializer\n+import com.daml.ledger.participant.state.index.v2.IndexPartyManagementService\n+import com.daml.ledger.participant.state.v2.{PartyAllocationResult, WriteService}\n+import com.digitalasset.grpc.adapter.ExecutionSequencerFactory\n+import com.digitalasset.ledger.api.v1.admin.party_management_service.PartyManagementServiceGrpc.PartyManagementService\n+import com.digitalasset.ledger.api.v1.admin.party_management_service._\n+import com.digitalasset.platform.api.grpc.GrpcApiService\n+import com.digitalasset.platform.common.util.{DirectExecutionContext => DE}\n+import com.digitalasset.platform.server.api.validation.ErrorFactories\n+import io.grpc.{BindableService, ServerServiceDefinition}\n+import org.slf4j.LoggerFactory\n+import scalaz.syntax.tag._\n+\n+import scala.compat.java8.FutureConverters\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class ApiPartyManagementService private (\n+    readBackend: IndexPartyManagementService,"
+  }
+]

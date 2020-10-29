@@ -1,0 +1,541 @@
+[
+  {
+    "id" : "77e241ed-3c2a-45bd-bcd9-fb178356fc48",
+    "prId" : 3703,
+    "comments" : [
+      {
+        "id" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n            , dataSerializable = IsSerializable False\r\n```\r\n\r\nFor reference, #3635 defines synonyms, but _does not_ define them as serializable. Therefore, presence of a synonym reference in a record or variant makes that record or variant unserializable, as well; I have not commented on that code change because the relevant function hasn't been updated in this PR, I believe. It is unsafe to simply extend the set of serializable types at will. cc @remyhaemmerle-da ",
+        "createdAt" : "2019-12-02T21:03:57Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2bdee8b4-0017-481e-b6fa-8e860b1d023d",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Thank you. And for further reference, the LF spec for type synonyms is updated by https://github.com/digital-asset/daml/pull/3694\r\n",
+        "createdAt" : "2019-12-02T21:27:00Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3359b461-6760-487e-9701-2a1246067f1c",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Your are right, the spec doesn't defined synonyms as serializable. I wonder, is that right?\r\nWhy not define a type-constructor defined by a type-synonym to be serializable, so long as the synonymized type is serializable.",
+        "createdAt" : "2019-12-02T21:38:57Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0564181c-5905-45d9-a2fc-4eda7e6f61d6",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Serializability is about values of a given type not about serializability of the type. Since we are not introducing new values, it doesn’t really make sense to talk about serializability of a type synonym and we should always use serializability of the underlying type. For the interface reader and Ledger API values we will always expand type synonyms.",
+        "createdAt" : "2019-12-03T07:51:35Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cc4a81dd-786e-4ed0-a1a5-a8f489e42fbb",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I agree with @S11001001. Currently `Serializability` is defined for types not for values.  \r\nTherefore: \r\nWe should specify how this works for type synonyms.  we need to add the following rule in the spec:\r\n```   \r\n     'synonym' T α₁ … αₙ ↦  σ₁  ∈  〚Ξ〛Mod  \r\n      ⊢ₛ  σ₁[α₁ ↦ τ₁, …, αₙ ↦ τₙ]\r\n    ———————————————————————————————————————————————————————————————— STyTypeSyn\r\n      ⊢ₛ  Mod:T τ₁ … τₙ\r\n```\r\n\r\nTo be consistent with the current philosophy of daml-lf, I also expect that type synonym definitions are annotated by the compiler with the `serializability` flag as any other definitions.    \r\n\r\n ",
+        "createdAt" : "2019-12-03T08:32:13Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "915dc77d-2388-4fa9-85a8-c2181ae2ffbd",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Sounds good :+1:",
+        "createdAt" : "2019-12-03T09:28:45Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "315488db-8931-46c6-b329-a13b789a400f",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "For, say, records we require that `t_1, ..., t_n` are serializable for `Mod:T t_1 ... t_n` to be serializable. The serializability inference works under that assumption. In fact, the `serializable` flag tells whether a type preserved serializability.",
+        "createdAt" : "2019-12-03T11:12:49Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a2b0370a-41fa-4fd9-becf-4b19b9b01a3e",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : null,
+        "body" : "Given that we only plan to use type synonyms at the moment for typeclasses, and thanks to dictionary sanitization the underlying fields will never be serializable (they're functions from unit), I don't think we need to worry about serializability for type synonyms at the moment.",
+        "createdAt" : "2019-12-03T11:27:54Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "de1711c1-07e4-4872-b4b7-c4e0d1767a8d",
+        "parentId" : "518a35a0-d864-408d-a2d1-2d676be99919",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I am fine with you proposal @associahedron. In this case, just for the sake of simplicity, set all type synonyms to Unseralizable, that is applied the change proposed by @S11001001.  ",
+        "createdAt" : "2019-12-03T12:36:55Z",
+        "updatedAt" : "2019-12-03T12:40:39Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8e10f3d85f2547f8c6f1968d814c0ffeba77445b",
+    "line" : 7,
+    "diffHunk" : "@@ -104,6 +104,13 @@ main = do\n             , tplChoices = NM.fromList ([chc,chc2] <> [arc | withArchiveChoice])\n             , tplKey = Nothing\n             }\n+    let _syn = DefDataType -- TODO(NICK) make use of this synonym\n+            { dataLocation = Nothing\n+            , dataTypeCon = TypeConName [\"Syn\"]\n+            , dataSerializable = IsSerializable True"
+  },
+  {
+    "id" : "3f176830-6d8a-490f-b486-8a3563879972",
+    "prId" : 3477,
+    "comments" : [
+      {
+        "id" : "f05afcba-ff17-418b-8168-2535df8d26f2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why can’t we support variants here? I know that it’s not possible to generate such code from DAML since we always build up a record (unless you manually write `Choice` instances) but it seems fairly easy to support this. in fact, it probably works out of the box unless you validate that the type is a record which I think you don’t do at the moment.\r\n\r\nIf we don’t support it as part of this PR, that’s fine as well but in that case I would like to keep the test case as an expected failure.",
+        "createdAt" : "2019-11-15T09:50:37Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e5208719-af55-4b60-bda4-ccf43e891edc",
+        "parentId" : "f05afcba-ff17-418b-8168-2535df8d26f2",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "The reason to change to a record type was because I wanted to test a cross-sdk exercise using DAML. I'll make the generated DALF have 2 choices: One with a record; one with a variant.",
+        "createdAt" : "2019-11-15T16:09:11Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3bc2336e-77b3-4f06-a959-16e6ab839058",
+        "parentId" : "f05afcba-ff17-418b-8168-2535df8d26f2",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Sounds good :+1:",
+        "createdAt" : "2019-11-15T16:38:20Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "45eb7b63-3a5a-4bce-b555-81928f6ca308",
+        "parentId" : "f05afcba-ff17-418b-8168-2535df8d26f2",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Looks like you didn’t do this? We still seem to only have one choice for a `Record`.\r\n- This is done now",
+        "createdAt" : "2019-11-19T08:07:11Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "67086118-333a-4b05-bbfc-e1b91f16b2a4",
+        "parentId" : "f05afcba-ff17-418b-8168-2535df8d26f2",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done now. \r\nBut I'm not really convinced of the utility of creating DALF for testing which is not of the form which would result from the daml compiler.",
+        "createdAt" : "2019-11-19T08:46:21Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "df46a0c0ece38f03f22149c7964ffc4d607dc43b",
+    "line" : 9,
+    "diffHunk" : "@@ -47,7 +47,7 @@ main = do\n             , dataTypeCon = TypeConName [\"Choice\"]\n             , dataSerializable = IsSerializable True\n             , dataParams = []\n-            , dataCons = DataVariant [(VariantConName \"Choice\", TUnit)]\n+            , dataCons = DataRecord [ (FieldName \"choiceArg\", TUnit) ]"
+  },
+  {
+    "id" : "dcc8eb76-8f6b-4cff-bf40-e0f076cf8cd4",
+    "prId" : 3477,
+    "comments" : [
+      {
+        "id" : "26bb48bc-c9ef-4889-8ef3-a968ce6b2786",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This hits exactly the case that I mentioned above where the choice name and type constructor name don’t match. Let’s please keep this and test that we emit a somewhat usable error message instead of simply removing it.",
+        "createdAt" : "2019-11-15T09:53:05Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ab74ac9d-8c7a-438a-a064-69e9c0a14c49",
+        "parentId" : "26bb48bc-c9ef-4889-8ef3-a968ce6b2786",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "If the related type of a choice can be anything, and we support that, the why would this case be an error?",
+        "createdAt" : "2019-11-15T16:10:48Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fb6f99f6-1df2-440f-99ce-d6645b25ec67",
+        "parentId" : "26bb48bc-c9ef-4889-8ef3-a968ce6b2786",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "reinstated to name the choice as \"NotChoice\" in the test (which works now because the code no longer assumes the choice datatype is named the same as the choice)",
+        "createdAt" : "2019-11-18T17:31:00Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0159f6b6-2748-4103-aa34-c8f0a11bbed8",
+        "parentId" : "26bb48bc-c9ef-4889-8ef3-a968ce6b2786",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "As I said elsewhere, I would like us to emit an error if the choice name and the type constructor name don’t match. Having  `exercise cid Choice` call a choice called `NotChoice` is really confusing.",
+        "createdAt" : "2019-11-19T08:09:59Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c7d57c00-5955-42b4-bd62-4a64b152d79c",
+        "parentId" : "26bb48bc-c9ef-4889-8ef3-a968ce6b2786",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I'm confused as to where you think this error check should go.\r\n\r\nFirst, we should decide it this name-match really is a well-formed condition of DALF, or not.\r\n\r\nIf it isn't, then a mismatched name is confusing I agree, but not an error to be detected, and especially not when importing existing DALF via cross-sdk.\r\n\r\nIf it is an explicit well-formed condition on DALF, then perhaps the compiler should assert this condition just like it does for the well-typed condition.  And probably we shouldn't generate testing DALF which is not well-formed.\r\n",
+        "createdAt" : "2019-11-19T09:06:47Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "18764cfe-abf0-4553-a0eb-4ca1414d8cdc",
+        "parentId" : "26bb48bc-c9ef-4889-8ef3-a968ce6b2786",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It is not a well-formed condition on a DALF but it is impossible to write DAML code that will violate this condition. There will always be DALF that we cannot handle in cross-SDK import since damlc is more restrictive than DAML-LF. In some cases, like variants for choice arguments that’s easy to address and not confusing so I think we shouldn’t impose additional restrictions there. In other cases, like mismatching choice names and type constructors it is really confusing and can lead to users calling (and thereby exercising) the wrong choice and you still cannot handle the general case (which is allowed in DAML-LF) where there are two choices with different names but the same type. Therefore I think there the check is very much needed even though it slightly restricts which DALFs work in cross-SDK imports.\r\n\r\nLet’s leave it like it is for now in this PR and add the check separately in another PR.",
+        "createdAt" : "2019-11-19T09:31:18Z",
+        "updatedAt" : "2019-11-19T22:40:52Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "df46a0c0ece38f03f22149c7964ffc4d607dc43b",
+    "line" : null,
+    "diffHunk" : "@@ -58,7 +58,7 @@ main = do\n             }\n     let chc = TemplateChoice\n             { chcLocation = Nothing\n-            , chcName = ChoiceName \"NotChoice\"\n+            , chcName = ChoiceName \"Choice\""
+  },
+  {
+    "id" : "ecc9b455-b3d0-4e60-b718-ee99b776feca",
+    "prId" : 3338,
+    "comments" : [
+      {
+        "id" : "a9ab35b1-31d8-49ce-9cb0-cc153cb5fd64",
+        "parentId" : null,
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I like this idiom.",
+        "createdAt" : "2019-11-05T14:14:56Z",
+        "updatedAt" : "2019-11-05T14:15:14Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7f9fc21dcf3180553445a6efd00ae19bc07f8523",
+    "line" : 53,
+    "diffHunk" : "@@ -61,14 +84,14 @@ main = do\n             , tplSignatories = tplParties\n             , tplObservers = ENil TParty\n             , tplAgreement = mkEmptyText\n-            , tplChoices = NM.fromList [chc]\n+            , tplChoices = NM.fromList ([chc] <> [arc | withArchiveChoice])"
+  },
+  {
+    "id" : "e4fc6a9e-05e6-42c8-8be3-662699e83f69",
+    "prId" : 3102,
+    "comments" : [
+      {
+        "id" : "7b5a26e3-0fb9-41ae-8f85-e068bbf2e7d1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ":see_no_evil: ",
+        "createdAt" : "2019-10-03T19:12:04Z",
+        "updatedAt" : "2019-10-03T19:14:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6412c1da-1a4c-4c86-9d60-abd81030062b",
+        "parentId" : "7b5a26e3-0fb9-41ae-8f85-e068bbf2e7d1",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Let's make sure we import the stdlib qualified before our users find out we don't do it. ;)",
+        "createdAt" : "2019-10-04T07:55:20Z",
+        "updatedAt" : "2019-10-04T07:55:20Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c73d5fdd3c9729ce3c93f9f81072db0c6e5c93fa",
+    "line" : 30,
+    "diffHunk" : "@@ -0,0 +1,83 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+module DA.Test.GenerateSimpleDalf (main) where\n+\n+import qualified Data.ByteString.Lazy as BSL\n+import qualified Data.NameMap as NM\n+import qualified Data.Text.IO as T\n+import System.Environment\n+\n+import DA.Daml.LF.Ast.Base\n+import DA.Daml.LF.Ast.Util\n+import DA.Daml.LF.Ast.Version\n+import DA.Daml.LF.Ast.World\n+import DA.Daml.LF.Proto3.Archive\n+import DA.Daml.LF.TypeChecker\n+import DA.Pretty\n+\n+-- | This tool generates a simple DALF file and writes it to the first\n+-- argument given on the command line. This DALF is intended to be used\n+-- as a test case for the plain DALF import feature.\n+main :: IO ()\n+main = do\n+    [file] <- getArgs\n+    let version = V1 (PointStable 6)\n+    let modName = ModuleName [\"Module\"]\n+    let modRef = Qualified PRSelf modName\n+    let tplFields = map FieldName [\"this\", \"arg\"]\n+    let tplRec = DefDataType\n+            { dataLocation = Nothing\n+            , dataTypeCon = TypeConName [\"Template\"]"
+  },
+  {
+    "id" : "c9671b95-b0ae-4556-bbbb-7fc64ab39530",
+    "prId" : 3102,
+    "comments" : [
+      {
+        "id" : "9530004c-f79b-434f-8afb-e31889e1e6d4",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "How do you expect this to be represented in DAML? Just ignore the choice name?",
+        "createdAt" : "2019-10-03T19:13:44Z",
+        "updatedAt" : "2019-10-03T19:14:27Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "299f3805-a88c-4c75-af82-f0bcac0a65b9",
+        "parentId" : "9530004c-f79b-434f-8afb-e31889e1e6d4",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Yep, ignore the choice name in DAML, expose it via its choice argument type and make sure we exercise the right choice at the DAML-LF level. ",
+        "createdAt" : "2019-10-04T07:54:48Z",
+        "updatedAt" : "2019-10-04T07:54:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c73d5fdd3c9729ce3c93f9f81072db0c6e5c93fa",
+    "line" : 48,
+    "diffHunk" : "@@ -0,0 +1,83 @@\n+-- Copyright (c) 2019 The DAML Authors. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+module DA.Test.GenerateSimpleDalf (main) where\n+\n+import qualified Data.ByteString.Lazy as BSL\n+import qualified Data.NameMap as NM\n+import qualified Data.Text.IO as T\n+import System.Environment\n+\n+import DA.Daml.LF.Ast.Base\n+import DA.Daml.LF.Ast.Util\n+import DA.Daml.LF.Ast.Version\n+import DA.Daml.LF.Ast.World\n+import DA.Daml.LF.Proto3.Archive\n+import DA.Daml.LF.TypeChecker\n+import DA.Pretty\n+\n+-- | This tool generates a simple DALF file and writes it to the first\n+-- argument given on the command line. This DALF is intended to be used\n+-- as a test case for the plain DALF import feature.\n+main :: IO ()\n+main = do\n+    [file] <- getArgs\n+    let version = V1 (PointStable 6)\n+    let modName = ModuleName [\"Module\"]\n+    let modRef = Qualified PRSelf modName\n+    let tplFields = map FieldName [\"this\", \"arg\"]\n+    let tplRec = DefDataType\n+            { dataLocation = Nothing\n+            , dataTypeCon = TypeConName [\"Template\"]\n+            , dataSerializable = IsSerializable True\n+            , dataParams = []\n+            , dataCons = DataRecord $ map (, TParty) tplFields\n+            }\n+    let tplParam = ExprVarName \"arg\"\n+    let tplParties =\n+            let cons f = ECons TParty (ERecProj (TypeConApp (modRef (dataTypeCon tplRec)) []) f (EVar tplParam))\n+            in foldr cons (ENil TParty) tplFields\n+    let chcArg = DefDataType\n+            { dataLocation = Nothing\n+            , dataTypeCon = TypeConName [\"Choice\"]\n+            , dataSerializable = IsSerializable True\n+            , dataParams = []\n+            , dataCons = DataVariant [(VariantConName \"Choice\", TUnit)]\n+            }\n+    let chc = TemplateChoice\n+            { chcLocation = Nothing\n+            , chcName = ChoiceName \"NotChoice\""
+  }
+]

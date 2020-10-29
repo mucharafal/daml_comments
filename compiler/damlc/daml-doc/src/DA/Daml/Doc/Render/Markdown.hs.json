@@ -1,0 +1,378 @@
+[
+  {
+    "id" : "bdf43369-aad3-4d39-9931-6a10fd1100f0",
+    "prId" : 2351,
+    "comments" : [
+      {
+        "id" : "cc8872ca-6738-4664-9987-f96f1ef227ad",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is there a specific reason why this has to be `5` or is `5` just somewhat arbitrarily chosen to avoid very short columns?",
+        "createdAt" : "2019-07-31T11:15:30Z",
+        "updatedAt" : "2019-07-31T16:47:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "43cf20febd7fb63e1a575296280a2c3177148144",
+    "line" : null,
+    "diffHunk" : "@@ -241,3 +85,55 @@ escapeMd = T.pack . concatMap escapeChar . T.unpack\n         | otherwise = [c]\n \n     shouldEscape = (`elem` (\"[]*_~`<>\\\\&\" :: String))\n+\n+-- | Render fields as a pipe-table, like this:\n+-- >  | Field    | Type     | Description\n+-- >  | :------- | :------- | :----------\n+-- >  | anA      | a        |\n+-- >  | another  | a        | another a\n+-- >  | andText  | Text     | and text\n+renderMdFields :: RenderEnv -> [(RenderText, RenderText, RenderText)] -> [T.Text]\n+renderMdFields _ []  = [\"(no fields)\"]\n+renderMdFields env fields = header <> fieldRows\n+  where\n+    textFields =\n+        [ ( renderMdText env name\n+          , renderMdText env ty\n+          , renderMdText env doc\n+          )\n+        | (name, ty, doc) <- fields\n+        ]\n+\n+    fLen = maximum $ 5 :"
+  },
+  {
+    "id" : "1669db81-6b6d-419e-985c-b3131f15724c",
+    "prId" : 2351,
+    "comments" : [
+      {
+        "id" : "72bb8eee-f7ef-4f93-9b3b-af20ed8d1dcb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh I guess it might be because `length \"Field\" = 5`? In that case, maybe just use `maximum $ length \"Field\" : length \"Type\" : …`.",
+        "createdAt" : "2019-07-31T11:17:07Z",
+        "updatedAt" : "2019-07-31T16:47:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "18b2d00c-fe35-455b-87d1-d647b4d0ebc3",
+        "parentId" : "72bb8eee-f7ef-4f93-9b3b-af20ed8d1dcb",
+        "author" : null,
+        "body" : "Yes, that's right!",
+        "createdAt" : "2019-07-31T12:08:15Z",
+        "updatedAt" : "2019-07-31T16:47:11Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "43cf20febd7fb63e1a575296280a2c3177148144",
+    "line" : 327,
+    "diffHunk" : "@@ -241,3 +85,55 @@ escapeMd = T.pack . concatMap escapeChar . T.unpack\n         | otherwise = [c]\n \n     shouldEscape = (`elem` (\"[]*_~`<>\\\\&\" :: String))\n+\n+-- | Render fields as a pipe-table, like this:\n+-- >  | Field    | Type     | Description\n+-- >  | :------- | :------- | :----------\n+-- >  | anA      | a        |\n+-- >  | another  | a        | another a\n+-- >  | andText  | Text     | and text\n+renderMdFields :: RenderEnv -> [(RenderText, RenderText, RenderText)] -> [T.Text]\n+renderMdFields _ []  = [\"(no fields)\"]\n+renderMdFields env fields = header <> fieldRows\n+  where\n+    textFields =\n+        [ ( renderMdText env name\n+          , renderMdText env ty\n+          , renderMdText env doc\n+          )\n+        | (name, ty, doc) <- fields\n+        ]\n+\n+    fLen = maximum $ 5 :\n+        [ max (T.length name) (T.length ty)\n+        | (name, ty, _) <- textFields ]\n+\n+    header =\n+        [ T.concat\n+            [ \"| \"\n+            , adjust fLen \"Field\""
+  },
+  {
+    "id" : "1d25ae30-526d-4664-a23e-005825751bf0",
+    "prId" : 2351,
+    "comments" : [
+      {
+        "id" : "bbf0b795-807c-4b43-af1c-846ae4f9f26f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is there any reason why you’re using `mconcatMap` instead of `foldMap` which is even in `base`? This PR does not introduce this but I would generally prefer `foldMap` since I had to check if `mconcatMap` actually does what I thought since I usually don’t use it.",
+        "createdAt" : "2019-07-31T11:28:16Z",
+        "updatedAt" : "2019-07-31T16:47:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "951cb9a1-6f4d-49cc-9b0d-9da3f67a3609",
+        "parentId" : "bbf0b795-807c-4b43-af1c-846ae4f9f26f",
+        "author" : null,
+        "body" : "I must be weird because I find `mconcatMap` more intuitive as a generalized  `concatMap`. It also has a more specific type than `foldMap`.",
+        "createdAt" : "2019-07-31T12:13:12Z",
+        "updatedAt" : "2019-07-31T16:47:11Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "43cf20febd7fb63e1a575296280a2c3177148144",
+    "line" : 238,
+    "diffHunk" : "@@ -3,236 +3,80 @@\n \n \n module DA.Daml.Doc.Render.Markdown\n-  ( renderSimpleMD\n+  ( renderMd\n   ) where\n \n import DA.Daml.Doc.Types\n-import DA.Daml.Doc.Render.Util\n+import DA.Daml.Doc.Render.Util (adjust)\n import DA.Daml.Doc.Render.Monoid\n \n-import           Data.Maybe\n-import qualified Data.Text as T\n import Data.List.Extra\n+import qualified Data.Text as T\n \n-\n--- | Declare anchor and generate HTML tag to insert in renderer output.\n-withAnchorTag :: Maybe Anchor -> (T.Text -> RenderOut) -> RenderOut\n-withAnchorTag Nothing fn = fn \"\"\n-withAnchorTag (Just anchor) fn = mconcat\n-    [ renderDeclareAnchor anchor\n-    , fn $ T.concat [\"<a name=\\\"\", unAnchor anchor, \"\\\"></a>\"]\n-    ]\n-\n--- | Declare anchor and output HTML tag between two pieces of text.\n-renderAnchorInfix :: T.Text -> Maybe Anchor ->  T.Text -> RenderOut\n-renderAnchorInfix pre anchor post =\n-    withAnchorTag anchor (\\tag -> renderLine $ T.concat [ pre, tag, post ])\n-\n--- | Render doc text. If Nothing, renders an empty line. If Just, renders\n--- doc text block between two empty lines.\n-renderDocText :: Maybe DocText -> RenderOut\n-renderDocText Nothing = renderLine \"\"\n-renderDocText (Just (DocText d)) = renderLines (\"\" : T.lines d ++ [\"\"])\n-\n-renderSimpleMD :: ModuleDoc -> RenderOut\n-renderSimpleMD ModuleDoc{..}\n-  | null md_templates && null md_classes &&\n-    null md_adts && null md_functions &&\n-    isNothing md_descr = mempty\n-renderSimpleMD ModuleDoc{..} = mconcat\n-    [ renderAnchorInfix \"# \" md_anchor (\"Module \" <> escapeMd (unModulename md_name))\n-    , renderDocText md_descr\n-    , section \"Templates\" tmpl2md md_templates\n-    , section \"Template Instances\" renderTemplateInstanceDocAsMarkdown md_templateInstances\n-    , section \"Typeclasses\" cls2md md_classes\n-    , section \"Data types\" adt2md md_adts\n-    , section \"Functions\" fct2md md_functions\n-    ]\n-  where\n-    section :: T.Text -> (a -> RenderOut) -> [a] -> RenderOut\n-    section _ _ [] = mempty\n-    section sectionTitle f xs = mconcat\n-        [ renderLines\n-            [ \"## \" <> sectionTitle\n-            , \"\"\n-            ]\n-        , mconcatMap f xs\n-        , renderLine \"\"\n-        ]\n-\n-\n-tmpl2md :: TemplateDoc -> RenderOut\n-tmpl2md TemplateDoc{..} = withAnchorTag td_anchor $ \\tag -> mconcat\n-    [ renderLineDep $ \\env -> T.concat\n-        [ \"### \"\n-        , tag\n-        , \"template \"\n-        , maybe \"\" ((<> \" => \") . type2md env) td_super\n-        , escapeMd . T.unwords $ unTypename td_name : td_args\n-        ]\n-    , renderDocText td_descr\n-    , fieldTable td_payload\n-    , if null td_choices\n-        then mempty\n-        else mconcat\n-            [ renderLines [\"\", \"Choices:\", \"\"]\n-            , mconcatMap choiceBullet td_choices\n-            ]\n-    ]\n-  where\n-    choiceBullet :: ChoiceDoc -> RenderOut\n-    choiceBullet ChoiceDoc{..} = mconcat\n-        [ renderLine (\"* \" <> escapeMd (unTypename cd_name))\n-        , renderIndent 2 $ mconcat\n-            [ renderDocText cd_descr\n-            , fieldTable cd_fields\n-            ]\n-        ]\n-\n-renderTemplateInstanceDocAsMarkdown :: TemplateInstanceDoc -> RenderOut\n-renderTemplateInstanceDocAsMarkdown TemplateInstanceDoc{..} = mconcat\n-    [ renderAnchorInfix \"**template instance \" ti_anchor $\n-        escapeMd (unTypename ti_name) <> \"**  \"\n-    , renderLineDep $ \\env -> T.concat [\"&nbsp; = \", type2md env ti_rhs]\n-    , renderDocText ti_descr\n-    ]\n-\n-cls2md :: ClassDoc -> RenderOut\n-cls2md ClassDoc{..} = withAnchorTag cl_anchor $ \\tag -> mconcat\n-    [ renderLineDep $ \\env -> T.concat\n-        [ tag\n-        , \"**class \"\n-        , maybe \"\" (\\x -> type2md env x <> \" => \") cl_super\n-        , escapeMd $ T.unwords (unTypename cl_name : cl_args)\n-        , \" where**\"\n-        ]\n-    , blockQuote $ mconcat\n-        [ renderDocText cl_descr\n-        , mconcatMap fct2md cl_functions\n-        ]\n-    ]\n-\n-adt2md :: ADTDoc -> RenderOut\n-adt2md TypeSynDoc{..} = mconcat\n-    [ renderAnchorInfix \"**type \" ad_anchor $\n-        escapeMd (T.unwords (unTypename ad_name : ad_args)) <> \"**  \"\n-    , blockQuote $ mconcat\n-        [ renderLineDep $ \\env -> T.concat [\"= \", type2md env ad_rhs]\n-        , renderDocText ad_descr\n-        ]\n-    ]\n-\n-adt2md ADTDoc{..} = mconcat\n-    [ renderAnchorInfix \"**data \" ad_anchor $\n-        escapeMd (T.unwords (unTypename ad_name : ad_args)) <> \"**\"\n-    , blockQuote $ mconcat\n-        [ renderDocText ad_descr\n-        , mconcatMap constrMdItem ad_constrs\n-        ]\n-    ]\n-\n-constrMdItem :: ADTConstr -> RenderOut\n-constrMdItem PrefixC{..} = withAnchorTag ac_anchor $ \\tag -> mconcat\n-    [ renderLineDep $ \\env -> T.unwords\n-        $ \"*\"\n-        : (tag <> bold (escapeMd (unTypename ac_name)))\n-        : map (type2md env) ac_args\n-    , renderIndent 2 $ renderDocText ac_descr\n-    , renderLine \"\"\n-    ]\n-constrMdItem RecordC{..} = mconcat\n-    [ renderAnchorInfix \"* \" ac_anchor . bold . escapeMd $ unTypename ac_name\n-    , renderIndent 2 $ mconcat\n-        [ renderDocText ac_descr\n-        , fieldTable ac_fields\n-        ]\n-    , renderLine \"\"\n-    ]\n-\n--- | Render fields as a pipe-table, like this:\n--- >  | Field    | Type/Description |\n--- >  | :------- | :---------------\n--- >  |`anA`     | `a`\n--- >  |`another` | `a`\n--- >  |          | another a\n--- >  |`andText` | `Text`\n--- >  |          | and text\n--- >\n-fieldTable :: [FieldDoc] -> RenderOut\n-fieldTable []  = renderLine \"(no fields)\"\n-fieldTable fds = header <> fieldRows <> renderLine \"\"\n-  where\n-    header = renderLines\n-      [ \"| \" <> adjust fLen \"Field\"   <> \" | Type/Description |\"\n-      , \"| :\" <> T.replicate (fLen - 1) \"-\" <> \" | :----------------\"\n-      ]\n-\n-    fieldRows = renderLinesDep $ \\env -> concat\n-      [ (\"| \" <> adjust fLen (escapeMd $ unFieldname fd_name)\n-              <> \" | \" <> type2md env fd_type <> \" |\")\n-        : maybe []\n-              (\\descr -> [col1Empty <> removeLineBreaks (unDocText descr) <> \" |\"])\n-              fd_descr\n-      | FieldDoc{..} <- fds ]\n-\n-    -- Markdown does not support multi-row cells so we have to remove\n-    -- line breaks.\n-    removeLineBreaks = T.unwords . T.lines\n-\n-    fLen = maximum $ 5 : map (T.length . escapeMd . unFieldname . fd_name) fds\n-      -- 5 = length of \"Field\" header\n-\n-    col1Empty = \"| \" <> T.replicate fLen \" \" <> \" | \"\n-\n--- | Render a type. Nested type applications are put in parentheses.\n-type2md :: RenderEnv -> Type -> T.Text\n-type2md env = f 0\n-  where\n-    -- 0 = no brackets\n-    -- 1 = brackets around function\n-    -- 2 = brackets around function AND application\n-    f :: Int -> Type -> T.Text\n-    f _ (TypeApp a n []) = link a n\n-    f i (TypeApp a n as) = (if i >= 2 then inParens else id) $\n-        T.unwords (link a n : map (f 2) as)\n-    f i (TypeFun ts) = (if i >= 1 then inParens else id) $\n-        T.intercalate \" -> \" $ map (f 1) ts\n-    f _ (TypeList t1) = \"\\\\[\" <> f 0 t1 <> \"\\\\]\"\n-    f _ (TypeTuple ts) = \"(\" <> T.intercalate \", \" (map (f 0) ts) <>  \")\"\n-\n-    link :: Maybe Anchor -> Typename -> T.Text\n-    link Nothing n = escapeMd $ unTypename n\n-    link (Just anchor) n =\n+renderMd :: RenderEnv -> RenderOut -> [T.Text]\n+renderMd env = \\case\n+    RenderSpaced chunks -> renderMdSpaced env chunks\n+    RenderModuleHeader title -> [\"# \" <> title]\n+    RenderSectionHeader title -> [\"## \" <> title]\n+    RenderBlock block -> blockquote (renderMd env block)\n+    RenderList items -> spaced (map (bullet . renderMd env) items)\n+    RenderFields fields -> renderMdFields env fields\n+    RenderPara text -> [renderMdText env text]\n+    RenderDocs docText -> T.lines . unDocText $ docText\n+    RenderAnchor anchor -> [anchorTag anchor]\n+\n+renderMdWithAnchor :: RenderEnv -> Anchor -> RenderOut -> [T.Text]\n+renderMdWithAnchor env anchor = \\case\n+    RenderModuleHeader title -> [\"# \" <> anchorTag anchor <> title]\n+    RenderSectionHeader title -> [\"## \" <> anchorTag anchor <> title]\n+    RenderPara text -> [anchorTag anchor <> renderMdText env text]\n+    other -> anchorTag anchor : renderMd env other\n+\n+renderMdSpaced :: RenderEnv -> [RenderOut] -> [T.Text]\n+renderMdSpaced env = spaced . renderMds env\n+\n+renderMds :: RenderEnv -> [RenderOut] -> [[T.Text]]\n+renderMds env = \\case\n+    RenderAnchor anchor : next : rest ->\n+        renderMdWithAnchor env anchor next : renderMds env rest\n+    next : rest -> renderMd env next : renderMds env rest\n+    [] -> []\n+\n+renderMdText :: RenderEnv -> RenderText -> T.Text\n+renderMdText env = \\case\n+    RenderConcat ts -> mconcatMap (renderMdText env) ts"
+  },
+  {
+    "id" : "0de01ea4-a6ae-4c6c-a63a-8f0040be3649",
+    "prId" : 2269,
+    "comments" : [
+      {
+        "id" : "996dbb34-f821-4736-82ee-b2884ca1f822",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "When do we expect `fct_type` to be `Nothing`? For partial type signatures?",
+        "createdAt" : "2019-07-24T06:51:03Z",
+        "updatedAt" : "2019-07-24T06:53:50Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7011d960-ca8d-495e-8897-517e6031ec47",
+        "parentId" : "996dbb34-f821-4736-82ee-b2884ca1f822",
+        "author" : null,
+        "body" : "Whenever we can't find the function's type info based on the name for some reason. Actually the only time this happens in the standard library is with the GHC.Enum functions (`eftInt`, `efdInt`, etc) and I'm not sure *why*. ",
+        "createdAt" : "2019-07-24T08:03:17Z",
+        "updatedAt" : "2019-07-24T08:03:17Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fd0a8374-d611-4370-80e1-63092c7c22ae",
+        "parentId" : "996dbb34-f821-4736-82ee-b2884ca1f822",
+        "author" : null,
+        "body" : "On further investigation, it seems this only happens when functions are not exported. (Does GHC change the names of non-exported functions, or get rid of the definitions altogether in some cases?) Since we shouldn't be showing these in the docs anyway, I think it'll be easy to make the type a mandatory part of the FunctionDocs.",
+        "createdAt" : "2019-07-24T08:17:22Z",
+        "updatedAt" : "2019-07-24T08:17:22Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4ff143ad6ff625aa8af6139a6c99374609e55f00",
+    "line" : 9,
+    "diffHunk" : "@@ -211,8 +211,11 @@ fct2md :: FunctionDoc -> RenderOut\n fct2md FunctionDoc{..} = mconcat\n     [ renderAnchorInfix \"\" fct_anchor $ T.concat\n         [ \"**\", escapeMd $ unFieldname fct_name, \"**  \" ]\n-    , renderLinesDep $ \\env ->\n-        maybe [] (\\t -> [\"&nbsp; : \" <> type2md env t]) fct_type\n+    , renderLineDep $ \\env -> T.concat\n+        [ \"&nbsp; : \"\n+        , maybe \"\" ((<> \" => \") . type2md env) fct_context\n+        , maybe \"\\\\_\"  (type2md env) fct_type"
+  },
+  {
+    "id" : "8491a3b6-ef44-4307-a4c9-2c51fa69c65f",
+    "prId" : 2269,
+    "comments" : [
+      {
+        "id" : "bb24b9ce-41bc-49f4-bd1e-553e390d4a34",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What is the rational for having a `&nbsp;` followed by a regular space? This seems odd to me.",
+        "createdAt" : "2019-07-24T08:45:26Z",
+        "updatedAt" : "2019-07-24T08:47:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e26d45cc-f5e0-4acd-871e-2de445eb8cf7",
+        "parentId" : "bb24b9ce-41bc-49f4-bd1e-553e390d4a34",
+        "author" : null,
+        "body" : "Markdown would interpret two spaces in a weird way, and `&nbsp; ` is enough to get HTML to accept this as a significant whitespace (although `&nbsp;&nbsp;` would work just as well).\r\n\r\n(But in my new PR I get rid of this anyway and start using blockquotes everywhere.)",
+        "createdAt" : "2019-07-24T08:52:12Z",
+        "updatedAt" : "2019-07-24T08:52:12Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "84bc6649-9bc9-43ab-81a8-87ec7b67cf82",
+        "parentId" : "bb24b9ce-41bc-49f4-bd1e-553e390d4a34",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That makes sense. Thanks for the explanation.",
+        "createdAt" : "2019-07-24T08:53:33Z",
+        "updatedAt" : "2019-07-24T08:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4ff143ad6ff625aa8af6139a6c99374609e55f00",
+    "line" : 7,
+    "diffHunk" : "@@ -211,8 +211,11 @@ fct2md :: FunctionDoc -> RenderOut\n fct2md FunctionDoc{..} = mconcat\n     [ renderAnchorInfix \"\" fct_anchor $ T.concat\n         [ \"**\", escapeMd $ unFieldname fct_name, \"**  \" ]\n-    , renderLinesDep $ \\env ->\n-        maybe [] (\\t -> [\"&nbsp; : \" <> type2md env t]) fct_type\n+    , renderLineDep $ \\env -> T.concat\n+        [ \"&nbsp; : \""
+  },
+  {
+    "id" : "a9ea63ad-e029-4dd6-9186-73f299cba3c6",
+    "prId" : 2259,
+    "comments" : [
+      {
+        "id" : "4e3af3cc-ec4e-41c7-a4cc-fc2da0577319",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe add `braces` and `parens` helpers?",
+        "createdAt" : "2019-07-23T11:03:34Z",
+        "updatedAt" : "2019-07-23T16:24:56Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "60c148ff-92d7-4002-9a19-5f6a38ac1a2e",
+        "parentId" : "4e3af3cc-ec4e-41c7-a4cc-fc2da0577319",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Or a `link` helper.",
+        "createdAt" : "2019-07-23T12:23:15Z",
+        "updatedAt" : "2019-07-23T16:24:56Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2ed4fda9eea075172b450f1f9bef15880ed2a82c",
+    "line" : 10,
+    "diffHunk" : "@@ -197,9 +197,15 @@ type2md env = f 0\n     link :: Maybe Anchor -> Typename -> T.Text\n     link Nothing n = escapeMd $ unTypename n\n     link (Just anchor) n =\n-        if renderAnchorAvailable env anchor\n-            then T.concat [\"[\", escapeMd $ unTypename n, \"](#\", unAnchor anchor, \")\"]\n-            else escapeMd $ unTypename n\n+        case lookupAnchor env anchor of\n+            Nothing -> escapeMd $ unTypename n\n+            Just anchorLoc -> T.concat\n+                [ \"[\""
+  },
+  {
+    "id" : "ea316425-3820-4047-b13a-f331b016c313",
+    "prId" : 2240,
+    "comments" : [
+      {
+        "id" : "1724891c-de0b-4902-944a-67fc19a034ca",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Might be a good idea to add a `bold x = \"**\" <> x <> \"**\"` helper.",
+        "createdAt" : "2019-07-22T11:25:46Z",
+        "updatedAt" : "2019-07-22T12:09:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8cc5011d7625b29e31ecc1842db80d8f6c47d650",
+    "line" : 14,
+    "diffHunk" : "@@ -89,6 +90,14 @@ tmpl2md TemplateDoc{..} = withAnchorTag td_anchor $ \\tag -> mconcat\n             ]\n         ]\n \n+renderTemplateInstanceDocAsMarkdown :: TemplateInstanceDoc -> RenderOut\n+renderTemplateInstanceDocAsMarkdown TemplateInstanceDoc{..} = mconcat\n+    [ renderAnchorInfix \"**template instance \" ti_anchor $"
+  },
+  {
+    "id" : "670b3878-1087-4e50-b389-4e161eae0bb8",
+    "prId" : 2156,
+    "comments" : [
+      {
+        "id" : "cbfe0fbb-836a-4b5a-a25a-483db4bd2197",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That explanation sounds like we're rendering a paragraph. Is that correct? If so, we should reflect it in the name.",
+        "createdAt" : "2019-07-16T11:43:38Z",
+        "updatedAt" : "2019-07-16T11:54:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "016bc982aaab1c6f6d2c1e7da4db8600400ec927",
+    "line" : 27,
+    "diffHunk" : "@@ -9,98 +9,124 @@ module DA.Daml.Doc.Render.Markdown\n \n import DA.Daml.Doc.Types\n import DA.Daml.Doc.Render.Util\n+import DA.Daml.Doc.Render.Monoid\n \n import           Data.Maybe\n import qualified Data.Text as T\n-import           Data.List (intersperse)\n+import Data.List.Extra\n \n-renderSimpleMD :: ModuleDoc -> T.Text\n+\n+-- | Declare anchor and generate HTML tag to insert in renderer output.\n+withAnchorTag :: Maybe Anchor -> (T.Text -> RenderOut) -> RenderOut\n+withAnchorTag Nothing fn = fn \"\"\n+withAnchorTag (Just anchor) fn = mconcat\n+    [ renderDeclareAnchor anchor\n+    , fn $ T.concat [\"<a name=\\\"\", unAnchor anchor, \"\\\"></a>\"]\n+    ]\n+\n+-- | Declare anchor and output HTML tag between two pieces of text.\n+renderAnchorInfix :: T.Text -> Maybe Anchor ->  T.Text -> RenderOut\n+renderAnchorInfix pre anchor post =\n+    withAnchorTag anchor (\\tag -> renderLine $ T.concat [ pre, tag, post ])\n+\n+-- | Render doc text. If Nothing, renders an empty line. If Just, renders\n+-- doc text block between two empty lines."
+  },
+  {
+    "id" : "2dff46d1-7868-4541-af12-e648db4638f6",
+    "prId" : 2156,
+    "comments" : [
+      {
+        "id" : "f094b54d-ac1c-4bf7-b886-f12cf16437a7",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not the biggest fan of abbreviations when the actual name is not much longer. It makes it harder for new people to dive into the code base. Nothing to change now but probably worth consider in the future.",
+        "createdAt" : "2019-07-16T11:46:05Z",
+        "updatedAt" : "2019-07-16T11:54:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "016bc982aaab1c6f6d2c1e7da4db8600400ec927",
+    "line" : 137,
+    "diffHunk" : "@@ -9,98 +9,124 @@ module DA.Daml.Doc.Render.Markdown\n \n import DA.Daml.Doc.Types\n import DA.Daml.Doc.Render.Util\n+import DA.Daml.Doc.Render.Monoid\n \n import           Data.Maybe\n import qualified Data.Text as T\n-import           Data.List (intersperse)\n+import Data.List.Extra\n \n-renderSimpleMD :: ModuleDoc -> T.Text\n+\n+-- | Declare anchor and generate HTML tag to insert in renderer output.\n+withAnchorTag :: Maybe Anchor -> (T.Text -> RenderOut) -> RenderOut\n+withAnchorTag Nothing fn = fn \"\"\n+withAnchorTag (Just anchor) fn = mconcat\n+    [ renderDeclareAnchor anchor\n+    , fn $ T.concat [\"<a name=\\\"\", unAnchor anchor, \"\\\"></a>\"]\n+    ]\n+\n+-- | Declare anchor and output HTML tag between two pieces of text.\n+renderAnchorInfix :: T.Text -> Maybe Anchor ->  T.Text -> RenderOut\n+renderAnchorInfix pre anchor post =\n+    withAnchorTag anchor (\\tag -> renderLine $ T.concat [ pre, tag, post ])\n+\n+-- | Render doc text. If Nothing, renders an empty line. If Just, renders\n+-- doc text block between two empty lines.\n+renderDocText :: Maybe DocText -> RenderOut\n+renderDocText Nothing = renderLine \"\"\n+renderDocText (Just (DocText d)) = renderLines (\"\" : T.lines d ++ [\"\"])\n+\n+renderSimpleMD :: ModuleDoc -> RenderOut\n renderSimpleMD ModuleDoc{..}\n   | null md_templates && null md_classes &&\n     null md_adts && null md_functions &&\n-    isNothing md_descr = T.empty\n-renderSimpleMD ModuleDoc{..} = T.unlines $\n-  [ \"# \" <> \"Module \" <> unModulename md_name\n-  , \"\"\n-  , maybe \"\" unDocText md_descr\n-  , \"\" ]\n-  <> concat\n-  [ if null md_templates then []\n-    else [ \"## Templates\"\n-         , \"\"\n-         , T.unlines $ map tmpl2md md_templates\n-         , \"\" ]\n-  , if null md_classes\n-    then []\n-    else [ \"## Typeclasses\"\n-         , \"\"\n-         , T.unlines $ map cls2md md_classes\n-         , \"\"\n-         ]\n-  , if null md_adts then []\n-    else [ \"## Data types\"\n-         , \"\"\n-         , T.unlines $ map adt2md md_adts\n-         , \"\" ]\n-  , if null md_functions then []\n-    else [ \"## Functions\"\n-         , \"\"\n-         , T.unlines $ map fct2md md_functions\n-         ]\n-  ]\n-\n-\n-tmpl2md :: TemplateDoc -> T.Text\n-tmpl2md TemplateDoc{..} = T.unlines $\n-    [ \"### Template \" <> asCode (unTypename td_name)\n-    , maybe \"\" (T.cons '\\n' . unDocText) td_descr\n-    , \"\"\n-    , fieldTable td_payload\n-    , \"\"\n-    , \"  #### Choices\"\n-    , \"\"\n-    ] ++ map choiceBullet td_choices -- ends by \"\\n\" because of unlines above\n-\n+    isNothing md_descr = mempty\n+renderSimpleMD ModuleDoc{..} = mconcat\n+    [ renderAnchorInfix \"# \" md_anchor (\"Module \" <> escapeMd (unModulename md_name))\n+    , renderDocText md_descr\n+    , section \"Templates\" tmpl2md md_templates\n+    , section \"Typeclasses\" cls2md md_classes\n+    , section \"Data types\" adt2md md_adts\n+    , section \"Functions\" fct2md md_functions\n+    ]\n   where\n-    choiceBullet :: ChoiceDoc -> T.Text\n-    choiceBullet ChoiceDoc{..} = T.unlines\n-        [ prefix \"* \" $ asCode (unTypename cd_name)\n-        , maybe \"  \" (flip T.snoc '\\n' . indent 2 . unDocText) cd_descr\n-        , indent 2 (fieldTable cd_fields)\n+    section :: T.Text -> (a -> RenderOut) -> [a] -> RenderOut\n+    section _ _ [] = mempty\n+    section sectionTitle f xs = mconcat\n+        [ renderLines\n+            [ \"## \" <> sectionTitle\n+            , \"\"\n+            ]\n+        , mconcatMap f xs\n+        , renderLine \"\"\n         ]\n \n-cls2md :: ClassDoc -> T.Text\n-cls2md ClassDoc{..} = T.unlines $\n-    [ \"### `class` \"\n-        <> maybe \"\" (\\x -> type2md x <> \" => \") cl_super\n-        <> T.unwords (unTypename cl_name : cl_args)\n-        <> \" where\"\n-    , maybe \"\" (T.cons '\\n' . indent 2 . unDocText) cl_descr\n-    ] ++ map (indent 2 . fct2md) cl_functions\n-\n-adt2md :: ADTDoc -> T.Text\n-adt2md TypeSynDoc{..} = T.unlines $\n-    [ \"### `type` \"\n-        <> asCode (unTypename ad_name <> (T.concat $ map (T.cons ' ') ad_args))\n-    , \"    = \" <> type2md ad_rhs\n-    ] ++ maybe [] ((:[]) . T.cons '\\n' . indent 2 . unDocText) ad_descr\n-\n-adt2md ADTDoc{..} = T.unlines $\n-    [ \"### `data` \"\n-        <> asCode (unTypename ad_name <> (T.concat $ map (T.cons ' ') ad_args))\n-    , maybe T.empty (T.cons '\\n' . indent 2 . unDocText) ad_descr\n-    ] ++ map constrMdItem ad_constrs\n-\n-constrMdItem :: ADTConstr -> T.Text\n-constrMdItem PrefixC{..} =\n-  (\"* \" <> T.unwords (asCode (unTypename ac_name) : map type2md ac_args))\n-  <> maybe T.empty (T.cons '\\n' . indent 2 . unDocText) ac_descr\n-constrMdItem RecordC{..} =\n-  (\"* \" <> asCode (unTypename ac_name))\n-  <> maybe T.empty (T.cons '\\n' . indent 2 . unDocText) ac_descr\n-  <> \"\\n\\n\"\n-  <> indent 2 (fieldTable ac_fields)\n \n+tmpl2md :: TemplateDoc -> RenderOut"
+  },
+  {
+    "id" : "3aa84b29-a9a1-491b-84dc-4cddfdc300dc",
+    "prId" : 2156,
+    "comments" : [
+      {
+        "id" : "d6e542d9-40aa-469c-a34a-61943ac249c2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Maybe rename `i` to `prec` to make it's meaning clear.",
+        "createdAt" : "2019-07-16T11:48:45Z",
+        "updatedAt" : "2019-07-16T11:54:08Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "016bc982aaab1c6f6d2c1e7da4db8600400ec927",
+    "line" : 272,
+    "diffHunk" : "@@ -111,50 +137,71 @@ constrMdItem RecordC{..} =\n -- >  |`andText` | `Text`\n -- >  |          | and text\n -- >\n-fieldTable :: [FieldDoc] -> T.Text\n-fieldTable []  = \"(no fields)\"\n-fieldTable fds = header <> fieldRows <> \"\\n\"\n+fieldTable :: [FieldDoc] -> RenderOut\n+fieldTable []  = renderLine \"(no fields)\"\n+fieldTable fds = header <> fieldRows <> renderLine \"\"\n   where\n-    header = T.unlines\n+    header = renderLines\n       [ \"| \" <> adjust fLen \"Field\"   <> \" | Type/Description |\"\n       , \"| :\" <> T.replicate (fLen - 1) \"-\" <> \" | :----------------\"\n       ]\n \n-    fieldRows = T.unlines\n-      [ \"| \" <> adjust fLen (asCode (unFieldname fd_name))\n-        <> \" | \" <> type2md fd_type <> \" |\"\n-        <> maybe \"\" (\\desc -> \"\\n\" <> col1Empty <> removeLineBreaks (unDocText desc) <> \" |\") fd_descr\n+    fieldRows = renderLinesDep $ \\env -> concat\n+      [ (\"| \" <> adjust fLen (escapeMd $ unFieldname fd_name)\n+              <> \" | \" <> type2md env fd_type <> \" |\")\n+        : maybe []\n+              (\\descr -> [col1Empty <> removeLineBreaks (unDocText descr) <> \" |\"])\n+              fd_descr\n       | FieldDoc{..} <- fds ]\n \n     -- Markdown does not support multi-row cells so we have to remove\n     -- line breaks.\n     removeLineBreaks = T.unwords . T.lines\n \n-    fLen = maximum $ 5 : map (T.length . asCode . unFieldname . fd_name) fds\n+    fLen = maximum $ 5 : map (T.length . escapeMd . unFieldname . fd_name) fds\n       -- 5 = length of \"Field\" header\n \n     col1Empty = \"| \" <> T.replicate fLen \" \" <> \" | \"\n \n -- | Render a type. Nested type applications are put in parentheses.\n-type2md :: Type -> T.Text\n-type2md t = t2md id t\n-  where t2md f (TypeFun ts) = f $ T.intercalate \" `->` \" $ map (t2md id) ts\n-        t2md _ (TypeList t1) = \"`[` \" <> t2md id t1 <> \" `]`\"\n-        t2md _ (TypeTuple ts) = \"`(` \" <>\n-                            T.concat (intersperse \", \" $ map (t2md id) ts) <>\n-                            \" `)`\"\n-        t2md _ (TypeApp _ n []) = asCode (unTypename n)\n-        t2md f (TypeApp _ name args) =\n-          f $ T.unwords ( asCode (unTypename name) : map (t2md codeParens) args)\n-        codeParens s = \"`(` \" <> s <> \" `)`\"\n-\n-fct2md :: FunctionDoc -> T.Text\n-fct2md FunctionDoc{..} =\n-  \"* \" <> asCode (unFieldname fct_name) <> maybe \"\" ((\" : \" <>) . type2md) fct_type\n-  <> maybe \"\" ((\"  \\n\" <>) . indent 2 . unDocText) fct_descr\n-  --             ^^ NB trailing whitespace to cause a line break\n-\n+type2md :: RenderEnv -> Type -> T.Text\n+type2md env = f 0\n+  where\n+    -- 0 = no brackets\n+    -- 1 = brackets around function\n+    -- 2 = brackets around function AND application\n+    f :: Int -> Type -> T.Text\n+    f _ (TypeApp a n []) = link a n\n+    f i (TypeApp a n as) = (if i >= 2 then inParens else id) $"
+  }
+]

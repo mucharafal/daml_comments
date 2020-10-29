@@ -1,0 +1,264 @@
+[
+  {
+    "id" : "f013090d-64bd-4eef-8c58-901871bf9887",
+    "prId" : 7146,
+    "comments" : [
+      {
+        "id" : "aa19a4d5-216a-4a7b-b0de-725a0166c658",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  -- Divulgee can't do positive lookup with maintainer authority.\r\n```\r\nI realize you didn’t introduce this but we might as well fix it now.",
+        "createdAt" : "2020-08-24T11:15:19Z",
+        "updatedAt" : "2020-08-24T12:11:38Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6c216294-c949-4913-8168-67580da8ae66",
+        "parentId" : "aa19a4d5-216a-4a7b-b0de-725a0166c658",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Good catch.",
+        "createdAt" : "2020-08-24T11:35:13Z",
+        "updatedAt" : "2020-08-24T12:11:38Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4fc3351a23f3b5dd403214e0e6d5c60cf5c1289e",
+    "line" : null,
+    "diffHunk" : "@@ -112,44 +134,83 @@ lookupTest = scenario do\n   submit obs do\n     (cid, l) <- fetchByKey @Keyed sig\n     assert (keyedCid == cid)\n+  -- Stakeholder can't see without authorization\n+  submitMustFail obs do visibleByKey @Keyed sig\n+  -- Stakeholder can see with authorization\n+  submit obs do\n+    b <- exercise sigDelegationCid VisibleKeyed with\n+      delegee = obs\n+      key = sig\n+    assert b\n   -- Stakeholder can't lookup without authorization\n   submitMustFail obs do lookupByKey @Keyed sig\n   -- Stakeholder can lookup with authorization\n-  submit obs do \n-    mcid <- exercise sigDelegationCid LookupKeyed with \n+  submit obs do\n+    mcid <- exercise sigDelegationCid LookupKeyed with\n       delegee = obs\n       lookupKey = sig\n     assert (mcid == Some keyedCid)\n \n-  -- Divulgee can't fetch\n+  -- Divulgee _can_ fetch the contract directly\n+  submit divulgee do\n+    exercise obsDelegationCid UnkeyedFetch with\n+        delegee = divulgee\n+        cid = keyedCid\n+  -- Divulgee can't fetch through the key\n   submitMustFail divulgee do fetchByKey @Keyed sig\n+  -- Divulgee can't see\n+  submitMustFail divulgee do visibleByKey @Keyed sig\n+  -- Divulgee can't see with stakeholder authority\n+  submitMustFail divulgee do\n+    exercise obsDelegationCid VisibleKeyed with\n+        delegee = divulgee\n+        key = sig\n   -- Divulgee can't lookup\n   submitMustFail divulgee do lookupByKey @Keyed sig\n   -- Divulgee can't lookup with stakeholder authority\n-  submitMustFail divulgee do \n+  submitMustFail divulgee do\n     exercise obsDelegationCid LookupKeyed with\n         delegee = divulgee\n         lookupKey = sig\n-  -- Divulgee can't do positive lookup with maintainer authority. \n+  -- Divulgee can't do positive lookup withm aintainer authority."
+  },
+  {
+    "id" : "1bcb492e-549a-4f72-b956-86197c0c876b",
+    "prId" : 6401,
+    "comments" : [
+      {
+        "id" : "4d5d6a0b-1fe2-4fd1-8020-ce20f1b098e2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Since I was wondering about this: Yes this is tested, we test everything in that directory.",
+        "createdAt" : "2020-06-18T09:37:23Z",
+        "updatedAt" : "2020-06-18T09:46:38Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7a12f48f-378c-46aa-98f6-3e702cc5d785",
+        "parentId" : "4d5d6a0b-1fe2-4fd1-8020-ce20f1b098e2",
+        "author" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "body" : "That was one of my main motivations for this. It would be even better if we had script-based tests for things like this as well.",
+        "createdAt" : "2020-06-18T09:47:14Z",
+        "updatedAt" : "2020-06-18T09:47:14Z",
+        "lastEditedBy" : {
+          "login" : "bame-da",
+          "name" : "Bernhard Elsner",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/40762178?u=28b5edbfe9271d5db3fcfa3b80d30f93cce4321f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "23f4684f-3d08-4767-ad68-4bae80fdbb53",
+        "parentId" : "4d5d6a0b-1fe2-4fd1-8020-ce20f1b098e2",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Wouldn’t be hard to make a directory that contains a bunch of scripts that are tested via `daml test-script`.",
+        "createdAt" : "2020-06-18T09:49:44Z",
+        "updatedAt" : "2020-06-18T09:49:45Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a27890adcd6e1a065d6f6ad496fe73220a8ff4de",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved."
+  },
+  {
+    "id" : "8e2c8cc8-c928-45f1-8b54-f11140d196b1",
+    "prId" : 6401,
+    "comments" : [
+      {
+        "id" : "6bdbf9d5-7bc8-4673-8b56-6fde46774ca7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "CI doesn’t like your header (probably wrong year but I’m guessing)",
+        "createdAt" : "2020-06-18T09:39:45Z",
+        "updatedAt" : "2020-06-18T09:46:38Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a27890adcd6e1a065d6f6ad496fe73220a8ff4de",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved."
+  },
+  {
+    "id" : "468a6dbb-150b-45a6-b0c3-7ff80af33a4b",
+    "prId" : 6401,
+    "comments" : [
+      {
+        "id" : "0df0c6e9-652b-4fc4-aecd-5e80829a89a8",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Let the code speak not the comments. 😺\r\n```suggestion\r\n  sig <- getParty \"Signatory\"\r\n```\r\nSame below.",
+        "createdAt" : "2020-06-18T13:22:41Z",
+        "updatedAt" : "2020-06-18T17:22:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a27890adcd6e1a065d6f6ad496fe73220a8ff4de",
+    "line" : 81,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module Keys where\n+\n+import DA.Optional\n+\n+template Keyed\n+  with\n+    sig : Party\n+    obs : Party\n+  where\n+    signatory sig\n+    observer obs\n+\n+    key sig : Party\n+    maintainer key\n+\n+template Divulger\n+  with\n+    divulgee : Party\n+    sig : Party\n+  where\n+    signatory divulgee\n+\n+    controller sig can\n+      nonconsuming DivulgeKeyed\n+        : Keyed\n+        with\n+          keyedCid : ContractId Keyed\n+        do\n+          fetch keyedCid\n+\n+template Delegation\n+  with\n+    sig : Party\n+    delegees : [Party]\n+  where\n+    signatory sig\n+    observer delegees\n+\n+    nonconsuming choice CreateKeyed\n+      : ContractId Keyed\n+      with\n+        delegee : Party\n+        obs : Party\n+      controller delegee\n+      do\n+        create Keyed with sig; obs\n+\n+    nonconsuming choice ArchiveKeyed\n+      : ()\n+      with\n+        delegee : Party\n+        keyedCid : ContractId Keyed\n+      controller delegee\n+      do\n+        archive keyedCid\n+\n+    nonconsuming choice LookupKeyed\n+      : Optional (ContractId Keyed)\n+      with\n+        lookupKey : Party\n+        delegee : Party\n+      controller delegee\n+      do\n+        lookupByKey @Keyed lookupKey\n+\n+    nonconsuming choice FetchKeyed\n+      : (ContractId Keyed, Keyed)\n+      with\n+        lookupKey : Party\n+        delegee : Party\n+      controller delegee\n+      do\n+        fetchByKey @Keyed lookupKey\n+\n+lookupTest = scenario do\n+\n+  -- Put four parties in the four possible relationships with a `Keyed`\n+  sig <- getParty \"s\" -- Signatory"
+  },
+  {
+    "id" : "7b6b6dee-6258-408c-b82b-c3ac93f05611",
+    "prId" : 6401,
+    "comments" : [
+      {
+        "id" : "30c51dfd-484e-47aa-a433-34afbd122027",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n\r\n  -- TESTING CREATES AND ARCHIVES\r\n```",
+        "createdAt" : "2020-06-18T13:29:44Z",
+        "updatedAt" : "2020-06-18T17:22:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a27890adcd6e1a065d6f6ad496fe73220a8ff4de",
+    "line" : 179,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module Keys where\n+\n+import DA.Optional\n+\n+template Keyed\n+  with\n+    sig : Party\n+    obs : Party\n+  where\n+    signatory sig\n+    observer obs\n+\n+    key sig : Party\n+    maintainer key\n+\n+template Divulger\n+  with\n+    divulgee : Party\n+    sig : Party\n+  where\n+    signatory divulgee\n+\n+    controller sig can\n+      nonconsuming DivulgeKeyed\n+        : Keyed\n+        with\n+          keyedCid : ContractId Keyed\n+        do\n+          fetch keyedCid\n+\n+template Delegation\n+  with\n+    sig : Party\n+    delegees : [Party]\n+  where\n+    signatory sig\n+    observer delegees\n+\n+    nonconsuming choice CreateKeyed\n+      : ContractId Keyed\n+      with\n+        delegee : Party\n+        obs : Party\n+      controller delegee\n+      do\n+        create Keyed with sig; obs\n+\n+    nonconsuming choice ArchiveKeyed\n+      : ()\n+      with\n+        delegee : Party\n+        keyedCid : ContractId Keyed\n+      controller delegee\n+      do\n+        archive keyedCid\n+\n+    nonconsuming choice LookupKeyed\n+      : Optional (ContractId Keyed)\n+      with\n+        lookupKey : Party\n+        delegee : Party\n+      controller delegee\n+      do\n+        lookupByKey @Keyed lookupKey\n+\n+    nonconsuming choice FetchKeyed\n+      : (ContractId Keyed, Keyed)\n+      with\n+        lookupKey : Party\n+        delegee : Party\n+      controller delegee\n+      do\n+        fetchByKey @Keyed lookupKey\n+\n+lookupTest = scenario do\n+\n+  -- Put four parties in the four possible relationships with a `Keyed`\n+  sig <- getParty \"s\" -- Signatory\n+  obs <- getParty \"o\" -- Observer\n+  divulgee <- getParty \"d\" -- Divulgee\n+  blind <- getParty \"b\" -- Blind\n+\n+  keyedCid <- submit sig do create Keyed with ..\n+  divulgercid <- submit divulgee do create Divulger with ..\n+  submit sig do exercise divulgercid DivulgeKeyed with ..\n+\n+  -- Now the signatory and observer delegate their choices\n+  sigDelegationCid <- submit sig do \n+    create Delegation with \n+      sig\n+      delegees = [obs, divulgee, blind]\n+  obsDelegationCid <- submit obs do \n+    create Delegation with\n+      sig = obs\n+      delegees = [divulgee, blind]\n+\n+  -- TESTING LOOKUPS AND FETCHES\n+\n+  -- Maintainer can fetch\n+  submit sig do\n+    (cid, keyed) <- fetchByKey @Keyed sig\n+    assert (keyedCid == cid)\n+  -- Maintainer can lookup\n+  submit sig do\n+    mcid <- lookupByKey @Keyed sig\n+    assert (mcid == Some keyedCid)\n+\n+  -- Stakeholder can fetch\n+  submit obs do\n+    (cid, l) <- fetchByKey @Keyed sig\n+    assert (keyedCid == cid)\n+  -- Stakeholder can't lookup without authorization\n+  submitMustFail obs do lookupByKey @Keyed sig\n+  -- Stakeholder can lookup with authorization\n+  submit obs do \n+    mcid <- exercise sigDelegationCid LookupKeyed with \n+      delegee = obs\n+      lookupKey = sig\n+    assert (mcid == Some keyedCid)\n+\n+  -- Divulgee can't fetch\n+  submitMustFail divulgee do fetchByKey @Keyed sig\n+  -- Divulgee can't lookup\n+  submitMustFail divulgee do lookupByKey @Keyed sig\n+  -- Divulgee can't lookup with stakeholder authority\n+  submitMustFail divulgee do \n+    exercise obsDelegationCid LookupKeyed with\n+        delegee = divulgee\n+        lookupKey = sig\n+  -- Divulgee can't do positive lookup with maintainer authority. \n+  -- Note that the lookup returns `None` so the assertion passes.\n+  -- If the assertion is changed to `isSome`, the assertion fails,\n+  -- which means the error message changes. The reason is that the\n+  -- assertion is checked at interpretation time, before the lookup\n+  -- is checked at validation time.\n+  submitMustFail divulgee do \n+    mcid <- exercise sigDelegationCid LookupKeyed with\n+      delegee = divulgee\n+      lookupKey = sig\n+    assert (isNone mcid)\n+  -- Divulgee can't fetch with stakeholder authority\n+  submitMustFail divulgee do \n+    (cid, keyed) <- exercise obsDelegationCid FetchKeyed with\n+      delegee = divulgee\n+      lookupKey = sig\n+    assert (keyedCid == cid)\n+\n+  -- Blind party can't fetch\n+  submitMustFail blind do fetchByKey @Keyed sig\n+  -- Blind party can't lookup\n+  submitMustFail blind do lookupByKey @Keyed sig\n+  -- Blind party can't lookup with stakeholder authority\n+  submitMustFail blind do\n+    exercise obsDelegationCid LookupKeyed with\n+      delegee = blind\n+      lookupKey = sig\n+  -- Blind party can't lookup with maintainer authority.\n+  -- The lookup initially returns `None`, but is rejected at\n+  -- validation time\n+  submitMustFail blind do\n+    mcid <- exercise sigDelegationCid LookupKeyed with\n+      delegee = blind\n+      lookupKey = sig\n+    assert (isNone mcid)\n+  -- Blind party can't fetch with stakeholder authority as lookup is negative\n+  submitMustFail blind do \n+    exercise obsDelegationCid FetchKeyed with\n+      delegee = blind\n+      lookupKey = sig\n+  -- Blind can do a negative lookup on a truly nonexistant contract\n+  submit blind do\n+    mcid <- exercise obsDelegationCid LookupKeyed with\n+      delegee = blind\n+      lookupKey = obs\n+    assert (isNone mcid)\n+  -- TESTING CREATES AND ARCHIVES"
+  },
+  {
+    "id" : "c10927ec-ea2f-49de-9325-44e9ba0a695a",
+    "prId" : 6401,
+    "comments" : [
+      {
+        "id" : "c21f372e-5647-4d50-ae06-5a118ed29c5e",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Do we run this through `daml test` or some other form of interpretation? We should definitely have this checked by a machine to make sure we don't break it ever again.",
+        "createdAt" : "2020-06-18T17:22:13Z",
+        "updatedAt" : "2020-06-18T17:22:26Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9820341a-8220-4382-baa6-e39f8c9362dd",
+        "parentId" : "c21f372e-5647-4d50-ae06-5a118ed29c5e",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Ok, I just saw we do. Consider this answered.",
+        "createdAt" : "2020-06-18T17:23:11Z",
+        "updatedAt" : "2020-06-18T17:23:11Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a27890adcd6e1a065d6f6ad496fe73220a8ff4de",
+    "line" : 1,
+    "diffHunk" : "@@ -0,0 +1,203 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved."
+  }
+]

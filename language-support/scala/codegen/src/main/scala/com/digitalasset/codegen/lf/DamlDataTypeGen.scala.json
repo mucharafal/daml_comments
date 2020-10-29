@@ -1,0 +1,86 @@
+[
+  {
+    "id" : "5402930e-8eb6-452e-82ad-53bc5d475630",
+    "prId" : 1833,
+    "comments" : [
+      {
+        "id" : "443ed5ef-885c-406a-be67-563a435b96c4",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Add `stdVectorType` alongside `stdMapType` to `LFUtil`, and\r\n\r\n```suggestion\r\n              val otherValues:  $stdVectorType[$appliedValueType] =\r\n```",
+        "createdAt" : "2019-06-24T13:03:44Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bb039877-3a22-4d73-aedd-45fe469dcb61",
+        "parentId" : "443ed5ef-885c-406a-be67-563a435b96c4",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-06-25T09:23:04Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0024f1caa606682717407339870b82441a5a448c",
+    "line" : null,
+    "diffHunk" : "@@ -134,11 +135,56 @@ object DamlRecordOrVariantTypeGen {\n           $valueInstanceExpr\"\"\"\n     }\n \n+    /**\n+      *  The generated class for a DAML enum type contains:\n+      *  - the definition of a \"Value\" trait\n+      *  - the definition of a _case object_ for each constructor of the DAML enum\n+      *  - A type class instance (i.e. implicit object) for serializing/deserializing\n+      *    to/from the ArgumentValue type (see typed-ledger-api project)\n+      */\n+    def toScalaDamlEnumType(constructors: List[Ref.Name]): (Set[Tree], (Tree, Tree)) = {\n+      val className = damlScalaName.name.capitalize\n+\n+      val klass =\n+        q\"\"\"\n+          sealed abstract class ${TypeName(className)}(\n+            override val constructor: String,\n+            override val index: Int\n+          ) extends ${tq\"$domainApiAlias.EnumRef\"} {\n+            ..$rootClassChildren\n+          }\"\"\"\n+\n+      val (imports, companionObject) = constructors match {\n+        case firstValue :: otherValues =>\n+          Set(LFUtil.domainApiImport) ->\n+            q\"\"\"\n+            object ${TermName(className)} extends\n+              ${tq\"$domainApiAlias.EnumCompanion[$appliedValueType]\"} {\n+              ..${constructors.zipWithIndex.map {\n+              case (c, i) =>\n+                q\"\"\"case object ${TermName(c.capitalize)} extends $appliedValueType($c, $i) \"\"\"\n+            }}\n+            \n+              val firstValue: $appliedValueType = ${TermName(firstValue.capitalize)}\n+              val otherValues:  Vector[$appliedValueType] ="
+  },
+  {
+    "id" : "f07c9936-1bd9-4fa2-9057-7d2a7973b4d7",
+    "prId" : 1833,
+    "comments" : [
+      {
+        "id" : "b026ef30-e244-4276-87c6-5e96ccf12a2a",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "For whatever reason, the `::` pattern is super brittle.\r\n\r\n```suggestion\r\n      val (imports, companionObject) = (constructors: List[Ref.Name]) match {\r\n```",
+        "createdAt" : "2019-06-26T07:42:08Z",
+        "updatedAt" : "2019-06-26T17:21:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0024f1caa606682717407339870b82441a5a448c",
+    "line" : null,
+    "diffHunk" : "@@ -134,11 +135,56 @@ object DamlRecordOrVariantTypeGen {\n           $valueInstanceExpr\"\"\"\n     }\n \n+    /**\n+      *  The generated class for a DAML enum type contains:\n+      *  - the definition of a \"Value\" trait\n+      *  - the definition of a _case object_ for each constructor of the DAML enum\n+      *  - A type class instance (i.e. implicit object) for serializing/deserializing\n+      *    to/from the ArgumentValue type (see typed-ledger-api project)\n+      */\n+    def toScalaDamlEnumType(constructors: List[Ref.Name]): (Set[Tree], (Tree, Tree)) = {\n+      val className = damlScalaName.name.capitalize\n+\n+      val klass =\n+        q\"\"\"\n+          sealed abstract class ${TypeName(className)}(\n+            override val constructor: String,\n+            override val index: Int\n+          ) extends ${tq\"$domainApiAlias.EnumRef\"} {\n+            ..$rootClassChildren\n+          }\"\"\"\n+\n+      val (imports, companionObject) = constructors match {"
+  }
+]

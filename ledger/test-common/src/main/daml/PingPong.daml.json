@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "72bb602e-d748-4645-b0c0-ea1efe9e6389",
+    "prId" : 5377,
+    "comments" : [
+      {
+        "id" : "672c6364-d641-47ef-b2e5-d65a1aa3d33f",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can we remove the explosion logic until we need it? (And even if we do need it eventually, I'd rather make it a separate DAML model.)",
+        "createdAt" : "2020-04-02T13:07:17Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1ac29884-e042-4f5a-8004-9b7cafc1b83f",
+        "parentId" : "672c6364-d641-47ef-b2e5-d65a1aa3d33f",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I'll have a look to understand it better but so far my understanding it that it builds a tree of pings rather than a single one. @mziolekda @dajmaki what do you think, are we going to use it soon e.g. to get a bit closer to real-world workload? If so I'd rather clean it up and leave it there.",
+        "createdAt" : "2020-04-03T07:36:14Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4e05ad6a-1594-4e08-9ad8-669488aeccf5",
+        "parentId" : "672c6364-d641-47ef-b2e5-d65a1aa3d33f",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Even if we do use it, I'd still prefer if it lived in something called _ExplodingPingPong.daml_ and this one was kept simple. I shouldn't have to understand the exploding-ness for the simple tests.",
+        "createdAt" : "2020-04-03T08:16:26Z",
+        "updatedAt" : "2020-04-06T12:50:22Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70cc33cce879b665e8969f8d4f92cb39b9b489d5",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,186 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+daml 1.2\n+module PingPong where\n+\n+import DA.Text\n+\n+template Ping\n+  with\n+    id : Text\n+    initiator : Party\n+    responders : [Party]\n+    maxLevel : Int\n+  where\n+\n+    signatory initiator\n+    observer responders\n+\n+    choice Respond : Either (ContractId Pong) (ContractId Explode)\n+        with\n+        winner : Party\n+      controller winner\n+        do\n+        if maxLevel == 0 then do\n+            png <- create Pong with id, initiator, responder = winner, observers = responders\n+            return (Left png)\n+        else do\n+            expl <- create Explode with id, initiator, responders, path = \"\", maxLevel\n+            return (Right expl)"
+  }
+]

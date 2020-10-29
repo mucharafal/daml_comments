@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "cabff273-f3d6-40de-99c8-f0971c187b3f",
+    "prId" : 7618,
+    "comments" : [
+      {
+        "id" : "0a7627c4-288e-4769-bc45-18a47a6a1d80",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "As mentioned on typelevel/cats-effect#556,\r\n\r\n> This must not be used with general purpose contexts like `scala.concurrent.ExecutionContext.Implicits.global`.\r\n\r\nMore details in the 71e59e1b3ef8ae66fb79f93cd94f71af8689e736 message\r\n\r\n> The point of using Blocker instead of ExecutionContext seems to be to especially emphasize to API users that it isn't appropriate to use an ExecutionContext with ordinary behavior.\r\n\r\nwhich seems to be confirmed by typelevel/cats-effect#555.",
+        "createdAt" : "2020-10-14T19:17:32Z",
+        "updatedAt" : "2020-10-15T20:55:55Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "96d796cb5ff2cb8b3ea93178d74041537cdd48cd",
+    "line" : null,
+    "diffHunk" : "@@ -38,7 +38,7 @@ class DatabaseActions extends LazyLogging {\n     */\n   private val xa = Transactor.fromConnection[IO](\n     DriverManager.getConnection(\"jdbc:sqlite::memory:\"),\n-    ExecutionContext.global)\n+    Blocker liftExecutionContext ExecutionContext.global)"
+  },
+  {
+    "id" : "586b83dd-aa5a-40ac-a6bf-d9b46f0c95ce",
+    "prId" : 2272,
+    "comments" : [
+      {
+        "id" : "5b92e6be-d97e-4353-bc4e-0b6ecd26912f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I think this is better expressed as:\r\n```\r\nresult.failed.foreach { case NonFatal(t) => logger.error(....) }\r\nresult\r\n```\r\n\r\nThe `recoverWith` indicates that some recovery checking is done, when it's actually not.",
+        "createdAt" : "2019-07-24T12:26:04Z",
+        "updatedAt" : "2019-07-25T07:50:53Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "def04d6f19265b802e19c71126fcb1db4b49a2c2",
+    "line" : null,
+    "diffHunk" : "@@ -95,11 +96,19 @@ class DatabaseActions {\n     } yield SqlQueryResult(colNames, data.map(_.map(Option(_).map(_.toString).getOrElse(\"null\"))))\n   }\n \n-  def runQuery(query: String): Try[SqlQueryResult] = {\n+  /** Returns the given value, logging failures */\n+  private def logErrors[T](result: Try[T]): Try[T] =\n+    result.recoverWith {"
+  }
+]

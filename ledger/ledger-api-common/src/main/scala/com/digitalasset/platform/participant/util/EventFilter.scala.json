@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "ffb3d761-9cc4-478a-9284-b335d157de92",
+    "prId" : 2931,
+    "comments" : [
+      {
+        "id" : "c221ba7d-ee36-4e2f-8681-897539ddb58c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Since this code is quite imperative in nature it may be worth considering an imperative idiom\r\n```scala\r\nfor ((party, filters) <- transactionFilter) {\r\n  if (filters.inclusive.isEmpty) global += party\r\n  else for (tid <- inclusive.templateIds) {\r\n    specific += tid -> party\r\n  }\r\n}\r\n```",
+        "createdAt" : "2019-09-17T12:04:43Z",
+        "updatedAt" : "2019-09-17T12:46:03Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "989877a0-17ba-4b0f-9d91-5511b31634dd",
+        "parentId" : "c221ba7d-ee36-4e2f-8681-897539ddb58c",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Good idea. Addressed in 421b44e24.",
+        "createdAt" : "2019-09-17T12:22:26Z",
+        "updatedAt" : "2019-09-17T12:46:03Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "36776f1e-a886-4820-960e-a1cb44b1a159",
+        "parentId" : "c221ba7d-ee36-4e2f-8681-897539ddb58c",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/2931/commits/421b44e244a3efabd7a0f4d90e9bc03ec6d291de",
+        "createdAt" : "2019-09-17T12:38:05Z",
+        "updatedAt" : "2019-09-17T12:46:03Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "49bc8899c0e36dc119d0bbaa989d149ce259ad10",
+    "line" : null,
+    "diffHunk" : "@@ -26,9 +26,23 @@ object EventFilter {\n     def isSubmitterSubscriber(submitterParty: Party): Boolean =\n       transactionFilter.filtersByParty.contains(submitterParty)\n \n-    private val subscribersByTemplateId: Map[Ref.Identifier, Set[Party]] = {\n-      val (specificSubscriptions, globalSubscriptions) = getSpecificAndGlobalSubscriptions(\n-        transactionFilter)\n+    lazy val (specificSubscriptions, globalSubscriptions) = {\n+      val specific = new ArrayBuffer[(Ref.Identifier, Party)]\n+      val global = immutable.Set.newBuilder[Party]\n+      transactionFilter.filtersByParty.foreach {"
+  }
+]

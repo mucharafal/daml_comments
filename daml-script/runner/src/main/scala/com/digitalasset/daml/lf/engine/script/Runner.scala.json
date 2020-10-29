@@ -1,0 +1,953 @@
+[
+  {
+    "id" : "9acb353c-2ca2-49e9-85c0-a4c5969a3879",
+    "prId" : 7292,
+    "comments" : [
+      {
+        "id" : "1b4d09c7-e48d-4d01-8ded-63e7778b0255",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "This means the machine is now persisted across multiple runs, right? Does this mean we need to reset it after runs, e.g. between test cases in `daml test-script`?",
+        "createdAt" : "2020-09-01T16:05:03Z",
+        "updatedAt" : "2020-09-01T16:27:08Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4ea81e1e-68ff-4f21-896a-3ad8e8058f36",
+        "parentId" : "1b4d09c7-e48d-4d01-8ded-63e7778b0255",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "An indvidual `Runner` is specific to a single script. I’m not aware of any case where we call `run` multiple for a single script or reuse `Runner` at all so this doesn’t really matter. But I agree that the API here is confusing and doesn’t enforce that this is used correctly and we should fix this. I’ve changed it to return the machine from `runWithClients` now. It feels a bit weird to return `(Machine, Future[_])` but it does the trick and avoids this. We should probably also kill the `Runner`constructer since we never construct a runner without running it immediately.",
+        "createdAt" : "2020-09-01T16:24:11Z",
+        "updatedAt" : "2020-09-01T16:27:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "00064d291b7f830115747541612d6af611501433",
+    "line" : null,
+    "diffHunk" : "@@ -283,6 +283,33 @@ object Runner {\n class Runner(compiledPackages: CompiledPackages, script: Script.Action, timeMode: ScriptTimeMode)\n     extends StrictLogging {\n \n+  // We overwrite the definition of fromLedgerValue with an identity function.\n+  // This is a type error but Speedy doesn’t care about the types and the only thing we do\n+  // with the result is convert it to ledger values/record so this is safe.\n+  private val extendedCompiledPackages = {\n+    val fromLedgerValue: PartialFunction[SDefinitionRef, SExpr] = {\n+      case LfDefRef(id) if id == script.scriptIds.damlScript(\"fromLedgerValue\") =>\n+        SEMakeClo(Array(), 1, SELocA(0))\n+    }\n+    new CompiledPackages(Compiler.FullStackTrace, Compiler.NoProfile) {\n+      override def getPackage(pkgId: PackageId): Option[Package] =\n+        compiledPackages.getPackage(pkgId)\n+      override def getDefinition(dref: SDefinitionRef): Option[SExpr] =\n+        fromLedgerValue.andThen(Some(_)).applyOrElse(dref, compiledPackages.getDefinition)\n+      // FIXME: avoid override of non abstract method\n+      override def packages: PartialFunction[PackageId, Package] = compiledPackages.packages\n+      override def packageIds: Set[PackageId] = compiledPackages.packageIds\n+      // FIXME: avoid override of non abstract method\n+      override def definitions: PartialFunction[SDefinitionRef, SExpr] =\n+        fromLedgerValue.orElse(compiledPackages.definitions)\n+      override def packageLanguageVersion: PartialFunction[PackageId, LanguageVersion] =\n+        compiledPackages.packageLanguageVersion\n+    }\n+  }\n+\n+  val machine =\n+    Speedy.Machine.fromPureSExpr(extendedCompiledPackages, script.expr, onLedger = false)"
+  },
+  {
+    "id" : "10683365-3fb5-4bb0-ac7b-fd41fd91cc6e",
+    "prId" : 7252,
+    "comments" : [
+      {
+        "id" : "374ffeaa-6c7e-49ca-9a01-201f82b7e44c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "maybe worth adding a comment that this is for backwards compat.",
+        "createdAt" : "2020-08-27T16:01:38Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dcfe6055-3815-4b01-a65c-23e3dd6f614c",
+        "parentId" : "374ffeaa-6c7e-49ca-9a01-201f82b7e44c",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-08-28T11:36:02Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5cd8cd54f886d4b5d729f46c48c70c22c49f3082",
+    "line" : 28,
+    "diffHunk" : "@@ -380,7 +386,12 @@ class Runner(compiledPackages: CompiledPackages, script: Script.Action, timeMode\n                       client <- Converter.toFuture(\n                         clients\n                           .getPartyParticipant(Party(party.value)))\n-                      submitRes <- client.submit(party, commands)\n+                      commitLocation <- if (vals.size == 3) {"
+  },
+  {
+    "id" : "55784a99-2ae5-463a-99a6-a5c3110254ca",
+    "prId" : 7252,
+    "comments" : [
+      {
+        "id" : "b8f22f1b-7d6a-4c62-ae1a-b7c0322359a2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "same here.",
+        "createdAt" : "2020-08-27T16:01:49Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fd3c02db-6686-457c-9a4f-007efebe3d7f",
+        "parentId" : "b8f22f1b-7d6a-4c62-ae1a-b7c0322359a2",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-08-28T11:36:08Z",
+        "updatedAt" : "2020-08-28T11:39:11Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5cd8cd54f886d4b5d729f46c48c70c22c49f3082",
+    "line" : 52,
+    "diffHunk" : "@@ -441,7 +452,12 @@ class Runner(compiledPackages: CompiledPackages, script: Script.Action, timeMode\n                       client <- Converter.toFuture(\n                         clients\n                           .getPartyParticipant(Party(party.value)))\n-                      submitRes <- client.submitMustFail(party, commands)\n+                      commitLocation <- if (vals.size == 3) {"
+  },
+  {
+    "id" : "2c324047-ece9-4048-9666-4c8534a3ca20",
+    "prId" : 7076,
+    "comments" : [
+      {
+        "id" : "4b1d5bc9-fe26-4be7-b72d-6c855ce6f040",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I have confirmed that replacing this branch by `Future.failed(...)` breaks the corresponding compatibility test.",
+        "createdAt" : "2020-08-11T12:16:56Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4f993b93-43dc-4ae1-ae1f-6d4f9bdb0bd2",
+        "parentId" : "4b1d5bc9-fe26-4be7-b72d-6c855ce6f040",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We don’t seem to have a `submitMustFail` in the compat tests. Should we add one?",
+        "createdAt" : "2020-08-11T14:40:09Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3184a05f-6a18-4018-b0ea-ba6ba61218e5",
+        "parentId" : "4b1d5bc9-fe26-4be7-b72d-6c855ce6f040",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh nvm, I just saw that you added it :facepalm: ",
+        "createdAt" : "2020-08-11T14:48:09Z",
+        "updatedAt" : "2020-08-12T08:10:17Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0b4069aeb0cabd660fe58e5ec6b9b3c3164957f2",
+    "line" : 16,
+    "diffHunk" : "@@ -399,6 +400,11 @@ class Runner(compiledPackages: CompiledPackages, script: Script.Action, timeMode\n                           } yield v\n                         }\n                         case Left(statusEx) => {\n+                          // This branch is superseded by SubmitMustFail below,\n+                          // however, it is maintained for backwards\n+                          // compatibility with DAML script DARs generated by\n+                          // older SDK versions that didn't distinguish Submit\n+                          // and SubmitMustFail."
+  },
+  {
+    "id" : "abf35bbc-3250-4b06-bd5c-7ee0e2557692",
+    "prId" : 6473,
+    "comments" : [
+      {
+        "id" : "85baa19b-fbb3-45d1-87bc-0db9380943ae",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Maybe scalaz has something for this? (Since it's imported already anyway)",
+        "createdAt" : "2020-06-24T12:00:45Z",
+        "updatedAt" : "2020-06-24T12:40:27Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "014807a9-80fe-4bef-850f-8e948485e369",
+        "parentId" : "85baa19b-fbb3-45d1-87bc-0db9380943ae",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I looked for it but scalaz doesn’t make `Future` an applicative so it doesn’t help either.",
+        "createdAt" : "2020-06-24T12:42:37Z",
+        "updatedAt" : "2020-06-24T12:42:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eabe3836b2a3398062b810766fa805c06c873c77",
+    "line" : 148,
+    "diffHunk" : "@@ -169,29 +200,40 @@ object Runner {\n       // Map is but it doesn’t return a Map so we have to call toMap afterwards.\n       defaultClient <- Future\n         .traverse(participantParams.default_participant.toList)(x =>\n-          connectApiParameters(x, clientConfig, maxInboundMessageSize))\n+          connectApiParameters(x, applicationId, tlsConfig, maxInboundMessageSize))\n         .map(_.headOption)\n       participantClients <- Future\n         .traverse(participantParams.participants: Map[Participant, ApiParameters])({\n-          case (k, v) => connectApiParameters(v, clientConfig, maxInboundMessageSize).map((k, _))\n+          case (k, v) =>\n+            connectApiParameters(v, applicationId, tlsConfig, maxInboundMessageSize).map((k, _))\n         })\n         .map(_.toMap)\n     } yield Participants(defaultClient, participantClients, participantParams.party_participants)\n   }\n \n-  def jsonClients(\n-      participantParams: Participants[ApiParameters],\n-      token: String,\n-      envIface: EnvironmentInterface)(\n+  def jsonClients(participantParams: Participants[ApiParameters], envIface: EnvironmentInterface)(\n       implicit ec: ExecutionContext,\n       system: ActorSystem): Future[Participants[JsonLedgerClient]] = {\n     def client(params: ApiParameters) = {\n       val uri = Uri(params.host + \":\" + params.port.toString)\n-      new JsonLedgerClient(uri, Jwt(token), envIface, system)\n+      params.access_token match {\n+        case None =>\n+          Future.failed(new RuntimeException(s\"The JSON API always requires access tokens\"))\n+        case Some(token) =>\n+          Future.successful(new JsonLedgerClient(uri, Jwt(token), envIface, system))\n+      }\n+\n     }\n-    val defClient = participantParams.default_participant.map(client(_))\n-    val otherClients = participantParams.participants.map({ case (k, v) => (k, client(v)) })\n-    Future { Participants(defClient, otherClients, participantParams.party_participants) }\n+    for {\n+      // Apparently Future.traverse is too stupid to traverse an\n+      // Option so you first have to convert to a list and then convert back.\n+      defClient <- Future\n+        .traverse(participantParams.default_participant.toList)(client(_))\n+        .map(_.headOption)"
+  },
+  {
+    "id" : "2ed17f43-c8d1-4dc3-ada7-f1ea06f21422",
+    "prId" : 6469,
+    "comments" : [
+      {
+        "id" : "df6d6ff4-d8bd-456e-a4f1-fc04ad9c8965",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "what happened with `headOption` it is not required any longer.... `participantParams.default_participant` is `Option[A]`, right?",
+        "createdAt" : "2020-06-24T20:33:40Z",
+        "updatedAt" : "2020-06-24T20:33:40Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6f353247-8abe-40a5-8d0b-b2111c533ba6",
+        "parentId" : "df6d6ff4-d8bd-456e-a4f1-fc04ad9c8965",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Indeed.",
+        "createdAt" : "2020-06-24T20:49:29Z",
+        "updatedAt" : "2020-06-24T20:49:30Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5e9f85e23ff1161af7fbc16f25932387c256b3ea",
+    "line" : 43,
+    "diffHunk" : "@@ -225,14 +218,8 @@ object Runner {\n \n     }\n     for {\n-      // Apparently Future.traverse is too stupid to traverse an\n-      // Option so you first have to convert to a list and then convert back.\n-      defClient <- Future\n-        .traverse(participantParams.default_participant.toList)(client(_))\n-        .map(_.headOption)\n-      otherClients <- Future\n-        .traverse(participantParams.participants)({ case (k, v) => client(v).map(c => (k, c)) })\n-        .map(_.toMap)\n+      defClient <- participantParams.default_participant.traverse(client(_))"
+  },
+  {
+    "id" : "4015490d-08dd-48a2-820e-d3fbcb329ccc",
+    "prId" : 5871,
+    "comments" : [
+      {
+        "id" : "68406ab1-b8c6-4252-bdfb-33b67d1a1c00",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Return is the source of all evil :D\r\nIn general, return is not compiled as you expect but using exception. \r\nBetter to avoid it. ",
+        "createdAt" : "2020-05-06T15:09:26Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "84d47c6d-eae8-4c3a-942b-b396c5da47e6",
+        "parentId" : "68406ab1-b8c6-4252-bdfb-33b67d1a1c00",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What exactly do you mean by that?",
+        "createdAt" : "2020-05-06T15:14:44Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8691c07e-f453-44ec-bf72-1bf35a8afcdc",
+        "parentId" : "68406ab1-b8c6-4252-bdfb-33b67d1a1c00",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "In general you cannot assume that scala returns are translate into simple java returns.\r\nA lot of time they are compiled using throw/catch ",
+        "createdAt" : "2020-05-06T15:35:41Z",
+        "updatedAt" : "2020-05-06T15:59:55Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c5abc021690792303b5546906c10528c3ce20380",
+    "line" : 13,
+    "diffHunk" : "@@ -298,231 +300,218 @@ class Runner(\n         Set.empty,\n       )\n \n-    // Removing the early return only makes this harder to read.\n-    @SuppressWarnings(Array(\"org.wartremover.warts.Return\"))"
+  },
+  {
+    "id" : "eb7929f7-e285-445f-a12c-4de2028005cf",
+    "prId" : 5871,
+    "comments" : [
+      {
+        "id" : "826ba0e6-69c6-463c-8692-d7371d97754f",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Why using `Either` when you can use directly `Future` ?",
+        "createdAt" : "2020-05-06T15:11:19Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3a42eb4e-199e-4d44-8937-58b9ba3460fd",
+        "parentId" : "826ba0e6-69c6-463c-8692-d7371d97754f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Because this is a synchronous call. Returning a `Future` is just confusing.",
+        "createdAt" : "2020-05-06T15:14:29Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "746af145-48e8-4932-a219-0beba8b01f97",
+        "parentId" : "826ba0e6-69c6-463c-8692-d7371d97754f",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "faire enough. ",
+        "createdAt" : "2020-05-06T15:35:16Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c5abc021690792303b5546906c10528c3ce20380",
+    "line" : null,
+    "diffHunk" : "@@ -298,231 +299,217 @@ class Runner(\n         Set.empty,\n       )\n \n-    // Removing the early return only makes this harder to read.\n-    @SuppressWarnings(Array(\"org.wartremover.warts.Return\"))\n-    def stepToValue(): Either[RuntimeException, Unit] = {\n-      while (!machine.isFinal) {\n+    @tailrec\n+    def stepToValue(): Future[SValue] ="
+  },
+  {
+    "id" : "abf79a4a-bcbe-4d94-8f32-89dbc577ba7e",
+    "prId" : 5871,
+    "comments" : [
+      {
+        "id" : "0aba6482-63e7-4fa8-b990-334867eeb91e",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Having a clean API for `go` (or `run`) simplify change the engine. ",
+        "createdAt" : "2020-05-06T15:11:52Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c5abc021690792303b5546906c10528c3ce20380",
+    "line" : 40,
+    "diffHunk" : "@@ -298,231 +299,217 @@ class Runner(\n         Set.empty,\n       )\n \n-    // Removing the early return only makes this harder to read.\n-    @SuppressWarnings(Array(\"org.wartremover.warts.Return\"))\n-    def stepToValue(): Either[RuntimeException, Unit] = {\n-      while (!machine.isFinal) {\n+    @tailrec\n+    def stepToValue(): Future[SValue] =\n+      if (machine.isFinal())\n+        Future.successful(machine.toSValue)\n+      else\n         machine.run() match {\n-          case SResultFinalValue(_) => ()\n-          case SResultError(err) => {\n+          case SResultFinalValue(_) =>\n+            stepToValue()\n+          case SResultError(err) =>\n             logger.error(Pretty.prettyError(err, machine.ptx).render(80))\n-            return Left(err)\n-          }\n-          case res => {\n-            return Left(new RuntimeException(s\"Unexpected speedy result $res\"))\n-          }\n+            Future.failed(err)\n+          case res =>\n+            Future.failed(new RuntimeException(s\"Unexpected speedy result $res\"))\n         }\n-      }\n-      Right(())\n-    }\n \n-    def go(): Future[SValue] = {\n+    def run(expr: SExpr): Future[SValue] = {"
+  },
+  {
+    "id" : "c00ef37a-869c-45c9-bcb0-81f257683d18",
+    "prId" : 5871,
+    "comments" : [
+      {
+        "id" : "061680f0-2754-47e3-88a8-7f997b59b6bb",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "You probably want the first step to be run in a Future, don't you ? ",
+        "createdAt" : "2020-05-06T15:13:25Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b421e03d-5656-4727-ba69-c702a66296e2",
+        "parentId" : "061680f0-2754-47e3-88a8-7f997b59b6bb",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Makes sense I guess but please add a comment.",
+        "createdAt" : "2020-05-06T15:31:23Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c5abc021690792303b5546906c10528c3ce20380",
+    "line" : null,
+    "diffHunk" : "@@ -298,231 +299,217 @@ class Runner(\n         Set.empty,\n       )\n \n-    // Removing the early return only makes this harder to read.\n-    @SuppressWarnings(Array(\"org.wartremover.warts.Return\"))\n-    def stepToValue(): Either[RuntimeException, Unit] = {\n-      while (!machine.isFinal) {\n+    @tailrec\n+    def stepToValue(): Future[SValue] =\n+      if (machine.isFinal())\n+        Future.successful(machine.toSValue)\n+      else\n         machine.run() match {\n-          case SResultFinalValue(_) => ()\n-          case SResultError(err) => {\n+          case SResultFinalValue(_) =>\n+            stepToValue()\n+          case SResultError(err) =>\n             logger.error(Pretty.prettyError(err, machine.ptx).render(80))\n-            return Left(err)\n-          }\n-          case res => {\n-            return Left(new RuntimeException(s\"Unexpected speedy result $res\"))\n-          }\n+            Future.failed(err)\n+          case res =>\n+            Future.failed(new RuntimeException(s\"Unexpected speedy result $res\"))\n         }\n-      }\n-      Right(())\n-    }\n \n-    def go(): Future[SValue] = {\n+    def run(expr: SExpr): Future[SValue] = {\n+      machine.ctrl = Speedy.CtrlExpr(expr)\n       stepToValue()\n-        .fold(Future.failed(_), Future.successful(_))\n-        .flatMap(_ =>\n-          machine.toSValue match {\n-            case SVariant(_, \"Free\", _, v) => {\n-              v match {\n-                case SVariant(_, \"Submit\", _, v) => {\n-                  v match {\n-                    case SRecord(_, _, vals) if vals.size == 3 => {\n-                      for {\n-                        freeAp <- vals.get(1) match {\n-                          // Unwrap Commands newtype\n-                          case SRecord(_, _, vals) if vals.size == 1 =>\n-                            Future.successful(vals.get(0))\n-                          case v =>\n-                            Future.failed(\n-                              new ConverterException(s\"Expected record with 1 field but got $v\"))\n+        .flatMap {\n+          case SVariant(_, \"Free\", _, v) => {\n+            v match {\n+              case SVariant(_, \"Submit\", _, v) => {\n+                v match {\n+                  case SRecord(_, _, vals) if vals.size == 3 => {\n+                    for {\n+                      freeAp <- vals.get(1) match {\n+                        // Unwrap Commands newtype\n+                        case SRecord(_, _, vals) if vals.size == 1 =>\n+                          Future.successful(vals.get(0))\n+                        case v =>\n+                          Future.failed(\n+                            new ConverterException(s\"Expected record with 1 field but got $v\"))\n+                      }\n+                      party <- Converter.toFuture(\n+                        Converter\n+                          .toParty(vals.get(0)))\n+                      commands <- Converter.toFuture(\n+                        Converter\n+                          .toCommands(extendedCompiledPackages, freeAp))\n+                      client <- Converter.toFuture(\n+                        clients\n+                          .getPartyParticipant(Party(party.value)))\n+                      submitRes <- client.submit(applicationId, party, commands)\n+                      v <- submitRes match {\n+                        case Right(results) => {\n+                          for {\n+                            filled <- Converter.toFuture(\n+                              Converter\n+                                .fillCommandResults(\n+                                  extendedCompiledPackages,\n+                                  lookupChoiceTy,\n+                                  valueTranslator,\n+                                  freeAp,\n+                                  results))\n+                            v <- {\n+                              run(filled)\n+                            }\n+                          } yield v\n                         }\n-                        party <- Converter.toFuture(\n-                          Converter\n-                            .toParty(vals.get(0)))\n-                        commands <- Converter.toFuture(\n-                          Converter\n-                            .toCommands(extendedCompiledPackages, freeAp))\n-                        client <- Converter.toFuture(\n-                          clients\n-                            .getPartyParticipant(Party(party.value)))\n-                        submitRes <- client.submit(applicationId, party, commands)\n-                        v <- submitRes match {\n-                          case Right(results) => {\n-                            for {\n-                              filled <- Converter.toFuture(\n-                                Converter\n-                                  .fillCommandResults(\n-                                    extendedCompiledPackages,\n-                                    lookupChoiceTy,\n-                                    valueTranslator,\n-                                    freeAp,\n-                                    results))\n-                              v <- {\n-                                machine.ctrl = Speedy.CtrlExpr(filled)\n-                                go()\n-                              }\n-                            } yield v\n-                          }\n-                          case Left(statusEx) => {\n-                            for {\n-                              res <- Converter.toFuture(\n-                                Converter\n-                                  .fromStatusException(script.scriptIds, statusEx))\n-                              v <- {\n-                                machine.ctrl =\n-                                  Speedy.CtrlExpr(SEApp(SEValue(vals.get(2)), Array(SEValue(res))))\n-                                go()\n-                              }\n-                            } yield v\n-                          }\n+                        case Left(statusEx) => {\n+                          for {\n+                            res <- Converter.toFuture(\n+                              Converter\n+                                .fromStatusException(script.scriptIds, statusEx))\n+                            v <- {\n+                              run(SEApp(SEValue(vals.get(2)), Array(SEValue(res))))\n+                            }\n+                          } yield v\n                         }\n-                      } yield v\n-                    }\n-                    case _ =>\n-                      Future.failed(\n-                        new ConverterException(s\"Expected record with 2 fields but got $v\"))\n+                      }\n+                    } yield v\n                   }\n+                  case _ =>\n+                    Future.failed(\n+                      new ConverterException(s\"Expected record with 2 fields but got $v\"))\n                 }\n-                case SVariant(_, \"Query\", _, v) => {\n-                  v match {\n-                    case SRecord(_, _, vals) if vals.size == 3 => {\n-                      val continue = vals.get(2)\n-                      for {\n-                        party <- Converter.toFuture(\n-                          Converter\n-                            .toParty(vals.get(0)))\n-                        tplId <- Converter.toFuture(\n-                          Converter\n-                            .typeRepToIdentifier(vals.get(1)))\n-                        client <- Converter.toFuture(\n-                          clients\n-                            .getPartyParticipant(Party(party.value)))\n-                        acs <- client.query(party, tplId)\n-                        res <- Converter.toFuture(\n-                          FrontStack(acs)\n-                            .traverseU(Converter\n-                              .fromCreated(valueTranslator, _)))\n-                        v <- {\n-                          machine.ctrl =\n-                            Speedy.CtrlExpr(SEApp(SEValue(continue), Array(SEValue(SList(res)))))\n-                          go()\n-                        }\n-                      } yield v\n-                    }\n-                    case _ =>\n-                      Future.failed(\n-                        new ConverterException(s\"Expected record with 3 fields but got $v\"))\n+              }\n+              case SVariant(_, \"Query\", _, v) => {\n+                v match {\n+                  case SRecord(_, _, vals) if vals.size == 3 => {\n+                    val continue = vals.get(2)\n+                    for {\n+                      party <- Converter.toFuture(\n+                        Converter\n+                          .toParty(vals.get(0)))\n+                      tplId <- Converter.toFuture(\n+                        Converter\n+                          .typeRepToIdentifier(vals.get(1)))\n+                      client <- Converter.toFuture(\n+                        clients\n+                          .getPartyParticipant(Party(party.value)))\n+                      acs <- client.query(party, tplId)\n+                      res <- Converter.toFuture(\n+                        FrontStack(acs)\n+                          .traverseU(Converter\n+                            .fromCreated(valueTranslator, _)))\n+                      v <- {\n+                        run(SEApp(SEValue(continue), Array(SEValue(SList(res)))))\n+                      }\n+                    } yield v\n                   }\n+                  case _ =>\n+                    Future.failed(\n+                      new ConverterException(s\"Expected record with 3 fields but got $v\"))\n                 }\n-                case SVariant(_, \"AllocParty\", _, v) => {\n-                  v match {\n-                    case SRecord(_, _, vals) if vals.size == 4 => {\n-                      val continue = vals.get(3)\n-                      for {\n-                        displayName <- vals.get(0) match {\n-                          case SText(value) => Future.successful(value)\n-                          case v =>\n-                            Future.failed(new ConverterException(s\"Expected SText but got $v\"))\n-                        }\n-                        partyIdHint <- vals.get(1) match {\n-                          case SText(t) => Future.successful(t)\n-                          case v =>\n-                            Future.failed(new ConverterException(s\"Expected SText but got $v\"))\n-                        }\n-                        participantName <- vals.get(2) match {\n-                          case SOptional(Some(SText(t))) => Future.successful(Some(Participant(t)))\n-                          case SOptional(None) => Future.successful(None)\n-                          case v =>\n-                            Future.failed(\n-                              new ConverterException(s\"Expected SOptional(SText) but got $v\"))\n-                        }\n-                        client <- clients.getParticipant(participantName) match {\n-                          case Right(client) => Future.successful(client)\n-                          case Left(err) => Future.failed(new RuntimeException(err))\n-                        }\n-                        party <- client.allocateParty(partyIdHint, displayName)\n-                        v <- {\n-                          participantName match {\n-                            case None => {\n-                              // If no participant is specified, we use default_participant so we don’t need to change anything.\n-                            }\n-                            case Some(participant) =>\n-                              clients = clients.copy(\n+              }\n+              case SVariant(_, \"AllocParty\", _, v) => {\n+                v match {\n+                  case SRecord(_, _, vals) if vals.size == 4 => {\n+                    val continue = vals.get(3)\n+                    for {\n+                      displayName <- vals.get(0) match {\n+                        case SText(value) => Future.successful(value)\n+                        case v =>\n+                          Future.failed(new ConverterException(s\"Expected SText but got $v\"))\n+                      }\n+                      partyIdHint <- vals.get(1) match {\n+                        case SText(t) => Future.successful(t)\n+                        case v =>\n+                          Future.failed(new ConverterException(s\"Expected SText but got $v\"))\n+                      }\n+                      participantName <- vals.get(2) match {\n+                        case SOptional(Some(SText(t))) => Future.successful(Some(Participant(t)))\n+                        case SOptional(None) => Future.successful(None)\n+                        case v =>\n+                          Future.failed(\n+                            new ConverterException(s\"Expected SOptional(SText) but got $v\"))\n+                      }\n+                      client <- clients.getParticipant(participantName) match {\n+                        case Right(client) => Future.successful(client)\n+                        case Left(err) => Future.failed(new RuntimeException(err))\n+                      }\n+                      party <- client.allocateParty(partyIdHint, displayName)\n+                      v <- {\n+                        participantName match {\n+                          case None => {\n+                            // If no participant is specified, we use default_participant so we don’t need to change anything.\n+                          }\n+                          case Some(participant) =>\n+                            clients =\n+                              clients.copy(\n                                 party_participants = clients.party_participants + (Party(\n                                   party.value) -> participant))\n-                          }\n-                          machine.ctrl =\n-                            Speedy.CtrlExpr(SEApp(SEValue(continue), Array(SEValue(party))))\n-                          go()\n                         }\n-                      } yield v\n-                    }\n-                    case _ =>\n-                      Future.failed(\n-                        new ConverterException(s\"Expected record with 2 fields but got $v\"))\n+                        run(SEApp(SEValue(continue), Array(SEValue(party))))\n+                      }\n+                    } yield v\n                   }\n+                  case _ =>\n+                    Future.failed(\n+                      new ConverterException(s\"Expected record with 2 fields but got $v\"))\n                 }\n-                case SVariant(_, \"GetTime\", _, continue) => {\n-                  val t = Timestamp.assertFromInstant(timeProvider.getCurrentTime)\n-                  machine.ctrl =\n-                    Speedy.CtrlExpr(SEApp(SEValue(continue), Array(SEValue(STimestamp(t)))))\n-                  go()\n-                }\n-                case SVariant(_, \"Sleep\", _, v) => {\n-                  v match {\n-                    case SRecord(_, _, vals) if vals.size == 2 => {\n-                      val continue = vals.get(1)\n-                      for {\n-                        sleepMicros <- vals.get(0) match {\n-                          case SRecord(_, _, vals) if vals.size == 1 =>\n-                            vals.get(0) match {\n-                              case SInt64(i) => Future.successful(i)\n-                              case _ =>\n-                                Future.failed(new ConverterException(s\"Expected SInt64 but got $v\"))\n-                            }\n-                          case v =>\n-                            Future.failed(new ConverterException(s\"Expected RelTime but got $v\"))\n-                        }\n-                        v <- {\n-                          val sleepMillis = sleepMicros / 1000\n-                          val sleepNanos = (sleepMicros % 1000) * 1000\n-                          Thread.sleep(sleepMillis, sleepNanos.toInt)\n-                          machine.ctrl =\n-                            Speedy.CtrlExpr(SEApp(SEValue(continue), Array(SEValue(SUnit))))\n-                          go()\n-                        }\n-                      } yield v\n-                    }\n-                    case _ =>\n-                      Future.failed(\n-                        new ConverterException(s\"Expected record with 2 fields but got $v\"))\n+              }\n+              case SVariant(_, \"GetTime\", _, continue) => {\n+                val t = Timestamp.assertFromInstant(timeProvider.getCurrentTime)\n+                run(SEApp(SEValue(continue), Array(SEValue(STimestamp(t)))))\n+              }\n+              case SVariant(_, \"Sleep\", _, v) => {\n+                v match {\n+                  case SRecord(_, _, vals) if vals.size == 2 => {\n+                    val continue = vals.get(1)\n+                    for {\n+                      sleepMicros <- vals.get(0) match {\n+                        case SRecord(_, _, vals) if vals.size == 1 =>\n+                          vals.get(0) match {\n+                            case SInt64(i) => Future.successful(i)\n+                            case _ =>\n+                              Future.failed(new ConverterException(s\"Expected SInt64 but got $v\"))\n+                          }\n+                        case v =>\n+                          Future.failed(new ConverterException(s\"Expected RelTime but got $v\"))\n+                      }\n+                      v <- {\n+                        val sleepMillis = sleepMicros / 1000\n+                        val sleepNanos = (sleepMicros % 1000) * 1000\n+                        Thread.sleep(sleepMillis, sleepNanos.toInt)\n+                        run(SEApp(SEValue(continue), Array(SEValue(SUnit))))\n+                      }\n+                    } yield v\n                   }\n+                  case _ =>\n+                    Future.failed(\n+                      new ConverterException(s\"Expected record with 2 fields but got $v\"))\n                 }\n-                case _ =>\n-                  Future.failed(\n-                    new ConverterException(s\"Expected Submit, Query or AllocParty but got $v\"))\n               }\n+              case _ =>\n+                Future.failed(\n+                  new ConverterException(s\"Expected Submit, Query or AllocParty but got $v\"))\n             }\n-            case SVariant(_, \"Pure\", _, v) =>\n-              v match {\n-                case SRecord(_, _, vals) if vals.size == 2 => {\n-                  // Unwrap the Tuple2 we get from the inlined StateT.\n-                  Future { vals.get(0) }\n-                }\n-                case _ => Future.failed(new ConverterException(s\"Expected Tuple2 but got $v\"))\n+          }\n+          case SVariant(_, \"Pure\", _, v) =>\n+            v match {\n+              case SRecord(_, _, vals) if vals.size == 2 => {\n+                // Unwrap the Tuple2 we get from the inlined StateT.\n+                Future { vals.get(0) }\n               }\n-            case v => Future.failed(new ConverterException(s\"Expected Free or Pure but got $v\"))\n-        })\n+              case _ => Future.failed(new ConverterException(s\"Expected Tuple2 but got $v\"))\n+            }\n+          case v => Future.failed(new ConverterException(s\"Expected Free or Pure but got $v\"))\n+        }\n     }\n \n     for {\n-      _ <- stepToValue().fold(Future.failed(_), Future.successful(_))\n-      _ <- machine.toSValue match {\n+      _ <- Future.unit"
+  },
+  {
+    "id" : "691233c8-0baf-492b-85fe-1230afd0a467",
+    "prId" : 5871,
+    "comments" : [
+      {
+        "id" : "32a54cb6-b63f-4042-ac59-1b9a3dc4b3fe",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This code looks weird, why do we need the recursive call? Can’t I just call `machine.run()` at the beginning which will immediately return if I have a final value and never recurse?",
+        "createdAt" : "2020-05-06T15:15:25Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f990c627-2e0d-4077-9f9c-ec043ce0f698",
+        "parentId" : "32a54cb6-b63f-4042-ac59-1b9a3dc4b3fe",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "@cocreature is right, we don't need to call `machine.isFinal` anymore. `machine.run` will run until we have a value or need some input. The code here looks like we never handle the need for more input anyway. Thus, calling `machine.run` once should do the job.",
+        "createdAt" : "2020-05-06T15:38:00Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4a053375-a415-4512-90aa-d24371849252",
+        "parentId" : "32a54cb6-b63f-4042-ac59-1b9a3dc4b3fe",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I was confused. I am fixing that right now. ",
+        "createdAt" : "2020-05-06T15:44:10Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c5abc021690792303b5546906c10528c3ce20380",
+    "line" : null,
+    "diffHunk" : "@@ -298,231 +299,217 @@ class Runner(\n         Set.empty,\n       )\n \n-    // Removing the early return only makes this harder to read.\n-    @SuppressWarnings(Array(\"org.wartremover.warts.Return\"))\n-    def stepToValue(): Either[RuntimeException, Unit] = {\n-      while (!machine.isFinal) {\n+    @tailrec\n+    def stepToValue(): Future[SValue] =\n+      if (machine.isFinal())"
+  },
+  {
+    "id" : "c88e92d6-acfe-412d-9481-631ba39f0a69",
+    "prId" : 5871,
+    "comments" : [
+      {
+        "id" : "652d64c4-2e51-43b2-9a70-345bc41dcc21",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why not?\r\n```suggestion\r\n        case SResultFinalValue(v) =>\r\n          Right(v)\r\n```",
+        "createdAt" : "2020-05-06T15:54:03Z",
+        "updatedAt" : "2020-05-06T15:59:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c5abc021690792303b5546906c10528c3ce20380",
+    "line" : null,
+    "diffHunk" : "@@ -298,231 +297,214 @@ class Runner(\n         Set.empty,\n       )\n \n-    // Removing the early return only makes this harder to read.\n-    @SuppressWarnings(Array(\"org.wartremover.warts.Return\"))\n-    def stepToValue(): Either[RuntimeException, Unit] = {\n-      while (!machine.isFinal) {\n-        machine.run() match {\n-          case SResultFinalValue(_) => ()\n-          case SResultError(err) => {\n-            logger.error(Pretty.prettyError(err, machine.ptx).render(80))\n-            return Left(err)\n-          }\n-          case res => {\n-            return Left(new RuntimeException(s\"Unexpected speedy result $res\"))\n-          }\n-        }\n+    def stepToValue(): Either[RuntimeException, SValue] =\n+      machine.run() match {\n+        case SResultFinalValue(_) =>\n+          Right(machine.toSValue)"
+  },
+  {
+    "id" : "71538327-b38e-4426-b55e-f056b47ea0be",
+    "prId" : 5565,
+    "comments" : [
+      {
+        "id" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "What's the purpose of `stepToValue` returning a future? As I understand it, right now the actual evaluation (`while (!machine.isFinal)`) is synchronous. If it should happen asynchronously then the whole body should be wrapped in `Future { ... }`, correct? If the whole body is wrapped in a `Future`, then `throw` would lead to a failed future.",
+        "createdAt" : "2020-04-15T13:15:19Z",
+        "updatedAt" : "2020-04-15T15:35:41Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "663288a5-5dab-4964-be48-9376b9fd39be",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We currently have a lot of code which ends up boiling down to something like `go().flatMap(stepToValue(); …; go())`. If `stepToValue` throws that will not produce a failed future but instead we run into the issue we described. We could wrap `stepToValue` into `Future` at the call site but then we have to do that at every call site which seems much easier to get wrong than changing the type so you’re forced to treat it as a future. Furthermore `Future.failed(…)` also has an advantage over `Future { throw …}` since the latter will execute the code asynchronously on an execution context while the former will just construct the resolved future directly which is much more efficient.",
+        "createdAt" : "2020-04-15T13:26:41Z",
+        "updatedAt" : "2020-04-15T15:35:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ab96d881-c15e-4834-8f0c-763eb37c966b",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "> We could wrap `stepToValue` into `Future` at the call site but then we have to do that at every call site which seems much easier to get wrong than changing the type so you’re forced to treat it as a future.\r\n\r\nMy suggestion was to wrap the implementation of `stepToValue` in `Future { ... }` not the call-site. I.e.\r\n```\r\ndef stepToValue(): Future[Unit] = Future {\r\n    ...\r\n}\r\n```\r\n\r\n> Furthermore Future.failed(…) also has an advantage over Future { throw …} since the latter will execute the code asynchronously on an execution context while the former will just construct the resolved future directly which is much more efficient.\r\n\r\nSorry, I'm still confused about this. Seeing the type `stepToValue(): Future[Unit]` suggests to me that the stepping is done asynchronously. If the function is supposed to be synchronous, then why not return `Either` or `Try`?",
+        "createdAt" : "2020-04-15T14:41:38Z",
+        "updatedAt" : "2020-04-15T15:35:41Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "39df64c0-c08f-4c75-8b07-3b5d3d69c670",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m not following, you suggest to wrap it in `Future` but then you suggest to return `Either`? Surely we can’t do both? We could use `Either` but given that we only use it in `Future` contexts we would then have to do the conversion to the failed future at every call site.",
+        "createdAt" : "2020-04-15T14:46:52Z",
+        "updatedAt" : "2020-04-15T15:35:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dac9c6a3-7d4f-4ab5-a19d-5d2d5fa80f1d",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I'm not suggesting to do both. It's an either or.\r\n\r\nThe point is, the way I understand `stepToValue` (and `go` seems to largely follow the same pattern) is that it is synchronous code. The `Future` type is only used to handle errors. (Though it's perfectly possible I'm missing something). So, why use `Future`?\r\n",
+        "createdAt" : "2020-04-15T15:15:11Z",
+        "updatedAt" : "2020-04-15T15:35:41Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8df0ee0c-1fb9-450d-9d64-2261b65af6ab",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You are completely right that it’s synchronous. But it’s only used in the context of the `runWithClients` future so it just seemed more convenient to move the conversion into `stepToValue` instead of doing it at the call site. But I don’t feel strongly about this so happy to switch it to `Either` and to the conversion at the call site if you prefer.",
+        "createdAt" : "2020-04-15T15:17:06Z",
+        "updatedAt" : "2020-04-15T15:35:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3515b95b-b7f5-4898-a0cf-e2895ebe6f2e",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Okay, wanted to make sure this is intentional. To me this seems confusing, but I'm not sure what Scala best practices say there. Can be fixed in a separate PR, though.",
+        "createdAt" : "2020-04-15T15:32:26Z",
+        "updatedAt" : "2020-04-15T15:35:41Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f19b20ee-0b8e-4ef6-bc5b-58931d5965d5",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "After thinking about it for a bit I agree, I’ve changed it to return `Either[RuntimeException, Unit]`. Thanks for the discussion!",
+        "createdAt" : "2020-04-15T15:37:07Z",
+        "updatedAt" : "2020-04-15T15:37:07Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6eae4bd7-23ef-4f25-99be-b83372d1d449",
+        "parentId" : "79c15d30-4b92-4d7f-8917-7c04122223a7",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Thank you!",
+        "createdAt" : "2020-04-15T15:57:31Z",
+        "updatedAt" : "2020-04-15T15:57:32Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4af3765dd3a2e95cfcea292ae6c40c7778a62c3f",
+    "line" : null,
+    "diffHunk" : "@@ -294,197 +294,240 @@ class Runner(\n     var machine =\n       Speedy.Machine.fromSExpr(script.expr, false, extendedCompiledPackages)\n \n-    def stepToValue() = {\n+    // Removing the early return only makes this harder to read.\n+    @SuppressWarnings(Array(\"org.wartremover.warts.Return\"))\n+    def stepToValue(): Future[Unit] = {"
+  },
+  {
+    "id" : "e990e827-3288-4f98-b50e-93d0c1c1696a",
+    "prId" : 5076,
+    "comments" : [
+      {
+        "id" : "d3b50550-49e6-43d7-bbeb-53173aba39cb",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It probably makes sense to also change this to return `Either[String, Script]` similar to the trigger runner.",
+        "createdAt" : "2020-03-18T17:32:34Z",
+        "updatedAt" : "2020-03-19T10:58:00Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7fb762ba-4fdf-4d40-a942-601b4c85ca82",
+        "parentId" : "d3b50550-49e6-43d7-bbeb-53173aba39cb",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, it turns out this allows to simplify the `unapply` bit in `TestMain`. I've updated the PR.",
+        "createdAt" : "2020-03-19T10:58:56Z",
+        "updatedAt" : "2020-03-19T10:58:56Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "01051d0c28be1ed94c820d9f5e2f51db6762c6cb",
+    "line" : null,
+    "diffHunk" : "@@ -107,6 +107,47 @@ object ParticipantsJsonProtocol extends DefaultJsonProtocol {\n   implicit val participantsFormat = jsonFormat3(Participants[ApiParameters])\n }\n \n+final case class Script(id: Identifier, expr: SExpr, param: Option[Type], scriptIds: ScriptIds)\n+\n+object Script {\n+  def fromDar(dar: Dar[(PackageId, Package)], scriptId: Identifier): Script = {\n+    val darMap = dar.all.toMap\n+    val compiler = Compiler(darMap)\n+    val compiledPackages =\n+      PureCompiledPackages(darMap, compiler.compilePackages(darMap.keys)).right.get\n+    fromIdentifier(compiledPackages, scriptId)\n+  }\n+  def fromIdentifier(compiledPackages: CompiledPackages, scriptId: Identifier): Script = {\n+    val scriptExpr = SEVal(LfDefRef(scriptId), None)\n+    val scriptTy = compiledPackages\n+      .getPackage(scriptId.packageId)\n+      .flatMap(_.lookupIdentifier(scriptId.qualifiedName).toOption) match {\n+      case Some(DValue(ty, _, _, _)) => ty\n+      case Some(d @ DTypeSyn(_, _)) =>\n+        throw new RuntimeException(s\"Expected DAML script but got synonym $d\")"
+  },
+  {
+    "id" : "92119e23-d6b8-4bad-b482-9a9e97fbe2a9",
+    "prId" : 4884,
+    "comments" : [
+      {
+        "id" : "699dbdce-eb3c-49d1-be81-19e1216d99fd",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`stdlibPackageId` was actually the wrong one. The reason why it didn’t matter is that speedy doesn’t care about types.",
+        "createdAt" : "2020-03-06T16:38:30Z",
+        "updatedAt" : "2020-03-06T16:38:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8fd4346aa20af87e9d836dc0dddb3377a854ecfb",
+    "line" : 40,
+    "diffHunk" : "@@ -151,31 +151,26 @@ class Runner(\n   val darMap: Map[PackageId, Package] = dar.all.toMap\n   val compiler = Compiler(darMap)\n   val scriptModuleName = DottedName.assertFromString(\"Daml.Script\")\n+  // TODO (MK) We should infer this package id based on the Script type of the script identifier.\n   val scriptPackageId: PackageId = dar.all\n     .find {\n       case (pkgId, pkg) => pkg.modules.contains(scriptModuleName)\n-    }\n-    .get\n-    ._1\n+    } match {\n+    case None =>\n+      throw new RuntimeException(\n+        \"daml-script library was not found in DAR. Add 'daml-script' to the dependencies in your 'daml.yaml' and define a DAML script'.\")\n+    case Some((pkgId, _)) => pkgId\n+  }\n   val scriptTyCon = Identifier(\n     scriptPackageId,\n     QualifiedName(scriptModuleName, DottedName.assertFromString(\"Script\")))\n-  val stdlibPackageId =\n-    dar.all\n-      .find {\n-        case (pkgId, pkg) =>\n-          pkg.modules.contains(DottedName.assertFromString(\"DA.Internal.LF\"))\n-      }\n-      .get\n-      ._1\n-  val primPackageId =\n-    dar.all\n-      .find {\n-        case (pkgId, pkg) =>\n-          pkg.modules.contains(DottedName.assertFromString(\"DA.Types\"))\n-      }\n-      .get\n-      ._1\n+\n+  // These two packages are stable packages\n+  val daTypesPackageId =\n+    PackageId.assertFromString(\"40f452260bef3f29dede136108fc08a88d5a5250310281067087da6f0baddff7\")\n+  val daInternalAnyPackageId ="
+  },
+  {
+    "id" : "e73fa7de-2d40-4b24-94b8-52b619b6527f",
+    "prId" : 3605,
+    "comments" : [
+      {
+        "id" : "2aa40e52-4da5-4346-80a1-956242b680bc",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Occurs because traverse's type parameters are wrong, as expanded a little in #6469: https://github.com/digital-asset/daml/pull/6469/files#diff-911de6a24e211785457135a0d167f519R173-R178",
+        "createdAt" : "2020-06-23T22:18:39Z",
+        "updatedAt" : "2020-06-23T22:18:39Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "74efff4194fa02b41d6c85a921cb77b96310f3fb",
+    "line" : 93,
+    "diffHunk" : "@@ -53,6 +57,82 @@ object LfValueCodec extends ApiCodecCompressed[AbsoluteContractId](false, false)\n   }\n }\n \n+case class Participant(participant: String)\n+case class Party(party: String)\n+case class ApiParameters(host: String, port: Int)\n+case class Participants[T](\n+    default_participant: Option[T],\n+    participants: Map[Participant, T],\n+    party_participants: Map[Party, Participant],\n+) {\n+  def getPartyParticipant(party: Party): Either[String, T] =\n+    party_participants.get(party) match {\n+      case None =>\n+        default_participant.fold[Either[String, T]](\n+          Left(s\"No participant for party $party and no default participant\"))(Right(_))\n+      case Some(participant) => getParticipant(Some(participant))\n+    }\n+  def getParticipant(participantOpt: Option[Participant]): Either[String, T] =\n+    participantOpt match {\n+      case None =>\n+        default_participant.fold[Either[String, T]](Left(s\"No default participant\"))(Right(_))\n+      case Some(participant) =>\n+        participants.get(participant) match {\n+          case None =>\n+            default_participant.fold[Either[String, T]](\n+              Left(s\"No participant $participant and no default participant\"))(Right(_))\n+          case Some(t) => Right(t)\n+        }\n+    }\n+}\n+\n+object ParticipantsJsonProtocol extends DefaultJsonProtocol {\n+  implicit object ParticipantFormat extends JsonFormat[Participant] {\n+    def read(value: JsValue) = value match {\n+      case JsString(s) => Participant(s)\n+      case _ => deserializationError(\"Expected Participant string\")\n+    }\n+    def write(p: Participant) = JsString(p.participant)\n+  }\n+  implicit object PartyFormat extends JsonFormat[Party] {\n+    def read(value: JsValue) = value match {\n+      case JsString(s) => Party(s)\n+      case _ => deserializationError(\"Expected Party string\")\n+    }\n+    def write(p: Party) = JsString(p.party)\n+  }\n+  implicit val apiParametersFormat = jsonFormat2(ApiParameters)\n+  implicit val participantsFormat = jsonFormat3(Participants[ApiParameters])\n+}\n+\n+object Runner {\n+  private def connectApiParameters(params: ApiParameters, clientConfig: LedgerClientConfiguration)(\n+      implicit ec: ExecutionContext,\n+      seq: ExecutionSequencerFactory): Future[LedgerClient] = {\n+    LedgerClient.singleHost(params.host, params.port, clientConfig)\n+  }\n+  // We might want to have one config per participant at some point but for now this should be sufficient.\n+  def connect(\n+      participantParams: Participants[ApiParameters],\n+      clientConfig: LedgerClientConfiguration)(\n+      implicit ec: ExecutionContext,\n+      seq: ExecutionSequencerFactory): Future[Participants[LedgerClient]] = {\n+    for {\n+      // The standard library is incredibly weird. Option is not Traversable so we have to convert to a list and back.\n+      // Map is but it doesn’t return a Map so we have to call toMap afterwards.\n+      defaultClient <- Future\n+        .traverse(participantParams.default_participant.toList)(x =>\n+          connectApiParameters(x, clientConfig))\n+        .map(_.headOption)\n+      participantClients <- Future\n+        .traverse(participantParams.participants: Map[Participant, ApiParameters])({\n+          case (k, v) => connectApiParameters(v, clientConfig).map((k, _))\n+        })\n+        .map(_.toMap)"
+  }
+]

@@ -1,0 +1,55 @@
+[
+  {
+    "id" : "33ff9076-6b23-4ebe-89e3-8c4cdeb0a23b",
+    "prId" : 5763,
+    "comments" : [
+      {
+        "id" : "9eb48bbb-aa5d-400a-ae78-5fcb85fcff55",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "```suggestion\r\n    Gen.nonEmptyBuildableOf[Vector[Int], Int](Arbitrary.arbitrary[Int])\r\n```",
+        "createdAt" : "2020-04-28T15:57:54Z",
+        "updatedAt" : "2020-04-28T16:09:04Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8936c543-3ae7-4a42-9d1f-5e6ac9760790",
+        "parentId" : "9eb48bbb-aa5d-400a-ae78-5fcb85fcff55",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "@S11001001 thanks!",
+        "createdAt" : "2020-04-28T16:09:49Z",
+        "updatedAt" : "2020-04-28T16:09:50Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "dd205df36aebde25377eeae2473edbf9e19da604",
+    "line" : null,
+    "diffHunk" : "@@ -24,22 +25,25 @@ class FlowUtilTest\n   implicit val asys: ActorSystem = ActorSystem(this.getClass.getSimpleName)\n   implicit val materializer: Materializer = Materializer(asys)\n \n-  \"allowOnlyFirstInput\" should \"pass 1st message through and replace all others with errors\" in forAll {\n-    xs: Vector[Int] =>\n-      val error = \"Error\"\n-      val errorNum = Math.max(xs.size - 1, 0)\n-      val expected: Vector[String \\/ Int] =\n-        xs.take(1).map(\\/-(_)) ++ Vector.fill(errorNum)(-\\/(error))\n-      val input: Source[String \\/ Int, NotUsed] =\n-        Source.fromIterator(() => xs.toIterator).map(\\/-(_))\n-\n-      val actualF: Future[Vector[String \\/ Int]] =\n-        input\n-          .via(allowOnlyFirstInput[String, Int](error))\n-          .runFold(Vector.empty[String \\/ Int])(_ :+ _)\n-\n-      whenReady(actualF) { actual =>\n-        actual shouldBe expected\n-      }\n+  \"allowOnlyFirstInput\" should \"pass 1st message through and replace all others with errors\" in forAll(\n+    nonEmptyVectorOfInts) { xs: Vector[Int] =>\n+    val error = \"Error\"\n+    val errorNum = Math.max(xs.size - 1, 0)\n+    val expected: Vector[String \\/ Int] =\n+      xs.take(1).map(\\/-(_)) ++ Vector.fill(errorNum)(-\\/(error))\n+    val input: Source[String \\/ Int, NotUsed] =\n+      Source.fromIterator(() => xs.toIterator).map(\\/-(_))\n+\n+    val actualF: Future[Vector[String \\/ Int]] =\n+      input\n+        .via(allowOnlyFirstInput[String, Int](error))\n+        .runFold(Vector.empty[String \\/ Int])(_ :+ _)\n+\n+    whenReady(actualF) { actual =>\n+      actual shouldBe expected\n+    }\n   }\n+\n+  private val nonEmptyVectorOfInts: Gen[Vector[Int]] =\n+    Gen.nonEmptyBuildableOf[Vector[Int], Int](Arbitrary.arbInt.arbitrary)"
+  }
+]

@@ -1,0 +1,183 @@
+[
+  {
+    "id" : "572a5cfc-b6cc-47e4-b1e1-9ecd205ff7f8",
+    "prId" : 7792,
+    "comments" : [
+      {
+        "id" : "9cdd9726-fbf5-47c1-b56d-b80b5e968821",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "With `Unit` methods, I prefer if they always use braces.\r\n\r\n```suggestion\r\n  override def close(): Unit = {\r\n    closed = true\r\n  }\r\n```",
+        "createdAt" : "2020-10-23T13:20:27Z",
+        "updatedAt" : "2020-10-27T16:16:39Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4a2f222921255b0e5a9b204e4f7f49b90539a953",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,47 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.apiserver.services\n+\n+import com.daml.dec.DirectExecutionContext\n+import com.daml.ledger.api.v1.version_service.GetApiVersionRequest\n+import com.daml.ledger.api.v1.version_service.GetApiVersionResponse\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc.VersionService\n+import com.daml.platform.api.grpc.GrpcApiService\n+import io.grpc.ServerServiceDefinition\n+\n+import scala.concurrent.Future\n+import scala.io.Source\n+\n+private[apiserver] final class ApiVersionService private\n+    extends VersionService\n+    with GrpcApiService {\n+\n+  @volatile var closed = false\n+  private val versionFile: String = \"ledger-api/VERSION\"\n+  private lazy val apiVersion: String = readVersion(versionFile)\n+\n+  override def getApiVersion(request: GetApiVersionRequest): Future[GetApiVersionResponse] =\n+    Future.successful {\n+      GetApiVersionResponse(apiVersion)\n+    }\n+\n+  private def readVersion(versionFileName: String): String =\n+    Source\n+      .fromResource(versionFileName)\n+      .getLines()\n+      .toList\n+      .head\n+\n+  override def bindService(): ServerServiceDefinition =\n+    VersionServiceGrpc.bindService(this, DirectExecutionContext)\n+\n+  override def close(): Unit = closed = true"
+  },
+  {
+    "id" : "429e8283-3a11-4fbd-a9bd-9af05ff54668",
+    "prId" : 7792,
+    "comments" : [
+      {
+        "id" : "a81ee8fc-f055-45ff-961e-4df6e8c107a4",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "This seems unused. I think you can just drop it and make `close` a no-op.",
+        "createdAt" : "2020-10-23T13:20:40Z",
+        "updatedAt" : "2020-10-27T16:16:39Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4a2f222921255b0e5a9b204e4f7f49b90539a953",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,47 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.apiserver.services\n+\n+import com.daml.dec.DirectExecutionContext\n+import com.daml.ledger.api.v1.version_service.GetApiVersionRequest\n+import com.daml.ledger.api.v1.version_service.GetApiVersionResponse\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc.VersionService\n+import com.daml.platform.api.grpc.GrpcApiService\n+import io.grpc.ServerServiceDefinition\n+\n+import scala.concurrent.Future\n+import scala.io.Source\n+\n+private[apiserver] final class ApiVersionService private\n+    extends VersionService\n+    with GrpcApiService {\n+\n+  @volatile var closed = false"
+  },
+  {
+    "id" : "ecd16d54-6579-4467-b74a-67f30612a48d",
+    "prId" : 7792,
+    "comments" : [
+      {
+        "id" : "182a3fb3-afa9-49f8-8e15-84058ff843c2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Afaict, this file won’t be there outside of our repo. I see two options:\r\n\r\n1. Either pack it in the resources and call `rlocation` like we do for other resources. This is packed into the JAR so it will be distribued.\r\n2. Or generate a source file based on this file and compile that.\r\n\r\nI’d probably do 1 but in the end it doesn’t matter all that much.",
+        "createdAt" : "2020-10-26T08:42:25Z",
+        "updatedAt" : "2020-10-27T16:16:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "36b18048-dc06-4575-afc2-9fdb322fccf4",
+        "parentId" : "182a3fb3-afa9-49f8-8e15-84058ff843c2",
+        "author" : {
+          "login" : "kamil-da",
+          "name" : "Kamil Bożek",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/72492440?u=e7ea2d3e3a22508e4942f56fa3fc86f6dd28f06c&v=4"
+        },
+        "body" : "So by using `rlocation` I can avoid manually placing the version file in the resources using `filegroup`?",
+        "createdAt" : "2020-10-26T09:52:15Z",
+        "updatedAt" : "2020-10-27T16:16:39Z",
+        "lastEditedBy" : {
+          "login" : "kamil-da",
+          "name" : "Kamil Bożek",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/72492440?u=e7ea2d3e3a22508e4942f56fa3fc86f6dd28f06c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8e0ff8d1-2aef-44b4-bcbf-6d0a1d2b0ac9",
+        "parentId" : "182a3fb3-afa9-49f8-8e15-84058ff843c2",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ll take that back. You need `rlocation` to get thigns in `data`. For `resources`, this should work fine.",
+        "createdAt" : "2020-10-26T11:44:45Z",
+        "updatedAt" : "2020-10-27T16:16:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4a2f222921255b0e5a9b204e4f7f49b90539a953",
+    "line" : 30,
+    "diffHunk" : "@@ -0,0 +1,46 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.apiserver.services\n+\n+import com.daml.dec.DirectExecutionContext\n+import com.daml.ledger.api.v1.version_service.GetApiVersionRequest\n+import com.daml.ledger.api.v1.version_service.GetApiVersionResponse\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc.VersionService\n+import com.daml.platform.api.grpc.GrpcApiService\n+import io.grpc.ServerServiceDefinition\n+\n+import scala.concurrent.Future\n+import scala.io.Source\n+\n+private[apiserver] final class ApiVersionService private\n+    extends VersionService\n+    with GrpcApiService {\n+\n+  private val versionFile: String = \"ledger-api/VERSION\""
+  },
+  {
+    "id" : "fb4bc357-8de2-48a5-b205-76fb2e31971b",
+    "prId" : 7792,
+    "comments" : [
+      {
+        "id" : "d60e377a-2532-4ce5-bcb4-c6664371df09",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Could you wrap this in a `Try` and log on `error` level in case something goes wrong?",
+        "createdAt" : "2020-10-26T12:22:45Z",
+        "updatedAt" : "2020-10-27T16:16:39Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d05c362e-da28-418c-98e3-17b4b82ebffe",
+        "parentId" : "d60e377a-2532-4ce5-bcb4-c6664371df09",
+        "author" : {
+          "login" : "kamil-da",
+          "name" : "Kamil Bożek",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/72492440?u=e7ea2d3e3a22508e4942f56fa3fc86f6dd28f06c&v=4"
+        },
+        "body" : "Do you expect exceptions to be re-thrown there or logged and swallowed?",
+        "createdAt" : "2020-10-26T13:18:58Z",
+        "updatedAt" : "2020-10-27T16:16:39Z",
+        "lastEditedBy" : {
+          "login" : "kamil-da",
+          "name" : "Kamil Bożek",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/72492440?u=e7ea2d3e3a22508e4942f56fa3fc86f6dd28f06c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4a2f222921255b0e5a9b204e4f7f49b90539a953",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,46 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.platform.apiserver.services\n+\n+import com.daml.dec.DirectExecutionContext\n+import com.daml.ledger.api.v1.version_service.GetApiVersionRequest\n+import com.daml.ledger.api.v1.version_service.GetApiVersionResponse\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc\n+import com.daml.ledger.api.v1.version_service.VersionServiceGrpc.VersionService\n+import com.daml.platform.api.grpc.GrpcApiService\n+import io.grpc.ServerServiceDefinition\n+\n+import scala.concurrent.Future\n+import scala.io.Source\n+\n+private[apiserver] final class ApiVersionService private\n+    extends VersionService\n+    with GrpcApiService {\n+\n+  private val versionFile: String = \"ledger-api/VERSION\"\n+  private lazy val apiVersion: String = readVersion(versionFile)\n+\n+  override def getApiVersion(request: GetApiVersionRequest): Future[GetApiVersionResponse] =\n+    Future.successful {\n+      GetApiVersionResponse(apiVersion)\n+    }\n+\n+  private def readVersion(versionFileName: String): String =\n+    Source"
+  }
+]

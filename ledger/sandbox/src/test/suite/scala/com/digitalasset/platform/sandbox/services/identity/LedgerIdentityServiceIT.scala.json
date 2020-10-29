@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "46b00632-5ba0-4e56-b62d-e5faf262760c",
+    "prId" : 3581,
+    "comments" : [
+      {
+        "id" : "4b04137f-927d-48c2-8f42-d647bf30f2f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Ew.",
+        "createdAt" : "2019-11-21T16:59:06Z",
+        "updatedAt" : "2019-11-21T16:59:29Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5c39c5e55b3870ae024f93c3924d85561c9cd829",
+    "line" : 117,
+    "diffHunk" : "@@ -0,0 +1,136 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.services.identity\n+\n+import java.util.UUID\n+\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.ledger.api.domain.LedgerId\n+import com.digitalasset.ledger.api.testing.utils.SuiteResourceManagementAroundEach\n+import com.digitalasset.platform.common.LedgerIdMode\n+import com.digitalasset.platform.sandbox.config.SandboxConfig\n+import com.digitalasset.platform.sandbox.persistence.{PostgresAroundAll, PostgresAroundEach}\n+import com.digitalasset.platform.sandbox.services.SandboxFixture\n+import org.scalatest.{Matchers, WordSpec}\n+import scalaz.syntax.tag._\n+\n+sealed trait LedgerIdentityServiceITBaseGiven\n+    extends WordSpec\n+    with Matchers\n+    with SandboxFixture\n+    with SuiteResourceManagementAroundEach {\n+\n+  private lazy val givenLedgerId: String = UUID.randomUUID.toString\n+\n+  override protected def config: SandboxConfig =\n+    super.config.copy(ledgerIdMode =\n+      LedgerIdMode.Static(LedgerId(Ref.LedgerString.assertFromString(givenLedgerId))))\n+\n+  // This test relies on inheriting from SuiteResourceManagementAroundEach to restart the ledger across test cases\n+\n+  \"A platform\" when {\n+    \"started\" should {\n+      \"expose the expected ledger identifier\" in {\n+        ledgerIdOnServer.unwrap shouldEqual givenLedgerId\n+      }\n+      \"expose the expected ledger identifier across restarts\" in {\n+        ledgerIdOnServer.unwrap shouldEqual givenLedgerId\n+      }\n+    }\n+  }\n+\n+}\n+\n+final class LedgerIdentityServiceInMemoryGivenIT extends LedgerIdentityServiceITBaseGiven\n+\n+final class LedgerIdentityServicePostgresGivenIT\n+    extends LedgerIdentityServiceITBaseGiven\n+    with PostgresAroundAll {\n+\n+  override protected def config: SandboxConfig =\n+    super.config.copy(jdbcUrl = Some(postgresFixture.jdbcUrl))\n+\n+}\n+\n+sealed trait LedgerIdentityServiceITBaseDynamic\n+    extends WordSpec\n+    with Matchers\n+    with SandboxFixture\n+    with SuiteResourceManagementAroundEach {\n+\n+  override protected def config: SandboxConfig =\n+    super.config.copy(ledgerIdMode = LedgerIdMode.Dynamic())\n+\n+  @volatile private var firstRunLedgerId: String = _\n+\n+  // This test relies on inheriting from SuiteResourceManagementAroundEach to restart the ledger across test cases\n+\n+  \"A platform\" when {\n+\n+    \"started\" should {\n+\n+      \"expose a ledger identifer\" in {\n+        firstRunLedgerId = ledgerIdOnServer.unwrap\n+        firstRunLedgerId should not be empty\n+      }\n+\n+      \"have different identifiers across restarts\" in {\n+        firstRunLedgerId should not equal ledgerIdOnServer.unwrap\n+      }\n+\n+    }\n+\n+  }\n+\n+}\n+\n+final class LedgerIdentityServiceInMemoryDynamicIT extends LedgerIdentityServiceITBaseDynamic\n+\n+final class LedgerIdentityServicePostgresDynamicIT\n+    extends LedgerIdentityServiceITBaseDynamic\n+    with PostgresAroundEach {\n+\n+  override protected def config: SandboxConfig =\n+    super.config.copy(jdbcUrl = Some(postgresFixture.jdbcUrl))\n+\n+}\n+\n+final class LedgerIdentityServicePostgresDynamicSharedPostgresIT\n+    extends WordSpec\n+    with Matchers\n+    with SandboxFixture\n+    with SuiteResourceManagementAroundEach\n+    with PostgresAroundAll {\n+\n+  override protected def config: SandboxConfig =\n+    super.config\n+      .copy(\n+        jdbcUrl = Some(postgresFixture.jdbcUrl),\n+        ledgerIdMode = Option(firstRunLedgerId).fold[LedgerIdMode](LedgerIdMode.Dynamic())(id =>\n+          LedgerIdMode.Static(LedgerId(Ref.LedgerString.assertFromString(id))))\n+      )\n+\n+  @volatile private var firstRunLedgerId: String = _\n+\n+  // This test relies on inheriting from SuiteResourceManagementAroundEach to restart the ledger across test cases AND\n+  // on PostgresAroundAll to share the Postgres instance across restarts to test the peculiar semantics of this case"
+  }
+]

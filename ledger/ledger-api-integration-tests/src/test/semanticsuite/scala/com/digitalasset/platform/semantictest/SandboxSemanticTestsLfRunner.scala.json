@@ -1,0 +1,33 @@
+[
+  {
+    "id" : "c2fe3b21-d888-4b3c-b846-a370fcf60b7f",
+    "prId" : 1171,
+    "comments" : [
+      {
+        "id" : "afe5250b-23b9-4a21-862a-a5957705024e",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "please remove this",
+        "createdAt" : "2019-05-16T08:13:53Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0375ea95bfb713575e4b4fa54cb2011cbc90f244",
+    "line" : null,
+    "diffHunk" : "@@ -3,68 +3,71 @@\n \n package com.digitalasset.platform.semantictest\n \n-import java.io.{BufferedInputStream, File, FileInputStream}\n+import java.io._\n \n import com.digitalasset.daml.lf.UniversalArchiveReader\n-import com.digitalasset.daml.lf.data.Ref.PackageId\n+import com.digitalasset.daml.lf.data.Ref.QualifiedName\n import com.digitalasset.daml.lf.engine.testing.SemanticTester\n-import com.digitalasset.daml.lf.lfpackage.{Ast, Decode}\n-import com.digitalasset.ledger.api.testing.utils.{\n-  AkkaBeforeAndAfterAll,\n-  SuiteResourceManagementAroundAll\n-}\n+import com.digitalasset.daml.lf.types.{Ledger => L}\n+import com.digitalasset.daml.lf.lfpackage.Decode\n+import com.digitalasset.ledger.api.testing.utils.{AkkaBeforeAndAfterAll, SuiteResourceManagementAroundAll}\n import com.digitalasset.platform.apitesting.MultiLedgerFixture\n import com.digitalasset.platform.services.time.TimeProviderType\n+import org.scalatest.concurrent.ScalaFutures\n import org.scalatest.{AsyncWordSpec, Matchers}\n \n+import scala.util.Random\n+\n class SandboxSemanticTestsLfRunner\n-    extends AsyncWordSpec\n+  extends AsyncWordSpec\n     with Matchers\n     with MultiLedgerFixture\n     with SuiteResourceManagementAroundAll\n+    with ScalaFutures\n     with AkkaBeforeAndAfterAll {\n \n-  private val darFile = new File(\"ledger/ledger-api-integration-tests/SemanticTests.dar\")\n+  private val defaultDarFile = new File(\"ledger/ledger-api-integration-tests/SemanticTests.dar\")\n \n-  override protected lazy val config: Config = Config.default\n-    .withDarFile(darFile.toPath)\n+  override protected def config: Config = Config.default\n+    .withDarFile(defaultDarFile.toPath)\n     .withTimeProvider(TimeProviderType.StaticAllowBackwards)\n \n   // TODO SC delete when implicit disclosure supplied in PostgresLedgerDao\n   override protected def fixtureIdsEnabled: Set[com.digitalasset.platform.testing.LedgerBackend] =\n     Set(com.digitalasset.platform.testing.LedgerBackend.SandboxInMemory)\n \n-  lazy val (mainPkgId, packages) = {\n-    val dar = UniversalArchiveReader().readFile(darFile).get\n+  lazy val (mainPkgId, packages, darFile) = {\n+    val df = config.darFiles.head.toFile\n+    val dar = UniversalArchiveReader().readFile(df).get\n     val packages = Map(dar.all.map {\n       case (pkgId, archive) => Decode.readArchivePayloadAndVersion(pkgId, archive)._1\n     }: _*)\n-    (dar.main._1, packages)\n+    (dar.main._1, packages, df)\n   }\n \n-  s\"sandbox launched with $darFile\" should {\n+  s\"a ledger launched with $darFile\" should {\n+    val runSuffix = \"-\" + Random.alphanumeric.take(10).mkString\n+    val partyNameMangler = (partyText: String) => partyText + runSuffix + Random.alphanumeric.take(10).mkString\n+    val commandIdMangler: ((QualifiedName, Int, L.NodeId) => String) = (scenario, stepId, nodeId) => {\n+//      Thread.sleep(100000)"
+  }
+]

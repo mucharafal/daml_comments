@@ -1,0 +1,1675 @@
+[
+  {
+    "id" : "5b568b02-84a0-4462-91c8-415d79e3756c",
+    "prId" : 7812,
+    "comments" : [
+      {
+        "id" : "56168c29-2679-47b3-a284-268283b56ab0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I thought those are identical now?",
+        "createdAt" : "2020-10-27T16:10:15Z",
+        "updatedAt" : "2020-10-27T17:17:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eb276b36d6afbbc0ef08b66b73e27bda3a0144bb",
+    "line" : 87,
+    "diffHunk" : "@@ -409,61 +414,64 @@ class Runner(\n       Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n     val (initialStateFree, evaluatedUpdate) = getInitialStateFreeAndUpdate(acs)\n \n-    // NB: the SubmitRequests produced here are submitted out-of-band; they\n-    // do not flow into the stream, so are not subject to backpressure or throttling\n-    val evaluatedInitialState: SValue =\n-      handleStepFreeResult(clientTime, v = initialStateFree, submit)\n-    logger.debug(s\"Initial state: $evaluatedInitialState\")\n-\n     // Prepare another speedy machine for evaluating expressions.\n     val machine: Speedy.Machine =\n       Speedy.Machine.fromPureSExpr(compiledPackages, SEValue(SUnit))\n \n+    val runInitialState = UnfoldState.toSource(freeTriggerSubmits(clientTime, initialStateFree))\n+\n+    val runRuleOnMsgs = UnfoldState.flatMapConcatNode { (state: SValue, messageVal: SValue) =>\n+      val clientTime: Timestamp =\n+        Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n+      machine.setExpressionToEvaluate(makeAppD(evaluatedUpdate, messageVal))\n+      val stateFun = Machine\n+        .stepToValue(machine)\n+        .expect(\"TriggerRule\", {\n+          case DamlAnyModuleRecord(\"TriggerRule\", DamlAnyModuleRecord(\"StateT\", fun)) => fun\n+        })\n+        .orConverterException\n+      machine.setExpressionToEvaluate(makeAppD(stateFun, state))\n+      val updateWithNewState = Machine.stepToValue(machine)\n+\n+      freeTriggerSubmits(clientTime, v = updateWithNewState)\n+        .leftMap(_.expect(\"TriggerRule new state\", {\n+          case DamlTuple2(SUnit, newState) =>\n+            logger.debug(s\"New state: $newState\")\n+            newState\n+        }).orConverterException)\n+    }\n+\n+    val logInitialState =\n+      Flow[SValue].wireTap(evaluatedInitialState =>\n+        logger.debug(s\"Initial state: $evaluatedInitialState\"))\n+\n     // The flow that we return:\n     //  - Maps incoming trigger messages to new trigger messages\n     //    replacing ledger command IDs with the IDs used internally;"
+  },
+  {
+    "id" : "e0c26aba-1518-4a9e-abec-ded53b8d2315",
+    "prId" : 7812,
+    "comments" : [
+      {
+        "id" : "d326dcca-3d36-4491-993d-a61342830263",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Nice! The ascii art is super helpful.",
+        "createdAt" : "2020-10-27T16:39:05Z",
+        "updatedAt" : "2020-10-27T17:17:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "eb276b36d6afbbc0ef08b66b73e27bda3a0144bb",
+    "line" : null,
+    "diffHunk" : "@@ -409,61 +414,64 @@ class Runner(\n       Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n     val (initialStateFree, evaluatedUpdate) = getInitialStateFreeAndUpdate(acs)\n \n-    // NB: the SubmitRequests produced here are submitted out-of-band; they\n-    // do not flow into the stream, so are not subject to backpressure or throttling\n-    val evaluatedInitialState: SValue =\n-      handleStepFreeResult(clientTime, v = initialStateFree, submit)\n-    logger.debug(s\"Initial state: $evaluatedInitialState\")\n-\n     // Prepare another speedy machine for evaluating expressions.\n     val machine: Speedy.Machine =\n       Speedy.Machine.fromPureSExpr(compiledPackages, SEValue(SUnit))\n \n+    val runInitialState = UnfoldState.toSource(freeTriggerSubmits(clientTime, initialStateFree))\n+\n+    val runRuleOnMsgs = UnfoldState.flatMapConcatNode { (state: SValue, messageVal: SValue) =>\n+      val clientTime: Timestamp =\n+        Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n+      machine.setExpressionToEvaluate(makeAppD(evaluatedUpdate, messageVal))\n+      val stateFun = Machine\n+        .stepToValue(machine)\n+        .expect(\"TriggerRule\", {\n+          case DamlAnyModuleRecord(\"TriggerRule\", DamlAnyModuleRecord(\"StateT\", fun)) => fun\n+        })\n+        .orConverterException\n+      machine.setExpressionToEvaluate(makeAppD(stateFun, state))\n+      val updateWithNewState = Machine.stepToValue(machine)\n+\n+      freeTriggerSubmits(clientTime, v = updateWithNewState)\n+        .leftMap(_.expect(\"TriggerRule new state\", {\n+          case DamlTuple2(SUnit, newState) =>\n+            logger.debug(s\"New state: $newState\")\n+            newState\n+        }).orConverterException)\n+    }\n+\n+    val logInitialState =\n+      Flow[SValue].wireTap(evaluatedInitialState =>\n+        logger.debug(s\"Initial state: $evaluatedInitialState\"))\n+\n     // The flow that we return:\n     //  - Maps incoming trigger messages to new trigger messages\n     //    replacing ledger command IDs with the IDs used internally;\n     //  - Folds over the trigger messages via the speedy machine\n     //    thereby accumulating the state changes.\n     // The materialized value of the flow is the (future) final state\n     // of this process.\n-    Flow[TriggerMsg]\n-      .wireTap(logReceivedMsg _)\n-      .via(hideIrrelevantMsgs)\n-      .map {\n-        case TransactionMsg(transaction) =>\n-          converter.fromTransaction(transaction).orConverterException\n-        case CompletionMsg(completion) =>\n-          val status = completion.getStatus\n-          if (status.code != 0) {\n-            logger.warn(s\"Command failed: ${status.message}, code: ${status.code}\")\n-          }\n-          converter.fromCompletion(completion).orConverterException\n-        case HeartbeatMsg() => converter.fromHeartbeat\n-      }\n-      .via(UnfoldState.flatMapConcatStates(evaluatedInitialState) { (state, messageVal) =>\n-        val clientTime: Timestamp =\n-          Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n-        machine.setExpressionToEvaluate(makeAppD(evaluatedUpdate, messageVal))\n-        val stateFun = Machine\n-          .stepToValue(machine)\n-          .expect(\"TriggerRule\", {\n-            case DamlAnyModuleRecord(\"TriggerRule\", DamlAnyModuleRecord(\"StateT\", fun)) => fun\n-          })\n-          .orConverterException\n-        machine.setExpressionToEvaluate(makeAppD(stateFun, state))\n-        val updateWithNewState = Machine.stepToValue(machine)\n-\n-        freeTriggerSubmits(clientTime, v = updateWithNewState)\n-          .leftMap(_.expect(\"TriggerRule new state\", {\n-            case DamlTuple2(SUnit, newState) =>\n-              logger.debug(s\"New state: $newState\")\n-              newState\n-          }).orConverterException)\n-      })\n-      .via(submitAndRemoveSubmissions(submit))\n-      .toMat(Sink.fold[SValue, SValue](evaluatedInitialState) { (_, newState) =>\n-        newState\n-      })(Keep.right[NotUsed, Future[SValue]])\n+    @SuppressWarnings(Array(\"org.wartremover.warts.NonUnitStatements\"))\n+    val graph = GraphDSL.create(Sink.last[SValue]) { implicit gb => saveLastState =>\n+      import GraphDSL.Implicits._\n+      val msgIn = gb add Flow[TriggerMsg].wireTap(logReceivedMsg _)\n+      val initialState = gb add runInitialState\n+      val initialStateOut = gb add Broadcast[SValue](2)\n+      val rule = gb add runRuleOnMsgs\n+      val submissions = gb add Merge[SubmitRequest](2)\n+      val finalStateIn = gb add Concat[SValue](2)\n+      // format: off\n+      initialState.out1 ~> logInitialState ~> initialStateOut ~> rule.in1"
+  },
+  {
+    "id" : "409242de-3804-4599-8c10-41b3c7261746",
+    "prId" : 7587,
+    "comments" : [
+      {
+        "id" : "2b0c0867-7b4a-44ca-b0d1-3af87321f2e6",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Looks like we should be able to pop from that set now if we’ve seen both the transaction as well as the completion for a command. Doesn’t have to be in this PR.",
+        "createdAt" : "2020-10-07T07:26:15Z",
+        "updatedAt" : "2020-10-07T07:32:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e1e2948a-cca5-4162-ac9b-c0b240438e15",
+        "parentId" : "2b0c0867-7b4a-44ca-b0d1-3af87321f2e6",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "#7598 ",
+        "createdAt" : "2020-10-07T15:09:52Z",
+        "updatedAt" : "2020-10-07T15:09:52Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6a7a51c3a04d2e56ca2b5ee2cbe95daaeeb378fb",
+    "line" : 120,
+    "diffHunk" : "@@ -411,32 +400,18 @@ class Runner(\n     Flow[TriggerMsg]\n       .wireTap(logReceivedMsg _)\n       .mapConcat[TriggerMsg]({\n-        case CompletionMsg(c) =>\n-          try {\n-            commandIdMap.get(UUID.fromString(c.commandId)) match {\n-              case None =>\n-                List()\n-              case Some(internalCommandId) =>\n-                List(CompletionMsg(c.copy(commandId = internalCommandId)))\n-            }\n-          } catch {\n-            // This happens for invalid UUIDs which we might get for\n-            // completions not emitted by the trigger.\n-            case _: IllegalArgumentException => List()\n-          }\n-        case TransactionMsg(t) =>\n-          try {\n-            commandIdMap.get(UUID.fromString(t.commandId)) match {\n-              case None =>\n-                List(TransactionMsg(t.copy(commandId = \"\")))\n-              case Some(internalCommandId) =>\n-                List(TransactionMsg(t.copy(commandId = internalCommandId)))\n-            }\n-          } catch {\n-            // This happens for invalid UUIDs which we might get for\n-            // transactions not emitted by the trigger.\n-            case _: IllegalArgumentException => List(TransactionMsg(t.copy(commandId = \"\")))\n-          }\n+        case msg @ CompletionMsg(c) =>\n+          // This happens for invalid UUIDs which we might get for\n+          // completions not emitted by the trigger.\n+          val uuid = fromTryCatchThrowable[UUID, IllegalArgumentException](\n+            UUID.fromString(c.commandId)).toOption\n+          (uuid exists commandIdsUsed).option(msg).toList\n+        case msg @ TransactionMsg(t) =>\n+          // This happens for invalid UUIDs which we might get for\n+          // transactions not emitted by the trigger.\n+          val uuid = fromTryCatchThrowable[UUID, IllegalArgumentException](\n+            UUID.fromString(t.commandId)).toOption\n+          List(if (uuid exists commandIdsUsed) msg else TransactionMsg(t.copy(commandId = \"\")))"
+  },
+  {
+    "id" : "3ecfe513-378e-402e-a0c6-72cd4f831d43",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "5071a670-8ebd-4b50-9439-927370b38e36",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That’s the mapping I was talking about above which we can get rid off with this change.",
+        "createdAt" : "2020-10-01T08:19:50Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : 85,
+    "diffHunk" : "@@ -217,53 +220,70 @@ class Runner(\n \n   private[this] def logger = ContextualizedLogger get getClass\n \n-  // Handles the result of initialState or update, i.e., (s, [Commands], Text)\n-  // by submitting the commands, printing the log message and returning\n-  // the new state\n-  private def handleStepResult(v: SValue, submit: SubmitRequest => Unit): SValue =\n-    v match {\n-      case SRecord(recordId, _, values)\n-          if recordId.qualifiedName ==\n-            QualifiedName(\n-              DottedName.assertFromString(\"DA.Types\"),\n-              DottedName.assertFromString(\"Tuple2\")) => {\n-        val newState = values.get(0)\n-        val commandVal = values.get(1)\n-        logger.debug(s\"New state: $newState\")\n-        commandVal match {\n-          case SList(transactions) =>\n-            // Each transaction is a list of commands\n-            for (commands <- transactions) {\n-              converter.toCommands(commands) match {\n-                case Left(err) => throw new ConverterException(err)\n-                case Right((commandId, commands)) => {\n-                  if (usedCommandIds.contains(commandId)) {\n-                    throw new RuntimeException(s\"Duplicate command id: $commandId\")\n-                  }\n-                  usedCommandIds += commandId\n-                  val commandUUID = UUID.randomUUID\n-                  commandIdMap += (commandUUID -> commandId)\n-                  val commandsArg = Commands(\n-                    ledgerId = client.ledgerId.unwrap,\n-                    applicationId = applicationId.unwrap,\n-                    commandId = commandUUID.toString,\n-                    party = party,\n-                    commands = commands\n-                  )\n-                  logger.debug(\n-                    s\"submitting command ID $commandId, commands ${commands.map(_.command.value)}\")\n-                  submit(SubmitRequest(commands = Some(commandsArg)))\n+  import Runner.{DamlTuple2, DamlFun}\n+\n+  @throws[RuntimeException]\n+  private def handleCommands[Z](\n+      commandId: String,\n+      commands: Seq[Command],\n+      submit: SubmitRequest => Z): Z = {\n+    if (usedCommandIds.contains(commandId)) {\n+      throw new RuntimeException(s\"Duplicate command id: $commandId\")\n+    }\n+    usedCommandIds += commandId\n+    val commandUUID = UUID.randomUUID\n+    commandIdMap += (commandUUID -> commandId)"
+  },
+  {
+    "id" : "1b20f349-4eae-470c-9849-bcf085c82893",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "649a0ba3-f827-40a2-a67c-cc80c483e376",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This was here before but a `ConverterException` might be more appropriate here.",
+        "createdAt" : "2020-10-01T08:23:10Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c5b8311c-3460-4130-96de-1c0fa741a2bd",
+        "parentId" : "649a0ba3-f827-40a2-a67c-cc80c483e376",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "de429c7fa535509ed61b4ef0f98b1d6c31da786a",
+        "createdAt" : "2020-10-01T17:17:05Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -217,53 +220,70 @@ class Runner(\n \n   private[this] def logger = ContextualizedLogger get getClass\n \n-  // Handles the result of initialState or update, i.e., (s, [Commands], Text)\n-  // by submitting the commands, printing the log message and returning\n-  // the new state\n-  private def handleStepResult(v: SValue, submit: SubmitRequest => Unit): SValue =\n-    v match {\n-      case SRecord(recordId, _, values)\n-          if recordId.qualifiedName ==\n-            QualifiedName(\n-              DottedName.assertFromString(\"DA.Types\"),\n-              DottedName.assertFromString(\"Tuple2\")) => {\n-        val newState = values.get(0)\n-        val commandVal = values.get(1)\n-        logger.debug(s\"New state: $newState\")\n-        commandVal match {\n-          case SList(transactions) =>\n-            // Each transaction is a list of commands\n-            for (commands <- transactions) {\n-              converter.toCommands(commands) match {\n-                case Left(err) => throw new ConverterException(err)\n-                case Right((commandId, commands)) => {\n-                  if (usedCommandIds.contains(commandId)) {\n-                    throw new RuntimeException(s\"Duplicate command id: $commandId\")\n-                  }\n-                  usedCommandIds += commandId\n-                  val commandUUID = UUID.randomUUID\n-                  commandIdMap += (commandUUID -> commandId)\n-                  val commandsArg = Commands(\n-                    ledgerId = client.ledgerId.unwrap,\n-                    applicationId = applicationId.unwrap,\n-                    commandId = commandUUID.toString,\n-                    party = party,\n-                    commands = commands\n-                  )\n-                  logger.debug(\n-                    s\"submitting command ID $commandId, commands ${commands.map(_.command.value)}\")\n-                  submit(SubmitRequest(commands = Some(commandsArg)))\n+  import Runner.{DamlTuple2, DamlFun}\n+\n+  @throws[RuntimeException]\n+  private def handleCommands[Z](\n+      commandId: String,\n+      commands: Seq[Command],\n+      submit: SubmitRequest => Z): Z = {\n+    if (usedCommandIds.contains(commandId)) {\n+      throw new RuntimeException(s\"Duplicate command id: $commandId\")\n+    }\n+    usedCommandIds += commandId\n+    val commandUUID = UUID.randomUUID\n+    commandIdMap += (commandUUID -> commandId)\n+    val commandsArg = Commands(\n+      ledgerId = client.ledgerId.unwrap,\n+      applicationId = applicationId.unwrap,\n+      commandId = commandUUID.toString,\n+      party = party,\n+      commands = commands\n+    )\n+    logger.debug(s\"submitting command ID $commandId, commands ${commands.map(_.command.value)}\")\n+    submit(SubmitRequest(commands = Some(commandsArg)))\n+  }\n+\n+  // Handles the value of update.\n+  private def handleStepFreeResult(\n+      clientTime: Timestamp,\n+      v: SValue,\n+      submit: SubmitRequest => Unit): SValue = {\n+    def evaluate(se: SExpr) = {\n+      val machine: Speedy.Machine = // TODO SC pull up\n+        Speedy.Machine.fromPureSExpr(compiledPackages, se)\n+      // Evaluate it.\n+      machine.setExpressionToEvaluate(se)\n+      Machine.stepToValue(machine)\n+    }\n+    def go(v: SValue): SValue =\n+      unrollFree(v) match {\n+        case Right(Right(vvv @ (variant, vv))) =>\n+          vvv.match2 {\n+            case \"GetTime\" /*(Time -> a)*/ => {\n+              case DamlFun(timeA) => go(evaluate(makeAppD(timeA, STimestamp(clientTime))))\n+            }\n+            case \"Submit\" /*(Commands, () -> a)*/ => {\n+              case DamlTuple2(commands, DamlFun(unitA)) =>\n+                converter.toCommands(commands) match {\n+                  case Left(err) => throw new ConverterException(err)\n+                  case Right((commandId, commands)) =>\n+                    handleCommands(commandId, commands, submit)\n                 }\n-              }\n+                go(evaluate(makeAppD(unitA, SUnit)))\n             }\n-          case _ => {}\n-        }\n-        newState\n-      }\n-      case v => {\n-        throw new RuntimeException(s\"Expected Tuple2 but got $v\")\n+            case _ => {\n+              case _ =>\n+                val msg = s\"unrecognized TriggerF step $variant\"\n+                logger.error(msg)\n+                throw new ConverterException(msg)\n+            }\n+          }(fallback = throw new ConverterException(s\"invalid contents for $variant: $vv\"))\n+        case Right(Left(newState)) => newState\n+        case Left(e) => throw new RuntimeException(e)"
+  },
+  {
+    "id" : "fd363cd0-cb60-49cd-a2eb-38ec40688915",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "f8551fad-9bfe-482a-ab6b-e4212c6fc554",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Maybe a better fit for the converter? Probably even the shared converter.",
+        "createdAt" : "2020-10-01T08:27:35Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7bf580a7-aec1-4782-9607-eaca80ff99b8",
+        "parentId" : "f8551fad-9bfe-482a-ab6b-e4212c6fc554",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "f8285a579128d7151ff30a661b5241dc4b87a9b8",
+        "createdAt" : "2020-10-01T17:18:31Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -497,6 +519,21 @@ object Runner extends StrictLogging {\n     }\n   }\n \n+  private[this] val DaTypesTuple2 ="
+  },
+  {
+    "id" : "ef36f2b3-176c-4f4d-a718-dc54312a5863",
+    "prId" : 7456,
+    "comments" : [
+      {
+        "id" : "dee69247-b59a-4912-9281-f5d37a8526ad",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we need the inner pattern match here?",
+        "createdAt" : "2020-10-02T07:51:15Z",
+        "updatedAt" : "2020-10-02T16:27:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "354d88c0-3b89-4aa0-8832-59aceaef4ea6",
+        "parentId" : "dee69247-b59a-4912-9281-f5d37a8526ad",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Just an artifact; we needed it when we returned a value, because that's the signature, but I suppose we can just\r\n\r\n* [x] throw earlier now.",
+        "createdAt" : "2020-10-02T15:11:52Z",
+        "updatedAt" : "2020-10-02T16:28:06Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ce88d90d-2b8f-4413-8853-7cbaab261400",
+        "parentId" : "dee69247-b59a-4912-9281-f5d37a8526ad",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "5709bffaf92efd91a1b92d751435959c4e86fc6d ",
+        "createdAt" : "2020-10-02T16:28:09Z",
+        "updatedAt" : "2020-10-02T16:28:09Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "27c8c9b1e1674688c7b1e08c329341d8e4615ef4",
+    "line" : null,
+    "diffHunk" : "@@ -217,54 +222,77 @@ class Runner(\n \n   private[this] def logger = ContextualizedLogger get getClass\n \n-  // Handles the result of initialState or update, i.e., (s, [Commands], Text)\n-  // by submitting the commands, printing the log message and returning\n-  // the new state\n-  private def handleStepResult(v: SValue, submit: SubmitRequest => Unit): SValue =\n-    v match {\n-      case SRecord(recordId, _, values)\n-          if recordId.qualifiedName ==\n-            QualifiedName(\n-              DottedName.assertFromString(\"DA.Types\"),\n-              DottedName.assertFromString(\"Tuple2\")) => {\n-        val newState = values.get(0)\n-        val commandVal = values.get(1)\n-        logger.debug(s\"New state: $newState\")\n-        commandVal match {\n-          case SList(transactions) =>\n-            // Each transaction is a list of commands\n-            for (commands <- transactions) {\n-              converter.toCommands(commands) match {\n-                case Left(err) => throw new ConverterException(err)\n-                case Right((commandId, commands)) => {\n-                  if (usedCommandIds.contains(commandId)) {\n-                    throw new RuntimeException(s\"Duplicate command id: $commandId\")\n-                  }\n-                  usedCommandIds += commandId\n-                  val commandUUID = UUID.randomUUID\n-                  commandIdMap += (commandUUID -> commandId)\n-                  val commandsArg = Commands(\n-                    ledgerId = client.ledgerId.unwrap,\n-                    applicationId = applicationId.unwrap,\n-                    commandId = commandUUID.toString,\n-                    party = party,\n-                    commands = commands\n-                  )\n-                  logger.debug(\n-                    s\"submitting command ID $commandId, commands ${commands.map(_.command.value)}\")\n-                  submit(SubmitRequest(commands = Some(commandsArg)))\n+  @throws[RuntimeException]\n+  private def handleCommands[Z](\n+      commandId: String,\n+      commands: Seq[Command],\n+      submit: SubmitRequest => Z): Z = {\n+    if (usedCommandIds.contains(commandId)) {\n+      throw new RuntimeException(s\"Duplicate command id: $commandId\")\n+    }\n+    usedCommandIds += commandId\n+    val commandUUID = UUID.randomUUID\n+    commandIdMap += (commandUUID -> commandId)\n+    val commandsArg = Commands(\n+      ledgerId = client.ledgerId.unwrap,\n+      applicationId = applicationId.unwrap,\n+      commandId = commandUUID.toString,\n+      party = party,\n+      commands = commands\n+    )\n+    logger.debug(s\"submitting command ID $commandId, commands ${commands.map(_.command.value)}\")\n+    submit(SubmitRequest(commands = Some(commandsArg)))\n+  }\n+\n+  import Runner.DamlFun\n+\n+  // Handles the value of update.\n+  private def handleStepFreeResult(\n+      clientTime: Timestamp,\n+      v: SValue,\n+      submit: SubmitRequest => Unit): SValue = {\n+    def evaluate(se: SExpr) = {\n+      val machine: Speedy.Machine =\n+        Speedy.Machine.fromPureSExpr(compiledPackages, se)\n+      // Evaluate it.\n+      machine.setExpressionToEvaluate(se)\n+      Machine.stepToValue(machine)\n+    }\n+    @tailrec def go(v: SValue): SValue = {\n+      val resumed = unrollFree(v) match {\n+        case Right(Right(vvv @ (variant, vv))) =>\n+          vvv.match2 {\n+            case \"GetTime\" /*(Time -> a)*/ => {\n+              case DamlFun(timeA) => Right(evaluate(makeAppD(timeA, STimestamp(clientTime))))\n+            }\n+            case \"Submit\" /*(Commands, () -> a)*/ => {\n+              case DamlTuple2(commands, DamlFun(unitA)) =>\n+                converter.toCommands(commands) match {\n+                  case Left(err) => throw new ConverterException(err)\n+                  case Right((commandId, commands)) =>\n+                    handleCommands(commandId, commands, submit)\n                 }\n-              }\n+                Right(evaluate(makeAppD(unitA, SUnit)))\n             }\n-          case _ => {}\n-        }\n-        newState\n+            case _ => {\n+              case _ =>"
+  },
+  {
+    "id" : "cbcc5459-b9a9-41c0-956a-0dd1c2699b70",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "557f2d60-50f5-434f-8462-ff8b6a25d919",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "20:58:20.100 [TriggerService-akka.actor.default-dispatcher-3] DEBUG com.daml.lf.engine.trigger.Runner - trigger received completion message Completion(658ee8d2-160f-413e-b6e3-c95ab01f4d7c,Some(Status(0,,Vector())),4,None) (context: {triggerDefinition=cc176cffd4667d83c42c1cba4402a21a24a05deb7ba6684cd1a7462809de72b1:TestTrigger:trigger, triggerId=535b9269-fe3f-426b-b83c-87b6c5b8b6c7})",
+        "createdAt" : "2020-09-02T21:08:29Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "95abb5ca-c9fc-4028-9fcb-933a89188a3d",
+        "parentId" : "557f2d60-50f5-434f-8462-ff8b6a25d919",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "(Of course, you will not see `triggerId` in context with the non-service runner.)",
+        "createdAt" : "2020-09-02T21:23:22Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 68,
+    "diffHunk" : "@@ -314,6 +324,12 @@ class Runner(\n     (triggerMsgSource, postSubmitFailure)\n   }\n \n+  private def logReceivedMsg(tm: TriggerMsg): Unit = tm match {\n+    case CompletionMsg(c) => logger.debug(s\"trigger received completion message $c\")"
+  },
+  {
+    "id" : "d8a020d2-18a0-439f-b85f-99d83039a326",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "a18006e6-6366-43e7-8d8f-6797d6904fe9",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "20:58:20.103 [TriggerService-akka.actor.default-dispatcher-3] DEBUG com.daml.lf.engine.trigger.Runner - trigger received transaction, ID 4 (context: {triggerDefinition=cc176cffd4667d83c42c1cba4402a21a24a05deb7ba6684cd1a7462809de72b1:TestTrigger:trigger, triggerId=535b9269-fe3f-426b-b83c-87b6c5b8b6c7})",
+        "createdAt" : "2020-09-02T21:08:56Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 69,
+    "diffHunk" : "@@ -314,6 +324,12 @@ class Runner(\n     (triggerMsgSource, postSubmitFailure)\n   }\n \n+  private def logReceivedMsg(tm: TriggerMsg): Unit = tm match {\n+    case CompletionMsg(c) => logger.debug(s\"trigger received completion message $c\")\n+    case TransactionMsg(t) => logger.debug(s\"trigger received transaction, ID ${t.transactionId}\")"
+  },
+  {
+    "id" : "da9c9802-4b83-498e-a579-2756ecc216e1",
+    "prId" : 7205,
+    "comments" : [
+      {
+        "id" : "773bce53-6b31-47b2-9eb9-4c0706a3f8af",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "20:58:20.093 [TriggerService-akka.actor.default-dispatcher-3] DEBUG com.daml.lf.engine.trigger.Runner - submitting command ID 0, commands ImmArray.ImmArraySeq(CreateCommand(Some(Identifier(cc176cffd4667d83c42c1cba4402a21a24a05deb7ba6684cd1a7462809de72b1,TestTrigger,B)),Some(Record(Some(Identifier(cc176cffd4667d83c42c1cba4402a21a24a05deb7ba6684cd1a7462809de72b1,TestTrigger,B)),Vector(RecordField(p,Some(Value(Party(Alice)))), RecordField(v,Some(Value(Int64(42))))))))) (context: {triggerDefinition=cc176cffd4667d83c42c1cba4402a21a24a05deb7ba6684cd1a7462809de72b1:TestTrigger:trigger, triggerId=535b9269-fe3f-426b-b83c-87b6c5b8b6c7})",
+        "createdAt" : "2020-09-02T21:12:26Z",
+        "updatedAt" : "2020-09-03T15:40:53Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5d5af3d7402e279de3eb423f6bf09c7b274c605",
+    "line" : 59,
+    "diffHunk" : "@@ -242,6 +250,8 @@ class Runner(\n                     party = party,\n                     commands = commands\n                   )\n+                  logger.debug(\n+                    s\"submitting command ID $commandId, commands ${commands.map(_.command.value)}\")"
+  },
+  {
+    "id" : "8555daf9-8112-406c-ab10-c108a3d3509d",
+    "prId" : 6576,
+    "comments" : [
+      {
+        "id" : "84a1ca34-089c-44fb-868a-fdd8153e3bed",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "If we always return an `SValue` can we just change the return type? It doesn’t seem useful to wrap it here.",
+        "createdAt" : "2020-07-02T09:39:58Z",
+        "updatedAt" : "2020-07-02T10:20:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "df21f0fc-c3ca-4ecc-adec-50c13fa02990",
+        "parentId" : "84a1ca34-089c-44fb-868a-fdd8153e3bed",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "There's lots of callers in the test which would need adapting. Happy to do that if that's what you prefer.",
+        "createdAt" : "2020-07-02T09:47:48Z",
+        "updatedAt" : "2020-07-02T10:20:48Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3ddc01e1-3094-4275-b8de-1d9500457ae1",
+        "parentId" : "84a1ca34-089c-44fb-868a-fdd8153e3bed",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Let’s do that. Should hopefully be easy enough to change.",
+        "createdAt" : "2020-07-02T09:49:10Z",
+        "updatedAt" : "2020-07-02T10:20:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a43ec21f-3035-441e-ad7c-1d10fc05cbe2",
+        "parentId" : "84a1ca34-089c-44fb-868a-fdd8153e3bed",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Let's do it but in a separate PR.",
+        "createdAt" : "2020-07-02T10:06:34Z",
+        "updatedAt" : "2020-07-02T10:20:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "aa21d0d1-5e97-4e1c-8d57-334fd8c04202",
+        "parentId" : "84a1ca34-089c-44fb-868a-fdd8153e3bed",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Done. Turned out most callers funnelled through a single point `toResult` where the change could be made.\r\nThanks.",
+        "createdAt" : "2020-07-02T10:22:56Z",
+        "updatedAt" : "2020-07-02T10:22:56Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d4ebcb9850a4c55d27bf585e555ceabb482760cb",
+    "line" : null,
+    "diffHunk" : "@@ -468,10 +465,12 @@ class Runner(\n           logger.error(s\"Unexpected exception: $e\")\n       })\n     }\n-    source\n-      .viaMat(msgFlow)(Keep.right[NotUsed, T])\n-      .toMat(getTriggerSink(name, acs, submit))(Keep.both)\n-      .run()\n+    val (t, futureValue) =\n+      source\n+        .viaMat(msgFlow)(Keep.right[NotUsed, T])\n+        .toMat(getTriggerSink(name, acs, submit))(Keep.both)\n+        .run()\n+    (t, futureValue.map(SEValue(_)))"
+  },
+  {
+    "id" : "7483c8e2-c577-44a9-a9af-aa647ee68ff4",
+    "prId" : 6576,
+    "comments" : [
+      {
+        "id" : "cf901a6b-9cf0-4b34-8b42-b70e66aa7007",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Given that the coding is a lot cleaner now, I wouldn't have asked for the comment anymore. 😃\r\nBut it doesn't do harm either.",
+        "createdAt" : "2020-07-02T10:05:55Z",
+        "updatedAt" : "2020-07-02T10:20:48Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d4ebcb9850a4c55d27bf585e555ceabb482760cb",
+    "line" : 110,
+    "diffHunk" : "@@ -392,40 +389,40 @@ class Runner(\n           }\n         case x @ HeartbeatMsg() => List(x) // Hearbeats don't carry any information.\n       })\n-      .toMat(\n-        Sink.fold[SExprAtomic, TriggerMsg](SEValue(evaluatedInitialState))((state, message) => {\n-          val messageVal = message match {\n-            case TransactionMsg(transaction) => {\n-              converter.fromTransaction(transaction) match {\n-                case Left(err) => throw new ConverterException(err)\n-                case Right(x) => x\n-              }\n+      .toMat(Sink.fold[SValue, TriggerMsg](evaluatedInitialState)((state, message) => {\n+        val messageVal = message match {\n+          case TransactionMsg(transaction) => {\n+            converter.fromTransaction(transaction) match {\n+              case Left(err) => throw new ConverterException(err)\n+              case Right(x) => x\n             }\n-            case CompletionMsg(completion) => {\n-              val status = completion.getStatus\n-              if (status.code != 0) {\n-                logger.warn(s\"Command failed: ${status.message}, code: ${status.code}\")\n-              }\n-              converter.fromCompletion(completion) match {\n-                case Left(err) => throw new ConverterException(err)\n-                case Right(x) => x\n-              }\n+          }\n+          case CompletionMsg(completion) => {\n+            val status = completion.getStatus\n+            if (status.code != 0) {\n+              logger.warn(s\"Command failed: ${status.message}, code: ${status.code}\")\n+            }\n+            converter.fromCompletion(completion) match {\n+              case Left(err) => throw new ConverterException(err)\n+              case Right(x) => x\n             }\n-            case HeartbeatMsg() => converter.fromHeartbeat\n           }\n-          val clientTime: Timestamp =\n-            Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n-          machine.setExpressionToEvaluate(\n-            makeApp(\n-              update,\n-              Array(SEValue(STimestamp(clientTime)): SExprAtomic, SEValue(messageVal), state)))\n-          val value = Machine.stepToValue(machine)\n-          val newState = handleStepResult(value, submit)\n-          SEValue(newState)\n-        }))(Keep.right[NotUsed, Future[SExpr]])\n+          case HeartbeatMsg() => converter.fromHeartbeat\n+        }\n+        val clientTime: Timestamp =\n+          Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n+        machine.setExpressionToEvaluate(\n+          makeApp(update, Array(STimestamp(clientTime): SValue, messageVal, state)))\n+        val value = Machine.stepToValue(machine)\n+        val newState = handleStepResult(value, submit)\n+        newState\n+      }))(Keep.right[NotUsed, Future[SValue]])\n   }\n \n-  def makeApp(func: AExpr, args: Array[SExprAtomic]): AExpr = {\n+  def makeApp(func: AExpr, values: Array[SValue]): AExpr = {\n+    val args: Array[SExprAtomic] = values.map(SEValue(_))\n+    // We can safely introduce a let-expression here to bind the `func` expression,\n+    // because there are no stack-references in `args`, since they are pure speedy values."
+  },
+  {
+    "id" : "fb609868-108a-4acd-8831-38c46a4f2213",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "2beec010-2363-49ec-bd20-915db31d6b8c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Don't we need to shift all stack references in `args` by 1 for this to work?",
+        "createdAt" : "2020-06-26T11:58:03Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3158df25-7dac-46a1-8bc7-aeb06526574c",
+        "parentId" : "2beec010-2363-49ec-bd20-915db31d6b8c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I dont think so, but I'll have a deeper think...",
+        "createdAt" : "2020-06-30T15:09:55Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6ed31256-3d0f-47a6-86b3-6bb2aeb78bb4",
+        "parentId" : "2beec010-2363-49ec-bd20-915db31d6b8c",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Did you think about it?",
+        "createdAt" : "2020-07-01T18:59:31Z",
+        "updatedAt" : "2020-07-01T18:59:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ac8f0d48-0424-4060-9f13-a4f95225cdc0",
+        "parentId" : "2beec010-2363-49ec-bd20-915db31d6b8c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Yes. It is safe because the args array always contains values (constructed with SEValue) and so will not contains any stack references.\r\n",
+        "createdAt" : "2020-07-02T07:05:45Z",
+        "updatedAt" : "2020-07-02T07:05:45Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "957db663-996f-42e3-ac4d-65127eef6030",
+        "parentId" : "2beec010-2363-49ec-bd20-915db31d6b8c",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I understand. Can you please add a comment in the code why it is safe and also explain why the function doesn't take an array of values but rather an array of expressions (or change it to take an array of values).",
+        "createdAt" : "2020-07-02T07:15:00Z",
+        "updatedAt" : "2020-07-02T07:15:01Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "394938f3-f305-45ca-b2ed-064a963864dd",
+        "parentId" : "2beec010-2363-49ec-bd20-915db31d6b8c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "https://github.com/digital-asset/daml/issues/6573",
+        "createdAt" : "2020-07-02T07:40:35Z",
+        "updatedAt" : "2020-07-02T07:41:05Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : 130,
+    "diffHunk" : "@@ -393,34 +392,41 @@ class Runner(\n           }\n         case x @ HeartbeatMsg() => List(x) // Hearbeats don't carry any information.\n       })\n-      .toMat(Sink.fold[SExpr, TriggerMsg](SEValue(evaluatedInitialState))((state, message) => {\n-        val messageVal = message match {\n-          case TransactionMsg(transaction) => {\n-            converter.fromTransaction(transaction) match {\n-              case Left(err) => throw new ConverterException(err)\n-              case Right(x) => x\n-            }\n-          }\n-          case CompletionMsg(completion) => {\n-            val status = completion.getStatus\n-            if (status.code != 0) {\n-              logger.warn(s\"Command failed: ${status.message}, code: ${status.code}\")\n+      .toMat(\n+        Sink.fold[SExprAtomic, TriggerMsg](SEValue(evaluatedInitialState))((state, message) => {\n+          val messageVal = message match {\n+            case TransactionMsg(transaction) => {\n+              converter.fromTransaction(transaction) match {\n+                case Left(err) => throw new ConverterException(err)\n+                case Right(x) => x\n+              }\n             }\n-            converter.fromCompletion(completion) match {\n-              case Left(err) => throw new ConverterException(err)\n-              case Right(x) => x\n+            case CompletionMsg(completion) => {\n+              val status = completion.getStatus\n+              if (status.code != 0) {\n+                logger.warn(s\"Command failed: ${status.message}, code: ${status.code}\")\n+              }\n+              converter.fromCompletion(completion) match {\n+                case Left(err) => throw new ConverterException(err)\n+                case Right(x) => x\n+              }\n             }\n+            case HeartbeatMsg() => converter.fromHeartbeat\n           }\n-          case HeartbeatMsg() => converter.fromHeartbeat\n-        }\n-        val clientTime: Timestamp =\n-          Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n-        machine.setExpressionToEvaluate(\n-          SEApp(update, Array(SEValue(STimestamp(clientTime)): SExpr, SEValue(messageVal), state)))\n-        val value = Machine.stepToValue(machine)\n-        val newState = handleStepResult(value, submit)\n-        SEValue(newState)\n-      }))(Keep.right[NotUsed, Future[SExpr]])\n+          val clientTime: Timestamp =\n+            Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)\n+          machine.setExpressionToEvaluate(\n+            makeApp(\n+              update,\n+              Array(SEValue(STimestamp(clientTime)): SExprAtomic, SEValue(messageVal), state)))\n+          val value = Machine.stepToValue(machine)\n+          val newState = handleStepResult(value, submit)\n+          SEValue(newState)\n+        }))(Keep.right[NotUsed, Future[SExpr]])\n+  }\n+\n+  def makeApp(func: AExpr, args: Array[SExprAtomic]): AExpr = {\n+    AExpr(SELet1General(func.wrapped, SEAppAtomicGeneral(SELocS(1), args)))"
+  },
+  {
+    "id" : "5109678b-c8ab-4ca5-85a7-d4fd7e5215bb",
+    "prId" : 5916,
+    "comments" : [
+      {
+        "id" : "25dead42-21b7-4c37-a777-13e79022894e",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Why did this change?",
+        "createdAt" : "2020-05-08T18:51:58Z",
+        "updatedAt" : "2020-05-08T19:08:40Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d731f0a1-d545-44c1-9ba2-27ccbd26c194",
+        "parentId" : "25dead42-21b7-4c37-a777-13e79022894e",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "So that we can log the name in the trigger sink.",
+        "createdAt" : "2020-05-08T19:15:47Z",
+        "updatedAt" : "2020-05-08T19:15:48Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "af232941b942e74dba8060b1a9b12c00425ead19",
+    "line" : 37,
+    "diffHunk" : "@@ -480,7 +483,7 @@ class Runner(\n     }\n     source\n       .viaMat(msgFlow)(Keep.right[NotUsed, T])\n-      .toMat(getTriggerSink(acs, submit))(Keep.both)\n+      .toMat(getTriggerSink(name, acs, submit))(Keep.both)"
+  },
+  {
+    "id" : "a9972f93-eff0-4f9a-9513-5d67fbde506e",
+    "prId" : 5875,
+    "comments" : [
+      {
+        "id" : "136d2bc2-1024-4d71-b17c-2d02371f6f93",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Note that `usedCommandIds` leaks memory. We should at least limit the size.",
+        "createdAt" : "2020-05-07T07:52:48Z",
+        "updatedAt" : "2020-05-07T10:47:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "09d276215366082b5891c9c2fd70ea2e27abc11d",
+    "line" : 31,
+    "diffHunk" : "@@ -210,15 +211,19 @@ class Runner(\n     applicationId: ApplicationId,\n     party: String,\n ) extends StrictLogging {\n-  private val compiler = Compiler(compiledPackages.packages)\n-  private val converter = Converter(compiledPackages, trigger.triggerIds)\n-  // This is a map from the command ids used on the ledger API to the command ids used internally\n-  // in the trigger which are just incremented at each step.\n+  // Compiles LF expressions into Speedy expressions.\n+  private val compiler: Compiler = Compiler(compiledPackages.packages)\n+  // Converts between various objects and SValues.\n+  private val converter: Converter = Converter(compiledPackages, trigger.triggerIds)\n+  // This is a map from the command IDs used on the ledger API to the\n+  // command IDs used internally in the trigger which are just\n+  // incremented at each step.\n   private var commandIdMap: Map[UUID, String] = Map.empty\n-  // This is the set of command ids emitted by the trigger.\n-  // We track this to detect collisions.\n+  // This is the set of command IDs emitted by the trigger.  We track"
+  },
+  {
+    "id" : "c8be85ed-e39b-4202-b9f2-e8b66fcfaef8",
+    "prId" : 5875,
+    "comments" : [
+      {
+        "id" : "7f479d80-fd14-4400-8e22-8b879a51e9d1",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "`msgFlow` isn’t a kill switch in general, e.g., in the tests we set it to something like `take(n)` to cut off the stream after n messages.",
+        "createdAt" : "2020-05-07T07:56:36Z",
+        "updatedAt" : "2020-05-07T10:47:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "09d276215366082b5891c9c2fd70ea2e27abc11d",
+    "line" : 146,
+    "diffHunk" : "@@ -434,7 +461,8 @@ class Runner(\n     } yield (acsResponses.flatMap(x => x.activeContracts), offset)\n   }\n \n-  // Run the trigger given the state of the ACS.\n+  // Run the trigger given the state of the ACS. The msgFlow argument"
+  },
+  {
+    "id" : "3c264a31-dd0c-4d05-bc0b-ce6ed2aa809e",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "4c94dfcc-3aea-4057-a4c1-909adcb61836",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        SourceQueue[Completion],\r\n```\r\nWe don’t actually care about the `WithComplete` part.",
+        "createdAt" : "2020-05-06T06:33:15Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "20f8c1cf-87d6-4e08-b951-8ce4f8c23c5d",
+        "parentId" : "4c94dfcc-3aea-4057-a4c1-909adcb61836",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-05-06T09:32:32Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -264,44 +267,68 @@ class Runner(\n       }\n     }\n \n+  // This function produces a pair of a source of trigger messages\n+  // and a function to call in the event of a command submission\n+  // failure.\n   private def msgSource(\n       client: LedgerClient,\n       offset: LedgerOffset,\n       heartbeat: Option[FiniteDuration],\n       party: String,\n       filter: TransactionFilter)(implicit materializer: Materializer)\n     : (Source[TriggerMsg, NotUsed], (String, StatusRuntimeException) => Unit) = {\n-    // We use the queue to post failures that occur directly on command submission as opposed to\n-    // appearing asynchronously on the completion stream\n-    val (completionQueue, completionQueueSource) =\n+\n+    // A queue for command submission failures together with a source\n+    // from which messages posted to the queue can be consumed.\n+    val (completionQueue, completionQueueSource): (\n+        SourceQueueWithComplete[Completion],"
+  },
+  {
+    "id" : "f194e42f-1b4e-43f5-ae5d-448b284eeb3b",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "c6f09500-d2c2-45c6-95fd-8b9d2628c8c7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "A failed command is not “committed on the ledger” but you will still get a completion.",
+        "createdAt" : "2020-05-06T06:34:11Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a39a11a0-4335-4747-b9f7-92f42b5c24f5",
+        "parentId" : "c6f09500-d2c2-45c6-95fd-8b9d2628c8c7",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-05-06T09:33:14Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -264,44 +267,68 @@ class Runner(\n       }\n     }\n \n+  // This function produces a pair of a source of trigger messages\n+  // and a function to call in the event of a command submission\n+  // failure.\n   private def msgSource(\n       client: LedgerClient,\n       offset: LedgerOffset,\n       heartbeat: Option[FiniteDuration],\n       party: String,\n       filter: TransactionFilter)(implicit materializer: Materializer)\n     : (Source[TriggerMsg, NotUsed], (String, StatusRuntimeException) => Unit) = {\n-    // We use the queue to post failures that occur directly on command submission as opposed to\n-    // appearing asynchronously on the completion stream\n-    val (completionQueue, completionQueueSource) =\n+\n+    // A queue for command submission failures together with a source\n+    // from which messages posted to the queue can be consumed.\n+    val (completionQueue, completionQueueSource): (\n+        SourceQueueWithComplete[Completion],\n+        Source[Completion, NotUsed]) =\n       Source.queue[Completion](10, OverflowStrategy.backpressure).preMaterialize()\n-    val transactionSource =\n+    // This function, given a command ID and a runtime exception,\n+    // posts to the completion queue.\n+    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n+      // 'Completion' is a type generated by protoc. It wraps a grpc\n+      // status code and represents the status of a committed command"
+  },
+  {
+    "id" : "993b4de9-39f3-4035-a161-4848f698f207",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "27fc38cc-e6c7-4c8a-ae46-eab60960f3dc",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I don’t think explaining types at their use site makes any sense. Types should be explained where they are defined. I realize you don’t use intellij so finding the generated Scala code is tricky so if you do want to link to something here link to the protobuf file instead of repeating what is said there.",
+        "createdAt" : "2020-05-06T06:36:31Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9ff5b87e-f37f-4bd7-95c3-c7b170ece542",
+        "parentId" : "27fc38cc-e6c7-4c8a-ae46-eab60960f3dc",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-05-06T09:33:25Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -264,44 +267,68 @@ class Runner(\n       }\n     }\n \n+  // This function produces a pair of a source of trigger messages\n+  // and a function to call in the event of a command submission\n+  // failure.\n   private def msgSource(\n       client: LedgerClient,\n       offset: LedgerOffset,\n       heartbeat: Option[FiniteDuration],\n       party: String,\n       filter: TransactionFilter)(implicit materializer: Materializer)\n     : (Source[TriggerMsg, NotUsed], (String, StatusRuntimeException) => Unit) = {\n-    // We use the queue to post failures that occur directly on command submission as opposed to\n-    // appearing asynchronously on the completion stream\n-    val (completionQueue, completionQueueSource) =\n+\n+    // A queue for command submission failures together with a source\n+    // from which messages posted to the queue can be consumed.\n+    val (completionQueue, completionQueueSource): (\n+        SourceQueueWithComplete[Completion],\n+        Source[Completion, NotUsed]) =\n       Source.queue[Completion](10, OverflowStrategy.backpressure).preMaterialize()\n-    val transactionSource =\n+    // This function, given a command ID and a runtime exception,\n+    // posts to the completion queue.\n+    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n+      // 'Completion' is a type generated by protoc. It wraps a grpc"
+  },
+  {
+    "id" : "5db51853-09d2-4016-b740-ce0af4da97ca",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "447f3371-be45-4273-b863-c9628187f4ec",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n    // Command completion source (ledger completion stream + synchronous submission failures).\r\n```",
+        "createdAt" : "2020-05-06T06:37:06Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "df92173a-e5c6-4d17-91a8-6d9fc3dd776e",
+        "parentId" : "447f3371-be45-4273-b863-c9628187f4ec",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-05-06T09:34:15Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -264,44 +267,68 @@ class Runner(\n       }\n     }\n \n+  // This function produces a pair of a source of trigger messages\n+  // and a function to call in the event of a command submission\n+  // failure.\n   private def msgSource(\n       client: LedgerClient,\n       offset: LedgerOffset,\n       heartbeat: Option[FiniteDuration],\n       party: String,\n       filter: TransactionFilter)(implicit materializer: Materializer)\n     : (Source[TriggerMsg, NotUsed], (String, StatusRuntimeException) => Unit) = {\n-    // We use the queue to post failures that occur directly on command submission as opposed to\n-    // appearing asynchronously on the completion stream\n-    val (completionQueue, completionQueueSource) =\n+\n+    // A queue for command submission failures together with a source\n+    // from which messages posted to the queue can be consumed.\n+    val (completionQueue, completionQueueSource): (\n+        SourceQueueWithComplete[Completion],\n+        Source[Completion, NotUsed]) =\n       Source.queue[Completion](10, OverflowStrategy.backpressure).preMaterialize()\n-    val transactionSource =\n+    // This function, given a command ID and a runtime exception,\n+    // posts to the completion queue.\n+    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n+      // 'Completion' is a type generated by protoc. It wraps a grpc\n+      // status code and represents the status of a committed command\n+      // on the ledger. Here we produce a value of this type corresponding\n+      // to a failed command submission.\n+      val _ = completionQueue.offer(\n+        Completion(\n+          commandId,\n+          Some(Status(s.getStatus().getCode().value(), s.getStatus().getDescription()))))\n+    }\n+\n+    // The transaction source (ledger).\n+    val transactionSource: Source[TriggerMsg, NotUsed] =\n       client.transactionClient\n         .getTransactions(offset, None, filter, verbose = true)\n-        .map[TriggerMsg](TransactionMsg)\n-    val completionSource =\n+        .map(TransactionMsg)\n+\n+    // Command completion source (ledger + failures)."
+  },
+  {
+    "id" : "0cedb6e0-0616-4f94-abfa-71a57e205056",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "1fd6d627-5b51-4adc-963e-dff86f34188d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "They can still be failed completions. They just didn’t fail synchronously during submission.",
+        "createdAt" : "2020-05-06T06:37:54Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "088fddab-7772-4263-b786-737795b64424",
+        "parentId" : "1fd6d627-5b51-4adc-963e-dff86f34188d",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-05-06T09:34:51Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -264,44 +267,68 @@ class Runner(\n       }\n     }\n \n+  // This function produces a pair of a source of trigger messages\n+  // and a function to call in the event of a command submission\n+  // failure.\n   private def msgSource(\n       client: LedgerClient,\n       offset: LedgerOffset,\n       heartbeat: Option[FiniteDuration],\n       party: String,\n       filter: TransactionFilter)(implicit materializer: Materializer)\n     : (Source[TriggerMsg, NotUsed], (String, StatusRuntimeException) => Unit) = {\n-    // We use the queue to post failures that occur directly on command submission as opposed to\n-    // appearing asynchronously on the completion stream\n-    val (completionQueue, completionQueueSource) =\n+\n+    // A queue for command submission failures together with a source\n+    // from which messages posted to the queue can be consumed.\n+    val (completionQueue, completionQueueSource): (\n+        SourceQueueWithComplete[Completion],\n+        Source[Completion, NotUsed]) =\n       Source.queue[Completion](10, OverflowStrategy.backpressure).preMaterialize()\n-    val transactionSource =\n+    // This function, given a command ID and a runtime exception,\n+    // posts to the completion queue.\n+    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n+      // 'Completion' is a type generated by protoc. It wraps a grpc\n+      // status code and represents the status of a committed command\n+      // on the ledger. Here we produce a value of this type corresponding\n+      // to a failed command submission.\n+      val _ = completionQueue.offer(\n+        Completion(\n+          commandId,\n+          Some(Status(s.getStatus().getCode().value(), s.getStatus().getDescription()))))\n+    }\n+\n+    // The transaction source (ledger).\n+    val transactionSource: Source[TriggerMsg, NotUsed] =\n       client.transactionClient\n         .getTransactions(offset, None, filter, verbose = true)\n-        .map[TriggerMsg](TransactionMsg)\n-    val completionSource =\n+        .map(TransactionMsg)\n+\n+    // Command completion source (ledger + failures).\n+    val completionSource: Source[TriggerMsg, NotUsed] =\n       client.commandClient\n         .completionSource(List(party), offset)\n         .mapConcat({\n           case CheckpointElement(_) => List()\n           case CompletionElement(c) => List(c)\n-        })\n-        .merge(completionQueueSource)\n-        .map[TriggerMsg](CompletionMsg)\n-    val source = heartbeat match {\n+        }) // Successful completions."
+  },
+  {
+    "id" : "47bc6458-29ed-489b-9c24-26243354b106",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks very fishy. I don’t think akka guarantees that you can cast from `Cancellable` to `NotUsed`. If you want to drop the materialized value use something like `mapMaterializedValue(_ => NotUsed.notUsed)`.",
+        "createdAt" : "2020-05-06T06:57:07Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "054bf888-ca01-47a7-96bd-4bc258386431",
+        "parentId" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I don't understand that. I claim the code the code is just the original program with explicit type annotations.\r\n\r\nWithout annotations we have:\r\n```\r\n    val heartbeatSource = heartbeat match {\r\n      case Some(interval) =>\r\n          Source.tick[TriggerMsg](interval, interval, HeartbeatMsg())\r\n      case None => Source.empty\r\n    }\r\n```\r\n\r\nNow If I annotate `heartbeatSource` as `heartbeatSource:[TriggerMsg, NotUsed]` I get a type error:\r\n```\r\nerror: type mismatch;\r\n found   : akka.stream.scaladsl.Source[com.daml.lf.engine.trigger.TriggerMsg,akka.actor.Cancellable]\r\n required: akka.stream.scaladsl.Source[com.daml.lf.engine.trigger.TriggerMsg,akka.NotUsed]\r\n          Source.tick[TriggerMsg](interval, interval, HeartbeatMsg())\r\n```\r\nSo I followed the types and we are now looking at the result.\r\n\r\nMy interpretation is without annotation, an implicit upcast is performed. When I annotate, the implicit cast needs to be made explicit. ",
+        "createdAt" : "2020-05-06T09:44:54Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9a3a9b1d-ef95-465b-8bef-e415ac0a5b64",
+        "parentId" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : ">     val heartbeatSource = heartbeat match {\r\n>       case Some(interval) =>\r\n>           Source.tick[TriggerMsg](interval, interval, HeartbeatMsg())\r\n>       case None => Source.empty\r\n>     }\r\n\r\nThis is not what we had before. Before we never got into a situation where we had to assign the same type to `Source.empty` and `Source.tick…` because we directly merged in the two case branches.",
+        "createdAt" : "2020-05-06T09:47:22Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b076cda4-2eb1-4cb5-96e8-89100f0a090d",
+        "parentId" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "That's a good point.",
+        "createdAt" : "2020-05-06T09:49:17Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "21b10b6c-eb33-426b-9a4e-56c231029c43",
+        "parentId" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "The fact remains though. \r\n```\r\nval heartbeatSource = heartbeat match {\r\n  case Some(interval) =>\r\n      Source.tick[TriggerMsg](interval, interval, HeartbeatMsg())\r\n  case None => Source.empty\r\n}\r\n```\r\nThis types and one assumes it types to `Source[TriggerMsg, NotUsed]`. If I annotate as such though then it no longer types without the cast.",
+        "createdAt" : "2020-05-06T09:57:01Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "63400029-4080-4a90-90cb-aef40d444709",
+        "parentId" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "I'll rephrase it so the cast is gone. I'd like to understand it though in the end. Perhaps I've incorrectly calculated the type of `heartbeat`? ",
+        "createdAt" : "2020-05-06T10:00:19Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c50af02d-95ea-4971-afb2-abc9b9ef1e2d",
+        "parentId" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The inferred type is `Source[TriggerMsg, Object]` not `Source[TriggerMsg, NotUsed]` which is an actual upcast. Again, `NotUsed` is not a superclass of `Cancellable` and scala will not do random casts during type inference. You could annotate with `Source[TriggerMsg, Object]` but I think `Source[TriggerMsg, NotUsed]` + `mapMaterializedValue` is a better solution here.",
+        "createdAt" : "2020-05-06T10:01:26Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2d8d8174-3625-480e-bba8-d9e0b990de32",
+        "parentId" : "8e29825a-e92e-42ef-b5bb-b0db8d1b1076",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok thanks. Yes, I was banking on the assumption that `Cancellable` was a sub-type of `NotUsed`. ",
+        "createdAt" : "2020-05-06T10:03:46Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -264,44 +267,68 @@ class Runner(\n       }\n     }\n \n+  // This function produces a pair of a source of trigger messages\n+  // and a function to call in the event of a command submission\n+  // failure.\n   private def msgSource(\n       client: LedgerClient,\n       offset: LedgerOffset,\n       heartbeat: Option[FiniteDuration],\n       party: String,\n       filter: TransactionFilter)(implicit materializer: Materializer)\n     : (Source[TriggerMsg, NotUsed], (String, StatusRuntimeException) => Unit) = {\n-    // We use the queue to post failures that occur directly on command submission as opposed to\n-    // appearing asynchronously on the completion stream\n-    val (completionQueue, completionQueueSource) =\n+\n+    // A queue for command submission failures together with a source\n+    // from which messages posted to the queue can be consumed.\n+    val (completionQueue, completionQueueSource): (\n+        SourceQueueWithComplete[Completion],\n+        Source[Completion, NotUsed]) =\n       Source.queue[Completion](10, OverflowStrategy.backpressure).preMaterialize()\n-    val transactionSource =\n+    // This function, given a command ID and a runtime exception,\n+    // posts to the completion queue.\n+    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n+      // 'Completion' is a type generated by protoc. It wraps a grpc\n+      // status code and represents the status of a committed command\n+      // on the ledger. Here we produce a value of this type corresponding\n+      // to a failed command submission.\n+      val _ = completionQueue.offer(\n+        Completion(\n+          commandId,\n+          Some(Status(s.getStatus().getCode().value(), s.getStatus().getDescription()))))\n+    }\n+\n+    // The transaction source (ledger).\n+    val transactionSource: Source[TriggerMsg, NotUsed] =\n       client.transactionClient\n         .getTransactions(offset, None, filter, verbose = true)\n-        .map[TriggerMsg](TransactionMsg)\n-    val completionSource =\n+        .map(TransactionMsg)\n+\n+    // Command completion source (ledger + failures).\n+    val completionSource: Source[TriggerMsg, NotUsed] =\n       client.commandClient\n         .completionSource(List(party), offset)\n         .mapConcat({\n           case CheckpointElement(_) => List()\n           case CompletionElement(c) => List(c)\n-        })\n-        .merge(completionQueueSource)\n-        .map[TriggerMsg](CompletionMsg)\n-    val source = heartbeat match {\n+        }) // Successful completions.\n+        .merge(completionQueueSource) // Failed completions.\n+        .map(CompletionMsg)\n+\n+    // Hearbeats source (we produce these repetitvely on a timer with\n+    // the given delay interval).\n+    val heartbeatSource: Source[TriggerMsg, NotUsed] = heartbeat match {\n       case Some(interval) =>\n-        transactionSource\n-          .merge(completionSource)\n-          .merge(Source.tick[TriggerMsg](interval, interval, HeartbeatMsg()))\n-      case None => transactionSource.merge(completionSource)\n-    }\n-    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n-      val _ = completionQueue.offer(\n-        Completion(\n-          commandId,\n-          Some(Status(s.getStatus().getCode().value(), s.getStatus().getDescription()))))\n+        val source: Source[TriggerMsg, Cancellable] =\n+          Source.tick[TriggerMsg](interval, interval, HeartbeatMsg())\n+        source.asInstanceOf[Source[TriggerMsg, NotUsed]] // Upcast. Won't fail."
+  },
+  {
+    "id" : "8001bae0-1da1-4a68-b29c-f3b873e6ad2b",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "e2fc49c5-2a22-4bd7-97ff-a003356119cf",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not sure this comment adds any value. The code here is pretty much literally what you have in the comment.",
+        "createdAt" : "2020-05-06T06:57:44Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b2f3c476-c0b6-4334-8f37-e7113b00999f",
+        "parentId" : "e2fc49c5-2a22-4bd7-97ff-a003356119cf",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-05-06T09:45:23Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -264,44 +267,68 @@ class Runner(\n       }\n     }\n \n+  // This function produces a pair of a source of trigger messages\n+  // and a function to call in the event of a command submission\n+  // failure.\n   private def msgSource(\n       client: LedgerClient,\n       offset: LedgerOffset,\n       heartbeat: Option[FiniteDuration],\n       party: String,\n       filter: TransactionFilter)(implicit materializer: Materializer)\n     : (Source[TriggerMsg, NotUsed], (String, StatusRuntimeException) => Unit) = {\n-    // We use the queue to post failures that occur directly on command submission as opposed to\n-    // appearing asynchronously on the completion stream\n-    val (completionQueue, completionQueueSource) =\n+\n+    // A queue for command submission failures together with a source\n+    // from which messages posted to the queue can be consumed.\n+    val (completionQueue, completionQueueSource): (\n+        SourceQueueWithComplete[Completion],\n+        Source[Completion, NotUsed]) =\n       Source.queue[Completion](10, OverflowStrategy.backpressure).preMaterialize()\n-    val transactionSource =\n+    // This function, given a command ID and a runtime exception,\n+    // posts to the completion queue.\n+    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n+      // 'Completion' is a type generated by protoc. It wraps a grpc\n+      // status code and represents the status of a committed command\n+      // on the ledger. Here we produce a value of this type corresponding\n+      // to a failed command submission.\n+      val _ = completionQueue.offer(\n+        Completion(\n+          commandId,\n+          Some(Status(s.getStatus().getCode().value(), s.getStatus().getDescription()))))\n+    }\n+\n+    // The transaction source (ledger).\n+    val transactionSource: Source[TriggerMsg, NotUsed] =\n       client.transactionClient\n         .getTransactions(offset, None, filter, verbose = true)\n-        .map[TriggerMsg](TransactionMsg)\n-    val completionSource =\n+        .map(TransactionMsg)\n+\n+    // Command completion source (ledger + failures).\n+    val completionSource: Source[TriggerMsg, NotUsed] =\n       client.commandClient\n         .completionSource(List(party), offset)\n         .mapConcat({\n           case CheckpointElement(_) => List()\n           case CompletionElement(c) => List(c)\n-        })\n-        .merge(completionQueueSource)\n-        .map[TriggerMsg](CompletionMsg)\n-    val source = heartbeat match {\n+        }) // Successful completions.\n+        .merge(completionQueueSource) // Failed completions.\n+        .map(CompletionMsg)\n+\n+    // Hearbeats source (we produce these repetitvely on a timer with\n+    // the given delay interval).\n+    val heartbeatSource: Source[TriggerMsg, NotUsed] = heartbeat match {\n       case Some(interval) =>\n-        transactionSource\n-          .merge(completionSource)\n-          .merge(Source.tick[TriggerMsg](interval, interval, HeartbeatMsg()))\n-      case None => transactionSource.merge(completionSource)\n-    }\n-    def postSubmitFailure(commandId: String, s: StatusRuntimeException) = {\n-      val _ = completionQueue.offer(\n-        Completion(\n-          commandId,\n-          Some(Status(s.getStatus().getCode().value(), s.getStatus().getDescription()))))\n+        val source: Source[TriggerMsg, Cancellable] =\n+          Source.tick[TriggerMsg](interval, interval, HeartbeatMsg())\n+        source.asInstanceOf[Source[TriggerMsg, NotUsed]] // Upcast. Won't fail.\n+      case None => Source.empty[TriggerMsg]\n     }\n-    (source, postSubmitFailure)\n+\n+    // Transactions + completions + hearbeats all merged into one"
+  },
+  {
+    "id" : "57725660-365d-4bb3-8342-b7e9e5dffaef",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "686f484d-b4dd-4652-9443-36aa2fd15f29",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Using `flatMap` inside the for comprehension makes it look like we might be using the effects of the Future when you are really using `flatMap` on lists. Keeping this in `yield` makes the separation much clearer.",
+        "createdAt" : "2020-05-06T07:00:17Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "72717fc3-0dec-4a5a-ab34-20a4d9d5622c",
+        "parentId" : "686f484d-b4dd-4652-9443-36aa2fd15f29",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok",
+        "createdAt" : "2020-05-06T09:45:57Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -408,7 +435,8 @@ class Runner(\n       offset = Array(acsResponses: _*).lastOption\n         .fold(LedgerOffset().withBoundary(LedgerOffset.LedgerBoundary.LEDGER_BEGIN))(resp =>\n           LedgerOffset().withAbsolute(resp.offset))\n-    } yield (acsResponses.flatMap(x => x.activeContracts), offset)\n+      activeContracts = acsResponses.flatMap(x => x.activeContracts)"
+  },
+  {
+    "id" : "c8d2584a-0967-4504-b0c6-ae920da3c4ae",
+    "prId" : 5852,
+    "comments" : [
+      {
+        "id" : "56353fe5-78ff-4d4d-912a-d2ff7110a1d7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Let’s please not document the standard library in our own code. If I see an inline comment I expect it to be something that I should pay attention to. There is nothing surprising or unusual here.",
+        "createdAt" : "2020-05-06T07:01:40Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "de13b7be-1ec8-4ee1-85fe-51187015c6b4",
+        "parentId" : "56353fe5-78ff-4d4d-912a-d2ff7110a1d7",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok\r\n",
+        "createdAt" : "2020-05-06T09:47:02Z",
+        "updatedAt" : "2020-05-06T10:13:43Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6ddc031f90743f4d0bd1d1df86525197e9afd851",
+    "line" : null,
+    "diffHunk" : "@@ -419,14 +447,23 @@ class Runner(\n   )(implicit materializer: Materializer, executionContext: ExecutionContext): (T, Future[SExpr]) = {\n     val (source, postFailure) =\n       msgSource(client, offset, trigger.heartbeat, party, transactionFilter)\n-    def submit(req: SubmitRequest) = {\n-      val f = client.commandClient\n+    def submit(req: SubmitRequest): Unit = {\n+      // Fire off a comand.\n+      val f: Future[Empty] = client.commandClient\n         .withTimeProvider(Some(Runner.getTimeProvider(timeProviderType)))\n         .submitSingleCommand(req)\n+\n+      // 'f.failed' is a new future that will be successfully completed"
+  },
+  {
+    "id" : "7095753d-6f32-4305-877d-81f0de34d0bb",
+    "prId" : 5038,
+    "comments" : [
+      {
+        "id" : "84b8ceda-b8de-4e8a-9cb1-116c9cefbac0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I think the API isn’t quite right get. It would make more sense to split the initialization into\r\n1. Take the packages and a trigger id, call `getTrigger`, `getTriggerFilter` and `getTriggerHeartbeat` and stuff that information in `Trigger`.\r\n2. Then make the runner take the `Trigger` and only handle connection to the ledger.\r\n\r\nHowever, I didn’t want to include this in this PR to make it easier to follow.",
+        "createdAt" : "2020-03-17T09:50:57Z",
+        "updatedAt" : "2020-03-17T09:50:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5cff5df7c8ddada578757bb1298720a07e4aa66a",
+    "line" : 287,
+    "diffHunk" : "@@ -384,50 +354,96 @@ class Runner(\n     }\n     source\n       .viaMat(msgFlow)(Keep.right[NotUsed, T])\n-      .toMat(getTriggerSink(converter, triggerExpr, triggerTy, timeProviderType, acs, submit))(\n-        Keep.both)\n+      .toMat(getTriggerSink(acs, submit))(Keep.both)\n       .run()\n   }\n }\n \n object Runner extends StrictLogging {\n+  // Return the time provider for a given time provider type.\n   def getTimeProvider(ty: TimeProviderType): TimeProvider = {\n     ty match {\n       case TimeProviderType.Static => TimeProvider.Constant(Instant.EPOCH)\n       case TimeProviderType.WallClock => TimeProvider.UTC\n       case _ => throw new RuntimeException(s\"Unexpected TimeProviderType: $ty\")\n     }\n   }\n-  def run(\n+\n+  // Given an identifier, search for the trigger and return the necessary metadata\n+  // to run it.\n+  // Throws an exception if the trigger is not found or not a valid trigger.\n+  def getTrigger(compiledPackages: CompiledPackages, triggerId: Identifier): Trigger = {\n+    val (tyCon: TypeConName, stateTy) =\n+      compiledPackages\n+        .getPackage(triggerId.packageId)\n+        .flatMap(_.lookupIdentifier(triggerId.qualifiedName).toOption) match {\n+        case Some(DValue(TApp(TTyCon(tcon), stateTy), _, _, _)) => (tcon, stateTy)\n+        case _ => {\n+          val errMsg = s\"Identifier ${triggerId.qualifiedName} does not point to a trigger\"\n+          throw new RuntimeException(errMsg)\n+        }\n+      }\n+    val triggerIds = TriggerIds(tyCon.packageId)\n+    if (tyCon == triggerIds.damlTriggerLowLevel(\"Trigger\")) {\n+      logger.debug(\"Running low-level trigger\")\n+      val triggerVal = EVal(triggerId)\n+      val triggerTy = TypeConApp(tyCon, ImmArray(stateTy))\n+      Trigger(triggerVal, triggerTy, triggerIds)\n+    } else if (tyCon == triggerIds.damlTrigger(\"Trigger\")) {\n+      logger.debug(\"Running high-level trigger\")\n+      val runTrigger = EVal(triggerIds.damlTrigger(\"runTrigger\"))\n+      val triggerState = TTyCon(triggerIds.damlTriggerInternal(\"TriggerState\"))\n+      val lowLevelTriggerTy = triggerIds.damlTriggerLowLevel(\"Trigger\")\n+      val lowTriggerVal = EApp(runTrigger, EVal(triggerId))\n+      val lowStateTy = TApp(triggerState, stateTy)\n+      val lowTriggerTy = TypeConApp(lowLevelTriggerTy, ImmArray(lowStateTy))\n+      Trigger(lowTriggerVal, lowTriggerTy, triggerIds)\n+    } else {\n+      val errMsg =\n+        s\"Identifier ${triggerId.qualifiedName} does not point to a trigger. Its type must be Daml.Trigger.Trigger or Daml.Trigger.LowLevel.Trigger.\"\n+      throw new RuntimeException(errMsg)\n+    }\n+  }\n+\n+  // Construct a trigger runner from the given DAR.\n+  def fromDar(\n       dar: Dar[(PackageId, Package)],\n       triggerId: Identifier,\n       client: LedgerClient,\n       timeProviderType: TimeProviderType,\n       applicationId: ApplicationId,\n-      party: String\n-  )(implicit materializer: Materializer, executionContext: ExecutionContext): Future[SExpr] = {\n-    val runner = new Runner(\n+      party: String): Runner = {\n+    val darMap = dar.all.toMap\n+    val compiler = Compiler(darMap)\n+    val compiledPackages =\n+      PureCompiledPackages(darMap, compiler.compilePackages(darMap.keys)).right.get\n+    val trigger = Runner.getTrigger(compiledPackages, triggerId)\n+    new Runner(\n       client,\n+      timeProviderType,\n       applicationId,\n-      party,\n-      dar\n+      compiledPackages,\n+      trigger,\n+      party\n     )\n-    val (triggerExpr, triggerTy, triggerIds) = runner.getTrigger(triggerId)\n-    val converter = Converter(runner.compiledPackages, triggerIds)\n-    val filter = runner.getTriggerFilter(converter, triggerExpr, triggerTy)\n-    val heartbeat = runner.getTriggerHeartbeat(converter, triggerExpr, triggerTy)\n+  }\n+\n+  // Convience wrapper that creates the runner and runs the trigger.\n+  def run(\n+      dar: Dar[(PackageId, Package)],\n+      triggerId: Identifier,\n+      client: LedgerClient,\n+      timeProviderType: TimeProviderType,\n+      applicationId: ApplicationId,\n+      party: String\n+  )(implicit materializer: Materializer, executionContext: ExecutionContext): Future[SExpr] = {\n+    val runner = Runner.fromDar(dar, triggerId, client, timeProviderType, applicationId, party)\n+    val filter = runner.getTriggerFilter()"
+  },
+  {
+    "id" : "8f63800c-f779-41d5-a95d-163e4559d922",
+    "prId" : 5038,
+    "comments" : [
+      {
+        "id" : "0077b68f-15df-4dd7-81c7-53c7248ea446",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Does `converter` still need to be an argument when it's a member of `Runner`?",
+        "createdAt" : "2020-03-17T10:38:54Z",
+        "updatedAt" : "2020-03-17T10:43:06Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "69d3da40-df74-4a14-bb0b-634cd60a447e",
+        "parentId" : "0077b68f-15df-4dd7-81c7-53c7248ea446",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It doesn’t, good catch! I’ll clean it up as part of the next refactoring PR.",
+        "createdAt" : "2020-03-17T10:51:03Z",
+        "updatedAt" : "2020-03-17T10:51:03Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "5cff5df7c8ddada578757bb1298720a07e4aa66a",
+    "line" : 39,
+    "diffHunk" : "@@ -73,7 +75,10 @@ class Runner(\n   // Handles the result of initialState or update, i.e., (s, [Commands], Text)\n   // by submitting the commands, printing the log message and returning\n   // the new state\n-  def handleStepResult(converter: Converter, v: SValue, submit: SubmitRequest => Unit): SValue =\n+  private def handleStepResult(\n+      converter: Converter,"
+  },
+  {
+    "id" : "623a85f7-0381-40e8-aff1-a1baf7e54380",
+    "prId" : 3983,
+    "comments" : [
+      {
+        "id" : "5af12926-2475-4902-b1c0-99094200061f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do I understand it correctly that we do not need to reset the log since we log on addition to the tracelog and never actually read the values?",
+        "createdAt" : "2020-01-08T14:59:42Z",
+        "updatedAt" : "2020-01-08T15:13:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3740d8d2-4303-4eb3-9ec9-fa5d4d38c632",
+        "parentId" : "5af12926-2475-4902-b1c0-99094200061f",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Yes, that's the idea.\r\nAlthough in DAMLScript the only tracelogs that you will see as the output of DAMLScript are the ones in the `Script` value, but not the ones that are logged as part of regular choice executions on the server.",
+        "createdAt" : "2020-01-08T15:04:50Z",
+        "updatedAt" : "2020-01-08T15:13:28Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c0315122-c204-4aea-b820-32280e3c4910",
+        "parentId" : "5af12926-2475-4902-b1c0-99094200061f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Sure that’s exactly how it should be imho :)",
+        "createdAt" : "2020-01-08T15:06:47Z",
+        "updatedAt" : "2020-01-08T15:13:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "7af1640707d0cfa84dc71cd6c9c0200392829790",
+    "line" : 32,
+    "diffHunk" : "@@ -118,42 +118,21 @@ class Runner(\n       }\n     }\n \n-  def logTraces(machine: Speedy.Machine): Speedy.Machine = {\n-    var traceEmpty = true\n-    machine.traceLog.iterator.foreach {\n-      case (msg, optLoc) =>\n-        traceEmpty = false\n-        logger.info(s\"TRACE ${Pretty.prettyLoc(optLoc).render(80)}: $msg\")\n-    }\n-    // Right now there isn’t a way to reset the TraceLog so we have to manually replace it by a new empty tracelog.\n-    // We might want to make this possible in the future since it would be a bit cheaper but\n-    // this shouldn’t be the bottleneck in triggers.\n-    if (traceEmpty) {\n-      // We can avoid allocating a new TraceLog in the common case where there was no trace statement.\n-      machine\n-    } else {\n-      machine.copy(traceLog = TraceLog(machine.traceLog.capacity))\n-    }\n-  }\n-\n-  def stepToValue(machine: Speedy.Machine): Speedy.Machine = {\n+  def stepToValue(machine: Speedy.Machine): Unit = {"
+  },
+  {
+    "id" : "ec6e2d17-7e53-490a-b035-a43894f8af5a",
+    "prId" : 3858,
+    "comments" : [
+      {
+        "id" : "ab39841e-a3b2-423d-89e0-7a17e954dd75",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I am a bit unsure on whether this should depend on the time provider, i.e., be static in static time mode or whether it should always UTC. Given that e.g. DABL always runs in static time mode, I could see it being useful to use UTC since that allows you to feed in time externally.\r\n\r\n@tweber-da Given that you raised this issue, do you have a preference here?\r\nor maybe @bame-da?",
+        "createdAt" : "2019-12-16T12:31:07Z",
+        "updatedAt" : "2019-12-16T12:52:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f1c49bd5-9f40-4a20-9099-524a06aa4e70",
+        "parentId" : "ab39841e-a3b2-423d-89e0-7a17e954dd75",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Merging for now. @tweber-da @bame-da let me know if you'd prefer the trigger to get wall clock time in static time mode as well.\r\n",
+        "createdAt" : "2019-12-17T10:11:58Z",
+        "updatedAt" : "2019-12-17T10:11:58Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "15fac3d5c4c90326214e18a515fa882a21f6ef7f",
+    "line" : 21,
+    "diffHunk" : "@@ -263,8 +265,15 @@ class Runner(\n       case Left(err) => throw new ConverterException(err)\n       case Right(x) => x\n     })\n+    val clientTime: Timestamp =\n+      Timestamp.assertFromInstant(Runner.getTimeProvider(timeProviderType).getCurrentTime)"
+  },
+  {
+    "id" : "b5c1e7ef-94c6-4355-b341-cd77502eb672",
+    "prId" : 3501,
+    "comments" : [
+      {
+        "id" : "db8a1496-4462-46d5-880b-ae63af6a05c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I think this isn’t quite right: First the commandId field is optional and will be an empty string for transactions submitted by another party so we need to handle this. Transactions submitted by our party might still come from a different client than the trigger so the UUID conversion can still fail. I would propose that in that case we should treat this as if no command id has been supplied and do the same for when the lookup fails.",
+        "createdAt" : "2019-11-18T09:58:58Z",
+        "updatedAt" : "2019-11-18T13:07:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6ee5c189-f454-43da-a0ff-c68cff957bc4",
+        "parentId" : "db8a1496-4462-46d5-880b-ae63af6a05c0",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "The empty case should be handled by the `try catch`. `UUID.fromString` should throw an `IllegalArgumentException` in case of an empty string or otherwise illegal UUID and the `catch` block handles that case.\r\n\r\nFor reference, this snippet is taken from the [`CompletionMsg` case above](https://github.com/digital-asset/daml/pull/3501/files/95ccc59b45119a070a0c30fb5451ca8855158438#diff-89250be8bed2fd6ce958fd8b1c1aeea9R204-R214).\r\n\r\n> I would propose that in that case we should treat this as if no command id has been supplied and do the same for when the lookup fails.\r\n\r\nSo, clear the `commandId` field instead of forwarding the incoming `msg` unchanged? ",
+        "createdAt" : "2019-11-18T12:36:38Z",
+        "updatedAt" : "2019-11-18T13:07:35Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4513ecc7-5227-4fc6-8256-e71ae90e9374",
+        "parentId" : "db8a1496-4462-46d5-880b-ae63af6a05c0",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Ah yeah, the catch makes sense. Clearing `commandId` sounds good and we should we should do thet for completions as well.",
+        "createdAt" : "2019-11-18T13:02:50Z",
+        "updatedAt" : "2019-11-18T13:07:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f56ed114-ad90-4da8-9fe2-6a30b95ab342",
+        "parentId" : "db8a1496-4462-46d5-880b-ae63af6a05c0",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I've changed it to clear the `commandId` in such cases. The `Converter` will then convert that into a `None : Optional CommandId`.\r\n\r\nIn case of `MCompletion` we're already dropping those messages with unknown command ids.",
+        "createdAt" : "2019-11-18T13:10:57Z",
+        "updatedAt" : "2019-11-18T13:10:57Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "29c0a995f2d88ec863b54a1e2a26bcb7649cf5d4",
+    "line" : 7,
+    "diffHunk" : "@@ -212,7 +212,17 @@ class Runner(\n             // This happens for invalid UUIDs which we might get for completions not emitted by the trigger.\n             case e: IllegalArgumentException => List()\n           }\n-        case msg @ TransactionMsg(_) => List(msg)\n+        case msg @ TransactionMsg(t) =>\n+          try {\n+            commandIdMap.get(UUID.fromString(t.commandId)) match {"
+  }
+]

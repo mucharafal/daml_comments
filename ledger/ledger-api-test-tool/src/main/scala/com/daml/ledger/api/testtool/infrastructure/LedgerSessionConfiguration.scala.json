@@ -1,0 +1,183 @@
+[
+  {
+    "id" : "40395416-49ea-4bb8-a4a3-05aea3263123",
+    "prId" : 7328,
+    "comments" : [
+      {
+        "id" : "aa3b617e-9bd4-4e1a-8a51-14152935f15c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "This definitely does not look as a `case class` any longer. I would recommend you remove the `case` qualifier.",
+        "createdAt" : "2020-09-07T10:05:41Z",
+        "updatedAt" : "2020-09-07T12:51:18Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8ae46ab7-fd4d-4b5e-9e44-a60d4f8d3a1b",
+        "parentId" : "aa3b617e-9bd4-4e1a-8a51-14152935f15c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Agreed. Done.",
+        "createdAt" : "2020-09-07T12:51:27Z",
+        "updatedAt" : "2020-09-07T12:51:27Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf7583b91c2f670c439f510026de0dfba0bb94f0",
+    "line" : null,
+    "diffHunk" : "@@ -7,13 +7,14 @@ import com.daml.ledger.api.testtool.infrastructure.participant.ParticipantSessio\n import com.daml.ledger.api.tls.TlsConfiguration\n \n private[testtool] final case class LedgerSessionConfiguration(\n-    participants: Vector[(String, Int)],\n+    private val participantAddresses: Vector[(String, Int)],\n+    private val ssl: Option[TlsConfiguration],\n+    private val partyAllocation: PartyAllocationConfiguration,"
+  },
+  {
+    "id" : "6a7b72c6-8515-4440-a843-3d15438a887a",
+    "prId" : 7328,
+    "comments" : [
+      {
+        "id" : "9e7b07e3-69bf-4c03-851c-514354a469b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "If the only use case for this class is to produce `ParticipantSessionConfiguration`s, laziness is likely to not be useful.",
+        "createdAt" : "2020-09-07T10:07:01Z",
+        "updatedAt" : "2020-09-07T12:51:18Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9eba6b64-c737-4c4f-9790-6c68b1d4fb22",
+        "parentId" : "9e7b07e3-69bf-4c03-851c-514354a469b8",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Removed the laziness. I think it was useful about half-way in, but not any more.",
+        "createdAt" : "2020-09-07T12:51:36Z",
+        "updatedAt" : "2020-09-07T12:51:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf7583b91c2f670c439f510026de0dfba0bb94f0",
+    "line" : null,
+    "diffHunk" : "@@ -7,13 +7,14 @@ import com.daml.ledger.api.testtool.infrastructure.participant.ParticipantSessio\n import com.daml.ledger.api.tls.TlsConfiguration\n \n private[testtool] final case class LedgerSessionConfiguration(\n-    participants: Vector[(String, Int)],\n+    private val participantAddresses: Vector[(String, Int)],\n+    private val ssl: Option[TlsConfiguration],\n+    private val partyAllocation: PartyAllocationConfiguration,\n     shuffleParticipants: Boolean,\n-    ssl: Option[TlsConfiguration],\n-    partyAllocation: PartyAllocationConfiguration,\n ) {\n-  def forParticipant(hostAndPort: (String, Int)): ParticipantSessionConfiguration = {\n-    val (host, port) = hostAndPort\n-    ParticipantSessionConfiguration(host, port, ssl, partyAllocation)\n-  }\n+  lazy val participants: Vector[ParticipantSessionConfiguration] ="
+  },
+  {
+    "id" : "18bd798d-1d3a-4e15-8221-ec8d1f82e2ed",
+    "prId" : 7328,
+    "comments" : [
+      {
+        "id" : "dbe70208-df16-4e8c-8376-da766bd9a3bb",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n    for ((host, port) <- participantAddresses) yield\r\n      ParticipantSessionConfiguration(host, port, ssl, partyAllocation)\r\n```\r\nA `for`-comprehension probably makes the destructuring a bit more terse.",
+        "createdAt" : "2020-09-07T10:26:49Z",
+        "updatedAt" : "2020-09-07T12:51:18Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "10b59e56-8e11-436d-ae11-3a279e3c675e",
+        "parentId" : "dbe70208-df16-4e8c-8376-da766bd9a3bb",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "If you accept this suggestion, you may want to give a second spin at `scalafmt`.",
+        "createdAt" : "2020-09-07T10:27:14Z",
+        "updatedAt" : "2020-09-07T12:51:18Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "23400f6a-5f9d-4783-9623-0105be2170ff",
+        "parentId" : "dbe70208-df16-4e8c-8376-da766bd9a3bb",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Much nicer, thank you.",
+        "createdAt" : "2020-09-07T12:52:23Z",
+        "updatedAt" : "2020-09-07T12:52:23Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cf7583b91c2f670c439f510026de0dfba0bb94f0",
+    "line" : null,
+    "diffHunk" : "@@ -7,13 +7,14 @@ import com.daml.ledger.api.testtool.infrastructure.participant.ParticipantSessio\n import com.daml.ledger.api.tls.TlsConfiguration\n \n private[testtool] final case class LedgerSessionConfiguration(\n-    participants: Vector[(String, Int)],\n+    private val participantAddresses: Vector[(String, Int)],\n+    private val ssl: Option[TlsConfiguration],\n+    private val partyAllocation: PartyAllocationConfiguration,\n     shuffleParticipants: Boolean,\n-    ssl: Option[TlsConfiguration],\n-    partyAllocation: PartyAllocationConfiguration,\n ) {\n-  def forParticipant(hostAndPort: (String, Int)): ParticipantSessionConfiguration = {\n-    val (host, port) = hostAndPort\n-    ParticipantSessionConfiguration(host, port, ssl, partyAllocation)\n-  }\n+  lazy val participants: Vector[ParticipantSessionConfiguration] =\n+    participantAddresses.map {\n+      case (host, port) =>\n+        ParticipantSessionConfiguration(host, port, ssl, partyAllocation)\n+    }"
+  }
+]

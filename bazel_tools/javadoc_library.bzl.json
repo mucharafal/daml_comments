@@ -1,0 +1,199 @@
+[
+  {
+    "id" : "d4eaf7eb-ab92-4fd9-9def-c71f76d69bf5",
+    "prId" : 5446,
+    "comments" : [
+      {
+        "id" : "c1c37582-169d-4835-b9fc-4489eeb56594",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Can the order in `-sourcepath` affect the output? If so, there should also be a `sort` in there.\r\n\r\nOtherwise, why not use `find`'s `-printf`? Also, the output of `find` should already end on `:`, so the colon in `:.` seems redundant.\r\n```suggestion\r\n        '-sourcepath $(find . -type d -name \"*java\" -printf \"%P:\").',\r\n```\r\n",
+        "createdAt" : "2020-04-06T11:56:54Z",
+        "updatedAt" : "2020-04-07T06:59:48Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9d8b4350-4e49-4069-9a87-fe06abd572e0",
+        "parentId" : "c1c37582-169d-4835-b9fc-4489eeb56594",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I took the line verbatim from the \"original\" in google-commons. I'm happy to make the change, but I also don't know what the reason for using `-print0` was in the first place",
+        "createdAt" : "2020-04-06T12:38:06Z",
+        "updatedAt" : "2020-04-07T06:59:48Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0381bd4ddb38d16789fb6264a0ec2210dbc9f7f6",
+    "line" : null,
+    "diffHunk" : "@@ -29,7 +29,8 @@ def _javadoc_library(ctx):\n \n     javadoc_command = [\n         java_home + \"/bin/javadoc\",\n-        \"-sourcepath .\",\n+        # this is an ugly hack to provide all directories ending with `java` as a \"source root\"\n+        '-sourcepath $(find * -type d -name \"*java\" -print0 | tr \"\\\\0\" :):.',"
+  },
+  {
+    "id" : "a2ba165e-bda7-4578-9204-0a91b3032dfe",
+    "prId" : 5446,
+    "comments" : [
+      {
+        "id" : "4f0fcdeb-f6bf-412c-b1c8-bca783493ffb",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "```suggestion\r\n            srcs.extend(src[DefaultInfo].files.to_list())\r\n```\r\nIs there any reason to restrict this case to `filegroup`? This way it would also work with say `genrule`s that generate files, which seems fine.",
+        "createdAt" : "2020-04-06T11:59:02Z",
+        "updatedAt" : "2020-04-07T06:59:48Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0381bd4ddb38d16789fb6264a0ec2210dbc9f7f6",
+    "line" : null,
+    "diffHunk" : "@@ -57,9 +58,20 @@ def _javadoc_library(ctx):\n \n     jar_command = \"%s/bin/jar cf %s -C tmp .\" % (java_home, ctx.outputs.jar.path)\n \n-    unjar_command = \"%s/bin/jar xf %s\" % (java_home, \" \".join([jar.path for f in ctx.attr.srcs for jar in f[JavaInfo].source_jars]))\n+    unjar_params = []\n+    srcs = []\n+    for src in ctx.attr.srcs:\n+        # this is for when the provided src is a java_library target\n+        if JavaInfo in src:\n+            for jar in src[JavaInfo].source_jars:\n+                unjar_params.append(jar.path)\n+                srcs.append(jar)\n+\n+        elif DefaultInfo in src:\n+            # I don't know how to assert that the target is a filegroup, but this works well enough\n+            srcs.extend(src[DefaultInfo].files.to_list())"
+  },
+  {
+    "id" : "41e2f0bc-b7ef-4e34-9188-4912f84c6979",
+    "prId" : 1867,
+    "comments" : [
+      {
+        "id" : "43245c34-e620-465e-876c-15cc1bec5cb0",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Does this need a `.exe` on Windows?",
+        "createdAt" : "2019-06-25T15:47:24Z",
+        "updatedAt" : "2019-06-25T15:57:01Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fb705af0-38a6-454d-b690-230b9dfb6a28",
+        "parentId" : "43245c34-e620-465e-876c-15cc1bec5cb0",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Afaik we don’t build any javadoc on Windows atm and I’m not sure we need to tbh. Either way, this is the same as the upstream rule (in both repos) so I’d suggest to merge it without Windows support and then add Windows support if we decide we want to have it given that this is blocking releases.",
+        "createdAt" : "2019-06-25T15:58:58Z",
+        "updatedAt" : "2019-06-25T15:58:58Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2cf802837823a6b0ea3f7e9e1b9a26d8a246306b",
+    "line" : 31,
+    "diffHunk" : "@@ -0,0 +1,89 @@\n+# Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+# This is a mixture of the javadoc_library rule in\n+# https://github.com/google/bazel-common and the one in\n+# https://github.com/stackb/rules_proto.\n+\n+# The main two factors for why we need this are\n+\n+# 1. We only have a source jar for java_proto_library.\n+# The rules in bazel-common do not support this.\n+\n+# 2. We need to get the source jar via the JavaInfo provider.\n+# The rules in rules_proto do not support this.\n+\n+# We probably want to clean this up and upstream it at some point.\n+\n+def _javadoc_library(ctx):\n+    transitive_deps = []\n+    for dep in ctx.attr.deps:\n+        if JavaInfo in dep:\n+            transitive_deps.append(dep[JavaInfo].transitive_deps)\n+        elif hasattr(dep, \"java\"):\n+            transitive_deps.append(dep.java.transitive_deps)\n+\n+    classpath = depset([], transitive = transitive_deps).to_list()\n+\n+    java_home = str(ctx.attr._jdk[java_common.JavaRuntimeInfo].java_home)\n+\n+    javadoc_command = [\n+        java_home + \"/bin/javadoc\","
+  },
+  {
+    "id" : "a3db419d-aef2-4477-b406-f3eec76e7255",
+    "prId" : 1867,
+    "comments" : [
+      {
+        "id" : "e1545c77-7c07-4716-aea3-6926380a4ac0",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Same here, `jar.exe`?",
+        "createdAt" : "2019-06-25T15:49:37Z",
+        "updatedAt" : "2019-06-25T15:57:01Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "21679f70-766d-4501-b6c1-21b0a96637db",
+        "parentId" : "e1545c77-7c07-4716-aea3-6926380a4ac0",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "IIRC `jar cf` sets a timestamp which makes this indeterministic. It's probably better to use zipper instead.",
+        "createdAt" : "2019-06-25T15:52:45Z",
+        "updatedAt" : "2019-06-25T15:57:02Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ba0b79e3-f005-4ac3-855d-cc33474dc784",
+        "parentId" : "e1545c77-7c07-4716-aea3-6926380a4ac0",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’d like to not deviate further from upstream than we have to and this is how the upstream rules work. Given that nothing depends on this, this doesn’t seem like an issue for now and if it becomes an issue we should fix all javadocs (and source jars) at once.",
+        "createdAt" : "2019-06-25T17:06:14Z",
+        "updatedAt" : "2019-06-25T17:06:15Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2cf802837823a6b0ea3f7e9e1b9a26d8a246306b",
+    "line" : 58,
+    "diffHunk" : "@@ -0,0 +1,89 @@\n+# Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+# This is a mixture of the javadoc_library rule in\n+# https://github.com/google/bazel-common and the one in\n+# https://github.com/stackb/rules_proto.\n+\n+# The main two factors for why we need this are\n+\n+# 1. We only have a source jar for java_proto_library.\n+# The rules in bazel-common do not support this.\n+\n+# 2. We need to get the source jar via the JavaInfo provider.\n+# The rules in rules_proto do not support this.\n+\n+# We probably want to clean this up and upstream it at some point.\n+\n+def _javadoc_library(ctx):\n+    transitive_deps = []\n+    for dep in ctx.attr.deps:\n+        if JavaInfo in dep:\n+            transitive_deps.append(dep[JavaInfo].transitive_deps)\n+        elif hasattr(dep, \"java\"):\n+            transitive_deps.append(dep.java.transitive_deps)\n+\n+    classpath = depset([], transitive = transitive_deps).to_list()\n+\n+    java_home = str(ctx.attr._jdk[java_common.JavaRuntimeInfo].java_home)\n+\n+    javadoc_command = [\n+        java_home + \"/bin/javadoc\",\n+        \"-sourcepath .\",\n+        \" \".join(ctx.attr.root_packages),\n+        \"-use\",\n+        \"-subpackages\",\n+        \":\".join(ctx.attr.root_packages),\n+        \"-encoding UTF8\",\n+        \"-classpath\",\n+        \":\".join([jar.path for jar in classpath]),\n+        \"-notimestamp\",\n+        \"-d tmp\",\n+        \"-Xdoclint:-missing\",\n+        \"-quiet\",\n+    ]\n+\n+    if ctx.attr.doctitle:\n+        javadoc_command.append('-doctitle \"%s\"' % ctx.attr.doctitle)\n+\n+    if ctx.attr.exclude_packages:\n+        javadoc_command.append(\"-exclude %s\" % \":\".join(ctx.attr.exclude_packages))\n+\n+    for link in ctx.attr.external_javadoc_links:\n+        javadoc_command.append(\"-linkoffline {0} {0}\".format(link))\n+\n+    if ctx.attr.bottom_text:\n+        javadoc_command.append(\"-bottom '%s'\" % ctx.attr.bottom_text)\n+\n+    jar_command = \"%s/bin/jar cf %s -C tmp .\" % (java_home, ctx.outputs.jar.path)"
+  }
+]

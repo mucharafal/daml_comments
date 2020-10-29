@@ -1,0 +1,383 @@
+[
+  {
+    "id" : "0ea3b4a7-971d-4494-a6a0-afb4928210de",
+    "prId" : 5490,
+    "comments" : [
+      {
+        "id" : "a56d5e39-5f94-4cf0-95cb-a76481886ae6",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This really needs to become a proper Haskell test. I'll take care of that once this PR has landed.",
+        "createdAt" : "2020-04-08T11:13:31Z",
+        "updatedAt" : "2020-04-08T11:13:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ee8346db5bf9c8320b2d9b947526d5882421efff",
+    "line" : 9,
+    "diffHunk" : "@@ -60,16 +60,10 @@ cd $TMP_DIR\n \n # Call daml2js.\n PATH=`dirname $YARN`:$PATH $DAML2TS -o daml2js $DAR\n-# We only needed this package.json in order to provide resolution of\n-# daml-types to daml2js and that's done with now.\n-rm package.json\n-# Since we eschew using workspaces and resolutions in this test, patch\n-# up the daml-ledger dependency on daml-types.\n-sed -i\"\" \"s|\\\"@daml/types\\\": \\\"$SDK_VERSION\\\"|\\\"@daml/types\\\": \\\"file:../daml-types\\\"|\" daml-ledger/package.json"
+  },
+  {
+    "id" : "1c18fdf9-97e0-4882-a65d-1fe742dd09da",
+    "prId" : 5171,
+    "comments" : [
+      {
+        "id" : "71ed89fc-b2a0-460c-8bda-2f5838e03db9",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Shouldn't we be able to do this without yarn workspaces now? It would be great to confirm that in this test.",
+        "createdAt" : "2020-03-25T17:37:37Z",
+        "updatedAt" : "2020-03-25T17:50:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "93d35154-19c0-4b64-a938-3e61ef017bef",
+        "parentId" : "71ed89fc-b2a0-460c-8bda-2f5838e03db9",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-03-25T19:19:03Z",
+        "updatedAt" : "2020-03-25T19:19:03Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ede39c0bc7b73401d689c75f3f46feb6f2c5843f",
+    "line" : 15,
+    "diffHunk" : "@@ -57,11 +57,14 @@ cp -rL $DAML_LEDGER/* $TMP_DAML_LEDGER\n \n cd $TMP_DIR\n \n-$DAML2TS -o daml2ts $DAR -p $TMP_DIR/package.json\n-$YARN install --frozen-lockfile\n-$YARN workspaces run build\n-$YARN workspaces run lint\n+# Call daml2ts.\n+PATH=`dirname $YARN`:$PATH $DAML2TS -o daml2ts $DAR\n \n+# The previous step provides all the daml2ts Javascript needed by the\n+# build-and-lint-test workspace.\n+$YARN install --pure-lockfile > /dev/null 2>&1\n+$YARN workspaces run build  # Build it.\n+$YARN workspaces run lint   # No great value in this but nonetheless, lint it."
+  },
+  {
+    "id" : "fa4d906d-9ddd-4b0a-a02f-0a7d0e71fc66",
+    "prId" : 4989,
+    "comments" : [
+      {
+        "id" : "95ebfd4a-fccc-4dc6-813c-506b28574a5c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I think this would be easier to understand if you swap the order to `rm -rf $TMP_DIR && mkdir -p $TMP_DIR`.",
+        "createdAt" : "2020-03-13T15:07:23Z",
+        "updatedAt" : "2020-03-13T15:44:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "96c2296f-db17-4626-9004-ea0c1dbfba3e",
+        "parentId" : "95ebfd4a-fccc-4dc6-813c-506b28574a5c",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok!",
+        "createdAt" : "2020-03-13T15:36:20Z",
+        "updatedAt" : "2020-03-13T15:44:26Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7c9308861747ac2b65f46635ea005cd769503c6e",
+    "line" : null,
+    "diffHunk" : "@@ -2,7 +2,23 @@\n # Copyright (c) 2020 The DAML Authors. All rights reserved.\n # SPDX-License-Identifier: Apache-2.0\n \n-set -euo pipefail\n+set -eo pipefail # Deliberately not set -u here.\n+\n+# It's sometimes useful to be able to run this test in a filesystem\n+# that one can inspect.\n+if [[ -z \"$BUILD_AND_LINT_TMP_DIR\" ]];\n+then\n+    TMP_DIR=$(mktemp -d)\n+    cleanup() {\n+        cd /\n+        rm -rf $TMP_DIR\n+    }\n+    trap cleanup EXIT\n+else\n+  TMP_DIR=\"$BUILD_AND_LINT_TMP_DIR\"\n+  mkdir -p $TMP_DIR && rm -rf $TMP_DIR/*"
+  },
+  {
+    "id" : "a3858fde-f73f-4e68-8ffc-79f2ec08bae6",
+    "prId" : 4989,
+    "comments" : [
+      {
+        "id" : "38bce111-0a1a-44aa-a91d-f9d627bcf056",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\nset -eou pipefail\r\n```",
+        "createdAt" : "2020-03-13T15:09:20Z",
+        "updatedAt" : "2020-03-13T15:44:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7c9308861747ac2b65f46635ea005cd769503c6e",
+    "line" : null,
+    "diffHunk" : "@@ -2,7 +2,23 @@\n # Copyright (c) 2020 The DAML Authors. All rights reserved.\n # SPDX-License-Identifier: Apache-2.0\n \n-set -euo pipefail\n+set -eo pipefail # Deliberately not set -u here."
+  },
+  {
+    "id" : "38c84afa-8d0c-45df-bf78-94c889e6238b",
+    "prId" : 4989,
+    "comments" : [
+      {
+        "id" : "fe32118f-9be2-4e07-85cd-9e082c5b13c7",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\nif [[ -z \"${BUILD_AND_LINT_TMP_DIR:-}\" ]];\r\n```\r\nI think it’s better to be explicit in the one place where a variable might be undefined than allow undefined variables everywhere.",
+        "createdAt" : "2020-03-13T15:09:54Z",
+        "updatedAt" : "2020-03-13T15:44:26Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "dba42bdf-386b-4236-8853-4d5df23c400d",
+        "parentId" : "fe32118f-9be2-4e07-85cd-9e082c5b13c7",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Got it. Thanks, that was the bash fu I was lacking.",
+        "createdAt" : "2020-03-13T15:36:56Z",
+        "updatedAt" : "2020-03-13T15:44:26Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7c9308861747ac2b65f46635ea005cd769503c6e",
+    "line" : null,
+    "diffHunk" : "@@ -2,7 +2,23 @@\n # Copyright (c) 2020 The DAML Authors. All rights reserved.\n # SPDX-License-Identifier: Apache-2.0\n \n-set -euo pipefail\n+set -eo pipefail # Deliberately not set -u here.\n+\n+# It's sometimes useful to be able to run this test in a filesystem\n+# that one can inspect.\n+if [[ -z \"$BUILD_AND_LINT_TMP_DIR\" ]];"
+  },
+  {
+    "id" : "4641790f-9e3b-4ede-a20c-f539200356cc",
+    "prId" : 4799,
+    "comments" : [
+      {
+        "id" : "13ef8196-deed-4782-ba50-cbf56e83e783",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can't we just remove them from the `package.json` file in the repo rather than doing `sed` surgery with the file?",
+        "createdAt" : "2020-03-04T18:08:38Z",
+        "updatedAt" : "2020-03-04T19:55:59Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bf1b5d0d-b02e-49a1-801a-0d1e82759bba",
+        "parentId" : "13ef8196-deed-4782-ba50-cbf56e83e783",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Unfortunately no. You want them in the workspaces at the `yarn install` step. That moves the packages into `node_modules`. They can't be in the workspaces for the subsequent `yarn workspaces run build` step though because that causes yarn to want to build `index.ts` in those packages which doesn't exist. This didn't come up before because we never ran `yarn workspaces build` rather, we would selectively `yarn run build` in directories in order. ",
+        "createdAt" : "2020-03-04T21:12:10Z",
+        "updatedAt" : "2020-03-04T21:12:11Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0fe83c2d-d320-4552-a6b8-2ce19fbfeab8",
+        "parentId" : "13ef8196-deed-4782-ba50-cbf56e83e783",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I figured out how to do it: use the `resolutions` field in the `package.json`. Here we go: https://github.com/digital-asset/daml/pull/4820.",
+        "createdAt" : "2020-03-05T00:13:21Z",
+        "updatedAt" : "2020-03-05T00:13:22Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4f120024-2d7e-4503-9274-dc128f68451d",
+        "parentId" : "13ef8196-deed-4782-ba50-cbf56e83e783",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "🎉 ",
+        "createdAt" : "2020-03-05T00:31:25Z",
+        "updatedAt" : "2020-03-05T00:31:25Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "516a9a33965e2db029a67edd5bcf173e1f360b77",
+    "line" : 36,
+    "diffHunk" : "@@ -45,10 +47,14 @@ cp -rL $DAML_LEDGER/* $TMP_DAML_LEDGER\n \n cd $TMP_DIR\n \n-$DAML2TS -o generated/src/daml $DAR\n-sed -i \"s/0.0.0-SDKVERSION/${VERSION}/\" generated/package.json\n+$DAML2TS -o daml2ts $DAR -p $TMP_DIR/package.json\n $YARN install --frozen-lockfile\n-cd generated\n-$YARN build\n-$YARN lint\n+# Remove the daml-types and daml-ledger workspaces. They were here for"
+  },
+  {
+    "id" : "413e2188-3d27-4357-b678-0bba6de8621e",
+    "prId" : 3441,
+    "comments" : [
+      {
+        "id" : "1334da18-28af-49f8-be81-b4a71d96117f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You probably need to add some bazel runfiles magic to make this work on Windows, the tests for `daml trigger --list` might be helpful as an example https://github.com/digital-asset/daml/blob/master/triggers/tests/list-triggers.sh",
+        "createdAt" : "2019-11-19T08:28:56Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "eff993c856bef39dda178c0b0ca7b3cc76f89f26",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,23 @@\n+# Copyright (c) 2019 The DAML Authors. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+set -euo pipefail\n+\n+YARN=$PWD/$1"
+  },
+  {
+    "id" : "f2ef2d98-990a-4394-b5b0-e31ca8a61788",
+    "prId" : 3441,
+    "comments" : [
+      {
+        "id" : "037968a6-d8ce-438a-85a9-cfe1cbe63463",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Maybe this could be separated into several Bazel rules and a macro that ties them together. That way we could leave it to `rules_nodejs` to call `yarn`.\r\n- One to call `daml2ts` - could be reused in other places that require generated ts.\r\n- `ts_library`/`nodejs_binary` as appropriate to test the generated ts.\r\n- Unfortunately, there doesn't seem to be linting support in `rules_nodejs`. So, that' need some custom `sh_test` still. See https://github.com/bazelbuild/rules_nodejs/issues/570.",
+        "createdAt" : "2019-11-19T09:29:17Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1a730faa-90c5-4494-a79e-b1c99cb46e89",
+        "parentId" : "037968a6-d8ce-438a-85a9-cfe1cbe63463",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That's a good idea. I'll do that in a separate PR at some point in the future when I find time.",
+        "createdAt" : "2019-11-19T13:10:35Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "eff993c856bef39dda178c0b0ca7b3cc76f89f26",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,23 @@\n+# Copyright (c) 2019 The DAML Authors. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+set -euo pipefail\n+\n+YARN=$PWD/$1\n+DAML2TS=$PWD/$2\n+DAR=$PWD/$3\n+TS_DIR=$PWD/$4\n+\n+TMP_DIR=$(mktemp -d)\n+cleanup() {\n+  rm -rf $TMP_DIR\n+}\n+trap cleanup EXIT\n+\n+cp -r $TS_DIR/* $TMP_DIR\n+cd $TMP_DIR\n+\n+$DAML2TS -o generated/src $DAR\n+$YARN install\n+$YARN workspaces run build\n+$YARN workspaces run lint"
+  }
+]

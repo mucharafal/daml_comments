@@ -1,0 +1,642 @@
+[
+  {
+    "id" : "7fd92833-a731-4b7d-9aaa-85cf7dcfbd43",
+    "prId" : 3561,
+    "comments" : [
+      {
+        "id" : "70c2c14d-da46-46fc-81c1-c1c7eb4bc638",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\nnewtype AuthSpec = AuthSpec { sharedSecret :: String }\r\n```",
+        "createdAt" : "2019-11-21T08:26:27Z",
+        "updatedAt" : "2019-11-21T14:35:55Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5921cf2292c982f7e588e3d1c6fc9f284d4537ea",
+    "line" : null,
+    "diffHunk" : "@@ -22,15 +23,20 @@ import System.Process\n \n import DA.Ledger.Trace\n \n-data SandboxSpec = SandboxSpec {dar :: String}\n+data AuthSpec = AuthSpec { sharedSecret :: String }"
+  },
+  {
+    "id" : "06ffcd8e-f75d-47a3-bbd0-61e061c185a1",
+    "prId" : 2276,
+    "comments" : [
+      {
+        "id" : "a95c715d-5fc5-4886-8e76-be6ab967d13c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Hah :slightly_smiling_face: ",
+        "createdAt" : "2019-07-24T13:14:07Z",
+        "updatedAt" : "2019-07-26T09:37:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8988d9bd-5b78-4d61-93d3-ddbf5b1edc52",
+        "parentId" : "a95c715d-5fc5-4886-8e76-be6ab967d13c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Now we know the answer :)",
+        "createdAt" : "2019-07-24T15:05:09Z",
+        "updatedAt" : "2019-07-26T09:37:24Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b1044f8910bd9bd3d4204e136642f3ada7c702f",
+    "line" : 52,
+    "diffHunk" : "@@ -7,42 +7,37 @@ module DA.Ledger.Sandbox ( -- Run a sandbox for testing on a dynamically selecte\n     Sandbox(..),\n     startSandbox,\n     shutdownSandbox,\n-    withSandbox,\n+    withSandbox\n     ) where\n \n-import Control.Exception (bracket, evaluate, onException)\n-import Control.Monad(when)\n+import Control.Concurrent (threadDelay)\n+import Control.Exception (bracket)\n import DA.Bazel.Runfiles(exe,locateRunfiles,mainWorkspace)\n-import DA.Ledger (Port (..), unPort)\n-import Data.List (isInfixOf)\n-import Data.List.Extra(splitOn)\n-import GHC.IO.Handle (Handle, hGetLine)\n+import DA.Ledger (Port (..))\n+import GHC.IO.Handle (Handle)\n+import Safe (readMay)\n+import System.IO.Extra (withTempFile)\n import System.FilePath((</>))\n-import System.Process (CreateProcess (..), ProcessHandle, StdStream (CreatePipe), createProcess, getPid, interruptProcessGroupOf, proc, waitForProcess)\n-import System.Time.Extra (Seconds, timeout)\n+import System.Process (CreateProcess (..), ProcessHandle, createProcess, getPid, interruptProcessGroupOf, proc, waitForProcess)\n \n import DA.Ledger.Trace\n \n data SandboxSpec = SandboxSpec {dar :: String}\n \n data Sandbox = Sandbox { port :: Port, proh :: ProcessHandle }\n \n-selectedPort :: Int\n-selectedPort = 0 --dynamic port selection\n \n-sandboxProcess :: SandboxSpec -> IO CreateProcess\n-sandboxProcess SandboxSpec{dar} = do\n+sandboxProcess :: SandboxSpec -> FilePath -> IO CreateProcess\n+sandboxProcess SandboxSpec{dar} portFile = do\n     binary <- locateRunfiles (mainWorkspace </> exe \"ledger/sandbox/sandbox-binary\")\n-    pure $ proc binary [ dar, \"--port\", show selectedPort]\n+    pure $ proc binary [ dar, \"--port-file\", portFile]\n \n-startSandboxProcess :: SandboxSpec -> IO (ProcessHandle,Maybe Handle)\n-startSandboxProcess spec = do\n-    processRecord <- sandboxProcess spec\n+startSandboxProcess :: SandboxSpec -> FilePath -> IO (ProcessHandle,Maybe Handle)\n+startSandboxProcess spec portFile = do\n+    processRecord <- sandboxProcess spec portFile\n     (_,hOutOpt,_,proh) <-\n         createProcess processRecord {\n-        std_out = CreatePipe,\n-        std_err = CreatePipe, -- Question: ought the pipe to be drained?"
+  },
+  {
+    "id" : "9a2f208e-c69d-4fda-8c58-524125bc2d3d",
+    "prId" : 2276,
+    "comments" : [
+      {
+        "id" : "fa71c84c-893b-427e-b55b-8a86ca945e11",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’m not sure I understand this. What exactly is the issue that you are trying to prevent here?",
+        "createdAt" : "2019-07-24T13:15:06Z",
+        "updatedAt" : "2019-07-26T09:37:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b1044f8910bd9bd3d4204e136642f3ada7c702f",
+    "line" : 55,
+    "diffHunk" : "@@ -7,42 +7,37 @@ module DA.Ledger.Sandbox ( -- Run a sandbox for testing on a dynamically selecte\n     Sandbox(..),\n     startSandbox,\n     shutdownSandbox,\n-    withSandbox,\n+    withSandbox\n     ) where\n \n-import Control.Exception (bracket, evaluate, onException)\n-import Control.Monad(when)\n+import Control.Concurrent (threadDelay)\n+import Control.Exception (bracket)\n import DA.Bazel.Runfiles(exe,locateRunfiles,mainWorkspace)\n-import DA.Ledger (Port (..), unPort)\n-import Data.List (isInfixOf)\n-import Data.List.Extra(splitOn)\n-import GHC.IO.Handle (Handle, hGetLine)\n+import DA.Ledger (Port (..))\n+import GHC.IO.Handle (Handle)\n+import Safe (readMay)\n+import System.IO.Extra (withTempFile)\n import System.FilePath((</>))\n-import System.Process (CreateProcess (..), ProcessHandle, StdStream (CreatePipe), createProcess, getPid, interruptProcessGroupOf, proc, waitForProcess)\n-import System.Time.Extra (Seconds, timeout)\n+import System.Process (CreateProcess (..), ProcessHandle, createProcess, getPid, interruptProcessGroupOf, proc, waitForProcess)\n \n import DA.Ledger.Trace\n \n data SandboxSpec = SandboxSpec {dar :: String}\n \n data Sandbox = Sandbox { port :: Port, proh :: ProcessHandle }\n \n-selectedPort :: Int\n-selectedPort = 0 --dynamic port selection\n \n-sandboxProcess :: SandboxSpec -> IO CreateProcess\n-sandboxProcess SandboxSpec{dar} = do\n+sandboxProcess :: SandboxSpec -> FilePath -> IO CreateProcess\n+sandboxProcess SandboxSpec{dar} portFile = do\n     binary <- locateRunfiles (mainWorkspace </> exe \"ledger/sandbox/sandbox-binary\")\n-    pure $ proc binary [ dar, \"--port\", show selectedPort]\n+    pure $ proc binary [ dar, \"--port-file\", portFile]\n \n-startSandboxProcess :: SandboxSpec -> IO (ProcessHandle,Maybe Handle)\n-startSandboxProcess spec = do\n-    processRecord <- sandboxProcess spec\n+startSandboxProcess :: SandboxSpec -> FilePath -> IO (ProcessHandle,Maybe Handle)\n+startSandboxProcess spec portFile = do\n+    processRecord <- sandboxProcess spec portFile\n     (_,hOutOpt,_,proh) <-\n         createProcess processRecord {\n-        std_out = CreatePipe,\n-        std_err = CreatePipe, -- Question: ought the pipe to be drained?\n-        create_group = True  -- To avoid sending INT to ourself\n+            create_group = True  -- To avoid sending INT to ourself"
+  },
+  {
+    "id" : "fed01c29-b14b-4e13-bfdc-e23da6b4e4f2",
+    "prId" : 2276,
+    "comments" : [
+      {
+        "id" : "18ffbeab-dcc9-443a-8194-a7690d34b0db",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Does this mean that we are now spamming stdout and stderr during tests? From a quick experiment it looks like sandbox is still very noisy even if you pass `--port-file`. Maybe just redirect stdout to `/dev/null`? (stderr seems to be clean by default afaict). `typed-process` has a cross-platform version of [/dev/null](https://hackage.haskell.org/package/typed-process-0.2.6.0/docs/System-Process-Typed.html#v:nullStream) that we could either steal or we could just switch to `typed-process` which generally seems like a saner API (we’ve already switched in other places due to issues with `process`).",
+        "createdAt" : "2019-07-24T13:16:38Z",
+        "updatedAt" : "2019-07-26T09:37:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d132ea16-4d74-4290-a8ed-cf325690983f",
+        "parentId" : "18ffbeab-dcc9-443a-8194-a7690d34b0db",
+        "author" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "body" : "yes, these are captured by Bazel and put into `test.log`, which I thought was better to keep, but on the other hand these are mixed with test results - I can redirect them to `/dev/null`",
+        "createdAt" : "2019-07-24T13:26:51Z",
+        "updatedAt" : "2019-07-26T09:37:24Z",
+        "lastEditedBy" : {
+          "login" : "majcherm-da",
+          "name" : "Michał Majcherski",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/43614029?u=8320ef35eb6289112c9c95df3e483f322c9aa60e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c36bce41-5d7e-4039-aacf-ce3080e64e43",
+        "parentId" : "18ffbeab-dcc9-443a-8194-a7690d34b0db",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I often run tests via `bazel run` to be able to pass arguments and see the output as it goes so I would prefer if they are not too noisy.",
+        "createdAt" : "2019-07-24T13:38:45Z",
+        "updatedAt" : "2019-07-26T09:37:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b1044f8910bd9bd3d4204e136642f3ada7c702f",
+    "line" : 51,
+    "diffHunk" : "@@ -7,42 +7,37 @@ module DA.Ledger.Sandbox ( -- Run a sandbox for testing on a dynamically selecte\n     Sandbox(..),\n     startSandbox,\n     shutdownSandbox,\n-    withSandbox,\n+    withSandbox\n     ) where\n \n-import Control.Exception (bracket, evaluate, onException)\n-import Control.Monad(when)\n+import Control.Concurrent (threadDelay)\n+import Control.Exception (bracket)\n import DA.Bazel.Runfiles(exe,locateRunfiles,mainWorkspace)\n-import DA.Ledger (Port (..), unPort)\n-import Data.List (isInfixOf)\n-import Data.List.Extra(splitOn)\n-import GHC.IO.Handle (Handle, hGetLine)\n+import DA.Ledger (Port (..))\n+import GHC.IO.Handle (Handle)\n+import Safe (readMay)\n+import System.IO.Extra (withTempFile)\n import System.FilePath((</>))\n-import System.Process (CreateProcess (..), ProcessHandle, StdStream (CreatePipe), createProcess, getPid, interruptProcessGroupOf, proc, waitForProcess)\n-import System.Time.Extra (Seconds, timeout)\n+import System.Process (CreateProcess (..), ProcessHandle, createProcess, getPid, interruptProcessGroupOf, proc, waitForProcess)\n \n import DA.Ledger.Trace\n \n data SandboxSpec = SandboxSpec {dar :: String}\n \n data Sandbox = Sandbox { port :: Port, proh :: ProcessHandle }\n \n-selectedPort :: Int\n-selectedPort = 0 --dynamic port selection\n \n-sandboxProcess :: SandboxSpec -> IO CreateProcess\n-sandboxProcess SandboxSpec{dar} = do\n+sandboxProcess :: SandboxSpec -> FilePath -> IO CreateProcess\n+sandboxProcess SandboxSpec{dar} portFile = do\n     binary <- locateRunfiles (mainWorkspace </> exe \"ledger/sandbox/sandbox-binary\")\n-    pure $ proc binary [ dar, \"--port\", show selectedPort]\n+    pure $ proc binary [ dar, \"--port-file\", portFile]\n \n-startSandboxProcess :: SandboxSpec -> IO (ProcessHandle,Maybe Handle)\n-startSandboxProcess spec = do\n-    processRecord <- sandboxProcess spec\n+startSandboxProcess :: SandboxSpec -> FilePath -> IO (ProcessHandle,Maybe Handle)\n+startSandboxProcess spec portFile = do\n+    processRecord <- sandboxProcess spec portFile\n     (_,hOutOpt,_,proh) <-\n         createProcess processRecord {\n-        std_out = CreatePipe,"
+  },
+  {
+    "id" : "51bfbaa4-39fe-4c3f-8111-8aac995e141f",
+    "prId" : 2276,
+    "comments" : [
+      {
+        "id" : "cf066da1-f957-4cbf-86b6-890875bee6e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Much nicer! :+1:",
+        "createdAt" : "2019-07-24T13:16:48Z",
+        "updatedAt" : "2019-07-26T09:37:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9b1044f8910bd9bd3d4204e136642f3ada7c702f",
+    "line" : 105,
+    "diffHunk" : "@@ -59,45 +54,11 @@ shutdownSandboxProcess proh = do\n     --trace $ \"Sandbox process exited with: \" <> show x\n     return ()\n \n-parsePortFromListeningLine :: String -> IO Port\n-parsePortFromListeningLine line = do\n-    [_,portNumStr] <- return (splitOn \":\" line)\n-    num <- evaluate (read portNumStr)\n-    return (Port num)\n-\n-interestingLineFromSandbox :: String -> Bool\n-interestingLineFromSandbox line =\n-    any (`isInfixOf` line)\n-    [--\"listening\",\n-     \"failed\", \"error\", \"Address already in use\", \"java.net.BindException\"]\n-\n-getListeningLine :: Handle -> IO String\n-getListeningLine h = loop where\n-    loop = do\n-        line <- hGetLine h\n-        when (interestingLineFromSandbox line) $ trace $ \"SANDBOX: \" <> line\n-        if \"listening\" `isInfixOf` line\n-            then return line\n-            else if \"initialization error\" `isInfixOf` line\n-                 then error line\n-                 else loop\n-\n-discoverListeningPort :: Maybe Handle -> IO Port\n-discoverListeningPort hOpt = do\n-    Just h <- return hOpt\n-    trace \"Looking for sandbox listening port...\"\n-    line <- getListeningLine h\n-    port <- parsePortFromListeningLine line\n-        `onException` trace (\"Failed to parse listening port from: \" <> show line)\n-    trace $ \"Sandbox listening on port: \" <> show (unPort port)\n-    return port\n-\n-startSandbox :: SandboxSpec-> IO Sandbox\n-startSandbox spec = do\n-    (proh,hOpt) <- startSandboxProcess spec\n-    port <-\n-        timeoutError 30 \"Didn't discover sandbox port\" (discoverListeningPort hOpt)\n-        `onException` shutdownSandboxProcess proh\n+startSandbox :: SandboxSpec -> IO Sandbox\n+startSandbox spec = withTempFile $ \\portFile -> do\n+    (proh,_hOpt) <- startSandboxProcess spec portFile\n+    portNum <- readPortFile maxRetries portFile"
+  },
+  {
+    "id" : "33459e78-4807-4d3e-95c3-c023754e0a02",
+    "prId" : 1803,
+    "comments" : [
+      {
+        "id" : "e3d938f2-60f1-4652-b1d9-1129aaf7af17",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Why make this CreatePipe then drain it to stdout? Just pass a handle to std_err.",
+        "createdAt" : "2019-06-21T14:56:32Z",
+        "updatedAt" : "2019-06-21T15:06:40Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "56eb8c23-10a3-4da8-b024-02229e9f741f",
+        "parentId" : "e3d938f2-60f1-4652-b1d9-1129aaf7af17",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "oops debugging :)",
+        "createdAt" : "2019-06-21T14:59:51Z",
+        "updatedAt" : "2019-06-21T15:06:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e3c9860e2116e31f3d775b8a0cd2d5704f29ff71",
+    "line" : null,
+    "diffHunk" : "@@ -40,12 +41,15 @@ sandboxProcess SandboxSpec{dar} = do\n startSandboxProcess :: SandboxSpec -> IO (ProcessHandle,Maybe Handle)\n startSandboxProcess spec = do\n     processRecord <- sandboxProcess spec\n-    (_,hOutOpt,_,proh) <-\n+    (_,hOutOpt,Just hErrOpt,proh) <-\n         createProcess processRecord {\n         std_out = CreatePipe,\n         std_err = CreatePipe, -- Question: ought the pipe to be drained?"
+  },
+  {
+    "id" : "bc1c1d23-8e03-4737-956f-0368e91b16d0",
+    "prId" : 1803,
+    "comments" : [
+      {
+        "id" : "6e7fcf30-9af4-47e1-8126-753359634c42",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "This is odd. print and not putStrLn? Sending to stdout and not stderr?",
+        "createdAt" : "2019-06-21T14:56:54Z",
+        "updatedAt" : "2019-06-21T15:06:40Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fea477f1-c4b0-4a8c-8b59-c77478b3cfed",
+        "parentId" : "6e7fcf30-9af4-47e1-8126-753359634c42",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "oops that was only for debugging",
+        "createdAt" : "2019-06-21T14:59:29Z",
+        "updatedAt" : "2019-06-21T15:06:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e3c9860e2116e31f3d775b8a0cd2d5704f29ff71",
+    "line" : null,
+    "diffHunk" : "@@ -40,12 +41,15 @@ sandboxProcess SandboxSpec{dar} = do\n startSandboxProcess :: SandboxSpec -> IO (ProcessHandle,Maybe Handle)\n startSandboxProcess spec = do\n     processRecord <- sandboxProcess spec\n-    (_,hOutOpt,_,proh) <-\n+    (_,hOutOpt,Just hErrOpt,proh) <-\n         createProcess processRecord {\n         std_out = CreatePipe,\n         std_err = CreatePipe, -- Question: ought the pipe to be drained?\n         create_group = True  -- To avoid sending INT to ourself\n         }\n+    _ <- forkIO $ forever $ do\n+        line <- hGetLine hErrOpt\n+        print line"
+  },
+  {
+    "id" : "5e3fa30d-b4cf-42fc-83c0-8a942ef0afc3",
+    "prId" : 1803,
+    "comments" : [
+      {
+        "id" : "a5a99044-1f15-4914-a5d6-2d9381f4659f",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Debugging?",
+        "createdAt" : "2019-06-21T14:57:00Z",
+        "updatedAt" : "2019-06-21T15:06:40Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9ce08d1d-0931-4dac-99cf-7ab5b29ace1b",
+        "parentId" : "a5a99044-1f15-4914-a5d6-2d9381f4659f",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "oops that what I get for trying to fix bugs quickly",
+        "createdAt" : "2019-06-21T14:59:43Z",
+        "updatedAt" : "2019-06-21T15:06:40Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e3c9860e2116e31f3d775b8a0cd2d5704f29ff71",
+    "line" : null,
+    "diffHunk" : "@@ -77,6 +81,7 @@ getListeningLine :: Handle -> IO String\n getListeningLine h = loop where\n     loop = do\n         line <- hGetLine h\n+        print line"
+  },
+  {
+    "id" : "0429ac1e-6ec6-4391-9f7d-002e3d36b8d2",
+    "prId" : 1023,
+    "comments" : [
+      {
+        "id" : "bc30b63e-daf6-4a57-a8ac-03bb5e5d438d",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Why not `DA.Ledger.Sandbox` as the module name? Having the module name and path not mix is often a poor idea.",
+        "createdAt" : "2019-05-08T21:17:09Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "83f5923b-3dd2-4d06-bdcb-690ffc81f68e",
+        "parentId" : "bc30b63e-daf6-4a57-a8ac-03bb5e5d438d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Oversight. Fixed.",
+        "createdAt" : "2019-05-09T12:18:42Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e332e354ce4d8c092b38a1ac64a702adfb8a2b44",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,123 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module Sandbox ( -- Run a sandbox for testing on a dynamically selected port"
+  },
+  {
+    "id" : "5dfedf63-0745-4fdd-9f3c-4abbdef48570",
+    "prId" : 1023,
+    "comments" : [
+      {
+        "id" : "c048cec2-d67d-4703-af45-01ad6e9b587f",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "No need to give an export list for this and many of the things below.",
+        "createdAt" : "2019-05-08T21:17:28Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "eea8b0ae-4187-4647-89f1-7e18e3da5160",
+        "parentId" : "c048cec2-d67d-4703-af45-01ad6e9b587f",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I read a suggestion on Hackage that imports should take either the form: `import qualified M` or `import M(...)`, so it's clear where the definition for every identifier is coming from.\r\n\r\nAs a Haskell Noob, I like very much being this explicit, especially while I am still finding my way around the standard libraries.\r\n\r\nOf course, I accept that some standard definitions (`when` ?) are so pervasive that perhaps the rule doesn't need to apply to them.\r\n\r\n",
+        "createdAt" : "2019-05-09T12:28:00Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e332e354ce4d8c092b38a1ac64a702adfb8a2b44",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,123 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module Sandbox ( -- Run a sandbox for testing on a dynamically selected port\n+    SandboxSpec(..),\n+    Sandbox(port),\n+    startSandbox,\n+    shutdownSandbox,\n+    withSandbox\n+    ) where\n+\n+import           Control.Concurrent.Async (race)\n+import           Control.Monad            (when)"
+  },
+  {
+    "id" : "d44df864-dc7b-4885-83ef-39ce66466deb",
+    "prId" : 1023,
+    "comments" : [
+      {
+        "id" : "de077951-0dfc-4672-b59e-972baf60b98d",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Why not just use `System.Time.Extra.timeout`? Inventing your own timeout handler is not a good plan.",
+        "createdAt" : "2019-05-08T21:18:21Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6a3899ed-d8bf-48c3-b754-c9803c76590d",
+        "parentId" : "de077951-0dfc-4672-b59e-972baf60b98d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Changed to use `System.Time.Extra.timeout` as suggested.\r\nBut this only replaces the use of `race`. The rest of the wrapper (now named `timeoutError`) persists.",
+        "createdAt" : "2019-05-09T12:23:16Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e332e354ce4d8c092b38a1ac64a702adfb8a2b44",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,123 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module Sandbox ( -- Run a sandbox for testing on a dynamically selected port\n+    SandboxSpec(..),\n+    Sandbox(port),\n+    startSandbox,\n+    shutdownSandbox,\n+    withSandbox\n+    ) where\n+\n+import           Control.Concurrent.Async (race)\n+import           Control.Monad            (when)\n+import           Control.Exception        (Exception, bracket, evaluate, onException, throw)\n+import           DA.Ledger                (Port (..), unPort)\n+import           Data.List                (isInfixOf)\n+import           Data.List.Split          (splitOn)\n+import           GHC.IO.Handle            (Handle, hGetLine)\n+import           Prelude                  hiding (log)\n+import           System.IO                (hFlush, stdout)\n+import           System.Process           (CreateProcess (..), ProcessHandle,\n+                                           StdStream (CreatePipe), createProcess, getPid,\n+                                           interruptProcessGroupOf, proc, waitForProcess)\n+import           System.Time.Extra        (Seconds, sleep)\n+\n+data SandboxSpec = SandboxSpec {dar :: String}\n+\n+data Sandbox = Sandbox { port :: Port, proh :: ProcessHandle }\n+\n+selectedPort :: Int\n+selectedPort = 0 --dynamic port selection\n+\n+sandboxProcess :: SandboxSpec -> CreateProcess\n+sandboxProcess SandboxSpec{dar} =\n+    proc binary [ dar, \"--port\", show selectedPort]\n+    where\n+        binary = \"ledger/sandbox/sandbox-binary\"\n+\n+startSandboxProcess :: SandboxSpec -> IO (ProcessHandle,Maybe Handle)\n+startSandboxProcess spec = do\n+    (_,hOutOpt,_,proh) <-\n+        createProcess (sandboxProcess spec) {\n+        std_out = CreatePipe,\n+        std_err = CreatePipe, -- Question: ought the pipe to be drained?\n+        create_group = True  -- To avoid sending INT to ourself\n+        }\n+    pid <- getPid proh\n+    log $ \"Sandbox process started, pid = \" <> show pid\n+    return (proh,hOutOpt)\n+\n+shutdownSandboxProcess :: ProcessHandle -> IO ()\n+shutdownSandboxProcess proh = do\n+    pidOpt <- getPid proh\n+    log $ \"Sending INT to sandbox process: \" <> show pidOpt\n+    interruptProcessGroupOf proh\n+    x <- timeout 5 \"Sandbox process didn't exit\" (waitForProcess proh)\n+    log $ \"Sandbox process exited with: \" <> show x\n+    return ()\n+\n+parsePortFromListeningLine :: String -> IO Port\n+parsePortFromListeningLine line = do\n+    [_,portNumStr] <- return (splitOn \":\" line)\n+    num <- evaluate (read portNumStr)\n+    return (Port num)\n+\n+interestingLineFromSandbox :: String -> Bool\n+interestingLineFromSandbox line =\n+    any (`isInfixOf` line)\n+    [--\"listening\",\n+     \"error\", \"Address already in use\", \"java.net.BindException\"]\n+\n+getListeningLine :: Handle -> IO String\n+getListeningLine h = loop where\n+    loop = do\n+        line <- hGetLine h\n+        when (interestingLineFromSandbox line) $ log $ \"SANDBOX: \" <> line\n+        if \"listening\" `isInfixOf` line\n+            then return line\n+            else if \"initialization error\" `isInfixOf` line\n+                 then error line\n+                 else loop\n+\n+discoverListeningPort :: Maybe Handle -> IO Port\n+discoverListeningPort hOpt = do\n+    Just h <- return hOpt\n+    log \"Looking for sandbox listening port...\"\n+    line <- getListeningLine h\n+    port <- parsePortFromListeningLine line\n+        `onException` log (\"Failed to parse listening port from: \" <> show line)\n+    log $ \"Sandbox listening on port: \" <> show (unPort port)\n+    return port\n+\n+startSandbox :: SandboxSpec-> IO Sandbox\n+startSandbox spec = do\n+    (proh,hOpt) <-startSandboxProcess spec\n+    port <-\n+        timeout 5 \"Didn't discover sandbox port\" (discoverListeningPort hOpt)\n+        `onException` shutdownSandboxProcess proh\n+    return Sandbox { port, proh }\n+\n+shutdownSandbox :: Sandbox -> IO ()\n+shutdownSandbox Sandbox{proh} = do shutdownSandboxProcess proh\n+\n+withSandbox :: SandboxSpec -> (Sandbox -> IO a) -> IO a\n+withSandbox spec f =\n+    bracket (startSandbox spec)\n+    shutdownSandbox\n+    f\n+\n+data Timeout = Timeout deriving Show\n+instance Exception Timeout\n+\n+timeout :: Seconds -> String -> IO a -> IO a"
+  },
+  {
+    "id" : "ed60c066-5b0f-448e-b81d-037e35d318e5",
+    "prId" : 1023,
+    "comments" : [
+      {
+        "id" : "f773d0f5-ba2e-4dd7-be2b-32d8d0673115",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We stopped aligning imports to minimize diffs. But we haven’t gone through the codebase and changed all old imports so you might see some inconsistencies here.",
+        "createdAt" : "2019-05-09T06:41:59Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "35171128-cae2-4722-8d27-b127be541564",
+        "parentId" : "f773d0f5-ba2e-4dd7-be2b-32d8d0673115",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "In truth we just fixed it in GHC upstream, so are desperately waiting for qualified after the module name! Until then, anything goes.",
+        "createdAt" : "2019-05-09T09:38:18Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "802afcdb-e13d-482c-8af3-41112a22e902",
+        "parentId" : "f773d0f5-ba2e-4dd7-be2b-32d8d0673115",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I unaligned my imports. No more `stylish-haskell` for me!\r\n",
+        "createdAt" : "2019-05-09T12:24:21Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e332e354ce4d8c092b38a1ac64a702adfb8a2b44",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,123 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module Sandbox ( -- Run a sandbox for testing on a dynamically selected port\n+    SandboxSpec(..),\n+    Sandbox(port),\n+    startSandbox,\n+    shutdownSandbox,\n+    withSandbox\n+    ) where\n+\n+import           Control.Concurrent.Async (race)"
+  },
+  {
+    "id" : "a22f29cd-cfad-425d-9751-dc5f6a3a4987",
+    "prId" : 1023,
+    "comments" : [
+      {
+        "id" : "140b8af1-7889-42f6-9d5f-d79459a8c84f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "It is probably a good idea to use `withCreateProcess` here.",
+        "createdAt" : "2019-05-09T06:43:39Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "bf327b4c-857e-4ba9-9f33-493d78e4dbf9",
+        "parentId" : "140b8af1-7889-42f6-9d5f-d79459a8c84f",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Having separate `startSandbox` and `shutdownSandbox`, we can't use `withCreateProcess`.\r\nBut I probably should make use of the standard `cleanupProcess`.\r\n",
+        "createdAt" : "2019-05-09T12:27:08Z",
+        "updatedAt" : "2019-05-09T15:25:47Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e332e354ce4d8c092b38a1ac64a702adfb8a2b44",
+    "line" : 36,
+    "diffHunk" : "@@ -0,0 +1,123 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module Sandbox ( -- Run a sandbox for testing on a dynamically selected port\n+    SandboxSpec(..),\n+    Sandbox(port),\n+    startSandbox,\n+    shutdownSandbox,\n+    withSandbox\n+    ) where\n+\n+import           Control.Concurrent.Async (race)\n+import           Control.Monad            (when)\n+import           Control.Exception        (Exception, bracket, evaluate, onException, throw)\n+import           DA.Ledger                (Port (..), unPort)\n+import           Data.List                (isInfixOf)\n+import           Data.List.Split          (splitOn)\n+import           GHC.IO.Handle            (Handle, hGetLine)\n+import           Prelude                  hiding (log)\n+import           System.IO                (hFlush, stdout)\n+import           System.Process           (CreateProcess (..), ProcessHandle,\n+                                           StdStream (CreatePipe), createProcess, getPid,\n+                                           interruptProcessGroupOf, proc, waitForProcess)\n+import           System.Time.Extra        (Seconds, sleep)\n+\n+data SandboxSpec = SandboxSpec {dar :: String}\n+\n+data Sandbox = Sandbox { port :: Port, proh :: ProcessHandle }\n+\n+selectedPort :: Int\n+selectedPort = 0 --dynamic port selection\n+\n+sandboxProcess :: SandboxSpec -> CreateProcess\n+sandboxProcess SandboxSpec{dar} =\n+    proc binary [ dar, \"--port\", show selectedPort]\n+    where\n+        binary = \"ledger/sandbox/sandbox-binary\"\n+\n+startSandboxProcess :: SandboxSpec -> IO (ProcessHandle,Maybe Handle)"
+  }
+]

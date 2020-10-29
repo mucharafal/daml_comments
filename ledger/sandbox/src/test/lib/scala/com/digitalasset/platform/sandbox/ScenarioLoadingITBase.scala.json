@@ -1,0 +1,211 @@
+[
+  {
+    "id" : "43446f3e-98c5-4b6b-909c-6baded6e2f9d",
+    "prId" : 6132,
+    "comments" : [
+      {
+        "id" : "0d5b379a-0959-4a43-b192-cf4cda1c7712",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can you join these into one line where possible?",
+        "createdAt" : "2020-05-28T06:04:20Z",
+        "updatedAt" : "2020-05-28T15:50:28Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "536eb664628c309b96aa8e7f89021dd38e8665a9",
+    "line" : null,
+    "diffHunk" : "@@ -30,7 +30,6 @@ import scala.concurrent.Future\n \n @SuppressWarnings("
+  },
+  {
+    "id" : "dc997141-e584-4ff3-8cef-18db65a71fae",
+    "prId" : 4953,
+    "comments" : [
+      {
+        "id" : "43e2fdce-0802-4d30-94d3-ad474c7599e4",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Nice. I actually tried making the same changes to `JdbcLedgerDao` when I saw the level of duplication there, but couldn't figure out what to do with this resulting test failure.",
+        "createdAt" : "2020-03-17T13:30:26Z",
+        "updatedAt" : "2020-03-17T19:46:55Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8c9c3ccf491dcebc26c083911d9714d2fa5d032f",
+    "line" : 8,
+    "diffHunk" : "@@ -129,17 +129,20 @@ abstract class ScenarioLoadingITBase\n           lookForContract(events, templateIds.dummyFactory)\n           lookForContract(events, templateIds.dummyContractFactory)\n \n-          resp.last should equal(GetActiveContractsResponse(\"8\", \"\", Seq.empty, None))\n+          val GetActiveContractsResponse(offset, workflowId, activeContracts, _) = resp.last\n+          offset should not be empty\n+          workflowId shouldBe empty\n+          activeContracts shouldBe empty"
+  },
+  {
+    "id" : "7ecdb31b-968d-4f51-9b8d-ca8cb003f9f3",
+    "prId" : 4755,
+    "comments" : [
+      {
+        "id" : "56b66b67-4f50-41e0-a7cd-dc0c26275070",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "What was the change for the increase of the contract id? A hearbeat after `#6:0`? Wonder how flaky this will be.",
+        "createdAt" : "2020-02-28T12:50:04Z",
+        "updatedAt" : "2020-03-02T18:11:35Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "93a2980e-6b59-42eb-9528-ffb4a177d476",
+        "parentId" : "56b66b67-4f50-41e0-a7cd-dc0c26275070",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "It's to do with the (somewhat accidental) bug fix, which was pushing out the wrong update to the time. Before, we were not recording the last `pass` in the ledger; now, we are.\r\n\r\nIn the test scenario, we have:\r\n\r\n```daml\r\n  pass (days 10)  -- #0\r\n  party <- getParty \"party\"\r\n  submit party (create Dummy with operator = party)  -- #1\r\n  pass (seconds 10)  -- #2\r\n  submit party (create DummyWithParam with operator = party)  -- #3\r\n  submit party (create DummyFactory with operator = party)  -- #4\r\n  pass (seconds 10)  -- #5\r\n  submit party (create DummyContractFactory with operator = party)  -- #6\r\n  pass (seconds 10)  -- #7\r\n  other <- getParty \"other\"\r\n  submitMustFail party (create Dummy with operator = other)\r\n  return ()\r\n```\r\n\r\nContracts `#8:0`–`#8.2` come from `dummyRequest.commands`.",
+        "createdAt" : "2020-02-28T13:02:44Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "77bd3495-58a3-41a8-a9ea-a09434d25598",
+        "parentId" : "56b66b67-4f50-41e0-a7cd-dc0c26275070",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Ah sorry. the passing of time is driven by the scenario of course. So no time-based flakiness 👍. Sorry for the noise.",
+        "createdAt" : "2020-03-02T10:44:41Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2eb2a348-5cf7-4149-ab8f-76c6b14205ea",
+        "parentId" : "56b66b67-4f50-41e0-a7cd-dc0c26275070",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "No worries; it's a confusing test and it took me quite some time to understand it myself!",
+        "createdAt" : "2020-03-02T10:46:12Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6d36fdaa30a004657bd518f427ba4d9695681aa0",
+    "line" : null,
+    "diffHunk" : "@@ -159,8 +161,8 @@ abstract class ScenarioLoadingITBase\n             val events = responses.flatMap(extractEvents)\n             val contractIds = events.map(_.contractId).toSet\n \n-            // note how we skip #0, #2 and #5 because of the `pass`es in the scenario.\n-            contractIds shouldBe Set(\"#4:0\", \"#7:2\", \"#3:0\", \"#7:1\", \"#1:0\", \"#7:0\", \"#6:0\")\n+            // note how we skip #0, #2, #5 and #7 because of the `pass`es in the scenario.\n+            contractIds shouldBe Set(\"#1:0\", \"#3:0\", \"#4:0\", \"#6:0\", \"#8:0\", \"#8:1\", \"#8:2\")"
+  },
+  {
+    "id" : "881a409d-ccc6-4a89-8a55-2b84d820c1ba",
+    "prId" : 4741,
+    "comments" : [
+      {
+        "id" : "110a6afc-18d3-46bc-81b9-4c13bfb673f1",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please remove commented out code and fix the above comment.",
+        "createdAt" : "2020-02-27T14:27:17Z",
+        "updatedAt" : "2020-03-02T09:32:20Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0e7298ed-342a-4e76-b110-62e7591e1a64",
+        "parentId" : "110a6afc-18d3-46bc-81b9-4c13bfb673f1",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-02-27T18:35:55Z",
+        "updatedAt" : "2020-03-02T09:32:20Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6fdd134e28edcb94e9bf2aff60e5605405bf6128",
+    "line" : null,
+    "diffHunk" : "@@ -160,7 +160,7 @@ abstract class ScenarioLoadingITBase\n             val contractIds = events.map(_.contractId).toSet\n \n             // note how we skip #0, #2 and #5 because of the `pass`es in the scenario.\n-            contractIds shouldBe Set(\"#4:0\", \"#7:2\", \"#3:0\", \"#7:1\", \"#1:0\", \"#7:0\", \"#6:0\")\n+            contractIds.size shouldBe 7 // Set(\"#4:0\", \"#7:2\", \"#3:0\", \"#7:1\", \"#1:0\", \"#7:0\", \"#6:0\")"
+  }
+]

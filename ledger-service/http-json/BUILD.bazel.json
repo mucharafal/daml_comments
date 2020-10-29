@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "0e1d4c8f-6877-483f-9614-3e106eda27d5",
+    "prId" : 4283,
+    "comments" : [
+      {
+        "id" : "6de5d6f2-ff97-43ce-89e1-cb641871a478",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "If it's no longer flaky, just remove it. `git` won't forget. :wink: ",
+        "createdAt" : "2020-01-30T15:01:58Z",
+        "updatedAt" : "2020-01-30T20:09:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b2774061-659d-4c77-a1f6-698a56ed043c",
+        "parentId" : "6de5d6f2-ff97-43ce-89e1-cb641871a478",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "don't jinx :)",
+        "createdAt" : "2020-01-30T15:03:24Z",
+        "updatedAt" : "2020-01-30T20:09:04Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d87234c7-64fe-47da-acb9-bf1a8e264f7f",
+        "parentId" : "6de5d6f2-ff97-43ce-89e1-cb641871a478",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Fixed by https://github.com/digital-asset/daml/pull/4283/commits/5be838a1e0220e94e79adebd3dd70ab7a8983c87",
+        "createdAt" : "2020-01-30T17:05:40Z",
+        "updatedAt" : "2020-01-30T20:09:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b94141eec4dcfe9e2f4dbaf31b18c8e8c82e409b",
+    "line" : null,
+    "diffHunk" : "@@ -115,8 +115,8 @@ da_scala_test(\n         \":Account.dar\",\n         \"//docs:quickstart-model.dar\",\n     ],\n-    # See https://github.com/digital-asset/daml/issues/4281\n-    flaky = True,\n+#    # See https://github.com/digital-asset/daml/issues/4281\n+#    flaky = True,"
+  },
+  {
+    "id" : "fa4d2ef0-5f07-4ee5-9d81-15b49bc16ceb",
+    "prId" : 3460,
+    "comments" : [
+      {
+        "id" : "1c1145b0-644f-446e-8300-83ddd6fa9e60",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Having `genrule`s creating directories is generally [not recommended](https://docs.bazel.build/versions/master/be/general.html#general-advice):\r\n> Avoid creating symlinks and directories. Bazel doesn't copy over the directory/symlink structure created by genrules and its dependency checking of directories is unsound.\r\n\r\nThat's likely the cause for the CI failure on Windows.\r\n\r\nCould `static-content` be extended to accept a zip archive in some form? Then you could zip those sources up using `@bazel_tools//tools/zip:zipper`. There are some examples in the repo, e.g. [here](https://github.com/digital-asset/daml/blob/99ea93168d84d456060bbdad4d7922e19eacf4f8/language-support/scala/codegen/codegen.bzl#L30).\r\n",
+        "createdAt" : "2019-11-15T08:57:37Z",
+        "updatedAt" : "2019-11-18T19:05:14Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "958b22f8f97f70c13e79214bc4d57bfd0fbee9fd",
+    "line" : null,
+    "diffHunk" : "@@ -65,11 +65,22 @@ da_scala_binary(\n     deps = [\":http-json\"] + http_json_deps,\n )\n \n+genrule(\n+    name = \"integration-test-static-content\",\n+    srcs = [\"src/test/integration-test-static-content/dummy.txt\"],\n+    outs = [\"integration-test-static-content\"],\n+    cmd = \"\"\"\n+    mkdir -p $(location integration-test-static-content)\n+    cp -L $(SRCS) $(location integration-test-static-content)\n+    \"\"\",\n+)"
+  }
+]

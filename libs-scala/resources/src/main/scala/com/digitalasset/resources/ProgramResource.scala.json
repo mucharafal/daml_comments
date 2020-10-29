@@ -1,0 +1,397 @@
+[
+  {
+    "id" : "7664ce6f-0274-4c7b-a1f8-f7d78f6c6c51",
+    "prId" : 5564,
+    "comments" : [
+      {
+        "id" : "4a5ae2bc-996c-4cf6-bb89-7f2bf32b73c0",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Probably passing the `executionContext` explicitly is simpler.",
+        "createdAt" : "2020-04-15T12:31:23Z",
+        "updatedAt" : "2020-04-15T12:31:59Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2d47e760-0d57-4038-8eae-7fe4fdf4f1c3",
+        "parentId" : "4a5ae2bc-996c-4cf6-bb89-7f2bf32b73c0",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Tried that but you end up with:\r\n\r\n```scala\r\n         Try(owner.acquire()(executionContext)).fold(Resource.failed(_)(executionContext), identity) \r\n```\r\n\r\nThat's a bit too noisy for me.",
+        "createdAt" : "2020-04-15T12:48:27Z",
+        "updatedAt" : "2020-04-15T12:48:27Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a0409328b7bfd7d678eb30a63b01ecbd6cffd90d",
+    "line" : 27,
+    "diffHunk" : "@@ -10,58 +10,55 @@ import com.daml.logging.LoggingContext.newLoggingContext\n import com.daml.resources.ProgramResource._\n \n import scala.concurrent.duration.{DurationInt, FiniteDuration}\n-import scala.concurrent.{Await, ExecutionContext, Future}\n+import scala.concurrent.{Await, ExecutionContext}\n+import scala.util.Try\n import scala.util.control.{NoStackTrace, NonFatal}\n-import scala.util.{Failure, Success, Try}\n \n class ProgramResource[T](\n     owner: => ResourceOwner[T],\n-    startupTimeout: FiniteDuration = 1.minute,\n-    tearDownDuration: FiniteDuration = 10.seconds,\n+    tearDownTimeout: FiniteDuration = 10.seconds,\n ) {\n   private val logger = ContextualizedLogger.get(getClass)\n \n   private val executorService = Executors.newCachedThreadPool()\n-  private implicit val executionContext: ExecutionContext =\n-    ExecutionContext.fromExecutor(executorService)\n \n   def run(): Unit = {\n     newLoggingContext { implicit logCtx =>\n-      val resource = Try(owner.acquire()).fold(Resource.failed, identity)\n+      val resource = {\n+        implicit val executionContext: ExecutionContext =\n+          ExecutionContext.fromExecutor(executorService)"
+  },
+  {
+    "id" : "fa0fd983-b738-41b2-88e7-7365b76a92e6",
+    "prId" : 4607,
+    "comments" : [
+      {
+        "id" : "d1a3ea61-517c-49fd-a9a2-e2ab8cefc58c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Why the self-type?",
+        "createdAt" : "2020-02-19T16:11:32Z",
+        "updatedAt" : "2020-02-19T20:48:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3fcb0f78-88a8-4e9d-b9a3-a3cfbb5a424a",
+        "parentId" : "d1a3ea61-517c-49fd-a9a2-e2ab8cefc58c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "To make sure people don't forget to actually extend `RuntimeException` or similar.",
+        "createdAt" : "2020-02-19T16:58:03Z",
+        "updatedAt" : "2020-02-19T20:48:13Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f5960f0b-1356-488e-b283-22ec96cf06ee",
+        "parentId" : "d1a3ea61-517c-49fd-a9a2-e2ab8cefc58c",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Then why removing the `RuntimeException`? :slightly_smiling_face: ",
+        "createdAt" : "2020-02-19T17:04:52Z",
+        "updatedAt" : "2020-02-19T20:48:13Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "71881bdb-e76b-4205-a10b-5470d0f5ba3f",
+        "parentId" : "d1a3ea61-517c-49fd-a9a2-e2ab8cefc58c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Because it allows me to do `new LedgerIdMismatchException(…) with StartupException`, which means that `LedgerIdMismatchException` can be moved to _ledger-api-common_, which doesn't have access to `StartupException` and doesn't know anything about the concept of \"startup\".",
+        "createdAt" : "2020-02-19T20:09:55Z",
+        "updatedAt" : "2020-02-19T20:48:13Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2631a6f3d08f69f84454f5b30c7ebcb7581b0e28",
+    "line" : 10,
+    "diffHunk" : "@@ -67,9 +67,12 @@ class ProgramResource[T](\n }\n \n object ProgramResource {\n-  abstract class StartupException(message: String)\n-      extends RuntimeException(message)\n-      with NoStackTrace\n \n-  abstract class SuppressedStartupException extends RuntimeException\n+  trait StartupException extends NoStackTrace {\n+    self: Exception =>"
+  },
+  {
+    "id" : "eb8dbf45-a2c0-4623-8754-f7ce3bbed734",
+    "prId" : 4422,
+    "comments" : [
+      {
+        "id" : "7d65866a-831b-4e27-8b47-a155ff750a39",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n            s\"Shutting down because of an initialization error: ${exception.getMessage}\", exception)\r\n```\r\nWhy the newline? It may be just escaped if structured logging is used, anyhow.",
+        "createdAt" : "2020-02-06T12:44:17Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2beca276-e600-4671-9c14-8c7a9572134a",
+        "parentId" : "7d65866a-831b-4e27-8b47-a155ff750a39",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "It's not, I checked. The error looks like this:\r\n\r\n```\r\nShutting down because of an initialization error.\r\nUnknown database: jdbc:notathing\r\n```\r\n\r\nIf I pass the exception as an argument, I get this:\r\n\r\n```\r\nShutting down because of an initialization error.\r\ncom.daml.ledger.on.sql.Database$InvalidDatabaseException: Unknown database: jdbc:notathing\r\n```",
+        "createdAt" : "2020-02-06T14:07:56Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "a3e584e59ae39b77a6088641e3c5a3287071b5ff",
+    "line" : 45,
+    "diffHunk" : "@@ -46,7 +46,12 @@ class ProgramResource[T](\n               stop()\n               sys.exit(1)\n           }\n-        case Failure(_: SuppressedException) =>\n+        case Failure(exception: StartupException) =>\n+          logger.error(\n+            s\"Shutting down because of an initialization error.\\n${exception.getMessage}\")"
+  },
+  {
+    "id" : "5348a2c0-5632-4d17-9e5f-5f1af33ef25a",
+    "prId" : 4422,
+    "comments" : [
+      {
+        "id" : "7709fca8-ef06-401e-8909-f4dba804c3ba",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "What does \"suppressed\" stand for here?",
+        "createdAt" : "2020-02-06T12:50:51Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e6cd3ea0-01bc-4e44-b09a-7c7de883083b",
+        "parentId" : "7709fca8-ef06-401e-8909-f4dba804c3ba",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "The same suggestion I gave above applies here, but without `message` and `cause`.",
+        "createdAt" : "2020-02-06T12:56:42Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1d2ce703-acc6-4dc1-aae4-f073bec0aea4",
+        "parentId" : "7709fca8-ef06-401e-8909-f4dba804c3ba",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "\"Suppressed\" stands for \"not shown to the user\".",
+        "createdAt" : "2020-02-06T14:17:41Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a3e584e59ae39b77a6088641e3c5a3287071b5ff",
+    "line" : null,
+    "diffHunk" : "@@ -59,5 +64,23 @@ class ProgramResource[T](\n }\n \n object ProgramResource {\n-  abstract class SuppressedException extends RuntimeException\n+\n+  abstract class StartupException(message: String, cause: Throwable)\n+      extends RuntimeException\n+      with NoStackTrace {\n+    def this() = this(null, null)\n+\n+    def this(message: String) = this(message, null)\n+\n+    def this(cause: Throwable) = this(null, cause)\n+  }\n+\n+  abstract class SuppressedStartupException(message: String, cause: Throwable)"
+  },
+  {
+    "id" : "036d62df-e9f8-4707-8770-5fabd9e25acf",
+    "prId" : 4422,
+    "comments" : [
+      {
+        "id" : "f97f09cf-8d92-4c3f-aeb4-117a83a9d601",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n  abstract class StartupException(override val getMessage: String) extends RuntimeException with NotStackTrace\r\n```\r\nDoesn't look like you are using it in any other way right now.",
+        "createdAt" : "2020-02-06T12:55:29Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "126a5270-30f4-40e9-b26a-963492a1cade",
+        "parentId" : "f97f09cf-8d92-4c3f-aeb4-117a83a9d601",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "If you choose to accept this suggestion you can drop the body of the class.",
+        "createdAt" : "2020-02-06T12:56:01Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cb4feb9a-20bd-406c-ad98-5848ee6ef9a5",
+        "parentId" : "f97f09cf-8d92-4c3f-aeb4-117a83a9d601",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Done. I thought I was being future-proof but you're right, it's not used.",
+        "createdAt" : "2020-02-06T14:08:15Z",
+        "updatedAt" : "2020-02-06T14:21:29Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a3e584e59ae39b77a6088641e3c5a3287071b5ff",
+    "line" : null,
+    "diffHunk" : "@@ -59,5 +64,23 @@ class ProgramResource[T](\n }\n \n object ProgramResource {\n-  abstract class SuppressedException extends RuntimeException\n+\n+  abstract class StartupException(message: String, cause: Throwable)"
+  },
+  {
+    "id" : "66cf6182-13bc-4215-90db-c149860ddcba",
+    "prId" : 4374,
+    "comments" : [
+      {
+        "id" : "4a321abf-f438-4727-ae90-4e5aa93fc5bf",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "I believe this was a better approach. Why the change?",
+        "createdAt" : "2020-02-04T14:49:35Z",
+        "updatedAt" : "2020-02-05T08:38:10Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0f7a70b6-aace-4369-850e-e2b192caf486",
+        "parentId" : "4a321abf-f438-4727-ae90-4e5aa93fc5bf",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Hmmm, maybe you're right. Currently it's gonna be the same everywhere though. Do you think we should move it back out now or wait until something needs a different implementation?",
+        "createdAt" : "2020-02-04T15:04:35Z",
+        "updatedAt" : "2020-02-05T08:38:10Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "95e16bff-a370-49ae-8e25-ccfd1e4ff2bf",
+        "parentId" : "4a321abf-f438-4727-ae90-4e5aa93fc5bf",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "No, your argument makes sense. I still thought it made sense to raise this.",
+        "createdAt" : "2020-02-04T16:02:18Z",
+        "updatedAt" : "2020-02-05T08:38:10Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b437c4ed92189cdb6f718d8b26b8e1751ed6ce9f",
+    "line" : 24,
+    "diffHunk" : "@@ -3,44 +3,61 @@\n \n package com.digitalasset.resources\n \n+import java.util.concurrent.{Executors, TimeUnit}\n+\n import com.digitalasset.logging.ContextualizedLogger\n import com.digitalasset.logging.LoggingContext.newLoggingContext\n import com.digitalasset.resources.ProgramResource._\n \n-import scala.concurrent.duration.DurationInt\n+import scala.concurrent.duration.{DurationInt, FiniteDuration}\n import scala.concurrent.{Await, ExecutionContext}\n import scala.util.control.NonFatal\n+import scala.util.{Failure, Success}\n \n-class ProgramResource[T](owner: ResourceOwner[T]) {\n+class ProgramResource[T](\n+    owner: ResourceOwner[T],\n+    startupTimeout: FiniteDuration = 1.minute,\n+    tearDownDuration: FiniteDuration = 10.seconds,\n+) {\n   private val logger = ContextualizedLogger.get(getClass)\n \n-  def run()(implicit executionContext: ExecutionContext): Unit = {"
+  }
+]

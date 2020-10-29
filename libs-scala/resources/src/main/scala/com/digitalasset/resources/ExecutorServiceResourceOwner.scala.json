@@ -1,0 +1,68 @@
+[
+  {
+    "id" : "3751e65d-1e16-4037-a20a-262f9e79cdd9",
+    "prId" : 4320,
+    "comments" : [
+      {
+        "id" : "bd043924-6fc2-4fed-ab25-21d14195e19c",
+        "parentId" : null,
+        "author" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "body" : "So this ugly piece of code takes care when an execution context is wrapped via `ExecutionContext.fromExecutorService`, but it will not detect the problem if a different wrapper is used.\r\n\r\nAlternatively, you could try to submit something to the given execution context and look at the executing thread's name to see whether they belong to the same execution context. Unfortunately, as there is no standard on how execution contexts name their threads, that's probably as brittle as the current mechanism.\r\n\r\nSo maybe just add a comment here that this test is not fool-proof?",
+        "createdAt" : "2020-01-31T09:51:59Z",
+        "updatedAt" : "2020-01-31T12:13:26Z",
+        "lastEditedBy" : {
+          "login" : "andreaslochbihler-da",
+          "name" : "Andreas Lochbihler",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/36634420?u=e4612b8608d57496b2fbe1939276b8b8b04e4d67&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "29e5c79c-b6ed-4bed-ba53-646684819f72",
+        "parentId" : "bd043924-6fc2-4fed-ab25-21d14195e19c",
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "I think the comment is probably the wisest. We're just trying to make sure people don't do something mad; we can't prevent them all. :-)\r\n\r\nIf people write tests, they'll catch this themselves, of course.",
+        "createdAt" : "2020-01-31T10:02:54Z",
+        "updatedAt" : "2020-01-31T12:13:26Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9bfc299c-e08b-4928-98fb-24888ae1aa88",
+        "parentId" : "bd043924-6fc2-4fed-ab25-21d14195e19c",
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Added a lot more commentary.",
+        "createdAt" : "2020-01-31T12:14:15Z",
+        "updatedAt" : "2020-01-31T12:14:15Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "03654c52a00ffd74928dad38440d43d20032346d",
+    "line" : 25,
+    "diffHunk" : "@@ -5,17 +5,51 @@ package com.digitalasset.resources\n \n import java.util.concurrent.{ExecutorService, TimeUnit}\n \n-import scala.concurrent.{ExecutionContext, Future}\n+import com.digitalasset.resources.ExecutorServiceResourceOwner._\n+\n+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}\n \n class ExecutorServiceResourceOwner[T <: ExecutorService](acquireExecutorService: () => T)\n     extends ResourceOwner[T] {\n   override def acquire()(implicit executionContext: ExecutionContext): Resource[T] =\n     Resource(\n-      Future(acquireExecutorService()),\n+      Future {\n+        val executorService = acquireExecutorService()\n+        executionContext match {\n+          case context: ExecutionContextExecutorService =>\n+            if (executorService == context) {\n+              throw new CannotAcquireExecutionContext()\n+            }\n+            // Ugly, but important so that we make sure we're not going to end up in deadlock."
+  }
+]

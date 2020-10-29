@@ -1,0 +1,383 @@
+[
+  {
+    "id" : "f7a460ea-e276-4a81-b353-42888d6538d2",
+    "prId" : 4106,
+    "comments" : [
+      {
+        "id" : "4a1d21dc-7282-458b-b24a-36cfef6f1b5d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This is unfortunately too permissive. It accepts the value `[null]`, which is not the encoding of any value.\r\n\r\nI'll merge it nevertheless and fix it and add a few tests in a follow-up PR.",
+        "createdAt" : "2020-01-20T09:23:48Z",
+        "updatedAt" : "2020-01-20T09:24:51Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c739f9c2d91bdb2279010a7ecd86f955f7ad67ec",
+    "line" : 33,
+    "diffHunk" : "@@ -207,18 +207,31 @@ export const ContractId = <T>(_t: Serializable<T>): Serializable<ContractId<T>>\n });\n \n /**\n- * The counterpart of DAML's `Optional T` type. Nested optionals are not yet\n- * supported.\n- */\n-export type Optional<T> = T | null;\n+ * The counterpart of DAML's `Optional T` type.\n+ */\n+export type Optional<T> =\n+  | null\n+  | Optional.Inner<T>\n+// eslint-disable-next-line @typescript-eslint/no-namespace\n+namespace Optional {\n+  export type Inner<T> = null extends T ? ([] | [Exclude<T, null>]) : T;\n+}\n \n /**\n- * Companion object of the `Optional` type.\n+ * Companion function of the `Optional` type.\n  */\n export const Optional = <T>(t: Serializable<T>): Serializable<Optional<T>> => ({\n-  decoder: () => jtv.oneOf(jtv.constant(null), t.decoder()),\n-  isOptional: false,\n+  decoder : () => jtv.oneOf<Optional<T>>(jtv.constant(null), Optional.Inner(t)),\n+  isOptional: true,\n });\n+Optional.Inner = <T>(t: Serializable<T>): jtv.Decoder<Optional.Inner<T>> =>\n+  ! t.isOptional\n+  ? t.decoder() as jtv.Decoder<Optional.Inner<T>>\n+  : jtv.oneOf(\n+      jtv.constant([]) as jtv.Decoder<[] | [Exclude<T, null>]>,\n+      jtv.tuple([t.decoder()]) as jtv.Decoder<[] | [Exclude<T, null>]>"
+  },
+  {
+    "id" : "d9a7ea76-ff5b-4340-a1c8-d0ac708e43b5",
+    "prId" : 4079,
+    "comments" : [
+      {
+        "id" : "94f50d78-7ca2-4d14-9285-221225836ce5",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Much better. 😉",
+        "createdAt" : "2020-01-17T10:44:07Z",
+        "updatedAt" : "2020-01-17T11:59:18Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3684c5eb9c15efbbc40610a2dae20c4ed5bb2f3b",
+    "line" : 42,
+    "diffHunk" : "@@ -113,11 +117,10 @@ export type Decimal = Numeric;\n export const Numeric = (_: number): Serializable<Numeric> =>\n   ({\n     decoder: jtv.string,\n+    isOptional: false,\n   })\n \n-export const Decimal: Serializable<Decimal> = {\n-  decoder: Numeric(10).decoder,\n-}\n+export const Decimal: Serializable<Decimal> = Numeric(10)"
+  },
+  {
+    "id" : "aac6961e-d0bf-4c3b-b752-fc951307f7a6",
+    "prId" : 4059,
+    "comments" : [
+      {
+        "id" : "1f3ddf2a-9fbd-4108-9302-a0b478989ee0",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "That is a quite peculiar style for defining a function. We should either go for `export function Numeric(_: number): Serializable<Numeric> { ... }` or for `export const Numeric = (_: number): Serializable<Numeric> => ...`. To fit the style of the surrounding code, I suggest\r\n```suggestion\r\nexport const Numeric = (_: number): Serializable<Numeric> => ({\r\n  decoder: jtv.string,\r\n});\r\n```",
+        "createdAt" : "2020-01-16T10:33:37Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "46051dc7-d4dc-4d26-b722-7b3c808cea58",
+        "parentId" : "1f3ddf2a-9fbd-4108-9302-a0b478989ee0",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Will fat arrow this.",
+        "createdAt" : "2020-01-16T14:10:26Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "80d40955-38be-46d9-86f8-8abdaa39fb69",
+        "parentId" : "1f3ddf2a-9fbd-4108-9302-a0b478989ee0",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ ",
+        "createdAt" : "2020-01-16T16:49:22Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7f354d3c44ce32c32bf1664b71dfbb279da9f2cc",
+    "line" : null,
+    "diffHunk" : "@@ -112,6 +112,26 @@ export const Decimal: Serializable<Decimal> = {\n   decoder: jtv.string,\n }\n \n+/**\n+ * The counterpart of DAML's `Numeric` type. We represent `Numeric`s as string\n+ * in order to avoid a loss of precision. The string must match the regular\n+ * expression `-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?`.\n+ */\n+export type Numeric = string;\n+\n+/**\n+ * Companion function of the `Numeric` type.\n+ */\n+// eslint-disable-next-line @typescript-eslint/no-unused-vars\n+export const Numeric = function (_: number): Serializable<Numeric> {"
+  },
+  {
+    "id" : "97515237-11b3-48c0-9219-496b9ce87c1f",
+    "prId" : 4059,
+    "comments" : [
+      {
+        "id" : "7ac694a5-c86c-4e5e-af80-0b177aa7d490",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Can you please make it `//TODO(SF, #xyz): ...`, where `#xyz` is the number of the issue for this. I prefer to be consistent on how to leave todos. That makes it easier to grep for todos.",
+        "createdAt" : "2020-01-16T10:36:07Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f3b48052-1126-44ea-8ff6-92ec043635eb",
+        "parentId" : "7ac694a5-c86c-4e5e-af80-0b177aa7d490",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Ok.",
+        "createdAt" : "2020-01-16T14:10:39Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "635ae542-2722-4bfc-b942-b6a503ce351b",
+        "parentId" : "7ac694a5-c86c-4e5e-af80-0b177aa7d490",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ ",
+        "createdAt" : "2020-01-16T16:49:39Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7f354d3c44ce32c32bf1664b71dfbb279da9f2cc",
+    "line" : null,
+    "diffHunk" : "@@ -112,6 +112,26 @@ export const Decimal: Serializable<Decimal> = {\n   decoder: jtv.string,\n }\n \n+/**\n+ * The counterpart of DAML's `Numeric` type. We represent `Numeric`s as string\n+ * in order to avoid a loss of precision. The string must match the regular\n+ * expression `-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?`.\n+ */\n+export type Numeric = string;\n+\n+/**\n+ * Companion function of the `Numeric` type.\n+ */\n+// eslint-disable-next-line @typescript-eslint/no-unused-vars\n+export const Numeric = function (_: number): Serializable<Numeric> {\n+  // To-do : Write a smarter decoder to replace 'jtv.string' that"
+  },
+  {
+    "id" : "69e2daf2-15ee-4973-ab87-822578a833f1",
+    "prId" : 4059,
+    "comments" : [
+      {
+        "id" : "1fac6382-1f65-4881-905f-1f3f02503b95",
+        "parentId" : null,
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "Rewrite this as an alias for `Numeric 10`.",
+        "createdAt" : "2020-01-16T14:14:28Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d7be9d50-6365-4b5a-99f7-6cbc2fec1a8d",
+        "parentId" : "1fac6382-1f65-4881-905f-1f3f02503b95",
+        "author" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "body" : "✔️ \r\n",
+        "createdAt" : "2020-01-16T16:46:57Z",
+        "updatedAt" : "2020-01-16T16:56:32Z",
+        "lastEditedBy" : {
+          "login" : "shayne-fletcher",
+          "name" : "Shayne Fletcher",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/1500167?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7f354d3c44ce32c32bf1664b71dfbb279da9f2cc",
+    "line" : null,
+    "diffHunk" : "@@ -112,6 +112,26 @@ export const Decimal: Serializable<Decimal> = {\n   decoder: jtv.string,"
+  },
+  {
+    "id" : "cfd9f1bf-b920-4bd0-a7d1-2ab2d2c8dbf2",
+    "prId" : 3441,
+    "comments" : [
+      {
+        "id" : "58f48a24-1218-4c4a-93fd-1986cd0f3da5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do we really care about supporting templates without an `Archive` choice? Just throwing an error in that case and only having `Template` seems less confusing to users.",
+        "createdAt" : "2019-11-19T08:32:51Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7c5a6e74-7e9b-4c46-8ed4-9d60a0de543f",
+        "parentId" : "58f48a24-1218-4c4a-93fd-1986cd0f3da5",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm getting ready for a world where `archive` is a builtin rather than an auto-generated choice. :)\r\n\r\nI'd prefer to leave like this for now and maybe even completely remove this in the future.",
+        "createdAt" : "2019-11-19T09:07:02Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bf358a98-4014-4756-bdc7-f223c3031dfb",
+        "parentId" : "58f48a24-1218-4c4a-93fd-1986cd0f3da5",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Actually, I'll follow your suggestion. Let's keep it simple for now.",
+        "createdAt" : "2019-11-19T11:01:41Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "eff993c856bef39dda178c0b0ca7b3cc76f89f26",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,263 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+import * as jtv from '@mojotech/json-type-validation';\n+\n+/**\n+ * Interface for companion objects of serializable types. Its main purpose is\n+ * to describe the JSON encoding of values of the serializable type.\n+ */\n+export interface Serializable<T> {\n+  // NOTE(MH): This must be a function to allow for mutually recursive decoders.\n+  decoder: () => jtv.Decoder<T>;\n+}\n+\n+/**\n+ * Identifier of a DAML template.\n+ */\n+export type TemplateId = {\n+  packageId: string;\n+  moduleName: string;\n+  entityName: string;\n+}\n+\n+/**\n+ * Companion object of the `TemplateId` type.\n+ */\n+const TemplateId: Serializable<TemplateId> = {\n+  decoder: () => jtv.object({\n+    packageId: jtv.string(),\n+    moduleName: jtv.string(),\n+    entityName: jtv.string(),\n+  })\n+}\n+\n+/**\n+ * Interface for objects representing DAML templates. It is similar to the\n+ * `Template` type class in DAML.\n+ */\n+export interface Template<T extends {}> extends Serializable<T> {\n+  templateId: TemplateId;\n+}\n+\n+/**\n+ * Interface for objects representing DAML choices. It is similar to the\n+ * `Choice` type class in DAML.\n+ */\n+export interface Choice<T, C> extends Serializable<C> {\n+  template: Template<T>;\n+  choiceName: string;\n+}\n+\n+/**\n+ * Interface for objects representing DAML templates with an `Archive` choice."
+  },
+  {
+    "id" : "0bbe715e-5bc5-4770-aafb-f1663b9348f3",
+    "prId" : 3441,
+    "comments" : [
+      {
+        "id" : "0e19846d-5de8-4132-bf84-29a87c225f58",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We should switch this to some kind of type that lets you do arithmetic at some point. Otherwise the first thing users are going to do is to convert this to a JS number which defeats the point.",
+        "createdAt" : "2019-11-19T08:35:28Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fdca2820-ee3c-4811-aafd-04150e3fc141",
+        "parentId" : "0e19846d-5de8-4132-bf84-29a87c225f58",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I agree. For now, this is \"good enough\" though.",
+        "createdAt" : "2019-11-19T09:04:30Z",
+        "updatedAt" : "2019-11-19T15:10:10Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "eff993c856bef39dda178c0b0ca7b3cc76f89f26",
+    "line" : 80,
+    "diffHunk" : "@@ -0,0 +1,263 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+import * as jtv from '@mojotech/json-type-validation';\n+\n+/**\n+ * Interface for companion objects of serializable types. Its main purpose is\n+ * to describe the JSON encoding of values of the serializable type.\n+ */\n+export interface Serializable<T> {\n+  // NOTE(MH): This must be a function to allow for mutually recursive decoders.\n+  decoder: () => jtv.Decoder<T>;\n+}\n+\n+/**\n+ * Identifier of a DAML template.\n+ */\n+export type TemplateId = {\n+  packageId: string;\n+  moduleName: string;\n+  entityName: string;\n+}\n+\n+/**\n+ * Companion object of the `TemplateId` type.\n+ */\n+const TemplateId: Serializable<TemplateId> = {\n+  decoder: () => jtv.object({\n+    packageId: jtv.string(),\n+    moduleName: jtv.string(),\n+    entityName: jtv.string(),\n+  })\n+}\n+\n+/**\n+ * Interface for objects representing DAML templates. It is similar to the\n+ * `Template` type class in DAML.\n+ */\n+export interface Template<T extends {}> extends Serializable<T> {\n+  templateId: TemplateId;\n+}\n+\n+/**\n+ * Interface for objects representing DAML choices. It is similar to the\n+ * `Choice` type class in DAML.\n+ */\n+export interface Choice<T, C> extends Serializable<C> {\n+  template: Template<T>;\n+  choiceName: string;\n+}\n+\n+/**\n+ * Interface for objects representing DAML templates with an `Archive` choice.\n+ */\n+export interface ArchivableTemplate<T extends {}> extends Template<T> {\n+  Archive: Choice<T, {}>;\n+}\n+\n+/**\n+ * The counterpart of DAML's `()` type.\n+ */\n+export type Unit = {};\n+\n+/**\n+ * Companion obect of the `Unit` type.\n+ */\n+export const Unit: Serializable<Unit> = {\n+  decoder: () => jtv.object({}),\n+}\n+\n+/**\n+ * The counterpart of DAML's `Bool` type.\n+ */\n+export type Bool = boolean;\n+\n+/**\n+ * Companion object of the `Bool` type.\n+ */\n+export const Bool: Serializable<Bool> = {\n+  decoder: jtv.boolean,\n+}\n+\n+/**\n+ * The counterpart of DAML's `Int` type. We represent `Int`s as string in order\n+ * to avoid a loss of precision.\n+ */\n+export type Int = string;"
+  }
+]

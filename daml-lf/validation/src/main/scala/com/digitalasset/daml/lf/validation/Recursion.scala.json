@@ -1,0 +1,390 @@
+[
+  {
+    "id" : "3f31b376-60cd-491c-9644-c11388ac8456",
+    "prId" : 7050,
+    "comments" : [
+      {
+        "id" : "4fdf8ffb-ed27-4506-a46d-67105bbf0b37",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What do the backticks do here? Turn an expression into a pattern that matches exactly the value of the expression?",
+        "createdAt" : "2020-08-07T06:03:57Z",
+        "updatedAt" : "2020-08-07T15:26:46Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "802aa34b-f4db-425a-a4bb-727e19398f4d",
+        "parentId" : "4fdf8ffb-ed27-4506-a46d-67105bbf0b37",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yes",
+        "createdAt" : "2020-08-07T06:34:53Z",
+        "updatedAt" : "2020-08-07T15:26:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edd5726604b0278196086666e0c0dae724cae3ff",
+    "line" : null,
+    "diffHunk" : "@@ -6,59 +6,26 @@ package com.daml.lf.validation\n import com.daml.lf.data.Ref._\n import com.daml.lf.language.Ast._\n import com.daml.lf.language.Graphs\n-import com.daml.lf.validation.traversable.{ExprTraversable, TypeTraversable}\n+import com.daml.lf.validation.traversable.TypeTraversable\n \n private[validation] object Recursion {\n \n   /* Check there are no cycles in the module references */\n \n   @throws[ValidationError]\n-  def checkPackage(pkgId: PackageId, modules: Map[ModuleName, Module]): Unit = {\n-    val g = modules.map {\n-      case (name, mod) => name -> (mod.definitions.values.flatMap(modRefs(pkgId, _)).toSet - name)\n+  def checkPackage(world: World, pkgId: PackageId, modules: Map[ModuleName, Module]): Unit = {\n+    val g = modules.transform { (name, _) =>\n+      def context = ContextModule(pkgId, name)\n+      world.idsInModule(context, pkgId, name).collect {\n+        case Identifier(`pkgId`, QualifiedName(modName, _)) => modName"
+  },
+  {
+    "id" : "40f3a8ef-f5e7-4373-8941-49e2bb3e4005",
+    "prId" : 7050,
+    "comments" : [
+      {
+        "id" : "ba61f5ab-1a98-44d5-b77c-148a96157b16",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I assume this has changed because we now have the `idsInModule` method on `world`. Is that correct?",
+        "createdAt" : "2020-08-07T06:05:25Z",
+        "updatedAt" : "2020-08-07T15:26:46Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "896f1c99-113c-458d-86ff-b902d6f0a7da",
+        "parentId" : "ba61f5ab-1a98-44d5-b77c-148a96157b16",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "outdated, but yes. ",
+        "createdAt" : "2020-08-07T08:31:04Z",
+        "updatedAt" : "2020-08-07T15:26:46Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "edd5726604b0278196086666e0c0dae724cae3ff",
+    "line" : null,
+    "diffHunk" : "@@ -6,59 +6,26 @@ package com.daml.lf.validation\n import com.daml.lf.data.Ref._\n import com.daml.lf.language.Ast._\n import com.daml.lf.language.Graphs\n-import com.daml.lf.validation.traversable.{ExprTraversable, TypeTraversable}\n+import com.daml.lf.validation.traversable.TypeTraversable\n \n private[validation] object Recursion {\n \n   /* Check there are no cycles in the module references */\n \n   @throws[ValidationError]\n-  def checkPackage(pkgId: PackageId, modules: Map[ModuleName, Module]): Unit = {\n-    val g = modules.map {\n-      case (name, mod) => name -> (mod.definitions.values.flatMap(modRefs(pkgId, _)).toSet - name)\n+  def checkPackage(world: World, pkgId: PackageId, modules: Map[ModuleName, Module]): Unit = {"
+  },
+  {
+    "id" : "8f3e3d8a-a342-4576-b948-9706c6ae317c",
+    "prId" : 4101,
+    "comments" : [
+      {
+        "id" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Don’t you need to recurse on the arguments here?",
+        "createdAt" : "2020-01-21T12:26:34Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "89c88f15-3fc3-42b9-b416-a5647debd5b9",
+        "parentId" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Wont that happen in the `TypeTraversable`?",
+        "createdAt" : "2020-01-21T13:18:09Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "74ea7638-6400-4473-af2d-95b2428d3bf0",
+        "parentId" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Ah, no it wont. Think you're right.",
+        "createdAt" : "2020-01-21T13:19:47Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b1fcfb3a-45fe-4e77-a58a-eec3ae5049ba",
+        "parentId" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Actually, take 3. I'm not sure.\r\nToo much scala magic for my brain to process :(",
+        "createdAt" : "2020-01-21T13:21:46Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "011641a5-9433-4e2a-8aa3-edc0b319fee0",
+        "parentId" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "My understanding is that `TypeTraversable` is roughly the equivalent of something like Haskell’s `plate`, i.e., a traversal for the immediate children that only goes down one level. Then it’s up to the function that you’re using to traverse to do further recursion, that’s why the `otherwise`case here calls the traversable again. Since you don’t fall into the otherwise case, you need to recurse on the arguments either by inlining the recursion on the arguments or my calling the traversable here as well.",
+        "createdAt" : "2020-01-21T13:29:57Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fc5cadb0-342f-4ffd-89f5-9cdfe6eaf0e5",
+        "parentId" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "`TypeTraversable(typp: Type)` gave you an traversable over the *direct* subtrees (of type `Type`) of `typ0`.\r\nIf you want to iterate over all the subtrees of `typ0` you have to recurse on each subtree. \r\nHere that is done by the default case (line 32/33).\r\nSince `TSynApp(typeSynName,_)` has now its own case and contains subtrees you have to recurse explicitly.\r\n",
+        "createdAt" : "2020-01-21T13:38:57Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e4fec515-47b6-4a02-b46b-2680b03703c9",
+        "parentId" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : ":+1: for @cocreature explanation.",
+        "createdAt" : "2020-01-21T13:41:37Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "05098104-8300-4163-8f96-aa8a06cae14f",
+        "parentId" : "8270d0bf-9a4d-48d8-ac70-226545e5fadf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Right. Thank you. I see now it is not doing deep recursion.",
+        "createdAt" : "2020-01-21T13:49:30Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e9b7ff4849afb993cbda3dc7bea03b90e9dd9c19",
+    "line" : null,
+    "diffHunk" : "@@ -25,6 +25,8 @@ private[validation] object Recursion {\n     val modRefsInType: Set[ModuleName] = {\n \n       def modRefsInType(acc: Set[ModuleName], typ0: Type): Set[ModuleName] = typ0 match {\n+        case TSynApp(typeSynName,_) if typeSynName.packageId == pkgId =>"
+  },
+  {
+    "id" : "9a7ef4ea-3698-4673-ba7c-c9b7b74ac35d",
+    "prId" : 4101,
+    "comments" : [
+      {
+        "id" : "d11c348c-7f75-44ae-b08d-fba6069e1dd5",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```suggestion\r\n          TypeTraversable(typ0).fodLeft(acc + typeSynName.qualifiedName.module)(modRefsInType)\r\n```",
+        "createdAt" : "2020-01-21T13:34:53Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e8fa34cc-66d5-44e8-965b-a0690a709147",
+        "parentId" : "d11c348c-7f75-44ae-b08d-fba6069e1dd5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Thank you. I made the fix using `/:` to be consistent.",
+        "createdAt" : "2020-01-21T14:03:28Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "cb036477-b679-42b2-a4e5-c5cb112a2074",
+        "parentId" : "d11c348c-7f75-44ae-b08d-fba6069e1dd5",
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "[FYI, `/:` and `:\\` are deprecated in favor of `foldLeft` and `foldRight` respectively.](https://www.scala-lang.org/api/2.12.10/scala/collection/TraversableOnce.html)",
+        "createdAt" : "2020-01-21T14:21:44Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "61f918ad-bcdd-4f02-bfbb-5f4d6b3ca915",
+        "parentId" : "d11c348c-7f75-44ae-b08d-fba6069e1dd5",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "All those `/:` are mine :( \r\nI will spend some time soon to remove all `/:`. \r\nYou can use here whatever you prefer. \r\n",
+        "createdAt" : "2020-01-21T14:26:36Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e9b7ff4849afb993cbda3dc7bea03b90e9dd9c19",
+    "line" : null,
+    "diffHunk" : "@@ -25,6 +25,8 @@ private[validation] object Recursion {\n     val modRefsInType: Set[ModuleName] = {\n \n       def modRefsInType(acc: Set[ModuleName], typ0: Type): Set[ModuleName] = typ0 match {\n+        case TSynApp(typeSynName,_) if typeSynName.packageId == pkgId =>\n+          acc + typeSynName.qualifiedName.module"
+  }
+]

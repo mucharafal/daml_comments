@@ -1,0 +1,934 @@
+[
+  {
+    "id" : "d293aecd-73b9-40b4-a3a2-d3679e060fe8",
+    "prId" : 5969,
+    "comments" : [
+      {
+        "id" : "e4885c34-9390-4b67-a974-2379e4f53a5b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "What you can do is something like this at the beginning:\r\n```\r\nval (activeContracts, ledgerEnd) = this.synchronized { (acs.activeContracts, ledgerEnd) }\r\n```\r\n\r\nThis way `ledgerEnd` and `acs` will be \"in sync\".",
+        "createdAt" : "2020-05-19T15:36:49Z",
+        "updatedAt" : "2020-05-19T16:21:35Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "44d1e871-eddb-4eed-87a4-5f8a737af387",
+        "parentId" : "e4885c34-9390-4b67-a974-2379e4f53a5b",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "With that change, the test no longer finds a duplicate.",
+        "createdAt" : "2020-05-19T16:19:38Z",
+        "updatedAt" : "2020-05-19T16:21:35Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "198b0217-2ad1-46fe-9730-e51facaaca65",
+        "parentId" : "e4885c34-9390-4b67-a974-2379e4f53a5b",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "907a64122e",
+        "createdAt" : "2020-05-19T16:21:49Z",
+        "updatedAt" : "2020-05-19T16:21:50Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "907a64122e44ab469a824cf4f86c649e932bba2a",
+    "line" : null,
+    "diffHunk" : "@@ -196,45 +196,49 @@ class InMemoryLedger(\n   override def ledgerEnd: Offset = entries.ledgerEnd\n \n   override def activeContracts(\n-      activeAt: Offset,\n       filter: Map[Party, Set[Ref.Identifier]],\n       verbose: Boolean,\n-  ): Source[GetActiveContractsResponse, NotUsed] =\n-    Source\n-      .fromIterator[ActiveContract](() =>\n-        acs.activeContracts.valuesIterator.flatMap(index\n-          .EventFilter(_)(TransactionFilter(filter.map {\n-            case (party, templates) =>\n-              party -> Filters(if (templates.nonEmpty) Some(InclusiveFilters(templates)) else None)\n-          }))\n-          .toList))\n-      .map { contract =>\n-        GetActiveContractsResponse(\n-          workflowId = contract.workflowId.getOrElse(\"\"),\n-          activeContracts = List(\n-            CreatedEvent(\n-              contract.eventId,\n-              contract.id.coid,\n-              Some(LfEngineToApi.toApiIdentifier(contract.contract.template)),\n-              contractKey = contract.key.map(\n-                ck =>\n+  ): (Source[GetActiveContractsResponse, NotUsed], Offset) =\n+    (\n+      Source\n+        .fromIterator[ActiveContract](\n+          () =>\n+            acs.activeContracts.valuesIterator.flatMap(\n+              index\n+                .EventFilter(_)(TransactionFilter(filter.map {\n+                  case (party, templates) =>\n+                    party -> Filters(\n+                      if (templates.nonEmpty) Some(InclusiveFilters(templates)) else None)\n+                }))\n+                .toList))\n+        .map { contract =>\n+          GetActiveContractsResponse(\n+            workflowId = contract.workflowId.getOrElse(\"\"),\n+            activeContracts = List(\n+              CreatedEvent(\n+                contract.eventId,\n+                contract.id.coid,\n+                Some(LfEngineToApi.toApiIdentifier(contract.contract.template)),\n+                contractKey = contract.key.map(\n+                  ck =>\n+                    LfEngineToApi.assertOrRuntimeEx(\n+                      \"converting stored contract\",\n+                      LfEngineToApi\n+                        .lfContractKeyToApiValue(verbose = verbose, ck))),\n+                createArguments = Some(\n                   LfEngineToApi.assertOrRuntimeEx(\n                     \"converting stored contract\",\n                     LfEngineToApi\n-                      .lfContractKeyToApiValue(verbose = verbose, ck))),\n-              createArguments = Some(\n-                LfEngineToApi.assertOrRuntimeEx(\n-                  \"converting stored contract\",\n-                  LfEngineToApi\n-                    .lfValueToApiRecord(verbose = verbose, contract.contract.arg.value))),\n-              contract.signatories.union(contract.observers).intersect(filter.keySet).toSeq,\n-              signatories = contract.signatories.toSeq,\n-              observers = contract.observers.toSeq,\n-              agreementText = Some(contract.agreementText)\n+                      .lfValueToApiRecord(verbose = verbose, contract.contract.arg.value))),\n+                contract.signatories.union(contract.observers).intersect(filter.keySet).toSeq,\n+                signatories = contract.signatories.toSeq,\n+                observers = contract.observers.toSeq,\n+                agreementText = Some(contract.agreementText)\n+              )\n             )\n           )\n-        )\n-      }\n+        },\n+      ledgerEnd /*TODO SC derive from copy of acs var instead*/ )"
+  },
+  {
+    "id" : "ee868bad-4f33-41b4-9394-f200dfca912b",
+    "prId" : 5541,
+    "comments" : [
+      {
+        "id" : "359a97cd-6058-4061-8ce0-16e2a209554b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "If this can actually happen, can we use a better error type?",
+        "createdAt" : "2020-04-15T12:36:16Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "9432a703-383b-463c-a0f7-eb4d151441c4",
+        "parentId" : "359a97cd-6058-4061-8ce0-16e2a209554b",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Not worth spending time on this, I had to change it due to the signature change, but `InMemoryLedger` will soon be gone. :crossed_fingers:",
+        "createdAt" : "2020-04-15T12:51:36Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2034352017063fbc2c958c5a086273e66ed0ad47",
+    "line" : 27,
+    "diffHunk" : "@@ -260,15 +260,26 @@ class InMemoryLedger(\n       acs.keys.get(key).filter(acs.isVisibleForStakeholders(_, forParty))\n     })\n \n-  override def lookupMaximumLedgerTime(contractIds: Set[AbsoluteContractId]): Future[Instant] =\n-    Future.fromTry(Try(this.synchronized {\n-      contractIds.foldLeft[Instant](Instant.EPOCH)((acc, id) => {\n-        val let = acs.activeContracts\n-          .getOrElse(id, sys.error(s\"Contract $id not found while looking for maximum ledger time\"))\n-          .let\n-        if (let.isAfter(acc)) let else acc\n-      })\n-    }))\n+  override def lookupMaximumLedgerTime(\n+      contractIds: Set[AbsoluteContractId]): Future[Option[Instant]] =\n+    if (contractIds.isEmpty) {\n+      Future.failed(\n+        new IllegalArgumentException(\n+          \"Cannot lookup the maximum ledger time for an empty set of contract identifiers\"\n+        )\n+      )\n+    } else {\n+      Future.fromTry(Try(this.synchronized {\n+        contractIds.foldLeft[Option[Instant]](Some(Instant.MIN))((acc, id) => {\n+          val let = acs.activeContracts\n+            .getOrElse(\n+              id,\n+              sys.error(s\"Contract $id not found while looking for maximum ledger time\"))"
+  },
+  {
+    "id" : "4aa8dcb3-266a-45eb-be51-99bfa67adcf9",
+    "prId" : 5541,
+    "comments" : [
+      {
+        "id" : "d8f5b2ce-6b27-4a44-8c95-cf20aeff544c",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "You could do the following:\r\n```\r\nimport Ordering.Implicits._\r\nlet.max(acc)\r\n```",
+        "createdAt" : "2020-04-16T07:23:16Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fd1ae4bd-d6d5-47cb-baa9-ecad97dd4db9",
+        "parentId" : "d8f5b2ce-6b27-4a44-8c95-cf20aeff544c",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "`InMemoryLedger` is going away soon, I'm satisfied with this, but thanks for raising it.",
+        "createdAt" : "2020-04-16T09:00:31Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "355e6347-23a5-4b1c-976c-c504ec4e917f",
+        "parentId" : "d8f5b2ce-6b27-4a44-8c95-cf20aeff544c",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Yeah, you're right 👍 ",
+        "createdAt" : "2020-04-16T09:36:30Z",
+        "updatedAt" : "2020-04-17T19:02:12Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "2034352017063fbc2c958c5a086273e66ed0ad47",
+    "line" : 29,
+    "diffHunk" : "@@ -260,15 +260,26 @@ class InMemoryLedger(\n       acs.keys.get(key).filter(acs.isVisibleForStakeholders(_, forParty))\n     })\n \n-  override def lookupMaximumLedgerTime(contractIds: Set[AbsoluteContractId]): Future[Instant] =\n-    Future.fromTry(Try(this.synchronized {\n-      contractIds.foldLeft[Instant](Instant.EPOCH)((acc, id) => {\n-        val let = acs.activeContracts\n-          .getOrElse(id, sys.error(s\"Contract $id not found while looking for maximum ledger time\"))\n-          .let\n-        if (let.isAfter(acc)) let else acc\n-      })\n-    }))\n+  override def lookupMaximumLedgerTime(\n+      contractIds: Set[AbsoluteContractId]): Future[Option[Instant]] =\n+    if (contractIds.isEmpty) {\n+      Future.failed(\n+        new IllegalArgumentException(\n+          \"Cannot lookup the maximum ledger time for an empty set of contract identifiers\"\n+        )\n+      )\n+    } else {\n+      Future.fromTry(Try(this.synchronized {\n+        contractIds.foldLeft[Option[Instant]](Some(Instant.MIN))((acc, id) => {\n+          val let = acs.activeContracts\n+            .getOrElse(\n+              id,\n+              sys.error(s\"Contract $id not found while looking for maximum ledger time\"))\n+            .let\n+          acc.map(acc => if (let.isAfter(acc)) let else acc)"
+  },
+  {
+    "id" : "57b2c101-abaf-43f8-aa51-f04d8b2b0b19",
+    "prId" : 5126,
+    "comments" : [
+      {
+        "id" : "ab05747e-2053-486d-9552-5345454d5016",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can we either add `submissionId =` or pull out a variable named `submissionId` for clarity?",
+        "createdAt" : "2020-03-23T09:01:36Z",
+        "updatedAt" : "2020-03-23T12:56:24Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d9b7a15f10547812f475182bc9e76b7934be96d1",
+    "line" : null,
+    "diffHunk" : "@@ -83,13 +84,17 @@ class InMemoryLedger(\n     timeProvider: TimeProvider,\n     acs0: InMemoryActiveLedgerState,\n     packageStoreInit: InMemoryPackageStore,\n-    ledgerEntries: ImmArray[LedgerEntryOrBump])\n-    extends Ledger {\n+    ledgerEntries: ImmArray[LedgerEntryOrBump],\n+    initialConfig: Configuration,\n+) extends Ledger {\n \n   private val logger = LoggerFactory.getLogger(this.getClass)\n \n   private val entries = {\n     val l = new LedgerEntries[InMemoryEntry](_.toString)\n+    l.publish(\n+      InMemoryConfigEntry(\n+        ConfigurationEntry.Accepted(UUID.randomUUID.toString, participantId, initialConfig)))"
+  },
+  {
+    "id" : "a5b65d97-d807-4de6-b6a9-7aaca862279b",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "74c32619-a8fa-4b47-80c5-bf59f177d1c4",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Wouldn't it be enough to synchronize on `acs` only?",
+        "createdAt" : "2020-03-25T11:25:22Z",
+        "updatedAt" : "2020-03-25T11:28:29Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0c6ba7b0-54d1-477a-b2b5-2e3fce91b002",
+        "parentId" : "74c32619-a8fa-4b47-80c5-bf59f177d1c4",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This class goes away soon and this just follows the same pattern used in the other methods.",
+        "createdAt" : "2020-03-25T11:45:44Z",
+        "updatedAt" : "2020-03-25T11:45:44Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : 14,
+    "diffHunk" : "@@ -170,6 +170,16 @@ class InMemoryLedger(\n       acs.keys.get(key).filter(acs.isVisibleForStakeholders(_, forParty))\n     })\n \n+  override def lookupMaximumLedgerTime(contractIds: Set[AbsoluteContractId]): Future[Instant] =\n+    Future.successful(this.synchronized {"
+  },
+  {
+    "id" : "b5976470-1aec-4465-91ff-47ee1e30a22f",
+    "prId" : 5100,
+    "comments" : [
+      {
+        "id" : "c1a410e9-e2a1-403a-b3ca-6501b4854c06",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "What is 5b?",
+        "createdAt" : "2020-03-25T11:25:44Z",
+        "updatedAt" : "2020-03-25T11:28:29Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d421ae1a437d89063df1c3e40078f52885762eaf",
+    "line" : 62,
+    "diffHunk" : "@@ -192,53 +202,52 @@ class InMemoryLedger(\n       submitterInfo: SubmitterInfo,\n       transactionMeta: TransactionMeta,\n       transaction: SubmittedTransaction): Unit = {\n+    val ledgerTime = transactionMeta.ledgerEffectiveTime.toInstant\n     val recordTime = timeProvider.getCurrentTime\n-    if (recordTime.isAfter(submitterInfo.maxRecordTime.toInstant)) {\n-      // This can happen if the DAML-LF computation (i.e. exercise of a choice) takes longer\n-      // than the time window between LET and MRT allows for.\n-      // See https://github.com/digital-asset/daml/issues/987\n-      handleError(\n-        submitterInfo,\n-        RejectionReason.TimedOut(\n-          s\"RecordTime $recordTime is after MaxiumRecordTime ${submitterInfo.maxRecordTime}\"))\n-    } else {\n-      val (transactionForIndex, disclosureForIndex, globalDivulgence) =\n-        Ledger.convertToCommittedTransaction(transactionId, transaction)\n-      // 5b. modify the ActiveContracts, while checking that we do not have double\n-      // spends or timing issues\n-      val acsRes = acs.addTransaction(\n-        transactionMeta.ledgerEffectiveTime.toInstant,\n-        transactionId,\n-        transactionMeta.workflowId,\n-        Some(submitterInfo.submitter),\n-        transactionForIndex,\n-        disclosureForIndex,\n-        globalDivulgence,\n-        List.empty\n+    val timeModel = ledgerConfiguration.get.timeModel\n+    timeModel\n+      .checkTime(ledgerTime, recordTime)\n+      .fold(\n+        reason => handleError(submitterInfo, RejectionReason.InvalidLedgerTime(reason)),\n+        _ => {\n+          val (transactionForIndex, disclosureForIndex, globalDivulgence) =\n+            Ledger.convertToCommittedTransaction(transactionId, transaction)\n+          // 5b. modify the ActiveContracts, while checking that we do not have double"
+  },
+  {
+    "id" : "11404a54-460f-4d2e-9cca-f2c4b82ecc71",
+    "prId" : 4967,
+    "comments" : [
+      {
+        "id" : "dcdfad54-482d-4f79-99e6-1ad2ce48177d",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This doesn't actually change the underlying commands though. Maybe you wanted to use `retain`?",
+        "createdAt" : "2020-03-12T16:41:13Z",
+        "updatedAt" : "2020-03-12T23:04:53Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "2b8f7e61995a21e7260bc22142f09d5236c8896e",
+    "line" : null,
+    "diffHunk" : "@@ -419,4 +419,12 @@ class InMemoryLedger(\n         }\n       }\n     }\n+\n+  override def removeExpiredDeduplicationData(currentTime: Instant): Future[Unit] =\n+    Future.successful {\n+      this.synchronized {\n+        commands.filter(p => p._2.deduplicateUntil.isAfter(currentTime))"
+  },
+  {
+    "id" : "87c87b84-27a1-4441-a5aa-b334655c8ef9",
+    "prId" : 4467,
+    "comments" : [
+      {
+        "id" : "627b8887-faea-4b19-ace8-d75538fb4e25",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Given that `getOrElseUpdate` seems to have the wrong semantics for your case, I would suggest we use an imperative style to highlight that we're causing side effects. Would this make it?\r\n```scala\r\n    Future.successful {\r\n      this.synchronized {\r\n        val entry = commands.get(deduplicationKey)\r\n        if (!entry.isDefined) {\r\n          commands += (deduplicationKey -> CommandDeduplicationEntry(\r\n            deduplicationKey,\r\n            submittedAt,\r\n            ttl,\r\n            None))\r\n        }\r\n        entry\r\n      }\r\n    }\r\n```\r\nTake it as a general suggestion and feel free to drop this here, though. After all, this will soon go away. :wink:",
+        "createdAt" : "2020-02-11T10:18:58Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "eb6bd6a8-cbeb-452d-85dd-9a1888388956",
+        "parentId" : "627b8887-faea-4b19-ace8-d75538fb4e25",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Other thinking point/general observation: could we restrict the synchronization scope to the mutable state we're accessing (i.e. `commands.synchronized` instead of `this.synchronized`)?",
+        "createdAt" : "2020-02-11T10:20:00Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8840fbff-1420-4fe3-a634-4576e739a347",
+        "parentId" : "627b8887-faea-4b19-ace8-d75538fb4e25",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "`scala.collection.concurrent.Map` has a `putIfAbsent` function which does this. We might consider using `TrieMap` rather than `mutable.Map`.",
+        "createdAt" : "2020-02-11T12:09:28Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2bd3fac2-1916-4b81-8989-8cf49d8e8eb6",
+        "parentId" : "627b8887-faea-4b19-ace8-d75538fb4e25",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "@stefanobaghino-da 's suggestion sounds good. I will not further optimize this though, as this code will go away (as you noted).",
+        "createdAt" : "2020-02-19T10:08:37Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "81c3bb07cc3057b6358f8d09902331b1a80501bf",
+    "line" : null,
+    "diffHunk" : "@@ -370,4 +351,33 @@ class InMemoryLedger(\n       .getSource(startInclusive, None)\n       .collect { case (offset, InMemoryConfigEntry(entry)) => offset -> entry }\n \n+  override def deduplicateCommand(\n+      deduplicationKey: String,\n+      submittedAt: Instant,\n+      ttl: Instant): Future[Option[CommandDeduplicationEntry]] =\n+    Future.successful(this.synchronized {\n+      commands\n+        .get(deduplicationKey)\n+        .fold[Option[CommandDeduplicationEntry]] {\n+          commands += (deduplicationKey -> CommandDeduplicationEntry(\n+            deduplicationKey,\n+            submittedAt,\n+            ttl,\n+            None))\n+          None\n+        }(ce => Some(ce))\n+    })"
+  },
+  {
+    "id" : "76cab1ae-17e6-41bf-81d2-87f14ea84dfe",
+    "prId" : 4467,
+    "comments" : [
+      {
+        "id" : "f2cc769e-f79b-4e1d-ba28-20360c5e5d61",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Possible alternative\r\n```scala\r\n      for (cde <- commands.get(deduplicationKey) if cde.submittedAt == submittedAt) {\r\n        commands.update(deduplicationKey, cde.copy(result = Some(result)))\r\n      }\r\n```",
+        "createdAt" : "2020-02-11T10:22:15Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "81c3bb07cc3057b6358f8d09902331b1a80501bf",
+    "line" : null,
+    "diffHunk" : "@@ -370,4 +351,33 @@ class InMemoryLedger(\n       .getSource(startInclusive, None)\n       .collect { case (offset, InMemoryConfigEntry(entry)) => offset -> entry }\n \n+  override def deduplicateCommand(\n+      deduplicationKey: String,\n+      submittedAt: Instant,\n+      ttl: Instant): Future[Option[CommandDeduplicationEntry]] =\n+    Future.successful(this.synchronized {\n+      commands\n+        .get(deduplicationKey)\n+        .fold[Option[CommandDeduplicationEntry]] {\n+          commands += (deduplicationKey -> CommandDeduplicationEntry(\n+            deduplicationKey,\n+            submittedAt,\n+            ttl,\n+            None))\n+          None\n+        }(ce => Some(ce))\n+    })\n+\n+  override def updateCommandResult(\n+      deduplicationKey: String,\n+      submittedAt: Instant,\n+      result: CommandSubmissionResult): Future[Unit] =\n+    Future.successful(this.synchronized {\n+      commands\n+        .get(deduplicationKey)\n+        .foreach(cde =>\n+          if (cde.submittedAt == submittedAt)\n+            commands.update(deduplicationKey, cde.copy(result = Some(result))))\n+      ()"
+  },
+  {
+    "id" : "a7ddd56c-0be1-49aa-961b-a4cfbc32ac11",
+    "prId" : 4467,
+    "comments" : [
+      {
+        "id" : "40f3d261-3d49-422d-83b8-39ac649351f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "A `var` pointing to a `mutable.Map`? Seems odd. Can you make this a `val` instead?",
+        "createdAt" : "2020-02-20T09:47:08Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "81c3bb07cc3057b6358f8d09902331b1a80501bf",
+    "line" : null,
+    "diffHunk" : "@@ -100,8 +99,9 @@ class InMemoryLedger(\n \n   // mutable state\n   private var acs = acs0\n-  private var deduplicator = Deduplicator()\n   private var ledgerConfiguration: Option[Configuration] = None\n+  private var commands: scala.collection.mutable.Map[String, CommandDeduplicationEntry] ="
+  },
+  {
+    "id" : "53dec816-0407-4963-8d5c-fb0f0b01d8bc",
+    "prId" : 3756,
+    "comments" : [
+      {
+        "id" : "547cd80a-0724-4cc2-804c-45a6366e3dce",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Please make this beginInclusive, which is the semantics we use for other offsets as well.",
+        "createdAt" : "2019-12-06T10:02:04Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d0e3ece8-2987-4bb2-8f3a-1d62860ec1b8",
+        "parentId" : "547cd80a-0724-4cc2-804c-45a6366e3dce",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "I don't know how to make it work when we remove internal offsets and use external \"opaque\" offsets. We cannot return \"the next offset\" from \"lookupConfiguration\" as we don't know what it is.",
+        "createdAt" : "2019-12-06T11:13:25Z",
+        "updatedAt" : "2019-12-13T17:13:57Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6e626a81c096637c202b8d3ca5d09dfa4e41393",
+    "line" : null,
+    "diffHunk" : "@@ -336,13 +336,15 @@ class InMemoryLedger(\n       }\n     }\n \n-  override def lookupLedgerConfiguration(): Future[Option[Configuration]] =\n-    Future.successful(this.synchronized { ledgerConfiguration })\n+  override def lookupLedgerConfiguration(): Future[Option[(Long, Configuration)]] =\n+    Future.successful(this.synchronized {\n+      ledgerConfiguration.map(config => ledgerEnd -> config)\n+    })\n \n   override def configurationEntries(\n-      offset: Option[Long]): Source[(Long, ConfigurationEntry), NotUsed] =\n+      startExclusive: Option[Long]): Source[(Long, ConfigurationEntry), NotUsed] ="
+  },
+  {
+    "id" : "ca0a6d68-9971-4144-bb3d-774f24c2baa2",
+    "prId" : 3744,
+    "comments" : [
+      {
+        "id" : "1bac2e8a-a409-4867-adf1-85f0c4868172",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Do you think it would be possible to reduce the scope of the lock, maybe to something private?",
+        "createdAt" : "2019-12-05T11:05:18Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e4645b6c-494f-4173-b54d-84ab961a85c2",
+        "parentId" : "1bac2e8a-a409-4867-adf1-85f0c4868172",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Maybe. I wouldn't make this change in this PR either way though.",
+        "createdAt" : "2019-12-05T12:12:09Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d8204b7c377ce994002fb11ce1227c245747b3d0",
+    "line" : 51,
+    "diffHunk" : "@@ -272,21 +259,39 @@ class InMemoryLedger(\n       acs.parties.values.toList\n     })\n \n-  override def allocateParty(\n+  override def publishPartyAllocation(\n+      submissionId: SubmissionId,\n       party: Party,\n-      displayName: Option[String]): Future[PartyAllocationResult] =\n-    Future.successful(this.synchronized {\n+      displayName: Option[String]): Future[SubmissionResult] =\n+    Future.successful(this.synchronized[SubmissionResult] {"
+  },
+  {
+    "id" : "5b51d4e4-3af2-4c6b-bc5a-6193835d889b",
+    "prId" : 3553,
+    "comments" : [
+      {
+        "id" : "12f21ec8-c43d-4132-87c0-216d17fa708a",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Todo",
+        "createdAt" : "2019-11-25T08:39:36Z",
+        "updatedAt" : "2019-11-27T14:09:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "04d3118b43225ee033b4c9bba93102cdc650df6a",
+    "line" : null,
+    "diffHunk" : "@@ -292,4 +305,28 @@ class InMemoryLedger(\n         }\n       )\n   }\n+\n+  override def publishConfiguration(\n+      maxRecordTime: Time.Timestamp,\n+      submissionId: String,\n+      config: Configuration): Future[SubmissionResult] =\n+    Future.successful {\n+      // FIXME(JM): Verify that new configuration is of a newer generation!"
+  },
+  {
+    "id" : "6558a8e9-d551-4e7e-8331-df234196bd8c",
+    "prId" : 3553,
+    "comments" : [
+      {
+        "id" : "16761d31-3c59-42e4-97a8-f73cd5e28e7d",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This needs to be `synchronized`, because of access to `var ledgerConfiguration`. See `publishTransaction` or `publishHeartbeat`.",
+        "createdAt" : "2019-11-26T20:52:58Z",
+        "updatedAt" : "2019-11-27T14:09:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7f81223d-c142-4a49-af0a-6ea4aed8cd3c",
+        "parentId" : "16761d31-3c59-42e4-97a8-f73cd5e28e7d",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "oops, fixing..",
+        "createdAt" : "2019-11-27T09:30:41Z",
+        "updatedAt" : "2019-11-27T14:09:02Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "04d3118b43225ee033b4c9bba93102cdc650df6a",
+    "line" : 140,
+    "diffHunk" : "@@ -292,4 +309,36 @@ class InMemoryLedger(\n         }\n       )\n   }\n+\n+  override def publishConfiguration(\n+      maxRecordTime: Time.Timestamp,\n+      submissionId: String,\n+      config: Configuration): Future[SubmissionResult] =\n+    Future.successful {"
+  },
+  {
+    "id" : "61b46144-4785-4c64-920c-8dc0d2f4a8b4",
+    "prId" : 3553,
+    "comments" : [
+      {
+        "id" : "b5bfe0f2-8ca2-442f-b1d3-1b3ddc168953",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This needs to be `synchronized`. See `publishTransaction` or `publishHeartbeat`.",
+        "createdAt" : "2019-11-26T20:53:33Z",
+        "updatedAt" : "2019-11-27T14:09:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "04d3118b43225ee033b4c9bba93102cdc650df6a",
+    "line" : null,
+    "diffHunk" : "@@ -292,4 +309,36 @@ class InMemoryLedger(\n         }\n       )\n   }\n+\n+  override def publishConfiguration(\n+      maxRecordTime: Time.Timestamp,\n+      submissionId: String,\n+      config: Configuration): Future[SubmissionResult] =\n+    Future.successful {\n+      ledgerConfiguration match {\n+        case Some(currentConfig) if config.generation != currentConfig.generation =>\n+          entries.publish(\n+            InMemoryConfigEntry(ConfigurationEntry.Rejected(\n+              submissionId,\n+              participantId,\n+              \"Generation mismatch, expected ${currentConfig.generation}, got ${config.generation}\",\n+              config)))\n+\n+        case _ =>\n+          entries.publish(\n+            InMemoryConfigEntry(ConfigurationEntry.Accepted(submissionId, participantId, config)))\n+          ledgerConfiguration = Some(config)\n+      }\n+      SubmissionResult.Acknowledged\n+    }\n+\n+  override def lookupLedgerConfiguration(): Future[Option[Configuration]] =\n+    Future.successful(ledgerConfiguration)"
+  },
+  {
+    "id" : "3bd44adb-bf90-4098-8487-072fc8875f94",
+    "prId" : 2739,
+    "comments" : [
+      {
+        "id" : "07140d66-43f3-4955-8836-8057bfd902f8",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n      LedgerSnapshot(entries.ledgerEnd, Source[ActiveContract](acs.activeContracts.values))\r\n```",
+        "createdAt" : "2019-09-04T07:37:21Z",
+        "updatedAt" : "2019-09-11T10:46:28Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "93628b81-8314-433c-bf2f-ddae02d09ab0",
+        "parentId" : "07140d66-43f3-4955-8836-8057bfd902f8",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Now I remember why I had this expression: `acs.activeContracts.values` is a mutable iterable (even though the map is immutable), but `Source` takes an immutable iterable. How do I best convert these? `acs.activeContracts.values.toList`?",
+        "createdAt" : "2019-09-04T12:25:18Z",
+        "updatedAt" : "2019-09-11T10:46:28Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9eabb59a-b37d-4d02-84ee-de9def20fdd5",
+        "parentId" : "07140d66-43f3-4955-8836-8057bfd902f8",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Yikes, that's disappointing of the scala stdlib api. Let's keep it as is.",
+        "createdAt" : "2019-09-04T14:20:42Z",
+        "updatedAt" : "2019-09-11T10:46:28Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2a6a2a2f-6f77-4afb-af07-d985d89e8cb9",
+        "parentId" : "07140d66-43f3-4955-8836-8057bfd902f8",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Changed to `Source.fromIterator(() => acs.activeContracts.valuesIterator))`",
+        "createdAt" : "2019-09-04T19:40:59Z",
+        "updatedAt" : "2019-09-11T10:46:28Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ac3bcd307e2d601598569750bf6c67817e64928e",
+    "line" : null,
+    "diffHunk" : "@@ -87,13 +88,13 @@ class InMemoryLedger(\n   // need to take the lock to make sure the two pieces of data are consistent.\n   override def snapshot(): Future[LedgerSnapshot] =\n     Future.successful(this.synchronized {\n-      LedgerSnapshot(entries.ledgerEnd, Source(acs.contracts))\n+      LedgerSnapshot(entries.ledgerEnd, Source[ActiveContract](acs.activeContracts.map(_._2)))"
+  },
+  {
+    "id" : "b21a937a-b0d7-4c59-8beb-4d3ca75dbc70",
+    "prId" : 1818,
+    "comments" : [
+      {
+        "id" : "a3f1a382-d16d-438a-94ac-82c55ed8f968",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "@gaboraranyossy-da @gerolf-da Opinions? In practice, the ownership of the package store is \"moved\" from the sandbox initialization part (scenario loading) to the `InMemoryLedger` instance.",
+        "createdAt" : "2019-06-28T08:42:00Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "862de6ed-d16b-49c4-9606-4a10f96a3d1e",
+        "parentId" : "a3f1a382-d16d-438a-94ac-82c55ed8f968",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "It's not really a clone, just a copied reference. I don't see why we would need it.",
+        "createdAt" : "2019-06-28T09:10:14Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6456ea8a-a578-4500-91c6-323c8a845748",
+        "parentId" : "a3f1a382-d16d-438a-94ac-82c55ed8f968",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Yes, this is just a copied reference. I was wondering whether we need a clone instead, given that the reference points to mutable data.",
+        "createdAt" : "2019-07-02T12:24:02Z",
+        "updatedAt" : "2019-07-02T12:24:58Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "55a36e98-6847-4970-8a4d-a7a5cac38990",
+        "parentId" : "a3f1a382-d16d-438a-94ac-82c55ed8f968",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "we are just reading here, aren't we? In that case I'd define a pure read-concerned interface for this purpose and have it passed as a dependency instead of the whole package store. ",
+        "createdAt" : "2019-07-02T12:31:04Z",
+        "updatedAt" : "2019-07-02T12:31:04Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "894bee47-515f-42cf-bd33-704eb25fb0e1",
+        "parentId" : "a3f1a382-d16d-438a-94ac-82c55ed8f968",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "New packages can be added at run time through the new admin API, see https://github.com/digital-asset/daml/pull/1818/files#diff-f0fa0fae9e9e5750f0db679f20742a95R263",
+        "createdAt" : "2019-07-02T12:33:41Z",
+        "updatedAt" : "2019-07-02T12:33:41Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "4be3615a-632f-4624-a0a6-ae57a72271a3",
+        "parentId" : "a3f1a382-d16d-438a-94ac-82c55ed8f968",
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "oh, right. Are we mutating the packages somewhere else too?",
+        "createdAt" : "2019-07-02T13:05:51Z",
+        "updatedAt" : "2019-07-02T13:05:52Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6bfd386c-02f5-41fc-9bf5-9107c0d4ac94",
+        "parentId" : "a3f1a382-d16d-438a-94ac-82c55ed8f968",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "No, the package store is initialized as part of the scenario loading, and after that passed to the ledger. It should not be modified from the outside.",
+        "createdAt" : "2019-07-02T13:10:43Z",
+        "updatedAt" : "2019-07-02T13:10:43Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bae23a0a96200d0ece436a646cceb68a50511f37",
+    "line" : 52,
+    "diffHunk" : "@@ -60,6 +69,9 @@ class InMemoryLedger(\n     l\n   }\n \n+  // TODO(RC): Do we need a clone here? The package store contains mutable state.\n+  private val packages = packages0"
+  }
+]

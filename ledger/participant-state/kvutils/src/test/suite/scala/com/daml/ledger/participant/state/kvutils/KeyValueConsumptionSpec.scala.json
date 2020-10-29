@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "07a6696d-aef7-4bc9-8b81-d3a1b66eace3",
+    "prId" : 6568,
+    "comments" : [
+      {
+        "id" : "0bdaed0f-f165-4ae3-8835-16a46598efc8",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "A test case seems to be missing for the case when both bounds are present. Also, see my comment above RE the messages for the single bound.",
+        "createdAt" : "2020-07-02T10:22:42Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3e9ea8c5-7712-45e1-b159-5adafbb5125b",
+        "parentId" : "0bdaed0f-f165-4ae3-8835-16a46598efc8",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added test case for that.",
+        "createdAt" : "2020-07-02T13:30:21Z",
+        "updatedAt" : "2020-07-03T08:21:00Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e115010b9d46239fedf65c99bcc15a46b7e8acd4",
+    "line" : 210,
+    "diffHunk" : "@@ -0,0 +1,143 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{\n+  DamlConfigurationRejectionEntry,\n+  DamlLogEntry,\n+  DamlLogEntryId,\n+  DamlOutOfTimeBoundsEntry,\n+  DamlPackageUploadEntry,\n+  DamlSubmitterInfo,\n+  DamlTransactionRejectionEntry\n+}\n+import org.scalatest.{Matchers, WordSpec}\n+import KeyValueConsumption.{logEntryToUpdate, outOfTimeBoundsEntryToUpdate}\n+import com.daml.ledger.participant.state.kvutils.api.LedgerReader\n+import com.daml.ledger.participant.state.v1\n+import com.daml.ledger.participant.state.v1.{Configuration, RejectionReason, Update}\n+import com.daml.lf.data.Ref\n+import com.daml.lf.data.Time.Timestamp\n+\n+class KeyValueConsumptionSpec extends WordSpec with Matchers {\n+  private val aLogEntryId = DamlLogEntryId.getDefaultInstance\n+  private val aLogEntryWithoutRecordTime = DamlLogEntry.newBuilder\n+    .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+    .build\n+  private val aRecordTimeForUpdate = Timestamp(123456789)\n+  private val aRecordTimeForUpdateInstant = aRecordTimeForUpdate.toInstant\n+  private val aRecordTimeFromLogEntry = Timestamp.assertFromInstant(Instant.ofEpochSecond(100))\n+  private val aLogEntryWithRecordTime = DamlLogEntry.newBuilder\n+    .setRecordTime(Conversions.buildTimestamp(aRecordTimeFromLogEntry))\n+    .setPackageUploadEntry(DamlPackageUploadEntry.getDefaultInstance)\n+    .build\n+  private val someSubmitterInfo = DamlSubmitterInfo.newBuilder\n+    .setSubmitter(\"a submitter\")\n+    .setApplicationId(\"test\")\n+    .setCommandId(\"a command ID\")\n+    .setDeduplicateUntil(com.google.protobuf.Timestamp.getDefaultInstance)\n+    .build\n+  private val aLogEntryWithTransactionRejectionEntry = DamlLogEntry.newBuilder\n+    .setTransactionRejectionEntry(\n+      DamlTransactionRejectionEntry.newBuilder\n+        .setSubmitterInfo(someSubmitterInfo))\n+    .build\n+  private val aLogEntryWithConfigurationRejectionEntry = DamlLogEntry.newBuilder\n+    .setConfigurationRejectionEntry(\n+      DamlConfigurationRejectionEntry.newBuilder\n+        .setConfiguration(Configuration.encode(LedgerReader.DefaultConfiguration))\n+        .setSubmissionId(\"a submission\")\n+        .setParticipantId(\"a participant\"))\n+    .build\n+\n+  \"logEntryToUpdate\" should {\n+    \"throw in case no record time is available from the log entry or input argument\" in {\n+      assertThrows[Err](\n+        logEntryToUpdate(aLogEntryId, aLogEntryWithoutRecordTime, recordTimeForUpdate = None))\n+    }\n+\n+    \"use log entry's record time instead of one provided as input\" in {\n+      val actual :: Nil = logEntryToUpdate(\n+        aLogEntryId,\n+        aLogEntryWithRecordTime,\n+        recordTimeForUpdate = Some(aRecordTimeForUpdate))\n+\n+      actual.recordTime shouldBe aRecordTimeFromLogEntry\n+    }\n+\n+    \"use record time from log entry if not provided as input\" in {\n+      val actual :: Nil =\n+        logEntryToUpdate(aLogEntryId, aLogEntryWithRecordTime, recordTimeForUpdate = None)\n+\n+      actual.recordTime shouldBe Timestamp.assertFromInstant(Instant.ofEpochSecond(100))\n+    }\n+  }\n+\n+  \"outOfTimeBoundsEntryToUpdate\" should {\n+    \"not generate an update for a deduplicated transaction entry\" in {\n+      val inputEntry = DamlOutOfTimeBoundsEntry.newBuilder\n+        .setEntry(aLogEntryWithTransactionRejectionEntry)\n+        .setDuplicateUntil(\n+          Conversions.buildTimestamp(Timestamp.assertFromInstant(aRecordTimeForUpdateInstant)))\n+        .build\n+\n+      outOfTimeBoundsEntryToUpdate(aRecordTimeForUpdate, inputEntry) shouldBe None\n+    }\n+\n+    \"generate a rejection entry for a transaction if record time is too late\" in {\n+      val inputEntry = DamlOutOfTimeBoundsEntry.newBuilder\n+        .setEntry(aLogEntryWithTransactionRejectionEntry)\n+        .setTooLateFrom(Conversions.buildTimestamp(\n+          Timestamp.assertFromInstant(aRecordTimeForUpdateInstant.minusMillis(1))))\n+        .build\n+\n+      val expectedUpdate = Update.CommandRejected(\n+        recordTime = aRecordTimeForUpdate,\n+        submitterInfo = Conversions.parseSubmitterInfo(someSubmitterInfo),\n+        reason = RejectionReason.InvalidLedgerTime(\"Ledger time outside of valid range\")\n+      )\n+      outOfTimeBoundsEntryToUpdate(aRecordTimeForUpdate, inputEntry) shouldBe Some(expectedUpdate)\n+    }\n+\n+    \"generate a rejection entry for a transaction if record time is too early\" in {\n+      val inputEntry = DamlOutOfTimeBoundsEntry.newBuilder\n+        .setEntry(aLogEntryWithTransactionRejectionEntry)\n+        .setTooEarlyUntil(Conversions.buildTimestamp(\n+          Timestamp.assertFromInstant(aRecordTimeForUpdateInstant.plusMillis(1))))\n+        .build\n+\n+      val expectedUpdate = Update.CommandRejected(\n+        recordTime = aRecordTimeForUpdate,\n+        submitterInfo = Conversions.parseSubmitterInfo(someSubmitterInfo),\n+        reason = RejectionReason.InvalidLedgerTime(\"Ledger time outside of valid range\")\n+      )\n+      outOfTimeBoundsEntryToUpdate(aRecordTimeForUpdate, inputEntry) shouldBe Some(expectedUpdate)\n+    }\n+"
+  }
+]

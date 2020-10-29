@@ -1,0 +1,171 @@
+[
+  {
+    "id" : "8b3370a1-d1a6-486f-b03e-aa9abe7d02ee",
+    "prId" : 7006,
+    "comments" : [
+      {
+        "id" : "e8fa9358-c334-4d0e-b28f-9f7a19b447a8",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I don't think this does what you think it does.\r\n\r\n```scala\r\nscala> Seq(Some(Seq(1, 2)), None, Some(Seq(3)), Some(Seq(4, 5)), None, Some(Seq(6, 7, 8)), None).map(_.toList).filterNot(_.isEmpty).map(_.mkString(System.lineSeparator())).mkString(System.lineSeparator())\r\nres0: String =\r\nList(1, 2)\r\nList(3)\r\nList(4, 5)\r\nList(6, 7, 8)\r\n```\r\n\r\nYou have an extra level of nesting which is masked by the first `mkString`, because `toString` is unsafe. You need to flatten twice.\r\n\r\n```scala\r\nscala> Seq(Some(Seq(1, 2)), None, Some(Seq(3)), Some(Seq(4, 5)), None, Some(Seq(6, 7, 8)), None).map(_.toList).filterNot(_.isEmpty).flatten.flatten.mkString(System.lineSeparator())\r\nres9: String =\r\n1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n```\r\n\r\nI may be missing something, but I think you need to test this more thoroughly. Perhaps this part of the integrity checker needs some unit tests.\r\n\r\n```suggestion\r\n            .map(_.toList)\r\n            .filterNot(_.isEmpty)\r\n            .flatten\r\n            .flatten\r\n            .mkString(System.lineSeparator())\r\n```",
+        "createdAt" : "2020-08-05T14:50:41Z",
+        "updatedAt" : "2020-08-06T12:37:01Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a1144e8d-bbac-4b77-b3f2-36d67f639144",
+        "parentId" : "e8fa9358-c334-4d0e-b28f-9f7a19b447a8",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Good point -- I'll add some tests for this bit.",
+        "createdAt" : "2020-08-05T17:05:18Z",
+        "updatedAt" : "2020-08-06T12:37:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "21d2b371-d390-414d-934f-669d29cddf3c",
+        "parentId" : "e8fa9358-c334-4d0e-b28f-9f7a19b447a8",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added tests for it and fixed it according to your suggestion. For multiple differences it was generating the wrong explanation string.",
+        "createdAt" : "2020-08-06T12:27:56Z",
+        "updatedAt" : "2020-08-06T12:37:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f9a8a714960c9893798e81f83f27699d28b2cfa1",
+    "line" : null,
+    "diffHunk" : "@@ -94,40 +94,55 @@ class IntegrityChecker[LogResult](commitStrategySupport: CommitStrategySupport[L\n     }\n   }\n \n-  private def compareWriteSets(expectedWriteSet: WriteSet, actualWriteSet: WriteSet): Unit = {\n+  private def compareWriteSets(expectedWriteSet: WriteSet, actualWriteSet: WriteSet): Unit =\n     if (expectedWriteSet == actualWriteSet) {\n       println(\"OK\".green)\n     } else {\n-      println(\"FAIL\".red)\n-      val message =\n+      val messageMaybe =\n         if (expectedWriteSet.size == actualWriteSet.size) {\n-          expectedWriteSet\n+          val differencesExplained = expectedWriteSet\n             .zip(actualWriteSet)\n-            .flatMap {\n+            .map {\n               case ((expectedKey, expectedValue), (actualKey, actualValue)) =>\n                 if (expectedKey == actualKey && expectedValue != actualValue) {\n-                  Seq(\n-                    s\"expected value:    ${bytesAsHexString(expectedValue)}\",\n-                    s\" vs. actual value: ${bytesAsHexString(actualValue)}\",\n-                    explainDifference(expectedKey, expectedValue, actualValue),\n-                  )\n+                  explainDifference(expectedKey, expectedValue, actualValue).map {\n+                    explainedDifference =>\n+                      Seq(\n+                        s\"expected value:    ${bytesAsHexString(expectedValue)}\",\n+                        s\" vs. actual value: ${bytesAsHexString(actualValue)}\",\n+                        explainedDifference,\n+                      )\n+                  }\n                 } else if (expectedKey != actualKey) {\n-                  Seq(\n-                    s\"expected key:    ${bytesAsHexString(expectedKey)}\",\n-                    s\" vs. actual key: ${bytesAsHexString(actualKey)}\",\n-                  )\n-                } else\n-                  Seq.empty\n+                  Some(\n+                    Seq(\n+                      s\"expected key:    ${bytesAsHexString(expectedKey)}\",\n+                      s\" vs. actual key: ${bytesAsHexString(actualKey)}\",\n+                    ))\n+                } else {\n+                  None\n+                }\n             }\n+            .map(_.toList)\n+            .filterNot(_.isEmpty)\n+            .map(_.mkString(System.lineSeparator()))\n             .mkString(System.lineSeparator())"
+  },
+  {
+    "id" : "d64e6f47-cea4-4af8-8159-88df5a5b02e5",
+    "prId" : 6619,
+    "comments" : [
+      {
+        "id" : "3f5ff955-f7bd-46a1-9a91-3ba8c85a6390",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Nice!",
+        "createdAt" : "2020-07-06T15:22:03Z",
+        "updatedAt" : "2020-07-06T15:22:08Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "4347243c5df4d484e4a2fbcbd63028211da9da6d",
+    "line" : 57,
+    "diffHunk" : "@@ -84,39 +82,47 @@ class IntegrityChecker[LogResult](commitStrategySupport: CommitStrategySupport[L\n           )\n           actualWriteSet = queryableWriteSet.getAndClearRecordedWriteSet()\n           sortedActualWriteSet = actualWriteSet.sortBy(_._1.asReadOnlyByteBuffer())\n-          _ = if (!compareWriteSets(expectedWriteSet, sortedActualWriteSet)) {\n-            println(AnsiColor.WHITE)\n-            sys.exit(1)\n-          }\n-          _ <- go(counter + 1)\n-        } yield ()\n+          _ = compareWriteSets(expectedWriteSet, sortedActualWriteSet)\n+          n <- go()\n+        } yield n + 1\n       }\n \n-    go(counter = 0)\n+    go().map { counter =>\n+      println(s\"Processed $counter submissions.\".white)\n+      println()\n+    }\n   }\n \n-  private def compareWriteSets(expectedWriteSet: WriteSet, actualWriteSet: WriteSet): Boolean = {\n+  private def compareWriteSets(expectedWriteSet: WriteSet, actualWriteSet: WriteSet): Unit = {\n     if (expectedWriteSet == actualWriteSet) {\n-      println(s\"${AnsiColor.GREEN}OK${AnsiColor.WHITE}\")\n-      true\n+      println(\"OK\".green)"
+  },
+  {
+    "id" : "0bcda0d7-f092-44da-9044-6adc54beaf5b",
+    "prId" : 6418,
+    "comments" : [
+      {
+        "id" : "09944d09-bd3c-41e0-927a-35c334aed2e4",
+        "parentId" : null,
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Does scala string interpolator revert back to neutral color in a subsequent line after color has been switched? If not, I would suggest printing `ok` lines in neutral color and `nok` lines in red for faster analysis",
+        "createdAt" : "2020-06-19T07:24:47Z",
+        "updatedAt" : "2020-06-19T14:58:32Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "942860d8-0610-47f6-964c-79c7fa2d9766",
+        "parentId" : "09944d09-bd3c-41e0-927a-35c334aed2e4",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Unfortunately it doesn't revert back to neutral color, that's why I added a `println` to switch back to white before exiting. All `nok` lines are red and only `ok` is in green currently, i.e., the output looks like this:\r\n![image](https://user-images.githubusercontent.com/57664299/85121609-5e121980-b225-11ea-993c-45281ba6d27c.png)\r\n\r\nDo you want to have a different layout/coloring?",
+        "createdAt" : "2020-06-19T10:08:12Z",
+        "updatedAt" : "2020-06-19T14:58:32Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "28914286-6ef3-498a-8106-c5203a19704d",
+        "parentId" : "09944d09-bd3c-41e0-927a-35c334aed2e4",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "That's ok, I did not read carefully enough. You only printing discrepancies to begin with.",
+        "createdAt" : "2020-06-19T12:45:18Z",
+        "updatedAt" : "2020-06-19T14:58:32Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "490d65c5a89e0cb3616ebb60abf97db64841a1c6",
+    "line" : 99,
+    "diffHunk" : "@@ -0,0 +1,173 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.participant.state.kvutils.tools\n+\n+import java.io.DataInputStream\n+import java.util.concurrent.{Executors, TimeUnit}\n+\n+import akka.actor.ActorSystem\n+import akka.stream.Materializer\n+import com.codahale.metrics.{ConsoleReporter, MetricRegistry}\n+import com.daml.ledger.on.memory.{InMemoryLedgerStateOperations, Index}\n+import com.daml.ledger.participant.state.kvutils\n+import com.daml.ledger.participant.state.kvutils.KeyValueCommitting\n+import com.daml.ledger.participant.state.kvutils.api.LedgerRecord\n+import com.daml.ledger.participant.state.kvutils.export.FileBasedLedgerDataExporter.{\n+  SubmissionInfo,\n+  WriteSet\n+}\n+import com.daml.ledger.participant.state.kvutils.export.{NoopLedgerDataExporter, Serialization}\n+import com.daml.ledger.validator.LedgerStateOperations.{Key, Value}\n+import com.daml.ledger.validator.batch.{\n+  BatchedSubmissionValidator,\n+  BatchedSubmissionValidatorFactory,\n+  BatchedSubmissionValidatorParameters,\n+  ConflictDetection\n+}\n+import com.daml.ledger.validator.{\n+  CommitStrategy,\n+  DamlLedgerStateReader,\n+  StateKeySerializationStrategy\n+}\n+import com.daml.lf.engine.Engine\n+import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n+\n+import scala.collection.mutable\n+import scala.concurrent.duration.Duration\n+import scala.concurrent.{Await, ExecutionContext}\n+import scala.io.AnsiColor\n+\n+class IntegrityChecker {\n+  private implicit val executionContext: ExecutionContext = ExecutionContext.fromExecutorService(\n+    Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors()))\n+  private implicit val actorSystem: ActorSystem = ActorSystem(\"integrity-checker\")\n+  private implicit val materializer: Materializer = Materializer(actorSystem)\n+\n+  private val stateKeySerializationStrategy = StateKeySerializationStrategy.createDefault()\n+\n+  def run(input: DataInputStream): Unit = {\n+    val engine = Engine()\n+    val metricRegistry = new MetricRegistry\n+    val metrics = new Metrics(metricRegistry)\n+    val submissionValidator = BatchedSubmissionValidator[Index](\n+      BatchedSubmissionValidatorParameters.default,\n+      new KeyValueCommitting(engine, metrics),\n+      new ConflictDetection(metrics),\n+      metrics,\n+      engine,\n+      NoopLedgerDataExporter\n+    )\n+    val inMemoryState = mutable.Map.empty[Key, Value]\n+    val inMemoryLog = mutable.ArrayBuffer[LedgerRecord]()\n+    val inMemoryLedgerStateOperations =\n+      new InMemoryLedgerStateOperations(inMemoryLog, inMemoryState)\n+    val writeRecordingLedgerStateOperations =\n+      new WriteRecordingLedgerStateOperations[Index](inMemoryLedgerStateOperations)\n+    val (reader, commitStrategy) =\n+      BatchedSubmissionValidatorFactory.readerAndCommitStrategyFrom(\n+        writeRecordingLedgerStateOperations,\n+        stateKeySerializationStrategy,\n+        NoopLedgerDataExporter)\n+    processSubmissions(\n+      input,\n+      submissionValidator,\n+      reader,\n+      commitStrategy,\n+      writeRecordingLedgerStateOperations)\n+    reportDetailedMetrics(metricRegistry)\n+  }\n+\n+  private def processSubmissions(\n+      input: DataInputStream,\n+      submissionValidator: BatchedSubmissionValidator[Index],\n+      reader: DamlLedgerStateReader,\n+      commitStrategy: CommitStrategy[Index],\n+      writeRecordingLedgerStateOperations: WriteRecordingLedgerStateOperations[Index]): Unit = {\n+    var counter = 0\n+    while (input.available() > 0) {\n+      val (submissionInfo, expectedWriteSet) = readSubmissionAndOutputs(input)\n+      val validationFuture = submissionValidator.validateAndCommit(\n+        submissionInfo.submissionEnvelope,\n+        submissionInfo.correlationId,\n+        submissionInfo.recordTimeInstant,\n+        submissionInfo.participantId,\n+        reader,\n+        commitStrategy\n+      )\n+      Await.ready(validationFuture, Duration(10, TimeUnit.SECONDS))\n+      counter += 1\n+      val actualWriteSet = writeRecordingLedgerStateOperations.getAndClearRecordedWriteSet()\n+      val sortedActualWriteSet = actualWriteSet.sortBy(_._1.asReadOnlyByteBuffer())\n+      if (!compareWriteSets(expectedWriteSet, sortedActualWriteSet)) {\n+        println(AnsiColor.WHITE)\n+        sys.exit(1)\n+      }\n+    }\n+    println(s\"Processed $counter submissions\")\n+  }\n+\n+  private def compareWriteSets(expectedWriteSet: WriteSet, actualWriteSet: WriteSet): Boolean = {\n+    if (expectedWriteSet == actualWriteSet) {\n+      println(s\"${AnsiColor.GREEN}OK${AnsiColor.WHITE}\")\n+      true\n+    } else {\n+      println(s\"${AnsiColor.RED}failed\")\n+      if (expectedWriteSet.size == actualWriteSet.size) {\n+        for (((expectedKey, expectedValue), (actualKey, actualValue)) <- expectedWriteSet.zip(\n+            actualWriteSet)) {\n+          if (expectedKey == actualKey && expectedValue != actualValue) {\n+            println(\n+              s\"expected value: ${bytesAsHexString(expectedValue)} vs. actual value: ${bytesAsHexString(actualValue)}\")"
+  }
+]

@@ -1,0 +1,193 @@
+[
+  {
+    "id" : "a46158b9-3bf2-4ffb-acce-b3bcf160b60e",
+    "prId" : 7548,
+    "comments" : [
+      {
+        "id" : "298c3932-d28f-48ab-bf0f-0eb7ef02ad3a",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We somehow use the singular `observer` for template-level observers. Let's do so here too.",
+        "createdAt" : "2020-10-14T10:49:06Z",
+        "updatedAt" : "2020-10-21T08:55:23Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1968095863437d26708412e9478b8d076d85897c",
+    "line" : null,
+    "diffHunk" : "@@ -542,7 +542,8 @@ pPrintTemplateChoice lvl modName tpl (TemplateChoice mbLoc name isConsuming cont\n       , pPrintAndType lvl precParam argBinder\n       , if levelHasTypes lvl then docHasType <-> pPrintPrec lvl 0 retType else empty\n       ]\n-    , nest 2 (keyword_ \"controller\" <-> pPrintPrec lvl 0 controller)\n+    , nest 2 (keyword_ \"controller\" <-> pPrintPrec lvl 0 controllers)\n+    , nest 2 (keyword_ \"observers\" <-> pPrintPrec lvl 0 observers)"
+  },
+  {
+    "id" : "b4c73402-9dd5-420c-b148-4d680609c856",
+    "prId" : 6280,
+    "comments" : [
+      {
+        "id" : "4a3a1000-5924-4b06-b397-59613dcbb928",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Your PR description says that you no longer emit kind annotations if the kind is start but this change seems to be doing exactly the opposite? We special-cased star before and did not emit the kind annotation whereas now we no longer special-case it.",
+        "createdAt" : "2020-06-10T06:36:28Z",
+        "updatedAt" : "2020-06-10T07:40:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a5b082ec-e22b-42fb-9899-e32d35e7ef62",
+        "parentId" : "4a3a1000-5924-4b06-b397-59613dcbb928",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Looks like there are too many negations in my PR description. It says\r\n> * Kind annotations are no longer omitted when the kind is `*` (star).\r\n\r\nMeaning, we now emit kind annotations even when the kind is `*`.",
+        "createdAt" : "2020-06-10T07:06:18Z",
+        "updatedAt" : "2020-06-10T07:40:21Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5763074b-306f-4021-93ac-11b1060d03af",
+        "parentId" : "4a3a1000-5924-4b06-b397-59613dcbb928",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I misread omitted as emitted :facepalm: ",
+        "createdAt" : "2020-06-10T07:40:10Z",
+        "updatedAt" : "2020-06-10T07:40:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "70954984b4ae80f38f6e0ce1578a074d463fe13b",
+    "line" : 54,
+    "diffHunk" : "@@ -294,13 +308,16 @@ precBinding = 0\n precParam = 1\n \n pPrintAndKind :: Pretty a => PrettyLevel -> Rational -> (a, Kind) -> Doc ann\n-pPrintAndKind lvl prec (v, k) = case k of\n-    KStar -> pPrintPrec lvl 0 v\n-    _ -> maybeParens (prec > precBinding) (pPrintPrec lvl 0 v <-> docHasType <-> kind_ (pPrintPrec lvl 0 k))\n+pPrintAndKind lvl prec (v, k)\n+  | levelHasKinds lvl = maybeParens (prec > precBinding) $"
+  },
+  {
+    "id" : "e59ce340-a7d4-4c7e-a635-32d2f61cde1a",
+    "prId" : 6280,
+    "comments" : [
+      {
+        "id" : "e6ed1284-eb32-4090-94ea-89d929dd119c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The description above mentions that you omit type annotations. Emitting type applications is another step imho. Not opposed to it but maybe update the comment.",
+        "createdAt" : "2020-06-10T06:38:32Z",
+        "updatedAt" : "2020-06-10T07:40:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "53e48705-261b-4947-b0e3-f87dbd8adba2",
+        "parentId" : "e6ed1284-eb32-4090-94ea-89d929dd119c",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Good point. I should say we omit type information in level -2. It's not only type annotations but also type applications and type abstraction.",
+        "createdAt" : "2020-06-10T07:37:51Z",
+        "updatedAt" : "2020-06-10T07:40:21Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "70954984b4ae80f38f6e0ce1578a074d463fe13b",
+    "line" : 86,
+    "diffHunk" : "@@ -448,10 +467,14 @@ instance Pretty Expr where\n       let (bs, e1) = view (rightSpine (unlocate _ETmLam)) e0\n       in  hang (docTmLambda <> hsep (map (pPrintAndType lvl precParam) bs) <> docTmLambdaDot)\n             2 (pPrintPrec lvl precELam e1)\n-    e0@ETyLam{} -> maybeParens (prec > precELam) $\n-      let (ts, e1) = view (rightSpine (unlocate _ETyLam)) e0\n-      in  hang (docTyLambda <> hsep (map (pPrintAndKind lvl precParam) ts) <> docTyLambdaDot)\n+    e0@ETyLam{}"
+  },
+  {
+    "id" : "14397f73-a7cb-4434-89d2-965a4da4e66e",
+    "prId" : 2530,
+    "comments" : [
+      {
+        "id" : "53d95dd1-208a-4d77-8bba-c9d27d0cf4f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Just to be clear, my “simplification” you mean that this simplifies the result not only the code right? This definitely seems to change how things are printed so “simplification” seems somewhat misleading.",
+        "createdAt" : "2019-08-14T09:34:14Z",
+        "updatedAt" : "2019-08-14T09:34:24Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0e45abb4-0d28-4ae3-898f-e516ab196e6d",
+        "parentId" : "53d95dd1-208a-4d77-8bba-c9d27d0cf4f9",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "What I had before was supposed to do what we do now but it didn't.",
+        "createdAt" : "2019-08-14T09:51:50Z",
+        "updatedAt" : "2019-08-14T09:51:50Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "fe2120a7950d1e101847fb01a9b188dd31cfdcc7",
+    "line" : 5,
+    "diffHunk" : "@@ -421,7 +421,7 @@ instance Pretty Expr where\n     EUpdate upd -> pPrintPrec lvl prec upd\n     EScenario scen -> pPrintPrec lvl prec scen\n     ELocation loc x\n-        | lvl >= PrettyLevel 1 -> sep [\"@location\" <> parens (pretty loc), nest 2 (parens (pPrintPrec lvl 0 x))]\n+        | lvl >= PrettyLevel 1 -> prettyAppDoc lvl prec (\"@location\" <> parens (pretty loc)) [TmArg x]"
+  }
+]

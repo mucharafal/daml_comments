@@ -1,0 +1,257 @@
+[
+  {
+    "id" : "9c492507-b5c1-4d82-927a-15f356937218",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "aab9a76e-75a6-497c-9edf-ea41426a28ad",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Use `:` for type signatures here",
+        "createdAt" : "2019-05-15T18:26:11Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "359518c4-1eae-4602-9215-556d272a44cd",
+        "parentId" : "aab9a76e-75a6-497c-9edf-ea41426a28ad",
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "It would be so good if we could actually test these for correctness",
+        "createdAt" : "2019-05-16T08:01:28Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -69,61 +66,59 @@ class  Bounded a  where\n -- ```\n --\n class  Enum a   where\n-    -- | the successor of a value.  For numeric types, 'succ' adds 1.\n+    -- | Returns the successor of the given value. For example, for\n+    -- numeric types, `succ` adds 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `succ maxBound`\n+    -- results in a runtime error.\n     succ                : a -> a\n-    -- | the predecessor of a value.  For numeric types, 'pred' subtracts 1.\n+    -- | Returns the predecessor of the given value. For example, for\n+    -- numeric types, `pred` subtracts 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `pred minBound`\n+    -- results in a runtime error.\n     pred                : a -> a\n-    -- | Convert from an 'Int'.\n+    -- | Convert a value from an `Int` to an `Enum` value: ie, returns\n+    -- the item at the `Int` position from the `Enum`.\n+\n     toEnum              : Int -> a\n-    -- | Convert to an 'Int'.\n-    -- It is implementation-dependent what 'fromEnum' returns when\n-    -- applied to a value that is too large to fit in an 'Int'.\n+    -- | Convert a value from an `Enum` value to an `Int`: ie, returns\n+    -- the `Int` position of the element within the `Enum`.\n+    --\n+    -- If `fromEnum` is applied to a value that's too large to\n+    -- fit in an `Int`, what is returned is up to your implementation.\n     fromEnum            : a -> Int\n \n-    -- | Used in Haskell's translation of `[n..]` with `[n..] = enumFrom n`,\n-    --   a possible implementation being `enumFrom n = n : enumFrom (succ n)`.\n-    --   For example:\n+    -- | Return a list of the `Enum` values starting at the `Int`\n+    -- position. For example:\n     --\n-    --     * `enumFrom 4 :: [Integer] = [4,5,6,7,...]`\n-    --     * `enumFrom 6 :: [Int] = [6,7,8,9,...,maxBound :: Int]`\n+    --     * `enumFrom 6 : [Int] = [6,7,8,9,...,maxBound : Int]`\n     enumFrom            : a -> [a]\n-    -- | Used in Haskell's translation of `[n,n'..]`\n-    --   with `[n,n'..] = enumFromThen n n'`, a possible implementation being\n-    --   `enumFromThen n n' = n : n' : worker (f x) (f x n')`,\n-    --   `worker s v = v : worker s (s v)`, `x = fromEnum n' - fromEnum n` and\n-    --   `f n y\n-    --     | n > 0 = f (n - 1) (succ y)\n-    --     | n < 0 = f (n + 1) (pred y)\n-    --     | otherwise = y`\n-    --   For example:\n+    -- | Returns a list of the `Enum` values with the first value at\n+    -- the first `Int` position, the second value at the second `Int`\n+    -- position, and further values with the same distance between them.\n+    --\n+    -- For example:\n     --\n-    --     * `enumFromThen 4 6 :: [Integer] = [4,6,8,10...]`\n+    --     * `enumFromThen 4 6 :: [Int] = [4,6,8,10...]`\n     --     * `enumFromThen 6 2 :: [Int] = [6,2,-2,-6,...,minBound :: Int]`\n     enumFromThen        : a -> a -> [a]\n-    -- | Used in Haskell's translation of `[n..m]` with\n-    --   `[n..m] = enumFromTo n m`, a possible implementation being\n-    --   `enumFromTo n m\n-    --      | n <= m = n : enumFromTo (succ n) m\n-    --      | otherwise = []`.\n-    --   For example:\n+    -- | Returns a list of the `Enum` values with the first value at\n+    -- the first `Int` position, and the last value at the last `Int`\n+    -- position.\n+    --\n+    -- For example:\n     --\n     --     * `enumFromTo 6 10 :: [Int] = [6,7,8,9,10]`\n-    --     * `enumFromTo 42 1 :: [Integer] = []`\n     enumFromTo          : a -> a -> [a]\n-    -- | Used in Haskell's translation of `[n,n'..m]` with\n-    --   `[n,n'..m] = enumFromThenTo n n' m`, a possible implementation\n-    --   being `enumFromThenTo n n' m = worker (f x) (c x) n m`,\n-    --   `x = fromEnum n' - fromEnum n`, `c x = bool (>=) (<=) (x > 0)`\n-    --   `f n y\n-    --      | n > 0 = f (n - 1) (succ y)\n-    --      | n < 0 = f (n + 1) (pred y)\n-    --      | otherwise = y` and\n-    --   `worker s c v m\n-    --      | c v m = v : worker s c (s v) m\n-    --      | otherwise = []`\n-    --   For example:\n+    -- | Returns a list of the `Enum` values with the first value at\n+    -- the first `Int` position, the second value at the second `Int`\n+    -- position, and further values with the same distance between them,\n+    -- with the final value at the final `Int` position.\n+    --\n+    -- For example:\n     --\n-    --     * `enumFromThenTo 4 2 -6 :: [Integer] = [4,2,0,-2,-4,-6]`\n+    --     * `enumFromThenTo 4 2 -6 :: [Int] = [4,2,0,-2,-4,-6]`"
+  },
+  {
+    "id" : "a02c8ad0-6900-457c-af41-228692fa655d",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "2f01d6e4-57e9-499e-a4fa-f99c8c338f5a",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "Ditto",
+        "createdAt" : "2019-05-15T18:26:20Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -69,61 +66,59 @@ class  Bounded a  where\n -- ```\n --\n class  Enum a   where\n-    -- | the successor of a value.  For numeric types, 'succ' adds 1.\n+    -- | Returns the successor of the given value. For example, for\n+    -- numeric types, `succ` adds 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `succ maxBound`\n+    -- results in a runtime error.\n     succ                : a -> a\n-    -- | the predecessor of a value.  For numeric types, 'pred' subtracts 1.\n+    -- | Returns the predecessor of the given value. For example, for\n+    -- numeric types, `pred` subtracts 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `pred minBound`\n+    -- results in a runtime error.\n     pred                : a -> a\n-    -- | Convert from an 'Int'.\n+    -- | Convert a value from an `Int` to an `Enum` value: ie, returns\n+    -- the item at the `Int` position from the `Enum`.\n+\n     toEnum              : Int -> a\n-    -- | Convert to an 'Int'.\n-    -- It is implementation-dependent what 'fromEnum' returns when\n-    -- applied to a value that is too large to fit in an 'Int'.\n+    -- | Convert a value from an `Enum` value to an `Int`: ie, returns\n+    -- the `Int` position of the element within the `Enum`.\n+    --\n+    -- If `fromEnum` is applied to a value that's too large to\n+    -- fit in an `Int`, what is returned is up to your implementation.\n     fromEnum            : a -> Int\n \n-    -- | Used in Haskell's translation of `[n..]` with `[n..] = enumFrom n`,\n-    --   a possible implementation being `enumFrom n = n : enumFrom (succ n)`.\n-    --   For example:\n+    -- | Return a list of the `Enum` values starting at the `Int`\n+    -- position. For example:\n     --\n-    --     * `enumFrom 4 :: [Integer] = [4,5,6,7,...]`\n-    --     * `enumFrom 6 :: [Int] = [6,7,8,9,...,maxBound :: Int]`\n+    --     * `enumFrom 6 : [Int] = [6,7,8,9,...,maxBound : Int]`\n     enumFrom            : a -> [a]\n-    -- | Used in Haskell's translation of `[n,n'..]`\n-    --   with `[n,n'..] = enumFromThen n n'`, a possible implementation being\n-    --   `enumFromThen n n' = n : n' : worker (f x) (f x n')`,\n-    --   `worker s v = v : worker s (s v)`, `x = fromEnum n' - fromEnum n` and\n-    --   `f n y\n-    --     | n > 0 = f (n - 1) (succ y)\n-    --     | n < 0 = f (n + 1) (pred y)\n-    --     | otherwise = y`\n-    --   For example:\n+    -- | Returns a list of the `Enum` values with the first value at\n+    -- the first `Int` position, the second value at the second `Int`\n+    -- position, and further values with the same distance between them.\n+    --\n+    -- For example:\n     --\n-    --     * `enumFromThen 4 6 :: [Integer] = [4,6,8,10...]`\n+    --     * `enumFromThen 4 6 :: [Int] = [4,6,8,10...]`\n     --     * `enumFromThen 6 2 :: [Int] = [6,2,-2,-6,...,minBound :: Int]`\n     enumFromThen        : a -> a -> [a]\n-    -- | Used in Haskell's translation of `[n..m]` with\n-    --   `[n..m] = enumFromTo n m`, a possible implementation being\n-    --   `enumFromTo n m\n-    --      | n <= m = n : enumFromTo (succ n) m\n-    --      | otherwise = []`.\n-    --   For example:\n+    -- | Returns a list of the `Enum` values with the first value at\n+    -- the first `Int` position, and the last value at the last `Int`\n+    -- position.\n+    --\n+    -- For example:\n     --\n     --     * `enumFromTo 6 10 :: [Int] = [6,7,8,9,10]`\n-    --     * `enumFromTo 42 1 :: [Integer] = []`\n     enumFromTo          : a -> a -> [a]\n-    -- | Used in Haskell's translation of `[n,n'..m]` with\n-    --   `[n,n'..m] = enumFromThenTo n n' m`, a possible implementation\n-    --   being `enumFromThenTo n n' m = worker (f x) (c x) n m`,\n-    --   `x = fromEnum n' - fromEnum n`, `c x = bool (>=) (<=) (x > 0)`\n-    --   `f n y\n-    --      | n > 0 = f (n - 1) (succ y)\n-    --      | n < 0 = f (n + 1) (pred y)\n-    --      | otherwise = y` and\n-    --   `worker s c v m\n-    --      | c v m = v : worker s c (s v) m\n-    --      | otherwise = []`\n-    --   For example:\n+    -- | Returns a list of the `Enum` values with the first value at\n+    -- the first `Int` position, the second value at the second `Int`\n+    -- position, and further values with the same distance between them,\n+    -- with the final value at the final `Int` position.\n+    --\n+    -- For example:\n     --\n-    --     * `enumFromThenTo 4 2 -6 :: [Integer] = [4,2,0,-2,-4,-6]`\n+    --     * `enumFromThenTo 4 2 -6 :: [Int] = [4,2,0,-2,-4,-6]`\n     --     * `enumFromThenTo 6 8 2 :: [Int] = []`"
+  },
+  {
+    "id" : "cb2552e6-12b5-45b2-8947-c4542143076b",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "08ea03ac-aa94-4d17-95cc-5ce053ccb82e",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : ": for type signatures",
+        "createdAt" : "2019-05-15T18:26:29Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -69,61 +66,59 @@ class  Bounded a  where\n -- ```\n --\n class  Enum a   where\n-    -- | the successor of a value.  For numeric types, 'succ' adds 1.\n+    -- | Returns the successor of the given value. For example, for\n+    -- numeric types, `succ` adds 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `succ maxBound`\n+    -- results in a runtime error.\n     succ                : a -> a\n-    -- | the predecessor of a value.  For numeric types, 'pred' subtracts 1.\n+    -- | Returns the predecessor of the given value. For example, for\n+    -- numeric types, `pred` subtracts 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `pred minBound`\n+    -- results in a runtime error.\n     pred                : a -> a\n-    -- | Convert from an 'Int'.\n+    -- | Convert a value from an `Int` to an `Enum` value: ie, returns\n+    -- the item at the `Int` position from the `Enum`.\n+\n     toEnum              : Int -> a\n-    -- | Convert to an 'Int'.\n-    -- It is implementation-dependent what 'fromEnum' returns when\n-    -- applied to a value that is too large to fit in an 'Int'.\n+    -- | Convert a value from an `Enum` value to an `Int`: ie, returns\n+    -- the `Int` position of the element within the `Enum`.\n+    --\n+    -- If `fromEnum` is applied to a value that's too large to\n+    -- fit in an `Int`, what is returned is up to your implementation.\n     fromEnum            : a -> Int\n \n-    -- | Used in Haskell's translation of `[n..]` with `[n..] = enumFrom n`,\n-    --   a possible implementation being `enumFrom n = n : enumFrom (succ n)`.\n-    --   For example:\n+    -- | Return a list of the `Enum` values starting at the `Int`\n+    -- position. For example:\n     --\n-    --     * `enumFrom 4 :: [Integer] = [4,5,6,7,...]`\n-    --     * `enumFrom 6 :: [Int] = [6,7,8,9,...,maxBound :: Int]`\n+    --     * `enumFrom 6 : [Int] = [6,7,8,9,...,maxBound : Int]`\n     enumFrom            : a -> [a]\n-    -- | Used in Haskell's translation of `[n,n'..]`\n-    --   with `[n,n'..] = enumFromThen n n'`, a possible implementation being\n-    --   `enumFromThen n n' = n : n' : worker (f x) (f x n')`,\n-    --   `worker s v = v : worker s (s v)`, `x = fromEnum n' - fromEnum n` and\n-    --   `f n y\n-    --     | n > 0 = f (n - 1) (succ y)\n-    --     | n < 0 = f (n + 1) (pred y)\n-    --     | otherwise = y`\n-    --   For example:\n+    -- | Returns a list of the `Enum` values with the first value at\n+    -- the first `Int` position, the second value at the second `Int`\n+    -- position, and further values with the same distance between them.\n+    --\n+    -- For example:\n     --\n-    --     * `enumFromThen 4 6 :: [Integer] = [4,6,8,10...]`\n+    --     * `enumFromThen 4 6 :: [Int] = [4,6,8,10...]`"
+  },
+  {
+    "id" : "7d0f2818-881a-44db-bada-07fabb32c7aa",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "9660539e-fea3-4e5f-88f7-c958f1553dc8",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n-- You can derive an instance of the `Bounded` class for any enumeration type. `minBound`\r\n```",
+        "createdAt" : "2019-05-16T07:20:35Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -25,40 +25,37 @@ import GHC.Show()\n import GHC.Classes\n import GHC.CString (fromString)\n \n--- | The `Bounded` class is used to name the upper and lower limits of a\n--- type.  `Ord` is not a superclass of `Bounded` since types that are not\n--- totally ordered may also have upper and lower bounds.\n+-- | Use the `Bounded` class to name the upper and lower limits of a\n+-- type.\n --\n--- The `Bounded` class may be derived for any enumeration type;\n--- `minBound` is the first constructor listed in the `data` declaration\n+-- You can derive `Bounded` class for any enumeration type. `minBound`"
+  },
+  {
+    "id" : "932793f8-bfba-4537-999a-8bb44f1ceb08",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "f91b69b2-78f8-43e9-83ee-65651ea91eca",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n-- * Both `succ maxBound` and `pred minBound` should result in\r\n```",
+        "createdAt" : "2019-05-16T07:21:40Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -25,40 +25,37 @@ import GHC.Show()\n import GHC.Classes\n import GHC.CString (fromString)\n \n--- | The `Bounded` class is used to name the upper and lower limits of a\n--- type.  `Ord` is not a superclass of `Bounded` since types that are not\n--- totally ordered may also have upper and lower bounds.\n+-- | Use the `Bounded` class to name the upper and lower limits of a\n+-- type.\n --\n--- The `Bounded` class may be derived for any enumeration type;\n--- `minBound` is the first constructor listed in the `data` declaration\n+-- You can derive `Bounded` class for any enumeration type. `minBound`\n+-- is the first constructor listed in the `data` declaration\n -- and `maxBound` is the last.\n--- `Bounded` may also be derived for single-constructor datatypes whose\n+-- You can also derive `Bounded` for single-constructor datatypes whose\n -- constituent types are in `Bounded`.\n-class  Bounded a  where\n+--\n+-- `Ord` is not a superclass of `Bounded` because types that are not\n+-- totally ordered can still have upper and lower bounds.\n+class Bounded a where\n     minBound, maxBound : a\n \n--- | Class `Enum` defines operations on sequentially ordered types.\n---\n--- The `enumFrom`... methods are used in Haskell's translation of\n--- arithmetic sequences.\n---\n--- Instances of `Enum` may be derived for any enumeration type (types\n--- whose constructors have no fields).  The nullary constructors are\n--- assumed to be numbered left-to-right by `fromEnum` from `0` through `n-1`.\n--- See Chapter 10 of the /Haskell Report/ for more details.\n+-- | Use the `Enum` class to define operations on sequentially ordered\n+-- types: that is, types that can be enumerated. `Enum` members have\n+-- defined successors and predecessors, which you can get with the `succ`\n+-- and `pred` functions.\n --\n -- For any type that is an instance of class `Bounded` as well as `Enum`,\n -- the following should hold:\n --\n--- * The calls `succ` `maxBound` and `pred` `minBound` should result in\n+-- * Both `succ` `maxBound` and `pred` `minBound` should result in"
+  },
+  {
+    "id" : "a10cc47c-a1c7-4189-93ec-b9c29d038565",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "7c6885ad-b7f4-4cc6-8d82-a3bb9eab1ffe",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'd say: `toEnum i` returns the item at the `i`th position of (the instance of) `Enum`.",
+        "createdAt" : "2019-05-16T07:23:42Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : null,
+    "diffHunk" : "@@ -69,61 +66,59 @@ class  Bounded a  where\n -- ```\n --\n class  Enum a   where\n-    -- | the successor of a value.  For numeric types, 'succ' adds 1.\n+    -- | Returns the successor of the given value. For example, for\n+    -- numeric types, `succ` adds 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `succ maxBound`\n+    -- results in a runtime error.\n     succ                : a -> a\n-    -- | the predecessor of a value.  For numeric types, 'pred' subtracts 1.\n+    -- | Returns the predecessor of the given value. For example, for\n+    -- numeric types, `pred` subtracts 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `pred minBound`\n+    -- results in a runtime error.\n     pred                : a -> a\n-    -- | Convert from an 'Int'.\n+    -- | Convert a value from an `Int` to an `Enum` value: ie, returns\n+    -- the item at the `Int` position from the `Enum`."
+  },
+  {
+    "id" : "1ff4a431-86aa-4f6f-be09-255eb742a746",
+    "prId" : 1163,
+    "comments" : [
+      {
+        "id" : "6977e587-a73f-4cd0-bff0-c14075b374b2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I think this information is important. Same below for `enumFromTo`.",
+        "createdAt" : "2019-05-16T07:25:40Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "77cf223d-42d6-4652-89ae-42822b53f67a",
+        "parentId" : "6977e587-a73f-4cd0-bff0-c14075b374b2",
+        "author" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "body" : "Maybe it's just the phrasing I object to. I might rephrase to say that this is what allows you to do `[n,n'..]`.",
+        "createdAt" : "2019-05-16T08:00:57Z",
+        "updatedAt" : "2019-05-16T19:53:41Z",
+        "lastEditedBy" : {
+          "login" : "bethaitman",
+          "name" : "Beth Aitman",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/3482051?u=97f3942927ae304a99251ea448bb8b65b6024e74&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "3b3ec6a8380b5ae386b7bea24b1b03865607c95a",
+    "line" : 104,
+    "diffHunk" : "@@ -69,61 +66,59 @@ class  Bounded a  where\n -- ```\n --\n class  Enum a   where\n-    -- | the successor of a value.  For numeric types, 'succ' adds 1.\n+    -- | Returns the successor of the given value. For example, for\n+    -- numeric types, `succ` adds 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `succ maxBound`\n+    -- results in a runtime error.\n     succ                : a -> a\n-    -- | the predecessor of a value.  For numeric types, 'pred' subtracts 1.\n+    -- | Returns the predecessor of the given value. For example, for\n+    -- numeric types, `pred` subtracts 1.\n+    --\n+    -- If the type is also an instance of `Bounded`, `pred minBound`\n+    -- results in a runtime error.\n     pred                : a -> a\n-    -- | Convert from an 'Int'.\n+    -- | Convert a value from an `Int` to an `Enum` value: ie, returns\n+    -- the item at the `Int` position from the `Enum`.\n+\n     toEnum              : Int -> a\n-    -- | Convert to an 'Int'.\n-    -- It is implementation-dependent what 'fromEnum' returns when\n-    -- applied to a value that is too large to fit in an 'Int'.\n+    -- | Convert a value from an `Enum` value to an `Int`: ie, returns\n+    -- the `Int` position of the element within the `Enum`.\n+    --\n+    -- If `fromEnum` is applied to a value that's too large to\n+    -- fit in an `Int`, what is returned is up to your implementation.\n     fromEnum            : a -> Int\n \n-    -- | Used in Haskell's translation of `[n..]` with `[n..] = enumFrom n`,\n-    --   a possible implementation being `enumFrom n = n : enumFrom (succ n)`.\n-    --   For example:\n+    -- | Return a list of the `Enum` values starting at the `Int`\n+    -- position. For example:\n     --\n-    --     * `enumFrom 4 :: [Integer] = [4,5,6,7,...]`\n-    --     * `enumFrom 6 :: [Int] = [6,7,8,9,...,maxBound :: Int]`\n+    --     * `enumFrom 6 : [Int] = [6,7,8,9,...,maxBound : Int]`\n     enumFrom            : a -> [a]\n-    -- | Used in Haskell's translation of `[n,n'..]`"
+  }
+]

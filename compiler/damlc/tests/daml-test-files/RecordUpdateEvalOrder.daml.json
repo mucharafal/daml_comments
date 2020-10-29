@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "fe5e863a-370b-4d99-97a3-61cd8d31716c",
+    "prId" : 6590,
+    "comments" : [
+      {
+        "id" : "8a186972-25f0-4cf9-aef7-53aeaa9624c5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "huh, I never realized that the order here affects evaluation.",
+        "createdAt" : "2020-07-03T07:06:19Z",
+        "updatedAt" : "2020-07-03T09:22:38Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "53ffbca2-9d63-49b4-a75f-f42d3d332b7c",
+        "parentId" : "8a186972-25f0-4cf9-aef7-53aeaa9624c5",
+        "author" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "body" : "I wouldn't be surprised if we change it in the future (when we start batching record updates in speedy), but at least the order is captured here so we don't change it accidentally.",
+        "createdAt" : "2020-07-03T09:02:10Z",
+        "updatedAt" : "2020-07-03T09:22:38Z",
+        "lastEditedBy" : {
+          "login" : "sofiafaro-da",
+          "name" : "Sofia Faro",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/63245722?u=b440e86239cc6cb4a8b4aacdc19fff8f1b61068d&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e9376d837f80d18b52ddb67f6b5420b992417047",
+    "line" : 28,
+    "diffHunk" : "@@ -0,0 +1,37 @@\n+-- | This test checks that the \"record update\" syntax has the expected evaluation\n+-- order in DAML. The expected order is that the record is evaluated before the\n+-- field, and fields are evaluated in order. (This makes a difference when\n+-- two or more of these computations diverge.)\n+--\n+-- @ERROR a1 failed\n+-- @ERROR b2.f failed\n+-- @ERROR b3.g failed\n+module RecordUpdateEvalOrder  (main1, main2, main3) where\n+\n+data A = A { f : Int }\n+\n+a1 : A\n+a1 = error \"a1 failed\"\n+\n+a2 : A -- expect a1 to fail\n+a2 = a1 { f = error \"a2 failed\" }\n+\n+data B = B { f : Int, g : Int }\n+\n+b1 : B\n+b1 = B { f = 0, g = 0 }\n+\n+b2 : B -- expect b2.f to fail\n+b2 = b1 { f = error \"b2.f failed\", g = error \"b2.g failed\" }\n+\n+b3 : B -- expect b3.g to fail\n+b3 = b1 { g = error \"b3.g failed\", f = error \"b3.f failed\" }"
+  }
+]

@@ -1,0 +1,148 @@
+[
+  {
+    "id" : "cae73a7e-dfa5-47ad-bedb-c0652e199196",
+    "prId" : 2998,
+    "comments" : [
+      {
+        "id" : "b519eb95-9513-49b5-b12d-e5c33700c7e2",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I'm not a huge fan of nested `Option` types. Since we anyway wrap the actual value, what do you think about something like this datatype (isomorphic to `Option`):\r\n\r\n```\r\nsealed trait LetLookup\r\ncase object LetUnknown extends LetLookup\r\ncase class Let(instant: Instant) extends LetLookup\r\n```\r\n\r\nCould maybe also achieved by having aliases like:\r\n```\r\ntype LetLookup = Option[Instant]\r\nval LetUnknown = None\r\nval Let = Some\r\n```\r\n\r\nThis makes it just ever so slightly more obvious what's going on.",
+        "createdAt" : "2019-09-24T16:06:38Z",
+        "updatedAt" : "2019-09-25T12:15:42Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4f449441-e7bd-4812-b6ce-a09ac563e7f3",
+        "parentId" : "b519eb95-9513-49b5-b12d-e5c33700c7e2",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "The `sealed trait LetLookup` is a good idea for making the code more readable, I'll use it.",
+        "createdAt" : "2019-09-25T08:36:30Z",
+        "updatedAt" : "2019-09-25T12:15:42Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "70b16fbc16e4aab40fda79c8fab58f8cfb07702d",
+    "line" : null,
+    "diffHunk" : "@@ -29,8 +29,13 @@ import com.digitalasset.platform.sandbox.stores.ActiveLedgerState._\n   */\n trait ActiveLedgerState[+Self] { this: ActiveLedgerState[Self] =>\n \n-  /** Callback to query an active or divulged contract, used for transaction validation */\n-  def lookupContract(cid: AbsoluteContractId): Option[Contract]\n+  /** Callback to query an active or divulged contract, used for transaction validation\n+    * Returns:\n+    * - None if the contract does not exist\n+    * - Some(None) if the contract exists, but its LET is unknown (i.e., a divulged contract)\n+    * - Some(Some(_)) if the contract exists and its LET is known\n+    * */\n+  def lookupContractLet(cid: AbsoluteContractId): Option[Option[Instant]]"
+  },
+  {
+    "id" : "6653c898-84b3-4cbc-a6c8-d1346497e43a",
+    "prId" : 2739,
+    "comments" : [
+      {
+        "id" : "1cccaeb9-927e-4540-b20b-5a92b3f8fe4b",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n  /** Note that this method is about divulging contracts _that have already been\r\n```",
+        "createdAt" : "2019-09-04T06:53:52Z",
+        "updatedAt" : "2019-09-11T10:46:28Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ac3bcd307e2d601598569750bf6c67817e64928e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,113 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.stores\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.v1.AbsoluteContractInst\n+import com.digitalasset.daml.lf.data.Ref.{Party, TransactionIdString}\n+import com.digitalasset.daml.lf.data.Relation.Relation\n+import com.digitalasset.daml.lf.transaction.Node.{GlobalKey, KeyWithMaintainers}\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, ContractInst, VersionedValue}\n+import com.digitalasset.ledger.WorkflowId\n+import com.digitalasset.platform.sandbox.stores.ActiveLedgerState._\n+\n+/**\n+  * An abstract representation of the active ledger state:\n+  * - Active contracts\n+  * - Divulged contracts\n+  * - Contract keys\n+  * - Known parties\n+  *\n+  * The active ledger state is used for validating transactions,\n+  * see [[ActiveLedgerStateManager]].\n+  *\n+  * The active ledger state could be derived from the transaction stream,\n+  * we keep track of it explicitly for performance reasons.\n+  */\n+trait ActiveLedgerState[+Self] { this: ActiveLedgerState[Self] =>\n+\n+  /** Callback to query an active contract */\n+  def lookupActiveContract(cid: AbsoluteContractId): Option[ActiveContract]\n+\n+  /** Callback to query an active or divulged contract, used for transaction validation */\n+  def lookupContract(cid: AbsoluteContractId): Option[Contract]\n+\n+  /** Callback to query a contract key, used for transaction validation */\n+  def keyExists(key: GlobalKey): Boolean\n+\n+  /** Called when a new contract is created */\n+  def addContract(c: ActiveContract, keyO: Option[GlobalKey]): Self\n+\n+  /** Called when the given contract is archived */\n+  def removeContract(cid: AbsoluteContractId, keyO: Option[GlobalKey]): Self\n+\n+  /** Called once for each transaction with the set of parties found in that transaction.\n+    * As the sandbox has an open world of parties, any party name mentioned in a transaction\n+    * will implicitly add that name to the list of known parties.\n+    */\n+  def addParties(parties: Set[Party]): Self\n+\n+  /** Note that this method is about disclosing contracts _that have already been"
+  },
+  {
+    "id" : "f22514ef-2388-43c0-8a39-6adbb8c896ca",
+    "prId" : 2739,
+    "comments" : [
+      {
+        "id" : "57c122ef-f52d-4408-8b83-f80a30b1361c",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n    * For divulged contracts, we only know their contract argument, but no other metadata.\r\n```",
+        "createdAt" : "2019-09-04T06:55:59Z",
+        "updatedAt" : "2019-09-11T10:46:28Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ac3bcd307e2d601598569750bf6c67817e64928e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,113 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.stores\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.v1.AbsoluteContractInst\n+import com.digitalasset.daml.lf.data.Ref.{Party, TransactionIdString}\n+import com.digitalasset.daml.lf.data.Relation.Relation\n+import com.digitalasset.daml.lf.transaction.Node.{GlobalKey, KeyWithMaintainers}\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, ContractInst, VersionedValue}\n+import com.digitalasset.ledger.WorkflowId\n+import com.digitalasset.platform.sandbox.stores.ActiveLedgerState._\n+\n+/**\n+  * An abstract representation of the active ledger state:\n+  * - Active contracts\n+  * - Divulged contracts\n+  * - Contract keys\n+  * - Known parties\n+  *\n+  * The active ledger state is used for validating transactions,\n+  * see [[ActiveLedgerStateManager]].\n+  *\n+  * The active ledger state could be derived from the transaction stream,\n+  * we keep track of it explicitly for performance reasons.\n+  */\n+trait ActiveLedgerState[+Self] { this: ActiveLedgerState[Self] =>\n+\n+  /** Callback to query an active contract */\n+  def lookupActiveContract(cid: AbsoluteContractId): Option[ActiveContract]\n+\n+  /** Callback to query an active or divulged contract, used for transaction validation */\n+  def lookupContract(cid: AbsoluteContractId): Option[Contract]\n+\n+  /** Callback to query a contract key, used for transaction validation */\n+  def keyExists(key: GlobalKey): Boolean\n+\n+  /** Called when a new contract is created */\n+  def addContract(c: ActiveContract, keyO: Option[GlobalKey]): Self\n+\n+  /** Called when the given contract is archived */\n+  def removeContract(cid: AbsoluteContractId, keyO: Option[GlobalKey]): Self\n+\n+  /** Called once for each transaction with the set of parties found in that transaction.\n+    * As the sandbox has an open world of parties, any party name mentioned in a transaction\n+    * will implicitly add that name to the list of known parties.\n+    */\n+  def addParties(parties: Set[Party]): Self\n+\n+  /** Note that this method is about disclosing contracts _that have already been\n+    * committed_. Implementors of [[ActiveLedgerState]] must take care to also store\n+    * divulgence information already present in `ActiveContract#divulgences` in the `addContract`\n+    * method.\n+    */\n+  def divulgeAlreadyCommittedContract(\n+      transactionId: TransactionIdString,\n+      global: Relation[AbsoluteContractId, Party],\n+      referencedContracts: List[(Value.AbsoluteContractId, AbsoluteContractInst)]): Self\n+}\n+\n+object ActiveLedgerState {\n+\n+  /** A contract that is part of the [[ActiveLedgerState]].\n+    * Depending on where the contract came from, other metadata may be available.\n+    */\n+  sealed abstract class Contract {\n+    def id: Value.AbsoluteContractId\n+    def contract: ContractInst[VersionedValue[AbsoluteContractId]]\n+\n+    /** For each party, the transaction id at which the contract was divulged */\n+    def divulgences: Map[Party, TransactionIdString]\n+\n+    /** Returns the new divulgences after the contract has been divulged to the given parties at the given transaction */\n+    def divulgeTo(\n+        parties: Set[Party],\n+        transactionId: TransactionIdString): Map[Party, TransactionIdString] =\n+      parties.foldLeft(divulgences)((m, e) => if (m.contains(e)) m else m + (e -> transactionId))\n+  }\n+\n+  /**\n+    * For divulged contracts, we only their contract argument, but no other metadata."
+  },
+  {
+    "id" : "84d92bc5-c436-432e-9814-14d8a2ad7c4f",
+    "prId" : 2739,
+    "comments" : [
+      {
+        "id" : "a45f9d0e-c958-4d20-b2a9-f1ebbfc151bb",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Rename to plural as it takes a list of contracts?",
+        "createdAt" : "2019-09-04T06:58:21Z",
+        "updatedAt" : "2019-09-11T10:46:28Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ac3bcd307e2d601598569750bf6c67817e64928e",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,113 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.stores\n+\n+import java.time.Instant\n+\n+import com.daml.ledger.participant.state.v1.AbsoluteContractInst\n+import com.digitalasset.daml.lf.data.Ref.{Party, TransactionIdString}\n+import com.digitalasset.daml.lf.data.Relation.Relation\n+import com.digitalasset.daml.lf.transaction.Node.{GlobalKey, KeyWithMaintainers}\n+import com.digitalasset.daml.lf.value.Value\n+import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, ContractInst, VersionedValue}\n+import com.digitalasset.ledger.WorkflowId\n+import com.digitalasset.platform.sandbox.stores.ActiveLedgerState._\n+\n+/**\n+  * An abstract representation of the active ledger state:\n+  * - Active contracts\n+  * - Divulged contracts\n+  * - Contract keys\n+  * - Known parties\n+  *\n+  * The active ledger state is used for validating transactions,\n+  * see [[ActiveLedgerStateManager]].\n+  *\n+  * The active ledger state could be derived from the transaction stream,\n+  * we keep track of it explicitly for performance reasons.\n+  */\n+trait ActiveLedgerState[+Self] { this: ActiveLedgerState[Self] =>\n+\n+  /** Callback to query an active contract */\n+  def lookupActiveContract(cid: AbsoluteContractId): Option[ActiveContract]\n+\n+  /** Callback to query an active or divulged contract, used for transaction validation */\n+  def lookupContract(cid: AbsoluteContractId): Option[Contract]\n+\n+  /** Callback to query a contract key, used for transaction validation */\n+  def keyExists(key: GlobalKey): Boolean\n+\n+  /** Called when a new contract is created */\n+  def addContract(c: ActiveContract, keyO: Option[GlobalKey]): Self\n+\n+  /** Called when the given contract is archived */\n+  def removeContract(cid: AbsoluteContractId, keyO: Option[GlobalKey]): Self\n+\n+  /** Called once for each transaction with the set of parties found in that transaction.\n+    * As the sandbox has an open world of parties, any party name mentioned in a transaction\n+    * will implicitly add that name to the list of known parties.\n+    */\n+  def addParties(parties: Set[Party]): Self\n+\n+  /** Note that this method is about disclosing contracts _that have already been\n+    * committed_. Implementors of [[ActiveLedgerState]] must take care to also store\n+    * divulgence information already present in `ActiveContract#divulgences` in the `addContract`\n+    * method.\n+    */\n+  def divulgeAlreadyCommittedContract("
+  }
+]

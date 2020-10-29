@@ -1,0 +1,374 @@
+[
+  {
+    "id" : "b205412e-d591-4c22-88de-c9ceada9a772",
+    "prId" : 2285,
+    "comments" : [
+      {
+        "id" : "c18817ef-3ea6-4ed2-9d6d-192c435ed254",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I would probably just inline the definition at this point. The helper doesn’t add that much. But I don’t feel strongly about this so your choice.",
+        "createdAt" : "2019-07-25T10:39:11Z",
+        "updatedAt" : "2019-07-25T10:41:10Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d5e4a4eab076ab2f3cb8f5143332e6a0450c98b9",
+    "line" : 17,
+    "diffHunk" : "@@ -34,8 +35,11 @@ import DA.Ledger.Types\n import UnliftIO (liftIO,timeout,bracket)\n \n configOfPort :: Port -> ClientConfig\n-configOfPort port =\n-    ClientConfig { clientServerHost = Host \"localhost\"\n+configOfPort = configOfHostAndPort \"localhost\"\n+\n+configOfHostAndPort :: Host -> Port -> ClientConfig\n+configOfHostAndPort host port ="
+  },
+  {
+    "id" : "2bbcdccc-5f99-4006-ae8d-b1394c28c51f",
+    "prId" : 2146,
+    "comments" : [
+      {
+        "id" : "5f130c69-0068-4845-9fcb-1a14ed1f1fd0",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "That looks like a race condition. What if someone else uploads something in the meantime? Given that we have the package it seems like we can do better even without an API change in the underlying service.\r\n\r\nA more important issue: Is this guaranteed to always return a single package id? What if I upload a DAR with multiple packages (e.g. one that has several dependencies). Will they not show up in `listPackages`?",
+        "createdAt" : "2019-07-15T12:52:30Z",
+        "updatedAt" : "2019-07-15T13:23:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "000a045e-a2fc-4804-aabf-dbed413bdf33",
+        "parentId" : "5f130c69-0068-4845-9fcb-1a14ed1f1fd0",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "You are probably right on both points.\r\nI'll move this function into Test.hs & say it's ok because the caller knows.",
+        "createdAt" : "2019-07-15T13:07:53Z",
+        "updatedAt" : "2019-07-15T13:23:34Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d985efb6-df07-4ce1-99d0-3c1713eaecc1",
+        "parentId" : "5f130c69-0068-4845-9fcb-1a14ed1f1fd0",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Thanks! Having this in the tests is totally reasonable.",
+        "createdAt" : "2019-07-15T13:10:03Z",
+        "updatedAt" : "2019-07-15T13:23:34Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "450a3ef00b954086e6def746c020486ccfc9de1a",
+    "line" : null,
+    "diffHunk" : "@@ -115,3 +119,15 @@ withGetAllTransactionTrees lid party verbose act = do\n     let filter = filterEverthingForParty party\n     let req = GetTransactionsRequest lid LedgerBegin Nothing filter verbose\n     withGetTransactionTrees req act\n+\n+\n+-- Would be nice if the underlying service returned the pid on successful upload.\n+uploadDarFileGetPid :: LedgerId -> BS.ByteString -> LedgerService (Either String PackageId)"
+  },
+  {
+    "id" : "8f2f119e-5805-42da-aae9-c0488d8f8714",
+    "prId" : 2096,
+    "comments" : [
+      {
+        "id" : "a6d671ec-0b77-40c0-831e-4bf0d431331a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Once you have the `MonadUnliftIO` instance, you should be able to simplify this to\r\n`bracket (getTransactionTrees req) (\\s -> closeStream s EOS) (act stream)` which makes sure that the stream is closed even in the presence of asynchronous exceptions.\r\n\r\nAs it is this code will not close the stream if you get an exception after acquiring it but before you get to the `try` or after the `try`.",
+        "createdAt" : "2019-07-11T07:30:49Z",
+        "updatedAt" : "2019-07-11T12:36:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d22cfa2d-b47b-4929-b6c8-4e8d77a0b6f1",
+        "parentId" : "a6d671ec-0b77-40c0-831e-4bf0d431331a",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "yup",
+        "createdAt" : "2019-07-11T08:04:45Z",
+        "updatedAt" : "2019-07-11T12:36:08Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1aed2480-3d77-4498-b7b8-6f9c11b5394b",
+        "parentId" : "a6d671ec-0b77-40c0-831e-4bf0d431331a",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Done. Using the `bracket` from `MonadLiftIO`.",
+        "createdAt" : "2019-07-11T12:31:51Z",
+        "updatedAt" : "2019-07-11T12:36:08Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "638953034e6f609d8a4b38b0e801ac0015e339b4",
+    "line" : null,
+    "diffHunk" : "@@ -59,5 +54,67 @@ getTransactionsPF lid party = do\n     let req2 = GetTransactionsRequest lid now         Nothing    filter verbose\n     stream <- getTransactions req1\n     future <- getTransactions req2\n-    past <- liftIO $ streamToList stream\n+    past <- withTimeout $ liftIO $ streamToList stream\n     return PastAndFuture { past, future }\n+\n+\n+withGetTransactions\n+    :: GetTransactionsRequest\n+    -> (Stream [Transaction] -> LedgerService a)\n+    -> LedgerService a\n+withGetTransactions req act = do\n+    stream <- getTransactions req\n+    res <- mapIOLedgerService try (act stream)\n+    liftIO $ closeStream stream EOS\n+    case res of\n+        Left e -> liftIO $ throwIO (e::SomeException)\n+        Right x -> return x\n+\n+\n+withGetTransactionTrees\n+    :: GetTransactionsRequest\n+    -> (Stream [TransactionTree] -> LedgerService a)\n+    -> LedgerService a\n+withGetTransactionTrees req act = do\n+    stream <- getTransactionTrees req"
+  },
+  {
+    "id" : "87f75ba6-c4b0-4af9-9eae-de65557851ce",
+    "prId" : 2096,
+    "comments" : [
+      {
+        "id" : "4fc534c3-cf2f-42a0-aa07-1a85605bcbfc",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This has the same issue that I described below for `withGetTransactionTrees` and it also looks like you should be able to reuse the logic (although once you turn it into a `bracket` it’s simple enough that I wouldn’t bother).",
+        "createdAt" : "2019-07-11T07:40:27Z",
+        "updatedAt" : "2019-07-11T12:36:08Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "698f7943-32a1-4be5-b4f5-a82c83921b1e",
+        "parentId" : "4fc534c3-cf2f-42a0-aa07-1a85605bcbfc",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2019-07-11T12:32:56Z",
+        "updatedAt" : "2019-07-11T12:36:08Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "638953034e6f609d8a4b38b0e801ac0015e339b4",
+    "line" : null,
+    "diffHunk" : "@@ -59,5 +54,67 @@ getTransactionsPF lid party = do\n     let req2 = GetTransactionsRequest lid now         Nothing    filter verbose\n     stream <- getTransactions req1\n     future <- getTransactions req2\n-    past <- liftIO $ streamToList stream\n+    past <- withTimeout $ liftIO $ streamToList stream\n     return PastAndFuture { past, future }\n+\n+\n+withGetTransactions\n+    :: GetTransactionsRequest\n+    -> (Stream [Transaction] -> LedgerService a)\n+    -> LedgerService a\n+withGetTransactions req act = do\n+    stream <- getTransactions req"
+  },
+  {
+    "id" : "7dd7edfc-2032-4da4-9cf4-fb7a0a0406af",
+    "prId" : 2096,
+    "comments" : [
+      {
+        "id" : "95879973-c32d-4ba4-a5fe-92ee5e43834f",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Awesome, much nicer!",
+        "createdAt" : "2019-07-11T12:40:51Z",
+        "updatedAt" : "2019-07-11T12:46:54Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "638953034e6f609d8a4b38b0e801ac0015e339b4",
+    "line" : 71,
+    "diffHunk" : "@@ -59,5 +58,60 @@ getTransactionsPF lid party = do\n     let req2 = GetTransactionsRequest lid now         Nothing    filter verbose\n     stream <- getTransactions req1\n     future <- getTransactions req2\n-    past <- liftIO $ streamToList stream\n+    Just past <- withTimeout $ liftIO $ streamToList stream\n     return PastAndFuture { past, future }\n+\n+\n+closeStreamLS :: Stream a -> LedgerService ()\n+closeStreamLS stream = liftIO $ closeStream stream EOS\n+\n+\n+withGetTransactions\n+    :: GetTransactionsRequest\n+    -> (Stream [Transaction] -> LedgerService a)\n+    -> LedgerService a\n+withGetTransactions req =\n+    bracket (getTransactions req) closeStreamLS"
+  },
+  {
+    "id" : "ba010031-7b3d-44d5-aa2b-8e68a99eea14",
+    "prId" : 2029,
+    "comments" : [
+      {
+        "id" : "b5fe3f12-f1ae-4e66-8d34-7c9cd8664eb5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Might be worth considering to chose a different name here given that `filter` is already in `Prelude` so this can be slightly confusing.",
+        "createdAt" : "2019-07-05T15:50:42Z",
+        "updatedAt" : "2019-07-05T16:14:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "019ae90d-67d4-414e-9fbb-f43e65cdf6a8",
+        "parentId" : "b5fe3f12-f1ae-4e66-8d34-7c9cd8664eb5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "The name `filter` originates in `transaction_service.proto`",
+        "createdAt" : "2019-07-08T09:43:15Z",
+        "updatedAt" : "2019-07-08T09:43:16Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "ec9c9d014032efd981e4522a47dfb769819d7c4a",
+    "line" : 23,
+    "diffHunk" : "@@ -37,13 +38,18 @@ configOfPort port =\n -- Non-primitive, but useful way to get Transactions\n -- TODO: move to separate Utils module?\n \n-getAllTransactions :: LedgerId -> Party -> LedgerService (Stream Transaction)\n-getAllTransactions lid party = do\n+getAllTransactions :: LedgerId -> Party -> Bool -> LedgerService (Stream Transaction)\n+getAllTransactions lid party verbose = do\n     let filter = filterEverthingForParty party\n-    let verbose = False\n     let req = GetTransactionsRequest lid LedgerBegin Nothing filter verbose\n     getTransactions req\n \n+getAllTransactionTrees :: LedgerId -> Party -> Bool -> LedgerService (Stream TransactionTree)\n+getAllTransactionTrees lid party verbose = do\n+    let filter = filterEverthingForParty party"
+  },
+  {
+    "id" : "ad565029-0a1c-4b5d-a079-edfee1c5d82a",
+    "prId" : 1342,
+    "comments" : [
+      {
+        "id" : "9290ef8b-5718-454e-833a-88a1b9342caf",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Using the record selector for the last field would be more appropriate here.",
+        "createdAt" : "2019-05-24T12:45:24Z",
+        "updatedAt" : "2019-05-24T12:45:25Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a22ef047-2210-4a97-87cd-b586dc650177",
+        "parentId" : "9290ef8b-5718-454e-833a-88a1b9342caf",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "so: `TransactionService{transactionServiceGetLedgerEnd=rpc}`\r\nAlthough this is differently fragile to changes in the proto generated code.\r\nNot fragile on additional or reorded rpcs; but now fragile on the rpc name.\r\nBut overall this seems better.\r\n",
+        "createdAt" : "2019-05-24T15:28:46Z",
+        "updatedAt" : "2019-05-24T15:28:47Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2d525510-eddf-4c67-af1a-75fffebd28ba",
+        "parentId" : "9290ef8b-5718-454e-833a-88a1b9342caf",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I would write\r\n```haskell\r\nlet rpc = transactionServiceGetLedgerEnd service\r\n```",
+        "createdAt" : "2019-05-24T16:08:38Z",
+        "updatedAt" : "2019-05-24T16:08:38Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b47e2ac0d39770b24721e1dcd04ee7bb4eed8269",
+    "line" : 130,
+    "diffHunk" : "@@ -108,102 +112,84 @@ mdm :: MetadataMap\n mdm = MetadataMap Map.empty\n \n \n-\n ----------------------------------------------------------------------\n--- Services with streaming responses\n-\n-data Elem a = Elem a | Eend | Eerr String\n-\n-deElem :: Elem a -> IO a\n-deElem = \\case\n-    Elem a -> return a\n-    Eend -> fail \"readStream, end\"\n-    Eerr s -> fail $ \"readStream, err: \" <> s\n-\n-newtype Stream a = Stream { mv :: MVar (Elem a) }\n-\n-newStream :: IO (Stream a)\n-newStream = do\n-    mv <- newEmptyMVar\n-    return Stream{mv}\n-\n-writeStream :: Stream a -> Elem a -> IO () -- internal use only\n-writeStream Stream{mv} elem = putMVar mv elem\n-\n-takeStream :: Stream a -> IO a\n-takeStream Stream{mv} = takeMVar mv >>= deElem\n-\n-data StreamState = SS -- TODO\n-getStreamContents :: Stream a -> IO ([a],StreamState)\n-getStreamContents Stream{mv} = do xs <- loop ; return (xs,SS)\n-    where\n-        loop = do\n-            tryTakeMVar mv >>= \\case\n-                Nothing -> return []\n-                Just e -> do\n-                    x <- deElem e\n-                    xs <- loop\n-                    return (x:xs)\n-\n--- wrap LL.Transaction to show summary\n-newtype LL_Transaction = LL_Transaction { low :: LL.Transaction } --TODO: remove\n-    deriving Eq\n-\n-instance Show LL_Transaction where\n-    show LL_Transaction{low} = _summary\n-        where\n-            _summary = \"Trans:id=\" <> Text.unpack transactionTransactionId\n-            _full = show low\n-            LL.Transaction{transactionTransactionId} = low\n-\n-\n--- TODO: return (HL) [Transaction]\n-transactions :: LedgerHandle -> Party -> IO (Stream LL_Transaction)\n-transactions LedgerHandle{port,lid} party = wrapE \"transactions\" $ do\n+-- transaction_service\n+\n+getLedgerEnd :: LedgerHandle -> IO LedgerOffset\n+getLedgerEnd LedgerHandle{port,lid} = wrapE \"getLedgerEnd\" $ do\n+    LL.withGRPCClient (config port) $ \\client -> do\n+        service <- LL.transactionServiceClient client\n+        let TransactionService _ _ _ _ _ _ rpc = service"
+  }
+]

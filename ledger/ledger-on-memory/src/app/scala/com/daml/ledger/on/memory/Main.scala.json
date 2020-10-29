@@ -1,0 +1,616 @@
+[
+  {
+    "id" : "2ee5f13d-fc37-452c-a62d-e1e229915ca5",
+    "prId" : 7428,
+    "comments" : [
+      {
+        "id" : "ad429b2e-715f-4313-9946-daeb6df9002b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Scala people like newlines.\r\n\r\nAlso constants are supposed to be capitalized. (I forget this a lot too.)\r\n\r\n```suggestion\r\n  private val RunnerName = \"In-Memory Ledger\"\r\n\r\n```",
+        "createdAt" : "2020-09-17T09:31:07Z",
+        "updatedAt" : "2020-09-17T12:22:06Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f10f4917bc7d77b93ce9759b85f312450ad902d1",
+    "line" : null,
+    "diffHunk" : "@@ -29,17 +29,26 @@ import com.daml.resources.{ProgramResource, ResourceOwner}\n import scopt.OptionParser\n \n object Main {\n+  private val runnerName = \"In-Memory Ledger\""
+  },
+  {
+    "id" : "b5a170a7-c33d-4c08-98fd-205bafaa9414",
+    "prId" : 7428,
+    "comments" : [
+      {
+        "id" : "6fae05f7-f9f9-4438-8f9f-8a216cb45bf7",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n      runner <- new Runner(RunnerName, factory).owner(args)\r\n```",
+        "createdAt" : "2020-09-17T09:31:14Z",
+        "updatedAt" : "2020-09-17T12:22:06Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f10f4917bc7d77b93ce9759b85f312450ad902d1",
+    "line" : null,
+    "diffHunk" : "@@ -29,17 +29,26 @@ import com.daml.resources.{ProgramResource, ResourceOwner}\n import scopt.OptionParser\n \n object Main {\n+  private val runnerName = \"In-Memory Ledger\"\n   def main(args: Array[String]): Unit = {\n     val resource = for {\n       dispatcher <- dispatcherOwner\n       sharedState = InMemoryState.empty\n       factory = new InMemoryLedgerFactory(dispatcher, sharedState)\n-      runner <- new Runner(\"In-Memory Ledger\", factory).owner(args)\n+      runner <- new Runner(runnerName, factory).owner(args)"
+  },
+  {
+    "id" : "e0ca1bf1-cdaf-41f4-8023-4813303a048d",
+    "prId" : 7428,
+    "comments" : [
+      {
+        "id" : "9fe7ce89-8cb1-4728-8cbe-c1332e07738b",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n      runner <- new Runner(RunnerName, factory).owner(config)\r\n```",
+        "createdAt" : "2020-09-17T09:31:22Z",
+        "updatedAt" : "2020-09-17T12:22:06Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f10f4917bc7d77b93ce9759b85f312450ad902d1",
+    "line" : null,
+    "diffHunk" : "@@ -29,17 +29,26 @@ import com.daml.resources.{ProgramResource, ResourceOwner}\n import scopt.OptionParser\n \n object Main {\n+  private val runnerName = \"In-Memory Ledger\"\n   def main(args: Array[String]): Unit = {\n     val resource = for {\n       dispatcher <- dispatcherOwner\n       sharedState = InMemoryState.empty\n       factory = new InMemoryLedgerFactory(dispatcher, sharedState)\n-      runner <- new Runner(\"In-Memory Ledger\", factory).owner(args)\n+      runner <- new Runner(runnerName, factory).owner(args)\n     } yield runner\n-\n     new ProgramResource(resource).run()\n   }\n \n+  // Utily if you want to spin this up as a library.\n+  def owner(config: Config[ExtraConfig]): ResourceOwner[Unit] =\n+    for {\n+      dispatcher <- dispatcherOwner\n+      sharedState = InMemoryState.empty\n+      factory = new InMemoryLedgerFactory(dispatcher, sharedState)\n+      runner <- new Runner(runnerName, factory).owner(config)"
+  },
+  {
+    "id" : "c8c4733e-3b7e-40ea-a743-32f64f1bd2ab",
+    "prId" : 7428,
+    "comments" : [
+      {
+        "id" : "7393bf93-a670-4b8e-9f37-f1e788ba01f8",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Can you use this in the `main` function above?",
+        "createdAt" : "2020-09-17T09:32:07Z",
+        "updatedAt" : "2020-09-17T12:22:06Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3e9669a0-f84f-42d4-a3d6-a7a562daaf89",
+        "parentId" : "7393bf93-a670-4b8e-9f37-f1e788ba01f8",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Not easily, see PR description. You need the factory to parse the config so you end up having to split it up and at that point I think it just gets more convoluted.",
+        "createdAt" : "2020-09-17T09:40:19Z",
+        "updatedAt" : "2020-09-17T12:22:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f10f4917bc7d77b93ce9759b85f312450ad902d1",
+    "line" : null,
+    "diffHunk" : "@@ -29,17 +29,26 @@ import com.daml.resources.{ProgramResource, ResourceOwner}\n import scopt.OptionParser\n \n object Main {\n+  private val runnerName = \"In-Memory Ledger\"\n   def main(args: Array[String]): Unit = {\n     val resource = for {\n       dispatcher <- dispatcherOwner\n       sharedState = InMemoryState.empty\n       factory = new InMemoryLedgerFactory(dispatcher, sharedState)\n-      runner <- new Runner(\"In-Memory Ledger\", factory).owner(args)\n+      runner <- new Runner(runnerName, factory).owner(args)\n     } yield runner\n-\n     new ProgramResource(resource).run()\n   }\n \n+  // Utily if you want to spin this up as a library.\n+  def owner(config: Config[ExtraConfig]): ResourceOwner[Unit] ="
+  },
+  {
+    "id" : "cee477c2-b254-436f-8b30-169622b4c754",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "ec9ef7c0-03fb-4648-a603-32856a2dbe30",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n        new InMemoryLedgerReaderWriter.PreExecutingOwner(\r\n```",
+        "createdAt" : "2020-08-04T09:04:09Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d5e12327-bd72-46a5-b627-807026488a0f",
+        "parentId" : "ec9ef7c0-03fb-4648-a603-32856a2dbe30",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:30:43Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -63,19 +66,34 @@ object Main {\n         loggingContext: LoggingContext,\n     ): ResourceOwner[KeyValueLedger] = {\n       val metrics = createMetrics(participantConfig, config)\n-      new InMemoryLedgerReaderWriter.Owner(\n-        ledgerId = config.ledgerId,\n-        config.extra.batchingLedgerWriterConfig,\n-        participantId = participantConfig.participantId,\n-        metrics = metrics,\n-        stateValueCache = caching.WeightedCache.from(\n-          configuration = config.stateValueCache,\n-          metrics = metrics.daml.kvutils.submission.validator.stateValueCache,\n-        ),\n-        dispatcher = dispatcher,\n-        state = state,\n-        engine = engine,\n-      )\n+      if (config.extra.preExecute)\n+        new memory.InMemoryLedgerReaderWriter.PreExecutingOwner("
+  },
+  {
+    "id" : "5e2c434e-6a02-4f2e-aa93-ade3a4530420",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "e5113de2-bd48-4fc1-8d38-ed3a66fe42b8",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Please name this argument.",
+        "createdAt" : "2020-08-04T09:23:39Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "17f91513-05b6-4920-a3e9-46da67477467",
+        "parentId" : "e5113de2-bd48-4fc1-8d38-ed3a66fe42b8",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:29:32Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -63,19 +66,34 @@ object Main {\n         loggingContext: LoggingContext,\n     ): ResourceOwner[KeyValueLedger] = {\n       val metrics = createMetrics(participantConfig, config)\n-      new InMemoryLedgerReaderWriter.Owner(\n-        ledgerId = config.ledgerId,\n-        config.extra.batchingLedgerWriterConfig,\n-        participantId = participantConfig.participantId,\n-        metrics = metrics,\n-        stateValueCache = caching.WeightedCache.from(\n-          configuration = config.stateValueCache,\n-          metrics = metrics.daml.kvutils.submission.validator.stateValueCache,\n-        ),\n-        dispatcher = dispatcher,\n-        state = state,\n-        engine = engine,\n-      )\n+      if (config.extra.preExecute)\n+        new memory.InMemoryLedgerReaderWriter.PreExecutingOwner(\n+          ledgerId = config.ledgerId,\n+          participantId = participantConfig.participantId,\n+          keySerializationStrategy = DefaultStateKeySerializationStrategy,\n+          metrics = metrics,\n+          stateValueCacheForPreExecution = caching.WeightedCache.from(\n+            configuration = config.stateValueCache,\n+            metrics = metrics.daml.kvutils.submission.validator.stateValueCache,\n+          ),\n+          dispatcher = dispatcher,\n+          state = state,\n+          engine = engine,\n+        )\n+      else\n+        new InMemoryLedgerReaderWriter.BatchingOwner(\n+          ledgerId = config.ledgerId,\n+          config.extra.batchingLedgerWriterConfig,"
+  },
+  {
+    "id" : "ef08f33d-ad24-4adb-942e-daf77a171d2a",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "f8b7c880-fbe1-460a-a340-b04f972c4a86",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "As you can only have one of pre-execution or batch, please add a `parser.checkConfig` check to make sure only one is set and fail fast if both are.",
+        "createdAt" : "2020-08-04T09:24:30Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f69fe892-a45e-489c-8aad-68668e9777b7",
+        "parentId" : "f8b7c880-fbe1-460a-a340-b04f972c4a86",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-04T12:29:27Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -96,6 +114,19 @@ object Main {\n               )\n             )\n         }\n+      parser\n+        .opt[Boolean](\"pre-execute\")\n+        .optional()\n+        .text(\n+          \"Whether to enable pre-execution (mutually exclusive with batching and will disable it).\")"
+  },
+  {
+    "id" : "3ee0e6f6-1be6-44e2-8024-1f4a16813f86",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "235d0f6b-9b34-4868-9167-d97912c52ac5",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n          \"Enable pre-execution (mutually exclusive with batching)\")\r\n```",
+        "createdAt" : "2020-08-04T14:25:34Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "41f0faa8-c87e-4115-a4fa-84cc30ea3a54",
+        "parentId" : "235d0f6b-9b34-4868-9167-d97912c52ac5",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "The flag will actually force pre-execution so I used a slight variation on your proposal (and changed the flag name itself).",
+        "createdAt" : "2020-08-04T15:49:12Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -96,6 +113,25 @@ object Main {\n               )\n             )\n         }\n+      parser\n+        .opt[Boolean](\"always-pre-execute\")\n+        .optional()\n+        .text(\n+          \"Whether to enable pre-execution (mutually exclusive with batching and will disable it).\")"
+  },
+  {
+    "id" : "0bf14dbe-7fc8-4e77-b9c8-4cba6b0b976a",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "1795ab2b-5885-423d-acc2-6b4c9d68181d",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n          Left(\"Either pre-executing or batching can be enabled, but not both.\")\r\n```",
+        "createdAt" : "2020-08-04T14:25:44Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e85960d7-a23d-4025-a4d3-d70c975062b9",
+        "parentId" : "1795ab2b-5885-423d-acc2-6b4c9d68181d",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "The flag will actually force pre-execution so I used a slight variation on your proposal (and changed the flag name itself).",
+        "createdAt" : "2020-08-04T15:49:20Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -96,6 +113,25 @@ object Main {\n               )\n             )\n         }\n+      parser\n+        .opt[Boolean](\"always-pre-execute\")\n+        .optional()\n+        .text(\n+          \"Whether to enable pre-execution (mutually exclusive with batching and will disable it).\")\n+        .action {\n+          case (preExecute, config) =>\n+            config.copy(\n+              extra = config.extra.copy(\n+                alwaysPreExecute = preExecute\n+              )\n+            )\n+        }\n+      parser.checkConfig { config =>\n+        if (config.extra.alwaysPreExecute && config.extra.batchingLedgerWriterConfig.enableBatching)\n+          Left(\"Either always pre-executing or batching can be enabled, but not both\")"
+  },
+  {
+    "id" : "41dc7330-68d3-4cc5-ae8e-84bb40bf43f9",
+    "prId" : 6793,
+    "comments" : [
+      {
+        "id" : "67894ab7-7b15-4cf4-a34b-601af2e2cf83",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n        .opt[Boolean](\"force-pre-execution\")\r\n```",
+        "createdAt" : "2020-08-04T15:51:46Z",
+        "updatedAt" : "2020-08-05T07:01:01Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "907cc656-78f4-498c-8590-86468be73e44",
+        "parentId" : "67894ab7-7b15-4cf4-a34b-601af2e2cf83",
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-08-05T07:01:48Z",
+        "updatedAt" : "2020-08-05T07:01:48Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b29591138330b767e0e3a5dc19bca73b14d0522c",
+    "line" : null,
+    "diffHunk" : "@@ -96,6 +113,24 @@ object Main {\n               )\n             )\n         }\n+      parser\n+        .opt[Boolean](\"force-pre-execute\")"
+  },
+  {
+    "id" : "54dc313a-730b-4995-9c77-0b978d12e0de",
+    "prId" : 6111,
+    "comments" : [
+      {
+        "id" : "b026aa3d-d457-42b5-b90c-5e37a0638e4e",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "The parentheses are unnecessary, I believe.",
+        "createdAt" : "2020-05-27T09:25:36Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "62e21cf1-ab38-42f7-8b99-2c3d93a3c1e2",
+        "parentId" : "b026aa3d-d457-42b5-b90c-5e37a0638e4e",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Removed.",
+        "createdAt" : "2020-05-27T10:04:40Z",
+        "updatedAt" : "2020-05-28T08:28:21Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "4eaa7219a57e7cae32f14958b2c32423ade3c9d3",
+    "line" : null,
+    "diffHunk" : "@@ -87,6 +92,18 @@ object Main {\n           val extra = config.extra\n           config.copy(extra = extra.copy(maxInboundMessageSize = maxInboundMessageSize))\n         })\n+      parser\n+        .opt[BatchingLedgerWriterConfig](\"batching\")\n+        .optional()\n+        .text(BatchingLedgerWriterConfigReader.UsageText)\n+        .action({\n+          case (parsedBatchingConfig, config) =>\n+            config.copy(\n+              extra = config.extra.copy(\n+                batchingLedgerWriterConfig = parsedBatchingConfig\n+              )\n+            )\n+        })"
+  },
+  {
+    "id" : "3f31a098-cf8c-44eb-b0d6-a38aa810299f",
+    "prId" : 4674,
+    "comments" : [
+      {
+        "id" : "1b305a96-84f6-4979-898e-c6657e758d99",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Seems like this line could be part of `InMemoryLedgerFactory`.",
+        "createdAt" : "2020-02-25T12:51:54Z",
+        "updatedAt" : "2020-02-26T13:34:02Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0eed4a60-f3e7-4ab5-8b29-b906125e8c8b",
+        "parentId" : "1b305a96-84f6-4979-898e-c6657e758d99",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I didn't know how to properly resolve the ownership of the dispatcher, because each call to `owner` (which will be made for each individual participant) should use the same dispatcher.",
+        "createdAt" : "2020-02-25T14:19:43Z",
+        "updatedAt" : "2020-02-26T13:34:02Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "dbff0b92-f16e-4aa9-b708-85853af17711",
+        "parentId" : "1b305a96-84f6-4979-898e-c6657e758d99",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Ah, if it needs to be shared, then as it is makes perfect sense.",
+        "createdAt" : "2020-02-25T16:01:17Z",
+        "updatedAt" : "2020-02-26T13:34:02Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "357d1c3ef2feb3fb5236e1f22c00afbf960d0ce6",
+    "line" : 18,
+    "diffHunk" : "@@ -4,20 +4,34 @@\n package com.daml.ledger.on.memory\n \n import akka.stream.Materializer\n+import com.daml.ledger.on.memory.InMemoryLedgerReaderWriter.Index\n import com.daml.ledger.participant.state.kvutils.app.LedgerFactory.SimpleLedgerFactory\n import com.daml.ledger.participant.state.kvutils.app.Runner\n import com.daml.ledger.participant.state.v1.{LedgerId, ParticipantId}\n import com.digitalasset.logging.LoggingContext\n+import com.digitalasset.platform.akkastreams.dispatcher.Dispatcher\n import com.digitalasset.resources.{ProgramResource, ResourceOwner}\n \n import scala.concurrent.ExecutionContext\n \n object Main {\n   def main(args: Array[String]): Unit = {\n-    new ProgramResource(new Runner(\"In-Memory Ledger\", InMemoryLedgerFactory).owner(args)).run()\n+    val resource = for {\n+      dispatcher <- InMemoryLedgerReaderWriter.dispatcher"
+  },
+  {
+    "id" : "2fac119c-4ba9-49d0-8c4e-ed2f0f53660d",
+    "prId" : 4674,
+    "comments" : [
+      {
+        "id" : "6b9153e9-f9f8-4126-947e-9a518a539a5d",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "`private`",
+        "createdAt" : "2020-02-25T12:57:40Z",
+        "updatedAt" : "2020-02-26T13:34:02Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "357d1c3ef2feb3fb5236e1f22c00afbf960d0ce6",
+    "line" : null,
+    "diffHunk" : "@@ -4,20 +4,34 @@\n package com.daml.ledger.on.memory\n \n import akka.stream.Materializer\n+import com.daml.ledger.on.memory.InMemoryLedgerReaderWriter.Index\n import com.daml.ledger.participant.state.kvutils.app.LedgerFactory.SimpleLedgerFactory\n import com.daml.ledger.participant.state.kvutils.app.Runner\n import com.daml.ledger.participant.state.v1.{LedgerId, ParticipantId}\n import com.digitalasset.logging.LoggingContext\n+import com.digitalasset.platform.akkastreams.dispatcher.Dispatcher\n import com.digitalasset.resources.{ProgramResource, ResourceOwner}\n \n import scala.concurrent.ExecutionContext\n \n object Main {\n   def main(args: Array[String]): Unit = {\n-    new ProgramResource(new Runner(\"In-Memory Ledger\", InMemoryLedgerFactory).owner(args)).run()\n+    val resource = for {\n+      dispatcher <- InMemoryLedgerReaderWriter.dispatcher\n+      factory = new InMemoryLedgerFactory(dispatcher)\n+      runner <- new Runner(\"In-Memory Ledger\", factory).owner(args)\n+    } yield runner\n+\n+    new ProgramResource(resource).run()\n   }\n \n-  object InMemoryLedgerFactory extends SimpleLedgerFactory[InMemoryLedgerReaderWriter] {\n+  class InMemoryLedgerFactory(dispatcher: Dispatcher[Index])\n+      extends SimpleLedgerFactory[InMemoryLedgerReaderWriter] {\n+\n+    // Here we share the ledger state access object, which also encapsulates InMemoryState,\n+    // so that the state can be shared amongst multiple participants for this in-memory ledger.\n+    val ledgerStateAccess = new InMemoryLedgerStateAccess()(ExecutionContext.global)"
+  }
+]

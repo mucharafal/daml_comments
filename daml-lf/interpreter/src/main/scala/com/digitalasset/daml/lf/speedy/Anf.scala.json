@@ -1,0 +1,1401 @@
+[
+  {
+    "id" : "ce932d2e-ae89-41c7-b053-b35e5d24b5ba",
+    "prId" : 6606,
+    "comments" : [
+      {
+        "id" : "f695dd09-2ae2-42a9-a8b2-3f880bcce3e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "You may find the formatting becomes much nicer if you split `k` into its own parameter list (in all cases).\r\n\r\nThis would become:\r\n\r\n```scala\r\n  private[this] def transformExp[A](\r\n      depth: DepthA,\r\n      env: Env,\r\n      exp: SExpr,\r\n      transform: Tx[SExpr, A],\r\n  )(k: K[AExpr, A]): Trampoline[A]\r\n```\r\n\r\nAnd its call site in `transformLet1` would look something like this:\r\n\r\n```scala\r\n      Bounce { () =>\r\n        transformExp(depth1, env1, body, transform) { body1 =>\r\n          Bounce(() => txK(AExpr(SELet1(rhs, body1.wrapped))))\r\n        }\r\n      }\r\n``` ",
+        "createdAt" : "2020-07-06T12:42:03Z",
+        "updatedAt" : "2020-07-06T12:43:02Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6bb92ccd-d563-4d0e-a381-74f2f4495a89",
+        "parentId" : "f695dd09-2ae2-42a9-a8b2-3f880bcce3e5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "@SamirTalwar-DA Thanks, I might try this fix, because the current formatting is truly awful.",
+        "createdAt" : "2020-07-06T14:18:50Z",
+        "updatedAt" : "2020-07-06T14:18:50Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "65b3fbbee49dc3ce74eb132bd8e62c398a10ccbb",
+    "line" : 337,
+    "diffHunk" : "@@ -194,132 +258,161 @@ private[lf] object Anf {\n     case SCPCons => 2\n   }\n \n-  /** `transformExp` is the function at the heart of the ANF transformation.  You can read\n-    it's type as saying: \"Caller, give me a general expression `exp`, (& depth/env info),\n-    and a continuation function `k` which says what you want to do with the transformed\n-    expression. Then I will do the transform, and call `k` with it. I reserve the right to\n-    wrap further expression-AST around the expression returned by `k`.\n-    See: `atomizeExp` for a instance where this wrapping occurs.\n+  /** `transformExp` is the function at the heart of the ANF transformation.\n+    *  You can read its type as saying: \"Caller, give me a general expression\n+    *  `exp`, (& depth/env info), and a transformation function `transform`\n+    *  which says what you want to do with the transformed expression. Then I\n+    *  will do the transform, and call `transform` with it. I reserve the right\n+    *  to wrap further expression-AST around the expression returned by\n+    *  `transform`.\n+    *\n+    *  See: `atomizeExp` for an instance where this wrapping occurs.\n+    *\n+    *  Note: this wrapping is the reason why we need a \"second\" CPS transform to\n+    *  achieve constant stack through trampoline.\n     */\n-  private[this] def transformExp(depth: DepthA, env: Env, exp: SExpr, k: K[SExpr]): Res =\n-    Bounce(() =>\n-      exp match {\n-        case atom0: SExprAtomic =>\n-          val atom = makeRelativeA(depth)(makeAbsoluteA(env, atom0))\n-          k(depth, atom)\n-\n-        case x: SEVal => k(depth, x)\n-        case x: SEImportValue => k(depth, x)\n-\n-        case SEAppGeneral(func, args) =>\n-          atomizeExp(\n-            depth,\n-            env,\n-            func, {\n-              case (depth, func) =>\n-                atomizeExps(\n-                  depth,\n-                  env,\n-                  args.toList, {\n-                    case (depth, args) =>\n-                      val func1 = makeRelativeA(depth)(func)\n-                      val args1 = args.map(makeRelativeA(depth))\n-                      k(depth, SEAppAtomic(func1, args1.toArray))\n-                  }\n-                )\n-            }\n-          )\n-        case SEMakeClo(fvs0, arity, body0) =>\n-          val fvs = fvs0.map((loc) => makeRelativeL(depth)(makeAbsoluteL(env, loc)))\n-          val body = flattenToAnf(body0).wrapped\n-          k(depth, SEMakeClo(fvs, arity, body))\n-\n-        case SECase(scrut, alts0) =>\n-          atomizeExp(depth, env, scrut, {\n-            case (depth, scrut) =>\n-              val scrut1 = makeRelativeA(depth)(scrut)\n-              val alts = flattenAlts(depth, env, alts0)\n-              k(depth, SECaseAtomic(scrut1, alts))\n-          })\n-\n-        case SELet(rhss, body) =>\n-          val expanded = expandMultiLet(rhss.toList, body)\n-          transformExp(depth, env, expanded, k)\n-\n-        case SELet1General(rhs, body) =>\n-          transformLet1(depth, env, rhs, body, k)\n-\n-        case SECatch(body0, handler0, fin0) =>\n-          flattenExp(\n-            depth,\n-            env,\n-            body0,\n-            body => {\n-              flattenExp(depth, env, handler0, handler => {\n-                flattenExp(depth, env, fin0, fin => {\n-                  k(depth, SECatch(body.wrapped, handler.wrapped, fin.wrapped))\n-                })\n-              })\n-            }\n-          )\n-\n-        case SELocation(loc, body) =>\n-          transformExp(depth, env, body, {\n-            case (depth, body) =>\n-              k(depth, SELocation(loc, body))\n-          })\n-\n-        case SELabelClosure(label, exp) =>\n-          transformExp(depth, env, exp, {\n-            case (depth, exp) =>\n-              k(depth, SELabelClosure(label, exp))\n-          })\n-\n-        case x: SEAbs => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SEWronglyTypeContractId => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SEVar => throw CompilationError(s\"flatten: unexpected: $x\")\n-\n-        case x: SEAppAtomicGeneral => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SEAppAtomicSaturatedBuiltin => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SELet1Builtin => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SECaseAtomic => throw CompilationError(s\"flatten: unexpected: $x\")\n-\n-    })\n-\n-  private[this] def atomizeExps(\n+  private[this] def transformExp[A](\n+      depth: DepthA,\n+      env: Env,\n+      exp: SExpr,\n+      transform: Tx[SExpr, A],\n+      k: K[AExpr, A]): Trampoline[A] ="
+  },
+  {
+    "id" : "829555f0-0b68-485f-aca7-6f7e734b6d7f",
+    "prId" : 6606,
+    "comments" : [
+      {
+        "id" : "6b4bf1fa-bb54-4408-a394-65be36e1322f",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "There's probably a monad in here somewhere, but I don't think you should worry about finding it.",
+        "createdAt" : "2020-07-06T12:42:57Z",
+        "updatedAt" : "2020-07-06T12:43:02Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "65b3fbbee49dc3ce74eb132bd8e62c398a10ccbb",
+    "line" : 411,
+    "diffHunk" : "@@ -194,132 +258,161 @@ private[lf] object Anf {\n     case SCPCons => 2\n   }\n \n-  /** `transformExp` is the function at the heart of the ANF transformation.  You can read\n-    it's type as saying: \"Caller, give me a general expression `exp`, (& depth/env info),\n-    and a continuation function `k` which says what you want to do with the transformed\n-    expression. Then I will do the transform, and call `k` with it. I reserve the right to\n-    wrap further expression-AST around the expression returned by `k`.\n-    See: `atomizeExp` for a instance where this wrapping occurs.\n+  /** `transformExp` is the function at the heart of the ANF transformation.\n+    *  You can read its type as saying: \"Caller, give me a general expression\n+    *  `exp`, (& depth/env info), and a transformation function `transform`\n+    *  which says what you want to do with the transformed expression. Then I\n+    *  will do the transform, and call `transform` with it. I reserve the right\n+    *  to wrap further expression-AST around the expression returned by\n+    *  `transform`.\n+    *\n+    *  See: `atomizeExp` for an instance where this wrapping occurs.\n+    *\n+    *  Note: this wrapping is the reason why we need a \"second\" CPS transform to\n+    *  achieve constant stack through trampoline.\n     */\n-  private[this] def transformExp(depth: DepthA, env: Env, exp: SExpr, k: K[SExpr]): Res =\n-    Bounce(() =>\n-      exp match {\n-        case atom0: SExprAtomic =>\n-          val atom = makeRelativeA(depth)(makeAbsoluteA(env, atom0))\n-          k(depth, atom)\n-\n-        case x: SEVal => k(depth, x)\n-        case x: SEImportValue => k(depth, x)\n-\n-        case SEAppGeneral(func, args) =>\n-          atomizeExp(\n-            depth,\n-            env,\n-            func, {\n-              case (depth, func) =>\n-                atomizeExps(\n-                  depth,\n-                  env,\n-                  args.toList, {\n-                    case (depth, args) =>\n-                      val func1 = makeRelativeA(depth)(func)\n-                      val args1 = args.map(makeRelativeA(depth))\n-                      k(depth, SEAppAtomic(func1, args1.toArray))\n-                  }\n-                )\n-            }\n-          )\n-        case SEMakeClo(fvs0, arity, body0) =>\n-          val fvs = fvs0.map((loc) => makeRelativeL(depth)(makeAbsoluteL(env, loc)))\n-          val body = flattenToAnf(body0).wrapped\n-          k(depth, SEMakeClo(fvs, arity, body))\n-\n-        case SECase(scrut, alts0) =>\n-          atomizeExp(depth, env, scrut, {\n-            case (depth, scrut) =>\n-              val scrut1 = makeRelativeA(depth)(scrut)\n-              val alts = flattenAlts(depth, env, alts0)\n-              k(depth, SECaseAtomic(scrut1, alts))\n-          })\n-\n-        case SELet(rhss, body) =>\n-          val expanded = expandMultiLet(rhss.toList, body)\n-          transformExp(depth, env, expanded, k)\n-\n-        case SELet1General(rhs, body) =>\n-          transformLet1(depth, env, rhs, body, k)\n-\n-        case SECatch(body0, handler0, fin0) =>\n-          flattenExp(\n-            depth,\n-            env,\n-            body0,\n-            body => {\n-              flattenExp(depth, env, handler0, handler => {\n-                flattenExp(depth, env, fin0, fin => {\n-                  k(depth, SECatch(body.wrapped, handler.wrapped, fin.wrapped))\n-                })\n-              })\n-            }\n-          )\n-\n-        case SELocation(loc, body) =>\n-          transformExp(depth, env, body, {\n-            case (depth, body) =>\n-              k(depth, SELocation(loc, body))\n-          })\n-\n-        case SELabelClosure(label, exp) =>\n-          transformExp(depth, env, exp, {\n-            case (depth, exp) =>\n-              k(depth, SELabelClosure(label, exp))\n-          })\n-\n-        case x: SEAbs => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SEWronglyTypeContractId => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SEVar => throw CompilationError(s\"flatten: unexpected: $x\")\n-\n-        case x: SEAppAtomicGeneral => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SEAppAtomicSaturatedBuiltin => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SELet1Builtin => throw CompilationError(s\"flatten: unexpected: $x\")\n-        case x: SECaseAtomic => throw CompilationError(s\"flatten: unexpected: $x\")\n-\n-    })\n-\n-  private[this] def atomizeExps(\n+  private[this] def transformExp[A](\n+      depth: DepthA,\n+      env: Env,\n+      exp: SExpr,\n+      transform: Tx[SExpr, A],\n+      k: K[AExpr, A]): Trampoline[A] =\n+    exp match {\n+      case atom0: SExprAtomic =>\n+        val atom = makeRelativeA(depth)(makeAbsoluteA(env, atom0))\n+        Bounce(() => transform(depth, atom, k))\n+\n+      case x: SEVal => Bounce(() => transform(depth, x, k))\n+      case x: SEImportValue => Bounce(() => transform(depth, x, k))\n+\n+      case SEAppGeneral(func, args) => {\n+        def tx2(\n+            func: AbsAtom)(depth: DepthA, args: List[AbsAtom], txK: K[AExpr, A]): Trampoline[A] = {\n+          val func1 = makeRelativeA(depth)(func)\n+          val args1 = args.map(makeRelativeA(depth))\n+          Bounce(() => transform(depth, SEAppAtomic(func1, args1.toArray), txK))\n+        }\n+        def tx1(depth: DepthA, func: AbsAtom, txK1: K[AExpr, A]): Trampoline[A] = {\n+          Bounce(() => atomizeExps(depth, env, args.toList, tx2(func), txK1))\n+        }\n+        Bounce(() => atomizeExp(depth, env, func, tx1, k))\n+      }\n+      case SEMakeClo(fvs0, arity, body0) =>\n+        val fvs = fvs0.map((loc) => makeRelativeL(depth)(makeAbsoluteL(env, loc)))\n+        val body = flattenToAnf(body0).wrapped\n+        Bounce(() => transform(depth, SEMakeClo(fvs, arity, body), k))\n+\n+      case SECase(scrut, alts0) => {\n+        def tx(depth: DepthA, scrut: AbsAtom, txK: K[AExpr, A]): Trampoline[A] = {\n+          val scrut1 = makeRelativeA(depth)(scrut)\n+          Bounce(\n+            () =>\n+              flattenAlts(\n+                depth,\n+                env,\n+                alts0,\n+                alts => Bounce(() => transform(depth, SECaseAtomic(scrut1, alts), txK))))\n+        }\n+        Bounce(() => atomizeExp(depth, env, scrut, tx, k))\n+      }\n+\n+      case SELet(rhss, body) =>\n+        val expanded = expandMultiLet(rhss.toList, body)\n+        Bounce(() => transformExp(depth, env, expanded, transform, k))\n+\n+      case SELet1General(rhs, body) =>\n+        Bounce(() => transformLet1(depth, env, rhs, body, transform, k))\n+\n+      case SECatch(body0, handler0, fin0) =>\n+        Bounce(\n+          () =>\n+            flattenExp(\n+              depth,\n+              env,\n+              body0,\n+              body =>\n+                Bounce(() =>\n+                  flattenExp(\n+                    depth,\n+                    env,\n+                    handler0,\n+                    handler =>\n+                      Bounce(\n+                        () =>\n+                          flattenExp(\n+                            depth,\n+                            env,\n+                            fin0,\n+                            fin =>\n+                              Bounce(() =>\n+                                transform(\n+                                  depth,\n+                                  SECatch(body.wrapped, handler.wrapped, fin.wrapped),\n+                                  k))))\n+                ))\n+          ))"
+  },
+  {
+    "id" : "07741151-4e92-4aaf-9910-34a5abb42800",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "a7757ef7-040b-4aa9-8f68-37b0e1f9541c",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "No re\r\n```suggestion\r\n  case class CompilationError(error: String) extends RuntimeException(error)\r\n```\r\nI do not see any reason to drop the \"stacktrace\" and use \"suppression\"  ",
+        "createdAt" : "2020-06-22T08:42:34Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "17786231-132d-4ea9-a957-a61198c282b7",
+        "parentId" : "a7757ef7-040b-4aa9-8f68-37b0e1f9541c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "made the suggested change",
+        "createdAt" : "2020-06-25T10:29:30Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  * Transformation to ANF based AST for the speedy interpreter.\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  type Anf = SExpr //TODO: make a distinct trait + sub-classe for Anf\n+\n+  /*** entry point to the ANF compilation phase */\n+  def flattenToAnf(exp: SExpr): Anf = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp)\n+  }\n+\n+  case class CompilationError(error: String) extends RuntimeException(error, null, true, false)"
+  },
+  {
+    "id" : "f7b73ba3-c416-47cd-a8ea-2ba77a748c5b",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "165a6a71-119c-4507-b66e-d0353e5aa74a",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```suggestion\r\n  sealed abstract class Trampoline[T] {\r\n```",
+        "createdAt" : "2020-06-22T08:43:07Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9a6977cc-c516-4454-a5df-8b7b0a955908",
+        "parentId" : "165a6a71-119c-4507-b66e-d0353e5aa74a",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-06-25T10:29:39Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  * Transformation to ANF based AST for the speedy interpreter.\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  type Anf = SExpr //TODO: make a distinct trait + sub-classe for Anf\n+\n+  /*** entry point to the ANF compilation phase */\n+  def flattenToAnf(exp: SExpr): Anf = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp)\n+  }\n+\n+  case class CompilationError(error: String) extends RuntimeException(error, null, true, false)\n+\n+  case class DepthE(n: Int)\n+  case class DepthA(n: Int)\n+\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  sealed trait Trampoline[T] {"
+  },
+  {
+    "id" : "a9c276de-a4cd-4f98-a972-9f31a4c63e2d",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "9b445985-2a34-4952-ae58-22d08451a3ac",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I am surprise this compile. ",
+        "createdAt" : "2020-06-22T08:56:43Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3173e820-2cc1-4087-a4d2-7d67e0be9293",
+        "parentId" : "9b445985-2a34-4952-ae58-22d08451a3ac",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "it did!...",
+        "createdAt" : "2020-06-25T10:29:48Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : 84,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  * Transformation to ANF based AST for the speedy interpreter.\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  type Anf = SExpr //TODO: make a distinct trait + sub-classe for Anf\n+\n+  /*** entry point to the ANF compilation phase */\n+  def flattenToAnf(exp: SExpr): Anf = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp)\n+  }\n+\n+  case class CompilationError(error: String) extends RuntimeException(error, null, true, false)\n+\n+  case class DepthE(n: Int)\n+  case class DepthA(n: Int)\n+\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  sealed trait Trampoline[T] {\n+    @tailrec\n+    def bounce: T = this match {\n+      case Land(x) => x\n+      case Bounce(continue) => continue().bounce"
+  },
+  {
+    "id" : "a491e155-9250-4625-bdac-70b6ecc37b89",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "832f2e4b-5ec7-401f-b8d6-0bab8d715e93",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```suggestion\r\n    final def bounce: T = this match {\r\n```",
+        "createdAt" : "2020-06-22T09:01:45Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7cebfed1-c5b4-46ec-a7c2-935aea052343",
+        "parentId" : "832f2e4b-5ec7-401f-b8d6-0bab8d715e93",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "made this change",
+        "createdAt" : "2020-06-25T10:29:58Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,268 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  * Transformation to ANF based AST for the speedy interpreter.\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  type Anf = SExpr //TODO: make a distinct trait + sub-classe for Anf\n+\n+  /*** entry point to the ANF compilation phase */\n+  def flattenToAnf(exp: SExpr): Anf = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp)\n+  }\n+\n+  case class CompilationError(error: String) extends RuntimeException(error, null, true, false)\n+\n+  case class DepthE(n: Int)\n+  case class DepthA(n: Int)\n+\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  sealed trait Trampoline[T] {\n+    @tailrec\n+    def bounce: T = this match {"
+  },
+  {
+    "id" : "825dddb5-81c0-4bcf-a51e-f3bf4230d59c",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "be7b4602-cebf-4c29-a9ec-8f9d183df85d",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n  The reason we convert to ANF is to improve the efficiency of speedy execution: the\r\n```",
+        "createdAt" : "2020-06-26T09:31:15Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f2a58543-780b-49fd-9f5f-9f80130f91d0",
+        "parentId" : "be7b4602-cebf-4c29-a9ec-8f9d183df85d",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-06-29T11:46:08Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,327 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  We reason we convert to ANF is to improve the efficiency of speedy execution: the"
+  },
+  {
+    "id" : "397ef3b1-35e2-46df-9094-49c6553f064f",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "1fdea0e7-9d8c-4307-9924-62d530e9ab45",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Is this comment still valid? Doesn't the Scala type checker enforce this for us given the separate AST for ANF expressions?",
+        "createdAt" : "2020-06-26T09:32:27Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "8f2c1d7d-e7e7-40e4-8194-c1badcd65876",
+        "parentId" : "1fdea0e7-9d8c-4307-9924-62d530e9ab45",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Yes this comment is still valid.\r\n`AExpr` is not currently a _proper_ separate type, but just a wrapper around `SExpr`.",
+        "createdAt" : "2020-06-29T11:49:23Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "53981270-13a8-4dd8-8828-d6448d86a764",
+        "parentId" : "1fdea0e7-9d8c-4307-9924-62d530e9ab45",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Yeah, I noticed afterward. Please don't forget to update this comment when you turn `AExpr` to a separate type.",
+        "createdAt" : "2020-06-29T11:58:02Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ab710e0f-a2b1-41fd-881d-fa0c180cf3ea",
+        "parentId" : "1fdea0e7-9d8c-4307-9924-62d530e9ab45",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "See #6521 ",
+        "createdAt" : "2020-06-29T13:57:17Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : 23,
+    "diffHunk" : "@@ -0,0 +1,327 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  We reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,"
+  },
+  {
+    "id" : "391ea2ae-cf5d-498b-94c9-53069aed65d4",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "b4c3a5aa-d3e2-4e00-83b4-0f8cb7c1d845",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    For speedy, the ANF pass occurs after translation to De-Bruijn indices and closure conversions,\r\n```",
+        "createdAt" : "2020-06-26T09:34:44Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ea499d71-9fb4-4361-9803-1bc686c0c809",
+        "parentId" : "b4c3a5aa-d3e2-4e00-83b4-0f8cb7c1d845",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Also, if we're nitpicking, there's no hyphen in De Bruijn.",
+        "createdAt" : "2020-06-26T14:04:09Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5312c69c-a820-4864-b1bf-5ad9486e3dab",
+        "parentId" : "b4c3a5aa-d3e2-4e00-83b4-0f8cb7c1d845",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-06-29T12:06:21Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,327 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  We reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp)\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De-Bruin and closure conversions,"
+  },
+  {
+    "id" : "1d7f9441-3730-48dd-a2fc-ea028ad817ea",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "If we don't use this, let's please remove it.",
+        "createdAt" : "2020-06-26T09:35:50Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0ecb324c-3ee4-4f80-b629-1c7885e71232",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "@garyverhaegen-da  is investigating if his approach to avoiding the stack overflow means that we can reinstate the commented out version.\r\n",
+        "createdAt" : "2020-06-29T13:03:56Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7e0669cc-1c56-4395-aa9e-5c1109abc351",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I agreed with Gary that we can leave investigation of flaky stack overflow to a future PR.",
+        "createdAt" : "2020-06-30T09:33:18Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a15d638a-a131-46a5-9fc8-c9376118f89a",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You just got 6 CI failures on this PR and I can still reliably reproduce them locally if I do 20 runs. This is going to make our CI unusable and we are also just before making a new stable release. Let’s please not merge this before this is addressed.",
+        "createdAt" : "2020-06-30T09:59:15Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "59d27dd3-985a-4a09-8356-010ac08e2de9",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "yup. we will not merge until this is sorted",
+        "createdAt" : "2020-06-30T10:35:39Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5fbb8be5-e38c-4c57-b489-a802b25c8c26",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Yes, this definitely a blocker for merging this.",
+        "createdAt" : "2020-06-30T10:36:30Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4ced79bb-4c2f-4504-b7e7-e9333460f796",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "This is sorted. The fix was for validate/go to not consume stack for nested let expressions.\r\nThe last build on CI was green. No flaky stack overflowe.\r\nAnd I got 100/100 locally on a problematic test.\r\n```\r\n$ bazel test -t- --runs_per_test=100 //ledger/sandbox:conformance-test-static-time-memory\r\n```",
+        "createdAt" : "2020-06-30T14:53:33Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e28d70d1-b128-4345-8543-373e3e700b32",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "This is fixed now. The problem was in `validate/go`. The last CI on green was good.",
+        "createdAt" : "2020-06-30T15:11:19Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b10d66f7-50fa-425f-9b2b-e80ac71d96d6",
+        "parentId" : "c60aae27-cb0b-40ac-a3c3-4c0346cd388c",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "> I agreed with Gary that we can leave investigation of flaky stack overflow to a future PR.\r\n\r\nTo clarify, I am looking into reintroducing the commented-out alternative for transformLet1 and resolve the SO issues that ensue, and that is the piece of work we think can be delayed to a separate PR. There was no intention of merging this PR if it were known-flaky in its current state.",
+        "createdAt" : "2020-06-30T15:32:04Z",
+        "updatedAt" : "2020-06-30T15:32:04Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,327 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  We reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp)\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De-Bruin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int)\n+\n+  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\n+  case class DepthA(n: Int)\n+\n+  /** `Env` contains the mapping from old to new depth, as well as the old-depth as these\n+    * components always travel together */\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  // TODO: reference something here about trampolines\n+  sealed abstract class Trampoline[T] {\n+    @tailrec\n+    final def bounce: T = this match {\n+      case Land(x) => x\n+      case Bounce(continue) => continue().bounce\n+    }\n+  }\n+\n+  final case class Land[T](x: T) extends Trampoline[T]\n+  final case class Bounce[T](continue: () => Trampoline[T]) extends Trampoline[T]\n+\n+  /** `Res` is the final, fully transformed ANF expression, returned by the continuations. */\n+  type Res = Trampoline[AExpr]\n+\n+  /** `K[T]` is the continuation type which must be passed to the core transformation\n+    functions, i,e, `transformExp`.\n+\n+    Notice how the DepthA is threaded through the continuation.\n+    */\n+  type K[T] = ((DepthA, T) => Res)\n+\n+  /** During conversion we need to deal with bindings which are made/found at a given\n+    absolute stack depth. These are represented using `AbsBinding`.\n+\n+    Note the contrast with the expression form `ELocS` which indicates a relative offset\n+    from the top of the stack. This relative-position is used in both the original\n+    expression which we traverse AND the new ANF expression we are constructing.\n+    */\n+  case class AbsBinding(abs: DepthA)\n+\n+  def makeAbsoluteB(env: Env, rel: Int): AbsBinding = {\n+    val oldAbs = DepthE(env.oldDepth.n - rel)\n+    env.absMap.get(oldAbs) match {\n+      case None => throw CompilationError(s\"makeAbsoluteB(env=$env,rel=$rel)\")\n+      case Some(abs) => AbsBinding(abs)\n+    }\n+  }\n+\n+  def makeRelativeB(depth: DepthA, binding: AbsBinding): Int = {\n+    (depth.n - binding.abs.n)\n+  }\n+\n+  type AbsAtom = Either[SExprAtomic, AbsBinding]\n+\n+  def makeAbsoluteA(env: Env, atom: SExprAtomic): AbsAtom = atom match {\n+    case SELocS(rel) => Right(makeAbsoluteB(env, rel))\n+    case x => Left(x)\n+  }\n+\n+  def makeRelativeA(depth: DepthA)(atom: AbsAtom): SExprAtomic = atom match {\n+    case Left(x: SELocS) => throw CompilationError(s\"makeRelativeA: unexpected: $x\")\n+    case Left(atom) => atom\n+    case Right(binding) => SELocS(makeRelativeB(depth, binding))\n+  }\n+\n+  def relocateA(depth: DepthA, env: Env)(atom: SExprAtomic): SExprAtomic = {\n+    makeRelativeA(depth)(makeAbsoluteA(env, atom))\n+  }\n+\n+  type AbsLoc = Either[SELoc, AbsBinding]\n+\n+  def makeAbsoluteL(env: Env, loc: SELoc): AbsLoc = loc match {\n+    case SELocS(rel) => Right(makeAbsoluteB(env, rel))\n+    case x: SELocA => Left(x)\n+    case x: SELocF => Left(x)\n+  }\n+\n+  def makeRelativeL(depth: DepthA)(loc: AbsLoc): SELoc = loc match {\n+    case Left(x: SELocS) => throw CompilationError(s\"makeRelativeL: unexpected: $x\")\n+    case Left(loc) => loc\n+    case Right(binding) => SELocS(makeRelativeB(depth, binding))\n+  }\n+\n+  def relocateL(depth: DepthA, env: Env)(loc: SELoc): SELoc = {\n+    makeRelativeL(depth)(makeAbsoluteL(env, loc))\n+  }\n+\n+  def flattenExp(depth: DepthA, env: Env, exp: SExpr): AExpr = {\n+    val k0: K[SExpr] = {\n+      case (depth @ _, expr) => Land(AExpr(expr))\n+    }\n+    transformExp(depth, env, exp, k0).bounce\n+  }\n+\n+  def transformLet1(depth: DepthA, env: Env, rhs: SExpr, body: SExpr, k: K[SExpr]): Res = {\n+    val rhs1 = flattenExp(depth, env, rhs).wrapped\n+    val depth1 = DepthA(depth.n + 1)\n+    val env1 = trackBindings(depth, env, 1)\n+    val body1 = flattenExp(depth1, env1, body).wrapped\n+    k(depth, SELet1(rhs1, body1))\n+  }\n+\n+  /*def transformLet1(depth: DepthA, env: Env, rhs: SExpr, body: SExpr, k: K[SExpr]): Res = {"
+  },
+  {
+    "id" : "c7420042-9eda-42a5-987b-52108333c4ba",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "a2d700c8-3f5b-4445-b0cb-6afd5878489b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why are we treating the `n == 0` case separately?",
+        "createdAt" : "2020-06-29T12:04:24Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a843882a-cfcd-4ea3-8a69-761d24b7b7f9",
+        "parentId" : "a2d700c8-3f5b-4445-b0cb-6afd5878489b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "efficiency",
+        "createdAt" : "2020-06-30T07:43:55Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "89c633f4-f723-49fb-98a0-48af96918913",
+        "parentId" : "a2d700c8-3f5b-4445-b0cb-6afd5878489b",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not convinced we gain any measurable performance benefits here. Since this is not part of a hot loop, let's please remove the special case and stick to easier to read code.",
+        "createdAt" : "2020-06-30T08:17:18Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "01a4b248-c013-4ad4-8a93-4e9b44958f2a",
+        "parentId" : "a2d700c8-3f5b-4445-b0cb-6afd5878489b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok",
+        "createdAt" : "2020-06-30T10:43:58Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,339 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int)\n+\n+  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\n+  case class DepthA(n: Int)\n+\n+  /** `Env` contains the mapping from old to new depth, as well as the old-depth as these\n+    * components always travel together */\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {"
+  },
+  {
+    "id" : "e0471111-34d3-4d86-9bdf-5eda7278a09b",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "d31becf2-3021-4275-92f9-c68c41ce2d70",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I suppose that is a comment for the reviewer. I've acknowledged it. Let's remove it now.",
+        "createdAt" : "2020-06-29T12:17:41Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a44072a6-7592-4b9b-8c8d-850270379cf6",
+        "parentId" : "d31becf2-3021-4275-92f9-c68c41ce2d70",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-06-30T09:01:28Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,339 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int)\n+\n+  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\n+  case class DepthA(n: Int)\n+\n+  /** `Env` contains the mapping from old to new depth, as well as the old-depth as these\n+    * components always travel together */\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  // TODO: reference something here about trampolines\n+  sealed abstract class Trampoline[T] {\n+    @tailrec\n+    final def bounce: T = this match {\n+      case Land(x) => x\n+      case Bounce(continue) => continue().bounce\n+    }\n+  }\n+\n+  final case class Land[T](x: T) extends Trampoline[T]\n+  final case class Bounce[T](continue: () => Trampoline[T]) extends Trampoline[T]\n+\n+  /** `Res` is the final, fully transformed ANF expression, returned by the continuations. */\n+  type Res = Trampoline[AExpr]\n+\n+  /** `K[T]` is the continuation type which must be passed to the core transformation\n+    functions, i,e, `transformExp`.\n+\n+    Notice how the DepthA is threaded through the continuation.\n+    */\n+  type K[T] = ((DepthA, T) => Res)\n+\n+  /** During conversion we need to deal with bindings which are made/found at a given\n+    absolute stack depth. These are represented using `AbsBinding`.\n+\n+    Note the contrast with the expression form `ELocS` which indicates a relative offset\n+    from the top of the stack. This relative-position is used in both the original\n+    expression which we traverse AND the new ANF expression we are constructing.\n+    */\n+  case class AbsBinding(abs: DepthA)\n+\n+  def makeAbsoluteB(env: Env, rel: Int): AbsBinding = {\n+    val oldAbs = DepthE(env.oldDepth.n - rel)\n+    env.absMap.get(oldAbs) match {\n+      case None => throw CompilationError(s\"makeAbsoluteB(env=$env,rel=$rel)\")\n+      case Some(abs) => AbsBinding(abs)\n+    }\n+  }\n+\n+  def makeRelativeB(depth: DepthA, binding: AbsBinding): Int = {\n+    (depth.n - binding.abs.n)\n+  }\n+\n+  type AbsAtom = Either[SExprAtomic, AbsBinding]\n+\n+  def makeAbsoluteA(env: Env, atom: SExprAtomic): AbsAtom = atom match {\n+    case SELocS(rel) => Right(makeAbsoluteB(env, rel))\n+    case x => Left(x)\n+  }\n+\n+  def makeRelativeA(depth: DepthA)(atom: AbsAtom): SExprAtomic = atom match {\n+    case Left(x: SELocS) => throw CompilationError(s\"makeRelativeA: unexpected: $x\")\n+    case Left(atom) => atom\n+    case Right(binding) => SELocS(makeRelativeB(depth, binding))\n+  }\n+\n+  def relocateA(depth: DepthA, env: Env)(atom: SExprAtomic): SExprAtomic = {\n+    makeRelativeA(depth)(makeAbsoluteA(env, atom))\n+  }\n+\n+  type AbsLoc = Either[SELoc, AbsBinding]\n+\n+  def makeAbsoluteL(env: Env, loc: SELoc): AbsLoc = loc match {\n+    case SELocS(rel) => Right(makeAbsoluteB(env, rel))\n+    case x: SELocA => Left(x)\n+    case x: SELocF => Left(x)\n+  }\n+\n+  def makeRelativeL(depth: DepthA)(loc: AbsLoc): SELoc = loc match {\n+    case Left(x: SELocS) => throw CompilationError(s\"makeRelativeL: unexpected: $x\")\n+    case Left(loc) => loc\n+    case Right(binding) => SELocS(makeRelativeB(depth, binding))\n+  }\n+\n+  def relocateL(depth: DepthA, env: Env)(loc: SELoc): SELoc = {\n+    makeRelativeL(depth)(makeAbsoluteL(env, loc))\n+  }\n+\n+  def flattenExp(depth: DepthA, env: Env, exp: SExpr, k: (AExpr => Trampoline[AExpr])): Res = {\n+    Bounce(() => k(transformExp(depth, env, exp, { case (_, sexpr) => Land(AExpr(sexpr)) }).bounce))\n+  }\n+\n+  def transformLet1(depth: DepthA, env: Env, rhs: SExpr, body: SExpr, k: K[SExpr]): Res = {\n+    flattenExp(\n+      depth,\n+      env,\n+      rhs, { rhs1 =>\n+        val depth1 = DepthA(depth.n + 1)\n+        val env1 = trackBindings(depth, env, 1)\n+        flattenExp(depth1, env1, body, { body1 =>\n+          k(depth, SELet1(rhs1.wrapped, body1.wrapped))\n+        })\n+      }\n+    )\n+  }\n+\n+  /*def transformLet1(depth: DepthA, env: Env, rhs: SExpr, body: SExpr, k: K[SExpr]): Res = {\n+    // This is a better transform, but sadly it can blow the stack for deeply nested lets.\n+    transformExp(depth, env, rhs, {\n+      case (depth, rhs) =>\n+        val depth1 = DepthA(depth.n + 1)\n+        val env1 = trackBindings(depth, env, 1)\n+        val body1 = transformExp(depth1, env1, body, k).bounce\n+        Land(SELet1(rhs, body1))\n+    })\n+  }*/\n+\n+  def flattenAlts(depth: DepthA, env: Env, alts: Array[SCaseAlt]): Array[SCaseAlt] = {\n+    alts.map {\n+      case SCaseAlt(pat, body0) =>\n+        val n = patternNArgs(pat)\n+        val env1 = trackBindings(depth, env, n)\n+        SCaseAlt(pat, flattenExp(DepthA(depth.n + n), env1, body0, body => {\n+          Land(body)\n+        }).bounce.wrapped)\n+    }\n+  }\n+\n+  def patternNArgs(pat: SCasePat): Int = pat match {\n+    case _: SCPEnum | _: SCPPrimCon | SCPNil | SCPDefault | SCPNone => 0\n+    case _: SCPVariant | SCPSome => 1\n+    case SCPCons => 2\n+  }\n+\n+  /** `transformExp` is the function at the heart of the ANF transformation.  You can read\n+    it's type as saying: \"Caller, give me a general expression `exp`, (& depth/env info),\n+    and a continuation function `k` which says what you want to do with the transformed\n+    expression. Then I will do the transform, and call `k` with it. I reserve the right to\n+    wrap further expression-AST around the expression returned by `k`.\n+    See: `atomizeExp` for a instance where this wrapping occurs.\n+    */\n+  def transformExp(depth: DepthA, env: Env, exp: SExpr, k: K[SExpr]): Res =\n+    Bounce(() =>\n+      exp match {\n+        case atom: SExprAtomic => k(depth, relocateA(depth, env)(atom))\n+        case x: SEVal => k(depth, x)\n+        case x: SEImportValue => k(depth, x)\n+\n+        // (NC) I'm not entirely happy with how the following code is formatted, but\n+        // scalafmt wont have it any other way."
+  },
+  {
+    "id" : "46c11f51-6e5f-4105-b845-3fb2ed482dfe",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "29455654-dafd-417e-8383-5830de9c01d0",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "This function and `relocateL` are both very small and called exactly once. Let's please inline them at their call sites for the sake of readability.",
+        "createdAt" : "2020-06-29T12:21:19Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a7c30423-6fa5-476b-9771-703a5d6f1705",
+        "parentId" : "29455654-dafd-417e-8383-5830de9c01d0",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "inlined",
+        "createdAt" : "2020-06-30T09:01:35Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,339 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int)\n+\n+  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\n+  case class DepthA(n: Int)\n+\n+  /** `Env` contains the mapping from old to new depth, as well as the old-depth as these\n+    * components always travel together */\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  // TODO: reference something here about trampolines\n+  sealed abstract class Trampoline[T] {\n+    @tailrec\n+    final def bounce: T = this match {\n+      case Land(x) => x\n+      case Bounce(continue) => continue().bounce\n+    }\n+  }\n+\n+  final case class Land[T](x: T) extends Trampoline[T]\n+  final case class Bounce[T](continue: () => Trampoline[T]) extends Trampoline[T]\n+\n+  /** `Res` is the final, fully transformed ANF expression, returned by the continuations. */\n+  type Res = Trampoline[AExpr]\n+\n+  /** `K[T]` is the continuation type which must be passed to the core transformation\n+    functions, i,e, `transformExp`.\n+\n+    Notice how the DepthA is threaded through the continuation.\n+    */\n+  type K[T] = ((DepthA, T) => Res)\n+\n+  /** During conversion we need to deal with bindings which are made/found at a given\n+    absolute stack depth. These are represented using `AbsBinding`.\n+\n+    Note the contrast with the expression form `ELocS` which indicates a relative offset\n+    from the top of the stack. This relative-position is used in both the original\n+    expression which we traverse AND the new ANF expression we are constructing.\n+    */\n+  case class AbsBinding(abs: DepthA)\n+\n+  def makeAbsoluteB(env: Env, rel: Int): AbsBinding = {\n+    val oldAbs = DepthE(env.oldDepth.n - rel)\n+    env.absMap.get(oldAbs) match {\n+      case None => throw CompilationError(s\"makeAbsoluteB(env=$env,rel=$rel)\")\n+      case Some(abs) => AbsBinding(abs)\n+    }\n+  }\n+\n+  def makeRelativeB(depth: DepthA, binding: AbsBinding): Int = {\n+    (depth.n - binding.abs.n)\n+  }\n+\n+  type AbsAtom = Either[SExprAtomic, AbsBinding]\n+\n+  def makeAbsoluteA(env: Env, atom: SExprAtomic): AbsAtom = atom match {\n+    case SELocS(rel) => Right(makeAbsoluteB(env, rel))\n+    case x => Left(x)\n+  }\n+\n+  def makeRelativeA(depth: DepthA)(atom: AbsAtom): SExprAtomic = atom match {\n+    case Left(x: SELocS) => throw CompilationError(s\"makeRelativeA: unexpected: $x\")\n+    case Left(atom) => atom\n+    case Right(binding) => SELocS(makeRelativeB(depth, binding))\n+  }\n+\n+  def relocateA(depth: DepthA, env: Env)(atom: SExprAtomic): SExprAtomic = {"
+  },
+  {
+    "id" : "6c7d6089-6fd7-4b9e-91ff-aaa0e88cd963",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "b2b3c3d1-cbfc-4cb3-8e6b-7cd2ac8d6046",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm not sure this explanation really cuts it. I'd say it's rather that `ELocS` is indexing relative to the end of the stack and what you're calling \"absolute\" is relative to the beginning of the stack frame of the current function.",
+        "createdAt" : "2020-06-29T12:56:50Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "7cbeb413-cec4-4e67-9c2f-7d95c02a1a55",
+        "parentId" : "b2b3c3d1-cbfc-4cb3-8e6b-7cd2ac8d6046",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I've improved the explanation in the comment,",
+        "createdAt" : "2020-06-30T09:01:57Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6f61126d-8c83-4cf2-8bf1-9ad3fb954414",
+        "parentId" : "b2b3c3d1-cbfc-4cb3-8e6b-7cd2ac8d6046",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "> An absolute stack depth is the offset from the bottom of the stack, which is empty when a function is entered.\r\n\r\nThat is not the case because we use the same stack throughout the whole interpretation. I would prefer to clarify this even further.",
+        "createdAt" : "2020-06-30T10:19:37Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "5e1ed089-72f6-4695-ad6a-2f59d46e2c9f",
+        "parentId" : "b2b3c3d1-cbfc-4cb3-8e6b-7cd2ac8d6046",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "clarified further",
+        "createdAt" : "2020-06-30T10:44:14Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : 111,
+    "diffHunk" : "@@ -0,0 +1,339 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int)\n+\n+  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\n+  case class DepthA(n: Int)\n+\n+  /** `Env` contains the mapping from old to new depth, as well as the old-depth as these\n+    * components always travel together */\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  // TODO: reference something here about trampolines\n+  sealed abstract class Trampoline[T] {\n+    @tailrec\n+    final def bounce: T = this match {\n+      case Land(x) => x\n+      case Bounce(continue) => continue().bounce\n+    }\n+  }\n+\n+  final case class Land[T](x: T) extends Trampoline[T]\n+  final case class Bounce[T](continue: () => Trampoline[T]) extends Trampoline[T]\n+\n+  /** `Res` is the final, fully transformed ANF expression, returned by the continuations. */\n+  type Res = Trampoline[AExpr]\n+\n+  /** `K[T]` is the continuation type which must be passed to the core transformation\n+    functions, i,e, `transformExp`.\n+\n+    Notice how the DepthA is threaded through the continuation.\n+    */\n+  type K[T] = ((DepthA, T) => Res)\n+\n+  /** During conversion we need to deal with bindings which are made/found at a given\n+    absolute stack depth. These are represented using `AbsBinding`.\n+\n+    Note the contrast with the expression form `ELocS` which indicates a relative offset\n+    from the top of the stack. This relative-position is used in both the original\n+    expression which we traverse AND the new ANF expression we are constructing.\n+    */"
+  },
+  {
+    "id" : "8908257e-1f13-4542-9fd8-aa9f0783969a",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "0cbf6058-1cc7-4907-9245-e02e154a7144",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The code below might become less verbose if we use something like\r\n```suggestion\r\n  case class DepthA(n: Int) {\r\n    def incr(m: Int) = DepthA(n+m)\r\n  }\r\n```\r\nThis might also help for `DepthE`.",
+        "createdAt" : "2020-06-29T13:14:23Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ed24d64e-5590-472a-a471-01ff406167e2",
+        "parentId" : "0cbf6058-1cc7-4907-9245-e02e154a7144",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I made the change for `DepthA` and `DepthE`. It's nice. Thanks.",
+        "createdAt" : "2020-06-30T09:02:27Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,339 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int)\n+\n+  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\n+  case class DepthA(n: Int)"
+  },
+  {
+    "id" : "8d2c8602-27e8-4b0e-b7c5-9f6238c5f217",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "e2d2b5ab-b0d3-4439-9296-a2f9a4ef2fd9",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Don't we need another parameter for this function which indicates if we really need to produce an atom or if a \"simple\" application is fine as well? I have a feeling that we currently transform, say,\r\n```haskell\r\n\\x -> f x x\r\n```\r\ninto\r\n```haskell\r\n\\x -> let y = f x x in y\r\n```\r\nSince performance has already significantly improved with the current state, we could do that in a follow-up PR.",
+        "createdAt" : "2020-06-29T13:23:13Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2a6bc9fe-3c63-4621-9354-4ddfc06bb8ca",
+        "parentId" : "e2d2b5ab-b0d3-4439-9296-a2f9a4ef2fd9",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I created an issue so we don't forget about this: https://github.com/digital-asset/daml/issues/6535",
+        "createdAt" : "2020-06-30T09:08:33Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "835aeabc-0438-4e59-aa4e-e18fb76e78aa",
+        "parentId" : "e2d2b5ab-b0d3-4439-9296-a2f9a4ef2fd9",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Thank you.",
+        "createdAt" : "2020-06-30T10:20:02Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,339 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int)\n+\n+  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\n+  case class DepthA(n: Int)\n+\n+  /** `Env` contains the mapping from old to new depth, as well as the old-depth as these\n+    * components always travel together */\n+  case class Env(absMap: Map[DepthE, DepthA], oldDepth: DepthE)\n+\n+  val initEnv = Env(absMap = Map.empty, oldDepth = DepthE(0))\n+\n+  def trackBindings(depth: DepthA, env: Env, n: Int): Env = {\n+    if (n == 0) {\n+      env\n+    } else {\n+      val extra = (0 to n - 1).map(i => (DepthE(env.oldDepth.n + i), DepthA(depth.n + i)))\n+      Env(absMap = env.absMap ++ extra, oldDepth = DepthE(env.oldDepth.n + n))\n+    }\n+  }\n+\n+  // TODO: reference something here about trampolines\n+  sealed abstract class Trampoline[T] {\n+    @tailrec\n+    final def bounce: T = this match {\n+      case Land(x) => x\n+      case Bounce(continue) => continue().bounce\n+    }\n+  }\n+\n+  final case class Land[T](x: T) extends Trampoline[T]\n+  final case class Bounce[T](continue: () => Trampoline[T]) extends Trampoline[T]\n+\n+  /** `Res` is the final, fully transformed ANF expression, returned by the continuations. */\n+  type Res = Trampoline[AExpr]\n+\n+  /** `K[T]` is the continuation type which must be passed to the core transformation\n+    functions, i,e, `transformExp`.\n+\n+    Notice how the DepthA is threaded through the continuation.\n+    */\n+  type K[T] = ((DepthA, T) => Res)\n+\n+  /** During conversion we need to deal with bindings which are made/found at a given\n+    absolute stack depth. These are represented using `AbsBinding`.\n+\n+    Note the contrast with the expression form `ELocS` which indicates a relative offset\n+    from the top of the stack. This relative-position is used in both the original\n+    expression which we traverse AND the new ANF expression we are constructing.\n+    */\n+  case class AbsBinding(abs: DepthA)\n+\n+  def makeAbsoluteB(env: Env, rel: Int): AbsBinding = {\n+    val oldAbs = DepthE(env.oldDepth.n - rel)\n+    env.absMap.get(oldAbs) match {\n+      case None => throw CompilationError(s\"makeAbsoluteB(env=$env,rel=$rel)\")\n+      case Some(abs) => AbsBinding(abs)\n+    }\n+  }\n+\n+  def makeRelativeB(depth: DepthA, binding: AbsBinding): Int = {\n+    (depth.n - binding.abs.n)\n+  }\n+\n+  type AbsAtom = Either[SExprAtomic, AbsBinding]\n+\n+  def makeAbsoluteA(env: Env, atom: SExprAtomic): AbsAtom = atom match {\n+    case SELocS(rel) => Right(makeAbsoluteB(env, rel))\n+    case x => Left(x)\n+  }\n+\n+  def makeRelativeA(depth: DepthA)(atom: AbsAtom): SExprAtomic = atom match {\n+    case Left(x: SELocS) => throw CompilationError(s\"makeRelativeA: unexpected: $x\")\n+    case Left(atom) => atom\n+    case Right(binding) => SELocS(makeRelativeB(depth, binding))\n+  }\n+\n+  def relocateA(depth: DepthA, env: Env)(atom: SExprAtomic): SExprAtomic = {\n+    makeRelativeA(depth)(makeAbsoluteA(env, atom))\n+  }\n+\n+  type AbsLoc = Either[SELoc, AbsBinding]\n+\n+  def makeAbsoluteL(env: Env, loc: SELoc): AbsLoc = loc match {\n+    case SELocS(rel) => Right(makeAbsoluteB(env, rel))\n+    case x: SELocA => Left(x)\n+    case x: SELocF => Left(x)\n+  }\n+\n+  def makeRelativeL(depth: DepthA)(loc: AbsLoc): SELoc = loc match {\n+    case Left(x: SELocS) => throw CompilationError(s\"makeRelativeL: unexpected: $x\")\n+    case Left(loc) => loc\n+    case Right(binding) => SELocS(makeRelativeB(depth, binding))\n+  }\n+\n+  def relocateL(depth: DepthA, env: Env)(loc: SELoc): SELoc = {\n+    makeRelativeL(depth)(makeAbsoluteL(env, loc))\n+  }\n+\n+  def flattenExp(depth: DepthA, env: Env, exp: SExpr, k: (AExpr => Trampoline[AExpr])): Res = {\n+    Bounce(() => k(transformExp(depth, env, exp, { case (_, sexpr) => Land(AExpr(sexpr)) }).bounce))\n+  }\n+\n+  def transformLet1(depth: DepthA, env: Env, rhs: SExpr, body: SExpr, k: K[SExpr]): Res = {\n+    flattenExp(\n+      depth,\n+      env,\n+      rhs, { rhs1 =>\n+        val depth1 = DepthA(depth.n + 1)\n+        val env1 = trackBindings(depth, env, 1)\n+        flattenExp(depth1, env1, body, { body1 =>\n+          k(depth, SELet1(rhs1.wrapped, body1.wrapped))\n+        })\n+      }\n+    )\n+  }\n+\n+  /*def transformLet1(depth: DepthA, env: Env, rhs: SExpr, body: SExpr, k: K[SExpr]): Res = {\n+    // This is a better transform, but sadly it can blow the stack for deeply nested lets.\n+    transformExp(depth, env, rhs, {\n+      case (depth, rhs) =>\n+        val depth1 = DepthA(depth.n + 1)\n+        val env1 = trackBindings(depth, env, 1)\n+        val body1 = transformExp(depth1, env1, body, k).bounce\n+        Land(SELet1(rhs, body1))\n+    })\n+  }*/\n+\n+  def flattenAlts(depth: DepthA, env: Env, alts: Array[SCaseAlt]): Array[SCaseAlt] = {\n+    alts.map {\n+      case SCaseAlt(pat, body0) =>\n+        val n = patternNArgs(pat)\n+        val env1 = trackBindings(depth, env, n)\n+        SCaseAlt(pat, flattenExp(DepthA(depth.n + n), env1, body0, body => {\n+          Land(body)\n+        }).bounce.wrapped)\n+    }\n+  }\n+\n+  def patternNArgs(pat: SCasePat): Int = pat match {\n+    case _: SCPEnum | _: SCPPrimCon | SCPNil | SCPDefault | SCPNone => 0\n+    case _: SCPVariant | SCPSome => 1\n+    case SCPCons => 2\n+  }\n+\n+  /** `transformExp` is the function at the heart of the ANF transformation.  You can read\n+    it's type as saying: \"Caller, give me a general expression `exp`, (& depth/env info),\n+    and a continuation function `k` which says what you want to do with the transformed\n+    expression. Then I will do the transform, and call `k` with it. I reserve the right to\n+    wrap further expression-AST around the expression returned by `k`.\n+    See: `atomizeExp` for a instance where this wrapping occurs.\n+    */\n+  def transformExp(depth: DepthA, env: Env, exp: SExpr, k: K[SExpr]): Res ="
+  },
+  {
+    "id" : "e88797b6-2d45-4fd4-a151-51acca1ce0bb",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "4b6e39fd-7ae4-4800-94f6-32b2d357e0d0",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Please delete this definition and use `com.daml.lf.speedy.Compiler.CompilationError` instead.",
+        "createdAt" : "2020-06-30T12:31:44Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "55c02c12-fe8b-4acb-ab19-3b6edbc6a8d5",
+        "parentId" : "4b6e39fd-7ae4-4800-94f6-32b2d357e0d0",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "done",
+        "createdAt" : "2020-06-30T15:23:58Z",
+        "updatedAt" : "2020-06-30T15:23:58Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,325 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)"
+  },
+  {
+    "id" : "d60edfab-2d4c-4cff-b132-65116f519aa9",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "fd2cfe01-5eed-4eb4-81d7-79fab8fc7be7",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```suggestion\r\nprivate[speedy] object Anf {\r\n```",
+        "createdAt" : "2020-06-30T12:35:59Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3288658e-9728-4388-909e-679c88669c77",
+        "parentId" : "fd2cfe01-5eed-4eb4-81d7-79fab8fc7be7",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I tried this. But sadly `flattenToAnf` is used in daml-script. I put a note in the code.",
+        "createdAt" : "2020-06-30T15:21:04Z",
+        "updatedAt" : "2020-06-30T15:21:05Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0d811aa9-04cc-4dd5-a63e-38b7a35b784c",
+        "parentId" : "fd2cfe01-5eed-4eb4-81d7-79fab8fc7be7",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "then maybe \r\n\r\n```suggestion\r\nprivate[lf] object Anf {\r\n```",
+        "createdAt" : "2020-06-30T15:29:27Z",
+        "updatedAt" : "2020-06-30T15:30:56Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : 35,
+    "diffHunk" : "@@ -0,0 +1,325 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {"
+  },
+  {
+    "id" : "83c6023e-7f54-4728-a840-c3b492ab184b",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "e0a1d0df-c56d-4cfe-8f62-f187fb83ee0b",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Could you please make all the other definition private ? \r\nIf you want to write unit tests for some of functions, you are authorize to make those package private (with a comment). \r\n ",
+        "createdAt" : "2020-06-30T12:37:39Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "22ee9c43-5fd9-409e-9b61-a66340598da5",
+        "parentId" : "e0a1d0df-c56d-4cfe-8f62-f187fb83ee0b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "made everything else private as you suggest",
+        "createdAt" : "2020-06-30T15:21:23Z",
+        "updatedAt" : "2020-06-30T15:21:23Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "336ad4df-59d7-46f8-901c-28e6ce1a41ec",
+        "parentId" : "e0a1d0df-c56d-4cfe-8f62-f187fb83ee0b",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "By definitions, I mean methods, **and** fields, **and** types. ",
+        "createdAt" : "2020-06-30T15:30:36Z",
+        "updatedAt" : "2020-06-30T17:06:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : 38,
+    "diffHunk" : "@@ -0,0 +1,325 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {"
+  },
+  {
+    "id" : "76a49b4c-4c75-40dd-820c-ea065b20c59c",
+    "prId" : 6440,
+    "comments" : [
+      {
+        "id" : "04040986-fb4f-44cd-a893-ece6673158cd",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```suggestion\r\n  final case class DepthE(n: Int) {\r\n```",
+        "createdAt" : "2020-06-30T12:56:20Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4ecd80da-04b0-40ce-a97c-ec8f8dfc06bb",
+        "parentId" : "04040986-fb4f-44cd-a893-ece6673158cd",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Fyi, here you could use scalaz Tag. This will avoid allocation of object. \r\n\r\nsomething like. \r\n```scala  \r\n  import scalaz.{@@, Tag}\r\n\r\n\r\n  /** `DepthE` tracks the stack-depth of the original expression being traversed */\r\n  trait DepthETag\r\n  type DepthE = Int @@ DepthETag\r\n  val DepthE = Tag.of[DepthETag]\r\n\r\n  /** `DepthA` tracks the stack-depth of the ANF expression being constructed */\r\n  trait DepthATag\r\n  type DepthA = Int @@ DepthATag\r\n  val DepthA = Tag.of[DepthATag]\r\n\r\n  def incr[Tag](x: Int @@ Tag, i: Int): Int @@ Tag =\r\n    Tag(Tag.unwrap(x) + i)\r\n```",
+        "createdAt" : "2020-06-30T12:59:08Z",
+        "updatedAt" : "2020-06-30T15:19:02Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0d82dcfd-a04b-4486-b382-7b9f120d8fe4",
+        "parentId" : "04040986-fb4f-44cd-a893-ece6673158cd",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I added the `final`\r\nI didn;t make the change to scalaz",
+        "createdAt" : "2020-06-30T15:22:02Z",
+        "updatedAt" : "2020-06-30T15:22:13Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "400cfd21-9af9-4f36-8e39-ab898c021649",
+        "parentId" : "04040986-fb4f-44cd-a893-ece6673158cd",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fine with me. \r\n",
+        "createdAt" : "2020-06-30T15:32:07Z",
+        "updatedAt" : "2020-06-30T15:32:34Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f1ca0fa6575631a0602ea895e0155fae12fd986b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,325 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.lf.speedy\n+\n+/**\n+  Transformation to ANF based AST for the speedy interpreter.\n+\n+  \"ANF\" stands for A-normal form.\n+  In essence it means that sub-expressions of most expression nodes are in atomic-form.\n+  The one exception is the let-expression.\n+\n+  Atomic mean: a variable reference (ELoc), a (literal) value, or a builtin.\n+  This is captured by any speedy-expression which `extends SExprAtomic`.\n+\n+  TODO: <EXAMPLE HERE>\n+\n+  The reason we convert to ANF is to improve the efficiency of speedy execution: the\n+  execution engine can take advantage of the atomic assumption, and often removes\n+  additional execution steps - in particular the pushing of continuations to allow\n+  execution to continue after a compound expression is reduced to a value.\n+\n+  The speedy machine now expects that it will never have to execute a non-ANF expression,\n+  crashing at runtime if one is encountered.  In particular we must ensure that the\n+  expression forms: SEAppGeneral and SECase are removed, and replaced by the simpler\n+  SEAppAtomic and SECaseAtomic (plus SELet as required).\n+\n+  */\n+import com.daml.lf.speedy.SExpr._\n+\n+import scala.annotation.tailrec\n+\n+object Anf {\n+\n+  /*** Entry point for the ANF transformation phase */\n+  def flattenToAnf(exp: SExpr): AExpr = {\n+    val depth = DepthA(0)\n+    val env = initEnv\n+    flattenExp(depth, env, exp, flattenedExpression => Land(flattenedExpression)).bounce\n+  }\n+\n+  /**\n+    The transformation code is implemented using a continuation-passing style of\n+    translation (which is quite common for translation to ANF). In general, naming nested\n+    compound expressions requires turning an expression kind of inside out, lifting the\n+    introduced let-expression up to the the nearest enclosing abstraction or case-branch.\n+\n+    For speedy, the ANF pass occurs after translation to De Brujin and closure conversions,\n+    which adds the additional complication of re-indexing the variable indexes. This is\n+    achieved by tracking the old and new depth & the mapping between them. See the types:\n+    DepthE, DepthA and Env.\n+\n+    There is also the issue of avoiding stack-overflow during compilation, which is\n+    managed by the using of a Trampoline[T] type.\n+    */\n+  case class CompilationError(error: String) extends RuntimeException(error)\n+\n+  /** `DepthE` tracks the stack-depth of the original expression being traversed */\n+  case class DepthE(n: Int) {"
+  }
+]

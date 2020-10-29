@@ -1,0 +1,33 @@
+[
+  {
+    "id" : "da589ee1-e50d-4c2b-8320-f5b68ab10513",
+    "prId" : 1481,
+    "comments" : [
+      {
+        "id" : "bef48876-0053-45e6-9923-d5dca0657c9a",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "scalaz ScalaCheckBinding includes an `Arbitrary` for `OneAnd[List, ?]` if you want to skip the runtime check below. (There's no benefit here to using the explicit `Gen` passing to `forAll` instead of implicit `Arbitrary` resolution.)",
+        "createdAt" : "2019-05-31T19:57:52Z",
+        "updatedAt" : "2019-06-03T14:49:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "15f2c5b1464e628ace830961aeced4e45bbcccac",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,50 @@\n+// Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.extractor.config\n+\n+import com.digitalasset.extractor.config.Generators._\n+import com.digitalasset.extractor.targets.Target\n+import org.scalacheck.Gen\n+import org.scalatest.prop.GeneratorDrivenPropertyChecks\n+import org.scalatest.{FlatSpec, Inside, Matchers}\n+\n+class ConfigParserSpec\n+    extends FlatSpec\n+    with Matchers\n+    with Inside\n+    with GeneratorDrivenPropertyChecks {\n+  behavior of ConfigParser.getClass.getSimpleName\n+\n+  val requiredArgs = Vector(\"--party\", \"Bob\")\n+\n+  it should \"parse template configuration\" in forAll(Gen.nonEmptyListOf(genTemplateConfig)) {\n+    templateConfigs: List[TemplateConfig] =>\n+      val args = requiredArgs ++ Vector(\"--templates\", templateConfigUserInput(templateConfigs))\n+      inside(ConfigParser.parse(args)) {\n+        case Some((config, _)) =>\n+          config.templateConfigs should ===(templateConfigs.toSet)\n+      }\n+  }\n+\n+  it should \"fail parsing when duplicate template configurations\" in forAll(\n+    Gen.nonEmptyListOf(genTemplateConfig)) { templateConfigs: List[TemplateConfig] =>"
+  }
+]

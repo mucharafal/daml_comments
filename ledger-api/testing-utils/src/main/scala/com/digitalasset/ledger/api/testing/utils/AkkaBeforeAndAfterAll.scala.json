@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "57fb589b-d45d-4400-8b80-a8a20de68e4a",
+    "prId" : 1400,
+    "comments" : [
+      {
+        "id" : "f93ec7f2-f462-40dc-946f-bdd1c5e79476",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "a `logger.error` would be better",
+        "createdAt" : "2019-05-27T15:49:52Z",
+        "updatedAt" : "2019-06-03T08:59:27Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "455e80a9ff9a1491c4764e344c9b5378f22b3abb",
+    "line" : null,
+    "diffHunk" : "@@ -3,16 +3,31 @@\n \n package com.digitalasset.ledger.api.testing.utils\n \n+import java.util.concurrent.Executors\n+\n import akka.actor.ActorSystem\n import akka.stream.ActorMaterializer\n+import com.google.common.util.concurrent.ThreadFactoryBuilder\n import org.scalatest.{BeforeAndAfterAll, Suite}\n \n-import scala.concurrent.Await\n+import scala.concurrent.{Await, ExecutionContext}\n import scala.concurrent.duration._\n \n-trait AkkaBeforeAndAfterAll extends BeforeAndAfterAll { self: Suite =>\n+trait AkkaBeforeAndAfterAll extends BeforeAndAfterAll {\n+  self: Suite =>\n+  protected def actorSystemName = this.getClass.getSimpleName\n+\n+  private val executorContext = ExecutionContext.fromExecutorService(\n+    Executors.newSingleThreadExecutor(\n+      new ThreadFactoryBuilder()\n+        .setDaemon(true)\n+        .setNameFormat(s\"${actorSystemName}-thread-pool-worker-%d\")\n+        .setUncaughtExceptionHandler((thread, _) =>\n+          println(s\"got an uncaught exception on thread: ${thread.getName}\"))"
+  },
+  {
+    "id" : "51e90f4b-1f6d-411c-b8a2-14931a035a34",
+    "prId" : 1171,
+    "comments" : [
+      {
+        "id" : "838c3616-3394-40e8-aab5-244084d973ac",
+        "parentId" : null,
+        "author" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "body" : "`val` to `def` would create a new ActorMaterializer every time, having a terrible outcome..",
+        "createdAt" : "2019-05-16T08:07:37Z",
+        "updatedAt" : "2019-05-28T09:31:39Z",
+        "lastEditedBy" : {
+          "login" : "gabor-aranyossy",
+          "name" : "Gabor Aranyossy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/29858875?u=03b5eca13ed32e74056ee216f2def12e249bcfed&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0375ea95bfb713575e4b4fa54cb2011cbc90f244",
+    "line" : null,
+    "diffHunk" : "@@ -12,9 +12,9 @@ import scala.concurrent.duration._\n \n trait AkkaBeforeAndAfterAll extends BeforeAndAfterAll { self: Suite =>\n \n-  protected implicit val system: ActorSystem = ActorSystem(this.getClass.getSimpleName)\n+  protected implicit def system: ActorSystem = ActorSystem(this.getClass.getSimpleName)"
+  }
+]

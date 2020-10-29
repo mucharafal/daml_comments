@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "d7467aa2-2b30-4810-b148-69ee333fe236",
+    "prId" : 3871,
+    "comments" : [
+      {
+        "id" : "868e01f5-47f9-4bb4-8965-457fb161890c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n    flatMap(identity)\r\n```",
+        "createdAt" : "2019-12-20T15:34:55Z",
+        "updatedAt" : "2019-12-22T14:40:42Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "54c2003e-1ec2-4390-92f6-036bb743a994",
+        "parentId" : "868e01f5-47f9-4bb4-8965-457fb161890c",
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Doesn't typecheck, because `A != Resource[B]`.",
+        "createdAt" : "2019-12-20T15:57:58Z",
+        "updatedAt" : "2019-12-22T14:40:42Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0c6828ae4d7794fc12160eb51a23c06485aac526",
+    "line" : 50,
+    "diffHunk" : "@@ -0,0 +1,134 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.resources\n+\n+import java.util.concurrent.atomic.AtomicBoolean\n+\n+import scala.collection.generic.CanBuildFrom\n+import scala.concurrent.{ExecutionContext, Future, Promise}\n+import scala.util.{Failure, Success, Try}\n+\n+trait Resource[A] {\n+  self =>\n+\n+  val asFuture: Future[A]\n+\n+  def release(): Future[Unit]\n+\n+  def map[B](f: A => B)(implicit executionContext: ExecutionContext): Resource[B] =\n+    Resource(asFuture.map(f), _ => Future.successful(()), release _)\n+\n+  def flatMap[B](f: A => Resource[B])(implicit executionContext: ExecutionContext): Resource[B] = {\n+    val nextFuture: Future[Resource[B]] =\n+      asFuture\n+        .map(f)\n+        // if `next.asFuture` fails, `nextFuture` should also fail\n+        .flatMap(next => next.asFuture.map(_ => next))\n+    val nextRelease = (_: B) =>\n+      nextFuture.transformWith {\n+        case Success(b) => b.release()\n+        case Failure(_) => Future.successful(())\n+    }\n+    Resource(nextFuture.flatMap(_.asFuture), nextRelease, release _)\n+  }\n+\n+  def withFilter(p: A => Boolean)(implicit executionContext: ExecutionContext): Resource[A] = {\n+    val future = asFuture.flatMap(\n+      value =>\n+        if (p(value))\n+          Future.successful(value)\n+        else\n+          Future.failed(new ResourceAcquisitionFilterException()))\n+    Resource(future, _ => Future.successful(()), release _)\n+  }\n+\n+  def flatten[B](\n+      implicit nestedEvidence: <:<[A, Resource[B]],\n+      executionContext: ExecutionContext,\n+  ): Resource[B] =\n+    flatMap(nested => nested)"
+  }
+]

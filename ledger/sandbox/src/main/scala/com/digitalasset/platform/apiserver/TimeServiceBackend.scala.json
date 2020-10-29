@@ -1,0 +1,208 @@
+[
+  {
+    "id" : "dff171c0-0b18-451b-b5ac-e33e175fe2b2",
+    "prId" : 4755,
+    "comments" : [
+      {
+        "id" : "20ef90fc-b27f-4339-aa2a-b0b27f188da4",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "What is the synchronization/locking mechanism that protects `queues` from inconsistent updates?",
+        "createdAt" : "2020-02-28T12:52:53Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a19b6a5d-9f11-4fd1-bdfe-1b8cac4f5528",
+        "parentId" : "20ef90fc-b27f-4339-aa2a-b0b27f188da4",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Good question. Perhaps we should use a `concurrent.TrieMap` instead.",
+        "createdAt" : "2020-02-28T12:57:31Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "34ca3717-cc34-48e8-98c4-f7b879d54c39",
+        "parentId" : "20ef90fc-b27f-4339-aa2a-b0b27f188da4",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-02-28T13:23:14Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6d36fdaa30a004657bd518f427ba4d9695681aa0",
+    "line" : null,
+    "diffHunk" : "@@ -38,19 +45,46 @@ object TimeServiceBackend {\n     }\n   }\n \n-  private class ObservingTimeServiceBackend(\n-      timeProvider: TimeServiceBackend,\n-      onTimeChange: Instant => Future[Unit]\n-  ) extends TimeServiceBackend {\n-    override def getCurrentTime: Instant = timeProvider.getCurrentTime\n-\n-    override def setCurrentTime(expectedTime: Instant, newTime: Instant): Future[Boolean] =\n-      timeProvider\n-        .setCurrentTime(expectedTime, newTime)\n-        .flatMap { success =>\n-          if (success)\n-            onTimeChange(expectedTime).map(_ => true)(DirectExecutionContext)\n-          else Future.successful(false)\n-        }(DirectExecutionContext)\n+  private final class AkkaQueueBasedObservedTimeServiceBackend(delegate: TimeServiceBackend)(\n+      implicit materializer: Materializer\n+  ) extends ObservedTimeServiceBackend {\n+    private val queues = mutable.Set[SourceQueueWithComplete[Instant]]()"
+  },
+  {
+    "id" : "ae3eb08a-101e-401d-bb1b-9d5169e6099d",
+    "prId" : 4755,
+    "comments" : [
+      {
+        "id" : "a8b7e075-506c-4901-8001-64c5bb112376",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "The indentation is hard to follow here. Can you possibly break this apart into smaller bits to improve readability, please?",
+        "createdAt" : "2020-03-02T12:30:53Z",
+        "updatedAt" : "2020-03-02T18:11:36Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6d36fdaa30a004657bd518f427ba4d9695681aa0",
+    "line" : null,
+    "diffHunk" : "@@ -38,19 +45,48 @@ object TimeServiceBackend {\n     }\n   }\n \n-  private class ObservingTimeServiceBackend(\n-      timeProvider: TimeServiceBackend,\n-      onTimeChange: Instant => Future[Unit]\n-  ) extends TimeServiceBackend {\n-    override def getCurrentTime: Instant = timeProvider.getCurrentTime\n-\n-    override def setCurrentTime(expectedTime: Instant, newTime: Instant): Future[Boolean] =\n-      timeProvider\n-        .setCurrentTime(expectedTime, newTime)\n-        .flatMap { success =>\n-          if (success)\n-            onTimeChange(expectedTime).map(_ => true)(DirectExecutionContext)\n-          else Future.successful(false)\n-        }(DirectExecutionContext)\n+  private final class AkkaQueueBasedObservedTimeServiceBackend(delegate: TimeServiceBackend)(\n+      implicit materializer: Materializer\n+  ) extends ObservedTimeServiceBackend {\n+    // There is no `TrieSet` type, so we emulate it with a `TrieMap` with meaningless values.\n+    // Scala doesn't react well to `()` in tuples, so we're using Boolean instead of Unit here.\n+    private val queues = concurrent.TrieMap[SourceQueueWithComplete[Instant], Boolean]()\n+\n+    override def getCurrentTime: Instant =\n+      delegate.getCurrentTime\n+\n+    override def setCurrentTime(currentTime: Instant, newTime: Instant): Future[Boolean] =\n+      delegate\n+        .setCurrentTime(currentTime, newTime)\n+        .andThen {\n+          case Success(true) =>\n+            queues.keys.foreach(_.offer(newTime))\n+        }(materializer.executionContext)\n+\n+    override def changes: ResourceOwner[Source[Instant, NotUsed]] =\n+      new ResourceOwner[Source[Instant, NotUsed]] {\n+        override def acquire()(\n+            implicit executionContext: ExecutionContext\n+        ): Resource[Source[Instant, NotUsed]] = {\n+          Resource(Future {"
+  },
+  {
+    "id" : "7ab2e175-acb2-4b99-9049-17e62fe37c6d",
+    "prId" : 4581,
+    "comments" : [
+      {
+        "id" : "0cc1010d-930e-4fad-acd0-4f1cace2403c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Would it make sense to make this an `abstract class` and making `clock` a `val` rather than a `def`?",
+        "createdAt" : "2020-02-18T15:29:54Z",
+        "updatedAt" : "2020-02-18T16:20:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ec5d982f-9a05-46df-b156-18672e56890a",
+        "parentId" : "0cc1010d-930e-4fad-acd0-4f1cace2403c",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "Yes, good call.",
+        "createdAt" : "2020-02-18T15:56:45Z",
+        "updatedAt" : "2020-02-18T16:20:51Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d6e1109c232c3009ef399fb97b86a4e91ad577ed",
+    "line" : null,
+    "diffHunk" : "@@ -12,52 +12,47 @@ import com.digitalasset.dec.DirectExecutionContext\n import scala.concurrent.Future\n \n trait TimeServiceBackend extends TimeProvider {\n+  def clock = new TimeServiceBackendClock(this)"
+  },
+  {
+    "id" : "1f2dce0b-5c6b-4b3b-9686-7924727249c0",
+    "prId" : 4581,
+    "comments" : [
+      {
+        "id" : "3496a831-5cc3-47c9-a2d4-f2d5133b634e",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Using the `DirectExecutionContext` inside a callback that uses the `DirectExecutionContext` is not a problem, right?",
+        "createdAt" : "2020-02-18T15:42:07Z",
+        "updatedAt" : "2020-02-18T16:20:51Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e2864538-6d98-43b2-8cd4-da4beea63ce6",
+        "parentId" : "3496a831-5cc3-47c9-a2d4-f2d5133b634e",
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "I don't think so, and I didn't change this code, just moved it. (Check the box ignoring whitespace changes.)",
+        "createdAt" : "2020-02-18T15:57:07Z",
+        "updatedAt" : "2020-02-18T16:20:51Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d6e1109c232c3009ef399fb97b86a4e91ad577ed",
+    "line" : 70,
+    "diffHunk" : "@@ -12,52 +12,47 @@ import com.digitalasset.dec.DirectExecutionContext\n import scala.concurrent.Future\n \n trait TimeServiceBackend extends TimeProvider {\n+  def clock = new TimeServiceBackendClock(this)\n+\n   def getCurrentTime: Instant\n \n   def setCurrentTime(currentTime: Instant, newTime: Instant): Future[Boolean]\n-\n-  def allowSettingTimeBackwards: Boolean\n }\n \n object TimeServiceBackend {\n-  def simple(startTime: Instant, allowSettingTimeBackwards: Boolean): TimeServiceBackend =\n-    new SimpleTimeServiceBackend(startTime, allowSettingTimeBackwards)\n+  def simple(startTime: Instant): TimeServiceBackend =\n+    new SimpleTimeServiceBackend(startTime)\n \n   def withObserver(\n       timeProvider: TimeServiceBackend,\n       onTimeChange: Instant => Future[Unit]): TimeServiceBackend =\n     new ObservingTimeServiceBackend(timeProvider, onTimeChange)\n-}\n \n-private class SimpleTimeServiceBackend(startTime: Instant, val allowSettingTimeBackwards: Boolean)\n-    extends TimeServiceBackend {\n-  private val timeRef = new AtomicReference[Instant](startTime)\n+  private class SimpleTimeServiceBackend(startTime: Instant) extends TimeServiceBackend {\n+    private val timeRef = new AtomicReference[Instant](startTime)\n \n-  override def getCurrentTime: Instant = timeRef.get\n+    override def getCurrentTime: Instant = timeRef.get\n \n-  override def setCurrentTime(expectedTime: Instant, newTime: Instant): Future[Boolean] = {\n-    val currentTime = timeRef.get\n-    val res = currentTime == expectedTime && timeRef.compareAndSet(currentTime, newTime)\n-    Future.successful(res)\n+    override def setCurrentTime(expectedTime: Instant, newTime: Instant): Future[Boolean] = {\n+      val currentTime = timeRef.get\n+      val res = currentTime == expectedTime && timeRef.compareAndSet(currentTime, newTime)\n+      Future.successful(res)\n+    }\n   }\n-}\n-\n-private class ObservingTimeServiceBackend(\n-    timeProvider: TimeServiceBackend,\n-    onTimeChange: Instant => Future[Unit]\n-) extends TimeServiceBackend {\n-\n-  override def getCurrentTime: Instant = timeProvider.getCurrentTime\n-\n-  override def setCurrentTime(expectedTime: Instant, newTime: Instant): Future[Boolean] =\n-    timeProvider\n-      .setCurrentTime(expectedTime, newTime)\n-      .flatMap { success =>\n-        if (success)\n-          onTimeChange(expectedTime).map(_ => true)(DirectExecutionContext)\n-        else Future.successful(false)\n-      }(DirectExecutionContext)\n-\n-  override def allowSettingTimeBackwards: Boolean = timeProvider.allowSettingTimeBackwards\n \n+  private class ObservingTimeServiceBackend(\n+      timeProvider: TimeServiceBackend,\n+      onTimeChange: Instant => Future[Unit]\n+  ) extends TimeServiceBackend {\n+    override def getCurrentTime: Instant = timeProvider.getCurrentTime\n+\n+    override def setCurrentTime(expectedTime: Instant, newTime: Instant): Future[Boolean] =\n+      timeProvider\n+        .setCurrentTime(expectedTime, newTime)\n+        .flatMap { success =>\n+          if (success)\n+            onTimeChange(expectedTime).map(_ => true)(DirectExecutionContext)"
+  }
+]

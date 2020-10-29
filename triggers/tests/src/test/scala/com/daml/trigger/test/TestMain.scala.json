@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "c6cb39b4-511e-40c9-81d1-1b9a13d8e6fc",
+    "prId" : 3170,
+    "comments" : [
+      {
+        "id" : "e4eea268-232c-43a0-9f86-3dda75eb9621",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "These have decreased since we now only get completions for commands that we have emitted ourselves.",
+        "createdAt" : "2019-10-14T13:55:20Z",
+        "updatedAt" : "2019-10-14T14:18:35Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f5b2df95f40b12430dbccc9c7c7f32e558465cbf",
+    "line" : 5,
+    "diffHunk" : "@@ -335,7 +335,7 @@ case class AcsTests(dar: Dar[(PackageId, Package)], runner: TestRunner) {\n       // 1 for the exercise in the trigger\n       // 2 completions for the trigger\n       NumMessages(6),\n-      SuccessfulCompletions(3),\n+      SuccessfulCompletions(2),"
+  },
+  {
+    "id" : "e7cdc138-afd8-4839-a60f-0b201f3fa509",
+    "prId" : 3096,
+    "comments" : [
+      {
+        "id" : "8317ea1d-36fc-41ae-ad42-f61fddb45e12",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Should we log the errors here to make failures easier to debug?",
+        "createdAt" : "2019-10-04T08:46:42Z",
+        "updatedAt" : "2019-10-04T08:58:46Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "6d576d50-7374-41c4-9aee-d45a53f4e956",
+        "parentId" : "8317ea1d-36fc-41ae-ad42-f61fddb45e12",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I believe we already log those error in `testFlow.onComplete`.",
+        "createdAt" : "2019-10-04T08:54:29Z",
+        "updatedAt" : "2019-10-04T08:58:46Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "42c9b5f9c39a79c974f1fbc9769309e220b7cce3",
+    "line" : 130,
+    "diffHunk" : "@@ -0,0 +1,421 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.trigger.test\n+\n+import java.io.File\n+import java.time.Instant\n+\n+import akka.actor.ActorSystem\n+import akka.stream._\n+import akka.stream.scaladsl.{Sink, Flow}\n+import scala.concurrent.{Await, ExecutionContext, Future}\n+import scala.concurrent.duration.Duration\n+import scala.util.{Success, Failure}\n+import scalaz.syntax.tag._\n+import scalaz.syntax.traverse._\n+\n+import com.digitalasset.ledger.api.refinements.ApiTypes.{ApplicationId}\n+import com.digitalasset.ledger.client.configuration.{\n+  CommandClientConfiguration,\n+  LedgerClientConfiguration,\n+  LedgerIdRequirement\n+}\n+import com.digitalasset.ledger.client.LedgerClient\n+import com.digitalasset.api.util.TimestampConversion.fromInstant\n+import com.digitalasset.ledger.api.v1.command_submission_service._\n+import com.digitalasset.ledger.api.v1.commands._\n+import com.digitalasset.ledger.api.v1.value\n+import com.digitalasset.ledger.api.v1.transaction_filter.{Filters, TransactionFilter}\n+import com.digitalasset.daml.lf.archive.DarReader\n+import com.digitalasset.daml.lf.archive.Dar\n+import com.digitalasset.daml.lf.language.Ast._\n+import com.digitalasset.daml.lf.archive.Decode\n+import com.digitalasset.daml.lf.data.Ref._\n+import com.digitalasset.daml_lf.DamlLf\n+import com.digitalasset.daml.lf.value.{Value => Lf}\n+import com.digitalasset.grpc.adapter.AkkaExecutionSequencerPool\n+import com.digitalasset.daml.lf.speedy.SExpr\n+import com.digitalasset.daml.lf.speedy.SExpr._\n+import com.digitalasset.daml.lf.speedy.SValue._\n+import com.digitalasset.ledger.api.validation.ValueValidator\n+import com.digitalasset.platform.server.api.validation.FieldValidations.{validateIdentifier}\n+\n+import com.daml.trigger.{Runner, TriggerMsg}\n+\n+case class Config(ledgerPort: Int, darPath: File)\n+\n+// We do not use scalatest here since that doesn’t work nicely with\n+// the client_server_test macro.\n+\n+case class NumMessages(num: Long)\n+\n+object TestRunner {\n+  def assertEqual[A](actual: A, expected: A) = {\n+    if (actual == expected) {\n+      Right(())\n+    } else {\n+      Left(s\"Expected $actual but got $expected\")\n+    }\n+  }\n+  def findStdlibPackageId(dar: Dar[(PackageId, Package)]) =\n+    dar.all\n+      .find {\n+        case (pkgId, pkg) =>\n+          pkg.modules.contains(DottedName.assertFromString(\"DA.Internal.Template\"))\n+      }\n+      .get\n+      ._1\n+}\n+\n+class TestRunner(ledgerPort: Int) {\n+  var partyCount = 0\n+\n+  val applicationId = ApplicationId(\"Trigger Test Runner\")\n+\n+  val clientConfig = LedgerClientConfiguration(\n+    applicationId = applicationId.unwrap,\n+    ledgerIdRequirement = LedgerIdRequirement(\"\", enabled = false),\n+    commandClient = CommandClientConfiguration.default,\n+    sslContext = None\n+  )\n+\n+  def getNewParty(): String = {\n+    partyCount = partyCount + 1\n+    s\"Alice$partyCount\"\n+  }\n+\n+  def genericTest[A](\n+      // test name\n+      name: String,\n+      // The dar package the trigger is in\n+      dar: Dar[(PackageId, Package)],\n+      // Identifier of the trigger value\n+      triggerId: Identifier,\n+      // Commands to interact with the trigger\n+      commands: (LedgerClient, String) => ExecutionContext => ActorMaterializer => Future[A],\n+      // the number of messages that should be delivered to the trigger\n+      numMessages: NumMessages,\n+      // assertion on final state\n+      assertFinalState: (SExpr, A) => Either[String, Unit],\n+      // assertion on the final acs represented as a map from template_id to\n+      // (contract_id, create_arguments)\n+      assertFinalACS: (\n+          Map[Identifier, Seq[(String, Lf.ValueRecord[Lf.AbsoluteContractId])]],\n+          A) => Either[String, Unit]) = {\n+\n+    println(s\"---\\n$name:\")\n+\n+    val system = ActorSystem(\"TriggerRunner\")\n+    val sequencer = new AkkaExecutionSequencerPool(\"TriggerRunnerPool\")(system)\n+    implicit val materializer: ActorMaterializer = ActorMaterializer()(system)\n+    implicit val ec: ExecutionContext = system.dispatcher\n+\n+    val party = getNewParty()\n+    val clientF = LedgerClient.singleHost(\"localhost\", ledgerPort, clientConfig)(ec, sequencer)\n+    val triggerFlow: Future[SExpr] = for {\n+      client <- clientF\n+      finalState <- Runner.run(\n+        dar,\n+        triggerId,\n+        client,\n+        applicationId,\n+        party,\n+        msgFlow = Flow[TriggerMsg].take(numMessages.num)\n+      )\n+    } yield finalState\n+    val commandsFlow: Future[A] =\n+      clientF.flatMap(client => commands(client, party)(ec)(materializer))\n+    triggerFlow.failed.foreach(_ => system.terminate)\n+    commandsFlow.failed.foreach(_ => system.terminate)"
+  }
+]

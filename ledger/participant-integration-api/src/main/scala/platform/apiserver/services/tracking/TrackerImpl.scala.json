@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "f7ebb337-53bb-456a-a8ad-88ac246b1c4d",
+    "prId" : 7601,
+    "comments" : [
+      {
+        "id" : "154b110f-2527-4e33-a812-3166963a1623",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n        delayTimer,\r\n      )\r\n```",
+        "createdAt" : "2020-10-08T07:47:23Z",
+        "updatedAt" : "2020-10-08T12:31:53Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a61fbec8a9d4dc44475daf366f77312a3c6c1c0d",
+    "line" : null,
+    "diffHunk" : "@@ -80,9 +80,15 @@ private[services] object TrackerImpl {\n       inputBufferSize: Int,\n       capacityCounter: Counter,\n       lengthCounter: Counter,\n+      delayTimer: Timer,\n   )(implicit materializer: Materializer, loggingContext: LoggingContext): TrackerImpl = {\n     val ((queue, mat), foreachMat) = InstrumentedSource\n-      .queue[QueueInput](inputBufferSize, OverflowStrategy.dropNew, capacityCounter, lengthCounter)\n+      .queue[QueueInput](\n+        inputBufferSize,\n+        OverflowStrategy.dropNew,\n+        capacityCounter,\n+        lengthCounter,\n+        delayTimer)"
+  },
+  {
+    "id" : "9de0dd6d-8910-4f74-8d8a-111a25163771",
+    "prId" : 7576,
+    "comments" : [
+      {
+        "id" : "5554ab41-cbb8-4c16-96fc-8b98a6352104",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "This is never decremented and we keep incrementing it every time the tracker gets created. I've refactored the code to handle the inc/dec in InstrumentedSource instead.",
+        "createdAt" : "2020-10-06T15:58:28Z",
+        "updatedAt" : "2020-10-07T11:04:05Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "76f067753b482633f0992ac86992896c2f75fcda",
+    "line" : null,
+    "diffHunk" : "@@ -76,9 +78,12 @@ private[services] object TrackerImpl {\n         Ctx[Promise[Completion], Completion],\n         Materialized[NotUsed, Promise[Completion]]],\n       inputBufferSize: Int,\n+      sizeCounter: Counter,\n+      saturationCounter: Counter,\n   )(implicit materializer: Materializer, loggingContext: LoggingContext): TrackerImpl = {\n-    val ((queue, mat), foreachMat) = Source\n-      .queue[QueueInput](inputBufferSize, OverflowStrategy.dropNew)\n+    sizeCounter.inc(inputBufferSize.toLong)"
+  }
+]

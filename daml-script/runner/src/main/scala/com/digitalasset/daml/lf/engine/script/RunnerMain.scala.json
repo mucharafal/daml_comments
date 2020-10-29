@@ -1,0 +1,102 @@
+[
+  {
+    "id" : "9b1a37e6-7834-42f9-b8d7-7394c377d20a",
+    "prId" : 5211,
+    "comments" : [
+      {
+        "id" : "c8b8828c-4b98-41a7-9e45-9325d3a838c9",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Would it make sense to move this check into the `checkConfig` step above?",
+        "createdAt" : "2020-03-27T09:53:11Z",
+        "updatedAt" : "2020-03-27T10:23:32Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2dd800d3-3b7c-40da-9966-f79e9a997f5f",
+        "parentId" : "c8b8828c-4b98-41a7-9e45-9325d3a838c9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Oh good point, I had forgotten about `checkConfig`, moved.",
+        "createdAt" : "2020-03-27T10:13:32Z",
+        "updatedAt" : "2020-03-27T10:23:36Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f6226b8e83eea9fbd0ca6b2e4f6c1675dfc79391",
+    "line" : null,
+    "diffHunk" : "@@ -99,11 +94,39 @@ object RunnerMain {\n               party_participants = Map.empty)\n         }\n         val flow: Future[Unit] = for {\n-          clients <- Runner.connect(participantParams, clientConfig)\n+\n+          clients <- if (config.jsonApi) {\n+            config.accessTokenFile match {\n+              case None => throw new RuntimeException(\"json-api requires a token\")"
+  },
+  {
+    "id" : "c74a216b-c9a7-4933-be39-1072ddd631ce",
+    "prId" : 5076,
+    "comments" : [
+      {
+        "id" : "18c0b61a-dc74-472c-9c4c-331818779b64",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Assuming I understand your plans for the follow-up PRs correctly, in the end the constructor shouldn’t throw anymore so we can probably remove the try here. Nothing to do in this PR though, just a note for the future :slightly_smiling_face: ",
+        "createdAt" : "2020-03-18T17:34:26Z",
+        "updatedAt" : "2020-03-19T10:58:00Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "901e65e0-18cf-4944-bc8d-4a07e098e1cd",
+        "parentId" : "18c0b61a-dc74-472c-9c4c-331818779b64",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Agreed.",
+        "createdAt" : "2020-03-19T10:59:28Z",
+        "updatedAt" : "2020-03-19T10:59:29Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "01051d0c28be1ed94c820d9f5e2f51db6762c6cb",
+    "line" : 12,
+    "diffHunk" : "@@ -84,8 +84,15 @@ object RunnerMain {\n           fileContent.parseJson\n         })\n \n+        val script = try {\n+          Script.fromDar(dar, scriptId)\n+        } catch {\n+          case e: Throwable =>\n+            system.terminate\n+            sys.exit(1)\n+        }\n         val runner = try {\n-          new Runner(dar, applicationId, commandUpdater, timeProvider)\n+          new Runner(dar, script.scriptIds, applicationId, commandUpdater, timeProvider)"
+  }
+]

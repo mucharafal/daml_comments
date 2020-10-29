@@ -1,0 +1,258 @@
+[
+  {
+    "id" : "7bc2ab3f-fdfb-4e06-9b25-4378eb35990a",
+    "prId" : 7548,
+    "comments" : [
+      {
+        "id" : "b8a85827-333b-4872-ac7d-8c06794ef4f3",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Why are we adding the observers for a non-consuming choice? That's the sort of confusion I was referring to above.",
+        "createdAt" : "2020-10-14T11:04:42Z",
+        "updatedAt" : "2020-10-21T08:55:23Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1968095863437d26708412e9478b8d076d85897c",
+    "line" : null,
+    "diffHunk" : "@@ -66,14 +66,15 @@ object NodeInfo {\n     def signatories: Set[Party]\n     def stakeholders: Set[Party]\n     def actingParties: Set[Party]\n+    def observers: Set[Party]\n \n     final def requiredAuthorizers(): Set[Party] = actingParties\n \n     final def informeesOfNode: Set[Party] =\n       if (consuming)\n-        stakeholders | actingParties\n+        stakeholders | actingParties | observers\n       else\n-        signatories | actingParties\n+        signatories | actingParties | observers"
+  },
+  {
+    "id" : "89931022-b556-41a7-a902-7158386b2de6",
+    "prId" : 4217,
+    "comments" : [
+      {
+        "id" : "9636fcf4-ec17-4b4a-ac9f-7fa4cf5bf5df",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I'm not a fan of adding members to an interface if not all implementations sensibly can implement it. According to the description, a positive key lookup should also provide signatories and stakeholders.",
+        "createdAt" : "2020-01-27T16:22:31Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "93890fea-4463-4f34-929f-cbe6540dee4f",
+        "parentId" : "9636fcf4-ec17-4b4a-ac9f-7fa4cf5bf5df",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Well yes they should be provided by it, but it’s a bigger refactoring to add them. For negative lookups we wouldn’t be able to provide them. Perhaps better to just extend NodeKind to carry the payload?",
+        "createdAt" : "2020-01-27T19:39:25Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f0e5fb05-b36a-4206-9c3e-73ef4c3bf682",
+        "parentId" : "9636fcf4-ec17-4b4a-ac9f-7fa4cf5bf5df",
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "Also, creates don't have actors. Perhaps we should use some other notions instead?",
+        "createdAt" : "2020-01-28T10:38:20Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cb440ee59bf91fd9ac31112376c6366885e98be4",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,39 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.transaction\n+\n+/** Trait for extracting information from an abstract node.\n+  * Used for sharing the implementation of common computations\n+  * over nodes and transactions.\n+  */\n+trait NodeInfo[PartyRep] {\n+\n+  /** The node kind, e.g. create, consuming exercise etc. */\n+  def kind: NodeKind\n+\n+  /** The signatories of the contract associated with the node. */\n+  def signatories: Set[PartyRep]"
+  },
+  {
+    "id" : "d88d8cec-08eb-469f-83b4-6c0267f6fe1f",
+    "prId" : 4217,
+    "comments" : [
+      {
+        "id" : "3a8272c5-1175-4e86-b122-ed206a045324",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Looks like `NodeKind` was only introduced to avoid a more verbose/noisy pattern match? This, coupled with a too wide definition of the interface `NodeInfo`, I'd rather err on the side of not introducing it.",
+        "createdAt" : "2020-01-27T16:50:18Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b10920e5-2d34-4e11-80a7-d6f2e76e4575",
+        "parentId" : "3a8272c5-1175-4e86-b122-ed206a045324",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "What would you suggest instead? This implementation is used on other “Node” implementations than the one defined by Node.scala. ",
+        "createdAt" : "2020-01-27T19:37:11Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "d14b1407-dfa8-48eb-b39a-2f2bd054b96d",
+        "parentId" : "3a8272c5-1175-4e86-b122-ed206a045324",
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "Why not push this inside of the trait? Especially since this is something that every trait implementation actually _can_ sensibly define?",
+        "createdAt" : "2020-01-28T10:35:03Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b47c6a5f-3ed8-4a5c-b5d9-74da2f423316",
+        "parentId" : "3a8272c5-1175-4e86-b122-ed206a045324",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Done.",
+        "createdAt" : "2020-01-28T13:38:57Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cb440ee59bf91fd9ac31112376c6366885e98be4",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,39 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.transaction\n+\n+/** Trait for extracting information from an abstract node.\n+  * Used for sharing the implementation of common computations\n+  * over nodes and transactions.\n+  */\n+trait NodeInfo[PartyRep] {\n+\n+  /** The node kind, e.g. create, consuming exercise etc. */\n+  def kind: NodeKind\n+\n+  /** The signatories of the contract associated with the node. */\n+  def signatories: Set[PartyRep]\n+\n+  /** The stakeholders of the contract associated with the node. */\n+  def stakeholders: Set[PartyRep]\n+\n+  /** The actors (e.g. the controlling parties of the choice) of the node. */\n+  def actors: Set[PartyRep]\n+}\n+\n+object NodeInfo {\n+\n+  /** Compute the informees of a node based on the ledger model definition.\n+    *\n+    * Refer to https://docs.daml.com/concepts/ledger-model/ledger-privacy.html#projections\n+    */\n+  def informeesOfNode[PartyRep](node: NodeInfo[PartyRep]): Set[PartyRep] =\n+    node.kind match {"
+  },
+  {
+    "id" : "1a3ce2cc-493c-4c23-bab2-66366a74946d",
+    "prId" : 4217,
+    "comments" : [
+      {
+        "id" : "4e653ffb-31d3-45cd-8abb-fed0ffd6524c",
+        "parentId" : null,
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "Why is this empty?",
+        "createdAt" : "2020-01-28T10:46:15Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0d2f6178-1e1f-4017-967e-8a96382ba79a",
+        "parentId" : "4e653ffb-31d3-45cd-8abb-fed0ffd6524c",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Oops, this should be the key maintainers (for now)",
+        "createdAt" : "2020-01-28T12:04:50Z",
+        "updatedAt" : "2020-02-05T13:13:20Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "cb440ee59bf91fd9ac31112376c6366885e98be4",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,39 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.transaction\n+\n+/** Trait for extracting information from an abstract node.\n+  * Used for sharing the implementation of common computations\n+  * over nodes and transactions.\n+  */\n+trait NodeInfo[PartyRep] {\n+\n+  /** The node kind, e.g. create, consuming exercise etc. */\n+  def kind: NodeKind\n+\n+  /** The signatories of the contract associated with the node. */\n+  def signatories: Set[PartyRep]\n+\n+  /** The stakeholders of the contract associated with the node. */\n+  def stakeholders: Set[PartyRep]\n+\n+  /** The actors (e.g. the controlling parties of the choice) of the node. */\n+  def actors: Set[PartyRep]\n+}\n+\n+object NodeInfo {\n+\n+  /** Compute the informees of a node based on the ledger model definition.\n+    *\n+    * Refer to https://docs.daml.com/concepts/ledger-model/ledger-privacy.html#projections\n+    */\n+  def informeesOfNode[PartyRep](node: NodeInfo[PartyRep]): Set[PartyRep] =\n+    node.kind match {\n+      case NodeKind.Create => node.stakeholders\n+      case NodeKind.Fetch => node.signatories | node.actors\n+      case NodeKind.ExerciseConsuming => node.stakeholders | node.actors\n+      case NodeKind.ExerciseNonConsuming => node.signatories | node.actors\n+      case NodeKind.LookupByKey => Set.empty"
+  }
+]

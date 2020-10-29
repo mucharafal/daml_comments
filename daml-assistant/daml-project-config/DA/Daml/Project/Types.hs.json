@@ -1,0 +1,71 @@
+[
+  {
+    "id" : "74f15505-dcf3-415f-a32d-547a9a7af167",
+    "prId" : 4420,
+    "comments" : [
+      {
+        "id" : "84985397-00a1-4d3d-959d-a9a7d2c5034a",
+        "parentId" : null,
+        "author" : null,
+        "body" : "```suggestion\r\n    = Forward EnrichedCompletion -- ^ Forward completions\r\n```",
+        "createdAt" : "2020-02-06T12:29:38Z",
+        "updatedAt" : "2020-02-06T12:43:11Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f51b49a2c1e2fc954375d45ec4f962193261ed48",
+    "line" : null,
+    "diffHunk" : "@@ -136,12 +136,34 @@ data SdkCommandInfo = SdkCommandInfo\n     , sdkCommandPath :: SdkCommandPath -- ^ file path of binary relative to sdk directory\n     , sdkCommandArgs :: SdkCommandArgs -- ^ extra args to pass before user-supplied args (defaults to [])\n     , sdkCommandDesc :: Maybe Text     -- ^ description of sdk command (optional)\n+    , sdkCommandForwardCompletion :: ForwardCompletion -- ^ Can we forward optparse-applicative completions to\n+                                                       -- this command\n+    , sdkCommandSdkPath :: SdkPath -- ^ SDK path so we can get the absolute path to the command.\n     } deriving (Eq, Show)\n \n-instance Y.FromJSON SdkCommandInfo where\n-    parseJSON = Y.withObject \"SdkCommandInfo\" $ \\p ->\n-        SdkCommandInfo\n-            <$> (p Y..: \"name\")\n-            <*> (p Y..: \"path\")\n-            <*> fmap (fromMaybe (SdkCommandArgs [])) (p Y..:? \"args\")\n-            <*> (p Y..:? \"desc\")\n+data ForwardCompletion\n+    = Forward EnrichedCompletion -- ^ Forwhat completions"
+  },
+  {
+    "id" : "dcefd799-6e78-4cd3-b792-b743a3aadde6",
+    "prId" : 4420,
+    "comments" : [
+      {
+        "id" : "9b014e98-53cd-4c1c-a9ee-44fb618b44a8",
+        "parentId" : null,
+        "author" : null,
+        "body" : "```suggestion\r\n        args <- fmap (fromMaybe (SdkCommandArgs [])) (p Y..:? \"args\")\r\n```",
+        "createdAt" : "2020-02-06T12:32:33Z",
+        "updatedAt" : "2020-02-06T12:43:11Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f51b49a2c1e2fc954375d45ec4f962193261ed48",
+    "line" : null,
+    "diffHunk" : "@@ -136,12 +136,34 @@ data SdkCommandInfo = SdkCommandInfo\n     , sdkCommandPath :: SdkCommandPath -- ^ file path of binary relative to sdk directory\n     , sdkCommandArgs :: SdkCommandArgs -- ^ extra args to pass before user-supplied args (defaults to [])\n     , sdkCommandDesc :: Maybe Text     -- ^ description of sdk command (optional)\n+    , sdkCommandForwardCompletion :: ForwardCompletion -- ^ Can we forward optparse-applicative completions to\n+                                                       -- this command\n+    , sdkCommandSdkPath :: SdkPath -- ^ SDK path so we can get the absolute path to the command.\n     } deriving (Eq, Show)\n \n-instance Y.FromJSON SdkCommandInfo where\n-    parseJSON = Y.withObject \"SdkCommandInfo\" $ \\p ->\n-        SdkCommandInfo\n-            <$> (p Y..: \"name\")\n-            <*> (p Y..: \"path\")\n-            <*> fmap (fromMaybe (SdkCommandArgs [])) (p Y..:? \"args\")\n-            <*> (p Y..:? \"desc\")\n+data ForwardCompletion\n+    = Forward EnrichedCompletion -- ^ Forwhat completions\n+    | NoForward -- ^ No forwarding, fall back to basic completion\n+    deriving (Eq, Show)\n+\n+-- | True if --bash-completion-enriched was part of argv.\n+newtype EnrichedCompletion = EnrichedCompletion { getEnrichedCompletion :: Bool }\n+    deriving (Eq, Show)\n+\n+hasEnrichedCompletion :: [String] -> EnrichedCompletion\n+hasEnrichedCompletion = EnrichedCompletion . elem \"--bash-completion-enriched\"\n+\n+instance Y.FromJSON (SdkPath -> EnrichedCompletion -> SdkCommandInfo) where\n+    parseJSON = Y.withObject \"SdkCommandInfo\" $ \\p -> do\n+        name <- p Y..: \"name\"\n+        path <- p Y..: \"path\"\n+        args <-  fmap (fromMaybe (SdkCommandArgs [])) (p Y..:? \"args\")"
+  },
+  {
+    "id" : "32d467c8-4b8b-4e03-9df4-1c21be762681",
+    "prId" : 4420,
+    "comments" : [
+      {
+        "id" : "bfe206b2-d517-41d7-ae68-d1204e1161c8",
+        "parentId" : null,
+        "author" : null,
+        "body" : "```suggestion\r\n        desc <- p Y..:? \"desc\"\r\n```",
+        "createdAt" : "2020-02-06T12:32:43Z",
+        "updatedAt" : "2020-02-06T12:43:11Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f51b49a2c1e2fc954375d45ec4f962193261ed48",
+    "line" : null,
+    "diffHunk" : "@@ -136,12 +136,34 @@ data SdkCommandInfo = SdkCommandInfo\n     , sdkCommandPath :: SdkCommandPath -- ^ file path of binary relative to sdk directory\n     , sdkCommandArgs :: SdkCommandArgs -- ^ extra args to pass before user-supplied args (defaults to [])\n     , sdkCommandDesc :: Maybe Text     -- ^ description of sdk command (optional)\n+    , sdkCommandForwardCompletion :: ForwardCompletion -- ^ Can we forward optparse-applicative completions to\n+                                                       -- this command\n+    , sdkCommandSdkPath :: SdkPath -- ^ SDK path so we can get the absolute path to the command.\n     } deriving (Eq, Show)\n \n-instance Y.FromJSON SdkCommandInfo where\n-    parseJSON = Y.withObject \"SdkCommandInfo\" $ \\p ->\n-        SdkCommandInfo\n-            <$> (p Y..: \"name\")\n-            <*> (p Y..: \"path\")\n-            <*> fmap (fromMaybe (SdkCommandArgs [])) (p Y..:? \"args\")\n-            <*> (p Y..:? \"desc\")\n+data ForwardCompletion\n+    = Forward EnrichedCompletion -- ^ Forwhat completions\n+    | NoForward -- ^ No forwarding, fall back to basic completion\n+    deriving (Eq, Show)\n+\n+-- | True if --bash-completion-enriched was part of argv.\n+newtype EnrichedCompletion = EnrichedCompletion { getEnrichedCompletion :: Bool }\n+    deriving (Eq, Show)\n+\n+hasEnrichedCompletion :: [String] -> EnrichedCompletion\n+hasEnrichedCompletion = EnrichedCompletion . elem \"--bash-completion-enriched\"\n+\n+instance Y.FromJSON (SdkPath -> EnrichedCompletion -> SdkCommandInfo) where\n+    parseJSON = Y.withObject \"SdkCommandInfo\" $ \\p -> do\n+        name <- p Y..: \"name\"\n+        path <- p Y..: \"path\"\n+        args <-  fmap (fromMaybe (SdkCommandArgs [])) (p Y..:? \"args\")\n+        desc <-  p Y..:? \"desc\""
+  }
+]

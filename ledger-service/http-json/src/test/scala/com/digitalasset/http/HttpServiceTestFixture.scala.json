@@ -1,0 +1,99 @@
+[
+  {
+    "id" : "6a7593cf-ece4-494e-aa4b-e7fada4ce0f4",
+    "prId" : 4593,
+    "comments" : [
+      {
+        "id" : "480c04b9-945e-4501-9a02-0cb587266cd4",
+        "parentId" : null,
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "Did `ledgerF.foreach` or `httpServiceF.foreach` throw an exception?\r\nReducing both futures into one, makes sense, I am just curious if this fixed anything.",
+        "createdAt" : "2020-02-26T15:11:49Z",
+        "updatedAt" : "2020-02-26T17:16:56Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "29e209e1-1480-4e54-b57e-b0dd7e5679d3",
+        "parentId" : "480c04b9-945e-4501-9a02-0cb587266cd4",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "It didn't end up fixing the feature in this PR, but we were dropping errors on the floor, and `close` or `unbind` might not be finished when you started the next test, so I left it in.",
+        "createdAt" : "2020-02-26T17:01:38Z",
+        "updatedAt" : "2020-02-26T17:16:56Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "23b63af2-027f-4ab7-8638-7d2a1a6a4b2d",
+        "parentId" : "480c04b9-945e-4501-9a02-0cb587266cd4",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "Well, I mean, we're still dropping errors on the floor, just in a deterministic way :)",
+        "createdAt" : "2020-02-26T18:14:03Z",
+        "updatedAt" : "2020-02-26T18:14:04Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d8c3640f424750f2bb6655ae779d003b71b15bca",
+    "line" : 22,
+    "diffHunk" : "@@ -96,12 +97,15 @@ object HttpServiceTestFixture {\n       a <- testFn(uri, encoder, decoder)\n     } yield a\n \n-    fa.onComplete { _ =>\n-      ledgerF.foreach(_._1.close())\n-      httpServiceF.foreach(_._1.unbind())\n+    fa.transformWith { ta =>\n+      Future\n+        .sequence(\n+          Seq(\n+            ledgerF.map(_._1.close()),\n+            httpServiceF.flatMap(_._1.unbind()),\n+          ) map (_ fallbackTo Future.successful(())))\n+        .flatMap(_ => Future fromTry ta)"
+  },
+  {
+    "id" : "ee23d419-ffce-4ae4-a9f0-66e9d21f8165",
+    "prId" : 3871,
+    "comments" : [
+      {
+        "id" : "054645fe-10e9-41a7-a264-6b60a23ba96c",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yeah, I don't know why we were looking for a port ourselves...",
+        "createdAt" : "2019-12-20T15:27:31Z",
+        "updatedAt" : "2019-12-22T14:40:42Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0c6828ae4d7794fc12160eb51a23c06485aac526",
+    "line" : null,
+    "diffHunk" : "@@ -57,13 +57,10 @@ object HttpServiceTestFixture {\n \n     val contractDaoF: Future[Option[ContractDao]] = jdbcConfig.map(c => initializeDb(c)).sequence\n \n-    val ledgerF: Future[(SandboxServer, Int)] = for {\n-      port <- toFuture(findOpenPort())\n-      ledger <- Future(new SandboxServer(ledgerConfig(port, dars, ledgerId)))\n-    } yield (ledger, port)\n+    val ledger = new SandboxServer(ledgerConfig(0, dars, ledgerId))"
+  }
+]

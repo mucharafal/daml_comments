@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "2d4cc085-cb97-47e5-add1-3041dbc98019",
+    "prId" : 3283,
+    "comments" : [
+      {
+        "id" : "5183f15b-eacb-4349-9ecc-aa6db72da12e",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "In general I'm opposed to automatic derivation of codecs. Especially in this case, the JWT format needs to be defined in some sort of specification that is part of the documentation, and the implementation needs to be able to read that token. This decouples the format of the token from the representation we actually want to work with. It would allow us to avoid using `Option[List[String]]` in favor of just `List[String]` for the party related claims, or just `Boolean` instead of `Option[Boolean]` (the `None` case is really just `false`).",
+        "createdAt" : "2019-10-30T10:12:45Z",
+        "updatedAt" : "2019-11-07T21:24:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5745bee4e7b5679372438fb65bfc553a184a767b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,104 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.ledger.api.auth\n+\n+import java.util.concurrent.{CompletableFuture, CompletionStage}\n+\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.jwt.JwtVerifier\n+import com.digitalasset.ledger.api.auth.AuthServiceJWT.Error\n+import io.grpc.Metadata\n+import org.slf4j.{Logger, LoggerFactory}\n+import spray.json._\n+\n+import scala.collection.mutable.ListBuffer\n+import scala.util.Try\n+\n+/** The JWT token payload used in [[AuthServiceJWT]]\n+  *\n+  * For forward/backward compatibility reasons, all fields are optional.\n+  *\n+  * The information in this token may be used to fill in missing data in gRPC ledger API requests.\n+  */\n+case class AuthServiceJWTPayload(\n+    ledgerId: Option[String],\n+    participantId: Option[String],\n+    applicationId: Option[String],\n+    exp: Option[String],\n+    admin: Option[Boolean],\n+    actAs: Option[List[String]],\n+    readAs: Option[List[String]]\n+)\n+\n+object AuthServiceJWTProtocol extends DefaultJsonProtocol {\n+  implicit val jwtPayloadFormat = jsonFormat7(AuthServiceJWTPayload.apply)"
+  },
+  {
+    "id" : "10d319f7-a6ce-46d1-9ce8-b2a2debd8dd0",
+    "prId" : 3283,
+    "comments" : [
+      {
+        "id" : "7f3cd03f-313a-4373-ba4f-3692dee961dc",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n    val bearerTokenRegex = \"[Bb]earer (.*)\".r\r\n```\r\nThere shouldn't be a `:`, and maybe even forcing the capital `B` should be okay. See https://tools.ietf.org/html/rfc6750#section-2.1",
+        "createdAt" : "2019-10-30T10:19:13Z",
+        "updatedAt" : "2019-11-07T21:24:55Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5745bee4e7b5679372438fb65bfc553a184a767b",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,104 @@\n+// Copyright (c) 2019 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.ledger.api.auth\n+\n+import java.util.concurrent.{CompletableFuture, CompletionStage}\n+\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.jwt.JwtVerifier\n+import com.digitalasset.ledger.api.auth.AuthServiceJWT.Error\n+import io.grpc.Metadata\n+import org.slf4j.{Logger, LoggerFactory}\n+import spray.json._\n+\n+import scala.collection.mutable.ListBuffer\n+import scala.util.Try\n+\n+/** The JWT token payload used in [[AuthServiceJWT]]\n+  *\n+  * For forward/backward compatibility reasons, all fields are optional.\n+  *\n+  * The information in this token may be used to fill in missing data in gRPC ledger API requests.\n+  */\n+case class AuthServiceJWTPayload(\n+    ledgerId: Option[String],\n+    participantId: Option[String],\n+    applicationId: Option[String],\n+    exp: Option[String],\n+    admin: Option[Boolean],\n+    actAs: Option[List[String]],\n+    readAs: Option[List[String]]\n+)\n+\n+object AuthServiceJWTProtocol extends DefaultJsonProtocol {\n+  implicit val jwtPayloadFormat = jsonFormat7(AuthServiceJWTPayload.apply)\n+}\n+\n+/** An AuthService that reads a JWT token from a `Authorization: Bearer` HTTP header.\n+  * The token is expected to use the format as defined in [[AuthServiceJWTPayload]]:\n+  */\n+class AuthServiceJWT(verifier: JwtVerifier) extends AuthService {\n+\n+  protected val logger: Logger = LoggerFactory.getLogger(AuthServiceJWT.getClass)\n+\n+  override def decodeMetadata(headers: Metadata): CompletionStage[Claims] = {\n+    decodeAndParse(headers).fold(\n+      error => {\n+        logger.warn(\"Authorization error:\", error)\n+        CompletableFuture.completedFuture(Claims.empty)\n+      },\n+      token => CompletableFuture.completedFuture(payloadToClaims(token))\n+    )\n+  }\n+\n+  private[this] def parsePayload(jwtPayload: String): Either[Error, AuthServiceJWTPayload] = {\n+    import AuthServiceJWTProtocol._\n+    Try(JsonParser(jwtPayload).convertTo[AuthServiceJWTPayload]).toEither.left.map(t =>\n+      Error(\"Could not parse JWT token: \" + t.getMessage))\n+  }\n+\n+  private[this] def decodeAndParse(headers: Metadata): Either[Error, AuthServiceJWTPayload] = {\n+    val bearerTokenRegex = \"[Bb]earer: (.*)\".r"
+  }
+]

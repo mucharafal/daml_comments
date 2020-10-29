@@ -1,0 +1,312 @@
+[
+  {
+    "id" : "830c17ce-13c9-46fe-819f-69278bcaa366",
+    "prId" : 5089,
+    "comments" : [
+      {
+        "id" : "9e58e0e0-46b6-4357-9fa0-b40e1966a301",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This test reads the transaction tree, not the flat transaction.",
+        "createdAt" : "2020-03-19T17:08:21Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9930fc72-8348-462d-9c4e-7e24ef7c8041",
+        "parentId" : "9e58e0e0-46b6-4357-9fa0-b40e1966a301",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yes, thanks, copy-pasta.",
+        "createdAt" : "2020-03-19T17:34:15Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f7e2e488-5f8f-4ab6-9a68-72b1660d776d",
+        "parentId" : "9e58e0e0-46b6-4357-9fa0-b40e1966a301",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/5089/commits/eba57bf61d9a7587aa53a066fc83b479c6980983",
+        "createdAt" : "2020-03-19T20:05:43Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b5d117bbf4b07fc2d8a6a4f8540241ce2ece5a56",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,158 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.store.dao\n+\n+import com.digitalasset.daml.lf.transaction.Node.{NodeCreate, NodeExercises}\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+import com.digitalasset.ledger.EventId\n+import com.digitalasset.platform.ApiOffset\n+import org.scalatest._\n+\n+private[dao] trait JdbcLedgerDaoTransactionTreesSpec\n+    extends OptionValues\n+    with Inside\n+    with LoneElement {\n+  this: AsyncFlatSpec with Matchers with JdbcLedgerDaoSuite =>\n+\n+  behavior of \"JdbcLedgerDao (lookupTransactionTreeById)\"\n+\n+  it should \"return nothing for a mismatching transaction id\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(transactionId = \"WRONG\", Set(tx.submittingParty.get))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return nothing for a mismatching party\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(\"WRONG\"))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (create)\" in {\n+    for {\n+      (offset, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(tx.submittingParty.get))\n+    } yield {\n+      inside(result.value.transaction) {\n+        case Some(transaction) =>\n+          val (eventId, createNode: NodeCreate.WithTxValue[AbsoluteContractId]) =\n+            tx.transaction.nodes.head\n+          transaction.commandId shouldBe tx.commandId.get\n+          transaction.offset shouldBe ApiOffset.toApiString(offset)\n+          transaction.transactionId shouldBe tx.transactionId\n+          transaction.workflowId shouldBe tx.workflowId.getOrElse(\"\")\n+          val created = transaction.eventsById.values.loneElement.getCreated\n+          transaction.rootEventIds.loneElement shouldEqual created.eventId\n+          created.eventId shouldBe eventId\n+          created.witnessParties should contain only tx.submittingParty.get\n+          created.agreementText.getOrElse(\"\") shouldBe createNode.coinst.agreementText\n+          created.contractKey shouldBe None\n+          created.createArguments shouldNot be(None)\n+          created.signatories should contain theSameElementsAs createNode.signatories\n+          created.observers should contain theSameElementsAs createNode.stakeholders.diff(\n+            createNode.signatories)\n+          created.templateId shouldNot be(None)\n+      }\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (exercise)\" in {\n+    for {\n+      (_, create) <- storeCreateTransaction()\n+      created <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(create.transactionId, Set(create.submittingParty.get))\n+      (offset, exercise) <- storeExerciseTransaction(\n+        AbsoluteContractId(created.get.transaction.get.eventsById.head._2.getCreated.contractId))\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(exercise.transactionId, Set(exercise.submittingParty.get))\n+    } yield {\n+      inside(result.value.transaction) {\n+        case Some(transaction) =>\n+          val (eventId, exerciseNode: NodeExercises.WithTxValue[EventId, AbsoluteContractId]) =\n+            exercise.transaction.nodes.head\n+          transaction.commandId shouldBe exercise.commandId.get\n+          transaction.offset shouldBe ApiOffset.toApiString(offset)\n+          transaction.transactionId shouldBe exercise.transactionId\n+          transaction.workflowId shouldBe exercise.workflowId.getOrElse(\"\")\n+          val exercised = transaction.eventsById.values.loneElement.getExercised\n+          transaction.rootEventIds.loneElement shouldEqual exercised.eventId\n+          exercised.eventId shouldBe eventId\n+          exercised.witnessParties should contain only exercise.submittingParty.get\n+          exercised.contractId shouldBe exerciseNode.targetCoid.coid\n+          exercised.templateId shouldNot be(None)\n+          exercised.actingParties should contain theSameElementsAs exerciseNode.actingParties\n+          exercised.childEventIds shouldBe Seq.empty\n+          exercised.choice shouldBe exerciseNode.choiceId\n+          exercised.choiceArgument shouldNot be(None)\n+          exercised.consuming shouldBe true\n+          exercised.exerciseResult shouldNot be(None)\n+      }\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (create, exercise)\" in {"
+  },
+  {
+    "id" : "c53f9722-6920-4261-b271-40f437090087",
+    "prId" : 5089,
+    "comments" : [
+      {
+        "id" : "db03cea4-5584-4bbf-8159-8d4d6f6871d0",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This test reads the transaction tree, not the flat transaction.",
+        "createdAt" : "2020-03-19T17:08:41Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b4ffc6f4-a58a-47d2-833b-a9132f9b4008",
+        "parentId" : "db03cea4-5584-4bbf-8159-8d4d6f6871d0",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yes, thanks, copy-pasta.",
+        "createdAt" : "2020-03-19T17:34:19Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "556cd5ff-986f-4d6a-ba4f-3b440b8f916d",
+        "parentId" : "db03cea4-5584-4bbf-8159-8d4d6f6871d0",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/5089/commits/eba57bf61d9a7587aa53a066fc83b479c6980983",
+        "createdAt" : "2020-03-19T20:05:52Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b5d117bbf4b07fc2d8a6a4f8540241ce2ece5a56",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,158 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.store.dao\n+\n+import com.digitalasset.daml.lf.transaction.Node.{NodeCreate, NodeExercises}\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+import com.digitalasset.ledger.EventId\n+import com.digitalasset.platform.ApiOffset\n+import org.scalatest._\n+\n+private[dao] trait JdbcLedgerDaoTransactionTreesSpec\n+    extends OptionValues\n+    with Inside\n+    with LoneElement {\n+  this: AsyncFlatSpec with Matchers with JdbcLedgerDaoSuite =>\n+\n+  behavior of \"JdbcLedgerDao (lookupTransactionTreeById)\"\n+\n+  it should \"return nothing for a mismatching transaction id\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(transactionId = \"WRONG\", Set(tx.submittingParty.get))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return nothing for a mismatching party\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(\"WRONG\"))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (create)\" in {\n+    for {\n+      (offset, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(tx.submittingParty.get))\n+    } yield {\n+      inside(result.value.transaction) {\n+        case Some(transaction) =>\n+          val (eventId, createNode: NodeCreate.WithTxValue[AbsoluteContractId]) =\n+            tx.transaction.nodes.head\n+          transaction.commandId shouldBe tx.commandId.get\n+          transaction.offset shouldBe ApiOffset.toApiString(offset)\n+          transaction.transactionId shouldBe tx.transactionId\n+          transaction.workflowId shouldBe tx.workflowId.getOrElse(\"\")\n+          val created = transaction.eventsById.values.loneElement.getCreated\n+          transaction.rootEventIds.loneElement shouldEqual created.eventId\n+          created.eventId shouldBe eventId\n+          created.witnessParties should contain only tx.submittingParty.get\n+          created.agreementText.getOrElse(\"\") shouldBe createNode.coinst.agreementText\n+          created.contractKey shouldBe None\n+          created.createArguments shouldNot be(None)\n+          created.signatories should contain theSameElementsAs createNode.signatories\n+          created.observers should contain theSameElementsAs createNode.stakeholders.diff(\n+            createNode.signatories)\n+          created.templateId shouldNot be(None)\n+      }\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (exercise)\" in {"
+  },
+  {
+    "id" : "a4277fc6-9e47-4a8d-9f0a-387dcd2bde95",
+    "prId" : 5089,
+    "comments" : [
+      {
+        "id" : "9585a334-8598-45af-a131-23aee0b85108",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This test reads the transaction tree, not the flat transaction.",
+        "createdAt" : "2020-03-19T17:08:57Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9944df3d-3005-4439-9cf5-3bf17820e427",
+        "parentId" : "9585a334-8598-45af-a131-23aee0b85108",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yes, thanks, copy-pasta.",
+        "createdAt" : "2020-03-19T17:34:24Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f36ba365-6653-484d-b67a-9154ab99363e",
+        "parentId" : "9585a334-8598-45af-a131-23aee0b85108",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Addressed by https://github.com/digital-asset/daml/pull/5089/commits/eba57bf61d9a7587aa53a066fc83b479c6980983",
+        "createdAt" : "2020-03-19T20:05:57Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b5d117bbf4b07fc2d8a6a4f8540241ce2ece5a56",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,158 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.store.dao\n+\n+import com.digitalasset.daml.lf.transaction.Node.{NodeCreate, NodeExercises}\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+import com.digitalasset.ledger.EventId\n+import com.digitalasset.platform.ApiOffset\n+import org.scalatest._\n+\n+private[dao] trait JdbcLedgerDaoTransactionTreesSpec\n+    extends OptionValues\n+    with Inside\n+    with LoneElement {\n+  this: AsyncFlatSpec with Matchers with JdbcLedgerDaoSuite =>\n+\n+  behavior of \"JdbcLedgerDao (lookupTransactionTreeById)\"\n+\n+  it should \"return nothing for a mismatching transaction id\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(transactionId = \"WRONG\", Set(tx.submittingParty.get))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return nothing for a mismatching party\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(\"WRONG\"))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (create)\" in {"
+  },
+  {
+    "id" : "6e852c01-f659-4334-8df8-81a7cbe048f4",
+    "prId" : 5089,
+    "comments" : [
+      {
+        "id" : "28a9f448-09ef-449a-96ce-0f9ec4ce7715",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "You could additionally check that the order of `root_event_ids` is the same as `[createEventId, exerciseEventId]`.",
+        "createdAt" : "2020-03-19T17:10:23Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ffd98a56-c203-4f8d-be26-eb097e4f9d5d",
+        "parentId" : "28a9f448-09ef-449a-96ce-0f9ec4ce7715",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Yes, thanks, copy-pasta.",
+        "createdAt" : "2020-03-19T17:34:30Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "3d988e51-98f5-42d8-a48f-d5370b7821d3",
+        "parentId" : "28a9f448-09ef-449a-96ce-0f9ec4ce7715",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : ":smile: ",
+        "createdAt" : "2020-03-19T17:34:38Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "337efc93-cb17-41be-9f0b-3705df64f111",
+        "parentId" : "28a9f448-09ef-449a-96ce-0f9ec4ce7715",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "> You could additionally check that the order of `root_event_ids` is the same as `[createEventId, exerciseEventId]`.\r\n\r\nHere it's not really relevant, here I'm extracting the events from the transaction created originally, the order for the response is checked a few lines below.",
+        "createdAt" : "2020-03-19T17:35:39Z",
+        "updatedAt" : "2020-03-20T11:06:26Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b5d117bbf4b07fc2d8a6a4f8540241ce2ece5a56",
+    "line" : 123,
+    "diffHunk" : "@@ -0,0 +1,158 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.store.dao\n+\n+import com.digitalasset.daml.lf.transaction.Node.{NodeCreate, NodeExercises}\n+import com.digitalasset.daml.lf.value.Value.AbsoluteContractId\n+import com.digitalasset.ledger.EventId\n+import com.digitalasset.platform.ApiOffset\n+import org.scalatest._\n+\n+private[dao] trait JdbcLedgerDaoTransactionTreesSpec\n+    extends OptionValues\n+    with Inside\n+    with LoneElement {\n+  this: AsyncFlatSpec with Matchers with JdbcLedgerDaoSuite =>\n+\n+  behavior of \"JdbcLedgerDao (lookupTransactionTreeById)\"\n+\n+  it should \"return nothing for a mismatching transaction id\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(transactionId = \"WRONG\", Set(tx.submittingParty.get))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return nothing for a mismatching party\" in {\n+    for {\n+      (_, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(\"WRONG\"))\n+    } yield {\n+      result shouldBe None\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (create)\" in {\n+    for {\n+      (offset, tx) <- storeCreateTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(tx.submittingParty.get))\n+    } yield {\n+      inside(result.value.transaction) {\n+        case Some(transaction) =>\n+          val (eventId, createNode: NodeCreate.WithTxValue[AbsoluteContractId]) =\n+            tx.transaction.nodes.head\n+          transaction.commandId shouldBe tx.commandId.get\n+          transaction.offset shouldBe ApiOffset.toApiString(offset)\n+          transaction.transactionId shouldBe tx.transactionId\n+          transaction.workflowId shouldBe tx.workflowId.getOrElse(\"\")\n+          val created = transaction.eventsById.values.loneElement.getCreated\n+          transaction.rootEventIds.loneElement shouldEqual created.eventId\n+          created.eventId shouldBe eventId\n+          created.witnessParties should contain only tx.submittingParty.get\n+          created.agreementText.getOrElse(\"\") shouldBe createNode.coinst.agreementText\n+          created.contractKey shouldBe None\n+          created.createArguments shouldNot be(None)\n+          created.signatories should contain theSameElementsAs createNode.signatories\n+          created.observers should contain theSameElementsAs createNode.stakeholders.diff(\n+            createNode.signatories)\n+          created.templateId shouldNot be(None)\n+      }\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (exercise)\" in {\n+    for {\n+      (_, create) <- storeCreateTransaction()\n+      created <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(create.transactionId, Set(create.submittingParty.get))\n+      (offset, exercise) <- storeExerciseTransaction(\n+        AbsoluteContractId(created.get.transaction.get.eventsById.head._2.getCreated.contractId))\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(exercise.transactionId, Set(exercise.submittingParty.get))\n+    } yield {\n+      inside(result.value.transaction) {\n+        case Some(transaction) =>\n+          val (eventId, exerciseNode: NodeExercises.WithTxValue[EventId, AbsoluteContractId]) =\n+            exercise.transaction.nodes.head\n+          transaction.commandId shouldBe exercise.commandId.get\n+          transaction.offset shouldBe ApiOffset.toApiString(offset)\n+          transaction.transactionId shouldBe exercise.transactionId\n+          transaction.workflowId shouldBe exercise.workflowId.getOrElse(\"\")\n+          val exercised = transaction.eventsById.values.loneElement.getExercised\n+          transaction.rootEventIds.loneElement shouldEqual exercised.eventId\n+          exercised.eventId shouldBe eventId\n+          exercised.witnessParties should contain only exercise.submittingParty.get\n+          exercised.contractId shouldBe exerciseNode.targetCoid.coid\n+          exercised.templateId shouldNot be(None)\n+          exercised.actingParties should contain theSameElementsAs exerciseNode.actingParties\n+          exercised.childEventIds shouldBe Seq.empty\n+          exercised.choice shouldBe exerciseNode.choiceId\n+          exercised.choiceArgument shouldNot be(None)\n+          exercised.consuming shouldBe true\n+          exercised.exerciseResult shouldNot be(None)\n+      }\n+    }\n+  }\n+\n+  it should \"return the expected flat transaction for a correct request (create, exercise)\" in {\n+    for {\n+      (offset, tx) <- storeFullyTransientTransaction()\n+      result <- ledgerDao.transactionsReader\n+        .lookupTransactionTreeById(tx.transactionId, Set(tx.submittingParty.get))\n+    } yield {\n+      inside(result.value.transaction) {\n+        case Some(transaction) =>\n+          val (createEventId, createNode) =\n+            tx.transaction.nodes.collectFirst {\n+              case (eventId, node: NodeCreate.WithTxValue[AbsoluteContractId]) =>\n+                eventId -> node\n+            }.get\n+          val (exerciseEventId, exerciseNode) =\n+            tx.transaction.nodes.collectFirst {\n+              case (eventId, node: NodeExercises.WithTxValue[EventId, AbsoluteContractId]) =>\n+                eventId -> node\n+            }.get\n+"
+  }
+]

@@ -1,0 +1,314 @@
+[
+  {
+    "id" : "e56188c8-4268-46f8-9336-a37eb384487d",
+    "prId" : 3923,
+    "comments" : [
+      {
+        "id" : "e3d813d2-2b14-489b-8fb5-20d5dc22de76",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Very happy about this extraction. ^_^",
+        "createdAt" : "2019-12-23T09:15:34Z",
+        "updatedAt" : "2020-01-10T10:31:04Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c820159bc8cad55858939f177705f0a8bab0fd13",
+    "line" : 544,
+    "diffHunk" : "@@ -3,556 +3,24 @@\n \n package com.daml.ledger.participant.state.kvutils\n \n-import java.io.File\n-import java.time.Duration\n-import java.util.UUID\n+import java.time.Clock\n \n-import akka.stream.scaladsl.Sink\n-import com.daml.ledger.participant.state.kvutils.InMemoryKVParticipantStateIT._\n-import com.daml.ledger.participant.state.v1.Update._\n import com.daml.ledger.participant.state.v1._\n-import com.digitalasset.daml.bazeltools.BazelRunfiles._\n-import com.digitalasset.daml.lf.archive.DarReader\n-import com.digitalasset.daml.lf.data.Ref\n import com.digitalasset.daml.lf.data.Ref.LedgerString\n import com.digitalasset.daml.lf.data.Time.Timestamp\n-import com.digitalasset.daml.lf.data.{InsertOrdSet, ImmArray}\n-import com.digitalasset.daml.lf.transaction.GenTransaction\n-import com.digitalasset.daml_lf_dev.DamlLf\n-import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll\n-import org.scalatest.Assertions._\n-import org.scalatest.{Assertion, AsyncWordSpec, BeforeAndAfterEach}\n \n-import scala.compat.java8.FutureConverters._\n-import scala.util.Try\n-import scala.collection.immutable.SortedMap\n+class InMemoryKVParticipantStateIT extends ParticipantStateIntegrationSpecBase {\n \n-class InMemoryKVParticipantStateIT\n-    extends AsyncWordSpec\n-    with BeforeAndAfterEach\n-    with AkkaBeforeAndAfterAll {\n+  override def participantStateFactory(\n+      participantId: ParticipantId,\n+      ledgerId: LedgerString): ReadService with WriteService =\n+    new InMemoryKVParticipantState(participantId, ledgerId)"
+  },
+  {
+    "id" : "b1a6360d-5218-405e-adb8-1252dec0fc92",
+    "prId" : 3744,
+    "comments" : [
+      {
+        "id" : "0403a4cb-7b4b-4a00-bb30-acbf49bf2af6",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "perhaps just use `assert(update.party.isSome)` or something here.",
+        "createdAt" : "2019-12-05T10:55:51Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e6880d62-8e57-4cc3-b331-1cfd50cd5a11",
+        "parentId" : "0403a4cb-7b4b-4a00-bb30-acbf49bf2af6",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Addressed in 165899128.",
+        "createdAt" : "2019-12-05T11:10:59Z",
+        "updatedAt" : "2019-12-05T15:56:33Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d8204b7c377ce994002fb11ce1227c245747b3d0",
+    "line" : null,
+    "diffHunk" : "@@ -130,88 +127,80 @@ class InMemoryKVParticipantStateIT\n     }\n \n     \"provide update after allocateParty\" in {\n-      val rt = ps.getNewRecordTime()\n-\n-      val hint = Some(\"Alice\")\n+      val hint = Some(Ref.Party.assertFromString(\"Alice\"))\n       val displayName = Some(\"Alice Cooper\")\n \n       for {\n-        allocResult <- ps.allocateParty(hint, displayName).toScala\n+        allocResult <- ps.allocateParty(hint, displayName, randomLedgerString()).toScala\n         updateTuple <- ps.stateUpdates(beginAfter = None).runWith(Sink.head)\n       } yield {\n-        allocResult match {\n-          case PartyAllocationResult.Ok(partyDetails) =>\n-            assert(partyDetails.party == hint.get)\n-            assert(partyDetails.displayName == displayName)\n-            assert(partyDetails.isLocal)\n-          case _ =>\n-            fail(\"unexpected response to party allocation\")\n-        }\n+        assert(\n+          allocResult == SubmissionResult.Acknowledged,\n+          s\"unexpected response to party allocation: $allocResult\")\n         updateTuple match {\n           case (offset: Offset, update: PartyAddedToParticipant) =>\n             assert(offset == Offset(Array(0L, 0L)))\n             assert(update.party == hint.get)\n             assert(update.displayName == displayName.get)\n             assert(update.participantId == ps.participantId)\n             assert(update.recordTime >= rt)\n-          case _ => fail(\"unexpected update message after a party allocation\")\n+          case _ =>\n+            fail(\n+              s\"unexpected update message after a party allocation. Error : ${allocResult.description}\")\n         }\n       }\n     }\n \n     \"accept allocateParty when hint is empty\" in {\n-      val hint = None\n+      val hintNone = None\n       val displayName = Some(\"Alice Cooper\")\n \n       for {\n-        result <- ps.allocateParty(hint, displayName).toScala\n+        result <- ps.allocateParty(hint = None, displayName, randomLedgerString()).toScala\n+        updateTuple <- ps.stateUpdates(beginAfter = None).runWith(Sink.head)\n       } yield {\n-        result match {\n-          case PartyAllocationResult.Ok(_) =>\n-            succeed\n+        assert(result == SubmissionResult.Acknowledged, \"unexpected response to party allocation\")\n+        updateTuple match {\n+          case (offset: Offset, update: PartyAddedToParticipant) =>\n+            assert(offset == Offset(Array(0L, 0L)))\n+            assert(update.party != hintNone)"
+  },
+  {
+    "id" : "cddcbc23-7f21-4929-b098-eed561e8bab9",
+    "prId" : 3726,
+    "comments" : [
+      {
+        "id" : "02bd048c-cf50-485f-94d6-48a28f39b14d",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What exactly is the difference between passing in an empty set and passing `None`?",
+        "createdAt" : "2019-12-04T09:42:45Z",
+        "updatedAt" : "2019-12-04T12:11:21Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "775ca4d7-07ec-4162-b9dc-21fe65cdd70f",
+        "parentId" : "02bd048c-cf50-485f-94d6-48a28f39b14d",
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "I wanted to be explicit that the package dependencies were not even computed.",
+        "createdAt" : "2019-12-04T10:43:21Z",
+        "updatedAt" : "2019-12-04T12:11:21Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "172715cbea18231150b7d6276af1c3f63490bc2f",
+    "line" : 23,
+    "diffHunk" : "@@ -387,7 +389,7 @@ class InMemoryKVParticipantStateIT\n \n object InMemoryKVParticipantStateIT {\n   private val emptyTransaction: SubmittedTransaction =\n-    PartialTransaction.initial.finish.right.get\n+    GenTransaction(SortedMap.empty, ImmArray.empty, Some(InsertOrdSet.empty))"
+  },
+  {
+    "id" : "699149cf-412c-4ad4-983f-6da263a9804a",
+    "prId" : 2031,
+    "comments" : [
+      {
+        "id" : "bec1fb47-9fe8-486f-92c3-4c87de5665f2",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "AAAAAAAHHHHHH",
+        "createdAt" : "2019-07-08T08:34:18Z",
+        "updatedAt" : "2019-07-08T09:59:14Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "907e868fd50d46831470c159b0eda4e8e24c2377",
+    "line" : null,
+    "diffHunk" : "@@ -85,7 +85,59 @@ class InMemoryKVParticipantStateIT extends AsyncWordSpec with AkkaBeforeAndAfter\n       }\n     }\n \n-    \"duplicate package removed from update after uploadPackages\" in {\n+    \"provide two updates after uploadPackages with two archives\" in {\n+      val ps = new InMemoryKVParticipantState(participantId)\n+      val rt = ps.getNewRecordTime()\n+\n+      val sourceDescription = Some(\"provided by test\")\n+      val archives = List(\n+        DamlLf.Archive.newBuilder\n+          .setHash(\"asdf\")\n+          .setPayload(ByteString.copyFromUtf8(\"AAAAAAAHHHHHH\"))"
+  },
+  {
+    "id" : "bbb043a4-992e-499d-a650-5cdd8349e044",
+    "prId" : 2031,
+    "comments" : [
+      {
+        "id" : "352bf8e8-333e-4267-84c8-63f84e3b3a95",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Minor: this block and the following can probably be defined as a function with the offset as a parameter.",
+        "createdAt" : "2019-07-08T08:36:25Z",
+        "updatedAt" : "2019-07-08T09:59:14Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c114286c-7350-4adb-bca2-b736b033f523",
+        "parentId" : "352bf8e8-333e-4267-84c8-63f84e3b3a95",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Done",
+        "createdAt" : "2019-07-08T10:00:38Z",
+        "updatedAt" : "2019-07-08T10:00:38Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "907e868fd50d46831470c159b0eda4e8e24c2377",
+    "line" : null,
+    "diffHunk" : "@@ -85,7 +85,59 @@ class InMemoryKVParticipantStateIT extends AsyncWordSpec with AkkaBeforeAndAfter\n       }\n     }\n \n-    \"duplicate package removed from update after uploadPackages\" in {\n+    \"provide two updates after uploadPackages with two archives\" in {\n+      val ps = new InMemoryKVParticipantState(participantId)\n+      val rt = ps.getNewRecordTime()\n+\n+      val sourceDescription = Some(\"provided by test\")\n+      val archives = List(\n+        DamlLf.Archive.newBuilder\n+          .setHash(\"asdf\")\n+          .setPayload(ByteString.copyFromUtf8(\"AAAAAAAHHHHHH\"))\n+          .build,\n+        DamlLf.Archive.newBuilder\n+          .setHash(\"zxcv\")\n+          .setPayload(ByteString.copyFromUtf8(\"ZZZZZZZZZZZZZ\"))\n+          .build\n+      )\n+\n+      for {\n+        result <- ps\n+          .uploadPackages(archives, sourceDescription)\n+          .toScala\n+        updateTuples <- ps.stateUpdates(beginAfter = None).take(2).runWith(Sink.seq)\n+      } yield {\n+        ps.close()\n+        result match {\n+          case UploadPackagesResult.Ok =>\n+            succeed\n+          case _ =>\n+            fail(\"unexpected response to party allocation\")\n+        }\n+        updateTuples.head match {"
+  },
+  {
+    "id" : "0312fdb7-3e50-403a-b080-8be4fea06d71",
+    "prId" : 2031,
+    "comments" : [
+      {
+        "id" : "9b51de5c-eb21-4fdc-b663-eb5279b3b131",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Minor: this fixture seems to resurface every now and then, you may want to pull it out of individual test, making it a `def` if needed.",
+        "createdAt" : "2019-07-08T08:38:11Z",
+        "updatedAt" : "2019-07-08T09:59:14Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7f42b6c1-509a-4bac-9ba9-e26ee8404667",
+        "parentId" : "9b51de5c-eb21-4fdc-b663-eb5279b3b131",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Done",
+        "createdAt" : "2019-07-08T10:00:48Z",
+        "updatedAt" : "2019-07-08T10:00:48Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "907e868fd50d46831470c159b0eda4e8e24c2377",
+    "line" : null,
+    "diffHunk" : "@@ -319,4 +391,39 @@ class InMemoryKVParticipantStateIT extends AsyncWordSpec with AkkaBeforeAndAfter\n     }\n   }\n \n+  \"return update [0,1] with beginAfter=[0,0]\" in {\n+    val ps = new InMemoryKVParticipantState(participantId)\n+    val rt = ps.getNewRecordTime()\n+\n+    val sourceDescription = Some(\"provided by test\")\n+    val archives = List("
+  },
+  {
+    "id" : "e5500bbf-9b3b-4aef-80e9-1f70ba917958",
+    "prId" : 1498,
+    "comments" : [
+      {
+        "id" : "bb1aaa41-7317-43a8-8585-970df42e753b",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "what's up with the unnecessary parens?",
+        "createdAt" : "2019-06-05T21:52:14Z",
+        "updatedAt" : "2019-06-07T06:35:42Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "0f3b450f-06ba-4d96-a8bc-195ad2c791c4",
+        "parentId" : "bb1aaa41-7317-43a8-8585-970df42e753b",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "warts remover made me add them",
+        "createdAt" : "2019-06-06T12:16:47Z",
+        "updatedAt" : "2019-06-07T06:35:42Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "d9e588cf1df2d92d070ee8832d72044b4329a1a1",
+    "line" : 23,
+    "diffHunk" : "@@ -43,41 +36,47 @@ class InMemoryKVParticipantStateIT extends AsyncWordSpec with AkkaBeforeAndAfter\n \n     \"return initial conditions\" in {\n       val ps = new InMemoryKVParticipantState\n-      ps.getLedgerInitialConditions\n+      ps.getLedgerInitialConditions()"
+  }
+]

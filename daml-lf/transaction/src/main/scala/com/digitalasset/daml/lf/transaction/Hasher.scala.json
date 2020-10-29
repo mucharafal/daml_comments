@@ -1,0 +1,227 @@
+[
+  {
+    "id" : "9a445900-9f40-4616-94ba-e2b4f28bb524",
+    "prId" : 3849,
+    "comments" : [
+      {
+        "id" : "2a4c309c-2322-48b6-ae55-c2b760e1a52a",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Is `xs.toImmArray` deterministic and stable?",
+        "createdAt" : "2020-01-14T08:55:28Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ec24861c-f8cf-4f77-95d1-96ac75e6819a",
+        "parentId" : "2a4c309c-2322-48b6-ae55-c2b760e1a52a",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Sure. `xs` is a `SortedLookupList`. `xs.toImmArray` is a list a list of key-value order by key. ",
+        "createdAt" : "2020-01-14T09:17:11Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3df638a5-fed4-4e0b-ae44-9500ea97af2c",
+        "parentId" : "2a4c309c-2322-48b6-ae55-c2b760e1a52a",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "with no duplicate key.  \r\nThe builders for `SortedLookupList`  ensure that. ",
+        "createdAt" : "2020-01-14T09:20:12Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "234101313181b0ea39c66a646366bd28d3d2adfd",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,105 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf\n+package transaction\n+\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.daml.lf.value.Value\n+\n+object Hasher {\n+\n+  // tags are used to avoid hash collisions due to equal encoding for different objects\n+\n+  // tags for atomic data\n+  private val tagUnit: Byte = 0x01\n+  private val tagTrue: Byte = 0x02\n+  private val tagFalse: Byte = 0x03\n+  private val tagInt64: Byte = 0x04\n+  private val tagNumeric: Byte = 0x05\n+  private val tagDate: Byte = 0x06\n+  private val tagTimeStamp: Byte = 0x07\n+  private val tagText: Byte = 0x08\n+  private val tagParty: Byte = 0x09\n+  private val tagContractId: Byte = 0x0A\n+\n+  // tag for collection data\n+  private val tagNone: Byte = 0x20\n+  private val tagSome: Byte = 0x21\n+  private val tagList: Byte = 0x22\n+  private val tagTextMap: Byte = 0x23\n+\n+  // tag for user defined data\n+  private val tagRecord: Byte = 0x40\n+  private val tagVariant: Byte = 0x41\n+  private val tagEnum: Byte = 0x42\n+\n+  // package private for testing purpose.\n+  // Do not call this method from outside Hasher object/\n+  private[transaction] implicit class HashBuilderOps(val builder: crypto.Hash.Builder)\n+      extends AnyVal {\n+\n+    import builder._\n+\n+    def addDottedName(name: Ref.DottedName): crypto.Hash.Builder =\n+      iterateOver(name.segments.iterator, name.segments.length)(_ add _)\n+\n+    def addQualifiedName(name: Ref.QualifiedName): crypto.Hash.Builder =\n+      addDottedName(name.module).addDottedName(name.name)\n+\n+    def addIdentifier(id: Ref.Identifier): crypto.Hash.Builder =\n+      add(id.packageId).add(id.qualifiedName.toString)\n+\n+    def addValue(value: Value[Value.AbsoluteContractId]): crypto.Hash.Builder = value match {\n+      case Value.ValueUnit =>\n+        add(tagUnit)\n+      case Value.ValueBool(true) =>\n+        add(tagTrue)\n+      case Value.ValueBool(false) =>\n+        add(tagFalse)\n+      case Value.ValueInt64(v) =>\n+        add(tagInt64).add(v)\n+      case Value.ValueNumeric(v) =>\n+        add(tagNumeric).add(v.scale).add(v.unscaledValue.toByteArray)\n+      case Value.ValueTimestamp(v) =>\n+        add(tagTimeStamp).add(v.micros)\n+      case Value.ValueDate(v) =>\n+        add(tagDate).add(v.days)\n+      case Value.ValueParty(v) =>\n+        add(tagParty).add(v)\n+      case Value.ValueText(v) =>\n+        add(tagText).add(v)\n+      case Value.ValueContractId(v) =>\n+        add(tagContractId).add(v.coid)\n+      case Value.ValueOptional(None) =>\n+        add(tagNone)\n+      case Value.ValueOptional(Some(v)) =>\n+        add(tagSome).addValue(v)\n+      case Value.ValueList(xs) =>\n+        add(tagList).iterateOver(xs.iterator, xs.length)(_ addValue _)\n+      case Value.ValueTextMap(xs) =>\n+        add(tagTextMap).iterateOver(xs.toImmArray.iterator, xs.toImmArray.length) {"
+  },
+  {
+    "id" : "9f8f5a2f-ac79-4a5c-bc7d-3c179e576e44",
+    "prId" : 3849,
+    "comments" : [
+      {
+        "id" : "56c01ffe-f1f4-4fb8-942a-5cfb04a3d913",
+        "parentId" : null,
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "Why are constructors and field names being ignored? Ditto for constructors in `ValueVariant` and `ValueEnum`",
+        "createdAt" : "2020-01-14T11:07:51Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "442b389e-67b1-4d76-af38-ec9693b6e134",
+        "parentId" : "56c01ffe-f1f4-4fb8-942a-5cfb04a3d913",
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "Also, is the order of fields stable?",
+        "createdAt" : "2020-01-14T12:06:53Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "06335f0a-dc41-4c18-b186-e0c40ef3cac9",
+        "parentId" : "56c01ffe-f1f4-4fb8-942a-5cfb04a3d913",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "This should be run only on well type values (I added a comment). Hence we do not care of the constructors and the field-names, and we have a stable order of fields. \r\nFurthermore, we may also drop constructor and field-name in the future.\r\n\r\n\r\n\r\n \r\n",
+        "createdAt" : "2020-01-14T14:40:08Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f812a79e-caf6-4766-a463-5fe1001894f5",
+        "parentId" : "56c01ffe-f1f4-4fb8-942a-5cfb04a3d913",
+        "author" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "body" : "OK, since the `key.templateId` describes all types, that's fine.",
+        "createdAt" : "2020-01-14T16:53:52Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "oggy-",
+          "name" : "Ognjen Maric",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/325151?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "234101313181b0ea39c66a646366bd28d3d2adfd",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,105 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf\n+package transaction\n+\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.daml.lf.value.Value\n+\n+object Hasher {\n+\n+  // tags are used to avoid hash collisions due to equal encoding for different objects\n+\n+  // tags for atomic data\n+  private val tagUnit: Byte = 0x01\n+  private val tagTrue: Byte = 0x02\n+  private val tagFalse: Byte = 0x03\n+  private val tagInt64: Byte = 0x04\n+  private val tagNumeric: Byte = 0x05\n+  private val tagDate: Byte = 0x06\n+  private val tagTimeStamp: Byte = 0x07\n+  private val tagText: Byte = 0x08\n+  private val tagParty: Byte = 0x09\n+  private val tagContractId: Byte = 0x0A\n+\n+  // tag for collection data\n+  private val tagNone: Byte = 0x20\n+  private val tagSome: Byte = 0x21\n+  private val tagList: Byte = 0x22\n+  private val tagTextMap: Byte = 0x23\n+\n+  // tag for user defined data\n+  private val tagRecord: Byte = 0x40\n+  private val tagVariant: Byte = 0x41\n+  private val tagEnum: Byte = 0x42\n+\n+  // package private for testing purpose.\n+  // Do not call this method from outside Hasher object/\n+  private[transaction] implicit class HashBuilderOps(val builder: crypto.Hash.Builder)\n+      extends AnyVal {\n+\n+    import builder._\n+\n+    def addDottedName(name: Ref.DottedName): crypto.Hash.Builder =\n+      iterateOver(name.segments.iterator, name.segments.length)(_ add _)\n+\n+    def addQualifiedName(name: Ref.QualifiedName): crypto.Hash.Builder =\n+      addDottedName(name.module).addDottedName(name.name)\n+\n+    def addIdentifier(id: Ref.Identifier): crypto.Hash.Builder =\n+      add(id.packageId).add(id.qualifiedName.toString)\n+\n+    def addValue(value: Value[Value.AbsoluteContractId]): crypto.Hash.Builder = value match {\n+      case Value.ValueUnit =>\n+        add(tagUnit)\n+      case Value.ValueBool(true) =>\n+        add(tagTrue)\n+      case Value.ValueBool(false) =>\n+        add(tagFalse)\n+      case Value.ValueInt64(v) =>\n+        add(tagInt64).add(v)\n+      case Value.ValueNumeric(v) =>\n+        add(tagNumeric).add(v.scale).add(v.unscaledValue.toByteArray)\n+      case Value.ValueTimestamp(v) =>\n+        add(tagTimeStamp).add(v.micros)\n+      case Value.ValueDate(v) =>\n+        add(tagDate).add(v.days)\n+      case Value.ValueParty(v) =>\n+        add(tagParty).add(v)\n+      case Value.ValueText(v) =>\n+        add(tagText).add(v)\n+      case Value.ValueContractId(v) =>\n+        add(tagContractId).add(v.coid)\n+      case Value.ValueOptional(None) =>\n+        add(tagNone)\n+      case Value.ValueOptional(Some(v)) =>\n+        add(tagSome).addValue(v)\n+      case Value.ValueList(xs) =>\n+        add(tagList).iterateOver(xs.iterator, xs.length)(_ addValue _)\n+      case Value.ValueTextMap(xs) =>\n+        add(tagTextMap).iterateOver(xs.toImmArray.iterator, xs.toImmArray.length) {\n+          case (acc, (k, v)) => acc.add(k).addValue(v)\n+        }\n+      case Value.ValueGenMap(_) =>\n+        sys.error(\"Hashing of generic map not implemented\")\n+      // Struct: should never be encountered\n+      case Value.ValueStruct(_) =>\n+        sys.error(\"Hashing of struct values is not supported\")\n+      case Value.ValueRecord(_, fs) =>"
+  },
+  {
+    "id" : "94f466f2-cb90-4b22-bc0d-9b4ee45f69a0",
+    "prId" : 3849,
+    "comments" : [
+      {
+        "id" : "120dbac5-8100-4778-b286-107560c3bdc6",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "The error cases should come last.",
+        "createdAt" : "2020-01-14T21:18:49Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a4a518ce-f658-4d15-ad01-fd6c40c4f5a4",
+        "parentId" : "120dbac5-8100-4778-b286-107560c3bdc6",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-01-15T08:22:09Z",
+        "updatedAt" : "2020-01-16T15:17:17Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "234101313181b0ea39c66a646366bd28d3d2adfd",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,108 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf\n+package transaction\n+\n+import com.digitalasset.daml.lf.data.Ref\n+import com.digitalasset.daml.lf.value.Value\n+\n+object Hasher {\n+\n+  // tags are used to avoid hash collisions due to equal encoding for different objects\n+\n+  // tags for atomic data\n+  private val tagUnit: Byte = 0x01\n+  private val tagTrue: Byte = 0x02\n+  private val tagFalse: Byte = 0x03\n+  private val tagInt64: Byte = 0x04\n+  private val tagNumeric: Byte = 0x05\n+  private val tagDate: Byte = 0x06\n+  private val tagTimeStamp: Byte = 0x07\n+  private val tagText: Byte = 0x08\n+  private val tagParty: Byte = 0x09\n+  private val tagContractId: Byte = 0x0A\n+\n+  // tag for collection data\n+  private val tagNone: Byte = 0x20\n+  private val tagSome: Byte = 0x21\n+  private val tagList: Byte = 0x22\n+  private val tagTextMap: Byte = 0x23\n+\n+  // tag for user defined data\n+  private val tagRecord: Byte = 0x40\n+  private val tagVariant: Byte = 0x41\n+  private val tagEnum: Byte = 0x42\n+\n+  // package private for testing purpose.\n+  // Do not call this method from outside Hasher object/\n+  private[transaction] implicit class HashBuilderOps(val builder: crypto.SHa256Hash.Builder)\n+      extends AnyVal {\n+\n+    import builder._\n+\n+    def addDottedName(name: Ref.DottedName): crypto.SHa256Hash.Builder =\n+      iterateOver(name.segments.iterator, name.segments.length)(_ add _)\n+\n+    def addQualifiedName(name: Ref.QualifiedName): crypto.SHa256Hash.Builder =\n+      addDottedName(name.module).addDottedName(name.name)\n+\n+    def addIdentifier(id: Ref.Identifier): crypto.SHa256Hash.Builder =\n+      add(id.packageId).addQualifiedName(id.qualifiedName)\n+\n+    def addTypedValue(value: Value[Value.AbsoluteContractId]): crypto.SHa256Hash.Builder =\n+      value match {\n+        case Value.ValueUnit =>\n+          add(tagUnit)\n+        case Value.ValueBool(true) =>\n+          add(tagTrue)\n+        case Value.ValueBool(false) =>\n+          add(tagFalse)\n+        case Value.ValueInt64(v) =>\n+          add(tagInt64).add(v)\n+        case Value.ValueNumeric(v) =>\n+          add(tagNumeric).add(v.scale).add(v.unscaledValue.toByteArray)\n+        case Value.ValueTimestamp(v) =>\n+          add(tagTimeStamp).add(v.micros)\n+        case Value.ValueDate(v) =>\n+          add(tagDate).add(v.days)\n+        case Value.ValueParty(v) =>\n+          add(tagParty).add(v)\n+        case Value.ValueText(v) =>\n+          add(tagText).add(v)\n+        case Value.ValueContractId(v) =>\n+          add(tagContractId).add(v.coid)\n+        case Value.ValueOptional(None) =>\n+          add(tagNone)\n+        case Value.ValueOptional(Some(v)) =>\n+          add(tagSome).addTypedValue(v)\n+        case Value.ValueList(xs) =>\n+          add(tagList).iterateOver(xs.iterator, xs.length)(_ addTypedValue _)\n+        case Value.ValueTextMap(xs) =>\n+          add(tagTextMap).iterateOver(xs.toImmArray.iterator, xs.toImmArray.length) {\n+            case (acc, (k, v)) => acc.add(k).addTypedValue(v)\n+          }\n+        case Value.ValueGenMap(_) =>"
+  }
+]

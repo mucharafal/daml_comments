@@ -1,0 +1,152 @@
+[
+  {
+    "id" : "f80fef46-2e79-418f-9065-09d8d9abf4fa",
+    "prId" : 1151,
+    "comments" : [
+      {
+        "id" : "637dfe78-fe8e-4a9e-8ccb-722254bed220",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "`strField` asserts that the given field is a string field, you could use it instead of `anyField`.\r\n\r\nAlso, I'm surprised that `JsValue` (returned by `anyField`) can be magically converted to a `Option[String]`",
+        "createdAt" : "2019-05-15T12:15:57Z",
+        "updatedAt" : "2019-05-17T06:35:00Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "772d3910-8d54-4c66-92b3-468dfd7d2e01",
+        "parentId" : "637dfe78-fe8e-4a9e-8ccb-722254bed220",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Fixed. I added `optionStrField` to Util.scala.",
+        "createdAt" : "2019-05-15T12:46:15Z",
+        "updatedAt" : "2019-05-17T06:35:00Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fa40588773325065a44dc4d703aec04bc19f0c20",
+    "line" : null,
+    "diffHunk" : "@@ -99,15 +99,17 @@ object ModelCodec {\n       def write(value: Contract): JsValue = JsObject(\n         \"id\" -> value.id.toJson,\n         \"template\" -> value.template.toJson,\n-        \"argument\" -> value.argument.toJson\n+        \"argument\" -> value.argument.toJson,\n+        \"agreementText\" -> value.agreementText.toJson\n       )\n       def read(value: JsValue, types: DamlLfTypeLookup): Contract = {\n         val id = anyField(value, \"id\", \"Contract\").convertTo[ApiTypes.ContractId]\n         val template = anyField(value, \"template\", \"Contract\").convertTo[Template]\n         val argument = ApiCodecCompressed\n           .jsValueToApiType(anyField(value, \"record\", \"Contract\"), template.id, types)\n           .asInstanceOf[ApiRecord]\n-        Contract(id, template, argument)\n+        val agreementText = anyField(value, \"agreementText\", \"Contract\").convertTo[Option[String]]"
+  },
+  {
+    "id" : "591fa949-e763-47a7-aa75-97b6a0b1cd0c",
+    "prId" : 1151,
+    "comments" : [
+      {
+        "id" : "ad3f52d5-e3ba-4fe5-8c8b-47d4527f0d56",
+        "parentId" : null,
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "I think there is an issue here.\r\n\r\nThe `write` method always includes a `agreementText` property, presumably with a `null` value when the agreement text is missing (I expect `None.toJson` returns `JsNull`).\r\nThe `read` method only handles cases where the property is missing, or where its value is a string (see optionStrField). How about handling `case Some(JsNull) => None` in `optionStrField`? \r\n\r\nI realize there is no corresponding test. For other codecs, we have tests, e.g., https://github.com/digital-asset/daml/blob/master/navigator/backend/src/test/scala/com/digitalasset/navigator/backend/json/DamlLfCodecSpec.scala#L28",
+        "createdAt" : "2019-05-16T08:57:37Z",
+        "updatedAt" : "2019-05-17T06:35:00Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6479417b-d611-4cac-9b8d-d1b8579a4a88",
+        "parentId" : "ad3f52d5-e3ba-4fe5-8c8b-47d4527f0d56",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Turns out that this `read` method can be deleted as it isn't used anywhere.",
+        "createdAt" : "2019-05-16T09:44:54Z",
+        "updatedAt" : "2019-05-17T06:35:00Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "72472ba8-c4bd-4104-80e0-ce2c3ed3f144",
+        "parentId" : "ad3f52d5-e3ba-4fe5-8c8b-47d4527f0d56",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Oh good catch. I'm not sure this whole class is needed at all - I can't think of any place where we would be serializing contract objects (the GraphQL API uses a different mechanism for serializing data).",
+        "createdAt" : "2019-05-16T09:50:32Z",
+        "updatedAt" : "2019-05-17T06:35:00Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6e1a2047-319d-498d-a88a-aefbc3246e11",
+        "parentId" : "ad3f52d5-e3ba-4fe5-8c8b-47d4527f0d56",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "See f4dd868 and 96943e4",
+        "createdAt" : "2019-05-16T11:35:15Z",
+        "updatedAt" : "2019-05-17T06:35:00Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "fa40588773325065a44dc4d703aec04bc19f0c20",
+    "line" : null,
+    "diffHunk" : "@@ -99,15 +99,17 @@ object ModelCodec {\n       def write(value: Contract): JsValue = JsObject(\n         \"id\" -> value.id.toJson,\n         \"template\" -> value.template.toJson,\n-        \"argument\" -> value.argument.toJson\n+        \"argument\" -> value.argument.toJson,\n+        \"agreementText\" -> value.agreementText.toJson\n       )\n       def read(value: JsValue, types: DamlLfTypeLookup): Contract = {\n         val id = anyField(value, \"id\", \"Contract\").convertTo[ApiTypes.ContractId]\n         val template = anyField(value, \"template\", \"Contract\").convertTo[Template]\n         val argument = ApiCodecCompressed\n           .jsValueToApiType(anyField(value, \"record\", \"Contract\"), template.id, types)\n           .asInstanceOf[ApiRecord]\n-        Contract(id, template, argument)\n+        val agreementText = optionStrField(value, \"agreementText\", \"Contract\")"
+  }
+]

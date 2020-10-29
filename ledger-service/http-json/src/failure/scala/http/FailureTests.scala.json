@@ -1,0 +1,64 @@
+[
+  {
+    "id" : "9d8742f4-d759-420f-98da-8c37e9d782e7",
+    "prId" : 7791,
+    "comments" : [
+      {
+        "id" : "8137dc7e-8531-4b37-b173-f8fccb71b7f9",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n      (status, output) <- postJsonStringRequestEncoded(\r\n```",
+        "createdAt" : "2020-10-23T16:49:06Z",
+        "updatedAt" : "2020-10-23T16:49:49Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9f75e7f2a54cf771b24f8a0370277e177701e1df",
+    "line" : null,
+    "diffHunk" : "@@ -72,6 +74,46 @@ final class FailureTests\n       } yield succeed\n   }\n \n+  \"Command submission timeouts\" in withHttpService { (uri, encoder, _, client) =>\n+    import encoder.implicits._\n+    import json.JsonProtocol._\n+    for {\n+      p <- allocateParty(client, \"Alice\")\n+      (status, _) <- postCreateCommand(\n+        accountCreateCommand(p, \"23\"),\n+        encoder,\n+        uri,\n+        headersWithParties(List(p.unwrap)))\n+      _ = status shouldBe StatusCodes.OK\n+      // Client -> Server connection\n+      _ = proxy.toxics().timeout(\"timeout\", ToxicDirection.UPSTREAM, 0)\n+      body <- FutureUtil.toFuture(SprayJson.encode1(accountCreateCommand(p, \"24\"))): Future[JsValue]\n+      (status, output) <- postJsonStringRequestString("
+  },
+  {
+    "id" : "79ca547d-2a8a-4a18-b2a9-d5f3068740d3",
+    "prId" : 7791,
+    "comments" : [
+      {
+        "id" : "8cb944b5-9a11-4f55-b765-0f3881874cab",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n      (status, output) <- postJsonStringRequestEncoded(\r\n```",
+        "createdAt" : "2020-10-23T16:49:17Z",
+        "updatedAt" : "2020-10-23T16:49:49Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9f75e7f2a54cf771b24f8a0370277e177701e1df",
+    "line" : null,
+    "diffHunk" : "@@ -72,6 +74,46 @@ final class FailureTests\n       } yield succeed\n   }\n \n+  \"Command submission timeouts\" in withHttpService { (uri, encoder, _, client) =>\n+    import encoder.implicits._\n+    import json.JsonProtocol._\n+    for {\n+      p <- allocateParty(client, \"Alice\")\n+      (status, _) <- postCreateCommand(\n+        accountCreateCommand(p, \"23\"),\n+        encoder,\n+        uri,\n+        headersWithParties(List(p.unwrap)))\n+      _ = status shouldBe StatusCodes.OK\n+      // Client -> Server connection\n+      _ = proxy.toxics().timeout(\"timeout\", ToxicDirection.UPSTREAM, 0)\n+      body <- FutureUtil.toFuture(SprayJson.encode1(accountCreateCommand(p, \"24\"))): Future[JsValue]\n+      (status, output) <- postJsonStringRequestString(\n+        uri.withPath(Uri.Path(\"/v1/create\")),\n+        body.compactPrint,\n+        headersWithParties(List(p.unwrap)))\n+      _ = status shouldBe StatusCodes.ServiceUnavailable\n+      _ = println(output.toString)\n+      _ = output shouldBe \"The server was not able to produce a timely response to your request.\\r\\nPlease try again in a short while!\"\n+      _ = proxy.toxics().get(\"timeout\").remove()\n+      (status, _) <- postCreateCommand(\n+        accountCreateCommand(p, \"25\"),\n+        encoder,\n+        uri,\n+        headersWithParties(List(p.unwrap)))\n+      _ = status shouldBe StatusCodes.OK\n+      // Server -> Client connection\n+      _ = proxy.toxics().timeout(\"timeout\", ToxicDirection.DOWNSTREAM, 0)\n+      (status, output) <- postJsonStringRequestString("
+  }
+]

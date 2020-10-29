@@ -1,0 +1,985 @@
+[
+  {
+    "id" : "8e5ed998-5d71-44c0-b341-717426f0cfd9",
+    "prId" : 7659,
+    "comments" : [
+      {
+        "id" : "f9c2b62b-7b3d-4e02-a65c-ebd4e7ee3440",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I should have filter the package IDs that are not in `pkgs`.\r\nI drop anyway all the topological sort, as it is not really usefull, as the speedy compiler already ask the dependencies in topological order.",
+        "createdAt" : "2020-10-12T17:20:48Z",
+        "updatedAt" : "2020-10-13T07:07:57Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "8de70cd49b48c77560bfaf68ae3ab3c150806871",
+    "line" : 17,
+    "diffHunk" : "@@ -260,17 +260,13 @@ final private[kvutils] class PackageCommitter(\n \n   private[this] def uploadPackages(pkgs: Map[Ref.PackageId, Ast.Package]): Either[String, Unit] =\n     metrics.daml.kvutils.committer.packageUpload.preloadTimer.time { () =>\n-      val errors = Graphs.topoSort(pkgs.transform((_, pkg) => pkg.directDeps)) match {\n-        case Left(cycles) =>\n-          List(s\"cycle in package definitions: ${cycles.vertices.mkString(\" -> \")}\")\n-        case Right(pkgIds) =>\n-          pkgIds.iterator.flatMap { pkgId =>"
+  },
+  {
+    "id" : "3a5cb1bd-117c-4d67-9301-717bef5658df",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "81cfd837-6367-453c-93b4-7dc9493bbd17",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "body" : "```suggestion\r\n  // The integrations using kvutils should handle long-running submissions (> 10s).\r\n```",
+        "createdAt" : "2020-09-23T12:17:46Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar-DA",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/60356447?u=f6cdfccc6ea4254bd7c212099bbac2c27a00a28c&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -56,9 +58,26 @@ private[kvutils] class PackageCommitter(\n     }\n   }\n \n-  private val validateEntry: Step = (ctx, uploadEntry) => {\n-    // NOTE(JM): Currently the proper validation is unimplemented. The package is decoded and preloaded\n-    // in background and we're just checking that hash and payload are set. See comment in [[preload]].\n+  // Full package validation.\n+  // The integrations using kvutils  hould handle long-running submissions (> 10s)."
+  },
+  {
+    "id" : "6a6c7c73-0eec-4903-8412-4baed3c25e9f",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "ffbe3ded-fc07-43be-a15e-05b53fcd728b",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "Why the name change to `enqueueFullValidation`? It isn't really validating them but rather preloading them since failures are not propagated anywhere.",
+        "createdAt" : "2020-09-23T12:38:28Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -121,9 +140,11 @@ private[kvutils] class PackageCommitter(\n     })\n   }\n \n-  private val enqueuePreload: Step = (_, uploadEntry) => {\n-    preloadExecutor.execute(\n-      preload(uploadEntry.getSubmissionId, uploadEntry.getArchivesList.asScala))\n+  private[this] val enqueueFullValidation: Step = { (_, uploadEntry) =>"
+  },
+  {
+    "id" : "568d1f63-f988-40f0-a609-45a15e3172da",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "72c1910c-d50c-4d64-9e9d-ad6618f3d888",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n  // The integrations using kvutils should handle long-running submissions (> 10s).\r\n```",
+        "createdAt" : "2020-09-24T07:34:39Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -56,9 +58,26 @@ private[kvutils] class PackageCommitter(\n     }\n   }\n \n-  private val validateEntry: Step = (ctx, uploadEntry) => {\n-    // NOTE(JM): Currently the proper validation is unimplemented. The package is decoded and preloaded\n-    // in background and we're just checking that hash and payload are set. See comment in [[preload]].\n+  // Full package validation.\n+  // The integrations using kvutils  hould handle long-running submissions (> 10s)."
+  },
+  {
+    "id" : "2634c667-aa4a-4b07-ad1a-64b061316fd2",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "8a9e511e-d8ad-4914-b5c6-2f4452e95c6a",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n    // The package should be decoded and validated in the background using [[enqueueFullValidation]].\r\n```",
+        "createdAt" : "2020-09-24T07:35:08Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -56,9 +58,26 @@ private[kvutils] class PackageCommitter(\n     }\n   }\n \n-  private val validateEntry: Step = (ctx, uploadEntry) => {\n-    // NOTE(JM): Currently the proper validation is unimplemented. The package is decoded and preloaded\n-    // in background and we're just checking that hash and payload are set. See comment in [[preload]].\n+  // Full package validation.\n+  // The integrations using kvutils  hould handle long-running submissions (> 10s).\n+  private[this] val fullValidateEntry: Step = { (ctx, uploadEntry) =>\n+    validatePackages(uploadEntry.getSubmissionId, uploadEntry.getArchivesList.iterator().asScala) match {\n+      case Right(_) =>\n+        StepContinue(uploadEntry)\n+      case Left(errMsg) =>\n+        rejectionTraceLog(errMsg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(Invalid.newBuilder.setDetails(errMsg))\n+        )\n+    }\n+  }\n+\n+  private val minimalValidateEntry: Step = (ctx, uploadEntry) => {\n+    // Minimal validation for integrations using kvutils that cannot handle long-running submissions.\n+    // The package should be decoded and validation in background using [[enqueueFullValidation]]."
+  },
+  {
+    "id" : "30bae62f-1b86-4dfb-8ecd-bf5229bbe371",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "9eb7251f-eb6f-45c9-beb8-0a951d37c2fc",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "I'm not sure about the name, but let's use regular scala naming conventions ;)\r\n```suggestion\r\n  protected def specificSteps: List[(StepInfo, Step)]\r\n```",
+        "createdAt" : "2020-10-02T13:17:10Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +134,314 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  final protected val authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"participant id ${uploadEntry.getParticipantId} did not match authenticated participant id ${ctx.getParticipantId}\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  final protected val deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  // Checks that packages are not repeated in the submission.\n+  final protected val checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (_, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+      if (duplicates.isEmpty)\n+        StepContinue(partialResult)\n+      else {\n+        val msg =\n+          duplicates.iterator\n+            .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+            .mkString(\", \")\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  private[this] def decodePackages(uploadEntry: DamlPackageUploadEntry.Builder)\n+    : Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  // Decode packages not known by the engine.\n+  final protected val decode: Step = {\n+    case (ctx, (uploadEntry, pkgs)) =>\n+      decodePackages(uploadEntry) match {\n+        case Right(newPkgs) =>\n+          StepContinue((uploadEntry, pkgs ++ newPkgs))\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .map(pkg => Ref.PackageId.assertFromString(pkg.getHash))\n+        .toSet\n+      engine.validatePackages(allPkgIds, pkgs).left.map(_.detailMsg)\n+    }\n+\n+  // Validate packages\n+  final protected val validate: Step = {\n+    case (ctx, partialResult @ (uploadEntry, pkgs)) =>\n+      validatePackages(uploadEntry, pkgs) match {\n+        case Right(_) =>\n+          StepContinue(partialResult)\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  // Minimal validation.\n+  // Checks that package IDs are valid and package payloads are non-empty.\n+  final protected val quicklyValidate: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val archives = uploadEntry.getArchivesList.asScala\n+      val errors =\n+        if (archives.nonEmpty) {\n+          archives.foldLeft(List.empty[String]) { (errors, archive) =>\n+            if (Ref.PackageId.fromString(archive.getHash).isRight && archive.getPayload.size > 0)\n+              errors\n+            else\n+              s\"Invalid archive ${archive.getHash}\" :: errors\n+          }\n+        } else {\n+          List(\"No archives in package\")\n+        }\n+\n+      if (errors.isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = errors.mkString(\", \")\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(Invalid.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  def uploadPackages(pkgs: Map[Ref.PackageId, Ast.Package]): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.preloadTimer.time { () =>\n+      val errors = Graphs.topoSort(pkgs.transform((_, pkg) => pkg.directDeps)) match {\n+        case Left(cycles) =>\n+          List(s\"cycle in package definitions: ${cycles.vertices.mkString(\" -> \")}\")\n+        case Right(pkgIds) =>\n+          pkgIds.iterator.flatMap { pkgId =>\n+            engine\n+              .preloadPackage(pkgId, pkgs(pkgId))\n+              .consume(_ => None, _ => None, _ => None)\n+              .fold(err => List(err.detailMsg), _ => List.empty)\n+          }.toList\n+      }\n+      Either.cond(\n+        errors.isEmpty,\n+        (),\n+        errors.mkString(\", \")\n+      )\n+    }\n+\n+  // Preload decoded packages\n+  final protected val preload: Step = {\n+    case (ctx, partialResult @ (uploadEntry, pkgs)) =>\n+      uploadPackages(pkgs) match {\n+        case Right(_) =>\n+          StepContinue(partialResult)\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  final protected val preloadExecutor =\n+    Executors.newSingleThreadExecutor { (runnable: Runnable) =>\n+      val t = new Thread(runnable)\n+      t.setDaemon(true)\n+      t\n+    }\n+\n   /** Preload the archives to the engine in a background thread.\n     *\n     * The background loading is a temporary workaround for handling processing of large packages. When our current\n     * integrations using kvutils can handle long-running submissions this can be removed and complete\n     * package type-checking and preloading can be done during normal processing.\n+    *\n+    * This assumes the engine validate the archive it receives.\n     */\n-  private def preload(submissionId: String, archives: Iterable[Archive]): Runnable = { () =>\n-    val ctx = metrics.daml.kvutils.committer.packageUpload.preloadTimer.time()\n-    def trace(msg: String): Unit = logger.trace(s\"$msg, correlationId=$submissionId\")\n-    try {\n-      val loadedPackages = engine.compiledPackages().packageIds\n-      val packages: Map[Ref.PackageId, Ast.Package] =\n-        metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n-          archives\n-            .filterNot(\n-              a =>\n-                Ref.PackageId\n-                  .fromString(a.getHash)\n-                  .fold(_ => false, loadedPackages.contains))\n-            .map { archive =>\n-              Decode.readArchiveAndVersion(archive)._1\n-            }\n-            .toMap\n-        }\n-      trace(s\"Preloading engine with ${packages.size} new packages\")\n-      packages.foreach {\n-        case (pkgId, pkg) =>\n-          engine\n-            .preloadPackage(pkgId, pkg)\n-            .consume(\n-              _ => sys.error(\"Unexpected request to PCS in preloadPackage\"),\n-              pkgId => packages.get(pkgId),\n-              _ => sys.error(\"Unexpected request to keys in preloadPackage\")\n-            )\n+  final protected val enqueuePreload: Step = {\n+    case (_, partialResult @ (uploadEntry, _)) =>\n+      preloadExecutor.execute { () =>\n+        traceLog(s\"Uploading ${uploadEntry.getArchivesCount} archive\", uploadEntry)\n+        decodePackages(uploadEntry)\n+          .flatMap(uploadPackages)\n+          .fold(\n+            msg => traceLog(s\"Uploading failed: $msg\", uploadEntry),\n+            _ => traceLog(s\"Uploading successful\", uploadEntry),\n+          )\n+        metrics.daml.kvutils.committer.packageUpload.loadedPackages(() =>\n+          engine.compiledPackages().packageIds.size)\n       }\n-      trace(\"Preload complete\")\n-    } catch {\n-      case scala.util.control.NonFatal(err) =>\n-        logger.error(\n-          s\"Preload exception, correlationId=$submissionId error='$err' stackTrace='${err.getStackTrace\n-            .mkString(\", \")}'\")\n-    } finally {\n-      val _ = ctx.stop()\n-    }\n+      StepContinue(partialResult)\n+  }\n+\n+  // Filter out packages already on the ledger.\n+  // Should be done after decoding, validation or preload, as those step may\n+  // require packages on the ledger by not loaded by the engine.\n+  protected val filterKnownPackages: Step = {\n+    case (ctx, (uploadEntry, pkgs)) =>\n+      val archives = uploadEntry.getArchivesList.asScala.filter { archive =>\n+        val stateKey = DamlStateKey.newBuilder\n+          .setPackageId(archive.getHash)\n+          .build\n+        ctx.get(stateKey).isEmpty\n+      }\n+      StepContinue(uploadEntry.clearArchives().addAllArchives(archives.asJava) -> pkgs)\n+  }\n+\n+  final private[committer] val buildLogEntry: Step = {\n+    case (ctx, (uploadEntry, _)) =>\n+      metrics.daml.kvutils.committer.packageUpload.accepts.inc()\n+      logger.trace(\n+        s\"Packages committed, packages=[${uploadEntry.getArchivesList.asScala.map(_.getHash).mkString(\", \")}] correlationId=${uploadEntry.getSubmissionId}\")\n+\n+      uploadEntry.getArchivesList.forEach { archive =>\n+        ctx.set(\n+          DamlStateKey.newBuilder.setPackageId(archive.getHash).build,\n+          DamlStateValue.newBuilder.setArchive(archive).build\n+        )\n+      }\n+      ctx.set(\n+        packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId),\n+        DamlStateValue.newBuilder\n+          .setSubmissionDedup(DamlSubmissionDedupValue.newBuilder)\n+          .build\n+      )\n+      val successLogEntry =\n+        buildLogEntryWithOptionalRecordTime(ctx.getRecordTime, _.setPackageUploadEntry(uploadEntry))\n+      if (ctx.preExecute) {\n+        setOutOfTimeBoundsLogEntry(uploadEntry, ctx)\n+      }\n+      StepStop(successLogEntry)\n   }\n \n+  final override protected val committerName: String = \"package_upload\"\n+\n+  protected def specific_steps: List[(StepInfo, Step)]"
+  },
+  {
+    "id" : "65e9ab9a-8c97-4a08-99d9-8713a263aa5f",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "4a9fd5f3-b687-417b-9b77-f69aea54d77b",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n    * This assumes the engine validates the archive it receives.\r\n```",
+        "createdAt" : "2020-10-05T15:24:06Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .map(pkg => Ref.PackageId.assertFromString(pkg.getHash))\n+        .toSet\n+      engine.validatePackages(allPkgIds, pkgs).left.map(_.detailMsg)\n+    }\n+\n+// Validate packages\n+  private[this] def strictlyValidatePackages: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- validatePackages(uploadEntry, pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(result) => result\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+// Minimal validation.\n+// Checks that package IDs are valid and package payloads are non-empty.\n+  private[this] def looselyValidatePackages: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val archives = uploadEntry.getArchivesList.asScala\n+      val errors =\n+        archives.foldLeft(List.empty[String]) { (errors, archive) =>\n+          if (archive.getPayload.isEmpty)\n+            s\"Empty archive '${archive.getHash}'\" :: errors\n+          else\n+            Ref.PackageId\n+              .fromString(archive.getHash)\n+              .fold(msg => s\"Invalid hash: $msg\" :: errors, _ => errors)\n+        }\n+\n+      if (errors.isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = errors.mkString(\", \")\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(Invalid.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  def uploadPackages(pkgs: Map[Ref.PackageId, Ast.Package]): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.preloadTimer.time { () =>\n+      val errors = Graphs.topoSort(pkgs.transform((_, pkg) => pkg.directDeps)) match {\n+        case Left(cycles) =>\n+          List(s\"cycle in package definitions: ${cycles.vertices.mkString(\" -> \")}\")\n+        case Right(pkgIds) =>\n+          pkgIds.iterator.flatMap { pkgId =>\n+            engine\n+              .preloadPackage(pkgId, pkgs(pkgId))\n+              .consume(_ => None, _ => None, _ => None)\n+              .fold(err => List(err.detailMsg), _ => List.empty)\n+          }.toList\n+      }\n+      Either.cond(\n+        errors.isEmpty,\n+        (),\n+        errors.mkString(\", \")\n+      )\n+    }\n+\n+// Preload decoded packages\n+  private[this] def preload: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- uploadPackages(pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(partialResult) =>\n+          partialResult\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def preloadExecutor =\n+    Executors.newSingleThreadExecutor { (runnable: Runnable) =>\n+      val t = new Thread(runnable)\n+      t.setDaemon(true)\n+      t\n+    }\n+\n   /** Preload the archives to the engine in a background thread.\n     *\n     * The background loading is a temporary workaround for handling processing of large packages. When our current\n     * integrations using kvutils can handle long-running submissions this can be removed and complete\n     * package type-checking and preloading can be done during normal processing.\n+    *\n+    * This assumes the engine validate the archive it receives."
+  },
+  {
+    "id" : "bdc1770b-2aa3-47ab-8924-5ce9565566ed",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "07e71725-d835-46c8-9e07-6c6916ea96c5",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n// Should be done after decoding, validation or preloading, as those steps may\r\n```",
+        "createdAt" : "2020-10-05T15:24:38Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .map(pkg => Ref.PackageId.assertFromString(pkg.getHash))\n+        .toSet\n+      engine.validatePackages(allPkgIds, pkgs).left.map(_.detailMsg)\n+    }\n+\n+// Validate packages\n+  private[this] def strictlyValidatePackages: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- validatePackages(uploadEntry, pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(result) => result\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+// Minimal validation.\n+// Checks that package IDs are valid and package payloads are non-empty.\n+  private[this] def looselyValidatePackages: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val archives = uploadEntry.getArchivesList.asScala\n+      val errors =\n+        archives.foldLeft(List.empty[String]) { (errors, archive) =>\n+          if (archive.getPayload.isEmpty)\n+            s\"Empty archive '${archive.getHash}'\" :: errors\n+          else\n+            Ref.PackageId\n+              .fromString(archive.getHash)\n+              .fold(msg => s\"Invalid hash: $msg\" :: errors, _ => errors)\n+        }\n+\n+      if (errors.isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = errors.mkString(\", \")\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(Invalid.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  def uploadPackages(pkgs: Map[Ref.PackageId, Ast.Package]): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.preloadTimer.time { () =>\n+      val errors = Graphs.topoSort(pkgs.transform((_, pkg) => pkg.directDeps)) match {\n+        case Left(cycles) =>\n+          List(s\"cycle in package definitions: ${cycles.vertices.mkString(\" -> \")}\")\n+        case Right(pkgIds) =>\n+          pkgIds.iterator.flatMap { pkgId =>\n+            engine\n+              .preloadPackage(pkgId, pkgs(pkgId))\n+              .consume(_ => None, _ => None, _ => None)\n+              .fold(err => List(err.detailMsg), _ => List.empty)\n+          }.toList\n+      }\n+      Either.cond(\n+        errors.isEmpty,\n+        (),\n+        errors.mkString(\", \")\n+      )\n+    }\n+\n+// Preload decoded packages\n+  private[this] def preload: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- uploadPackages(pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(partialResult) =>\n+          partialResult\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def preloadExecutor =\n+    Executors.newSingleThreadExecutor { (runnable: Runnable) =>\n+      val t = new Thread(runnable)\n+      t.setDaemon(true)\n+      t\n+    }\n+\n   /** Preload the archives to the engine in a background thread.\n     *\n     * The background loading is a temporary workaround for handling processing of large packages. When our current\n     * integrations using kvutils can handle long-running submissions this can be removed and complete\n     * package type-checking and preloading can be done during normal processing.\n+    *\n+    * This assumes the engine validate the archive it receives.\n     */\n-  private def preload(submissionId: String, archives: Iterable[Archive]): Runnable = { () =>\n-    val ctx = metrics.daml.kvutils.committer.packageUpload.preloadTimer.time()\n-    def trace(msg: String): Unit = logger.trace(s\"$msg, correlationId=$submissionId\")\n-    try {\n-      val loadedPackages = engine.compiledPackages().packageIds\n-      val packages: Map[Ref.PackageId, Ast.Package] =\n-        metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n-          archives\n-            .filterNot(\n-              a =>\n-                Ref.PackageId\n-                  .fromString(a.getHash)\n-                  .fold(_ => false, loadedPackages.contains))\n-            .map { archive =>\n-              Decode.readArchiveAndVersion(archive)._1\n-            }\n-            .toMap\n-        }\n-      trace(s\"Preloading engine with ${packages.size} new packages\")\n-      packages.foreach {\n-        case (pkgId, pkg) =>\n-          engine\n-            .preloadPackage(pkgId, pkg)\n-            .consume(\n-              _ => sys.error(\"Unexpected request to PCS in preloadPackage\"),\n-              pkgId => packages.get(pkgId),\n-              _ => sys.error(\"Unexpected request to keys in preloadPackage\")\n-            )\n+  private[this] def enqueuePreload: Step = {\n+    case (_, partialResult @ (uploadEntry, mbPkgs)) =>\n+      // we need to extract the archives synchronously as other steps may modify uploadEntry\n+      val archives = uploadEntry.getArchivesList.iterator().asScala.toList\n+      preloadExecutor.execute { () =>\n+        traceLog(s\"Uploading ${uploadEntry.getArchivesCount} archive\", uploadEntry)\n+        val result = for {\n+          pkgs <- if (mbPkgs.isEmpty) decodePackages(archives) else Right(mbPkgs)\n+          _ <- uploadPackages(pkgs)\n+        } yield ()\n+        result.fold(\n+          msg => traceLog(s\"Uploading failed: $msg\", uploadEntry),\n+          _ => traceLog(s\"Uploading successful\", uploadEntry),\n+        )\n+        metrics.daml.kvutils.committer.packageUpload.loadedPackages(() =>\n+          engine.compiledPackages().packageIds.size)\n       }\n-      trace(\"Preload complete\")\n-    } catch {\n-      case scala.util.control.NonFatal(err) =>\n-        logger.error(\n-          s\"Preload exception, correlationId=$submissionId error='$err' stackTrace='${err.getStackTrace\n-            .mkString(\", \")}'\")\n-    } finally {\n-      val _ = ctx.stop()\n-    }\n+      StepContinue(partialResult)\n+  }\n+\n+// Filter out packages already on the ledger.\n+// Should be done after decoding, validation or preload, as those step may"
+  },
+  {
+    "id" : "9a1b3c97-e314-4a29-a090-f034055debf6",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "e7e5ca7a-0c4d-4abe-b5c4-c9a8e07e3c98",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please put these companion objects for `ValidationMode` and `PreloadingMode` into separate files as the file `PackageCommitter` is already way too long. As a bonus, GitHub will be hopefully be able to generate an easier to read diff.",
+        "createdAt" : "2020-10-05T15:27:14Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "95012459-7ba1-4fdd-9545-f346586ddb80",
+        "parentId" : "e7e5ca7a-0c4d-4abe-b5c4-c9a8e07e3c98",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Done",
+        "createdAt" : "2020-10-06T06:56:51Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -5,196 +5,122 @@ package com.daml.ledger.participant.state.kvutils.committer\n \n import java.util.concurrent.Executors\n \n-import com.daml.daml_lf_dev.DamlLf.Archive\n+import com.daml.daml_lf_dev.DamlLf\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils\n import com.daml.ledger.participant.state.kvutils.Conversions.packageUploadDedupKey\n import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n import com.daml.ledger.participant.state.kvutils.committer.Committer.{\n   StepInfo,\n   buildLogEntryWithOptionalRecordTime\n }\n-import com.daml.lf.archive.Decode\n+import com.daml.lf\n import com.daml.lf.data.Ref\n import com.daml.lf.data.Time.Timestamp\n import com.daml.lf.engine.Engine\n-import com.daml.lf.language.Ast\n+import com.daml.lf.language.{Ast, Graphs}\n import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n \n import scala.collection.JavaConverters._\n+import scala.util.control.NonFatal\n \n-private[kvutils] class PackageCommitter(\n-    engine: Engine,\n-    override protected val metrics: Metrics,\n-) extends Committer[DamlPackageUploadEntry.Builder] {\n+object PackageCommitter {\n \n-  override protected val committerName = \"package_upload\"\n+  /** Defines the different package validation modes. */\n+  sealed abstract class ValidationMode extends Product with Serializable\n \n-  metrics.daml.kvutils.committer.packageUpload.loadedPackages(() =>\n-    engine.compiledPackages().packageIds.size)\n+  object ValidationMode {"
+  },
+  {
+    "id" : "2cbb4fae-ea60-46c4-8d2e-f38443ac7ab6",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "6b37064d-510f-4e31-9be3-bac04b500806",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n    /** Specifies that the committer should validate packages before\r\n```",
+        "createdAt" : "2020-10-05T15:27:35Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -5,196 +5,122 @@ package com.daml.ledger.participant.state.kvutils.committer\n \n import java.util.concurrent.Executors\n \n-import com.daml.daml_lf_dev.DamlLf.Archive\n+import com.daml.daml_lf_dev.DamlLf\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils\n import com.daml.ledger.participant.state.kvutils.Conversions.packageUploadDedupKey\n import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n import com.daml.ledger.participant.state.kvutils.committer.Committer.{\n   StepInfo,\n   buildLogEntryWithOptionalRecordTime\n }\n-import com.daml.lf.archive.Decode\n+import com.daml.lf\n import com.daml.lf.data.Ref\n import com.daml.lf.data.Time.Timestamp\n import com.daml.lf.engine.Engine\n-import com.daml.lf.language.Ast\n+import com.daml.lf.language.{Ast, Graphs}\n import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n \n import scala.collection.JavaConverters._\n+import scala.util.control.NonFatal\n \n-private[kvutils] class PackageCommitter(\n-    engine: Engine,\n-    override protected val metrics: Metrics,\n-) extends Committer[DamlPackageUploadEntry.Builder] {\n+object PackageCommitter {\n \n-  override protected val committerName = \"package_upload\"\n+  /** Defines the different package validation modes. */\n+  sealed abstract class ValidationMode extends Product with Serializable\n \n-  metrics.daml.kvutils.committer.packageUpload.loadedPackages(() =>\n-    engine.compiledPackages().packageIds.size)\n+  object ValidationMode {\n \n-  private def rejectionTraceLog(\n-      msg: String,\n-      packageUploadEntry: DamlPackageUploadEntry.Builder,\n-  ): Unit =\n-    logger.trace(\n-      s\"Package upload rejected, $msg, correlationId=${packageUploadEntry.getSubmissionId}\")\n-\n-  private val authorizeSubmission: Step = (ctx, uploadEntry) => {\n-    if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg =\n-        s\"participant id ${uploadEntry.getParticipantId} did not match authenticated participant id ${ctx.getParticipantId}\"\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setParticipantNotAuthorized(\n-          ParticipantNotAuthorized.newBuilder\n-            .setDetails(msg))\n-      )\n-    }\n-  }\n+    /** Specifies that the committer should validate the package before"
+  },
+  {
+    "id" : "474b5d4c-306e-489e-b6fe-762cbc29b0a0",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "1ac0bc6f-7e46-492e-9cad-2baa34a92620",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "I'd suggest naming this as `Never` or `DontPreload` to avoid having such a short class name (e.g. it'll be easier to find it via quick search).",
+        "createdAt" : "2020-10-05T15:29:45Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -5,196 +5,122 @@ package com.daml.ledger.participant.state.kvutils.committer\n \n import java.util.concurrent.Executors\n \n-import com.daml.daml_lf_dev.DamlLf.Archive\n+import com.daml.daml_lf_dev.DamlLf\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils\n import com.daml.ledger.participant.state.kvutils.Conversions.packageUploadDedupKey\n import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n import com.daml.ledger.participant.state.kvutils.committer.Committer.{\n   StepInfo,\n   buildLogEntryWithOptionalRecordTime\n }\n-import com.daml.lf.archive.Decode\n+import com.daml.lf\n import com.daml.lf.data.Ref\n import com.daml.lf.data.Time.Timestamp\n import com.daml.lf.engine.Engine\n-import com.daml.lf.language.Ast\n+import com.daml.lf.language.{Ast, Graphs}\n import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n \n import scala.collection.JavaConverters._\n+import scala.util.control.NonFatal\n \n-private[kvutils] class PackageCommitter(\n-    engine: Engine,\n-    override protected val metrics: Metrics,\n-) extends Committer[DamlPackageUploadEntry.Builder] {\n+object PackageCommitter {\n \n-  override protected val committerName = \"package_upload\"\n+  /** Defines the different package validation modes. */\n+  sealed abstract class ValidationMode extends Product with Serializable\n \n-  metrics.daml.kvutils.committer.packageUpload.loadedPackages(() =>\n-    engine.compiledPackages().packageIds.size)\n+  object ValidationMode {\n \n-  private def rejectionTraceLog(\n-      msg: String,\n-      packageUploadEntry: DamlPackageUploadEntry.Builder,\n-  ): Unit =\n-    logger.trace(\n-      s\"Package upload rejected, $msg, correlationId=${packageUploadEntry.getSubmissionId}\")\n-\n-  private val authorizeSubmission: Step = (ctx, uploadEntry) => {\n-    if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg =\n-        s\"participant id ${uploadEntry.getParticipantId} did not match authenticated participant id ${ctx.getParticipantId}\"\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setParticipantNotAuthorized(\n-          ParticipantNotAuthorized.newBuilder\n-            .setDetails(msg))\n-      )\n-    }\n-  }\n+    /** Specifies that the committer should validate the package before\n+      * committing them to the ledger.\n+      * When using this mode, the packages committed to the ledger can\n+      * be fully trusted and do not have to be validated when loaded\n+      * into the engine.  */\n+    case object Strict extends ValidationMode\n \n-  private val validateEntry: Step = (ctx, uploadEntry) => {\n-    // NOTE(JM): Currently the proper validation is unimplemented. The package is decoded and preloaded\n-    // in background and we're just checking that hash and payload are set. See comment in [[preload]].\n-    val archives = uploadEntry.getArchivesList.asScala\n-    val errors = if (archives.nonEmpty) {\n-      archives.foldLeft(List.empty[String]) { (errors, archive) =>\n-        if (archive.getHashBytes.size > 0 && archive.getPayload.size > 0)\n-          errors\n-        else\n-          s\"Invalid archive ${archive.getHash}\" :: errors\n-      }\n-    } else {\n-      List(\"No archives in package\")\n-    }\n-    if (errors.isEmpty) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg = errors.mkString(\", \")\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setInvalidPackage(\n-          Invalid.newBuilder\n-            .setDetails(msg)\n-        )\n-      )\n-    }\n-  }\n+    /** Specifies that the committer should perform a fast validation of\n+      * the packages before committing them to the ledger.\n+      * This mode is useful for ledger integrations that cannot handle\n+      * long-running submissions (> 10s).\n+      * When using this mode, the packages committed to the ledger\n+      * cannot be trusted and must be validated every time they are\n+      * loaded into the engine.  */\n+    case object Lenient extends ValidationMode\n \n-  private val deduplicateSubmission: Step = (ctx, uploadEntry) => {\n-    val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n-    if (ctx.get(submissionKey).isEmpty) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n-      )\n-    }\n+    /** Specifies that the committer should not perform any validation the\n+      * packages before committing them to the ledger.\n+      * This should be used only by non distributed ledgers, like\n+      * DAML-on-SQL, where the validation done in the API server is\n+      * can be trusted.  */\n+    case object No extends ValidationMode\n   }\n \n-  private val filterDuplicates: Step = (ctx, uploadEntry) => {\n-    val archives = uploadEntry.getArchivesList.asScala.filter { archive =>\n-      val stateKey = DamlStateKey.newBuilder\n-        .setPackageId(archive.getHash)\n-        .build\n-      ctx.get(stateKey).isEmpty\n-    }\n-    StepContinue(uploadEntry.clearArchives().addAllArchives(archives.asJava))\n-  }\n+  /** Defines the different package preloading modes. */\n+  sealed abstract class PreloadingMode extends Product with Serializable\n \n-  private val preloadExecutor = {\n-    Executors.newSingleThreadExecutor((runnable: Runnable) => {\n-      val t = new Thread(runnable)\n-      t.setDaemon(true)\n-      t\n-    })\n-  }\n+  object PreloadingMode {\n \n-  private val enqueuePreload: Step = (_, uploadEntry) => {\n-    preloadExecutor.execute(\n-      preload(uploadEntry.getSubmissionId, uploadEntry.getArchivesList.asScala))\n-    StepContinue(uploadEntry)\n-  }\n+    /** Specifies that the packages should be preloading into the engine\n+      * before committed.  */\n+    case object Synchronous extends PreloadingMode\n \n-  private[committer] val buildLogEntry: Step = (ctx, uploadEntry) => {\n-    metrics.daml.kvutils.committer.packageUpload.accepts.inc()\n-    logger.trace(\n-      s\"Packages committed, packages=[${uploadEntry.getArchivesList.asScala.map(_.getHash).mkString(\", \")}] correlationId=${uploadEntry.getSubmissionId}\")\n+    /** Specify that the packages should be preloaded into the engine\n+      * asynchronously with the rest of the commit process.  This mode\n+      * is useful for ledger integrations that cannot handle\n+      * long-running submissions (> 10s).\n+      * Failure of the preloading process will not affect the\n+      * commit.  */\n+    case object Asynchronous extends PreloadingMode\n \n-    uploadEntry.getArchivesList.forEach { archive =>\n-      ctx.set(\n-        DamlStateKey.newBuilder.setPackageId(archive.getHash).build,\n-        DamlStateValue.newBuilder.setArchive(archive).build\n-      )\n-    }\n-    ctx.set(\n-      packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId),\n-      DamlStateValue.newBuilder\n-        .setSubmissionDedup(DamlSubmissionDedupValue.newBuilder)\n-        .build\n-    )\n-    val successLogEntry =\n-      buildLogEntryWithOptionalRecordTime(ctx.getRecordTime, _.setPackageUploadEntry(uploadEntry))\n-    if (ctx.preExecute) {\n-      setOutOfTimeBoundsLogEntry(uploadEntry, ctx)\n-    }\n-    StepStop(successLogEntry)\n-  }\n+    /** Specify that the packages should not be preloaded into the\n+      * engine.  */\n+    case object No extends PreloadingMode"
+  },
+  {
+    "id" : "ec0b564f-c996-4a0a-a962-d528e0c0e021",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "b2f05267-f16b-45c7-af57-d64a22615803",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Can you combine these two blocks, please? Generating an option then branching on that option makes the logic harder to follow.\r\nE.g.:\r\n```scala\r\n  if (seenOnce.isEmpty || duplicates.nonEmpty) {\r\n    val validationError = if (seenOnce.isEmpty) { \r\n      \"No archives in submission\"\r\n    } else {\r\n      ...\r\n    }\r\n    rejectionTraceLog(validationErrorMessage, ...)\r\n    ...\r\n  } else {\r\n    StepContinue(...)\r\n  }\r\n```",
+        "createdAt" : "2020-10-05T15:38:39Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a6b44f9d-9b6d-45d9-82dd-3f7909737ed8",
+        "parentId" : "b2f05267-f16b-45c7-af57-d64a22615803",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "done.",
+        "createdAt" : "2020-10-08T07:33:39Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)"
+  },
+  {
+    "id" : "a046f170-59b3-43e9-bd5e-449c7c1e8fd0",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "fd4966fa-c25a-485f-8888-3fbb8173f3ca",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n      packages: Map[Ref.PackageId, Ast.Package],\r\n```",
+        "createdAt" : "2020-10-05T15:41:29Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : 315,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],"
+  },
+  {
+    "id" : "31693de6-9acb-42a3-81c5-a27b86fb5569",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "acfeb694-5c3a-44ec-9d9a-c6ddeff3eaaa",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n      val allPackageIds = uploadEntry.getArchivesList\r\n```",
+        "createdAt" : "2020-10-05T15:41:40Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "46274182-4771-4e5c-bfb5-3de81caf0051",
+        "parentId" : "acfeb694-5c3a-44ec-9d9a-c6ddeff3eaaa",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Taking into account that \"package\" is not a valid identifier, I prefer to use `pkg` everywhere. ",
+        "createdAt" : "2020-10-08T07:38:37Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : 318,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList"
+  },
+  {
+    "id" : "375cdfd7-95fb-48b0-b800-b6612553dcc8",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "5abfc7f6-5814-43bc-8892-ea66eaba1b55",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Why do we need to assume that here?",
+        "createdAt" : "2020-10-05T15:43:36Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5945d1ba-6b87-4a8e-9afa-ea445736e10d",
+        "parentId" : "5abfc7f6-5814-43bc-8892-ea66eaba1b55",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "It was just a remark. Usually `toSet` is linear in the size of the collection.\r\nI dropped the comment. ",
+        "createdAt" : "2020-10-08T07:35:09Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here."
+  },
+  {
+    "id" : "f0dbb4a1-76be-4065-ad46-5b32e4568061",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "9556e4df-7f51-4794-8eaf-746500376f58",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "What is `mbPkgs`? Can you change this name to be meaningful, please?",
+        "createdAt" : "2020-10-05T15:47:12Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .map(pkg => Ref.PackageId.assertFromString(pkg.getHash))\n+        .toSet\n+      engine.validatePackages(allPkgIds, pkgs).left.map(_.detailMsg)\n+    }\n+\n+// Validate packages\n+  private[this] def strictlyValidatePackages: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>"
+  },
+  {
+    "id" : "309c951f-43bd-4a59-9122-a38da6310383",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "fec93c66-6de0-4b60-b48b-2cf4f0dd267c",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Please use curly braces around the `if` branches here to improve readability.",
+        "createdAt" : "2020-10-05T15:49:45Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "b3679bd8-47d5-48ca-a098-7d1f1e62bed2",
+        "parentId" : "fec93c66-6de0-4b60-b48b-2cf4f0dd267c",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2020-10-08T07:59:20Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .map(pkg => Ref.PackageId.assertFromString(pkg.getHash))\n+        .toSet\n+      engine.validatePackages(allPkgIds, pkgs).left.map(_.detailMsg)\n+    }\n+\n+// Validate packages\n+  private[this] def strictlyValidatePackages: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- validatePackages(uploadEntry, pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(result) => result\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+// Minimal validation.\n+// Checks that package IDs are valid and package payloads are non-empty.\n+  private[this] def looselyValidatePackages: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val archives = uploadEntry.getArchivesList.asScala\n+      val errors =\n+        archives.foldLeft(List.empty[String]) { (errors, archive) =>\n+          if (archive.getPayload.isEmpty)\n+            s\"Empty archive '${archive.getHash}'\" :: errors\n+          else\n+            Ref.PackageId\n+              .fromString(archive.getHash)\n+              .fold(msg => s\"Invalid hash: $msg\" :: errors, _ => errors)\n+        }\n+\n+      if (errors.isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = errors.mkString(\", \")\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(Invalid.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  def uploadPackages(pkgs: Map[Ref.PackageId, Ast.Package]): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.preloadTimer.time { () =>\n+      val errors = Graphs.topoSort(pkgs.transform((_, pkg) => pkg.directDeps)) match {\n+        case Left(cycles) =>\n+          List(s\"cycle in package definitions: ${cycles.vertices.mkString(\" -> \")}\")\n+        case Right(pkgIds) =>\n+          pkgIds.iterator.flatMap { pkgId =>\n+            engine\n+              .preloadPackage(pkgId, pkgs(pkgId))\n+              .consume(_ => None, _ => None, _ => None)\n+              .fold(err => List(err.detailMsg), _ => List.empty)\n+          }.toList\n+      }\n+      Either.cond(\n+        errors.isEmpty,\n+        (),\n+        errors.mkString(\", \")\n+      )\n+    }\n+\n+// Preload decoded packages\n+  private[this] def preload: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)"
+  },
+  {
+    "id" : "61240589-35b4-4d1c-9852-eb8a8bd7d5fa",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "96e6c1db-0262-44e0-b103-37ebe1cfc624",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "```suggestion\r\n          _ => traceLog(\"Uploading successful\", uploadEntry),\r\n```",
+        "createdAt" : "2020-10-05T15:52:50Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .map(pkg => Ref.PackageId.assertFromString(pkg.getHash))\n+        .toSet\n+      engine.validatePackages(allPkgIds, pkgs).left.map(_.detailMsg)\n+    }\n+\n+// Validate packages\n+  private[this] def strictlyValidatePackages: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- validatePackages(uploadEntry, pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(result) => result\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+// Minimal validation.\n+// Checks that package IDs are valid and package payloads are non-empty.\n+  private[this] def looselyValidatePackages: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val archives = uploadEntry.getArchivesList.asScala\n+      val errors =\n+        archives.foldLeft(List.empty[String]) { (errors, archive) =>\n+          if (archive.getPayload.isEmpty)\n+            s\"Empty archive '${archive.getHash}'\" :: errors\n+          else\n+            Ref.PackageId\n+              .fromString(archive.getHash)\n+              .fold(msg => s\"Invalid hash: $msg\" :: errors, _ => errors)\n+        }\n+\n+      if (errors.isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = errors.mkString(\", \")\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(Invalid.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  def uploadPackages(pkgs: Map[Ref.PackageId, Ast.Package]): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.preloadTimer.time { () =>\n+      val errors = Graphs.topoSort(pkgs.transform((_, pkg) => pkg.directDeps)) match {\n+        case Left(cycles) =>\n+          List(s\"cycle in package definitions: ${cycles.vertices.mkString(\" -> \")}\")\n+        case Right(pkgIds) =>\n+          pkgIds.iterator.flatMap { pkgId =>\n+            engine\n+              .preloadPackage(pkgId, pkgs(pkgId))\n+              .consume(_ => None, _ => None, _ => None)\n+              .fold(err => List(err.detailMsg), _ => List.empty)\n+          }.toList\n+      }\n+      Either.cond(\n+        errors.isEmpty,\n+        (),\n+        errors.mkString(\", \")\n+      )\n+    }\n+\n+// Preload decoded packages\n+  private[this] def preload: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- uploadPackages(pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(partialResult) =>\n+          partialResult\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def preloadExecutor =\n+    Executors.newSingleThreadExecutor { (runnable: Runnable) =>\n+      val t = new Thread(runnable)\n+      t.setDaemon(true)\n+      t\n+    }\n+\n   /** Preload the archives to the engine in a background thread.\n     *\n     * The background loading is a temporary workaround for handling processing of large packages. When our current\n     * integrations using kvutils can handle long-running submissions this can be removed and complete\n     * package type-checking and preloading can be done during normal processing.\n+    *\n+    * This assumes the engine validate the archive it receives.\n     */\n-  private def preload(submissionId: String, archives: Iterable[Archive]): Runnable = { () =>\n-    val ctx = metrics.daml.kvutils.committer.packageUpload.preloadTimer.time()\n-    def trace(msg: String): Unit = logger.trace(s\"$msg, correlationId=$submissionId\")\n-    try {\n-      val loadedPackages = engine.compiledPackages().packageIds\n-      val packages: Map[Ref.PackageId, Ast.Package] =\n-        metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n-          archives\n-            .filterNot(\n-              a =>\n-                Ref.PackageId\n-                  .fromString(a.getHash)\n-                  .fold(_ => false, loadedPackages.contains))\n-            .map { archive =>\n-              Decode.readArchiveAndVersion(archive)._1\n-            }\n-            .toMap\n-        }\n-      trace(s\"Preloading engine with ${packages.size} new packages\")\n-      packages.foreach {\n-        case (pkgId, pkg) =>\n-          engine\n-            .preloadPackage(pkgId, pkg)\n-            .consume(\n-              _ => sys.error(\"Unexpected request to PCS in preloadPackage\"),\n-              pkgId => packages.get(pkgId),\n-              _ => sys.error(\"Unexpected request to keys in preloadPackage\")\n-            )\n+  private[this] def enqueuePreload: Step = {\n+    case (_, partialResult @ (uploadEntry, mbPkgs)) =>\n+      // we need to extract the archives synchronously as other steps may modify uploadEntry\n+      val archives = uploadEntry.getArchivesList.iterator().asScala.toList\n+      preloadExecutor.execute { () =>\n+        traceLog(s\"Uploading ${uploadEntry.getArchivesCount} archive\", uploadEntry)\n+        val result = for {\n+          pkgs <- if (mbPkgs.isEmpty) decodePackages(archives) else Right(mbPkgs)\n+          _ <- uploadPackages(pkgs)\n+        } yield ()\n+        result.fold(\n+          msg => traceLog(s\"Uploading failed: $msg\", uploadEntry),\n+          _ => traceLog(s\"Uploading successful\", uploadEntry),"
+  },
+  {
+    "id" : "09cf82d2-ab8c-455c-b62b-0f1594bf5f4c",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "e2239772-2b01-4e9f-b319-250f926fa3b6",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "What about calling this `preloadSynchronously` or `preloadSync`? Even better would be `decodeAndPreload` as that's what's really happening.",
+        "createdAt" : "2020-10-05T15:54:11Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "61f61906-9a50-4e35-80a9-3ce28e635f59",
+        "parentId" : "e2239772-2b01-4e9f-b319-250f926fa3b6",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "good idea. changed.",
+        "createdAt" : "2020-10-08T07:43:24Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -205,52 +131,330 @@ private[kvutils] class PackageCommitter(\n         )\n       )\n     )\n+\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n+        uploadEntry.getSubmissionId,\n+        uploadEntry.getParticipantId,\n+        identity,\n+      )\n+    )\n+\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setParticipantNotAuthorized(ParticipantNotAuthorized.newBuilder.setDetails(msg))\n+        )\n+      }\n   }\n \n+  private[this] def deduplicateSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n+      if (ctx.get(submissionKey).isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+// Checks that packages are not repeated in the submission.\n+  private[this] def checkForDuplicates: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val (seenOnce, duplicates) = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .foldLeft((Set.empty[ByteString], Set.empty[ByteString])) {\n+          case ((seenOnce, duplicates), pkg) =>\n+            val hash = pkg.getHashBytes\n+            if (seenOnce(hash))\n+              (seenOnce, duplicates + hash)\n+            else\n+              (seenOnce + hash, duplicates)\n+        }\n+\n+      val mbMsg =\n+        if (seenOnce.isEmpty)\n+          Some(\"No archives in submission\")\n+        else if (duplicates.nonEmpty)\n+          Some(\n+            duplicates.iterator\n+              .map(pkgId => s\"package ${pkgId.toStringUtf8} appears more than once\")\n+              .mkString(\", \"))\n+        else None\n+\n+      mbMsg match {\n+        case None => StepContinue(partialResult)\n+        case Some(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+  private[this] def decodePackages(\n+      archives: Traversable[DamlLf.Archive],\n+  ): Either[String, Map[Ref.PackageId, Ast.Package]] =\n+    metrics.daml.kvutils.committer.packageUpload.decodeTimer.time { () =>\n+      type Result = Either[List[String], Map[Ref.PackageId, Ast.Package]]\n+      // toSet is constant time here.\n+      val knownPackages = engine.compiledPackages().packageIds.toSet[String]\n+\n+      archives\n+        .foldLeft[Result](Right(Map.empty)) { (acc, arch) =>\n+          try {\n+            if (knownPackages(arch.getHash)) {\n+              // If the package is already known by the engine, we don't decode it but still verify its hash.\n+              lf.archive.Reader.HashChecker.decodeArchive(arch)\n+              acc\n+            } else {\n+              acc.map(_ + lf.archive.Decode.decodeArchive(arch))\n+            }\n+          } catch {\n+            case NonFatal(e) =>\n+              Left(\n+                s\"Cannot decode archive ${arch.getHash}: ${e.getMessage}\" :: acc.left\n+                  .getOrElse(Nil))\n+          }\n+        }\n+        .left\n+        .map(_.mkString(\", \"))\n+    }\n+\n+  private[this] def validatePackages(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      pkgs: Map[Ref.PackageId, Ast.Package],\n+  ): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.validateTimer.time { () =>\n+      val allPkgIds = uploadEntry.getArchivesList\n+        .iterator()\n+        .asScala\n+        .map(pkg => Ref.PackageId.assertFromString(pkg.getHash))\n+        .toSet\n+      engine.validatePackages(allPkgIds, pkgs).left.map(_.detailMsg)\n+    }\n+\n+// Validate packages\n+  private[this] def strictlyValidatePackages: Step = {\n+    case (ctx, (uploadEntry, mbPkgs)) =>\n+      val result = for {\n+        pkgs <- if (mbPkgs.isEmpty) decodePackages(uploadEntry.getArchivesList.asScala)\n+        else Right(mbPkgs)\n+        _ <- validatePackages(uploadEntry, pkgs)\n+      } yield StepContinue((uploadEntry, pkgs))\n+\n+      result match {\n+        case Right(result) => result\n+        case Left(msg) =>\n+          rejectionTraceLog(msg, uploadEntry)\n+          reject(\n+            ctx.getRecordTime,\n+            uploadEntry.getSubmissionId,\n+            uploadEntry.getParticipantId,\n+            _.setInvalidPackage(DamlKvutils.Invalid.newBuilder.setDetails(msg))\n+          )\n+      }\n+  }\n+\n+// Minimal validation.\n+// Checks that package IDs are valid and package payloads are non-empty.\n+  private[this] def looselyValidatePackages: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      val archives = uploadEntry.getArchivesList.asScala\n+      val errors =\n+        archives.foldLeft(List.empty[String]) { (errors, archive) =>\n+          if (archive.getPayload.isEmpty)\n+            s\"Empty archive '${archive.getHash}'\" :: errors\n+          else\n+            Ref.PackageId\n+              .fromString(archive.getHash)\n+              .fold(msg => s\"Invalid hash: $msg\" :: errors, _ => errors)\n+        }\n+\n+      if (errors.isEmpty) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg = errors.mkString(\", \")\n+        rejectionTraceLog(msg, uploadEntry)\n+        reject(\n+          ctx.getRecordTime,\n+          uploadEntry.getSubmissionId,\n+          uploadEntry.getParticipantId,\n+          _.setInvalidPackage(Invalid.newBuilder.setDetails(msg))\n+        )\n+      }\n+  }\n+\n+  def uploadPackages(pkgs: Map[Ref.PackageId, Ast.Package]): Either[String, Unit] =\n+    metrics.daml.kvutils.committer.packageUpload.preloadTimer.time { () =>\n+      val errors = Graphs.topoSort(pkgs.transform((_, pkg) => pkg.directDeps)) match {\n+        case Left(cycles) =>\n+          List(s\"cycle in package definitions: ${cycles.vertices.mkString(\" -> \")}\")\n+        case Right(pkgIds) =>\n+          pkgIds.iterator.flatMap { pkgId =>\n+            engine\n+              .preloadPackage(pkgId, pkgs(pkgId))\n+              .consume(_ => None, _ => None, _ => None)\n+              .fold(err => List(err.detailMsg), _ => List.empty)\n+          }.toList\n+      }\n+      Either.cond(\n+        errors.isEmpty,\n+        (),\n+        errors.mkString(\", \")\n+      )\n+    }\n+\n+// Preload decoded packages\n+  private[this] def preload: Step = {"
+  },
+  {
+    "id" : "d7046bbe-8e08-4dfa-88fd-95f1e2ff2773",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "6d06f089-9fde-4a17-b7d6-428ed617a8cd",
+        "parentId" : null,
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "'d suggest naming this as `Never` or `DontValidate` to avoid having such a short class name (e.g. it'll be easier to find it via quick search).",
+        "createdAt" : "2020-10-05T15:56:02Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -5,196 +5,122 @@ package com.daml.ledger.participant.state.kvutils.committer\n \n import java.util.concurrent.Executors\n \n-import com.daml.daml_lf_dev.DamlLf.Archive\n+import com.daml.daml_lf_dev.DamlLf\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils\n import com.daml.ledger.participant.state.kvutils.Conversions.packageUploadDedupKey\n import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n import com.daml.ledger.participant.state.kvutils.committer.Committer.{\n   StepInfo,\n   buildLogEntryWithOptionalRecordTime\n }\n-import com.daml.lf.archive.Decode\n+import com.daml.lf\n import com.daml.lf.data.Ref\n import com.daml.lf.data.Time.Timestamp\n import com.daml.lf.engine.Engine\n-import com.daml.lf.language.Ast\n+import com.daml.lf.language.{Ast, Graphs}\n import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n \n import scala.collection.JavaConverters._\n+import scala.util.control.NonFatal\n \n-private[kvutils] class PackageCommitter(\n-    engine: Engine,\n-    override protected val metrics: Metrics,\n-) extends Committer[DamlPackageUploadEntry.Builder] {\n+object PackageCommitter {\n \n-  override protected val committerName = \"package_upload\"\n+  /** Defines the different package validation modes. */\n+  sealed abstract class ValidationMode extends Product with Serializable\n \n-  metrics.daml.kvutils.committer.packageUpload.loadedPackages(() =>\n-    engine.compiledPackages().packageIds.size)\n+  object ValidationMode {\n \n-  private def rejectionTraceLog(\n-      msg: String,\n-      packageUploadEntry: DamlPackageUploadEntry.Builder,\n-  ): Unit =\n-    logger.trace(\n-      s\"Package upload rejected, $msg, correlationId=${packageUploadEntry.getSubmissionId}\")\n-\n-  private val authorizeSubmission: Step = (ctx, uploadEntry) => {\n-    if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg =\n-        s\"participant id ${uploadEntry.getParticipantId} did not match authenticated participant id ${ctx.getParticipantId}\"\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setParticipantNotAuthorized(\n-          ParticipantNotAuthorized.newBuilder\n-            .setDetails(msg))\n-      )\n-    }\n-  }\n+    /** Specifies that the committer should validate the package before\n+      * committing them to the ledger.\n+      * When using this mode, the packages committed to the ledger can\n+      * be fully trusted and do not have to be validated when loaded\n+      * into the engine.  */\n+    case object Strict extends ValidationMode\n \n-  private val validateEntry: Step = (ctx, uploadEntry) => {\n-    // NOTE(JM): Currently the proper validation is unimplemented. The package is decoded and preloaded\n-    // in background and we're just checking that hash and payload are set. See comment in [[preload]].\n-    val archives = uploadEntry.getArchivesList.asScala\n-    val errors = if (archives.nonEmpty) {\n-      archives.foldLeft(List.empty[String]) { (errors, archive) =>\n-        if (archive.getHashBytes.size > 0 && archive.getPayload.size > 0)\n-          errors\n-        else\n-          s\"Invalid archive ${archive.getHash}\" :: errors\n-      }\n-    } else {\n-      List(\"No archives in package\")\n-    }\n-    if (errors.isEmpty) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg = errors.mkString(\", \")\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setInvalidPackage(\n-          Invalid.newBuilder\n-            .setDetails(msg)\n-        )\n-      )\n-    }\n-  }\n+    /** Specifies that the committer should perform a fast validation of\n+      * the packages before committing them to the ledger.\n+      * This mode is useful for ledger integrations that cannot handle\n+      * long-running submissions (> 10s).\n+      * When using this mode, the packages committed to the ledger\n+      * cannot be trusted and must be validated every time they are\n+      * loaded into the engine.  */\n+    case object Lenient extends ValidationMode\n \n-  private val deduplicateSubmission: Step = (ctx, uploadEntry) => {\n-    val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n-    if (ctx.get(submissionKey).isEmpty) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n-      )\n-    }\n+    /** Specifies that the committer should not perform any validation the\n+      * packages before committing them to the ledger.\n+      * This should be used only by non distributed ledgers, like\n+      * DAML-on-SQL, where the validation done in the API server is\n+      * can be trusted.  */\n+    case object No extends ValidationMode"
+  },
+  {
+    "id" : "01486f21-ee7f-4224-a399-188f5324e149",
+    "prId" : 7460,
+    "comments" : [
+      {
+        "id" : "f1002689-5cf3-4316-bdd4-48b020675040",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "```suggestion\r\n          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authorized participant ID '${ctx.getParticipantId}'\"\r\n```",
+        "createdAt" : "2020-10-07T11:54:59Z",
+        "updatedAt" : "2020-10-08T09:30:43Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "0a4599bcbf38cacac4088b9b73021b01c997c440",
+    "line" : null,
+    "diffHunk" : "@@ -5,252 +5,400 @@ package com.daml.ledger.participant.state.kvutils.committer\n \n import java.util.concurrent.Executors\n \n-import com.daml.daml_lf_dev.DamlLf.Archive\n+import com.daml.daml_lf_dev.DamlLf\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils\n import com.daml.ledger.participant.state.kvutils.Conversions.packageUploadDedupKey\n import com.daml.ledger.participant.state.kvutils.DamlKvutils._\n import com.daml.ledger.participant.state.kvutils.committer.Committer.{\n   StepInfo,\n   buildLogEntryWithOptionalRecordTime\n }\n-import com.daml.lf.archive.Decode\n+import com.daml.lf\n import com.daml.lf.data.Ref\n import com.daml.lf.data.Time.Timestamp\n import com.daml.lf.engine.Engine\n-import com.daml.lf.language.Ast\n+import com.daml.lf.language.{Ast, Graphs}\n import com.daml.metrics.Metrics\n+import com.google.protobuf.ByteString\n \n import scala.collection.JavaConverters._\n+import scala.util.control.NonFatal\n \n-private[kvutils] class PackageCommitter(\n+object PackageCommitter {}\n+\n+final private[kvutils] class PackageCommitter(\n     engine: Engine,\n     override protected val metrics: Metrics,\n-) extends Committer[DamlPackageUploadEntry.Builder] {\n+    validationMode: PackageValidationMode = PackageValidationMode.Lenient,\n+    preloadingMode: PackagePreloadingMode = PackagePreloadingMode.Asynchronous,\n+) extends Committer[(DamlPackageUploadEntry.Builder, Map[Ref.PackageId, Ast.Package])] {\n \n-  override protected val committerName = \"package_upload\"\n+  /** The initial internal state passed to first step. */\n+  override protected def init(\n+      ctx: CommitContext,\n+      submission: DamlSubmission,\n+  ): (DamlPackageUploadEntry.Builder, Map[Ref.PackageId, Ast.Package]) =\n+    (submission.getPackageUploadEntry.toBuilder, Map.empty)\n \n-  metrics.daml.kvutils.committer.packageUpload.loadedPackages(() =>\n-    engine.compiledPackages().packageIds.size)\n+  def traceLog(msg: String, uploadEntry: DamlPackageUploadEntry.Builder): Unit =\n+    logger.trace(s\"$msg, correlationId=${uploadEntry.getSubmissionId}\")\n \n-  private def rejectionTraceLog(\n+  private[this] def rejectionTraceLog(\n       msg: String,\n-      packageUploadEntry: DamlPackageUploadEntry.Builder,\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n   ): Unit =\n-    logger.trace(\n-      s\"Package upload rejected, $msg, correlationId=${packageUploadEntry.getSubmissionId}\")\n-\n-  private val authorizeSubmission: Step = (ctx, uploadEntry) => {\n-    if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg =\n-        s\"participant id ${uploadEntry.getParticipantId} did not match authenticated participant id ${ctx.getParticipantId}\"\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setParticipantNotAuthorized(\n-          ParticipantNotAuthorized.newBuilder\n-            .setDetails(msg))\n-      )\n-    }\n+    traceLog(s\"Package upload rejected, $msg\", uploadEntry)\n+\n+  private[this] def reject(\n+      recordTime: Option[Timestamp],\n+      submissionId: String,\n+      participantId: String,\n+      addErrorDetails: DamlPackageUploadRejectionEntry.Builder => DamlPackageUploadRejectionEntry.Builder,\n+  ): StepStop = {\n+    metrics.daml.kvutils.committer.packageUpload.rejections.inc()\n+    StepStop(buildRejectionLogEntry(recordTime, submissionId, participantId, addErrorDetails))\n   }\n \n-  private val validateEntry: Step = (ctx, uploadEntry) => {\n-    // NOTE(JM): Currently the proper validation is unimplemented. The package is decoded and preloaded\n-    // in background and we're just checking that hash and payload are set. See comment in [[preload]].\n-    val archives = uploadEntry.getArchivesList.asScala\n-    val errors = if (archives.nonEmpty) {\n-      archives.foldLeft(List.empty[String]) { (errors, archive) =>\n-        if (archive.getHashBytes.size > 0 && archive.getPayload.size > 0)\n-          errors\n-        else\n-          s\"Invalid archive ${archive.getHash}\" :: errors\n-      }\n-    } else {\n-      List(\"No archives in package\")\n-    }\n-    if (errors.isEmpty) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg = errors.mkString(\", \")\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n-        uploadEntry.getSubmissionId,\n-        uploadEntry.getParticipantId,\n-        _.setInvalidPackage(\n-          Invalid.newBuilder\n-            .setDetails(msg)\n+  private[this] def buildRejectionLogEntry(\n+      recordTime: Option[Timestamp],\n+      submissionId: String,\n+      participantId: String,\n+      addErrorDetails: DamlPackageUploadRejectionEntry.Builder => DamlPackageUploadRejectionEntry.Builder,\n+  ): DamlLogEntry =\n+    buildLogEntryWithOptionalRecordTime(\n+      recordTime,\n+      _.setPackageUploadRejectionEntry(\n+        addErrorDetails(\n+          DamlPackageUploadRejectionEntry.newBuilder\n+            .setSubmissionId(submissionId)\n+            .setParticipantId(participantId)\n         )\n       )\n-    }\n-  }\n+    )\n \n-  private val deduplicateSubmission: Step = (ctx, uploadEntry) => {\n-    val submissionKey = packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId)\n-    if (ctx.get(submissionKey).isEmpty) {\n-      StepContinue(uploadEntry)\n-    } else {\n-      val msg = s\"duplicate submission='${uploadEntry.getSubmissionId}'\"\n-      rejectionTraceLog(msg, uploadEntry)\n-      reject(\n-        ctx.getRecordTime,\n+  private[this] def setOutOfTimeBoundsLogEntry(\n+      uploadEntry: DamlPackageUploadEntry.Builder,\n+      commitContext: CommitContext): Unit =\n+    commitContext.outOfTimeBoundsLogEntry = Some(\n+      buildRejectionLogEntry(\n+        recordTime = None,\n         uploadEntry.getSubmissionId,\n         uploadEntry.getParticipantId,\n-        _.setDuplicateSubmission(Duplicate.newBuilder.setDetails(msg))\n+        identity,\n       )\n-    }\n-  }\n+    )\n \n-  private val filterDuplicates: Step = (ctx, uploadEntry) => {\n-    val archives = uploadEntry.getArchivesList.asScala.filter { archive =>\n-      val stateKey = DamlStateKey.newBuilder\n-        .setPackageId(archive.getHash)\n-        .build\n-      ctx.get(stateKey).isEmpty\n-    }\n-    StepContinue(uploadEntry.clearArchives().addAllArchives(archives.asJava))\n+  private[this] def authorizeSubmission: Step = {\n+    case (ctx, partialResult @ (uploadEntry, _)) =>\n+      if (ctx.getParticipantId == uploadEntry.getParticipantId) {\n+        StepContinue(partialResult)\n+      } else {\n+        val msg =\n+          s\"Participant ID '${uploadEntry.getParticipantId}' did not match authenticated participant ID '${ctx.getParticipantId}'\""
+  },
+  {
+    "id" : "25521ae5-2be9-4c82-82e9-d8ad126e9a25",
+    "prId" : 6630,
+    "comments" : [
+      {
+        "id" : "bbdcae4f-3a40-429e-a482-d65bf4f7cebf",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I think this is confusing, I'd rather specialize this method into something like `buildPreExecutionOutOfBoundsLogEntry`.",
+        "createdAt" : "2020-07-09T06:41:21Z",
+        "updatedAt" : "2020-07-09T10:04:48Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a46dc15f-fde4-4b5e-bcd3-f554b9ce5a43",
+        "parentId" : "bbdcae4f-3a40-429e-a482-d65bf4f7cebf",
+        "author" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "body" : "Added a separate method for setting out-of-time-bounds log entry.",
+        "createdAt" : "2020-07-09T09:29:13Z",
+        "updatedAt" : "2020-07-09T10:04:48Z",
+        "lastEditedBy" : {
+          "login" : "miklos-da",
+          "name" : "Miklos",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/57664299?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "30f59a7ea813c8683703e913a307efff5574108f",
+    "line" : null,
+    "diffHunk" : "@@ -144,9 +144,18 @@ private[kvutils] class PackageCommitter(\n         .setSubmissionDedup(DamlSubmissionDedupValue.newBuilder)\n         .build\n     )\n-    val logEntry =\n+    val successLogEntry =\n       buildLogEntryWithOptionalRecordTime(ctx.getRecordTime, _.setPackageUploadEntry(uploadEntry))\n-    StepStop(logEntry)\n+    if (ctx.preExecute) {\n+      ctx.outOfTimeBoundsLogEntry = Some(\n+        buildRejectionLogEntry(\n+          recordTime = None,"
+  },
+  {
+    "id" : "4f439f1a-f1af-42c1-80cd-5f3551fb0186",
+    "prId" : 6630,
+    "comments" : [
+      {
+        "id" : "311ed336-44aa-49bc-b2a6-cb570ce0accf",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "I still feel like a less technical flag name would be more readable, like `dryRun` or `speculative` (so as not to tie this to `preexecution`) but there are less calls to this method now, so I'm OK with this.",
+        "createdAt" : "2020-07-09T10:34:31Z",
+        "updatedAt" : "2020-07-09T10:36:24Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "30f59a7ea813c8683703e913a307efff5574108f",
+    "line" : null,
+    "diffHunk" : "@@ -178,9 +184,9 @@ private[kvutils] class PackageCommitter(\n       submissionId: String,\n       participantId: String,\n       addErrorDetails: DamlPackageUploadRejectionEntry.Builder => DamlPackageUploadRejectionEntry.Builder,\n-      incrementMetric: Boolean = true,\n+      incrementRejectionCount: Boolean = true,"
+  },
+  {
+    "id" : "10ecb95f-5db9-4cfb-a946-98002516953d",
+    "prId" : 3923,
+    "comments" : [
+      {
+        "id" : "4a4f9d31-0797-4cf2-839f-4ee278061749",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Ah, yes, wise, thanks. :slightly_smiling_face: ",
+        "createdAt" : "2020-01-06T16:50:59Z",
+        "updatedAt" : "2020-01-10T10:31:04Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c820159bc8cad55858939f177705f0a8bab0fd13",
+    "line" : 18,
+    "diffHunk" : "@@ -58,16 +58,20 @@ private[kvutils] case class PackageCommitter(engine: Engine)\n   private val validateEntry: Step = (ctx, uploadEntry) => {\n     // NOTE(JM): Currently the proper validation is unimplemented. The package is decoded and preloaded\n     // in background and we're just checking that hash and payload are set. See comment in [[preload]].\n-    val errors = uploadEntry.getArchivesList.asScala.foldLeft(List.empty[String]) {\n-      (errors, archive) =>\n+    val archives = uploadEntry.getArchivesList.asScala\n+    val errors = if (archives.nonEmpty) {\n+      archives.foldLeft(List.empty[String]) { (errors, archive) =>\n         if (archive.getHashBytes.size > 0 && archive.getPayload.size > 0)\n           errors\n         else\n           s\"Invalid archive ${archive.getHash}\" :: errors\n+      }\n+    } else {\n+      List(\"No archives in package\")\n     }\n-    if (errors.isEmpty)\n+    if (errors.isEmpty) {"
+  },
+  {
+    "id" : "d8d8119d-7666-4fc6-bf00-ee548dc190c6",
+    "prId" : 3888,
+    "comments" : [
+      {
+        "id" : "406abf71-fd4f-4d52-9581-6a2427728f80",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "make it \"package_upload\" to follow normal conventions.",
+        "createdAt" : "2019-12-18T12:47:14Z",
+        "updatedAt" : "2019-12-18T12:57:32Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a4c7d72d-13cb-46e4-8027-7c99470f9309",
+        "parentId" : "406abf71-fd4f-4d52-9581-6a2427728f80",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Done",
+        "createdAt" : "2019-12-18T12:58:31Z",
+        "updatedAt" : "2019-12-18T12:58:32Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "b3f8ca00f4b0a6155052c48ac1ddd953df935889",
+    "line" : null,
+    "diffHunk" : "@@ -162,6 +162,8 @@ private[kvutils] case class PackageCommitter(engine: Engine)\n     \"buildLogEntry\" -> buildLogEntry\n   )\n \n+  override lazy val committerName = \"packageUpload\""
+  },
+  {
+    "id" : "f951b73f-35a9-42d8-b932-b735c4d10f81",
+    "prId" : 3847,
+    "comments" : [
+      {
+        "id" : "0baf2813-d417-4349-8411-f01590deed0d",
+        "parentId" : null,
+        "author" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "body" : "make into constant",
+        "createdAt" : "2019-12-17T12:19:11Z",
+        "updatedAt" : "2019-12-17T18:52:24Z",
+        "lastEditedBy" : {
+          "login" : "dajmaki",
+          "name" : "Jussi Mäki",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/19684330?u=abb996187e6b472110abdd8dc3c27c4fc0140b92&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cb2a9d3d-8601-42f8-a910-0e125f6c80e2",
+        "parentId" : "0baf2813-d417-4349-8411-f01590deed0d",
+        "author" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "body" : "Same as above",
+        "createdAt" : "2019-12-17T16:17:59Z",
+        "updatedAt" : "2019-12-17T18:52:24Z",
+        "lastEditedBy" : {
+          "login" : "mziolekda",
+          "name" : "mziolekda",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/28315767?u=bfa7fd34d88616828ab02abda54fea595b0fde29&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c9a07f89574f1c170c540c240010fa88a826ce2f",
+    "line" : 63,
+    "diffHunk" : "@@ -116,6 +131,12 @@ private[kvutils] case class PackageCommitter(engine: Engine)\n         DamlStateValue.newBuilder.setArchive(archive).build\n       )\n     }\n+    ctx.set(\n+      packageUploadDedupKey(ctx.getParticipantId, uploadEntry.getSubmissionId),\n+      DamlStateValue.newBuilder"
+  }
+]

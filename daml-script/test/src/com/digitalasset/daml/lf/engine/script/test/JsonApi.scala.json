@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "166e14b7-3735-4b74-ac25-f25a80b7e27b",
+    "prId" : 5211,
+    "comments" : [
+      {
+        "id" : "ef50bce6-3a14-431b-b0ad-38e9512c47e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Same comment about hard-coded ports.",
+        "createdAt" : "2020-03-27T10:03:47Z",
+        "updatedAt" : "2020-03-27T10:23:32Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "e2c258d9-9a05-4ba5-a9ba-a4e54f0c606c",
+        "parentId" : "ef50bce6-3a14-431b-b0ad-38e9512c47e9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "See my comment above on why they are exclusive for now (might still be nicer to pass it in as an argument to only hardcode them in one place but I’ll leave it for now).",
+        "createdAt" : "2020-03-27T10:23:02Z",
+        "updatedAt" : "2020-03-27T10:23:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f6226b8e83eea9fbd0ca6b2e4f6c1675dfc79391",
+    "line" : 101,
+    "diffHunk" : "@@ -0,0 +1,118 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.daml.lf.engine.script.test\n+\n+import java.nio.file.{Files, Path, Paths}\n+import java.io.File\n+import java.util.stream.Collectors\n+import scalaz.syntax.traverse._\n+import spray.json._\n+\n+import com.digitalasset.daml.lf.archive.Dar\n+import com.digitalasset.daml.lf.archive.DarReader\n+import com.digitalasset.daml.lf.archive.Decode\n+import com.digitalasset.daml.lf.data.Ref._\n+import com.digitalasset.daml.lf.language.Ast._\n+import com.digitalasset.daml.lf.speedy.SValue._\n+import com.digitalasset.daml_lf_dev.DamlLf\n+import com.digitalasset.ledger.api.refinements.ApiTypes.{ApplicationId}\n+\n+import com.digitalasset.daml.lf.engine.script._\n+\n+object JsonApi {\n+\n+  case class TestBasic(dar: Dar[(PackageId, Package)], runner: JsonTestRunner) {\n+    val scriptId = Identifier(dar.main._1, QualifiedName.assertFromString(\"ScriptTest:jsonBasic\"))\n+    def runTests(): Unit = {\n+      runner.genericTest(\n+        \"basic\",\n+        scriptId,\n+        Some(JsString(\"Alice\")), {\n+          case v => TestRunner.assertEqual(v, SInt64(42), \"exercise result\")\n+        }\n+      )\n+    }\n+  }\n+\n+  case class TestCreateAndExercise(dar: Dar[(PackageId, Package)], runner: JsonTestRunner) {\n+    val scriptId =\n+      Identifier(dar.main._1, QualifiedName.assertFromString(\"ScriptTest:jsonCreateAndExercise\"))\n+    def runTests(): Unit = {\n+      runner.genericTest(\n+        \"createAndExercise\",\n+        scriptId,\n+        Some(JsString(\"Alice\")), {\n+          case v => TestRunner.assertEqual(v, SInt64(42), \"exercise result\")\n+        }\n+      )\n+    }\n+  }\n+\n+  case class TestExerciseByKey(dar: Dar[(PackageId, Package)], runner: JsonTestRunner) {\n+    val scriptId =\n+      Identifier(dar.main._1, QualifiedName.assertFromString(\"ScriptTest:jsonExerciseByKey\"))\n+    def runTests(): Unit = {\n+      runner.genericTest(\n+        \"exerciseByKey\",\n+        scriptId,\n+        Some(JsString(\"Alice\")), {\n+          case SRecord(_, _, vals) if vals.size == 2 =>\n+            TestRunner.assertEqual(vals.get(0), vals.get(1), \"contract ids\")\n+          case v => Left(s\"Expected Tuple2 but got $v\")\n+        }\n+      )\n+    }\n+  }\n+\n+  case class Config(\n+      darPath: File,\n+      accessTokenFile: Path,\n+  )\n+\n+  private val configParser = new scopt.OptionParser[Config](\"daml_script_test\") {\n+    head(\"daml_script_test\")\n+\n+    arg[File](\"<dar>\")\n+      .required()\n+      .action((d, c) => c.copy(darPath = d))\n+\n+    opt[String](\"access-token-file\")\n+      .required()\n+      .action { (f, c) =>\n+        c.copy(accessTokenFile = Paths.get(f))\n+      }\n+  }\n+\n+  private val applicationId = ApplicationId(\"DAML Script Tests\")\n+\n+  def main(args: Array[String]): Unit = {\n+    configParser.parse(args, Config(null, null)) match {\n+      case None =>\n+        sys.exit(1)\n+      case Some(config) =>\n+        val encodedDar: Dar[(PackageId, DamlLf.ArchivePayload)] =\n+          DarReader().readArchiveFromFile(config.darPath).get\n+        val dar: Dar[(PackageId, Package)] = encodedDar.map {\n+          case (pkgId, pkgArchive) => Decode.readArchivePayload(pkgId, pkgArchive)\n+        }\n+\n+        val participantParams =\n+          Participants(Some(ApiParameters(\"http://localhost\", 7500)), Map.empty, Map.empty)"
+  }
+]

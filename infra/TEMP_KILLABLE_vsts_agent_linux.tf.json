@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "6ad1146e-4eb1-49b7-8b75-7784ccf1dee3",
+    "prId" : 4386,
+    "comments" : [
+      {
+        "id" : "1ad8f0cb-12b5-44ec-b55b-534d46713039",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I thought the end goal is to have these not be preemptible. I guess for testing it just doesn’t matter?",
+        "createdAt" : "2020-02-04T17:20:50Z",
+        "updatedAt" : "2020-02-07T19:16:09Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "98dbeebd-f75b-4d2b-82b5-534c021e6339",
+        "parentId" : "1ad8f0cb-12b5-44ec-b55b-534d46713039",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Preemptible means 20% of the price, so there's no reason not to in this case.",
+        "createdAt" : "2020-02-04T17:51:39Z",
+        "updatedAt" : "2020-02-07T19:16:09Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6a5f3a8c88f76eb84d7f530af7864d48e0cad0f9",
+    "line" : 54,
+    "diffHunk" : "@@ -0,0 +1,56 @@\n+# Copyright (c) 2020 The DAML Authors. All rights reserved.\n+# SPDX-License-Identifier: Apache-2.0\n+\n+resource \"google_compute_region_instance_group_manager\" \"temp-killable\" {\n+  provider           = \"google-beta\"\n+  name               = \"temp-killable\"\n+  base_instance_name = \"temp-killable\"\n+  region             = \"${local.region}\"\n+  target_size        = 3\n+\n+  version {\n+    name              = \"temp-killable\"\n+    instance_template = \"${google_compute_instance_template.temp-killable.self_link}\"\n+  }\n+\n+  update_policy {\n+    type            = \"PROACTIVE\"\n+    minimal_action  = \"REPLACE\"\n+    max_surge_fixed = 3\n+    min_ready_sec   = 60\n+  }\n+}\n+\n+resource \"google_compute_instance_template\" \"temp-killable\" {\n+  name_prefix  = \"killable-\"\n+  machine_type = \"n1-standard-1\"\n+  labels       = \"${local.labels}\"\n+\n+  disk {\n+    disk_size_gb = 20\n+    disk_type    = \"pd-ssd\"\n+    source_image = \"ubuntu-os-cloud/ubuntu-1604-lts\"\n+  }\n+\n+  lifecycle {\n+    create_before_destroy = true\n+  }\n+\n+  network_interface {\n+    network = \"default\"\n+\n+    // Ephemeral IP to get access to the Internet\n+    access_config {}\n+  }\n+\n+  service_account {\n+    email  = \"log-writer@da-dev-gcp-daml-language.iam.gserviceaccount.com\"\n+    scopes = [\"cloud-platform\"]\n+  }\n+\n+  scheduling {\n+    automatic_restart   = false\n+    on_host_maintenance = \"TERMINATE\"\n+    preemptible         = true"
+  }
+]

@@ -1,0 +1,148 @@
+[
+  {
+    "id" : "57598e6a-8d0a-4c03-87f2-ff4f6a9f344d",
+    "prId" : 816,
+    "comments" : [
+      {
+        "id" : "c9755790-b545-49f6-8233-1eb53411d108",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "```suggestion\r\n    show = Text.unpack . party\r\n```",
+        "createdAt" : "2019-05-01T10:39:58Z",
+        "updatedAt" : "2019-05-01T13:50:53Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ed28d8989bedb633bd82d5be0f472d1a86b1a780",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE DataKinds         #-}\n+{-# LANGUAGE GADTs             #-}\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+module LedgerHL(\n+    Port(..),\n+    LedgerHandle,\n+    LedgerId,\n+    Party(..),\n+    Transaction,\n+    ResponseStream,\n+    connect,\n+    identity,\n+    getTransactionStream,\n+    nextResponse,\n+    ) where\n+\n+import           Control.Concurrent\n+import           Control.Monad.Fix  (fix)\n+import qualified Data.Map           as Map\n+import           Data.Text.Lazy     (Text)\n+import qualified Data.Text.Lazy     as Text\n+import           Prelude            hiding (log)\n+\n+import           LedgerId\n+import           Transaction\n+\n+import Network.GRPC.HighLevel.Generated (\n+    withGRPCClient,\n+    ClientRequest(\n+            ClientReaderRequest,\n+            ClientNormalRequest\n+            ),\n+    ClientResult(\n+            ClientErrorResponse,\n+            ClientReaderResponse,\n+            ClientNormalResponse\n+            ),\n+    MetadataMap(..),\n+    GRPCMethodType(Normal,ServerStreaming),\n+    ClientConfig(..),\n+    Port(..),\n+    Host(..),\n+    )\n+\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService as TS\n+\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService(GetTransactionsRequest(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(TransactionFilter(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(Filters(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffsetValue(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset_LedgerBoundary(..))\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import qualified Proto3.Suite.Types as PST\n+\n+\n+data LedgerHandle = LedgerHandle { port :: Port, id :: LedgerId }\n+\n+identity :: LedgerHandle -> LedgerId\n+identity LedgerHandle{id} = id\n+\n+\n+newtype Party = Party { party :: Text }\n+\n+instance Show Party where\n+    show Party{party} = Text.unpack party"
+  },
+  {
+    "id" : "15f79d1a-bcfc-49b5-9b30-360b4cdea203",
+    "prId" : 816,
+    "comments" : [
+      {
+        "id" : "3e75226f-99d6-4550-b239-70e4611d853c",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "```suggestion\r\n    return $ LedgerId text\r\n```",
+        "createdAt" : "2019-05-01T10:40:15Z",
+        "updatedAt" : "2019-05-01T13:50:53Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ed28d8989bedb633bd82d5be0f472d1a86b1a780",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE DataKinds         #-}\n+{-# LANGUAGE GADTs             #-}\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+module LedgerHL(\n+    Port(..),\n+    LedgerHandle,\n+    LedgerId,\n+    Party(..),\n+    Transaction,\n+    ResponseStream,\n+    connect,\n+    identity,\n+    getTransactionStream,\n+    nextResponse,\n+    ) where\n+\n+import           Control.Concurrent\n+import           Control.Monad.Fix  (fix)\n+import qualified Data.Map           as Map\n+import           Data.Text.Lazy     (Text)\n+import qualified Data.Text.Lazy     as Text\n+import           Prelude            hiding (log)\n+\n+import           LedgerId\n+import           Transaction\n+\n+import Network.GRPC.HighLevel.Generated (\n+    withGRPCClient,\n+    ClientRequest(\n+            ClientReaderRequest,\n+            ClientNormalRequest\n+            ),\n+    ClientResult(\n+            ClientErrorResponse,\n+            ClientReaderResponse,\n+            ClientNormalResponse\n+            ),\n+    MetadataMap(..),\n+    GRPCMethodType(Normal,ServerStreaming),\n+    ClientConfig(..),\n+    Port(..),\n+    Host(..),\n+    )\n+\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService as TS\n+\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService(GetTransactionsRequest(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(TransactionFilter(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(Filters(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffsetValue(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset_LedgerBoundary(..))\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import qualified Proto3.Suite.Types as PST\n+\n+\n+data LedgerHandle = LedgerHandle { port :: Port, id :: LedgerId }\n+\n+identity :: LedgerHandle -> LedgerId\n+identity LedgerHandle{id} = id\n+\n+\n+newtype Party = Party { party :: Text }\n+\n+instance Show Party where\n+    show Party{party} = Text.unpack party\n+    \n+\n+newtype ResponseStream a = ResponseStream { chan :: Chan a }\n+\n+nextResponse :: ResponseStream a -> IO a\n+nextResponse ResponseStream{chan} = readChan chan\n+\n+\n+connect :: Port -> IO LedgerHandle\n+connect port = do\n+    id <- getLedgerIdentity port\n+    return$ LedgerHandle {port, id}\n+\n+getLedgerIdentity :: Port -> IO LedgerId\n+getLedgerIdentity port = do\n+    log$ \"ledgerIdentity\"\n+    withGRPCClient (config port) $ \\client -> do\n+        rpcs <- LIS.ledgerIdentityServiceClient client\n+        callLedgerIdService rpcs\n+\n+callLedgerIdService :: LIS.LedgerIdentityService ClientRequest ClientResult -> IO LedgerId\n+callLedgerIdService (LIS.LedgerIdentityService rpc) = do\n+    response <- rpc (wrap (LIS.GetLedgerIdentityRequest noTrace))\n+    LIS.GetLedgerIdentityResponse text <- unwrap response\n+    return$ LedgerId text"
+  },
+  {
+    "id" : "edbb14c5-b19c-4920-9078-26a0cebde6a1",
+    "prId" : 816,
+    "comments" : [
+      {
+        "id" : "3697f098-64ec-4041-8385-d0bdd022e03b",
+        "parentId" : null,
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "This line fails the build; should be\r\n```suggestion\r\n    log \"ledgerIdentity\"\r\n```\r\naccording to the linter",
+        "createdAt" : "2019-05-01T11:59:58Z",
+        "updatedAt" : "2019-05-01T13:50:53Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a4af33e4-e82d-463e-8874-b801486675fc",
+        "parentId" : "3697f098-64ec-4041-8385-d0bdd022e03b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "yup",
+        "createdAt" : "2019-05-01T12:59:10Z",
+        "updatedAt" : "2019-05-01T13:50:53Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ed28d8989bedb633bd82d5be0f472d1a86b1a780",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE DataKinds         #-}\n+{-# LANGUAGE GADTs             #-}\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+module LedgerHL(\n+    Port(..),\n+    LedgerHandle,\n+    LedgerId,\n+    Party(..),\n+    Transaction,\n+    ResponseStream,\n+    connect,\n+    identity,\n+    getTransactionStream,\n+    nextResponse,\n+    ) where\n+\n+import           Control.Concurrent\n+import           Control.Monad.Fix  (fix)\n+import qualified Data.Map           as Map\n+import           Data.Text.Lazy     (Text)\n+import qualified Data.Text.Lazy     as Text\n+import           Prelude            hiding (log)\n+\n+import           LedgerId\n+import           Transaction\n+\n+import Network.GRPC.HighLevel.Generated (\n+    withGRPCClient,\n+    ClientRequest(\n+            ClientReaderRequest,\n+            ClientNormalRequest\n+            ),\n+    ClientResult(\n+            ClientErrorResponse,\n+            ClientReaderResponse,\n+            ClientNormalResponse\n+            ),\n+    MetadataMap(..),\n+    GRPCMethodType(Normal,ServerStreaming),\n+    ClientConfig(..),\n+    Port(..),\n+    Host(..),\n+    )\n+\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService as TS\n+\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService(GetTransactionsRequest(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(TransactionFilter(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(Filters(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffsetValue(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset_LedgerBoundary(..))\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import qualified Proto3.Suite.Types as PST\n+\n+\n+data LedgerHandle = LedgerHandle { port :: Port, id :: LedgerId }\n+\n+identity :: LedgerHandle -> LedgerId\n+identity LedgerHandle{id} = id\n+\n+\n+newtype Party = Party { party :: Text }\n+\n+instance Show Party where\n+    show Party{party} = Text.unpack party\n+    \n+\n+newtype ResponseStream a = ResponseStream { chan :: Chan a }\n+\n+nextResponse :: ResponseStream a -> IO a\n+nextResponse ResponseStream{chan} = readChan chan\n+\n+\n+connect :: Port -> IO LedgerHandle\n+connect port = do\n+    id <- getLedgerIdentity port\n+    return$ LedgerHandle {port, id}\n+\n+getLedgerIdentity :: Port -> IO LedgerId\n+getLedgerIdentity port = do\n+    log$ \"ledgerIdentity\""
+  },
+  {
+    "id" : "3983bbb4-ca27-40d6-9dad-6f0a03bad4db",
+    "prId" : 816,
+    "comments" : [
+      {
+        "id" : "a7fc9223-5234-4e77-9299-985fb03fd0eb",
+        "parentId" : null,
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Assuming this needs a space too, for consistency with Neil's other remarks.",
+        "createdAt" : "2019-05-01T12:00:29Z",
+        "updatedAt" : "2019-05-01T13:50:53Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ed28d8989bedb633bd82d5be0f472d1a86b1a780",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,188 @@\n+-- Copyright (c) 2019 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+{-# LANGUAGE DataKinds         #-}\n+{-# LANGUAGE GADTs             #-}\n+{-# LANGUAGE OverloadedStrings #-}\n+\n+module LedgerHL(\n+    Port(..),\n+    LedgerHandle,\n+    LedgerId,\n+    Party(..),\n+    Transaction,\n+    ResponseStream,\n+    connect,\n+    identity,\n+    getTransactionStream,\n+    nextResponse,\n+    ) where\n+\n+import           Control.Concurrent\n+import           Control.Monad.Fix  (fix)\n+import qualified Data.Map           as Map\n+import           Data.Text.Lazy     (Text)\n+import qualified Data.Text.Lazy     as Text\n+import           Prelude            hiding (log)\n+\n+import           LedgerId\n+import           Transaction\n+\n+import Network.GRPC.HighLevel.Generated (\n+    withGRPCClient,\n+    ClientRequest(\n+            ClientReaderRequest,\n+            ClientNormalRequest\n+            ),\n+    ClientResult(\n+            ClientErrorResponse,\n+            ClientReaderResponse,\n+            ClientNormalResponse\n+            ),\n+    MetadataMap(..),\n+    GRPCMethodType(Normal,ServerStreaming),\n+    ClientConfig(..),\n+    Port(..),\n+    Host(..),\n+    )\n+\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService as TS\n+\n+import Com.Digitalasset.Ledger.Api.V1.TransactionService(GetTransactionsRequest(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(TransactionFilter(..))\n+import Com.Digitalasset.Ledger.Api.V1.TransactionFilter(Filters(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffsetValue(..))\n+import Com.Digitalasset.Ledger.Api.V1.LedgerOffset(LedgerOffset_LedgerBoundary(..))\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import qualified Proto3.Suite.Types as PST\n+\n+\n+data LedgerHandle = LedgerHandle { port :: Port, id :: LedgerId }\n+\n+identity :: LedgerHandle -> LedgerId\n+identity LedgerHandle{id} = id\n+\n+\n+newtype Party = Party { party :: Text }\n+\n+instance Show Party where\n+    show Party{party} = Text.unpack party\n+    \n+\n+newtype ResponseStream a = ResponseStream { chan :: Chan a }\n+\n+nextResponse :: ResponseStream a -> IO a\n+nextResponse ResponseStream{chan} = readChan chan\n+\n+\n+connect :: Port -> IO LedgerHandle\n+connect port = do\n+    id <- getLedgerIdentity port\n+    return$ LedgerHandle {port, id}"
+  }
+]

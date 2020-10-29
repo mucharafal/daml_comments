@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "52109f60-5ef9-4445-902f-b5aa6ef2ac6c",
+    "prId" : 4053,
+    "comments" : [
+      {
+        "id" : "6e1647cd-73ac-41f8-975b-41272f419f9a",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Referring to \"the fix\" in a comment isn't very useful past the lifetime of the pull request.",
+        "createdAt" : "2020-01-15T13:55:58Z",
+        "updatedAt" : "2020-01-15T14:08:00Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "28019b2b08ac2d4640cda8b30939c96d566a2e9f",
+    "line" : 111,
+    "diffHunk" : "@@ -0,0 +1,124 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.sandbox.stores.ledger.sql\n+import java.time.{Duration => JDuration}\n+\n+import akka.stream.scaladsl.Sink\n+import com.digitalasset.ledger.api.domain\n+import com.digitalasset.ledger.api.testing.utils.{\n+  SuiteResourceManagementAroundAll,\n+  MockMessages => M\n+}\n+import com.digitalasset.ledger.api.v1.admin.party_management_service.PartyManagementServiceGrpc\n+import com.digitalasset.ledger.api.v1.command_completion_service.CommandCompletionServiceGrpc\n+import com.digitalasset.ledger.api.v1.command_submission_service.{\n+  CommandSubmissionServiceGrpc,\n+  SubmitRequest\n+}\n+import com.digitalasset.ledger.api.v1.commands.{Command, CreateCommand}\n+import com.digitalasset.ledger.api.v1.ledger_offset.LedgerOffset\n+import com.digitalasset.ledger.api.v1.transaction_service.TransactionServiceGrpc\n+import com.digitalasset.ledger.api.v1.value.{Record, RecordField, Value}\n+import com.digitalasset.ledger.client.configuration.CommandClientConfiguration\n+import com.digitalasset.ledger.client.services.admin.PartyManagementClient\n+import com.digitalasset.ledger.client.services.commands.CommandClient\n+import com.digitalasset.ledger.client.services.transactions.TransactionClient\n+import com.digitalasset.platform.sandbox.config.SandboxConfig\n+import com.digitalasset.platform.sandbox.services.{SandboxFixture, TestCommands}\n+import com.digitalasset.platform.services.time.TimeProviderType\n+import org.scalatest.concurrent.ScalaFutures\n+import org.scalatest.time.{Millis, Span}\n+import org.scalatest.{AsyncWordSpec, Matchers}\n+import scalaz.syntax.tag._\n+\n+class TransactionStreamTerminationIT\n+    extends AsyncWordSpec\n+    with Matchers\n+    with ScalaFutures\n+    with TestCommands\n+    with SandboxFixture\n+    with SuiteResourceManagementAroundAll {\n+\n+  override implicit def patienceConfig: PatienceConfig =\n+    PatienceConfig(scaled(Span(15000, Millis)), scaled(Span(150, Millis)))\n+\n+  override protected def config: SandboxConfig = super.config.copy(\n+    jdbcUrl = Some(\"jdbc:h2:mem:static_time;db_close_delay=-1\"),\n+    timeProviderType = TimeProviderType.Static\n+  )\n+  def commandClientConfig =\n+    CommandClientConfiguration(\n+      config.commandConfig.maxCommandsInFlight,\n+      config.commandConfig.maxParallelSubmissions,\n+      true,\n+      JDuration.ofMillis(2000)\n+    )\n+  private val applicationId = \"transaction-stream-termination-test\"\n+\n+  private def newTransactionClient(ledgerId: domain.LedgerId) =\n+    new TransactionClient(ledgerId, TransactionServiceGrpc.stub(channel))\n+\n+  private def newPartyManagement(ledgerId: domain.LedgerId) =\n+    new PartyManagementClient(PartyManagementServiceGrpc.stub(channel))\n+\n+  private def newCommandSubmissionClient(ledgerId: domain.LedgerId) =\n+    new CommandClient(\n+      CommandSubmissionServiceGrpc.stub(channel),\n+      CommandCompletionServiceGrpc.stub(channel),\n+      ledgerId,\n+      applicationId,\n+      commandClientConfig,\n+      None\n+    )\n+\n+  \"TransactionService\" when {\n+    \"streaming transactions until ledger end with no corresponding ledger entries\" should {\n+      \"terminate properly\" in {\n+\n+        val actualLedgerId = ledgerId()\n+        val begin =\n+          LedgerOffset(LedgerOffset.Value.Boundary(LedgerOffset.LedgerBoundary.LEDGER_BEGIN))\n+        val end = LedgerOffset(LedgerOffset.Value.Boundary(LedgerOffset.LedgerBoundary.LEDGER_END))\n+        val submitRequest: SubmitRequest =\n+          M.submitRequest.update(\n+            _.commands.ledgerId := actualLedgerId.unwrap,\n+            _.commands.applicationId := applicationId,\n+            _.commands.commands := List(\n+              Command(Command.Command.Create(CreateCommand(\n+                Some(templateIds.dummy),\n+                Some(Record(\n+                  Some(templateIds.dummy),\n+                  Seq(RecordField(\n+                    \"operator\",\n+                    Option(Value(Value.Sum.Party(M.submitAndWaitRequest.commands.get.party)))))))\n+              ))))\n+          )\n+\n+        val commandClient = newCommandSubmissionClient(actualLedgerId)\n+        val txClient = newTransactionClient(actualLedgerId)\n+        val partyManagementClient = newPartyManagement(actualLedgerId)\n+\n+        def getLedgerEnd = txClient.getLedgerEnd().map(_.getOffset.value.absolute.get.toLong)\n+        for {\n+          endAtStartOfTest <- getLedgerEnd\n+          // first we create a transaction\n+          _ <- commandClient.trackSingleCommand(submitRequest)\n+          endAfterSubmission <- getLedgerEnd\n+          // next we allocate a party. this causes the ledger end to move without a corresponding ledger entry\n+          _ <- partyManagementClient.allocateParty(None, None)\n+          endAfterParty <- getLedgerEnd\n+          // without the fix, this call will cause the test to run into a timeout"
+  }
+]

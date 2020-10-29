@@ -1,0 +1,262 @@
+[
+  {
+    "id" : "9d4eebc4-e8fb-4e2b-bb58-dd280b51f22d",
+    "prId" : 4575,
+    "comments" : [
+      {
+        "id" : "dd15f7f2-efe6-465f-afd5-7af0ba8ccb59",
+        "parentId" : null,
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Why do we expect done to be false?",
+        "createdAt" : "2020-02-18T14:49:52Z",
+        "updatedAt" : "2020-02-18T14:50:45Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "837fffe6-24cc-438a-9a72-785cf6db6aa1",
+        "parentId" : "dd15f7f2-efe6-465f-afd5-7af0ba8ccb59",
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Because the stream is infinite. We'll never be done with it.",
+        "createdAt" : "2020-02-18T14:53:45Z",
+        "updatedAt" : "2020-02-18T14:53:45Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "90f7c8ab-37d4-4a8c-ae27-6d16c09c135d",
+        "parentId" : "dd15f7f2-efe6-465f-afd5-7af0ba8ccb59",
+        "author" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "body" : "Ah right. 👍 ",
+        "createdAt" : "2020-02-18T15:00:00Z",
+        "updatedAt" : "2020-02-18T15:00:01Z",
+        "lastEditedBy" : {
+          "login" : "rohanjr",
+          "name" : "Rohan Jacob-Rao",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/10836630?u=a30da7f2a9ceeb7c25249d5146f10fce61aeec4e&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "cb8f98a76ddd91a53fc1396c1041af21a6363001",
+    "line" : 31,
+    "diffHunk" : "@@ -72,17 +72,29 @@ afterAll(() => {\n   console.log('Killed JSON API');\n });\n \n-test('create + fetch & exercise', async () => {\n-  const aliceLedger = new Ledger({token: ALICE_TOKEN, httpBaseUrl: HTTP_BASE_URL});\n-  const bobLedger = new Ledger({token: BOB_TOKEN, httpBaseUrl: HTTP_BASE_URL});\n-  const aliceStream = aliceLedger.streamQuery(Main.Person, {party: ALICE_PARTY});\n-  const aliceIterator = pEvent.iterator(aliceStream, 'change', {rejectionEvents: ['close'], multiArgs: true});\n-  const aliceIteratorNext = async () => {\n-    const {done, value} = await aliceIterator.next();\n+interface PromisifiedStream<T extends object, K, I extends string, State> {\n+  next(): Promise<[State, readonly Event<T, K, I>[]]>;\n+  close(): void;\n+}\n+\n+function promisifyStream<T extends object, K, I extends string, State>(\n+  stream: Stream<T, K, I, State>,\n+): PromisifiedStream<T, K, I, State> {\n+  const iterator = pEvent.iterator(stream, 'change', {rejectionEvents: ['close'], multiArgs: true});\n+  const next = async () => {\n+    const {done, value} = await iterator.next();\n     expect(done).toBe(false);"
+  },
+  {
+    "id" : "1f33a6d4-96d7-4922-b193-85b0bb70ccf6",
+    "prId" : 4563,
+    "comments" : [
+      {
+        "id" : "70ad31e1-8fbb-4e6b-8d2b-ae8c5c8c9942",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "The tests in here could use some cleanup. I'll do that in a separate PR once this one has landed.",
+        "createdAt" : "2020-02-18T12:22:44Z",
+        "updatedAt" : "2020-02-18T13:12:03Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "f23d04dd4ca3defd63f5b006b0707b33fb189bcc",
+    "line" : 1,
+    "diffHunk" : "@@ -12,15 +12,20 @@ import * as LibMod from '../daml/daml-tests/Lib/Mod';\n const LEDGER_ID = 'daml2ts-tests';"
+  },
+  {
+    "id" : "d89799cc-2d09-4dc7-a45f-483017b08ae5",
+    "prId" : 4172,
+    "comments" : [
+      {
+        "id" : "0e11d4f8-a411-4379-bdbe-705f9ca1a9f0",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Good catch!",
+        "createdAt" : "2020-01-23T08:10:15Z",
+        "updatedAt" : "2020-01-23T08:10:15Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bb069b4579c3384e3d68f27303cfdb45ff41335d",
+    "line" : 13,
+    "diffHunk" : "@@ -67,9 +66,6 @@ afterAll(() => {\n   console.log('Killed JSON API');\n });\n \n-// TODO(MH, #3518): `daml2ts` should generate this type as `Main.Person.Key`.\n-type PersonKey = {_1: daml.Party; _2: daml.Int}"
+  },
+  {
+    "id" : "f0aa2dcc-77d7-4745-bc0a-5d8fe87c6d81",
+    "prId" : 4010,
+    "comments" : [
+      {
+        "id" : "b3bac741-c249-4e95-a95c-83f3c399de50",
+        "parentId" : null,
+        "author" : null,
+        "body" : "🎉 ",
+        "createdAt" : "2020-01-10T14:46:07Z",
+        "updatedAt" : "2020-01-10T14:46:37Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "b5284a5a7154b6d90166eefbdae861e0721cd9e1",
+    "line" : 14,
+    "diffHunk" : "@@ -111,6 +111,23 @@ test('create + fetch & exercise', async () => {\n   expect(personContracts).toHaveLength(1);\n   expect(personContracts[0]).toEqual(alice6Contract);\n \n+  // Alice has another birthday and turns 7.\n+  [result, events] = await ledger.exerciseByKey(Main.Person.Birthday, alice6Contract.key, {});"
+  },
+  {
+    "id" : "0afec4da-2998-456f-a95c-d6b0a15f7d8b",
+    "prId" : 4007,
+    "comments" : [
+      {
+        "id" : "218807a0-bfbc-4c3c-bbab-ce7ef0866e80",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "I'm planning to add another birthday via `exerciseByKey`. That's why I added the 5 and 6 everywhere.",
+        "createdAt" : "2020-01-10T11:08:10Z",
+        "updatedAt" : "2020-01-10T11:31:24Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "276671a26fdc402941bb1efb18d93a791374c635",
+    "line" : 29,
+    "diffHunk" : "@@ -65,38 +66,49 @@ afterAll(() => {\n   console.log('Killed JSON API');\n });\n \n+// TODO(MH, #3518): `daml2ts` should generate this type as `Main.Person.Key`.\n+type PersonKey = {_1: daml.Party; _2: daml.Int}\n+\n test('create + fetch & exercise', async () => {\n   const ledger = new Ledger(ALICE_TOKEN, `http://localhost:${JSON_API_PORT}/`);\n-  const alice: Main.Person = {\n+  const alice5: Main.Person = {\n     name: 'Alice from Wonderland',\n     party: ALICE_PARTY,\n     age: '5',\n   };\n-  const aliceKey = {_1: alice.party, _2: alice.age};\n-  const aliceContract = await ledger.create(Main.Person, alice);\n-  expect(aliceContract.payload).toEqual(alice);\n-  expect(aliceContract.key).toEqual(aliceKey);\n+  const alice5Key = {_1: alice5.party, _2: alice5.age};"
+  },
+  {
+    "id" : "07a573ab-81a2-4643-854b-39a1407c2c74",
+    "prId" : 3992,
+    "comments" : [
+      {
+        "id" : "e5e1ba62-bd90-482f-acdc-108dffd00719",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\n    sumProd: {tag: 'Corge', value: {x:'1', y:'Garlpy'}},\r\n```\r\nLet's add the trailing comma so we don't always get a two-line change whenever we want to add a single line.",
+        "createdAt" : "2020-01-09T10:18:34Z",
+        "updatedAt" : "2020-01-09T10:44:36Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "44a82c79835717eb07741f129aaf863f2b0aeaf5",
+    "line" : 6,
+    "diffHunk" : "@@ -110,7 +110,8 @@ test('create + fetch & exercise', async () => {\n     tuple: {_1: '12', _2: 'mmm'},\n     enum: Main.Color.Red,\n     enumList: [Main.Color.Red, Main.Color.Blue, Main.Color.Yellow],\n-    variant: {tag: 'Add', value: {_1:{tag: 'Lit', value: '1'}, _2:{tag: 'Lit', value: '2'}}}\n+    variant: {tag: 'Add', value: {_1:{tag: 'Lit', value: '1'}, _2:{tag: 'Lit', value: '2'}}},\n+    sumProd: {tag: 'Corge', value: {x:'1', y:'Garlpy'}}"
+  },
+  {
+    "id" : "0cdbdb4b-c9db-429b-835e-8ec0304c2337",
+    "prId" : 3895,
+    "comments" : [
+      {
+        "id" : "b8f2e199-dcdc-46e3-9091-948a1bb6e2f4",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "`expect` is a normal function.\r\n```suggestion\r\n  expect(er).not.toEqual(aliceContract.contractId);\r\n```",
+        "createdAt" : "2019-12-20T10:33:49Z",
+        "updatedAt" : "2019-12-20T12:56:44Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a63d1a81485323a7fa5c1e1b7822721fa74377e8",
+    "line" : null,
+    "diffHunk" : "@@ -79,6 +80,17 @@ test('create + fetch', async () => {\n   expect(personContracts).toHaveLength(1);\n   expect(personContracts[0]).toEqual(aliceContract);\n \n+  // Alice has a birthday.\n+  const [er, es] = await ledger.exercise(Main.Person.Birthday, aliceContract.contractId, {});\n+  // Resulting in her old record being archived and replaced with a new one.\n+  expect(es).toHaveLength(2);\n+  const aliceOldContract: ArchiveEvent<Main.Person> = (es[0] as { archived: ArchiveEvent<Main.Person> }).archived;\n+  const aliceNewContract: CreateEvent<Main.Person>  = (es[1] as { created: CreateEvent<Main.Person> }).created;\n+  // The result of the exercise ('er') is her new record ID.\n+  expect (er).not.toEqual(aliceContract.contractId);"
+  },
+  {
+    "id" : "682cdb39-0622-4e12-a717-bf2a647b2a60",
+    "prId" : 3895,
+    "comments" : [
+      {
+        "id" : "3f691d6f-c25e-489a-9467-8c23af437e7b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "```suggestion\r\nimport Ledger, { CreateEvent, ArchiveEvent } from  '@digitalasset/daml-ledger-fetch'\r\n```\r\nand remove the previous line.",
+        "createdAt" : "2019-12-20T10:38:15Z",
+        "updatedAt" : "2019-12-20T12:56:44Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a63d1a81485323a7fa5c1e1b7822721fa74377e8",
+    "line" : null,
+    "diffHunk" : "@@ -5,6 +5,7 @@ import { ChildProcess, spawn } from 'child_process';\n import waitOn from 'wait-on';\n import { encode } from 'jwt-simple';\n import Ledger from '@digitalasset/daml-ledger-fetch'\n+import { CreateEvent, ArchiveEvent } from  '@digitalasset/daml-ledger-fetch'"
+  }
+]

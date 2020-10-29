@@ -1,0 +1,343 @@
+[
+  {
+    "id" : "76d14fb5-fdd2-4e89-80b0-13dfdeeb4ed3",
+    "prId" : 5412,
+    "comments" : [
+      {
+        "id" : "f84acbe4-a1e2-445b-acd7-3344040261e9",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Do we need to run this on Windows? If not maybe just disable it there, given how directory outputs can be problematic.",
+        "createdAt" : "2020-04-03T10:29:51Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "50aec047-cecb-4f71-9434-8273e093fbde",
+        "parentId" : "f84acbe4-a1e2-445b-acd7-3344040261e9",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Disabled on Windows.",
+        "createdAt" : "2020-04-03T11:54:37Z",
+        "updatedAt" : "2020-04-03T11:54:37Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "19ab45a39af18f11b36a390f3bb8b7df2e365380",
+    "line" : 24,
+    "diffHunk" : "@@ -79,3 +82,88 @@ def sdk_tarball(name, version):\n         \"\"\".format(version = version),\n         visibility = [\"//visibility:public\"],\n     )\n+\n+def _protos_zip_impl(ctx):\n+    posix = ctx.toolchains[\"@rules_sh//sh/posix:toolchain_type\"]\n+    tmp_dir = ctx.actions.declare_directory(\"tmp_dir\")\n+    zipper_args_file = ctx.actions.declare_file(\n+        ctx.label.name + \".zipper_args\",\n+    )\n+    tools = [ctx.executable._tar, ctx.executable._gzip]\n+    ctx.actions.run_shell(\n+        inputs = [ctx.file._ledger_api_tarball] + ctx.files._daml_lf_tarballs,\n+        outputs = [tmp_dir],"
+  },
+  {
+    "id" : "99b85db1-124e-4e44-9b35-f8662673bbcc",
+    "prId" : 5412,
+    "comments" : [
+      {
+        "id" : "3ea351cd-e813-4290-a703-964a43b66764",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I'm starting to think that we should implement our own versions of `pkg_tar` that can create `tar` and `zip` and don't have the leading `./` issue.",
+        "createdAt" : "2020-04-03T10:30:37Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "76cba450-3c3d-41ab-9c67-8c5aa7199653",
+        "parentId" : "3ea351cd-e813-4290-a703-964a43b66764",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I vaguely recall seeing issues that `pkg_zip` also has other problems where it breaks directory structures. But haven’t looked too deeply into it.",
+        "createdAt" : "2020-04-03T11:45:22Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "687bb3af-4145-4747-bc5b-a9a9b5dc55f8",
+        "parentId" : "3ea351cd-e813-4290-a703-964a43b66764",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "One has to be a bit careful about how one uses it. As far as I understand the right intuition for these rules is that they originate from generating docker images. There you want to distinguish between paths that should always be placed at the filesystem root (e.g. `/usr/bin/...`) and those that should be placed under some path prefix. They use leading `./` for that distinction. I.e. paths that don't lead with `./` will always remain at the root of the archive independent of the `package_dir` attribute. Paths that do lead with `./` will be placed underneath `package_dir`. AFAIK `pkg_tar|zip` always apply the `./` prefrix, but this distinction matters on the `deps` attribute. If you pull in an archive that doesn't follow that convention you'll end up with surprises.",
+        "createdAt" : "2020-04-03T11:53:36Z",
+        "updatedAt" : "2020-04-03T11:53:36Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "19ab45a39af18f11b36a390f3bb8b7df2e365380",
+    "line" : 64,
+    "diffHunk" : "@@ -79,3 +82,88 @@ def sdk_tarball(name, version):\n         \"\"\".format(version = version),\n         visibility = [\"//visibility:public\"],\n     )\n+\n+def _protos_zip_impl(ctx):\n+    posix = ctx.toolchains[\"@rules_sh//sh/posix:toolchain_type\"]\n+    tmp_dir = ctx.actions.declare_directory(\"tmp_dir\")\n+    zipper_args_file = ctx.actions.declare_file(\n+        ctx.label.name + \".zipper_args\",\n+    )\n+    tools = [ctx.executable._tar, ctx.executable._gzip]\n+    ctx.actions.run_shell(\n+        inputs = [ctx.file._ledger_api_tarball] + ctx.files._daml_lf_tarballs,\n+        outputs = [tmp_dir],\n+        tools = tools,\n+        command = \"\"\"\n+          set -eou pipefail\n+          export PATH=$PATH:{path}\n+          tar xf {ledger_api_tarball} -C {tmp_dir}\n+          for file in {lf_tarballs}\n+          do\n+              tar xf $file -C {tmp_dir}\n+          done\n+        \"\"\".format(\n+            ledger_api_tarball = ctx.file._ledger_api_tarball.path,\n+            tmp_dir = tmp_dir.path,\n+            lf_tarballs = \" \".join([f.path for f in ctx.files._daml_lf_tarballs]),\n+            path = \":\".join([\"$PWD/`dirname {tool}`\".format(tool = tool.path) for tool in tools]),\n+        ),\n+    )\n+\n+    # zipper does not have an option to recursively zip files so we\n+    # use find to list the files.\n+    ctx.actions.run_shell(\n+        outputs = [zipper_args_file],\n+        inputs = [tmp_dir],\n+        command = \"\"\"\n+        {find} -L {tmp_dir} -type f | {sed} -E 's#^{tmp_dir}/(.*)$#protos-{version}/\\\\1={tmp_dir}/\\\\1#' > {args_file}\n+        \"\"\".format(\n+            version = sdk_version,\n+            find = posix.commands[\"find\"],\n+            sed = posix.commands[\"sed\"],\n+            tmp_dir = tmp_dir.path,\n+            args_file = zipper_args_file.path,\n+        ),\n+    )\n+    ctx.actions.run(\n+        outputs = [ctx.outputs.out],\n+        inputs = [zipper_args_file, tmp_dir],\n+        executable = ctx.executable._zipper,\n+        arguments = [\"cC\", ctx.outputs.out.path, \"@\" + zipper_args_file.path],\n+    )\n+\n+protos_zip = rule("
+  },
+  {
+    "id" : "8c434bc2-ce25-4886-9236-61522c4300e5",
+    "prId" : 5412,
+    "comments" : [
+      {
+        "id" : "a92a1a7e-fab6-44b1-a5af-5341590ab51b",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "You could also use something like\r\n```\r\n{find} -L daml-lf/archive/src/main/protobuf -type f -printf \"protos-{version}/%P=%p\\n\" > {args_file}\r\n```\r\ninstead of using `sed`. Note the upper and lower-case `p`.",
+        "createdAt" : "2020-04-03T11:39:55Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "976c9120-c306-4ab1-b98a-6d560bc5227b",
+        "parentId" : "a92a1a7e-fab6-44b1-a5af-5341590ab51b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Much nicer, thank you! Your `find` skillz are clearly ahead of mine :slightly_smiling_face: ",
+        "createdAt" : "2020-04-03T11:50:44Z",
+        "updatedAt" : "2020-04-03T11:50:45Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "19ab45a39af18f11b36a390f3bb8b7df2e365380",
+    "line" : null,
+    "diffHunk" : "@@ -79,3 +82,88 @@ def sdk_tarball(name, version):\n         \"\"\".format(version = version),\n         visibility = [\"//visibility:public\"],\n     )\n+\n+def _protos_zip_impl(ctx):\n+    posix = ctx.toolchains[\"@rules_sh//sh/posix:toolchain_type\"]\n+    tmp_dir = ctx.actions.declare_directory(\"tmp_dir\")\n+    zipper_args_file = ctx.actions.declare_file(\n+        ctx.label.name + \".zipper_args\",\n+    )\n+    tools = [ctx.executable._tar, ctx.executable._gzip]\n+    ctx.actions.run_shell(\n+        inputs = [ctx.file._ledger_api_tarball] + ctx.files._daml_lf_tarballs,\n+        outputs = [tmp_dir],\n+        tools = tools,\n+        command = \"\"\"\n+          set -eou pipefail\n+          export PATH=$PATH:{path}\n+          tar xf {ledger_api_tarball} -C {tmp_dir}\n+          for file in {lf_tarballs}\n+          do\n+              tar xf $file -C {tmp_dir}\n+          done\n+        \"\"\".format(\n+            ledger_api_tarball = ctx.file._ledger_api_tarball.path,\n+            tmp_dir = tmp_dir.path,\n+            lf_tarballs = \" \".join([f.path for f in ctx.files._daml_lf_tarballs]),\n+            path = \":\".join([\"$PWD/`dirname {tool}`\".format(tool = tool.path) for tool in tools]),\n+        ),\n+    )\n+\n+    # zipper does not have an option to recursively zip files so we\n+    # use find to list the files.\n+    ctx.actions.run_shell(\n+        outputs = [zipper_args_file],\n+        inputs = [tmp_dir],\n+        command = \"\"\"\n+        {find} -L {tmp_dir} -type f | {sed} -E 's#^{tmp_dir}/(.*)$#protos-{version}/\\\\1={tmp_dir}/\\\\1#' > {args_file}"
+  },
+  {
+    "id" : "16f1a090-2601-41cd-a0ef-4794a8ecf361",
+    "prId" : 5412,
+    "comments" : [
+      {
+        "id" : "8cc9f480-5029-49de-8df1-18d0b03cb8ed",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "These look more like regular attributes than hidden attributes. But, given that this is only used once, it's probably fine.",
+        "createdAt" : "2020-04-03T11:40:23Z",
+        "updatedAt" : "2020-04-03T11:50:14Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "e4ed2ff0-8457-4760-aece-5aecbf0c7bff",
+        "parentId" : "8cc9f480-5029-49de-8df1-18d0b03cb8ed",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "I’ve changed it to regular attributes.",
+        "createdAt" : "2020-04-03T11:50:18Z",
+        "updatedAt" : "2020-04-03T11:50:18Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3b11a65b-cb68-4ba5-b5b9-0b799e666e4d",
+        "parentId" : "8cc9f480-5029-49de-8df1-18d0b03cb8ed",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Thanks!",
+        "createdAt" : "2020-04-03T11:59:33Z",
+        "updatedAt" : "2020-04-03T11:59:33Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "19ab45a39af18f11b36a390f3bb8b7df2e365380",
+    "line" : null,
+    "diffHunk" : "@@ -79,3 +82,88 @@ def sdk_tarball(name, version):\n         \"\"\".format(version = version),\n         visibility = [\"//visibility:public\"],\n     )\n+\n+def _protos_zip_impl(ctx):\n+    posix = ctx.toolchains[\"@rules_sh//sh/posix:toolchain_type\"]\n+    tmp_dir = ctx.actions.declare_directory(\"tmp_dir\")\n+    zipper_args_file = ctx.actions.declare_file(\n+        ctx.label.name + \".zipper_args\",\n+    )\n+    tools = [ctx.executable._tar, ctx.executable._gzip]\n+    ctx.actions.run_shell(\n+        inputs = [ctx.file._ledger_api_tarball] + ctx.files._daml_lf_tarballs,\n+        outputs = [tmp_dir],\n+        tools = tools,\n+        command = \"\"\"\n+          set -eou pipefail\n+          export PATH=$PATH:{path}\n+          tar xf {ledger_api_tarball} -C {tmp_dir}\n+          for file in {lf_tarballs}\n+          do\n+              tar xf $file -C {tmp_dir}\n+          done\n+        \"\"\".format(\n+            ledger_api_tarball = ctx.file._ledger_api_tarball.path,\n+            tmp_dir = tmp_dir.path,\n+            lf_tarballs = \" \".join([f.path for f in ctx.files._daml_lf_tarballs]),\n+            path = \":\".join([\"$PWD/`dirname {tool}`\".format(tool = tool.path) for tool in tools]),\n+        ),\n+    )\n+\n+    # zipper does not have an option to recursively zip files so we\n+    # use find to list the files.\n+    ctx.actions.run_shell(\n+        outputs = [zipper_args_file],\n+        inputs = [tmp_dir],\n+        command = \"\"\"\n+        {find} -L {tmp_dir} -type f | {sed} -E 's#^{tmp_dir}/(.*)$#protos-{version}/\\\\1={tmp_dir}/\\\\1#' > {args_file}\n+        \"\"\".format(\n+            version = sdk_version,\n+            find = posix.commands[\"find\"],\n+            sed = posix.commands[\"sed\"],\n+            tmp_dir = tmp_dir.path,\n+            args_file = zipper_args_file.path,\n+        ),\n+    )\n+    ctx.actions.run(\n+        outputs = [ctx.outputs.out],\n+        inputs = [zipper_args_file, tmp_dir],\n+        executable = ctx.executable._zipper,\n+        arguments = [\"cC\", ctx.outputs.out.path, \"@\" + zipper_args_file.path],\n+    )\n+\n+protos_zip = rule(\n+    implementation = _protos_zip_impl,\n+    attrs = {\n+        \"_daml_lf_tarballs\": attr.label_list(\n+            allow_files = True,\n+            default = [\n+                Label(\"//daml-lf/archive:daml_lf_{}_archive_proto_tarball.tar.gz\".format(version))\n+                for version in LF_VERSIONS\n+            ],\n+        ),\n+        \"_ledger_api_tarball\": attr.label(allow_single_file = True, default = Label(\"//ledger-api/grpc-definitions:ledger-api-protos.tar.gz\")),"
+  },
+  {
+    "id" : "96b8aa54-1f3c-44a3-84e2-b6abf0e3a5b0",
+    "prId" : 5258,
+    "comments" : [
+      {
+        "id" : "c2d65b55-2571-487a-9a5a-c62bd2ff64c3",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Do we rely on the top-level directory for things like the damlc/assistant/… tarballs now? Maybe worth leaving a comment here then since the top-level directory and the path in the release tarball did not always match up in the past.",
+        "createdAt" : "2020-03-30T06:38:24Z",
+        "updatedAt" : "2020-03-30T17:12:01Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "60bb9da6-0527-49d6-94b7-e24348603fd6",
+        "parentId" : "c2d65b55-2571-487a-9a5a-c62bd2ff64c3",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Turns out that the tarballs generated by `pkg_tar` are subtly different from the previous ones. `pkg_tar` prefixes all entries with a `./`. This doesn't change the result of unpacking the archive, but it changes the meaning of `tar`'s `--strip-components` flag, which breaks the `daml-sdk-head` script, and may impact users. The underlying tool that is called by `pkg_tar` has a flag to change the overall path prefix. I tried patching the rule to make use of that flag to prevent the `./` prefix. However, unfortunately that prefix is used by `pkg_tar` when combining multiple tarballs, without it files in `deps` do not get prepended with `package_dir` (i.e. `sdk-X.Y.Z`). So, `pkg_tar` seems unfit for our use-case. I've reverted to `genrule` with `tar`, but added the flags for reproducibility. ",
+        "createdAt" : "2020-03-30T17:17:05Z",
+        "updatedAt" : "2020-03-30T17:17:05Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "69349542a5aabac60ab89317fcc23e11433cf9ae",
+    "line" : null,
+    "diffHunk" : "@@ -1,79 +1,51 @@\n # Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n # SPDX-License-Identifier: Apache-2.0\n \n+load(\"@bazel_tools//tools/build_defs/pkg:pkg.bzl\", \"pkg_tar\")\n+\n def sdk_tarball(name, version):\n+    config = name + \"-config\"\n     native.genrule(\n+        name = config,\n+        srcs = [\"sdk-config.yaml.tmpl\"],\n+        outs = [\"sdk-config.yaml\"],\n+        cmd = \"sed 's/__VERSION__/{version}/' $(SRCS) > $(OUTS)\".format(version = version),\n+    )\n+    pkg_tar(\n         name = name,\n+        extension = \"tar.gz\",\n         srcs = [\n-            \":sdk-config.yaml.tmpl\",\n+            config,\n             \":install.sh\",\n             \":install.bat\",\n-            \"//ledger/sandbox:src/main/resources/logback.xml\",\n-            \"//navigator/backend:src/main/resources/logback.xml\",\n-            \"//extractor:src/main/resources/logback.xml\",\n-            \"//ledger-service/http-json:release/json-api-logback.xml\",\n-            \"//language-support/java/codegen:src/main/resources/logback.xml\",\n-            \"//triggers/runner:src/main/resources/logback.xml\",\n-            \"//daml-script/runner:src/main/resources/logback.xml\",\n             \"//:NOTICES\",\n+            \"//compiler/daml-extension:vsix\",\n+            \"//triggers/daml:daml-trigger-dars\",\n+            \"//daml-script/daml:daml-script-dars\",\n+        ],\n+        files = {\n+            \"//daml-assistant/daml-sdk:sdk_deploy.jar\": \"daml-sdk/daml-sdk.jar\",\n+            \"//ledger/sandbox:src/main/resources/logback.xml\": \"daml-sdk/sandbox-logback.xml\",\n+            \"//navigator/backend:src/main/resources/logback.xml\": \"daml-sdk/navigator-logback.xml\",\n+            \"//extractor:src/main/resources/logback.xml\": \"daml-sdk/extractor-logback.xml\",\n+            \"//ledger-service/http-json:release/json-api-logback.xml\": \"daml-sdk/json-api-logback.xml\",\n+            \"//language-support/java/codegen:src/main/resources/logback.xml\": \"daml-sdk/codegen-logback.xml\",\n+            \"//triggers/runner:src/main/resources/logback.xml\": \"daml-sdk/trigger-logback.xml\",\n+            \"//daml-script/runner:src/main/resources/logback.xml\": \"daml-sdk/script-logback.xml\",\n+        },\n+        deps = [\n             \"//daml-assistant:daml-dist\",\n             \"//compiler/damlc:damlc-dist\",\n-            \"//compiler/daml-extension:vsix\",\n             \"//daml-assistant/daml-helper:daml-helper-dist\",\n             \"//language-support/ts/codegen:daml2ts-dist\",\n             \"//templates:templates-tarball.tar.gz\",\n-            \"//triggers/daml:daml-trigger-dars\",\n-            \"//daml-script/daml:daml-script-dars\",\n-            \"//daml-assistant/daml-sdk:sdk_deploy.jar\",\n         ],\n-        outs = [\"{}.tar.gz\".format(name)],\n-        cmd = \"\"\"\n-          # damlc\n-          VERSION={version}\n-          OUT=sdk-$$VERSION\n-          mkdir -p $$OUT\n-\n-          cp $(location //:NOTICES) $$OUT/NOTICES\n-\n-          cp $(location :install.sh) $$OUT/install.sh\n-          cp $(location :install.bat) $$OUT/install.bat\n-\n-          cp $(location :sdk-config.yaml.tmpl) $$OUT/sdk-config.yaml\n-          sed -i \"s/__VERSION__/$$VERSION/\" $$OUT/sdk-config.yaml\n-\n-          mkdir -p $$OUT/daml\n-          tar xf $(location //daml-assistant:daml-dist) --strip-components=1 -C $$OUT/daml\n-\n-          mkdir -p $$OUT/damlc\n-          tar xf $(location //compiler/damlc:damlc-dist) --strip-components=1 -C $$OUT/damlc\n-\n-          mkdir -p $$OUT/daml-libs\n-          cp -t $$OUT/daml-libs $(locations //triggers/daml:daml-trigger-dars)\n-          cp -t $$OUT/daml-libs $(locations //daml-script/daml:daml-script-dars)\n-\n-          mkdir -p $$OUT/daml-helper\n-          tar xf $(location //daml-assistant/daml-helper:daml-helper-dist) --strip-components=1 -C $$OUT/daml-helper\n-\n-          mkdir -p $$OUT/daml2ts\n-          tar xf $(location //language-support/ts/codegen:daml2ts-dist) --strip-components=1 -C $$OUT/daml2ts\n-\n-          mkdir -p $$OUT/studio\n-          cp $(location //compiler/daml-extension:vsix) $$OUT/studio/daml-bundled.vsix\n-\n-          mkdir -p $$OUT/templates\n-          tar xf $(location //templates:templates-tarball.tar.gz) --strip-components=1 -C $$OUT/templates\n-\n-          mkdir -p $$OUT/daml-sdk\n-          cp $(location //daml-assistant/daml-sdk:sdk_deploy.jar) $$OUT/daml-sdk/daml-sdk.jar\n-          cp -L $(location //ledger-service/http-json:release/json-api-logback.xml) $$OUT/daml-sdk/\n-          cp -L $(location //ledger/sandbox:src/main/resources/logback.xml) $$OUT/daml-sdk/sandbox-logback.xml\n-          cp -L $(location //navigator/backend:src/main/resources/logback.xml) $$OUT/daml-sdk/navigator-logback.xml\n-          cp -L $(location //extractor:src/main/resources/logback.xml) $$OUT/daml-sdk/extractor-logback.xml\n-          cp -L $(location //language-support/java/codegen:src/main/resources/logback.xml) $$OUT/daml-sdk/codegen-logback.xml\n-          cp -L $(location //triggers/runner:src/main/resources/logback.xml) $$OUT/daml-sdk/trigger-logback.xml\n-          cp -L $(location //daml-script/runner:src/main/resources/logback.xml) $$OUT/daml-sdk/script-logback.xml\n-\n-          tar c --format=ustar --sort=name --owner=root:0 --group=root:0 --mtime=0 $$OUT | gzip -n > $@\n-        \"\"\".format(version = version),\n-        visibility = [\"//visibility:public\"],\n+        strip_prefix = \"/\",\n+        package_dir = \"sdk-{version}\".format(version = version),\n+        remap_paths = {"
+  },
+  {
+    "id" : "313cd22d-a2d0-47c1-8323-4739853f3717",
+    "prId" : 4513,
+    "comments" : [
+      {
+        "id" : "903a0b06-1051-4225-841f-0dd9ed9967f5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Comment for myself and other reviewers: This is no longer necessary because the embedded version is `0.0.0` for `daml-sdk-head`.",
+        "createdAt" : "2020-02-19T10:53:53Z",
+        "updatedAt" : "2020-02-25T14:08:02Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "f99a65e7-77e4-4988-8048-b19ff72c9f13",
+        "parentId" : "903a0b06-1051-4225-841f-0dd9ed9967f5",
+        "author" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "body" : "Right. In the current state we build all these libraries with the latest release version number, and then for a head build we need to go inside the packages and change the version number to `0.0.0` to match `daml-head`.\r\n\r\nIn other words, in the current setup we take a build that has been done with a different version and manually patch it to look like 0.0.0, whereas in this PR we use the same version number for both the sdk tarball build and the build of all the things it depends on, so there is no need for additional patching.",
+        "createdAt" : "2020-02-19T12:54:13Z",
+        "updatedAt" : "2020-02-25T14:08:02Z",
+        "lastEditedBy" : {
+          "login" : "garyverhaegen-da",
+          "name" : "Gary Verhaegen",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/45561385?u=eb17386ea66edbd0cd449e33b2d291bf5a1b51cb&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "81246bd2733ace93653cb663dca5a0cdaf7c11e9",
+    "line" : 21,
+    "diffHunk" : "@@ -54,18 +53,6 @@ def sdk_tarball(name, version):\n           cp -t $$OUT/daml-libs $(location //triggers/daml:daml-trigger.dar)\n           cp -t $$OUT/daml-libs $(location //daml-script/daml:daml-script.dar)\n \n-          # Patch the SDK version in all bundled DAML libraries."
+  }
+]

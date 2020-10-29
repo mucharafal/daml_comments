@@ -1,0 +1,236 @@
+[
+  {
+    "id" : "eb52973d-e981-4412-9106-eb741fa59046",
+    "prId" : 755,
+    "comments" : [
+      {
+        "id" : "c664709b-a480-4fcc-b662-ed42db296d10",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Is there a reason why you only allow users to configure the port? I would change `ledgerId` to accept a `ClientConfig` instead and only keep this as a helper (or remove it completely).",
+        "createdAt" : "2019-04-29T09:53:01Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0c723249-5919-4522-a776-71c44709a860",
+        "parentId" : "c664709b-a480-4fcc-b662-ed42db296d10",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "No reason. This is just all I neeed so far.",
+        "createdAt" : "2019-04-29T11:52:04Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7d1db8045e0b7241a3e130bf03f9013a8d6e2662",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+{-# LANGUAGE DataKinds #-}\n+{-# LANGUAGE GADTs     #-}\n+\n+module LedgerIdentity(\n+  LedgerId,\n+  ledgerId,\n+  Port(..),\n+  )\n+where\n+\n+import qualified Data.Map           as Map\n+import           Data.String        (fromString)\n+import qualified Data.Text.Lazy     as Text\n+\n+import Network.GRPC.HighLevel.Generated (\n+  withGRPCClient,\n+  ClientRequest(\n+      --ClientReaderRequest\n+      ClientNormalRequest\n+      ),\n+  ClientResult(\n+        --ClientReaderResponse,\n+      ClientNormalResponse,\n+      ClientErrorResponse\n+      ),\n+  MetadataMap(..),\n+  GRPCMethodType(Normal\n+                 --ServerStreaming,\n+                 ),\n+  ClientConfig(..),\n+  Port(..),\n+  Host(..),\n+  )\n+\n+import Network.GRPC.HighLevel.Client(\n+  TimeoutSeconds,\n+  )\n+\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+    \n+data LedgerId = LedgerId String deriving Show\n+\n+ledgerId :: Port -> IO LedgerId\n+ledgerId port = do\n+  withGRPCClient (config port) $ \\client -> do\n+    rpcs <- LIS.ledgerIdentityServiceClient client\n+    callLedgerIdService rpcs\n+\n+callLedgerIdService :: LIS.LedgerIdentityService ClientRequest ClientResult -> IO LedgerId\n+callLedgerIdService (LIS.LedgerIdentityService rpc) = do\n+  response <- rpc (wrap (LIS.GetLedgerIdentityRequest noTrace))\n+  LIS.GetLedgerIdentityResponse text <- unwrap response\n+  let id = LedgerId (Text.unpack text)\n+  return id\n+\n+noTrace :: Maybe TraceContext\n+noTrace = Nothing\n+\n+wrap :: r -> ClientRequest 'Normal r a\n+wrap r = ClientNormalRequest r timeout mdm\n+\n+unwrap :: ClientResult 'Normal a -> IO a\n+unwrap = \\case\n+  ClientNormalResponse x _m1 _m2 _status _details -> return x\n+  ClientErrorResponse e -> fail (show e)\n+\n+\n+config :: Port -> ClientConfig\n+config port =\n+  ClientConfig { clientServerHost = Host (fromString \"localhost\")"
+  },
+  {
+    "id" : "940807b0-8e40-4b60-834f-85b851900df2",
+    "prId" : 755,
+    "comments" : [
+      {
+        "id" : "c70c46f9-6163-4d93-9583-375cca0e421b",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Given that you get it back as a `Text` below, why not make this a newtype around `Text`?",
+        "createdAt" : "2019-04-29T10:11:20Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f6559c66-ff89-486f-a105-87ef88182207",
+        "parentId" : "c70c46f9-6163-4d93-9583-375cca0e421b",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok",
+        "createdAt" : "2019-04-29T11:46:08Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7d1db8045e0b7241a3e130bf03f9013a8d6e2662",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+{-# LANGUAGE DataKinds #-}\n+{-# LANGUAGE GADTs     #-}\n+\n+module LedgerIdentity(\n+  LedgerId,\n+  ledgerId,\n+  Port(..),\n+  )\n+where\n+\n+import qualified Data.Map           as Map\n+import           Data.String        (fromString)\n+import qualified Data.Text.Lazy     as Text\n+\n+import Network.GRPC.HighLevel.Generated (\n+  withGRPCClient,\n+  ClientRequest(\n+      --ClientReaderRequest\n+      ClientNormalRequest\n+      ),\n+  ClientResult(\n+        --ClientReaderResponse,\n+      ClientNormalResponse,\n+      ClientErrorResponse\n+      ),\n+  MetadataMap(..),\n+  GRPCMethodType(Normal\n+                 --ServerStreaming,\n+                 ),\n+  ClientConfig(..),\n+  Port(..),\n+  Host(..),\n+  )\n+\n+import Network.GRPC.HighLevel.Client(\n+  TimeoutSeconds,\n+  )\n+\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+    \n+data LedgerId = LedgerId String deriving Show"
+  },
+  {
+    "id" : "71c3b66c-2115-4a7c-b7ab-175014e4e29b",
+    "prId" : 755,
+    "comments" : [
+      {
+        "id" : "7eaeb78d-df97-4ee9-80e8-625991e618a2",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "We generally go for 4 space indents.",
+        "createdAt" : "2019-04-29T10:11:37Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "83028d15-fd4a-418a-b86f-6f840eee9a0e",
+        "parentId" : "7eaeb78d-df97-4ee9-80e8-625991e618a2",
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "👍 👍 👍 👍 ",
+        "createdAt" : "2019-04-29T10:47:41Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "2f3090e4-7701-4834-ab11-6db1d8f2bf82",
+        "parentId" : "7eaeb78d-df97-4ee9-80e8-625991e618a2",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "ok",
+        "createdAt" : "2019-04-29T11:49:38Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7d1db8045e0b7241a3e130bf03f9013a8d6e2662",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+{-# LANGUAGE DataKinds #-}\n+{-# LANGUAGE GADTs     #-}\n+\n+module LedgerIdentity(\n+  LedgerId,\n+  ledgerId,\n+  Port(..),\n+  )\n+where\n+\n+import qualified Data.Map           as Map\n+import           Data.String        (fromString)\n+import qualified Data.Text.Lazy     as Text\n+\n+import Network.GRPC.HighLevel.Generated (\n+  withGRPCClient,\n+  ClientRequest(\n+      --ClientReaderRequest\n+      ClientNormalRequest\n+      ),\n+  ClientResult(\n+        --ClientReaderResponse,\n+      ClientNormalResponse,\n+      ClientErrorResponse\n+      ),\n+  MetadataMap(..),\n+  GRPCMethodType(Normal\n+                 --ServerStreaming,\n+                 ),\n+  ClientConfig(..),\n+  Port(..),\n+  Host(..),\n+  )\n+\n+import Network.GRPC.HighLevel.Client(\n+  TimeoutSeconds,\n+  )\n+\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+    \n+data LedgerId = LedgerId String deriving Show\n+\n+ledgerId :: Port -> IO LedgerId\n+ledgerId port = do\n+  withGRPCClient (config port) $ \\client -> do"
+  },
+  {
+    "id" : "11a32a52-eb5f-4d2a-bcdf-21bbc3cfbd1c",
+    "prId" : 755,
+    "comments" : [
+      {
+        "id" : "c31039c1-8e1f-4084-b40f-1d7af248c59a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n  ClientConfig { clientServerHost =\"localhost\"\r\n```",
+        "createdAt" : "2019-04-29T10:13:27Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9fff1467-5821-4993-a9ad-6b88258cb2bb",
+        "parentId" : "c31039c1-8e1f-4084-b40f-1d7af248c59a",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "This requires {-# LANGUAGE OverloadedStrings #-}\r\nbut if we that's preferred style, then ok.",
+        "createdAt" : "2019-04-29T11:51:19Z",
+        "updatedAt" : "2019-04-29T13:22:39Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "7d1db8045e0b7241a3e130bf03f9013a8d6e2662",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,81 @@\n+{-# LANGUAGE DataKinds #-}\n+{-# LANGUAGE GADTs     #-}\n+\n+module LedgerIdentity(\n+  LedgerId,\n+  ledgerId,\n+  Port(..),\n+  )\n+where\n+\n+import qualified Data.Map           as Map\n+import           Data.String        (fromString)\n+import qualified Data.Text.Lazy     as Text\n+\n+import Network.GRPC.HighLevel.Generated (\n+  withGRPCClient,\n+  ClientRequest(\n+      --ClientReaderRequest\n+      ClientNormalRequest\n+      ),\n+  ClientResult(\n+        --ClientReaderResponse,\n+      ClientNormalResponse,\n+      ClientErrorResponse\n+      ),\n+  MetadataMap(..),\n+  GRPCMethodType(Normal\n+                 --ServerStreaming,\n+                 ),\n+  ClientConfig(..),\n+  Port(..),\n+  Host(..),\n+  )\n+\n+import Network.GRPC.HighLevel.Client(\n+  TimeoutSeconds,\n+  )\n+\n+import Com.Digitalasset.Ledger.Api.V1.TraceContext(TraceContext)\n+import Com.Digitalasset.Ledger.Api.V1.LedgerIdentityService as LIS\n+    \n+data LedgerId = LedgerId String deriving Show\n+\n+ledgerId :: Port -> IO LedgerId\n+ledgerId port = do\n+  withGRPCClient (config port) $ \\client -> do\n+    rpcs <- LIS.ledgerIdentityServiceClient client\n+    callLedgerIdService rpcs\n+\n+callLedgerIdService :: LIS.LedgerIdentityService ClientRequest ClientResult -> IO LedgerId\n+callLedgerIdService (LIS.LedgerIdentityService rpc) = do\n+  response <- rpc (wrap (LIS.GetLedgerIdentityRequest noTrace))\n+  LIS.GetLedgerIdentityResponse text <- unwrap response\n+  let id = LedgerId (Text.unpack text)\n+  return id\n+\n+noTrace :: Maybe TraceContext\n+noTrace = Nothing\n+\n+wrap :: r -> ClientRequest 'Normal r a\n+wrap r = ClientNormalRequest r timeout mdm\n+\n+unwrap :: ClientResult 'Normal a -> IO a\n+unwrap = \\case\n+  ClientNormalResponse x _m1 _m2 _status _details -> return x\n+  ClientErrorResponse e -> fail (show e)\n+\n+\n+config :: Port -> ClientConfig\n+config port =\n+  ClientConfig { clientServerHost = Host (fromString \"localhost\")"
+  }
+]

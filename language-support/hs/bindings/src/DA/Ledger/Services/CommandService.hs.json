@@ -1,0 +1,171 @@
+[
+  {
+    "id" : "b1850903-2666-4169-b085-ba848824883c",
+    "prId" : 2300,
+    "comments" : [
+      {
+        "id" : "a9891855-a7e0-4413-b28d-01db90aa815b",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "FYI, `Data.Functor` and `Contol.Monad` export\r\n```haskell\r\nvoid :: Functor f => f a -> f ()\r\nvoid = fmap (const ())\r\n```\r\nYou might use that.",
+        "createdAt" : "2019-07-29T09:16:03Z",
+        "updatedAt" : "2019-07-29T09:23:30Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6881f11ae2ea90b93eeb3f7fff2caf129a2d7f9d",
+    "line" : 15,
+    "diffHunk" : "@@ -26,9 +27,7 @@ submitAndWait commands =\n         let request = LL.SubmitAndWaitRequest (Just (lowerCommands commands)) noTrace\n         rpc (ClientNormalRequest request timeout emptyMdm)\n             >>= unwrapWithInvalidArgument\n-            >>= \\case\n-            Right LL.SubmitAndWaitForTransactionIdResponse{} -> return $ Right ()\n-            Left details -> return $ Left $ show $ unStatusDetails details\n+            <&> fmap (\\LL.SubmitAndWaitForTransactionIdResponse{} -> ())"
+  },
+  {
+    "id" : "da44f577-b108-4522-aca7-fddfcd620886",
+    "prId" : 2300,
+    "comments" : [
+      {
+        "id" : "d4858cec-2ac5-4cec-9916-d6232daf8b06",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "We have quite a few functions returning `LedgerService (Either _ _)`. Would it make sense to move the error handling capabilities into the `LedgerService` monad?",
+        "createdAt" : "2019-07-29T09:22:21Z",
+        "updatedAt" : "2019-07-29T09:23:30Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "1725dcf2-e113-4d31-be99-cd2a69630ea8",
+        "parentId" : "d4858cec-2ac5-4cec-9916-d6232daf8b06",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I don't think so.",
+        "createdAt" : "2019-07-29T13:45:24Z",
+        "updatedAt" : "2019-07-29T13:45:24Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "6881f11ae2ea90b93eeb3f7fff2caf129a2d7f9d",
+    "line" : 38,
+    "diffHunk" : "@@ -59,7 +53,7 @@ submitAndWaitForTransaction commands =\n             Right response ->\n                 either (fail . show) (return . Right) $ raiseResponse response\n             Left details ->\n-                return $ Left $ show $ unStatusDetails details\n+                return $ Left details"
+  },
+  {
+    "id" : "a73702c4-0e9e-4457-81bd-a60f9e84a7fb",
+    "prId" : 2294,
+    "comments" : [
+      {
+        "id" : "bb66e0fd-48ab-4f58-8477-108638739c77",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You can simply this case to  `bimap (show . unStatusDetails) (const ())` which makes it easier to see what is going on here.",
+        "createdAt" : "2019-07-26T11:03:23Z",
+        "updatedAt" : "2019-07-26T11:12:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "fe3d88e0-ed08-4296-9c83-b94a2ec3e920",
+        "parentId" : "bb66e0fd-48ab-4f58-8477-108638739c77",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Didn't need `bimap`, just `fmap`, after the change for your following comment",
+        "createdAt" : "2019-07-26T12:44:26Z",
+        "updatedAt" : "2019-07-26T12:44:26Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c0ec24e79f3af8f63b25e4d8163a78a9f7f9bfb9",
+    "line" : 12,
+    "diffHunk" : "@@ -25,13 +25,10 @@ submitAndWait commands =\n         let LL.CommandService{commandServiceSubmitAndWaitForTransactionId=rpc} = service\n         let request = LL.SubmitAndWaitRequest (Just (lowerCommands commands)) noTrace\n         rpc (ClientNormalRequest request timeout emptyMdm)\n+            >>= unwrapWithInvalidArgument\n             >>= \\case\n-            ClientNormalResponse LL.SubmitAndWaitForTransactionIdResponse{} _m1 _m2 _status _details -> do\n-                return $ Right ()\n-            ClientErrorResponse (ClientIOError (GRPCIOBadStatusCode StatusInvalidArgument details)) ->\n-                return $ Left $ show $ unStatusDetails details\n-            ClientErrorResponse e ->\n-                fail (show e)\n+            Right LL.SubmitAndWaitForTransactionIdResponse{} -> return $ Right ()"
+  },
+  {
+    "id" : "baf6eac8-5514-47c1-a608-260b3fb14bac",
+    "prId" : 2294,
+    "comments" : [
+      {
+        "id" : "32f57438-eb06-4c8b-a0a6-e8936966990c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This pattern seems to be repeated quite often. Maybe we should factor it out into `(a -> IO b) -> Either StatusDetails a -> IO (Either String b)`? Or given that it seems like the only thing we ever do to the `StatusDetails` field is to call `show . unStatusDetails` on it, this could also be moved to `unwrapWithInvalidArgument` and the helper for this turns into `traverse`.",
+        "createdAt" : "2019-07-26T11:08:18Z",
+        "updatedAt" : "2019-07-26T11:12:48Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "452788f7-2185-44ba-b11b-7b2826e5e779",
+        "parentId" : "32f57438-eb06-4c8b-a0a6-e8936966990c",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "Thanks. I moved the call to  `unStatusDetails` into `unwrapWithInvalidArgument`\r\nand made some other trivial simplifications.\r\nNext PR",
+        "createdAt" : "2019-07-26T12:43:15Z",
+        "updatedAt" : "2019-07-26T12:43:15Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "c0ec24e79f3af8f63b25e4d8163a78a9f7f9bfb9",
+    "line" : 24,
+    "diffHunk" : "@@ -41,14 +38,13 @@ submitAndWaitForTransactionId commands =\n         let LL.CommandService{commandServiceSubmitAndWaitForTransactionId=rpc} = service\n         let request = LL.SubmitAndWaitRequest (Just (lowerCommands commands)) noTrace\n         rpc (ClientNormalRequest request timeout emptyMdm)\n+            >>= unwrapWithInvalidArgument\n             >>= \\case\n-            ClientNormalResponse response _m1 _m2 _status _details -> do\n+            Right response -> do"
+  }
+]

@@ -1,0 +1,130 @@
+[
+  {
+    "id" : "3befa87d-b085-4ebb-adce-b9a0988ee051",
+    "prId" : 5906,
+    "comments" : [
+      {
+        "id" : "8aa21056-9f60-4c1a-8faf-b967684bda42",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n    logger.debug(\"Invoking grpc-submission on commandId={}\", submitRequest.commands.map(_.commandId).get)\r\n```\r\n1. The commands will be there, no need to have a fallback value, if it passed validation there's a bug\r\n2. When using `logback` directly, favor `logback`'s templates over Scala string interpolation (the former acts lazily)",
+        "createdAt" : "2020-05-08T11:24:05Z",
+        "updatedAt" : "2020-06-16T06:16:43Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "ff6dbce3-cb33-434d-b639-fe23ed96c8c4",
+        "parentId" : "8aa21056-9f60-4c1a-8faf-b967684bda42",
+        "author" : {
+          "login" : "daravep",
+          "name" : null,
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/14316769?u=ecf84cb9190107a561ee4bec759072fdefd73269&v=4"
+        },
+        "body" : "1. But this is a client library. I'm sure that clients will mess this up and failing with a random scala exception on a log message would be shitty. So I'd prefer to keep it.\r\n2. You are right with the `logback`. Fixed.",
+        "createdAt" : "2020-05-08T12:17:27Z",
+        "updatedAt" : "2020-06-16T06:16:43Z",
+        "lastEditedBy" : {
+          "login" : "daravep",
+          "name" : null,
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/14316769?u=ecf84cb9190107a561ee4bec759072fdefd73269&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "3e4317c95049297a09dbd3bff4fddfe94a9ee660",
+    "line" : null,
+    "diffHunk" : "@@ -61,9 +56,14 @@ final class CommandClient(\n   def submitSingleCommand(\n       submitRequest: SubmitRequest,\n       token: Option[String] = None): Future[Empty] =\n+      submit(token)(submitRequest)\n+\n+  private def submit(token: Option[String])(submitRequest: SubmitRequest): Future[Empty] = {\n+    logger.debug(s\"Invoking grpc-submission on commandId=${submitRequest.commands.map(_.commandId).getOrElse(\"no-command-id\")}\")"
+  },
+  {
+    "id" : "49f38706-0d73-407c-a67a-519681f02397",
+    "prId" : 3080,
+    "comments" : [
+      {
+        "id" : "ceb73886-0f82-4903-b257-65e3b640310f",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Talking about server-side loggers in the context of the scala client seems confusing to me.",
+        "createdAt" : "2019-10-03T08:49:52Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "88bd776e-023d-46e7-9e34-5129058b281e",
+        "parentId" : "ceb73886-0f82-4903-b257-65e3b640310f",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "In fact, the only place `CommandClient` is being used is in the case of `LowLevelCommandServiceAccess.RemoteServices`, which itself is actually never instantiated.\r\nI'd say we remove `LowLevelCommandServiceAccess.RemoteServices`, the two pattern matches, and consequently also this change to `CommandClient`, which will not be necessary anymore.",
+        "createdAt" : "2019-10-03T08:56:48Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "06368dd2-6d09-48c8-8611-6ad00e63b8e8",
+        "parentId" : "ceb73886-0f82-4903-b257-65e3b640310f",
+        "author" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "body" : "Done",
+        "createdAt" : "2019-10-03T12:17:33Z",
+        "updatedAt" : "2019-10-03T15:26:22Z",
+        "lastEditedBy" : {
+          "login" : "oliverse-da",
+          "name" : "Oliver Seeliger",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/46452754?u=dd1d8e09760abe67b40a4e527a15aafe9d104d82&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d95f1ee782ebcf961b9c14dc7408e26e2e9e470e",
+    "line" : null,
+    "diffHunk" : "@@ -41,6 +41,7 @@ import scalaz.syntax.tag._\n   * @param config                   Options for changing behavior.\n   * @param timeProviderO            If defined, it will be used to override LET and MRT values on incoming commands.\n   *                                 Let will be set based on current time, and TTL will stay the same or be adjusted based on [[config]]\n+  * @param serverLoggerOverrideO    If defined specifies a server-side logger to use instead."
+  }
+]

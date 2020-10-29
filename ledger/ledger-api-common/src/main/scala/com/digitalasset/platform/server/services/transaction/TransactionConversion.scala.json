@@ -1,0 +1,77 @@
+[
+  {
+    "id" : "380b3d3d-fa02-4e9b-aa14-4e33ea194aad",
+    "prId" : 1404,
+    "comments" : [
+      {
+        "id" : "309ef5fd-1ccb-45fd-85be-d2f4462c1f36",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "@gaboraranyossy-da: the previous code that corresponds to the `forall` is in [VisibleTransaction.scala](https://github.com/digital-asset/daml/blob/master/ledger/ledger-api-common/src/main/scala/com/digitalasset/platform/server/services/transaction/VisibleTransaction.scala#L42-L45), where keep the commandId in case the submitter is unknown.\r\nDo we expect in this case that the command id would also already be `None`, or should we explicitly only keep the commandId if the subscriber is also the submitter?",
+        "createdAt" : "2019-05-27T12:54:19Z",
+        "updatedAt" : "2019-05-27T15:11:21Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6e81d0a7-f8f4-485f-88e3-8000336c5438",
+        "parentId" : "309ef5fd-1ccb-45fd-85be-d2f4462c1f36",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "It looks to me that previously the flat transaction response and the transaction tree response were inconsistent in this regard.\r\n[FlatTransaction behavior](https://github.com/digital-asset/daml/pull/1404/files#diff-f81f736de2b1a109b981cf125fb7b4deL113): `.fold(false)(...)` == `.exists(...)`\r\n[TransactionTree behavior](https://github.com/digital-asset/daml/blob/master/ledger/ledger-api-common/src/main/scala/com/digitalasset/platform/server/services/transaction/VisibleTransaction.scala#L42-L45): `case _ => transaction.meta` == not changing the data if `transaction.meta.submitter == None` == \".forall(...)\"",
+        "createdAt" : "2019-05-27T13:03:59Z",
+        "updatedAt" : "2019-05-27T15:11:21Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bf93bce0-f190-4a81-bce0-8dcd19510c12",
+        "parentId" : "309ef5fd-1ccb-45fd-85be-d2f4462c1f36",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Clarified offline: both submitter and commandId of `AcceptedTransaction` are set to `None` if the ledger node does not host the submitting party (i.e. retrieved the transaction via the up-and-coming ReadService). For sake of consistency, we'll use `exists` like we do for flat transactions.",
+        "createdAt" : "2019-05-27T13:35:14Z",
+        "updatedAt" : "2019-05-27T15:11:21Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "d13c314bfb155f5296f9443344408ad3e98e4e1d",
+    "line" : null,
+    "diffHunk" : "@@ -3,64 +3,111 @@\n \n package com.digitalasset.platform.server.services.transaction\n \n-import com.digitalasset.daml.lf.data.Ref.LedgerString\n-import com.digitalasset.daml.lf.data.Relation.Relation\n+import com.digitalasset.daml.lf.data.{Ref => LfRef}\n import com.digitalasset.daml.lf.engine\n import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, VersionedValue}\n import com.digitalasset.daml.lf.value.{Value => Lf}\n-import com.digitalasset.daml.lf.data.{Ref => LfRef}\n-import com.digitalasset.ledger.api.v1.event.Event.Event.{Archived, Created}\n-import com.digitalasset.ledger.api.v1.event.{ArchivedEvent, CreatedEvent, Event, ExercisedEvent}\n-import com.digitalasset.ledger.api.v1.transaction.TreeEvent\n-import com.digitalasset.platform.api.v1.event.EventOps._\n+import com.digitalasset.ledger.api.domain\n+import com.digitalasset.ledger.api.domain.Event.{CreateOrArchiveEvent, CreateOrExerciseEvent}\n+import com.digitalasset.ledger.backend.api.v1.LedgerSyncEvent.AcceptedTransaction\n+import com.digitalasset.platform.api.v1.event.EventOps.getEventIndex\n import com.digitalasset.platform.common.{PlatformTypes => P}\n-import com.digitalasset.platform.participant.util.LfEngineToApi\n+import com.digitalasset.platform.participant.util.EventFilter.TemplateAwareFilter\n+import com.digitalasset.platform.server.services.transaction.TransactionFiltration.RichTransactionFilter\n import scalaz.Tag\n+import scalaz.syntax.tag._\n \n import scala.annotation.tailrec\n import scala.collection.breakOut\n \n trait TransactionConversion {\n \n-  type Party = LfRef.Party\n-  type EventId = LfRef.LedgerString\n-\n-  def genToApiTransaction(\n-      transaction: P.GenTransaction[EventId, AbsoluteContractId],\n-      explicitDisclosure: Relation[EventId, Party],\n-      verbose: Boolean = false): TransactionTreeNodes = {\n-    val events = engine.Event.collectEvents(transaction, explicitDisclosure)\n-    eventsToTransaction(events, verbose)\n+  def acceptedToDomainFlat(\n+      trans: AcceptedTransaction,\n+      filter: domain.TransactionFilter\n+  ): Option[domain.Transaction] = {\n+    val tx = trans.transaction.mapNodeId(domain.EventId(_))\n+    val events = engine.Event\n+      .collectEvents(tx, trans.explicitDisclosure.map { case (k, v) => domain.EventId(k) -> v })\n+    val allEvents = events.roots.toSeq\n+      .sortBy(evId => getEventIndex(evId.unwrap))\n+      .foldLeft(List.empty[CreateOrArchiveEvent])((l, evId) =>\n+        l ::: flattenEvents(events.events, evId, true))\n+\n+    val eventFilter = TemplateAwareFilter(filter)\n+    val filteredEvents = TransientContractRemover\n+      .removeTransients(allEvents)\n+      .flatMap(eventFilter.filterCreateOrArchiveWitnesses(_).toList)\n+\n+    val submitterIsSubscriber =\n+      trans.submitter\n+        .map(LfRef.Party.assertFromString)\n+        .fold(false)(eventFilter.isSubmitterSubscriber)\n+    if (filteredEvents.nonEmpty || submitterIsSubscriber) {\n+      Some(\n+        domain.Transaction(\n+          domain.TransactionId(trans.transactionId),\n+          Tag.subst(trans.commandId).filter(_ => submitterIsSubscriber),\n+          Tag.subst(trans.workflowId),\n+          trans.recordTime,\n+          filteredEvents,\n+          domain.LedgerOffset.Absolute(trans.offset),\n+          None\n+        ))\n+    } else None\n   }\n-  private def convert(ps: Set[LfRef.Party]): Seq[String] = ps.toSeq\n-\n-  def eventsToTransaction(\n-      allEvents: P.Events[EventId, AbsoluteContractId],\n-      verbose: Boolean): TransactionTreeNodes = {\n-    val events = allEvents.events.map {\n-      case (nodeId, value) =>\n-        (nodeId, value match {\n-          case e: P.ExerciseEvent[EventId, AbsoluteContractId] =>\n-            TreeEvent(TreeEvent.Kind.Exercised(lfExerciseToApi(nodeId, e, verbose)))\n-          case c: P.CreateEvent[AbsoluteContractId] =>\n-            TreeEvent(TreeEvent.Kind.Created(lfCreateToApi(nodeId, c, true, verbose)))\n-        })\n-    }\n \n-    removeInvisibleRoots(events, allEvents.roots.toList.sortBy(getEventIndex))\n+  def acceptedToDomainTree(\n+      trans: AcceptedTransaction,\n+      filter: domain.TransactionFilter): Option[domain.TransactionTree] = {\n+\n+    val tx = trans.transaction.mapNodeId(domain.EventId(_))\n+    filter.filter(tx).map { disclosureByNodeId =>\n+      val allEvents = engine.Event\n+        .collectEvents(tx, disclosureByNodeId)\n+      val events = allEvents.events.map {\n+        case (nodeId, value) =>\n+          (nodeId, value match {\n+            case e: P.ExerciseEvent[domain.EventId, AbsoluteContractId] =>\n+              lfExerciseToDomain(nodeId, e)\n+            case c: P.CreateEvent[AbsoluteContractId] =>\n+              lfCreateToDomain(nodeId, c, true)\n+          })\n+      }\n+\n+      val (byId, roots) =\n+        removeInvisibleRoots(\n+          events,\n+          allEvents.roots.toList\n+            .sortBy(evid => getEventIndex(evid.unwrap)))\n+      val subscriberIsSubmitter = trans.submitter.forall(sub =>"
+  }
+]

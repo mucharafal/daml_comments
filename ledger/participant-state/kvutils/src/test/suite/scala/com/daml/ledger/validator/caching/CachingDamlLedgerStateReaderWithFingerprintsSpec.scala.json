@@ -1,0 +1,30 @@
+[
+  {
+    "id" : "c21fb5ff-291c-4103-8fac-4fc47a30a9b3",
+    "prId" : 6711,
+    "comments" : [
+      {
+        "id" : "caa8c7db-6ac1-479e-8e5c-10a290ff8b4e",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "```suggestion\r\n  }\r\n\r\n```",
+        "createdAt" : "2020-07-14T15:24:30Z",
+        "updatedAt" : "2020-07-15T08:11:38Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e6145fdda1728eb9dd00d6dc94b3e0058872bbb2",
+    "line" : 117,
+    "diffHunk" : "@@ -0,0 +1,91 @@\n+// Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.validator.caching\n+\n+import com.daml.caching.{Cache, Weight, WeightedCache}\n+import com.daml.ledger.participant.state.kvutils.DamlKvutils.{DamlStateKey, DamlStateValue}\n+import com.daml.ledger.participant.state.kvutils.{Fingerprint, FingerprintPlaceholder}\n+import com.daml.ledger.participant.state.kvutils.caching.`Message Weight`\n+import com.daml.ledger.validator.DefaultStateKeySerializationStrategy\n+import com.daml.ledger.validator.preexecution.DamlLedgerStateReaderWithFingerprints\n+import com.google.protobuf.MessageLite\n+import org.mockito.ArgumentMatchers.argThat\n+import org.mockito.Mockito.{times, verify, when}\n+import org.scalatest.mockito.MockitoSugar\n+import org.scalatest.{AsyncWordSpec, Inside, Matchers}\n+\n+import scala.concurrent.{ExecutionContext, Future}\n+\n+class CachingDamlLedgerStateReaderWithFingerprintsSpec\n+    extends AsyncWordSpec\n+    with Matchers\n+    with Inside\n+    with MockitoSugar {\n+  \"read\" should {\n+    \"update cache upon read if policy allows\" in {\n+      val mockReader = mock[DamlLedgerStateReaderWithFingerprints]\n+      when(mockReader.read(argThat((keys: Seq[DamlStateKey]) => keys.size == 1)))\n+        .thenReturn(Future.successful(Seq((Some(aDamlStateValue()), FingerprintPlaceholder))))\n+      val instance = newInstance(mockReader, shouldCache = true)\n+\n+      instance.read(Seq(aDamlStateKey)).map { _ =>\n+        instance.cache.getIfPresent(aDamlStateKey) shouldBe defined\n+      }\n+    }\n+\n+    \"do not update cache upon read if policy does not allow\" in {\n+      val mockReader = mock[DamlLedgerStateReaderWithFingerprints]\n+      when(mockReader.read(argThat((keys: Seq[DamlStateKey]) => keys.size == 1)))\n+        .thenReturn(Future.successful(Seq((Some(aDamlStateValue()), FingerprintPlaceholder))))\n+      val instance = newInstance(mockReader, shouldCache = false)\n+\n+      instance.read(Seq(aDamlStateKey)).map { _ =>\n+        instance.cache.getIfPresent(aDamlStateKey) should not be defined\n+      }\n+    }\n+\n+    \"serve request from cache for seen key (if policy allows)\" in {\n+      val mockReader = mock[DamlLedgerStateReaderWithFingerprints]\n+      when(mockReader.read(argThat((keys: Seq[DamlStateKey]) => keys.size == 1)))\n+        .thenReturn(Future.successful(Seq((None, FingerprintPlaceholder))))\n+      val instance = newInstance(mockReader, shouldCache = true)\n+\n+      for {\n+        originalReadState <- instance.read(Seq(aDamlStateKey))\n+        readAgain <- instance.read(Seq(aDamlStateKey))\n+      } yield {\n+        verify(mockReader, times(1)).read(_)\n+        readAgain shouldEqual originalReadState\n+      }\n+    }\n+\n+    \"return results for keys in the same order as requested\" in {\n+      succeed\n+    }\n+  }"
+  }
+]

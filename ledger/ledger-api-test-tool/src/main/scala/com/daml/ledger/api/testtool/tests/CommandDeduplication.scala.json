@@ -1,0 +1,80 @@
+[
+  {
+    "id" : "170069ed-18f6-4248-85aa-33502d76caae",
+    "prId" : 4467,
+    "comments" : [
+      {
+        "id" : "b6fd2adb-e2a2-4564-9865-7d23e5929269",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "Minor: remember to get rid of code that's been commented out. :slightly_smiling_face: ",
+        "createdAt" : "2020-02-20T09:30:54Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "81c3bb07cc3057b6358f8d09902331b1a80501bf",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,63 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.api.testtool.tests\n+\n+import java.util.UUID\n+\n+import com.daml.ledger.api.testtool.infrastructure.Allocation._\n+//import com.daml.ledger.api.testtool.infrastructure.Assertions.assertGrpcError"
+  },
+  {
+    "id" : "f2bd8d89-27a9-4d88-b819-b056cae7694b",
+    "prId" : 4467,
+    "comments" : [
+      {
+        "id" : "c2b84cc7-9198-47fb-a2b1-1831827f8e82",
+        "parentId" : null,
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "```suggestion\r\n        _ <- Delayed.by(ttl)(())\r\n```",
+        "createdAt" : "2020-02-20T09:31:22Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "d63e2696-3ea3-464e-b8ac-063508624c04",
+        "parentId" : "c2b84cc7-9198-47fb-a2b1-1831827f8e82",
+        "author" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "body" : "Doesn't work, it's the wrong kind of Duration (protobuf vs scala)",
+        "createdAt" : "2020-02-20T16:49:34Z",
+        "updatedAt" : "2020-02-26T09:55:05Z",
+        "lastEditedBy" : {
+          "login" : "rautenrieth-da",
+          "name" : "Robert Autenrieth",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/31539813?u=e5fe17e2c6f986e9ee04c5b9ca5f6a5a90d1c94a&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "81c3bb07cc3057b6358f8d09902331b1a80501bf",
+    "line" : 51,
+    "diffHunk" : "@@ -0,0 +1,63 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.daml.ledger.api.testtool.tests\n+\n+import java.util.UUID\n+\n+import com.daml.ledger.api.testtool.infrastructure.Allocation._\n+//import com.daml.ledger.api.testtool.infrastructure.Assertions.assertGrpcError\n+import com.daml.ledger.api.testtool.infrastructure.{LedgerSession, LedgerTestSuite}\n+import com.digitalasset.ledger.test_stable.Test.Dummy\n+import com.digitalasset.timer.Delayed\n+import com.google.protobuf.duration.Duration\n+//import io.grpc.Status\n+\n+import scala.concurrent.duration.DurationInt\n+\n+final class CommandDeduplication(session: LedgerSession) extends LedgerTestSuite(session) {\n+\n+  test(\n+    \"CDSimpleDeduplication\",\n+    \"Deduplicate commands within the TTL window\",\n+    allocate(SingleParty),\n+  ) {\n+    case Participants(Participant(ledger, party)) =>\n+      val ttlSeconds = 5\n+      val ttl = Duration.of(ttlSeconds.toLong, 0)\n+      val a = UUID.randomUUID.toString\n+      val b = UUID.randomUUID.toString\n+\n+      for {\n+        request <- ledger.submitRequest(party, Dummy(party).create.command)\n+        requestA = request.update(_.commands.ttl := ttl, _.commands.commandId := a)\n+\n+        // Submit command A (first TTL window)\n+        _ <- ledger.submit(requestA)\n+        _ <- ledger.submit(requestA)\n+\n+        // Wait until the end of first TTL window\n+        _ <- Delayed.by(ttlSeconds.seconds)(())"
+  }
+]

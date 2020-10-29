@@ -1,0 +1,33 @@
+[
+  {
+    "id" : "05812bb7-3922-47f3-a0d8-5b10c11522a1",
+    "prId" : 518,
+    "comments" : [
+      {
+        "id" : "2030f634-2df6-4a42-a2c3-76d72a514157",
+        "parentId" : null,
+        "author" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "body" : "```suggestion\r\n          \"Ambiguous data type declaration. Write \" ++\r\n```",
+        "createdAt" : "2019-04-16T08:21:15Z",
+        "updatedAt" : "2019-04-16T10:11:54Z",
+        "lastEditedBy" : {
+          "login" : "neil-da",
+          "name" : "Neil Mitchell",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/35463327?u=0eb1719958bc6e449ec5e7df3a312fa566f5055d&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "a910d2e94262fac9d44a0e064698c125ad8e3435",
+    "line" : null,
+    "diffHunk" : "@@ -71,17 +73,23 @@ checkDataTypes m = checkAmbiguousDataTypes m ++ checkUnlabelledConArgs m\n \n \n checkAmbiguousDataTypes :: GHC.ParsedSource -> [(GHC.SrcSpan, String)]\n-checkAmbiguousDataTypes m =\n-    [ (ss, \"Ambiguous data type. Please disambiguate, e.g. data Foo = Foo {} for a record type or data Foo = Foo () for a variant type.\")\n-    | GHC.L ss decl <- GHC.hsmodDecls (GHC.unLoc m), isBad decl ]\n-    where\n-        isBad :: GHC.HsDecl GHC.GhcPs -> Bool\n-        -- Is the declaration a data type with one constructor and zero arguments?\n-        isBad decl\n-          | GHC.TyClD _ GHC.DataDecl{tcdDataDefn=GHC.HsDataDefn{dd_cons=[con]}} <- decl -- single con data type\n-          , GHC.PrefixCon [] <- GHC.con_args (GHC.unLoc con) -- zero arguments\n-          = True\n-        isBad _ = False\n+checkAmbiguousDataTypes (GHC.L _ m) =\n+    mapMaybe getAmbiguousError (GHC.hsmodDecls m)\n+  where\n+    getAmbiguousError :: GHC.LHsDecl GHC.GhcPs -> Maybe (GHC.SrcSpan, String)\n+    -- Generate an error if the declaration is a data type with one constructor and zero arguments\n+    getAmbiguousError (GHC.L ss decl)\n+      | GHC.TyClD _ GHC.DataDecl{tcdDataDefn=GHC.HsDataDefn{dd_cons=[con]}} <- decl -- single con data type\n+      , GHC.PrefixCon [] <- GHC.con_args (GHC.unLoc con) -- zero arguments\n+      = Just (ss, message)\n+      | otherwise\n+      = Nothing\n+      where\n+        message =\n+          \"Ambiguous data type declaration. \" ++ \"Write \" ++"
+  }
+]

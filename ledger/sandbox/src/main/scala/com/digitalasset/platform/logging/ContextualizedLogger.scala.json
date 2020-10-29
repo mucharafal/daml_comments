@@ -1,0 +1,108 @@
+[
+  {
+    "id" : "5657773b-dce4-433d-ad36-36b19cce771a",
+    "prId" : 4046,
+    "comments" : [
+      {
+        "id" : "4e996211-d004-46e3-abe3-1641dd0980d0",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Is this extra caching really necessary? Normally we would only create a logger for a specific name only once. I feel like I'm missing something. Could you help me find it?",
+        "createdAt" : "2020-01-15T13:25:38Z",
+        "updatedAt" : "2020-01-16T07:56:16Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "a4ddec0d-261b-4931-97f9-de99784d2414",
+        "parentId" : "4e996211-d004-46e3-abe3-1641dd0980d0",
+        "author" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "body" : "You would create a `Logger` via the factory, and this ensures it's created only once because `LoggerFactory` caches loggers. This caches the logger wrapper as well. In most current usages I'd say we would end up creating few objects with this logger, but I'd prefer it to have the same behavior of `LoggerFactory` in case we start using it on smaller, more numerous objects.",
+        "createdAt" : "2020-01-16T07:26:18Z",
+        "updatedAt" : "2020-01-16T07:56:16Z",
+        "lastEditedBy" : {
+          "login" : "stefanobaghino-da",
+          "name" : "Stefano Baghino",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/43749967?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9aac1cf1b1c5758a7fc6cb6c605911ef5efe8e47",
+    "line" : 15,
+    "diffHunk" : "@@ -0,0 +1,44 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.logging\n+\n+import org.slf4j.{Logger, LoggerFactory}\n+\n+import scala.collection.concurrent.TrieMap\n+import scala.reflect.ClassTag\n+\n+object ContextualizedLogger {\n+\n+  // Caches loggers to prevent them from needlessly waste memory\n+  // Replicates the behavior of the underlying Slf4j logger factory\n+  private[this] val cache = TrieMap.empty[String, ContextualizedLogger]"
+  },
+  {
+    "id" : "d30d2284-e03f-4901-84fd-61c73fe15a57",
+    "prId" : 4046,
+    "comments" : [
+      {
+        "id" : "1b2758d5-14a5-4dee-aa70-c848e85c0cbc",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "```suggestion\r\n  // Caches loggers to prevent them from needlessly wasting memory\r\n```",
+        "createdAt" : "2020-01-15T13:42:10Z",
+        "updatedAt" : "2020-01-16T07:56:16Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "9aac1cf1b1c5758a7fc6cb6c605911ef5efe8e47",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,44 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.logging\n+\n+import org.slf4j.{Logger, LoggerFactory}\n+\n+import scala.collection.concurrent.TrieMap\n+import scala.reflect.ClassTag\n+\n+object ContextualizedLogger {\n+\n+  // Caches loggers to prevent them from needlessly waste memory"
+  },
+  {
+    "id" : "5454653d-158a-44b0-97a0-aade2451582a",
+    "prId" : 4046,
+    "comments" : [
+      {
+        "id" : "e4dd847c-fd0c-4bda-baf9-3b77096a07d7",
+        "parentId" : null,
+        "author" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "body" : "Good catch.",
+        "createdAt" : "2020-01-15T13:43:28Z",
+        "updatedAt" : "2020-01-16T07:56:16Z",
+        "lastEditedBy" : {
+          "login" : "SamirTalwar",
+          "name" : "Samir Talwar",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/47582?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "9aac1cf1b1c5758a7fc6cb6c605911ef5efe8e47",
+    "line" : 27,
+    "diffHunk" : "@@ -0,0 +1,44 @@\n+// Copyright (c) 2020 The DAML Authors. All rights reserved.\n+// SPDX-License-Identifier: Apache-2.0\n+\n+package com.digitalasset.platform.logging\n+\n+import org.slf4j.{Logger, LoggerFactory}\n+\n+import scala.collection.concurrent.TrieMap\n+import scala.reflect.ClassTag\n+\n+object ContextualizedLogger {\n+\n+  // Caches loggers to prevent them from needlessly waste memory\n+  // Replicates the behavior of the underlying Slf4j logger factory\n+  private[this] val cache = TrieMap.empty[String, ContextualizedLogger]\n+\n+  // Allows to explicitly pass a logger, should be used for testing only\n+  private[logging] def createFor(withoutContext: Logger): ContextualizedLogger =\n+    new ContextualizedLogger(withoutContext)\n+\n+  // Slf4j handles the caching of the underlying logger itself\n+  private[logging] def createFor(name: String): ContextualizedLogger =\n+    createFor(LoggerFactory.getLogger(name))\n+\n+  /**\n+    * Gets from cache (or creates) a [[ContextualizedLogger]].\n+    * Automatically strips the `$` at the end of Scala `object`s' name."
+  }
+]

@@ -1,0 +1,49 @@
+[
+  {
+    "id" : "bd434b91-c625-4248-a638-20cfa25e1c85",
+    "prId" : 5608,
+    "comments" : [
+      {
+        "id" : "eba8bc49-24fd-43be-bb6f-5d8334ce505a",
+        "parentId" : null,
+        "author" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "body" : "Can you elaborate on the removal of these checks?",
+        "createdAt" : "2020-04-20T12:11:11Z",
+        "updatedAt" : "2020-04-22T08:28:36Z",
+        "lastEditedBy" : {
+          "login" : "fabiotudone-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/59609563?u=a3a8ac844c9aacd1d1bd319a77d1d0ac60d701a3&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "15b6533f-474a-4c62-b06a-bae7de72dd2c",
+        "parentId" : "eba8bc49-24fd-43be-bb6f-5d8334ce505a",
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "This has to do with how a transaction is validated:\r\nFirst it is fully interpreted, and only afterwards the original and the re-interpreted transaction are compared. In the case of a test with a false negative key lookup (the participant found no contract id for a given key, but the committer found one), this particular transaction was rejected due to this failed assertion, rather than a failed validation.\r\nIdeally the validation would only produce nodes one by one and compare the produced node directly with the node in the original transaction. This would avoid doing additional work in a failure case. Unfortunately this is not how the validation is currently set up.",
+        "createdAt" : "2020-04-20T12:37:52Z",
+        "updatedAt" : "2020-04-22T08:28:36Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "14a595f3821f329c479056c81f9a9413d0109715",
+    "line" : 19,
+    "diffHunk" : "@@ -469,20 +469,18 @@ template Delegation\n         with\n           p: Party\n           k: Text\n-          expected: Optional (ContractId Delegated)\n         do\n-          (cid, _) <- fetchByKey @Delegated (p, k)\n-          assertMsg \"fetch matches\" (expected == Some cid)\n+          _ <- fetchByKey @Delegated (p, k)\n+          pure ()\n \n     controller delegate can\n       nonconsuming LookupByKeyDelegated: ()\n         with\n           p: Party\n           k: Text\n-          expected: Optional (ContractId Delegated)\n         do\n-          actual <- lookupByKey @Delegated (p, k)\n-          assertMsg \"lookup matches\" (expected == actual)"
+  }
+]

@@ -1,0 +1,267 @@
+[
+  {
+    "id" : "e4f5a2a1-6676-4473-b529-66b8d5472bc4",
+    "prId" : 5858,
+    "comments" : [
+      {
+        "id" : "7791487b-41ff-4d9c-928d-0f4e12fa6e3c",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "Isn't this just an instance of the compatibility test above where SDK and Ledger both use version `0.0.0`?",
+        "createdAt" : "2020-05-06T08:54:32Z",
+        "updatedAt" : "2020-05-06T08:56:14Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "84d93107-a61c-4d1c-a2dd-f0204bb0a47e",
+        "parentId" : "7791487b-41ff-4d9c-928d-0f4e12fa6e3c",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Yes, we keep this for now since they are more convenient for development but I expect that we’ll probably kill them in the foreseeable future.",
+        "createdAt" : "2020-05-06T08:56:41Z",
+        "updatedAt" : "2020-05-06T08:56:41Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "38e07713b832d79f70aae67be2b8ae25c0d760f3",
+    "line" : 44,
+    "diffHunk" : "@@ -41,33 +41,42 @@ main = do\n   damlHelper <- locateRunfiles (mainWorkspace </> \"daml-assistant\" </> \"daml-helper\" </> exe \"daml-helper\")\n   let tools = Tools {..}\n   defaultMain $ testGroup \"Deployment\"\n-    [ authenticatedUploadTest tools\n+    [ authenticationTests tools\n     , fetchTest tools\n     ]\n \n--- | Test `daml ledger upload-dar --access-token-file`\n-authenticatedUploadTest :: Tools -> TestTree\n-authenticatedUploadTest Tools{..} = do\n-  let sharedSecret = \"TheSharedSecret\"\n+-- | Test `daml ledger list-parties --access-token-file`\n+authenticationTests :: Tools -> TestTree\n+authenticationTests Tools{..} =\n   withSandbox defaultSandboxConf { mbSharedSecret = Just sharedSecret } $ \\getSandboxPort ->\n-    testCaseSteps \"authenticatedUploadTest\" $ \\step -> do\n-    port <- getSandboxPort\n-    withTempDir $ \\deployDir -> do\n-      withCurrentDirectory deployDir $ do\n-        writeMinimalProject\n-        step \"build\"\n-        callProcessSilent damlc [\"build\"]\n-        let dar = \".daml/dist/proj1-0.0.1.dar\"\n-        let tokenFile = deployDir </> \"secretToken.jwt\"\n-        step \"upload\"\n-        -- The trailing newline is not required but we want to test that it is supported.\n-        writeFileUTF8 tokenFile (\"Bearer \" <> makeSignedJwt sharedSecret <> \"\\n\")\n-        callProcessSilent damlHelper\n-          [ \"ledger\", \"upload-dar\"\n-          , \"--access-token-file\", tokenFile\n-          , \"--host\", \"localhost\", \"--port\", show port\n-          , dar\n-          ]\n+    testGroup \"authentication\""
+  },
+  {
+    "id" : "1a87d4f6-8f77-4c61-9015-1cff78ce6ff6",
+    "prId" : 5372,
+    "comments" : [
+      {
+        "id" : "4adbde4c-8025-49ee-9ab7-0e19fd2fd18c",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\ngetMainPidByInspetcingDar :: FilePath -> IO String\r\ngetMainPidByInspectingDar fp = do\r\n```",
+        "createdAt" : "2020-04-02T11:58:28Z",
+        "updatedAt" : "2020-04-02T12:49:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6d8aab42003914ce590293bb68d01166e8609fa",
+    "line" : null,
+    "diffHunk" : "@@ -95,20 +99,13 @@ fetchTest tools@Tools{..} = do\n           ]\n         callProcessSilent damlc [\"validate-dar\", fetchedDar]\n \n--- | Using `daml inspect-dar`, discover the main package-identifier of a dar.\n-getMainPidByInspecingDar :: Tools -> FilePath -> String -> IO String\n-getMainPidByInspecingDar Tools{damlc} dar projName = do\n-  stdout <- callProcessForStdout damlc [\"inspect-dar\", dar]\n-  [grepped] <- pure $\n-        [ line\n-        | line <- lines stdout\n-        -- expect a single line containing double quotes and the projName\n-        , \"\\\"\" `isInfixOf` line\n-        , projName `isInfixOf` line\n-        ]\n-  -- and the main pid is found between the 1st and 2nd double-quotes\n-  [_,pid,_] <- pure $ splitOn \"\\\"\" grepped\n-  return pid\n+-- | Discover the main package-identifier of a dar.\n+getMainPidByInspecingDar :: FilePath -> IO String\n+getMainPidByInspecingDar fp = do"
+  },
+  {
+    "id" : "55fe260d-1b0a-4fdb-b513-0867313a2f57",
+    "prId" : 5372,
+    "comments" : [
+      {
+        "id" : "b91fa344-76b7-4871-92fe-9d91f2ea8168",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "```suggestion\r\n        pid <- getMainPidByInspectingDar origDar\r\n```\r\nOr just remove the suffix, and call it `getMainPid`.",
+        "createdAt" : "2020-04-02T11:58:47Z",
+        "updatedAt" : "2020-04-02T12:49:47Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e6d8aab42003914ce590293bb68d01166e8609fa",
+    "line" : null,
+    "diffHunk" : "@@ -84,7 +88,7 @@ fetchTest tools@Tools{..} = do\n           , \"--host\", \"localhost\" , \"--port\" , show port\n           , origDar\n           ]\n-        pid <- getMainPidByInspecingDar tools origDar \"proj1\"\n+        pid <- getMainPidByInspecingDar origDar"
+  },
+  {
+    "id" : "c210819a-ef50-4c4e-95f5-878ff9b1fe70",
+    "prId" : 5372,
+    "comments" : [
+      {
+        "id" : "282b734a-d708-4e07-b268-69eded4a9fc2",
+        "parentId" : null,
+        "author" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "body" : "May I suggest to rename this to `getMainPkgIdOfDar`? `pid` reminds me of process identifiers. :bowtie:",
+        "createdAt" : "2020-04-02T15:16:17Z",
+        "updatedAt" : "2020-04-02T15:16:22Z",
+        "lastEditedBy" : {
+          "login" : "hurryabit",
+          "name" : "Martin Huschenbett",
+          "avatarUrl" : "https://avatars0.githubusercontent.com/u/11665611?u=7dbd00d5e7ea53919ed31dc4200f602ebca91c8f&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e6d8aab42003914ce590293bb68d01166e8609fa",
+    "line" : 66,
+    "diffHunk" : "@@ -95,20 +99,13 @@ fetchTest tools@Tools{..} = do\n           ]\n         callProcessSilent damlc [\"validate-dar\", fetchedDar]\n \n--- | Using `daml inspect-dar`, discover the main package-identifier of a dar.\n-getMainPidByInspecingDar :: Tools -> FilePath -> String -> IO String\n-getMainPidByInspecingDar Tools{damlc} dar projName = do\n-  stdout <- callProcessForStdout damlc [\"inspect-dar\", dar]\n-  [grepped] <- pure $\n-        [ line\n-        | line <- lines stdout\n-        -- expect a single line containing double quotes and the projName\n-        , \"\\\"\" `isInfixOf` line\n-        , projName `isInfixOf` line\n-        ]\n-  -- and the main pid is found between the 1st and 2nd double-quotes\n-  [_,pid,_] <- pure $ splitOn \"\\\"\" grepped\n-  return pid\n+-- | Discover the main package-identifier of a dar.\n+getMainPidOfDar :: FilePath -> IO String"
+  },
+  {
+    "id" : "fbb268fa-f03d-4d11-b5e5-6a28375e3c50",
+    "prId" : 5342,
+    "comments" : [
+      {
+        "id" : "3c91bb07-8d60-4408-a98f-2b1cac5eb8e5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we need `/bin`?",
+        "createdAt" : "2020-04-01T14:44:26Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "c19e0070-c49f-4df7-a0e7-fd707436d7f4",
+        "parentId" : "3c91bb07-8d60-4408-a98f-2b1cac5eb8e5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "It's gone. I change from using callProcess to callCommand instead.",
+        "createdAt" : "2020-04-02T08:35:36Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c4585811a1d5dd8c2de2c7598d8e15a88ac1b345",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,128 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.Helper.Test.Deployment (main) where\n+\n+import Data.List.Extra (isInfixOf,splitOn,intercalate)\n+import System.Directory.Extra (withCurrentDirectory)\n+import System.Environment.Blank (setEnv)\n+import System.FilePath (searchPathSeparator,(</>))\n+import System.IO.Extra (withTempDir,writeFileUTF8)\n+import Test.Tasty (TestTree,defaultMain,testGroup)\n+import Test.Tasty.HUnit (testCaseSteps)\n+import qualified Data.Aeson as Aeson\n+import qualified Data.Map as Map\n+import qualified Data.Text as T\n+import qualified Web.JWT as JWT\n+\n+import DA.Bazel.Runfiles (mainWorkspace,locateRunfiles)\n+import DA.Test.Calling\n+import DA.Test.Sandbox (mbSharedSecret,withSandbox,defaultSandboxConf)\n+import DA.Test.Util (withEnv)\n+import SdkVersion\n+\n+main :: IO ()\n+main = do\n+  -- We manipulate global state via the working directory\n+  -- so running tests in parallel will cause trouble.\n+  setEnv \"TASTY_NUM_THREADS\" \"1\" True\n+  helper <- locateRunfiles (mainWorkspace </> \"daml-assistant\" </> \"daml-helper\")\n+  damlc <- locateRunfiles (mainWorkspace </> \"compiler\" </> \"damlc\")\n+  let path = intercalate [searchPathSeparator] [\"/bin\", \"/usr/bin\", damlc, helper]"
+  },
+  {
+    "id" : "65d09b3d-0e14-49a5-8428-965f0e5d72ef",
+    "prId" : 5342,
+    "comments" : [
+      {
+        "id" : "774785e4-25b6-40be-82d8-f46440ac94d5",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "As I said on the other PR, this is just unnecessarily hacky. Let’s please just read the DAR like we do in the packaging tests instead of calling out to `damlc inspect-dar`.",
+        "createdAt" : "2020-04-01T14:45:26Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4cae71a2-086e-4f7b-a229-3db19be1e103",
+        "parentId" : "774785e4-25b6-40be-82d8-f46440ac94d5",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "I don't think the `inspect-dar` is that hacky! It was the simplest user level way I could think of to determine the `pkgId` from a DAR.\r\n\r\nHowever, I think what it highlights is that since we now have a user facing command which takes a `pkgId` argument, we also need a user facing command which returns the package-id of a DAR. This would be used here instead of the `inspect-dar` hack.\r\n\r\nIn any case, regardless of the hackiness of using `inspect-dar`, it pre-existed this PR, and is not the focus of this PR which is to move testing out of integration-tests.\r\n",
+        "createdAt" : "2020-04-02T08:35:52Z",
+        "updatedAt" : "2020-04-02T08:48:06Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9627592e-0b8b-45d2-bfd3-6864d2535fa4",
+        "parentId" : "774785e4-25b6-40be-82d8-f46440ac94d5",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "You don’t need a user-level way, using a library function is perfectly fine here. And while it’s true that  it predates this PR, I did already point this out in the PR that added it so I don’t think that matters here.\r\n\r\nI do agree that we need a machine readable output for `inspect-dar`, see https://github.com/digital-asset/daml/issues/3117 but even if we had that, I don’t want to use this here. Tying five different commands together only makes it harder to figure out what is actually going wrong if the tests fails. Tests should focus on testing one thing not test the `inspect-dar` command when they really want to test `fetch-dar`.",
+        "createdAt" : "2020-04-02T08:44:32Z",
+        "updatedAt" : "2020-04-02T09:04:53Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "c4585811a1d5dd8c2de2c7598d8e15a88ac1b345",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,128 @@\n+-- Copyright (c) 2020 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.\n+-- SPDX-License-Identifier: Apache-2.0\n+\n+module DA.Daml.Helper.Test.Deployment (main) where\n+\n+import Data.List.Extra (isInfixOf,splitOn,intercalate)\n+import System.Directory.Extra (withCurrentDirectory)\n+import System.Environment.Blank (setEnv)\n+import System.FilePath (searchPathSeparator,(</>))\n+import System.IO.Extra (withTempDir,writeFileUTF8)\n+import Test.Tasty (TestTree,defaultMain,testGroup)\n+import Test.Tasty.HUnit (testCaseSteps)\n+import qualified Data.Aeson as Aeson\n+import qualified Data.Map as Map\n+import qualified Data.Text as T\n+import qualified Web.JWT as JWT\n+\n+import DA.Bazel.Runfiles (mainWorkspace,locateRunfiles)\n+import DA.Test.Calling\n+import DA.Test.Sandbox (mbSharedSecret,withSandbox,defaultSandboxConf)\n+import DA.Test.Util (withEnv)\n+import SdkVersion\n+\n+main :: IO ()\n+main = do\n+  -- We manipulate global state via the working directory\n+  -- so running tests in parallel will cause trouble.\n+  setEnv \"TASTY_NUM_THREADS\" \"1\" True\n+  helper <- locateRunfiles (mainWorkspace </> \"daml-assistant\" </> \"daml-helper\")\n+  damlc <- locateRunfiles (mainWorkspace </> \"compiler\" </> \"damlc\")\n+  let path = intercalate [searchPathSeparator] [\"/bin\", \"/usr/bin\", damlc, helper]\n+  withEnv [ (\"PATH\", Just path)] $ defaultMain $ testGroup \"DAML-UX\"\n+    [ authenticatedUploadTest\n+    , fetchTest\n+    ]\n+\n+-- | Test `daml ledger upload-dar --access-token-file`\n+authenticatedUploadTest :: TestTree\n+authenticatedUploadTest = do\n+  let sharedSecret = \"TheSharedSecret\"\n+  withSandbox defaultSandboxConf { mbSharedSecret = Just sharedSecret } $ \\getSandboxPort ->\n+    testCaseSteps \"authenticatedUploadTest\" $ \\step -> do\n+    port <- getSandboxPort\n+    withTempDir $ \\deployDir -> do\n+      withCurrentDirectory deployDir $ do\n+        writeMinimalProject\n+        step \"build\"\n+        callCommandQuiet \"damlc build\"\n+        let dar = \".daml/dist/proj1-0.0.1.dar\"\n+        let tokenFile = deployDir </> \"secretToken.jwt\"\n+        step \"upload\"\n+        -- The trailing newline is not required but we want to test that it is supported.\n+        writeFileUTF8 tokenFile (\"Bearer \" <> makeSignedJwt sharedSecret <> \"\\n\")\n+        callCommandQuiet $ unwords\n+          [ \"daml-helper ledger upload-dar\"\n+          , \"--access-token-file \" <> tokenFile\n+          , \"--host localhost\" , \"--port\", show port\n+          , dar\n+          ]\n+\n+makeSignedJwt :: String -> String\n+makeSignedJwt sharedSecret = do\n+  let urc = JWT.ClaimsMap $ Map.fromList [ (\"admin\", Aeson.Bool True)]\n+  let cs = mempty { JWT.unregisteredClaims = urc }\n+  let key = JWT.hmacSecret $ T.pack sharedSecret\n+  let text = JWT.encodeSigned key mempty cs\n+  T.unpack text\n+\n+-- | Test `daml ledger fetch-dar`\n+fetchTest :: TestTree\n+fetchTest = do\n+  withSandbox defaultSandboxConf $ \\getSandboxPort ->\n+    testCaseSteps \"fetchTest\" $ \\step -> do\n+    port <- getSandboxPort\n+    withTempDir $ \\fetchDir -> do\n+      withCurrentDirectory fetchDir $ do\n+        writeMinimalProject\n+        let origDar = \".daml/dist/proj1-0.0.1.dar\"\n+        step \"build/upload\"\n+        callCommandQuiet $ unwords [\"damlc build\"]\n+        callCommandQuiet $ unwords\n+          [ \"daml-helper ledger upload-dar\"\n+          , \"--host\", \"localhost\" , \"--port\" , show port\n+          , origDar\n+          ]\n+        pid <- getMainPidByInspecingDar origDar \"proj1\"\n+        step \"fetch/validate\"\n+        let fetchedDar = \"fetched.dar\"\n+        callCommandQuiet $ unwords\n+          [ \"daml-helper ledger fetch-dar\"\n+          , \"--host\", \"localhost\" , \"--port\", show port\n+          , \"--main-package-id\", pid\n+          , \"-o\", fetchedDar\n+          ]\n+        callCommandQuiet $ unwords [\"damlc validate-dar\", fetchedDar]\n+\n+-- | Using `daml inspect-dar`, discover the main package-identifier of a dar.\n+getMainPidByInspecingDar :: FilePath -> String -> IO String"
+  }
+]

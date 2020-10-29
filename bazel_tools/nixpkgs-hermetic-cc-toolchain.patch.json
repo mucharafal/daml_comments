@@ -1,0 +1,234 @@
+[
+  {
+    "id" : "1308bedf-e294-470c-8c83-2eca1f4a67a3",
+    "prId" : 6761,
+    "comments" : [
+      {
+        "id" : "2c4a730a-0106-46df-bfcc-ba7d1d07dfac",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Would be great to get this merged upstream.",
+        "createdAt" : "2020-07-23T06:52:16Z",
+        "updatedAt" : "2020-07-23T07:02:06Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "c5c6e59f-9a5a-4cf4-8410-3d5c3b5cfc1b",
+        "parentId" : "2c4a730a-0106-46df-bfcc-ba7d1d07dfac",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yes, upstream PRs are here https://github.com/tweag/rules_nixpkgs/pull/132, https://github.com/tweag/rules_nixpkgs/pull/128. I've factored out the `nixopts` location expansion into its own PR to ease review.",
+        "createdAt" : "2020-07-23T07:45:56Z",
+        "updatedAt" : "2020-07-23T07:45:57Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e5dfc1ccf7712a117fc20f148674854c71250990",
+    "line" : 1,
+    "diffHunk" : "@@ -200,71 +200,23 @@ index 721f64d..3ee682b 100644\n  Example:"
+  },
+  {
+    "id" : "d06ebd8e-f84a-4906-a534-662064b9d9d4",
+    "prId" : 5976,
+    "comments" : [
+      {
+        "id" : "2b89a6db-9d77-4dae-bd2a-88144c12a4ad",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "The description says “overriding this autodetection makes builds more hermetic” while here you then (correctly) specify that it is “inhermetic”. While that’s not really contradictory it does sound a bit confusing (no need to address this here but maybe worth keeping in mind for the `rules_nixpkgs` PR).",
+        "createdAt" : "2020-05-18T06:50:29Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "6b04f4b2-46d9-4775-8adb-698e4e967cd9",
+        "parentId" : "2b89a6db-9d77-4dae-bd2a-88144c12a4ad",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Yeah, the docstrings could use a second pass. It is more hermetic than the builtin autodetection in that at least it doesn't use whatever `cc` is in `PATH` but the one provided by nixpkgs. However, it is still inhermetic in that it is influenced by some environment variables.",
+        "createdAt" : "2020-05-18T08:37:53Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "bcdb916c0d94aead04759fa80443d95e751d3c95",
+    "line" : null,
+    "diffHunk" : "@@ -0,0 +1,1221 @@\n+diff --git a/.bazelrc b/.bazelrc\n+index d226e65..687c136 100644\n+--- a/.bazelrc\n++++ b/.bazelrc\n+@@ -1 +1,7 @@\n+ build --host_platform=@io_tweag_rules_nixpkgs//nixpkgs/platforms:host\n++build --crosstool_top=@nixpkgs_config_cc//:toolchain\n++# Using toolchain resolution can lead to spurious dependencies on\n++# `@local_config_cc//:builtin_include_directory_paths`. This needs to be\n++# resolved before `--incompatible_enable_cc_toolchain_resolution` can be\n++# recommended for `nixpkgs_cc_configure_hermetic`.\n++# build --incompatible_enable_cc_toolchain_resolution\n+diff --git a/BUILD.bazel b/BUILD.bazel\n+index e69de29..efcf274 100644\n+--- a/BUILD.bazel\n++++ b/BUILD.bazel\n+@@ -0,0 +1,4 @@\n++exports_files([\n++    \"nixpkgs.json\",\n++    \"nixpkgs.nix\",\n++])\n+diff --git a/CHANGELOG.md b/CHANGELOG.md\n+index 8596633..234c41b 100644\n+--- a/CHANGELOG.md\n++++ b/CHANGELOG.md\n+@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.\n+ \n+ The format is based on [Keep a Changelog](https://keepachangelog.com/).\n+ \n++## [Unreleased]\n++\n++[Unreleased]: https://github.com/tweag/rules_nixpkgs/compare/v0.7.0...HEAD\n++\n++### Added\n++\n++- Add `expand_location` attribute to `nixpkgs_package`. When enabled instances\n++  of `$(location LABEL)` in the `nixopts` attribute will be expanded to the\n++  file path of the file referenced by `LABEL`.\n++  See [#128][#128].\n++- Define `nixpkgs_cc_configure_hermetic` in `//nixpkgs:repositories.bzl`.\n++  See [#128][#128].\n++\n++### Deprecated\n++\n++- `nixpkgs_cc_configure` has been deprecated in favor of\n++  `nixpkgs_cc_configure_hermetic` and will be replaced by it in future.\n++  See [#128][#128].\n++\n++[#128]: https://github.com/tweag/rules_nixpkgs/pull/128\n++\n+ ## [0.7.0] - 2020-04-20\n+ \n+ [0.7.0]: https://github.com/tweag/rules_nixpkgs/compare/v0.6.0...v0.7.0\n+diff --git a/README.md b/README.md\n+index 721f64d..07dbd8c 100644\n+--- a/README.md\n++++ b/README.md\n+@@ -176,7 +176,7 @@ Make the content of a Nixpkgs package available in the Bazel workspace.\n+ nixpkgs_package(\n+     name, attribute_path, nix_file, nix_file_deps, nix_file_content,\n+     repository, repositories, build_file, build_file_content, nixopts,\n+-    fail_not_supported,\n++    expand_location, fail_not_supported,\n+ )\n+ ```\n+ \n+@@ -306,6 +306,18 @@ filegroup(\n+         <p>Extra flags to pass when calling Nix.</p>\n+       </td>\n+     </tr>\n++    <tr>\n++      <td><code>nixopts</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>\n++            If set to <code>True</code> any instance of\n++            <code>$(location LABEL)</code> in <code>nixopts</code>\n++            will be replaced by the path to the file referenced by\n++            <code>LABEL</code> relative to the workspace root.\n++        </p>\n++      </td>\n++    </tr>\n+     <tr>\n+       <td><code>fail_not_supported</code></td>\n+       <td>\n+@@ -321,6 +333,96 @@ filegroup(\n+   </tbody>\n+ </table>\n+ \n++### nixpkgs_cc_configure_hermetic\n++\n++Use a CC toolchain from Nixpkgs. No-op if not a nix-based platform.\n++\n++By default, Bazel auto-configures a CC toolchain from commands (e.g.\n++`gcc`) available in the environment. To make builds more hermetic, use\n++this rule to specify explicitly which commands the toolchain should use.\n++\n++Specifically, it builds a Nix derivation that provides the CC toolchain tools\n++in the `bin/` path and constructs a CC toolchain that uses those tools.\n++\n++Note:\n++\n++You need to configure `--crosstool_top=@<name>//:toolchain` to activate this\n++toolchain.\n++\n++Example:\n++\n++```bzl\n++nixpkgs_cc_configure_hermetic(repository = \"@nixpkgs//:default.nix\")\n++```\n++\n++<table class=\"table table-condensed table-bordered table-params\">\n++  <colgroup>\n++    <col class=\"col-param\" />\n++    <col class=\"param-description\" />\n++  </colgroup>\n++  <thead>\n++    <tr>\n++      <th colspan=\"2\">Attributes</th>\n++    </tr>\n++  </thead>\n++  <tbody>\n++    <tr>\n++      <td><code>attribute_path</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the Nix expression under this attribute path. Requires `nix_file` or `nix_file_content`.</p>\n++      </td>\n++      <td><code>nix_file</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the Nix expression defined in this file. Specify only one of `nix_file` or `nix_file_content`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>nix_file_content</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the given Nix expression. Specify only one of `nix_file` or `nix_file_content`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>nix_file_deps</code></td>\n++      <td>\n++        <p><code>List of labels; optional</code></p>\n++        <p>Additional files that the Nix expression depends on.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>repository</code></td>\n++      <td>\n++        <p><code>Label; optional</code></p>\n++        <p>Provides `<nixpkgs>`. Specify one of `repositories` or `repository`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>repositories</code></td>\n++      <td>\n++        <p><code>String-keyed label dict; optional</code></p>\n++        <p>Provides `<nixpkgs>` and other repositories. Specify one of `repositories` or `repository`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>quiet</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>Whether to hide `nix-build` output.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>fail_not_supported</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>Whether to fail if `nix-build` is not available.</p>\n++      </td>\n++    </tr>\n++  </tbody>\n++</table>\n++\n+ ### nixpkgs_cc_configure\n+ \n+ Tells Bazel to use compilers and linkers from Nixpkgs for the CC\n+@@ -328,6 +430,15 @@ toolchain. By default, Bazel autodetects a toolchain on the current\n+ `PATH`. Overriding this autodetection makes builds more hermetic and\n+ is considered a best practice.\n+ \n++Deprecated:\n++\n++Use `nixpkgs_cc_configure_hermetic` instead.\n++\n++This uses Bazel's autoconfigure toolchain under the hood, which is\n++inhermetic. In particular, system include directories specified in the"
+  },
+  {
+    "id" : "4b5a2263-4f9f-4135-b457-20bdc51db4bc",
+    "prId" : 5976,
+    "comments" : [
+      {
+        "id" : "67756db3-046d-4447-9d34-2b43c123d230",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "huh, does buildifier not catch this?",
+        "createdAt" : "2020-05-18T06:51:23Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "ff555d04-ea02-47f1-8e19-4382ff44163f",
+        "parentId" : "67756db3-046d-4447-9d34-2b43c123d230",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "`rules_nixpkgs` CI doesn't include a buildifier step right now.",
+        "createdAt" : "2020-05-18T08:31:28Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bcdb916c0d94aead04759fa80443d95e751d3c95",
+    "line" : 276,
+    "diffHunk" : "@@ -0,0 +1,1221 @@\n+diff --git a/.bazelrc b/.bazelrc\n+index d226e65..687c136 100644\n+--- a/.bazelrc\n++++ b/.bazelrc\n+@@ -1 +1,7 @@\n+ build --host_platform=@io_tweag_rules_nixpkgs//nixpkgs/platforms:host\n++build --crosstool_top=@nixpkgs_config_cc//:toolchain\n++# Using toolchain resolution can lead to spurious dependencies on\n++# `@local_config_cc//:builtin_include_directory_paths`. This needs to be\n++# resolved before `--incompatible_enable_cc_toolchain_resolution` can be\n++# recommended for `nixpkgs_cc_configure_hermetic`.\n++# build --incompatible_enable_cc_toolchain_resolution\n+diff --git a/BUILD.bazel b/BUILD.bazel\n+index e69de29..efcf274 100644\n+--- a/BUILD.bazel\n++++ b/BUILD.bazel\n+@@ -0,0 +1,4 @@\n++exports_files([\n++    \"nixpkgs.json\",\n++    \"nixpkgs.nix\",\n++])\n+diff --git a/CHANGELOG.md b/CHANGELOG.md\n+index 8596633..234c41b 100644\n+--- a/CHANGELOG.md\n++++ b/CHANGELOG.md\n+@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.\n+ \n+ The format is based on [Keep a Changelog](https://keepachangelog.com/).\n+ \n++## [Unreleased]\n++\n++[Unreleased]: https://github.com/tweag/rules_nixpkgs/compare/v0.7.0...HEAD\n++\n++### Added\n++\n++- Add `expand_location` attribute to `nixpkgs_package`. When enabled instances\n++  of `$(location LABEL)` in the `nixopts` attribute will be expanded to the\n++  file path of the file referenced by `LABEL`.\n++  See [#128][#128].\n++- Define `nixpkgs_cc_configure_hermetic` in `//nixpkgs:repositories.bzl`.\n++  See [#128][#128].\n++\n++### Deprecated\n++\n++- `nixpkgs_cc_configure` has been deprecated in favor of\n++  `nixpkgs_cc_configure_hermetic` and will be replaced by it in future.\n++  See [#128][#128].\n++\n++[#128]: https://github.com/tweag/rules_nixpkgs/pull/128\n++\n+ ## [0.7.0] - 2020-04-20\n+ \n+ [0.7.0]: https://github.com/tweag/rules_nixpkgs/compare/v0.6.0...v0.7.0\n+diff --git a/README.md b/README.md\n+index 721f64d..07dbd8c 100644\n+--- a/README.md\n++++ b/README.md\n+@@ -176,7 +176,7 @@ Make the content of a Nixpkgs package available in the Bazel workspace.\n+ nixpkgs_package(\n+     name, attribute_path, nix_file, nix_file_deps, nix_file_content,\n+     repository, repositories, build_file, build_file_content, nixopts,\n+-    fail_not_supported,\n++    expand_location, fail_not_supported,\n+ )\n+ ```\n+ \n+@@ -306,6 +306,18 @@ filegroup(\n+         <p>Extra flags to pass when calling Nix.</p>\n+       </td>\n+     </tr>\n++    <tr>\n++      <td><code>nixopts</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>\n++            If set to <code>True</code> any instance of\n++            <code>$(location LABEL)</code> in <code>nixopts</code>\n++            will be replaced by the path to the file referenced by\n++            <code>LABEL</code> relative to the workspace root.\n++        </p>\n++      </td>\n++    </tr>\n+     <tr>\n+       <td><code>fail_not_supported</code></td>\n+       <td>\n+@@ -321,6 +333,96 @@ filegroup(\n+   </tbody>\n+ </table>\n+ \n++### nixpkgs_cc_configure_hermetic\n++\n++Use a CC toolchain from Nixpkgs. No-op if not a nix-based platform.\n++\n++By default, Bazel auto-configures a CC toolchain from commands (e.g.\n++`gcc`) available in the environment. To make builds more hermetic, use\n++this rule to specify explicitly which commands the toolchain should use.\n++\n++Specifically, it builds a Nix derivation that provides the CC toolchain tools\n++in the `bin/` path and constructs a CC toolchain that uses those tools.\n++\n++Note:\n++\n++You need to configure `--crosstool_top=@<name>//:toolchain` to activate this\n++toolchain.\n++\n++Example:\n++\n++```bzl\n++nixpkgs_cc_configure_hermetic(repository = \"@nixpkgs//:default.nix\")\n++```\n++\n++<table class=\"table table-condensed table-bordered table-params\">\n++  <colgroup>\n++    <col class=\"col-param\" />\n++    <col class=\"param-description\" />\n++  </colgroup>\n++  <thead>\n++    <tr>\n++      <th colspan=\"2\">Attributes</th>\n++    </tr>\n++  </thead>\n++  <tbody>\n++    <tr>\n++      <td><code>attribute_path</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the Nix expression under this attribute path. Requires `nix_file` or `nix_file_content`.</p>\n++      </td>\n++      <td><code>nix_file</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the Nix expression defined in this file. Specify only one of `nix_file` or `nix_file_content`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>nix_file_content</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the given Nix expression. Specify only one of `nix_file` or `nix_file_content`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>nix_file_deps</code></td>\n++      <td>\n++        <p><code>List of labels; optional</code></p>\n++        <p>Additional files that the Nix expression depends on.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>repository</code></td>\n++      <td>\n++        <p><code>Label; optional</code></p>\n++        <p>Provides `<nixpkgs>`. Specify one of `repositories` or `repository`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>repositories</code></td>\n++      <td>\n++        <p><code>String-keyed label dict; optional</code></p>\n++        <p>Provides `<nixpkgs>` and other repositories. Specify one of `repositories` or `repository`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>quiet</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>Whether to hide `nix-build` output.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>fail_not_supported</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>Whether to fail if `nix-build` is not available.</p>\n++      </td>\n++    </tr>\n++  </tbody>\n++</table>\n++\n+ ### nixpkgs_cc_configure\n+ \n+ Tells Bazel to use compilers and linkers from Nixpkgs for the CC\n+@@ -328,6 +430,15 @@ toolchain. By default, Bazel autodetects a toolchain on the current\n+ `PATH`. Overriding this autodetection makes builds more hermetic and\n+ is considered a best practice.\n+ \n++Deprecated:\n++\n++Use `nixpkgs_cc_configure_hermetic` instead.\n++\n++This uses Bazel's autoconfigure toolchain under the hood, which is\n++inhermetic. In particular, system include directories specified in the\n++environment can leak in and affect the cache keys of target depending on\n++the cc toolchain leading to cache misses.\n++\n+ Example:\n+ \n+ ```bzl\n+diff --git a/WORKSPACE b/WORKSPACE\n+index f37ab6c..f8d40ad 100644\n+--- a/WORKSPACE\n++++ b/WORKSPACE\n+@@ -6,7 +6,7 @@ rules_nixpkgs_dependencies()\n+ \n+ load(\n+     \"//nixpkgs:nixpkgs.bzl\",\n+-    \"nixpkgs_cc_configure\",\n++    \"nixpkgs_cc_configure_hermetic\",\n+     \"nixpkgs_git_repository\",\n+     \"nixpkgs_local_repository\",\n+     \"nixpkgs_package\",\n+@@ -134,7 +134,7 @@ nixpkgs_package(\n+     repository = \"@nixpkgs\",\n+ )\n+ \n+-nixpkgs_cc_configure(repository = \"@remote_nixpkgs\")\n++nixpkgs_cc_configure_hermetic(repository = \"@remote_nixpkgs\")\n+ \n+ nixpkgs_python_configure(\n+     python2_attribute_path = \"python2\",\n+@@ -147,6 +147,27 @@ nixpkgs_package(\n+     repository = \"@remote_nixpkgs\",\n+ )\n+ \n++nixpkgs_package(\n++    name = \"nixpkgs_location_expansion_test\",\n++    build_file_content = \"exports_files(glob(['out/**']))\",\n++    expand_location = True,\n++    nix_file = \"//tests:location_expansion.nix\",\n++    nix_file_deps = [\n++        \"//:nixpkgs.json\",\n++        \"//:nixpkgs.nix\",\n++        \"@io_tweag_rules_nixpkgs//tests:relative_imports/nixpkgs.nix\",\n++    ],\n++    nixopts = [\n++        \"--arg\",\n++        \"attrs\",\n++        \"{ nixpkgs_json = $(location //:nixpkgs.json); nixpkgs_nix = $(location //:nixpkgs.nix); }\",\n++        \"--arg\",\n++        \"relative_imports\",\n++        \"$(location @io_tweag_rules_nixpkgs//tests:relative_imports/nixpkgs.nix)\",\n++    ],\n++    repository = \"@remote_nixpkgs\",\n++)\n++\n+ load(\"@bazel_tools//tools/build_defs/repo:http.bzl\", \"http_archive\")\n+ \n+ http_archive(\n+@@ -179,12 +200,11 @@ http_archive(\n+ \n+ load(\n+     \"//nixpkgs:toolchains/go.bzl\",\n+-    \"nixpkgs_go_configure\"\n++    \"nixpkgs_go_configure\",\n+ )\n+ \n+ nixpkgs_go_configure(repository = \"@nixpkgs\")\n+ \n+-load(\"@io_bazel_rules_go//go:deps.bzl\", \"go_rules_dependencies\", \"go_register_toolchains\")\n++load(\"@io_bazel_rules_go//go:deps.bzl\", \"go_register_toolchains\", \"go_rules_dependencies\")\n+ \n+ go_rules_dependencies()\n+-\n+diff --git a/nixpkgs/constraints/BUILD.bazel b/nixpkgs/constraints/BUILD.bazel\n+index 6662530..94678bd 100644\n+--- a/nixpkgs/constraints/BUILD.bazel\n++++ b/nixpkgs/constraints/BUILD.bazel\n+@@ -3,7 +3,7 @@ package(default_visibility = [\"//visibility:public\"])\n+ constraint_setting(name = \"nix\")\n+ \n+ constraint_value(\n+-    name =  \"support_nix\","
+  },
+  {
+    "id" : "a1da7ed4-7f7f-4279-98b3-08b7bce41ded",
+    "prId" : 5976,
+    "comments" : [
+      {
+        "id" : "ba203d7a-e515-4172-b956-b87c4e94346e",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This looks like it is inconsistent with how Bazel handles this kind of stuff where you have to escape the `$` if you want it to not have special meaning. Probably not a big deal.",
+        "createdAt" : "2020-05-18T06:53:29Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "cc66b73d-2631-439b-849f-bda53be4bd21",
+        "parentId" : "ba203d7a-e515-4172-b956-b87c4e94346e",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "I don't follow. We do want `$(location )` to have special meaning, just that here we define that special meaning with `_expand_location`. Note `$(location )` expension is not automatic, a rule has to invoke [`ctx.expand_location`](https://docs.bazel.build/versions/master/skylark/lib/ctx.html#expand_location) explicitly. However, here we are within a repository rule, so `ctx.expand_location` is not available to us.",
+        "createdAt" : "2020-05-18T08:33:36Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "083ec220-792e-4110-95f9-69b3fc845392",
+        "parentId" : "ba203d7a-e515-4172-b956-b87c4e94346e",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "What I mean is that only `$(location …)` has special meaning. In other contexts in Bazel where `$(location …)` has special meaning, everything starting with `$` has special meaning and you have to escape something like `$abc` whereas here you do not need the escaping.",
+        "createdAt" : "2020-05-18T08:53:27Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "2b12a29f-4d60-4266-bd49-f03966fe772a",
+        "parentId" : "ba203d7a-e515-4172-b956-b87c4e94346e",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Oh, I see, yes that would be more consistent. location expansion is not enabled by default, so it's not a big deal here. But, yes, this should be improved upstream.",
+        "createdAt" : "2020-05-18T13:46:39Z",
+        "updatedAt" : "2020-05-18T15:01:30Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bcdb916c0d94aead04759fa80443d95e751d3c95",
+    "line" : 318,
+    "diffHunk" : "@@ -0,0 +1,1221 @@\n+diff --git a/.bazelrc b/.bazelrc\n+index d226e65..687c136 100644\n+--- a/.bazelrc\n++++ b/.bazelrc\n+@@ -1 +1,7 @@\n+ build --host_platform=@io_tweag_rules_nixpkgs//nixpkgs/platforms:host\n++build --crosstool_top=@nixpkgs_config_cc//:toolchain\n++# Using toolchain resolution can lead to spurious dependencies on\n++# `@local_config_cc//:builtin_include_directory_paths`. This needs to be\n++# resolved before `--incompatible_enable_cc_toolchain_resolution` can be\n++# recommended for `nixpkgs_cc_configure_hermetic`.\n++# build --incompatible_enable_cc_toolchain_resolution\n+diff --git a/BUILD.bazel b/BUILD.bazel\n+index e69de29..efcf274 100644\n+--- a/BUILD.bazel\n++++ b/BUILD.bazel\n+@@ -0,0 +1,4 @@\n++exports_files([\n++    \"nixpkgs.json\",\n++    \"nixpkgs.nix\",\n++])\n+diff --git a/CHANGELOG.md b/CHANGELOG.md\n+index 8596633..234c41b 100644\n+--- a/CHANGELOG.md\n++++ b/CHANGELOG.md\n+@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.\n+ \n+ The format is based on [Keep a Changelog](https://keepachangelog.com/).\n+ \n++## [Unreleased]\n++\n++[Unreleased]: https://github.com/tweag/rules_nixpkgs/compare/v0.7.0...HEAD\n++\n++### Added\n++\n++- Add `expand_location` attribute to `nixpkgs_package`. When enabled instances\n++  of `$(location LABEL)` in the `nixopts` attribute will be expanded to the\n++  file path of the file referenced by `LABEL`.\n++  See [#128][#128].\n++- Define `nixpkgs_cc_configure_hermetic` in `//nixpkgs:repositories.bzl`.\n++  See [#128][#128].\n++\n++### Deprecated\n++\n++- `nixpkgs_cc_configure` has been deprecated in favor of\n++  `nixpkgs_cc_configure_hermetic` and will be replaced by it in future.\n++  See [#128][#128].\n++\n++[#128]: https://github.com/tweag/rules_nixpkgs/pull/128\n++\n+ ## [0.7.0] - 2020-04-20\n+ \n+ [0.7.0]: https://github.com/tweag/rules_nixpkgs/compare/v0.6.0...v0.7.0\n+diff --git a/README.md b/README.md\n+index 721f64d..07dbd8c 100644\n+--- a/README.md\n++++ b/README.md\n+@@ -176,7 +176,7 @@ Make the content of a Nixpkgs package available in the Bazel workspace.\n+ nixpkgs_package(\n+     name, attribute_path, nix_file, nix_file_deps, nix_file_content,\n+     repository, repositories, build_file, build_file_content, nixopts,\n+-    fail_not_supported,\n++    expand_location, fail_not_supported,\n+ )\n+ ```\n+ \n+@@ -306,6 +306,18 @@ filegroup(\n+         <p>Extra flags to pass when calling Nix.</p>\n+       </td>\n+     </tr>\n++    <tr>\n++      <td><code>nixopts</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>\n++            If set to <code>True</code> any instance of\n++            <code>$(location LABEL)</code> in <code>nixopts</code>\n++            will be replaced by the path to the file referenced by\n++            <code>LABEL</code> relative to the workspace root.\n++        </p>\n++      </td>\n++    </tr>\n+     <tr>\n+       <td><code>fail_not_supported</code></td>\n+       <td>\n+@@ -321,6 +333,96 @@ filegroup(\n+   </tbody>\n+ </table>\n+ \n++### nixpkgs_cc_configure_hermetic\n++\n++Use a CC toolchain from Nixpkgs. No-op if not a nix-based platform.\n++\n++By default, Bazel auto-configures a CC toolchain from commands (e.g.\n++`gcc`) available in the environment. To make builds more hermetic, use\n++this rule to specify explicitly which commands the toolchain should use.\n++\n++Specifically, it builds a Nix derivation that provides the CC toolchain tools\n++in the `bin/` path and constructs a CC toolchain that uses those tools.\n++\n++Note:\n++\n++You need to configure `--crosstool_top=@<name>//:toolchain` to activate this\n++toolchain.\n++\n++Example:\n++\n++```bzl\n++nixpkgs_cc_configure_hermetic(repository = \"@nixpkgs//:default.nix\")\n++```\n++\n++<table class=\"table table-condensed table-bordered table-params\">\n++  <colgroup>\n++    <col class=\"col-param\" />\n++    <col class=\"param-description\" />\n++  </colgroup>\n++  <thead>\n++    <tr>\n++      <th colspan=\"2\">Attributes</th>\n++    </tr>\n++  </thead>\n++  <tbody>\n++    <tr>\n++      <td><code>attribute_path</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the Nix expression under this attribute path. Requires `nix_file` or `nix_file_content`.</p>\n++      </td>\n++      <td><code>nix_file</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the Nix expression defined in this file. Specify only one of `nix_file` or `nix_file_content`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>nix_file_content</code></td>\n++      <td>\n++        <p><code>String; optional</code></p>\n++        <p>Obtain the toolchain from the given Nix expression. Specify only one of `nix_file` or `nix_file_content`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>nix_file_deps</code></td>\n++      <td>\n++        <p><code>List of labels; optional</code></p>\n++        <p>Additional files that the Nix expression depends on.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>repository</code></td>\n++      <td>\n++        <p><code>Label; optional</code></p>\n++        <p>Provides `<nixpkgs>`. Specify one of `repositories` or `repository`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>repositories</code></td>\n++      <td>\n++        <p><code>String-keyed label dict; optional</code></p>\n++        <p>Provides `<nixpkgs>` and other repositories. Specify one of `repositories` or `repository`.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>quiet</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>Whether to hide `nix-build` output.</p>\n++      </td>\n++    </tr>\n++    <tr>\n++      <td><code>fail_not_supported</code></td>\n++      <td>\n++        <p><code>Bool; optional</code></p>\n++        <p>Whether to fail if `nix-build` is not available.</p>\n++      </td>\n++    </tr>\n++  </tbody>\n++</table>\n++\n+ ### nixpkgs_cc_configure\n+ \n+ Tells Bazel to use compilers and linkers from Nixpkgs for the CC\n+@@ -328,6 +430,15 @@ toolchain. By default, Bazel autodetects a toolchain on the current\n+ `PATH`. Overriding this autodetection makes builds more hermetic and\n+ is considered a best practice.\n+ \n++Deprecated:\n++\n++Use `nixpkgs_cc_configure_hermetic` instead.\n++\n++This uses Bazel's autoconfigure toolchain under the hood, which is\n++inhermetic. In particular, system include directories specified in the\n++environment can leak in and affect the cache keys of target depending on\n++the cc toolchain leading to cache misses.\n++\n+ Example:\n+ \n+ ```bzl\n+diff --git a/WORKSPACE b/WORKSPACE\n+index f37ab6c..f8d40ad 100644\n+--- a/WORKSPACE\n++++ b/WORKSPACE\n+@@ -6,7 +6,7 @@ rules_nixpkgs_dependencies()\n+ \n+ load(\n+     \"//nixpkgs:nixpkgs.bzl\",\n+-    \"nixpkgs_cc_configure\",\n++    \"nixpkgs_cc_configure_hermetic\",\n+     \"nixpkgs_git_repository\",\n+     \"nixpkgs_local_repository\",\n+     \"nixpkgs_package\",\n+@@ -134,7 +134,7 @@ nixpkgs_package(\n+     repository = \"@nixpkgs\",\n+ )\n+ \n+-nixpkgs_cc_configure(repository = \"@remote_nixpkgs\")\n++nixpkgs_cc_configure_hermetic(repository = \"@remote_nixpkgs\")\n+ \n+ nixpkgs_python_configure(\n+     python2_attribute_path = \"python2\",\n+@@ -147,6 +147,27 @@ nixpkgs_package(\n+     repository = \"@remote_nixpkgs\",\n+ )\n+ \n++nixpkgs_package(\n++    name = \"nixpkgs_location_expansion_test\",\n++    build_file_content = \"exports_files(glob(['out/**']))\",\n++    expand_location = True,\n++    nix_file = \"//tests:location_expansion.nix\",\n++    nix_file_deps = [\n++        \"//:nixpkgs.json\",\n++        \"//:nixpkgs.nix\",\n++        \"@io_tweag_rules_nixpkgs//tests:relative_imports/nixpkgs.nix\",\n++    ],\n++    nixopts = [\n++        \"--arg\",\n++        \"attrs\",\n++        \"{ nixpkgs_json = $(location //:nixpkgs.json); nixpkgs_nix = $(location //:nixpkgs.nix); }\",\n++        \"--arg\",\n++        \"relative_imports\",\n++        \"$(location @io_tweag_rules_nixpkgs//tests:relative_imports/nixpkgs.nix)\",\n++    ],\n++    repository = \"@remote_nixpkgs\",\n++)\n++\n+ load(\"@bazel_tools//tools/build_defs/repo:http.bzl\", \"http_archive\")\n+ \n+ http_archive(\n+@@ -179,12 +200,11 @@ http_archive(\n+ \n+ load(\n+     \"//nixpkgs:toolchains/go.bzl\",\n+-    \"nixpkgs_go_configure\"\n++    \"nixpkgs_go_configure\",\n+ )\n+ \n+ nixpkgs_go_configure(repository = \"@nixpkgs\")\n+ \n+-load(\"@io_bazel_rules_go//go:deps.bzl\", \"go_rules_dependencies\", \"go_register_toolchains\")\n++load(\"@io_bazel_rules_go//go:deps.bzl\", \"go_register_toolchains\", \"go_rules_dependencies\")\n+ \n+ go_rules_dependencies()\n+-\n+diff --git a/nixpkgs/constraints/BUILD.bazel b/nixpkgs/constraints/BUILD.bazel\n+index 6662530..94678bd 100644\n+--- a/nixpkgs/constraints/BUILD.bazel\n++++ b/nixpkgs/constraints/BUILD.bazel\n+@@ -3,7 +3,7 @@ package(default_visibility = [\"//visibility:public\"])\n+ constraint_setting(name = \"nix\")\n+ \n+ constraint_value(\n+-    name =  \"support_nix\",\n++    name = \"support_nix\",\n+     constraint_setting = \":nix\",\n+ )\n+ \n+diff --git a/nixpkgs/nixpkgs.bzl b/nixpkgs/nixpkgs.bzl\n+index fb87da4..6bf2d90 100644\n+--- a/nixpkgs/nixpkgs.bzl\n++++ b/nixpkgs/nixpkgs.bzl\n+@@ -1,7 +1,15 @@\n+ \"\"\"Rules for importing Nixpkgs packages.\"\"\"\n+ \n++load(\"@bazel_skylib//lib:paths.bzl\", \"paths\")\n++load(\"@bazel_skylib//lib:sets.bzl\", \"sets\")\n+ load(\"@bazel_tools//tools/cpp:cc_configure.bzl\", \"cc_autoconf_impl\")\n+-load(\"@bazel_tools//tools/cpp:lib_cc_configure.bzl\", \"get_cpu_value\")\n++load(\n++    \"@bazel_tools//tools/cpp:lib_cc_configure.bzl\",\n++    \"get_cpu_value\",\n++    \"get_starlark_list\",\n++    \"write_builtin_include_directory_paths\",\n++)\n++load(\"@bazel_tools//tools/build_defs/repo:utils.bzl\", \"maybe\")\n+ \n+ def _nixpkgs_git_repository_impl(repository_ctx):\n+     repository_ctx.file(\"BUILD\")\n+@@ -70,6 +78,54 @@ nixpkgs_local_repository = repository_rule(\n+ def _is_supported_platform(repository_ctx):\n+     return repository_ctx.which(\"nix-build\") != None\n+ \n++def _expand_location(repository_ctx, string, labels, attr = None):\n++    \"\"\"Expand `$(location label)` to a path.\n++\n++    Attrs:\n++      repository_ctx: The repository rule context.\n++      string: string, Replace instances of `$(location )` in this string.\n++      labels: dict from label to path: Known label to path mappings.\n++      attr: string, The rule attribute to use for error reporting.\n++\n++    Returns:\n++      The string with all instances of `$(location )` replaced by paths.\n++    \"\"\"\n++    num = string.count(\"$(location \")"
+  }
+]

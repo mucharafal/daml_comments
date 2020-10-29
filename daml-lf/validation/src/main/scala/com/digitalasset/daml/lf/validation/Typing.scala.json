@@ -1,0 +1,635 @@
+[
+  {
+    "id" : "d71f4fdb-f2d1-4880-adf5-c7a32f7ca4e2",
+    "prId" : 7548,
+    "comments" : [
+      {
+        "id" : "777add08-52bf-4d69-8920-31270f3df84b",
+        "parentId" : null,
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "```suggestion\r\n          observers.foreach(checkExpr(_, TParties))\r\n```\r\nDon't need the comment anymore.",
+        "createdAt" : "2020-10-15T08:07:41Z",
+        "updatedAt" : "2020-10-21T08:55:23Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "1968095863437d26708412e9478b8d076d85897c",
+    "line" : null,
+    "diffHunk" : "@@ -358,7 +358,9 @@ private[validation] object Typing {\n               throw EIllegalShadowingExprVar(ctx, param)\n             checkExpr(controllers, TParties)\n           }\n-          checkExpr(observers, TParties) // NICK, should this be conditional on supportsContractObservers?\n+          observers.foreach {\n+            checkExpr(_, TParties) // NICK, should this be conditional on supportsContractObservers?\n+          }"
+  },
+  {
+    "id" : "3dc46cf7-cc28-4202-9fbc-9ebca9866fa7",
+    "prId" : 5344,
+    "comments" : [
+      {
+        "id" : "80e4b91e-15aa-4d73-bb76-e5b0b63c9fa8",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Was this just unused?",
+        "createdAt" : "2020-04-01T14:09:09Z",
+        "updatedAt" : "2020-04-02T12:01:28Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "a70d6d57-9b4c-46bb-b35c-4f42b7701d69",
+        "parentId" : "80e4b91e-15aa-4d73-bb76-e5b0b63c9fa8",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I factorize the comment part of `typeOfCommit` and `typeOfMustFailAt`",
+        "createdAt" : "2020-04-01T14:54:08Z",
+        "updatedAt" : "2020-04-02T12:01:28Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "4d06f1e2-dc27-4486-9a38-23759299d50f",
+        "parentId" : "80e4b91e-15aa-4d73-bb76-e5b0b63c9fa8",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I revert this change as it is not related the the concern of the PR.  ",
+        "createdAt" : "2020-04-01T15:51:45Z",
+        "updatedAt" : "2020-04-02T12:01:28Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "f3e99fe570d6d6948c946adcee18b6f542f3c7ed",
+    "line" : null,
+    "diffHunk" : "@@ -765,18 +765,10 @@ private[validation] object Typing {\n         TUpdate(TOptional(TContractId(TTyCon(retrieveByKey.templateId))))\n     }\n \n-    private def typeOfCommit(typ: Type, party: Expr, update: Expr): Type = {\n+    private def checkCommit(typ: Type, party: Expr, update: Expr): Type = {\n       checkType(typ, KStar)\n       checkExpr(party, TParty)\n       checkExpr(update, TUpdate(typ))\n-      TScenario(typ)\n-    }\n-\n-    private def typeOfMustFailAt(typ: Type, party: Expr, update: Expr): Type = {"
+  },
+  {
+    "id" : "70c9f80f-4b49-4c78-bc0b-ddae73393b86",
+    "prId" : 4101,
+    "comments" : [
+      {
+        "id" : "f8d49b2d-7d26-4cf1-a3f4-c99b81759777",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "In the Haskell typechecker, you recurse on the result of the expansion to expand synonyms that might be in there. Is this not necessary here? If so why?",
+        "createdAt" : "2020-01-20T08:09:11Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "0c1f2141-011f-4d1d-a65a-3efc76be295f",
+        "parentId" : "f8d49b2d-7d26-4cf1-a3f4-c99b81759777",
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "It is necessary here also. Thanks, nice catch. Fixed now.",
+        "createdAt" : "2020-01-20T19:48:04Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "e9b7ff4849afb993cbda3dc7bea03b90e9dd9c19",
+    "line" : null,
+    "diffHunk" : "@@ -439,6 +444,35 @@ private[validation] object Typing {\n         KStar\n     }\n \n+    private def expandTypeSynonyms(typ0: Type): Type = typ0 match {\n+      case TSynApp(syn, args) =>\n+        expandSynApp(syn, args)"
+  },
+  {
+    "id" : "5e8670c9-0a91-4d44-a2ce-438e12df9172",
+    "prId" : 4101,
+    "comments" : [
+      {
+        "id" : "36d53a14-8aba-4dae-8b42-140520624d27",
+        "parentId" : null,
+        "author" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "body" : "And completing this missing piece!",
+        "createdAt" : "2020-01-21T14:56:56Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "nickchapman-da",
+          "name" : null,
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/49153372?v=4"
+        },
+        "tags" : [
+        ]
+      },
+      {
+        "id" : "39355075-4f14-4c92-a056-b1770ac04ee7",
+        "parentId" : "36d53a14-8aba-4dae-8b42-140520624d27",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Happy to do this in a separate PR. We should still be able to test expansion of type synonyms without checking that the definition is well formed",
+        "createdAt" : "2020-01-21T15:02:15Z",
+        "updatedAt" : "2020-01-22T18:54:57Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "e9b7ff4849afb993cbda3dc7bea03b90e9dd9c19",
+    "line" : 4,
+    "diffHunk" : "@@ -265,6 +265,7 @@ private[validation] object Typing {\n         }\n       case (dfnName, dfn: DValue) =>\n         Env(mod.languageVersion, world, ContextDefValue(pkgId, mod.name, dfnName)).checkDValue(dfn)\n+      case (_, _: DTypeSyn) => // TODO #3616: check type synonyms"
+  },
+  {
+    "id" : "745ff9e9-043e-4e68-971f-13a6e8cc7c81",
+    "prId" : 3734,
+    "comments" : [
+      {
+        "id" : "ef2f72e1-652f-49c3-aae0-3d20a23ab45a",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Why do we have `BTextSliceIndex` twice with different types? I guess the first one should be `BTextSlice`?",
+        "createdAt" : "2019-12-04T16:29:03Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "7b59e97c-ef6f-4c1c-a742-682e2466b8f0",
+        "parentId" : "ef2f72e1-652f-49c3-aae0-3d20a23ab45a",
+        "author" : null,
+        "body" : "Indeed! Thanks!",
+        "createdAt" : "2019-12-04T17:17:13Z",
+        "updatedAt" : "2019-12-05T13:34:25Z",
+        "lastEditedBy" : null,
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "ea94ecd7a45890252cd55edbd0adda2787b8cbdc",
+    "line" : null,
+    "diffHunk" : "@@ -232,6 +232,15 @@ private[validation] object Typing {\n         TForall(\n           alpha.name -> KStar,\n           TForall(beta.name -> KStar, TContractId(alpha) ->: TContractId(beta))),\n+      // Unstable text functions\n+      BTextAsciiToUpper -> (TText ->: TText),\n+      BTextAsciiToLower -> (TText ->: TText),\n+      BTextSliceIndex -> (TInt64 ->: TInt64 ->: TText ->: TText),"
+  },
+  {
+    "id" : "2f9b548b-9586-4c0f-9344-7ee0f1cf23c7",
+    "prId" : 3431,
+    "comments" : [
+      {
+        "id" : "2c56d3e9-386b-4449-9f40-fb821ceb421e",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Should `TText` not rather be `alpha`?",
+        "createdAt" : "2019-11-12T13:19:11Z",
+        "updatedAt" : "2019-11-12T13:24:52Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f9cfec96-0a81-4903-990d-e000ad6b443b",
+        "parentId" : "2c56d3e9-386b-4449-9f40-fb821ceb421e",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Thanks ! fixed",
+        "createdAt" : "2019-11-12T13:24:07Z",
+        "updatedAt" : "2019-11-12T13:24:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "100650c2b9398b69a6f0315c442acedb917736c5",
+    "line" : null,
+    "diffHunk" : "@@ -125,6 +125,50 @@ private[validation] object Typing {\n           alpha.name -> KStar,\n           TMap(alpha) ->: TInt64\n         ),\n+      // GenMaps\n+      BGenMapEmpty ->\n+        TForall(alpha.name -> KStar, TForall(beta.name -> KStar, TGenMap(alpha, beta))),\n+      BGenMapInsert ->\n+        TForall(\n+          alpha.name -> KStar,\n+          TForall(\n+            beta.name -> KStar,\n+            alpha ->: beta ->: TGenMap(alpha, beta) ->: TGenMap(alpha, beta))),\n+      BGenMapLookup ->\n+        TForall(\n+          alpha.name -> KStar,\n+          TForall(\n+            beta.name -> KStar,\n+            TText ->: TGenMap(alpha, beta) ->: TOptional(beta)"
+  },
+  {
+    "id" : "9f21875c-8040-4241-8310-9567bd3657ee",
+    "prId" : 3431,
+    "comments" : [
+      {
+        "id" : "4e4bbbde-538d-4f57-8e49-24d226aac365",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Should `TText` not rather be `alpha`?",
+        "createdAt" : "2019-11-12T13:20:51Z",
+        "updatedAt" : "2019-11-12T13:24:52Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "67c1e263-2725-4eef-a432-d7bb8f644d2a",
+        "parentId" : "4e4bbbde-538d-4f57-8e49-24d226aac365",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Thanks. fixed also. ",
+        "createdAt" : "2019-11-12T13:24:19Z",
+        "updatedAt" : "2019-11-12T13:24:52Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "100650c2b9398b69a6f0315c442acedb917736c5",
+    "line" : null,
+    "diffHunk" : "@@ -125,6 +125,50 @@ private[validation] object Typing {\n           alpha.name -> KStar,\n           TMap(alpha) ->: TInt64\n         ),\n+      // GenMaps\n+      BGenMapEmpty ->\n+        TForall(alpha.name -> KStar, TForall(beta.name -> KStar, TGenMap(alpha, beta))),\n+      BGenMapInsert ->\n+        TForall(\n+          alpha.name -> KStar,\n+          TForall(\n+            beta.name -> KStar,\n+            alpha ->: beta ->: TGenMap(alpha, beta) ->: TGenMap(alpha, beta))),\n+      BGenMapLookup ->\n+        TForall(\n+          alpha.name -> KStar,\n+          TForall(\n+            beta.name -> KStar,\n+            TText ->: TGenMap(alpha, beta) ->: TOptional(beta)\n+          )),\n+      BGenMapDelete ->\n+        TForall(\n+          alpha.name -> KStar,\n+          TForall(\n+            beta.name -> KStar,\n+            TText ->: TGenMap(alpha, beta) ->: TGenMap(alpha, beta)"
+  },
+  {
+    "id" : "2aaa4ae6-d3da-4045-a94a-bc110c6dc054",
+    "prId" : 3326,
+    "comments" : [
+      {
+        "id" : "960e86e4-783c-4a85-b66b-93e8f3c5d90d",
+        "parentId" : null,
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "Should this also be called `checkGroundType` to be consistent with https://github.com/digital-asset/daml/pull/3326#discussion_r342036768?",
+        "createdAt" : "2019-11-04T15:02:41Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "1ce11cda-9e07-4b48-86ae-2f38e979807e",
+        "parentId" : "960e86e4-783c-4a85-b66b-93e8f3c5d90d",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed.",
+        "createdAt" : "2019-11-04T15:15:12Z",
+        "updatedAt" : "2019-11-04T16:19:34Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "609c22d98f12f9cd4dc89a8e0d9f1cf0af882a2d",
+    "line" : null,
+    "diffHunk" : "@@ -727,35 +727,21 @@ private[validation] object Typing {\n         checkExpr(exp, TScenario(typ))\n     }\n \n-    private def checkAnyType(typ: Type): Unit = {\n-      // we check that typ contains neither variables nor quantifiers\n-      TypeTraversable(typ)\n+    // we check that typ contains neither variables nor quantifiers\n+    private def checkSimpleType_(typ: Type): Unit = {"
+  },
+  {
+    "id" : "b203cc98-bf8a-4b46-9647-a2d44a9a0a40",
+    "prId" : 3293,
+    "comments" : [
+      {
+        "id" : "55c5c238-5b64-439f-bd0b-41a50f12b827",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Rename to `typeCon`?\r\n```suggestion\r\n      case EToTextTypeConName(typeCon) =>\r\n```",
+        "createdAt" : "2019-10-30T14:26:46Z",
+        "updatedAt" : "2019-10-30T14:54:14Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "fca87b51-ead6-4cce-84cd-dea9b3b712ae",
+        "parentId" : "55c5c238-5b64-439f-bd0b-41a50f12b827",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-10-30T14:50:54Z",
+        "updatedAt" : "2019-10-30T14:54:14Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "21966e0332a605efb87463491d305a573f02db43",
+    "line" : null,
+    "diffHunk" : "@@ -824,7 +824,7 @@ private[validation] object Typing {\n         typeOfToAny(ty, body)\n       case EFromAny(ty, body) =>\n         typeOfFromAny(ty, body)\n-      case EToTextTemplateId(tmplId) =>\n+      case EToTextTypeConName(tmplId) =>"
+  },
+  {
+    "id" : "f86adcc2-8d0d-454a-83fe-cce35a081082",
+    "prId" : 3293,
+    "comments" : [
+      {
+        "id" : "c941fa87-fbd0-4677-bcef-07ac3cf48b6a",
+        "parentId" : null,
+        "author" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "body" : "Should this function be renamed as well?",
+        "createdAt" : "2019-10-30T14:27:11Z",
+        "updatedAt" : "2019-10-30T14:54:14Z",
+        "lastEditedBy" : {
+          "login" : "gerolf-da",
+          "name" : "Gerolf Seitz",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/29121423?u=f683aa614e742c653ae8c01b194905dcdef6e974&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "9c3ee2d8-e21e-46d1-a092-fd6ef80a17eb",
+        "parentId" : "c941fa87-fbd0-4677-bcef-07ac3cf48b6a",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "fixed",
+        "createdAt" : "2019-10-30T14:48:11Z",
+        "updatedAt" : "2019-10-30T14:54:14Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "21966e0332a605efb87463491d305a573f02db43",
+    "line" : null,
+    "diffHunk" : "@@ -824,7 +824,7 @@ private[validation] object Typing {\n         typeOfToAny(ty, body)\n       case EFromAny(ty, body) =>\n         typeOfFromAny(ty, body)\n-      case EToTextTemplateId(tmplId) =>\n+      case EToTextTypeConName(tmplId) =>\n         typeOfToTextTemplateId(tmplId)"
+  },
+  {
+    "id" : "be4c7d6e-bc1e-4f2f-b362-e8799e42f739",
+    "prId" : 3115,
+    "comments" : [
+      {
+        "id" : "a7d29db8-a689-4748-a8a6-132a3ed01944",
+        "parentId" : null,
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "This only checks that the type exists but it could be a type with parameters in which case `SBTyCon` seems like a weird primitive since it can’t actually be used to get a textual representation of a type but only the type constructor.\r\n\r\nI would suggest to either limit this to types with no type parameters or even to just template types. I don’t really have a preference here, what do you think @remyhaemmerle-da?",
+        "createdAt" : "2019-10-07T08:44:36Z",
+        "updatedAt" : "2019-10-07T11:10:04Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "520c3976-0099-4cd6-99fe-251e9f03be53",
+        "parentId" : "a7d29db8-a689-4748-a8a6-132a3ed01944",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "I do not really care: \r\n 1 We can check that the constructor correspond to a template (with `lookupTemplate`). In this case I will call the primitive `templateIdToString`\r\n 2 We can check it is a monorphic type\r\n 3 We can let it like that. \r\n\r\nI am inclined toward the first one, but  I am fine with the other choices.",
+        "createdAt" : "2019-10-07T08:55:26Z",
+        "updatedAt" : "2019-10-07T11:10:04Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "582b39e1-3787-46bc-a1c3-a3b543946c2d",
+        "parentId" : "a7d29db8-a689-4748-a8a6-132a3ed01944",
+        "author" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "body" : "The first one seems like the most consistent. Since builtin types (e.g. `Int64`) are not supported either.",
+        "createdAt" : "2019-10-07T09:53:23Z",
+        "updatedAt" : "2019-10-07T11:10:04Z",
+        "lastEditedBy" : {
+          "login" : "aherrmann-da",
+          "name" : "Andreas Herrmann",
+          "avatarUrl" : "https://avatars3.githubusercontent.com/u/42969706?v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "94d789b4-e3c0-4f84-bb35-726ad109e5d4",
+        "parentId" : "a7d29db8-a689-4748-a8a6-132a3ed01944",
+        "author" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "body" : "Please go ahead with  your prefer choice. ",
+        "createdAt" : "2019-10-07T09:54:24Z",
+        "updatedAt" : "2019-10-07T11:10:04Z",
+        "lastEditedBy" : {
+          "login" : "remyhaemmerle-da",
+          "name" : "Remy",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/45566104?u=10d0caf8150a686217852f90e91314a4de3239a9&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "5bb1e9d7c998101d7649c6fbfc26715c6c7245b3",
+    "line" : null,
+    "diffHunk" : "@@ -738,6 +738,11 @@ private[validation] object Typing {\n       TOptional(TTyCon(tpl))\n     }\n \n+    private def typeOfTyCon(tyCon: TypeConName): Type = {\n+      lookupDataType(ctx, tyCon)"
+  },
+  {
+    "id" : "e9c54ac7-b596-435f-a608-9c4a65221a42",
+    "prId" : 2950,
+    "comments" : [
+      {
+        "id" : "6d067e43-8eff-435a-8510-14f3a88c5cb3",
+        "parentId" : null,
+        "author" : null,
+        "body" : "@remyhaemmerle-da  This was a bug in the scala daml-lf typechecker that only affected the new MUL_NUMERIC and DIV_NUMERIC.",
+        "createdAt" : "2019-09-19T10:55:57Z",
+        "updatedAt" : "2019-09-24T14:18:02Z",
+        "lastEditedBy" : null,
+        "tags" : [
+        ]
+      }
+    ],
+    "commit" : "bae243c1ecdc420b8ddb5e91675a9a0deec24993",
+    "line" : 5,
+    "diffHunk" : "@@ -42,7 +42,7 @@ private[validation] object Typing {\n   protected[validation] lazy val typeOfBuiltinFunction = {\n     val alpha = TVar(Name.assertFromString(\"$alpha$\"))\n     val beta = TVar(Name.assertFromString(\"$beta$\"))\n-    val gamma = TVar(Name.assertFromString(\"$beta$\"))\n+    val gamma = TVar(Name.assertFromString(\"$gamma$\"))"
+  }
+]

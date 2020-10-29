@@ -1,0 +1,218 @@
+[
+  {
+    "id" : "5bbc3202-1f45-4947-9e7a-b9bf8f6af8e4",
+    "prId" : 7571,
+    "comments" : [
+      {
+        "id" : "cfc5870a-8a96-4226-8b71-e580facf8a8b",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "If it is not allowed for either of these to be empty, I would prefer to use non-empty types; this applies throughout the modeling of party sets in this PR, for which e.g. you might use `OneAnd[Set, ?]` or some newtype that enforces the invariant.",
+        "createdAt" : "2020-10-05T17:40:31Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "890dd951-aaf5-4c82-92c2-7e06ded41aca",
+        "parentId" : "cfc5870a-8a96-4226-8b71-e580facf8a8b",
+        "author" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "body" : "Either of these can be empty but not both. I’ve hidden the constructor and adds a smart constructor that checks for this and then switched `parties` over to `OneAnd[Set, Party]`.",
+        "createdAt" : "2020-10-06T10:39:04Z",
+        "updatedAt" : "2020-10-08T11:09:12Z",
+        "lastEditedBy" : {
+          "login" : "cocreature",
+          "name" : "Moritz Kiefer",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/1313584?u=7864421488a876940b33e865c4b0091925617ca7&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "6489aaa0d5262d62016575dbcf3ca97582f3a81b",
+    "line" : null,
+    "diffHunk" : "@@ -49,7 +49,20 @@ object domain {\n \n   type LfValue = lf.value.Value[lf.value.Value.ContractId]\n \n-  case class JwtPayload(ledgerId: LedgerId, applicationId: ApplicationId, party: Party)\n+  // Until we get multi-party submissions, write endpoints require a single party.\n+  case class JwtWritePayload(ledgerId: LedgerId, applicationId: ApplicationId, party: Party) {\n+    def toReadPayload: JwtPayload = JwtPayload(ledgerId, applicationId, List(), List(party))\n+  }\n+\n+  // JWT payload that preserves readAs and actAs and supports multiple parties. This is currently only used for\n+  // read endpoints but once we get multi-party submissions, this can also be used for write endpoints.\n+  case class JwtPayload(\n+      ledgerId: LedgerId,\n+      applicationId: ApplicationId,\n+      readAs: List[Party],\n+      actAs: List[Party]) {"
+  },
+  {
+    "id" : "fdb42f8c-f4ce-4703-b287-80ded75dd4c7",
+    "prId" : 5079,
+    "comments" : [
+      {
+        "id" : "04df3d8f-7d75-4720-8cdc-3f7bce72d71e",
+        "parentId" : null,
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "\"Later in the stream\" is always the desired one; comparing them is an unneeded complication.\r\n\r\n```suggestion\r\n    implicit val semigroup: Semigroup[Offset] = Tag.unsubst(Semigroup[Offset @@ Tags.LastVal])\r\n```",
+        "createdAt" : "2020-03-18T19:08:47Z",
+        "updatedAt" : "2020-03-18T20:30:24Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "3833401c-5a7e-4121-a93b-568cbddb11f6",
+        "parentId" : "04df3d8f-7d75-4720-8cdc-3f7bce72d71e",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "`Tags.LastVal` is not the same as `Ordering.max`... why LastVal? We care about the largest offset, not the last one why is that complication? The offsets are ordered in any case.",
+        "createdAt" : "2020-03-18T19:39:56Z",
+        "updatedAt" : "2020-03-18T20:30:24Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "5884b6de-a55c-488b-83c6-87bc26e5a1be",
+        "parentId" : "04df3d8f-7d75-4720-8cdc-3f7bce72d71e",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "No, in this case, we care about the last one.\r\n\r\nWe care about the largest one in the only temporally-unordered scenario: that is, the one that you originally implemented the comparison for. Stream steps are already temporally ordered, so introducing another layer of ordering on top of that is needless complication.",
+        "createdAt" : "2020-03-18T19:41:23Z",
+        "updatedAt" : "2020-03-18T20:30:24Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "bcf6c105-f83e-4a08-ba6e-c86ca33f927a",
+        "parentId" : "04df3d8f-7d75-4720-8cdc-3f7bce72d71e",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "plus it will break the associativity law.",
+        "createdAt" : "2020-03-18T19:42:56Z",
+        "updatedAt" : "2020-03-18T20:30:24Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "8531b261-ff50-497b-b227-26355b686142",
+        "parentId" : "04df3d8f-7d75-4720-8cdc-3f7bce72d71e",
+        "author" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "body" : "No, both max and lastval are associative. That is why scalaz defines semigroups for them at all.",
+        "createdAt" : "2020-03-18T19:44:14Z",
+        "updatedAt" : "2020-03-18T20:30:24Z",
+        "lastEditedBy" : {
+          "login" : "S11001001",
+          "name" : "Stephen Compall",
+          "avatarUrl" : "https://avatars1.githubusercontent.com/u/219186?u=7b27ed58a578fe7d4983d1bab28c2f5608ed8739&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "28598bbc-3b91-45eb-9ce7-a4fa50208ba9",
+        "parentId" : "04df3d8f-7d75-4720-8cdc-3f7bce72d71e",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "a1 + (a2 + a3) = a3\r\n(a1 + a2) + a3 = a3\r\nscratch the associaitivity law :)",
+        "createdAt" : "2020-03-18T19:46:05Z",
+        "updatedAt" : "2020-03-18T20:30:24Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      },
+      {
+        "id" : "f013bcaf-ea23-48ba-a619-5623d5dc009d",
+        "parentId" : "04df3d8f-7d75-4720-8cdc-3f7bce72d71e",
+        "author" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "body" : "@S11001001 thanks, you are 100% right!... if I leave the semigroup implementation as ordering.max, the property that we observe in the test will always be true:\r\n```\r\nlastSeen should be > liveStart\r\n```\r\nso, yeah we should capture the last one, the left operand.",
+        "createdAt" : "2020-03-18T20:28:05Z",
+        "updatedAt" : "2020-03-18T20:30:24Z",
+        "lastEditedBy" : {
+          "login" : "leo-da",
+          "name" : "Leonid Shlyapnikov",
+          "avatarUrl" : "https://avatars2.githubusercontent.com/u/27688859?u=375a6e2bd1079fec6f7d6d582ac05b5628218384&v=4"
+        },
+        "tags" : [
+          {
+            "value" : "outdated"
+          }
+        ]
+      }
+    ],
+    "commit" : "61c9ce2e2b169caeb867390654a67140bc44b2a8",
+    "line" : null,
+    "diffHunk" : "@@ -144,6 +157,14 @@ object domain {\n \n     def toLedgerApi(o: Offset): lav1.ledger_offset.LedgerOffset =\n       lav1.ledger_offset.LedgerOffset(lav1.ledger_offset.LedgerOffset.Value.Absolute(unwrap(o)))\n+\n+    implicit val ordering: Ordering[Offset] =\n+      Ordering.by(LedgerOffsetUtil.parseOffsetString _ compose unwrap)(\n+        LedgerOffsetUtil.LongEitherLongLongOrdering)\n+\n+    implicit val semigroup: Semigroup[Offset] = new Semigroup[Offset] {"
+  }
+]
